@@ -281,7 +281,8 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
         break;
       }
 
-      case "getBondedDevices": {
+      case "getBondedDevices":
+      {
         final Set<BluetoothDevice> bondedDevices = mBluetoothAdapter.getBondedDevices();
         Protos.ConnectedDevicesResponse.Builder p = Protos.ConnectedDevicesResponse.newBuilder();
         for (BluetoothDevice d : bondedDevices) {
@@ -339,6 +340,7 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
           mDevices.put(deviceId, new BluetoothDeviceCache(gattServer));
           result.success(null);
         });
+        break;
       }
 
       case "disconnect":
