@@ -246,8 +246,15 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
       case "startScan":
       {
         ensurePermissionBeforeAction(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? Manifest.permission.BLUETOOTH_SCAN : Manifest.permission.ACCESS_FINE_LOCATION, (granted, permission) -> {
-          if (granted)
-            startScan(call, result);
+          if (granted) {
+            ensurePermissionBeforeAction(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? Manifest.permission.BLUETOOTH_CONNECT : null, (granted, permission) -> {
+              if (granted)
+                startScan(call, result);
+              else
+                result.error(
+                        "no_permissions", String.format("flutter_blue plugin requires %s for scanning", permission), null);
+            });
+          }
           else
             result.error(
                     "no_permissions", String.format("flutter_blue plugin requires %s for scanning", permission), null);
