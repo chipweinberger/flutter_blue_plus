@@ -267,9 +267,22 @@ class DeviceScreen extends StatelessWidget {
               stream: device.state,
               initialData: BluetoothDeviceState.connecting,
               builder: (c, snapshot) => ListTile(
-                leading: (snapshot.data == BluetoothDeviceState.connected)
-                    ? Icon(Icons.bluetooth_connected)
-                    : Icon(Icons.bluetooth_disabled),
+                leading: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(snapshot.data == BluetoothDeviceState.connected
+                        ? Icons.bluetooth_connected
+                        : Icons.bluetooth_disabled),
+                    snapshot.data == BluetoothDeviceState.connected
+                        ? StreamBuilder<int>(
+                        stream: rssiStream(),
+                        builder: (context, snapshot) {
+                          return Text(snapshot.hasData ? '${snapshot.data}dBm' : '',
+                              style: Theme.of(context).textTheme.caption);
+                        })
+                        : Text('', style: Theme.of(context).textTheme.caption),
+                  ],
+                ),
                 title: Text(
                     'Device is ${snapshot.data.toString().split('.')[1]}.'),
                 subtitle: Text('${device.id}'),
@@ -323,5 +336,12 @@ class DeviceScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+  
+  Stream<int> rssiStream() async* {
+    for (;;) {
+      yield await device.readRssi();
+      await Future.delayed(Duration(seconds: 1));
+    }
   }
 }
