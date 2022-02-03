@@ -1,3 +1,6 @@
+## 1.1.1
+* Copyright reverted to Paul DeMarco
+
 ## 1.1.0
 
 * Possible crash fix caused by wrong raw data (fixed by narrit)
