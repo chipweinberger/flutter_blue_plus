@@ -123,10 +123,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                                    message:@"Peripheral not found"
                                    details:nil];
       }
-      if( [peripheral state] == CBPeripheralStateDisconnected){
-        [_centralManager connectPeripheral:peripheral options:nil];
-      }
       // TODO: Implement Connect options (#36)
+      [_centralManager connectPeripheral:peripheral options:nil];
       result(nil);
     } @catch(FlutterError *e) {
       result(e);
@@ -395,19 +393,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
 - (void)centralManager:(CBCentralManager *)central didDisconnectPeripheral:(CBPeripheral *)peripheral error:(NSError *)error {
   NSLog(@"didDisconnectPeripheral");
-  // if user disconnect manually, error code should be 0
-  if( [error code] != 0 ){
-    // unexpected disconnection -> try reconnect
-    @try {
-      NSLog(@"didDisconnectPeripheral:trying reconnect");
-      [central connectPeripheral:peripheral options:nil];
-    } @catch(FlutterError *e) {
-    }
-  }else{
-    NSLog(@"didDisconnectPeripheral:user disconnected");
-    // Unregister self as delegate for peripheral, not working #42
-    peripheral.delegate = nil;
-  }
+  // Unregister self as delegate for peripheral, not working #42
+  peripheral.delegate = nil;
 
   // Send connection state
   [_channel invokeMethod:@"DeviceState" arguments:[self toFlutterData:[self toDeviceStateProto:peripheral state:peripheral.state]]];
