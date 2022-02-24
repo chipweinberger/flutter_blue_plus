@@ -14,7 +14,8 @@ class BluetoothDevice {
         name = p.name,
         type = BluetoothDeviceType.values[p.type.value];
 
-  BehaviorSubject<bool> _isDiscoveringServices = BehaviorSubject.seeded(false);
+  final BehaviorSubject<bool> _isDiscoveringServices =
+      BehaviorSubject.seeded(false);
   Stream<bool> get isDiscoveringServices => _isDiscoveringServices.stream;
 
   /// Establishes a connection to the Bluetooth Device.
@@ -52,7 +53,7 @@ class BluetoothDevice {
   Future disconnect() => FlutterBluePlus.instance._channel
       .invokeMethod('disconnect', id.toString());
 
-  BehaviorSubject<List<BluetoothService>> _services =
+  final BehaviorSubject<List<BluetoothService>> _services =
       BehaviorSubject.seeded([]);
 
   /// Discovers services offered by the remote device as well as their characteristics and descriptors
@@ -68,7 +69,7 @@ class BluetoothDevice {
         .map((buffer) => protos.DiscoverServicesResult.fromBuffer(buffer))
         .where((p) => p.remoteId == id.toString())
         .map((p) => p.services)
-        .map((s) => s.map((p) => new BluetoothService.fromProto(p)).toList())
+        .map((s) => s.map((p) => BluetoothService.fromProto(p)).toList())
         .first
         .then((list) {
       _services.add(list);
@@ -91,7 +92,7 @@ class BluetoothDevice {
         .invokeMethod('services', id.toString())
         .then((buffer) =>
             protos.DiscoverServicesResult.fromBuffer(buffer).services)
-        .then((i) => i.map((s) => new BluetoothService.fromProto(s)).toList());
+        .then((i) => i.map((s) => BluetoothService.fromProto(s)).toList());
     yield* _services.stream;
   }
 
