@@ -274,9 +274,9 @@ class DeviceScreen extends StatelessWidget {
                 leading: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(snapshot.data == BluetoothDeviceState.connected
-                        ? const Icons.bluetooth_connected
-                        : const Icons.bluetooth_disabled),
+                    snapshot.data == BluetoothDeviceState.connected
+                        ? const Icon(Icons.bluetooth_connected)
+                        : const Icon(Icons.bluetooth_disabled),
                     snapshot.data == BluetoothDeviceState.connected
                         ? StreamBuilder<int>(
                         stream: rssiStream(),
