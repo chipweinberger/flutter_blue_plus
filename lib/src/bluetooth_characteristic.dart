@@ -1,4 +1,4 @@
-// Copyright 2022, Bosko Popovic.
+// Copyright 2017, Paul DeMarco.
 // All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
@@ -21,7 +21,7 @@ class BluetoothCharacteristic {
     }
   }
 
-  BehaviorSubject<List<int>> _value;
+  final BehaviorSubject<List<int>> _value;
   Stream<List<int>> get value => Rx.merge([
         _value.stream,
         onValueChangedStream,
@@ -33,7 +33,7 @@ class BluetoothCharacteristic {
       : uuid = Guid(p.uuid),
         deviceId = DeviceIdentifier(p.remoteId),
         serviceUuid = Guid(p.serviceUuid),
-        secondaryServiceUuid = (p.secondaryServiceUuid.length > 0)
+        secondaryServiceUuid = (p.secondaryServiceUuid.isNotEmpty)
             ? Guid(p.secondaryServiceUuid)
             : null,
         descriptors =
@@ -83,8 +83,7 @@ class BluetoothCharacteristic {
     return FlutterBluePlus.instance._methodStream
         .where((m) => m.method == "ReadCharacteristicResponse")
         .map((m) => m.arguments)
-        .map((buffer) =>
-            new protos.ReadCharacteristicResponse.fromBuffer(buffer))
+        .map((buffer) => protos.ReadCharacteristicResponse.fromBuffer(buffer))
         .where((p) =>
             (p.remoteId == request.remoteId) &&
             (p.characteristic.uuid == request.characteristicUuid) &&
@@ -133,7 +132,7 @@ class BluetoothCharacteristic {
         .first
         .then((w) => w.success)
         .then((success) => (!success)
-            ? throw new Exception('Failed to write the characteristic')
+            ? throw Exception('Failed to write the characteristic')
             : null)
         .then((_) => null);
   }
@@ -186,7 +185,7 @@ class CharacteristicProperties {
   final bool notifyEncryptionRequired;
   final bool indicateEncryptionRequired;
 
-  CharacteristicProperties(
+  const CharacteristicProperties(
       {this.broadcast = false,
       this.read = false,
       this.writeWithoutResponse = false,
