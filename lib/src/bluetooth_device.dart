@@ -14,6 +14,11 @@ class BluetoothDevice {
         name = p.name,
         type = BluetoothDeviceType.values[p.type.value];
 
+  BluetoothDevice.fromId(String id)
+      : id = DeviceIdentifier(id),
+        name = "Unknown name",
+        type = BluetoothDeviceType.unknown;
+
   final BehaviorSubject<bool> _isDiscoveringServices =
       BehaviorSubject.seeded(false);
   Stream<bool> get isDiscoveringServices => _isDiscoveringServices.stream;
