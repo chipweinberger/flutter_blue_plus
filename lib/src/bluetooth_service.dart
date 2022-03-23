@@ -1,4 +1,4 @@
-// Copyright 2022, Bosko Popovic.
+// Copyright 2017, Paul DeMarco.
 // All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
@@ -12,14 +12,14 @@ class BluetoothService {
   final List<BluetoothService> includedServices;
 
   BluetoothService.fromProto(protos.BluetoothService p)
-      : uuid = new Guid(p.uuid),
-        deviceId = new DeviceIdentifier(p.remoteId),
+      : uuid = Guid(p.uuid),
+        deviceId = DeviceIdentifier(p.remoteId),
         isPrimary = p.isPrimary,
         characteristics = p.characteristics
-            .map((c) => new BluetoothCharacteristic.fromProto(c))
+            .map((c) => BluetoothCharacteristic.fromProto(c))
             .toList(),
         includedServices = p.includedServices
-            .map((s) => new BluetoothService.fromProto(s))
+            .map((s) => BluetoothService.fromProto(s))
             .toList();
 
   @override

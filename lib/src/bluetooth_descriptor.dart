@@ -1,18 +1,18 @@
-// Copyright 2022, Bosko Popovic.
+// Copyright 2017, Paul DeMarco.
 // All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
 part of flutter_blue_plus;
 
 class BluetoothDescriptor {
-  static final Guid cccd = new Guid("00002902-0000-1000-8000-00805f9b34fb");
+  static final Guid cccd = Guid("00002902-0000-1000-8000-00805f9b34fb");
 
   final Guid uuid;
   final DeviceIdentifier deviceId;
   final Guid serviceUuid;
   final Guid characteristicUuid;
 
-  BehaviorSubject<List<int>> _value;
+  final BehaviorSubject<List<int>> _value;
   Stream<List<int>> get value => _value.stream;
 
   List<int> get lastValue => _value.value;
@@ -76,7 +76,7 @@ class BluetoothDescriptor {
         .first
         .then((w) => w.success)
         .then((success) => (!success)
-            ? throw new Exception('Failed to write the descriptor')
+            ? throw Exception('Failed to write the descriptor')
             : null)
         .then((_) => _value.add(value))
         .then((_) => null);
