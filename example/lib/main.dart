@@ -343,9 +343,15 @@ class DeviceScreen extends StatelessWidget {
   }
   
   Stream<int> rssiStream() async* {
-    for (;;) {
+    var isConnected = true;
+    final subscription = device.state.listen((state) {
+      isConnected = state == BluetoothDeviceState.connected;
+    });
+    while (isConnected) {
       yield await device.readRssi();
       await Future.delayed(Duration(seconds: 1));
     }
+    subscription.cancel();
+    // Device disconnected, stopping RSSI stream
   }
 }
