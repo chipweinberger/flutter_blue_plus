@@ -349,12 +349,7 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
         BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(deviceId);
         BluetoothDeviceCache cache = mDevices.remove(deviceId);
         if(cache != null) {
-          BluetoothGatt gattServer = cache.gatt;
-          gattServer.disconnect();
-          int state = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
-          if(state == BluetoothProfile.STATE_DISCONNECTED) {
-            gattServer.close();
-          }
+          cache.gatt.close();
         }
         result.success(null);
         break;
