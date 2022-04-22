@@ -14,6 +14,15 @@ class BluetoothDevice {
         name = p.name,
         type = BluetoothDeviceType.values[p.type.value];
 
+  /// Use on Android when the MAC address is known.
+  ///
+  /// This constructor enables the Android to connect to a specific device
+  /// as soon as it becomes available on the bluetooth "network".
+  BluetoothDevice.fromId(String id, {String? name, BluetoothDeviceType? type})
+      : id = DeviceIdentifier(id),
+        name = name ?? "Unknown name",
+        type = type ?? BluetoothDeviceType.unknown;
+
   final BehaviorSubject<bool> _isDiscoveringServices =
       BehaviorSubject.seeded(false);
   Stream<bool> get isDiscoveringServices => _isDiscoveringServices.stream;
@@ -152,6 +161,22 @@ class BluetoothDevice {
   /// Indicates whether the Bluetooth Device can send a write without response
   Future<bool> get canSendWriteWithoutResponse =>
       Future.error(UnimplementedError());
+
+  /// Read the RSSI for a connected remote device
+  Future<int> readRssi() async {
+    final remoteId = id.toString();
+    await FlutterBluePlus.instance._channel.invokeMethod('readRssi', remoteId);
+
+    return FlutterBluePlus.instance._methodStream
+        .where((m) => m.method == "ReadRssiResult")
+        .map((m) => m.arguments)
+        .map((buffer) => protos.ReadRssiResult.fromBuffer(buffer))
+        .where((p) => (p.remoteId == remoteId))
+        .first
+        .then((c) {
+      return (c.rssi);
+    });
+  }
 
   @override
   bool operator ==(Object other) =>

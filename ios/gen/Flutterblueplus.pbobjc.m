@@ -2213,6 +2213,62 @@ typedef struct ProtosMtuSizeResponse__storage_ {
 
 @end
 
+#pragma mark - ProtosReadRssiResult
+
+@implementation ProtosReadRssiResult
+
+@dynamic remoteId;
+@dynamic rssi;
+
+typedef struct ProtosReadRssiResult__storage_ {
+  uint32_t _has_storage_[1];
+  int32_t rssi;
+  NSString *remoteId;
+} ProtosReadRssiResult__storage_;
+
+// This method is threadsafe because it is initially called
+// in +initialize for each subclass.
++ (GPBDescriptor *)descriptor {
+  static GPBDescriptor *descriptor = nil;
+  if (!descriptor) {
+    static GPBMessageFieldDescription fields[] = {
+      {
+        .name = "remoteId",
+        .dataTypeSpecific.clazz = Nil,
+        .number = ProtosReadRssiResult_FieldNumber_RemoteId,
+        .hasIndex = 0,
+        .offset = (uint32_t)offsetof(ProtosReadRssiResult__storage_, remoteId),
+        .flags = (GPBFieldFlags)(GPBFieldOptional | GPBFieldClearHasIvarOnZero),
+        .dataType = GPBDataTypeString,
+      },
+      {
+        .name = "rssi",
+        .dataTypeSpecific.clazz = Nil,
+        .number = ProtosReadRssiResult_FieldNumber_Rssi,
+        .hasIndex = 1,
+        .offset = (uint32_t)offsetof(ProtosReadRssiResult__storage_, rssi),
+        .flags = (GPBFieldFlags)(GPBFieldOptional | GPBFieldClearHasIvarOnZero),
+        .dataType = GPBDataTypeInt32,
+      },
+    };
+    GPBDescriptor *localDescriptor =
+        [GPBDescriptor allocDescriptorForClass:[ProtosReadRssiResult class]
+                                     rootClass:[ProtosFlutterblueplusRoot class]
+                                          file:ProtosFlutterblueplusRoot_FileDescriptor()
+                                        fields:fields
+                                    fieldCount:(uint32_t)(sizeof(fields) / sizeof(GPBMessageFieldDescription))
+                                   storageSize:sizeof(ProtosReadRssiResult__storage_)
+                                         flags:(GPBDescriptorInitializationFlags)(GPBDescriptorInitializationFlag_UsesClassRefs | GPBDescriptorInitializationFlag_Proto3OptionalKnown)];
+    #if defined(DEBUG) && DEBUG
+      NSAssert(descriptor == nil, @"Startup recursed!");
+    #endif  // DEBUG
+    descriptor = localDescriptor;
+  }
+  return descriptor;
+}
+
+@end
+
 
 #pragma clang diagnostic pop
 

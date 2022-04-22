@@ -245,12 +245,19 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
 
       case "startScan":
       {
-        ensurePermissionBeforeAction(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? Manifest.permission.BLUETOOTH_SCAN : Manifest.permission.ACCESS_FINE_LOCATION, (granted, permission) -> {
-          if (granted)
-            startScan(call, result);
+        ensurePermissionBeforeAction(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? Manifest.permission.BLUETOOTH_SCAN : Manifest.permission.ACCESS_FINE_LOCATION, (grantedScan, permissionScan) -> {
+          if (grantedScan) {
+            ensurePermissionBeforeAction(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? Manifest.permission.BLUETOOTH_CONNECT : null, (grantedConnect, permissionConnect) -> {
+              if (grantedConnect)
+                startScan(call, result);
+              else
+                result.error(
+                        "no_permissions", String.format("flutter_blue plugin requires %s for scanning", permissionConnect), null);
+            });
+          }
           else
             result.error(
-                    "no_permissions", String.format("flutter_blue plugin requires %s for scanning", permission), null);
+                    "no_permissions", String.format("flutter_blue plugin requires %s for scanning", permissionScan), null);
         });
         break;
       }
@@ -654,6 +661,24 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
         break;
       }
 
+      case "readRssi":
+      {
+        String remoteId = (String)call.arguments;
+        BluetoothGatt gatt;
+        try {
+          gatt = locateGatt(remoteId);
+          if(gatt.readRemoteRssi()) {
+            result.success(null);
+          } else {
+            result.error("readRssi", "gatt.readRemoteRssi returned false", null);
+          }
+        } catch(Exception e) {
+          result.error("readRssi", e.getMessage(), e);
+        }
+
+        break;
+      }
+
       default:
       {
         result.notImplemented();
@@ -991,6 +1016,12 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
     @Override
     public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
       log(LogLevel.DEBUG, "[onReadRemoteRssi] rssi: " + rssi + " status: " + status);
+      if(status == BluetoothGatt.GATT_SUCCESS) {
+        Protos.ReadRssiResult.Builder p = Protos.ReadRssiResult.newBuilder();
+        p.setRemoteId(gatt.getDevice().getAddress());
+        p.setRssi(rssi);
+        invokeMethodUIThread("ReadRssiResult", p.build().toByteArray());
+      }
     }
 
     @Override

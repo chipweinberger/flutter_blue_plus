@@ -1,3 +1,10 @@
+## 1.1.3
+* Read RSSI from a connected BLE device #1 (thanks to sophisticode)
+* Fixed a crash on Android OS 12 (added check for BLUETOOTH_CONNECT permission) (fixed by dspells)
+* Added BluetoothDevice constructor from id (MAC address) (thanks to tanguypouriel)
+* The previous version wasn't disconnecting properly and the device could be still connected under the hood as the cancel() was not called. (fixed by killalad)
+* dependencies update (min micro version updating)
+
 ## 1.1.2
 * Remove connect to BLE device after BLE device has disconnected #11 (fixed by sophisticode)
 * fixed Dart Analysis warnings

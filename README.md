@@ -162,6 +162,7 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 | state                       |  :white_check_mark:  |  :white_check_mark:  | Stream of state changes for the Bluetooth Device. |
 | mtu                         |  :white_check_mark:  |  :white_check_mark:  | Stream of mtu size changes. |
 | requestMtu                  |  :white_check_mark:  |                      | Request to change the MTU for the device. |
+| readRssi                    |  :white_check_mark:  |  :white_check_mark:  | Read RSSI from a connected device. |
 
 ### BluetoothCharacteristic API
 |                             |       Android        |         iOS          |             Description            |
