@@ -868,7 +868,13 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
       ScanFilter f = new ScanFilter.Builder().setServiceUuid(ParcelUuid.fromString(uuid)).build();
       filters.add(f);
     }
-    ScanSettings settings = new ScanSettings.Builder().setScanMode(scanMode).build();
+    ScanSettings settings = new ScanSettings.Builder()
+          .setScanMode(scanMode)
+          .setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES)
+          .setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE)
+          .setNumOfMatches(ScanSettings.MATCH_NUM_ONE_ADVERTISEMENT)
+          .setReportDelay(0L)
+          .build();
     scanner.startScan(filters, settings, getScanCallback21());
   }
 
