@@ -86,11 +86,12 @@ const ScanSettings$json = const {
     const {'1': 'android_scan_mode', '3': 1, '4': 1, '5': 5, '10': 'androidScanMode'},
     const {'1': 'service_uuids', '3': 2, '4': 3, '5': 9, '10': 'serviceUuids'},
     const {'1': 'allow_duplicates', '3': 3, '4': 1, '5': 8, '10': 'allowDuplicates'},
+    const {'1': 'mac_addresses', '3': 4, '4': 3, '5': 9, '10': 'macAddresses'},
   ],
 };
 
 /// Descriptor for `ScanSettings`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List scanSettingsDescriptor = $convert.base64Decode('CgxTY2FuU2V0dGluZ3MSKgoRYW5kcm9pZF9zY2FuX21vZGUYASABKAVSD2FuZHJvaWRTY2FuTW9kZRIjCg1zZXJ2aWNlX3V1aWRzGAIgAygJUgxzZXJ2aWNlVXVpZHMSKQoQYWxsb3dfZHVwbGljYXRlcxgDIAEoCFIPYWxsb3dEdXBsaWNhdGVz');
+final $typed_data.Uint8List scanSettingsDescriptor = $convert.base64Decode('CgxTY2FuU2V0dGluZ3MSKgoRYW5kcm9pZF9zY2FuX21vZGUYASABKAVSD2FuZHJvaWRTY2FuTW9kZRIjCg1zZXJ2aWNlX3V1aWRzGAIgAygJUgxzZXJ2aWNlVXVpZHMSKQoQYWxsb3dfZHVwbGljYXRlcxgDIAEoCFIPYWxsb3dEdXBsaWNhdGVzEiMKDW1hY19hZGRyZXNzZXMYBCADKAlSDG1hY0FkZHJlc3Nlcw==');
 @$core.Deprecated('Use scanResultDescriptor instead')
 const ScanResult$json = const {
   '1': 'ScanResult',
