@@ -181,6 +181,7 @@ class FlutterBluePlus {
     ScanMode scanMode = ScanMode.lowLatency,
     List<Guid> withServices = const [],
     List<Guid> withDevices = const [],
+    List<String> macAddresses = const [],
     Duration? timeout,
     bool allowDuplicates = false,
   }) async {
@@ -188,6 +189,7 @@ class FlutterBluePlus {
             scanMode: scanMode,
             withServices: withServices,
             withDevices: withDevices,
+            macAddresses: macAddresses,
             timeout: timeout,
             allowDuplicates: allowDuplicates)
         .drain();
