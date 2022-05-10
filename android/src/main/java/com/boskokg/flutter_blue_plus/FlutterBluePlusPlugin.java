@@ -878,7 +878,7 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
 
     for (int i = 0; i < count; i++) {
       ScanFilter f;
-      if (macCount == count) {
+      if (macCount > 0) {
         String macAddress = proto.getMacAddresses(i);
         f = new ScanFilter.Builder().setDeviceAddress(macAddress).build();
       } else {
