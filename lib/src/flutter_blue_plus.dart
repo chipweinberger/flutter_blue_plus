@@ -310,6 +310,27 @@ class AdvertisementData {
   final Map<String, List<int>> serviceData;
   final List<String> serviceUuids;
   final Uint8List rawBytes;
+  final Map<int, List<int>> otherData;
+
+  /// Parse raw advertising bytes to a Map of ADV
+  ///
+  /// Documentation comes from here: https://docs.silabs.com/bluetooth/latest/general/adv-and-scanning/bluetooth-adv-data-basics
+  static Map<int, List<int>> parseRawAdvertisementBytes(
+      Uint8List rawAdvertisingBytes) {
+    Map<int, Uint8List> data = {};
+    for (int advCounter = 0;
+        advCounter < rawAdvertisingBytes.length;
+        advCounter++) {
+      int dataLen = rawAdvertisingBytes[advCounter++];
+      if (dataLen == 0) continue;
+      int typeIdentifier = rawAdvertisingBytes[advCounter++];
+      int offset = (dataLen - 2);
+      data[typeIdentifier] = rawAdvertisingBytes.sublist(advCounter,
+          advCounter + (offset + 1)); // +1 as end must be the next element
+      advCounter += offset;
+    }
+    return data;
+  }
 
   AdvertisementData.fromProto(protos.AdvertisementData p)
       : localName = p.localName,
@@ -319,7 +340,9 @@ class AdvertisementData {
         manufacturerData = p.manufacturerData,
         serviceData = p.serviceData,
         serviceUuids = p.serviceUuids,
-        rawBytes = Uint8List.fromList(p.rawBytes);
+        rawBytes = Uint8List.fromList(p.rawBytes),
+        otherData = AdvertisementData.parseRawAdvertisementBytes(
+            Uint8List.fromList(p.rawBytes));
 
   @override
   String toString() {
