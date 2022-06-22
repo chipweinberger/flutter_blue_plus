@@ -199,6 +199,7 @@ typedef GPB_ENUM(ProtosAdvertisementData_FieldNumber) {
   ProtosAdvertisementData_FieldNumber_ManufacturerData = 4,
   ProtosAdvertisementData_FieldNumber_ServiceData = 5,
   ProtosAdvertisementData_FieldNumber_ServiceUuidsArray = 6,
+  ProtosAdvertisementData_FieldNumber_RawBytes = 7,
 };
 
 GPB_FINAL @interface ProtosAdvertisementData : GPBMessage
@@ -224,6 +225,8 @@ GPB_FINAL @interface ProtosAdvertisementData : GPBMessage
 @property(nonatomic, readwrite, strong, null_resettable) NSMutableArray<NSString*> *serviceUuidsArray;
 /** The number of items in @c serviceUuidsArray without causing the array to be created. */
 @property(nonatomic, readonly) NSUInteger serviceUuidsArray_Count;
+
+@property(nonatomic, readwrite, copy, null_resettable) NSData *rawBytes;
 
 @end
 

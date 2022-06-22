@@ -36,6 +36,7 @@ message AdvertisementData {
   map<int32, bytes> manufacturer_data = 4; // Map of manufacturers to their data
   map<string, bytes> service_data = 5;  // Map of service UUIDs to their data.
   repeated string service_uuids = 6;
+  bytes raw_bytes = 7;
 }
 
 message ScanSettings {

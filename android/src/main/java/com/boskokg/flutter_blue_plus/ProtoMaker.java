@@ -91,6 +91,9 @@ public class ProtoMaker {
                     a.addServiceUuids(s.getUuid().toString());
                 }
             }
+            byte[] rawBytes = scanRecord.getBytes();
+            if(rawBytes!=null)
+                a.setRawBytes(ByteString.copyFrom(rawBytes));
         }
         p.setRssi(scanResult.getRssi());
         p.setAdvertisementData(a.build());

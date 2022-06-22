@@ -309,6 +309,7 @@ class AdvertisementData {
   final Map<int, List<int>> manufacturerData;
   final Map<String, List<int>> serviceData;
   final List<String> serviceUuids;
+  final Uint8List rawBytes;
 
   AdvertisementData.fromProto(protos.AdvertisementData p)
       : localName = p.localName,
@@ -317,10 +318,11 @@ class AdvertisementData {
         connectable = p.connectable,
         manufacturerData = p.manufacturerData,
         serviceData = p.serviceData,
-        serviceUuids = p.serviceUuids;
+        serviceUuids = p.serviceUuids,
+        rawBytes = Uint8List.fromList(p.rawBytes);
 
   @override
   String toString() {
-    return 'AdvertisementData{localName: $localName, txPowerLevel: $txPowerLevel, connectable: $connectable, manufacturerData: $manufacturerData, serviceData: $serviceData, serviceUuids: $serviceUuids}';
+    return 'AdvertisementData{localName: $localName, txPowerLevel: $txPowerLevel, connectable: $connectable, manufacturerData: $manufacturerData, serviceData: $serviceData, serviceUuids: $serviceUuids, rawBytes: ${hex.encode(rawBytes)}}';
   }
 }

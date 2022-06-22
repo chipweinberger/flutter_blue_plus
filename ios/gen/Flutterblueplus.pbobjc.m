@@ -219,6 +219,7 @@ BOOL ProtosBluetoothState_State_IsValidValue(int32_t value__) {
 @dynamic manufacturerData, manufacturerData_Count;
 @dynamic serviceData, serviceData_Count;
 @dynamic serviceUuidsArray, serviceUuidsArray_Count;
+@dynamic rawBytes;
 
 typedef struct ProtosAdvertisementData__storage_ {
   uint32_t _has_storage_[1];
@@ -227,6 +228,7 @@ typedef struct ProtosAdvertisementData__storage_ {
   GPBInt32ObjectDictionary *manufacturerData;
   NSMutableDictionary *serviceData;
   NSMutableArray *serviceUuidsArray;
+  NSData *rawBytes;
 } ProtosAdvertisementData__storage_;
 
 // This method is threadsafe because it is initially called
@@ -288,6 +290,15 @@ typedef struct ProtosAdvertisementData__storage_ {
         .offset = (uint32_t)offsetof(ProtosAdvertisementData__storage_, serviceUuidsArray),
         .flags = GPBFieldRepeated,
         .dataType = GPBDataTypeString,
+      },
+      {
+        .name = "rawBytes",
+        .dataTypeSpecific.clazz = Nil,
+        .number = ProtosAdvertisementData_FieldNumber_RawBytes,
+        .hasIndex = 4,
+        .offset = (uint32_t)offsetof(ProtosAdvertisementData__storage_, rawBytes),
+        .flags = (GPBFieldFlags)(GPBFieldOptional | GPBFieldClearHasIvarOnZero),
+        .dataType = GPBDataTypeBytes,
       },
     };
     GPBDescriptor *localDescriptor =
