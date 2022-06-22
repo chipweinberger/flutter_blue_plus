@@ -302,6 +302,18 @@ class ScanResult {
   }
 }
 
+class AdvertisementDataElement {
+  final int identifier;
+  final Uint8List value;
+
+  AdvertisementDataElement({required this.identifier, required this.value});
+
+  @override
+  String toString() {
+    return 'AdvertisementDataElement{identifier: $identifier, value: $value}';
+  }
+}
+
 class AdvertisementData {
   final String localName;
   final int? txPowerLevel;
@@ -310,14 +322,14 @@ class AdvertisementData {
   final Map<String, List<int>> serviceData;
   final List<String> serviceUuids;
   final Uint8List rawBytes;
-  final Map<int, List<int>> otherData;
+  final List<AdvertisementDataElement> elements;
 
-  /// Parse raw advertising bytes to a Map of ADV
+  /// Parse raw advertising bytes to a List of ADV element
   ///
   /// Documentation comes from here: https://docs.silabs.com/bluetooth/latest/general/adv-and-scanning/bluetooth-adv-data-basics
-  static Map<int, List<int>> parseRawAdvertisementBytes(
+  static List<AdvertisementDataElement> parseRawAdvertisementBytes(
       Uint8List rawAdvertisingBytes) {
-    Map<int, Uint8List> data = {};
+    List<AdvertisementDataElement> otherData = [];
     for (int advCounter = 0;
         advCounter < rawAdvertisingBytes.length;
         advCounter++) {
@@ -325,11 +337,18 @@ class AdvertisementData {
       if (dataLen == 0) continue;
       int typeIdentifier = rawAdvertisingBytes[advCounter++];
       int offset = (dataLen - 2);
-      data[typeIdentifier] = rawAdvertisingBytes.sublist(advCounter,
-          advCounter + (offset + 1)); // +1 as end must be the next element
+      otherData.add(
+        AdvertisementDataElement(
+          identifier: typeIdentifier,
+          value: rawAdvertisingBytes.sublist(
+            advCounter,
+            advCounter + (offset + 1),
+          ),
+        ),
+      ); // +1 as end must be the next element
       advCounter += offset;
     }
-    return data;
+    return otherData;
   }
 
   AdvertisementData.fromProto(protos.AdvertisementData p)
@@ -341,7 +360,7 @@ class AdvertisementData {
         serviceData = p.serviceData,
         serviceUuids = p.serviceUuids,
         rawBytes = Uint8List.fromList(p.rawBytes),
-        otherData = AdvertisementData.parseRawAdvertisementBytes(
+        elements = AdvertisementData.parseRawAdvertisementBytes(
             Uint8List.fromList(p.rawBytes));
 
   @override
