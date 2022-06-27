@@ -14,6 +14,13 @@ class FlutterBluePlus {
   Stream<MethodCall> get _methodStream => _methodStreamController
       .stream; // Used internally to dispatch methods from platform.
 
+  /// Fix for issue https://github.com/pauldemarco/flutter_blue/issues/608
+  /// Cached broadcast stream for FlutterBlue.state events
+  /// Caching this stream allows for more than one listener to subscribe
+  /// and unsubscribe apart from each other,
+  /// while allowing events to still be sent to others that are subscribed
+  Stream<BluetoothState>? _stateStream;
+
   /// Singleton boilerplate
   FlutterBluePlus._() {
     _channel.setMethodCallHandler((MethodCall call) async {
@@ -83,10 +90,12 @@ class FlutterBluePlus {
         .then((buffer) => protos.BluetoothState.fromBuffer(buffer))
         .then((s) => BluetoothState.values[s.state.value]);
 
-    yield* _stateChannel
+    _stateStream ??= _stateChannel
         .receiveBroadcastStream()
         .map((buffer) => protos.BluetoothState.fromBuffer(buffer))
         .map((s) => BluetoothState.values[s.state.value]);
+
+    yield* _stateStream!;
   }
 
   /// Retrieve a list of connected devices
