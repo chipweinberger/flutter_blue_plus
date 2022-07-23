@@ -54,6 +54,15 @@ class BluetoothDevice {
     }
   }
 
+  /// Send a pairing request to the device.
+  /// Currently only implemented on Android.
+  Future<void> pair() async {
+    if (Platform.isAndroid) {
+      return FlutterBluePlus.instance._channel
+          .invokeMethod('pair', id.toString());
+    }
+  }
+
   /// Cancels connection to the Bluetooth Device
   Future disconnect() => FlutterBluePlus.instance._channel
       .invokeMethod('disconnect', id.toString());

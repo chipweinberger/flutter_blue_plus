@@ -359,6 +359,15 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
         break;
       }
 
+      case "pair":
+      {
+        String deviceId = (String)call.arguments;
+        BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(deviceId);
+        device.createBond();
+        result.success(null);
+        break;
+      }
+
       case "disconnect":
       {
         String deviceId = (String)call.arguments;
