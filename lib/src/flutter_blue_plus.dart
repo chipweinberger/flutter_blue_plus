@@ -280,11 +280,13 @@ class ScanResult {
   ScanResult.fromProto(protos.ScanResult p)
       : device = BluetoothDevice.fromProto(p.device),
         advertisementData = AdvertisementData.fromProto(p.advertisementData),
-        rssi = p.rssi;
+        rssi = p.rssi,
+        timeStamp = DateTime.now();
 
   final BluetoothDevice device;
   final AdvertisementData advertisementData;
   final int rssi;
+  final DateTime timeStamp;
 
   @override
   bool operator ==(Object other) =>
@@ -298,7 +300,7 @@ class ScanResult {
 
   @override
   String toString() {
-    return 'ScanResult{device: $device, advertisementData: $advertisementData, rssi: $rssi}';
+    return 'ScanResult{device: $device, advertisementData: $advertisementData, rssi: $rssi, timeStamp: $timeStamp}';
   }
 }
 
