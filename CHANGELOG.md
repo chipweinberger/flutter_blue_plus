@@ -1,3 +1,6 @@
+## 1.2.0
+* connect timeout fixed (thanks to crazy-rodney, sophisticode, SkuggaEdward, MousyBusiness and cthurston)
+
 ## 1.1.3
 * Read RSSI from a connected BLE device #1 (thanks to sophisticode)
 * Fixed a crash on Android OS 12 (added check for BLUETOOTH_CONNECT permission) (fixed by dspells)
