@@ -1,3 +1,9 @@
+## 1.2.0
+* connect timeout fixed (thanks to crazy-rodney, sophisticode, SkuggaEdward, MousyBusiness and cthurston)
+* Add timestamp field to ScanResult class #59 (thanks to simon-iversen)
+* Add FlutterBlue.name to get the human readable device name #93 (thanks to mvo5)
+* Fix bug where if there were multiple subscribers to FlutterBlue.state and one cancelled it would accidentally cancel all subscribers (thank to MacMalainey and MrCsabaToth)
+
 ## 1.1.3
 * Read RSSI from a connected BLE device #1 (thanks to sophisticode)
 * Fixed a crash on Android OS 12 (added check for BLUETOOTH_CONNECT permission) (fixed by dspells)
