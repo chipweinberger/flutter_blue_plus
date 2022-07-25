@@ -609,10 +609,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
   }
   // Manufacturer Specific Data
   NSData *manufData = advertisementData[CBAdvertisementDataManufacturerDataKey];
-  if(manufData != nil && manufData.length > 2) {
+  if(manufData != nil && manufData.length > 3) {
     unsigned short manufacturerId;
     [manufData getBytes:&manufacturerId length:2];
-    [[ads manufacturerData] setObject:[manufData subdataWithRange:NSMakeRange(2, manufData.length - 2)] forKey:manufacturerId];
+    [[ads manufacturerData] setObject:[manufData subdataWithRange:NSMakeRange(3, manufData.length - 3)] forKey:manufacturerId];
   }
   // Service Data
   NSDictionary *serviceData = advertisementData[CBAdvertisementDataServiceDataKey];
