@@ -228,6 +228,15 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
         break;
       }
 
+      case "name":
+      {
+        String name = mBluetoothAdapter.getName();
+        if (name == null)
+          name = "";
+        result.success(name);
+        break;
+      }
+
       case "turnOn":
       {
         if (!mBluetoothAdapter.isEnabled()) {
@@ -348,6 +357,15 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
           mDevices.put(deviceId, new BluetoothDeviceCache(gattServer));
           result.success(null);
         });
+        break;
+      }
+
+      case "pair":
+      {
+        String deviceId = (String)call.arguments;
+        BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(deviceId);
+        device.createBond();
+        result.success(null);
         break;
       }
 
