@@ -121,12 +121,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     @try {
       CBPeripheral *peripheral = [_scannedPeripherals objectForKey:remoteId];
       if(peripheral == nil) {
-        NSMutableDictionary *connectedPeripheral = [NSMutableDictionary new];
         NSArray *periphs = [self->_centralManager retrieveConnectedPeripheralsWithServices:@[[CBUUID UUIDWithString:@"1800"]]];
         for (CBPeripheral *p in periphs) {
           NSString *uuid = [[p identifier] UUIDString];
           p.delegate = self;
-          [_scannedPeripherals setObject: p forKey:uuid];
+          [_scannedPeripherals setObject:p forKey:uuid];
         }
         peripheral = [_scannedPeripherals objectForKey:remoteId];
       }
