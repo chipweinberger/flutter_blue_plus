@@ -1,3 +1,6 @@
+## 1.3.0
+* Ios: fixed manufacturer data parsing #104 (thanks to sqcsabbey)
+
 ## 1.2.0
 * connect timeout fixed (thanks to crazy-rodney, sophisticode, SkuggaEdward, MousyBusiness and cthurston)
 * Add timestamp field to ScanResult class #59 (thanks to simon-iversen)
