@@ -349,7 +349,7 @@ class DeviceScreen extends StatelessWidget {
     });
     while (isConnected) {
       yield await device.readRssi();
-      await Future.delayed(Duration(seconds: 1));
+      await Future.delayed(const Duration(seconds: 1));
     }
     subscription.cancel();
     // Device disconnected, stopping RSSI stream
