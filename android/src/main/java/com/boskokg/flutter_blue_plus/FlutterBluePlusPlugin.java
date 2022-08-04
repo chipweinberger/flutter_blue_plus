@@ -44,6 +44,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -879,15 +880,33 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
     BluetoothLeScanner scanner = mBluetoothAdapter.getBluetoothLeScanner();
     if(scanner == null) throw new IllegalStateException("getBluetoothLeScanner() is null. Is the Adapter on?");
     int scanMode = proto.getAndroidScanMode();
-    int count = proto.getServiceUuidsCount();
-    List<ScanFilter> filters = new ArrayList<>(count);
-    for(int i = 0; i < count; i++) {
-      String uuid = proto.getServiceUuids(i);
-      ScanFilter f = new ScanFilter.Builder().setServiceUuid(ParcelUuid.fromString(uuid)).build();
-      filters.add(f);
-    }
+    List<ScanFilter> filters = fetchFilters(proto);
     ScanSettings settings = new ScanSettings.Builder().setScanMode(scanMode).build();
     scanner.startScan(filters, settings, getScanCallback21());
+  }
+
+  @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+  private List<ScanFilter> fetchFilters(Protos.ScanSettings proto) {
+    List<ScanFilter> filters;
+
+    int macCount = proto.getMacAddressesCount();
+    int serviceCount = proto.getServiceUuidsCount();
+    int count = macCount > 0 ? macCount : serviceCount;
+    filters = new ArrayList<>(count);
+
+    for (int i = 0; i < count; i++) {
+      ScanFilter f;
+      if (macCount > 0) {
+        String macAddress = proto.getMacAddresses(i);
+        f = new ScanFilter.Builder().setDeviceAddress(macAddress).build();
+      } else {
+        String uuid = proto.getServiceUuids(i);
+        f = new ScanFilter.Builder().setServiceUuid(ParcelUuid.fromString(uuid)).build();
+      }
+      filters.add(f);
+    }
+
+    return filters;
   }
 
   @TargetApi(21)
