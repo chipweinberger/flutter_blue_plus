@@ -23,7 +23,7 @@ class Guid {
     final bytes = hex.decode(input);
 
     if (bytes.length != 6) {
-      throw FormatException("The format is invalid: " + input);
+      throw FormatException("The format is invalid: $input");
     }
 
     return bytes + List<int>.filled(10, 0);

@@ -1,3 +1,9 @@
+## 1.3.0
+* Ios: fixed manufacturer data parsing #104 (thanks to sqcsabbey)
+* Ios: Fixed an error when calling the connect method of a connected device #106 (thanks to figureai)
+* Android: Scan Filter by Mac Address #57 (thanks to  Zyr00)
+* Upgrading to linter 2.0.1, excluding generated ProtoBuf files from linting. (thanks to MrCsabaToth)
+
 ## 1.2.0
 * connect timeout fixed (thanks to crazy-rodney, sophisticode, SkuggaEdward, MousyBusiness and cthurston)
 * Add timestamp field to ScanResult class #59 (thanks to simon-iversen)
