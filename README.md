@@ -27,6 +27,12 @@ The BluetoothDevice object is then used to directly interact with characteristic
 FlutterBluePlus flutterBlue = FlutterBluePlus.instance;
 ```
 
+## Disabling CBCentralManagerOptionShowPowerAlertKey
+If you do not want to show `CBCentralManagerOptionShowPowerAlertKey` alerts, create your instance as:
+```dart
+FlutterBluePlus flutterBlue = FlutterBluePlus(showIosPowerAlert: false);
+```
+
 ### Scan for devices
 ```dart
 // Start scanning
