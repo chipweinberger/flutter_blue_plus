@@ -279,6 +279,12 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
         break;
       }
 
+      case "setShowIosPowerAlert":
+      {
+        result.success(null);
+        break;
+      }
+
       case "getConnectedDevices":
       {
         ensurePermissionBeforeAction(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? Manifest.permission.BLUETOOTH_CONNECT : null, (granted, permission) -> {

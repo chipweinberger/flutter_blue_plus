@@ -68,6 +68,14 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     result(nil);
     return;
   }
+  if ([@"setShowIosPowerAlert" isEqualToString:call.method]) {
+    NSNumber *showPowerAlert = [call arguments];
+    if (self.centralManager == nil) {
+      self.centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil options:@{CBCentralManagerOptionShowPowerAlertKey: showPowerAlert}];
+    }
+    result(nil);
+    return;
+  }
   if (self.centralManager == nil) {
     self.centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
   }

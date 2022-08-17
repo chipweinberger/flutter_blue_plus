@@ -21,15 +21,22 @@ class FlutterBluePlus {
   Stream<BluetoothState>? _stateStream;
 
   /// Singleton boilerplate
-  FlutterBluePlus._() {
+  FlutterBluePlus._({bool showIosPowerAlert = true}) {
     _channel.setMethodCallHandler((MethodCall call) async {
       _methodStreamController.add(call);
     });
 
+    _channel.invokeMethod('setShowIosPowerAlert', showIosPowerAlert);
+
     setLogLevel(logLevel);
   }
 
+  /// FlutterBluePlus factory with optional [showIosPowerAlert] parameter
+  factory FlutterBluePlus({bool showIosPowerAlert = true}) =>
+      FlutterBluePlus._(showIosPowerAlert: showIosPowerAlert);
+
   static final FlutterBluePlus _instance = FlutterBluePlus._();
+
   static FlutterBluePlus get instance => _instance;
 
   /// Log level of the instance, default is all messages (debug).
