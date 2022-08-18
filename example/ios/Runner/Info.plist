@@ -47,5 +47,7 @@
 	<string>We need BT access because it&apos;s a BT App.</string>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
 </dict>
 </plist>
