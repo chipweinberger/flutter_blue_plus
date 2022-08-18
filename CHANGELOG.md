@@ -1,3 +1,6 @@
+## 1.3.1
+* Reverted: Ios: fixed manufacturer data parsing #104 (thanks to sqcsabbey)
+
 ## 1.3.0
 * Ios: fixed manufacturer data parsing #104 (thanks to sqcsabbey)
 * Ios: Fixed an error when calling the connect method of a connected device #106 (thanks to figureai)
