@@ -169,7 +169,8 @@ class ScanSettings extends $pb.GeneratedMessage {
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'androidScanMode', $pb.PbFieldType.O3)
     ..pPS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'serviceUuids')
     ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'allowDuplicates')
-    ..aOB(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'offloadBatching')
+    ..pPS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'macAddresses')
+    ..aOB(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'offloadBatching')
     ..hasRequiredFields = false
   ;
 
@@ -218,13 +219,16 @@ class ScanSettings extends $pb.GeneratedMessage {
   void clearAllowDuplicates() => clearField(3);
 
   @$pb.TagNumber(4)
-  $core.bool get offloadBatching => $_getBF(3);
-  @$pb.TagNumber(4)
-  set offloadBatching($core.bool v) { $_setBool(3, v); }
-  @$pb.TagNumber(4)
-  $core.bool hasOffloadBatching() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearOffloadBatching() => clearField(4);
+  $core.List<$core.String> get macAddresses => $_getList(3);
+
+  @$pb.TagNumber(5)
+  $core.bool get offloadBatching => $_getBF(4);
+  @$pb.TagNumber(5)
+  set offloadBatching($core.bool v) { $_setBool(4, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasOffloadBatching() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearOffloadBatching() => clearField(5);
 }
 
 class ScanResult extends $pb.GeneratedMessage {
