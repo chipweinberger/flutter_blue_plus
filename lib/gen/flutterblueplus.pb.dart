@@ -3,7 +3,7 @@
 //  source: flutterblueplus.proto
 //
 // @dart = 2.12
-// ignore_for_file: annotate_overrides,camel_case_types,unnecessary_const,non_constant_identifier_names,library_prefixes,unused_import,unused_shown_name,return_of_invalid_type,unnecessary_this,prefer_final_fields
+// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
 
 import 'dart:core' as $core;
 
@@ -20,15 +20,7 @@ class Int32Value extends $pb.GeneratedMessage {
   ;
 
   Int32Value._() : super();
-  factory Int32Value({
-    $core.int? value,
-  }) {
-    final _result = create();
-    if (value != null) {
-      _result.value = value;
-    }
-    return _result;
-  }
+  factory Int32Value() => create();
   factory Int32Value.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory Int32Value.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
@@ -67,15 +59,7 @@ class BluetoothState extends $pb.GeneratedMessage {
   ;
 
   BluetoothState._() : super();
-  factory BluetoothState({
-    BluetoothState_State? state,
-  }) {
-    final _result = create();
-    if (state != null) {
-      _result.state = state;
-    }
-    return _result;
-  }
+  factory BluetoothState() => create();
   factory BluetoothState.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory BluetoothState.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
@@ -119,35 +103,7 @@ class AdvertisementData extends $pb.GeneratedMessage {
   ;
 
   AdvertisementData._() : super();
-  factory AdvertisementData({
-    $core.String? localName,
-    Int32Value? txPowerLevel,
-    $core.bool? connectable,
-    $core.Map<$core.int, $core.List<$core.int>>? manufacturerData,
-    $core.Map<$core.String, $core.List<$core.int>>? serviceData,
-    $core.Iterable<$core.String>? serviceUuids,
-  }) {
-    final _result = create();
-    if (localName != null) {
-      _result.localName = localName;
-    }
-    if (txPowerLevel != null) {
-      _result.txPowerLevel = txPowerLevel;
-    }
-    if (connectable != null) {
-      _result.connectable = connectable;
-    }
-    if (manufacturerData != null) {
-      _result.manufacturerData.addAll(manufacturerData);
-    }
-    if (serviceData != null) {
-      _result.serviceData.addAll(serviceData);
-    }
-    if (serviceUuids != null) {
-      _result.serviceUuids.addAll(serviceUuids);
-    }
-    return _result;
-  }
+  factory AdvertisementData() => create();
   factory AdvertisementData.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory AdvertisementData.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
@@ -214,31 +170,12 @@ class ScanSettings extends $pb.GeneratedMessage {
     ..pPS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'serviceUuids')
     ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'allowDuplicates')
     ..pPS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'macAddresses')
+    ..aOB(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'offloadBatching')
     ..hasRequiredFields = false
   ;
 
   ScanSettings._() : super();
-  factory ScanSettings({
-    $core.int? androidScanMode,
-    $core.Iterable<$core.String>? serviceUuids,
-    $core.bool? allowDuplicates,
-    $core.Iterable<$core.String>? macAddresses,
-  }) {
-    final _result = create();
-    if (androidScanMode != null) {
-      _result.androidScanMode = androidScanMode;
-    }
-    if (serviceUuids != null) {
-      _result.serviceUuids.addAll(serviceUuids);
-    }
-    if (allowDuplicates != null) {
-      _result.allowDuplicates = allowDuplicates;
-    }
-    if (macAddresses != null) {
-      _result.macAddresses.addAll(macAddresses);
-    }
-    return _result;
-  }
+  factory ScanSettings() => create();
   factory ScanSettings.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory ScanSettings.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
@@ -283,6 +220,15 @@ class ScanSettings extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(4)
   $core.List<$core.String> get macAddresses => $_getList(3);
+
+  @$pb.TagNumber(5)
+  $core.bool get offloadBatching => $_getBF(4);
+  @$pb.TagNumber(5)
+  set offloadBatching($core.bool v) { $_setBool(4, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasOffloadBatching() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearOffloadBatching() => clearField(5);
 }
 
 class ScanResult extends $pb.GeneratedMessage {
@@ -294,23 +240,7 @@ class ScanResult extends $pb.GeneratedMessage {
   ;
 
   ScanResult._() : super();
-  factory ScanResult({
-    BluetoothDevice? device,
-    AdvertisementData? advertisementData,
-    $core.int? rssi,
-  }) {
-    final _result = create();
-    if (device != null) {
-      _result.device = device;
-    }
-    if (advertisementData != null) {
-      _result.advertisementData = advertisementData;
-    }
-    if (rssi != null) {
-      _result.rssi = rssi;
-    }
-    return _result;
-  }
+  factory ScanResult() => create();
   factory ScanResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory ScanResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
@@ -372,19 +302,7 @@ class ConnectRequest extends $pb.GeneratedMessage {
   ;
 
   ConnectRequest._() : super();
-  factory ConnectRequest({
-    $core.String? remoteId,
-    $core.bool? androidAutoConnect,
-  }) {
-    final _result = create();
-    if (remoteId != null) {
-      _result.remoteId = remoteId;
-    }
-    if (androidAutoConnect != null) {
-      _result.androidAutoConnect = androidAutoConnect;
-    }
-    return _result;
-  }
+  factory ConnectRequest() => create();
   factory ConnectRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory ConnectRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
@@ -434,23 +352,7 @@ class BluetoothDevice extends $pb.GeneratedMessage {
   ;
 
   BluetoothDevice._() : super();
-  factory BluetoothDevice({
-    $core.String? remoteId,
-    $core.String? name,
-    BluetoothDevice_Type? type,
-  }) {
-    final _result = create();
-    if (remoteId != null) {
-      _result.remoteId = remoteId;
-    }
-    if (name != null) {
-      _result.name = name;
-    }
-    if (type != null) {
-      _result.type = type;
-    }
-    return _result;
-  }
+  factory BluetoothDevice() => create();
   factory BluetoothDevice.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory BluetoothDevice.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
@@ -511,31 +413,7 @@ class BluetoothService extends $pb.GeneratedMessage {
   ;
 
   BluetoothService._() : super();
-  factory BluetoothService({
-    $core.String? uuid,
-    $core.String? remoteId,
-    $core.bool? isPrimary,
-    $core.Iterable<BluetoothCharacteristic>? characteristics,
-    $core.Iterable<BluetoothService>? includedServices,
-  }) {
-    final _result = create();
-    if (uuid != null) {
-      _result.uuid = uuid;
-    }
-    if (remoteId != null) {
-      _result.remoteId = remoteId;
-    }
-    if (isPrimary != null) {
-      _result.isPrimary = isPrimary;
-    }
-    if (characteristics != null) {
-      _result.characteristics.addAll(characteristics);
-    }
-    if (includedServices != null) {
-      _result.includedServices.addAll(includedServices);
-    }
-    return _result;
-  }
+  factory BluetoothService() => create();
   factory BluetoothService.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory BluetoothService.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
@@ -604,39 +482,7 @@ class BluetoothCharacteristic extends $pb.GeneratedMessage {
   ;
 
   BluetoothCharacteristic._() : super();
-  factory BluetoothCharacteristic({
-    $core.String? uuid,
-    $core.String? remoteId,
-    $core.String? serviceUuid,
-    $core.String? secondaryServiceUuid,
-    $core.Iterable<BluetoothDescriptor>? descriptors,
-    CharacteristicProperties? properties,
-    $core.List<$core.int>? value,
-  }) {
-    final _result = create();
-    if (uuid != null) {
-      _result.uuid = uuid;
-    }
-    if (remoteId != null) {
-      _result.remoteId = remoteId;
-    }
-    if (serviceUuid != null) {
-      _result.serviceUuid = serviceUuid;
-    }
-    if (secondaryServiceUuid != null) {
-      _result.secondaryServiceUuid = secondaryServiceUuid;
-    }
-    if (descriptors != null) {
-      _result.descriptors.addAll(descriptors);
-    }
-    if (properties != null) {
-      _result.properties = properties;
-    }
-    if (value != null) {
-      _result.value = value;
-    }
-    return _result;
-  }
+  factory BluetoothCharacteristic() => create();
   factory BluetoothCharacteristic.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory BluetoothCharacteristic.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
@@ -729,31 +575,7 @@ class BluetoothDescriptor extends $pb.GeneratedMessage {
   ;
 
   BluetoothDescriptor._() : super();
-  factory BluetoothDescriptor({
-    $core.String? uuid,
-    $core.String? remoteId,
-    $core.String? serviceUuid,
-    $core.String? characteristicUuid,
-    $core.List<$core.int>? value,
-  }) {
-    final _result = create();
-    if (uuid != null) {
-      _result.uuid = uuid;
-    }
-    if (remoteId != null) {
-      _result.remoteId = remoteId;
-    }
-    if (serviceUuid != null) {
-      _result.serviceUuid = serviceUuid;
-    }
-    if (characteristicUuid != null) {
-      _result.characteristicUuid = characteristicUuid;
-    }
-    if (value != null) {
-      _result.value = value;
-    }
-    return _result;
-  }
+  factory BluetoothDescriptor() => create();
   factory BluetoothDescriptor.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory BluetoothDescriptor.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
@@ -837,51 +659,7 @@ class CharacteristicProperties extends $pb.GeneratedMessage {
   ;
 
   CharacteristicProperties._() : super();
-  factory CharacteristicProperties({
-    $core.bool? broadcast,
-    $core.bool? read,
-    $core.bool? writeWithoutResponse,
-    $core.bool? write,
-    $core.bool? notify,
-    $core.bool? indicate,
-    $core.bool? authenticatedSignedWrites,
-    $core.bool? extendedProperties,
-    $core.bool? notifyEncryptionRequired,
-    $core.bool? indicateEncryptionRequired,
-  }) {
-    final _result = create();
-    if (broadcast != null) {
-      _result.broadcast = broadcast;
-    }
-    if (read != null) {
-      _result.read = read;
-    }
-    if (writeWithoutResponse != null) {
-      _result.writeWithoutResponse = writeWithoutResponse;
-    }
-    if (write != null) {
-      _result.write = write;
-    }
-    if (notify != null) {
-      _result.notify = notify;
-    }
-    if (indicate != null) {
-      _result.indicate = indicate;
-    }
-    if (authenticatedSignedWrites != null) {
-      _result.authenticatedSignedWrites = authenticatedSignedWrites;
-    }
-    if (extendedProperties != null) {
-      _result.extendedProperties = extendedProperties;
-    }
-    if (notifyEncryptionRequired != null) {
-      _result.notifyEncryptionRequired = notifyEncryptionRequired;
-    }
-    if (indicateEncryptionRequired != null) {
-      _result.indicateEncryptionRequired = indicateEncryptionRequired;
-    }
-    return _result;
-  }
+  factory CharacteristicProperties() => create();
   factory CharacteristicProperties.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory CharacteristicProperties.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
@@ -1002,19 +780,7 @@ class DiscoverServicesResult extends $pb.GeneratedMessage {
   ;
 
   DiscoverServicesResult._() : super();
-  factory DiscoverServicesResult({
-    $core.String? remoteId,
-    $core.Iterable<BluetoothService>? services,
-  }) {
-    final _result = create();
-    if (remoteId != null) {
-      _result.remoteId = remoteId;
-    }
-    if (services != null) {
-      _result.services.addAll(services);
-    }
-    return _result;
-  }
+  factory DiscoverServicesResult() => create();
   factory DiscoverServicesResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory DiscoverServicesResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
@@ -1059,27 +825,7 @@ class ReadCharacteristicRequest extends $pb.GeneratedMessage {
   ;
 
   ReadCharacteristicRequest._() : super();
-  factory ReadCharacteristicRequest({
-    $core.String? remoteId,
-    $core.String? characteristicUuid,
-    $core.String? serviceUuid,
-    $core.String? secondaryServiceUuid,
-  }) {
-    final _result = create();
-    if (remoteId != null) {
-      _result.remoteId = remoteId;
-    }
-    if (characteristicUuid != null) {
-      _result.characteristicUuid = characteristicUuid;
-    }
-    if (serviceUuid != null) {
-      _result.serviceUuid = serviceUuid;
-    }
-    if (secondaryServiceUuid != null) {
-      _result.secondaryServiceUuid = secondaryServiceUuid;
-    }
-    return _result;
-  }
+  factory ReadCharacteristicRequest() => create();
   factory ReadCharacteristicRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory ReadCharacteristicRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
@@ -1146,19 +892,7 @@ class ReadCharacteristicResponse extends $pb.GeneratedMessage {
   ;
 
   ReadCharacteristicResponse._() : super();
-  factory ReadCharacteristicResponse({
-    $core.String? remoteId,
-    BluetoothCharacteristic? characteristic,
-  }) {
-    final _result = create();
-    if (remoteId != null) {
-      _result.remoteId = remoteId;
-    }
-    if (characteristic != null) {
-      _result.characteristic = characteristic;
-    }
-    return _result;
-  }
+  factory ReadCharacteristicResponse() => create();
   factory ReadCharacteristicResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory ReadCharacteristicResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
@@ -1212,31 +946,7 @@ class ReadDescriptorRequest extends $pb.GeneratedMessage {
   ;
 
   ReadDescriptorRequest._() : super();
-  factory ReadDescriptorRequest({
-    $core.String? remoteId,
-    $core.String? descriptorUuid,
-    $core.String? serviceUuid,
-    $core.String? secondaryServiceUuid,
-    $core.String? characteristicUuid,
-  }) {
-    final _result = create();
-    if (remoteId != null) {
-      _result.remoteId = remoteId;
-    }
-    if (descriptorUuid != null) {
-      _result.descriptorUuid = descriptorUuid;
-    }
-    if (serviceUuid != null) {
-      _result.serviceUuid = serviceUuid;
-    }
-    if (secondaryServiceUuid != null) {
-      _result.secondaryServiceUuid = secondaryServiceUuid;
-    }
-    if (characteristicUuid != null) {
-      _result.characteristicUuid = characteristicUuid;
-    }
-    return _result;
-  }
+  factory ReadDescriptorRequest() => create();
   factory ReadDescriptorRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory ReadDescriptorRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
@@ -1312,19 +1022,7 @@ class ReadDescriptorResponse extends $pb.GeneratedMessage {
   ;
 
   ReadDescriptorResponse._() : super();
-  factory ReadDescriptorResponse({
-    ReadDescriptorRequest? request,
-    $core.List<$core.int>? value,
-  }) {
-    final _result = create();
-    if (request != null) {
-      _result.request = request;
-    }
-    if (value != null) {
-      _result.value = value;
-    }
-    return _result;
-  }
+  factory ReadDescriptorResponse() => create();
   factory ReadDescriptorResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory ReadDescriptorResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
@@ -1379,35 +1077,7 @@ class WriteCharacteristicRequest extends $pb.GeneratedMessage {
   ;
 
   WriteCharacteristicRequest._() : super();
-  factory WriteCharacteristicRequest({
-    $core.String? remoteId,
-    $core.String? characteristicUuid,
-    $core.String? serviceUuid,
-    $core.String? secondaryServiceUuid,
-    WriteCharacteristicRequest_WriteType? writeType,
-    $core.List<$core.int>? value,
-  }) {
-    final _result = create();
-    if (remoteId != null) {
-      _result.remoteId = remoteId;
-    }
-    if (characteristicUuid != null) {
-      _result.characteristicUuid = characteristicUuid;
-    }
-    if (serviceUuid != null) {
-      _result.serviceUuid = serviceUuid;
-    }
-    if (secondaryServiceUuid != null) {
-      _result.secondaryServiceUuid = secondaryServiceUuid;
-    }
-    if (writeType != null) {
-      _result.writeType = writeType;
-    }
-    if (value != null) {
-      _result.value = value;
-    }
-    return _result;
-  }
+  factory WriteCharacteristicRequest() => create();
   factory WriteCharacteristicRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory WriteCharacteristicRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
@@ -1492,19 +1162,7 @@ class WriteCharacteristicResponse extends $pb.GeneratedMessage {
   ;
 
   WriteCharacteristicResponse._() : super();
-  factory WriteCharacteristicResponse({
-    WriteCharacteristicRequest? request,
-    $core.bool? success,
-  }) {
-    final _result = create();
-    if (request != null) {
-      _result.request = request;
-    }
-    if (success != null) {
-      _result.success = success;
-    }
-    return _result;
-  }
+  factory WriteCharacteristicResponse() => create();
   factory WriteCharacteristicResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory WriteCharacteristicResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
@@ -1559,35 +1217,7 @@ class WriteDescriptorRequest extends $pb.GeneratedMessage {
   ;
 
   WriteDescriptorRequest._() : super();
-  factory WriteDescriptorRequest({
-    $core.String? remoteId,
-    $core.String? descriptorUuid,
-    $core.String? serviceUuid,
-    $core.String? secondaryServiceUuid,
-    $core.String? characteristicUuid,
-    $core.List<$core.int>? value,
-  }) {
-    final _result = create();
-    if (remoteId != null) {
-      _result.remoteId = remoteId;
-    }
-    if (descriptorUuid != null) {
-      _result.descriptorUuid = descriptorUuid;
-    }
-    if (serviceUuid != null) {
-      _result.serviceUuid = serviceUuid;
-    }
-    if (secondaryServiceUuid != null) {
-      _result.secondaryServiceUuid = secondaryServiceUuid;
-    }
-    if (characteristicUuid != null) {
-      _result.characteristicUuid = characteristicUuid;
-    }
-    if (value != null) {
-      _result.value = value;
-    }
-    return _result;
-  }
+  factory WriteDescriptorRequest() => create();
   factory WriteDescriptorRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory WriteDescriptorRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
@@ -1672,19 +1302,7 @@ class WriteDescriptorResponse extends $pb.GeneratedMessage {
   ;
 
   WriteDescriptorResponse._() : super();
-  factory WriteDescriptorResponse({
-    WriteDescriptorRequest? request,
-    $core.bool? success,
-  }) {
-    final _result = create();
-    if (request != null) {
-      _result.request = request;
-    }
-    if (success != null) {
-      _result.success = success;
-    }
-    return _result;
-  }
+  factory WriteDescriptorResponse() => create();
   factory WriteDescriptorResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory WriteDescriptorResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
@@ -1738,31 +1356,7 @@ class SetNotificationRequest extends $pb.GeneratedMessage {
   ;
 
   SetNotificationRequest._() : super();
-  factory SetNotificationRequest({
-    $core.String? remoteId,
-    $core.String? serviceUuid,
-    $core.String? secondaryServiceUuid,
-    $core.String? characteristicUuid,
-    $core.bool? enable,
-  }) {
-    final _result = create();
-    if (remoteId != null) {
-      _result.remoteId = remoteId;
-    }
-    if (serviceUuid != null) {
-      _result.serviceUuid = serviceUuid;
-    }
-    if (secondaryServiceUuid != null) {
-      _result.secondaryServiceUuid = secondaryServiceUuid;
-    }
-    if (characteristicUuid != null) {
-      _result.characteristicUuid = characteristicUuid;
-    }
-    if (enable != null) {
-      _result.enable = enable;
-    }
-    return _result;
-  }
+  factory SetNotificationRequest() => create();
   factory SetNotificationRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory SetNotificationRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
@@ -1839,23 +1433,7 @@ class SetNotificationResponse extends $pb.GeneratedMessage {
   ;
 
   SetNotificationResponse._() : super();
-  factory SetNotificationResponse({
-    $core.String? remoteId,
-    BluetoothCharacteristic? characteristic,
-    $core.bool? success,
-  }) {
-    final _result = create();
-    if (remoteId != null) {
-      _result.remoteId = remoteId;
-    }
-    if (characteristic != null) {
-      _result.characteristic = characteristic;
-    }
-    if (success != null) {
-      _result.success = success;
-    }
-    return _result;
-  }
+  factory SetNotificationResponse() => create();
   factory SetNotificationResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory SetNotificationResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
@@ -1915,19 +1493,7 @@ class OnCharacteristicChanged extends $pb.GeneratedMessage {
   ;
 
   OnCharacteristicChanged._() : super();
-  factory OnCharacteristicChanged({
-    $core.String? remoteId,
-    BluetoothCharacteristic? characteristic,
-  }) {
-    final _result = create();
-    if (remoteId != null) {
-      _result.remoteId = remoteId;
-    }
-    if (characteristic != null) {
-      _result.characteristic = characteristic;
-    }
-    return _result;
-  }
+  factory OnCharacteristicChanged() => create();
   factory OnCharacteristicChanged.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory OnCharacteristicChanged.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
@@ -1978,19 +1544,7 @@ class DeviceStateResponse extends $pb.GeneratedMessage {
   ;
 
   DeviceStateResponse._() : super();
-  factory DeviceStateResponse({
-    $core.String? remoteId,
-    DeviceStateResponse_BluetoothDeviceState? state,
-  }) {
-    final _result = create();
-    if (remoteId != null) {
-      _result.remoteId = remoteId;
-    }
-    if (state != null) {
-      _result.state = state;
-    }
-    return _result;
-  }
+  factory DeviceStateResponse() => create();
   factory DeviceStateResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory DeviceStateResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
@@ -2038,15 +1592,7 @@ class ConnectedDevicesResponse extends $pb.GeneratedMessage {
   ;
 
   ConnectedDevicesResponse._() : super();
-  factory ConnectedDevicesResponse({
-    $core.Iterable<BluetoothDevice>? devices,
-  }) {
-    final _result = create();
-    if (devices != null) {
-      _result.devices.addAll(devices);
-    }
-    return _result;
-  }
+  factory ConnectedDevicesResponse() => create();
   factory ConnectedDevicesResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory ConnectedDevicesResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
@@ -2080,19 +1626,7 @@ class MtuSizeRequest extends $pb.GeneratedMessage {
   ;
 
   MtuSizeRequest._() : super();
-  factory MtuSizeRequest({
-    $core.String? remoteId,
-    $core.int? mtu,
-  }) {
-    final _result = create();
-    if (remoteId != null) {
-      _result.remoteId = remoteId;
-    }
-    if (mtu != null) {
-      _result.mtu = mtu;
-    }
-    return _result;
-  }
+  factory MtuSizeRequest() => create();
   factory MtuSizeRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory MtuSizeRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
@@ -2141,19 +1675,7 @@ class MtuSizeResponse extends $pb.GeneratedMessage {
   ;
 
   MtuSizeResponse._() : super();
-  factory MtuSizeResponse({
-    $core.String? remoteId,
-    $core.int? mtu,
-  }) {
-    final _result = create();
-    if (remoteId != null) {
-      _result.remoteId = remoteId;
-    }
-    if (mtu != null) {
-      _result.mtu = mtu;
-    }
-    return _result;
-  }
+  factory MtuSizeResponse() => create();
   factory MtuSizeResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory MtuSizeResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
@@ -2202,19 +1724,7 @@ class ReadRssiResult extends $pb.GeneratedMessage {
   ;
 
   ReadRssiResult._() : super();
-  factory ReadRssiResult({
-    $core.String? remoteId,
-    $core.int? rssi,
-  }) {
-    final _result = create();
-    if (remoteId != null) {
-      _result.remoteId = remoteId;
-    }
-    if (rssi != null) {
-      _result.rssi = rssi;
-    }
-    return _result;
-  }
+  factory ReadRssiResult() => create();
   factory ReadRssiResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory ReadRssiResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(

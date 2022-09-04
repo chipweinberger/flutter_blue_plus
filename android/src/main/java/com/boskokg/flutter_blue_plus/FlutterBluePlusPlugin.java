@@ -73,6 +73,7 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
   private EventChannel stateChannel;
   private BluetoothManager mBluetoothManager;
   private BluetoothAdapter mBluetoothAdapter;
+  private boolean supportsOffloadBatching;
 
   private FlutterPluginBinding pluginBinding;
   private ActivityPluginBinding activityBinding;
@@ -90,6 +91,7 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
 
   private final ArrayList<String> macDeviceScanned = new ArrayList<>();
   private boolean allowDuplicates = false;
+  private boolean offloadBatching = false;
 
   public FlutterBluePlusPlugin() {}
 
@@ -146,6 +148,7 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
       stateChannel.setStreamHandler(stateHandler);
       mBluetoothManager = (BluetoothManager) application.getSystemService(Context.BLUETOOTH_SERVICE);
       mBluetoothAdapter = mBluetoothManager.getAdapter();
+      supportsOffloadBatching = mBluetoothAdapter.isOffloadedScanBatchingSupported();
     }
   }
 
@@ -818,6 +821,7 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
     try {
       settings = Protos.ScanSettings.newBuilder().mergeFrom(data).build();
       allowDuplicates = settings.getAllowDuplicates();
+      offloadBatching = settings.getOffloadBatching();
       macDeviceScanned.clear();
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
         startScan21(settings);
@@ -863,7 +867,19 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
         @Override
         public void onBatchScanResults(List<ScanResult> results) {
           super.onBatchScanResults(results);
-
+          if (results != null) {
+            for (int i = 0; i < results.size(); i++) {
+              if (!allowDuplicates && results.get(i).getDevice() != null
+                  && results.get(i).getDevice().getAddress() != null) {
+                if (macDeviceScanned.contains(results.get(i).getDevice().getAddress())) {
+                  return;
+                }
+                macDeviceScanned.add(results.get(i).getDevice().getAddress());
+              }
+              Protos.ScanResult scanResult = ProtoMaker.from(results.get(i).getDevice(), results.get(i));
+              invokeMethodUIThread("ScanResult", scanResult.toByteArray());
+            }
+          }
         }
 
         @Override
@@ -881,7 +897,13 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
     if(scanner == null) throw new IllegalStateException("getBluetoothLeScanner() is null. Is the Adapter on?");
     int scanMode = proto.getAndroidScanMode();
     List<ScanFilter> filters = fetchFilters(proto);
-    ScanSettings settings = new ScanSettings.Builder().setScanMode(scanMode).build();
+    ScanSettings settings;
+    if (offloadBatching && supportsOffloadBatching) {
+      settings = new ScanSettings.Builder().setScanMode(scanMode)
+          .setReportDelay((scanMode == 0) ? 2000 : (scanMode == 1) ? 1000 : (scanMode == 2) ? 500 : 0).build();
+    } else {
+      settings = new ScanSettings.Builder().setScanMode(scanMode).build();
+    }
     scanner.startScan(filters, settings, getScanCallback21());
   }
 
