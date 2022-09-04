@@ -43,6 +43,7 @@ message ScanSettings {
   repeated string service_uuids = 2;
   bool allow_duplicates = 3;
   repeated string mac_addresses = 4;
+  bool offload_batching = 5;
 }
 
 message ScanResult {

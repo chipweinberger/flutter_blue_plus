@@ -3,7 +3,7 @@
 //  source: flutterblueplus.proto
 //
 // @dart = 2.12
-// ignore_for_file: annotate_overrides,camel_case_types,unnecessary_const,non_constant_identifier_names,library_prefixes,unused_import,unused_shown_name,return_of_invalid_type,unnecessary_this,prefer_final_fields,deprecated_member_use_from_same_package
+// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,deprecated_member_use_from_same_package,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
 
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
@@ -87,11 +87,12 @@ const ScanSettings$json = const {
     const {'1': 'service_uuids', '3': 2, '4': 3, '5': 9, '10': 'serviceUuids'},
     const {'1': 'allow_duplicates', '3': 3, '4': 1, '5': 8, '10': 'allowDuplicates'},
     const {'1': 'mac_addresses', '3': 4, '4': 3, '5': 9, '10': 'macAddresses'},
+    const {'1': 'offload_batching', '3': 5, '4': 1, '5': 8, '10': 'offloadBatching'},
   ],
 };
 
 /// Descriptor for `ScanSettings`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List scanSettingsDescriptor = $convert.base64Decode('CgxTY2FuU2V0dGluZ3MSKgoRYW5kcm9pZF9zY2FuX21vZGUYASABKAVSD2FuZHJvaWRTY2FuTW9kZRIjCg1zZXJ2aWNlX3V1aWRzGAIgAygJUgxzZXJ2aWNlVXVpZHMSKQoQYWxsb3dfZHVwbGljYXRlcxgDIAEoCFIPYWxsb3dEdXBsaWNhdGVzEiMKDW1hY19hZGRyZXNzZXMYBCADKAlSDG1hY0FkZHJlc3Nlcw==');
+final $typed_data.Uint8List scanSettingsDescriptor = $convert.base64Decode('CgxTY2FuU2V0dGluZ3MSKgoRYW5kcm9pZF9zY2FuX21vZGUYASABKAVSD2FuZHJvaWRTY2FuTW9kZRIjCg1zZXJ2aWNlX3V1aWRzGAIgAygJUgxzZXJ2aWNlVXVpZHMSKQoQYWxsb3dfZHVwbGljYXRlcxgDIAEoCFIPYWxsb3dEdXBsaWNhdGVzEiMKDW1hY19hZGRyZXNzZXMYBCADKAlSDG1hY0FkZHJlc3NlcxIpChBvZmZsb2FkX2JhdGNoaW5nGAUgASgIUg9vZmZsb2FkQmF0Y2hpbmc=');
 @$core.Deprecated('Use scanResultDescriptor instead')
 const ScanResult$json = const {
   '1': 'ScanResult',
