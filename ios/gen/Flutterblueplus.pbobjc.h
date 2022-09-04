@@ -233,8 +233,7 @@ typedef GPB_ENUM(ProtosScanSettings_FieldNumber) {
   ProtosScanSettings_FieldNumber_AndroidScanMode = 1,
   ProtosScanSettings_FieldNumber_ServiceUuidsArray = 2,
   ProtosScanSettings_FieldNumber_AllowDuplicates = 3,
-  ProtosScanSettings_FieldNumber_MacAddressesArray = 4,
-  ProtosScanSettings_FieldNumber_OffloadBatching = 5,
+  ProtosScanSettings_FieldNumber_OffloadBatching = 4,
 };
 
 GPB_FINAL @interface ProtosScanSettings : GPBMessage
@@ -246,10 +245,6 @@ GPB_FINAL @interface ProtosScanSettings : GPBMessage
 @property(nonatomic, readonly) NSUInteger serviceUuidsArray_Count;
 
 @property(nonatomic, readwrite) BOOL allowDuplicates;
-
-@property(nonatomic, readwrite, strong, null_resettable) NSMutableArray<NSString*> *macAddressesArray;
-/** The number of items in @c macAddressesArray without causing the array to be created. */
-@property(nonatomic, readonly) NSUInteger macAddressesArray_Count;
 
 @property(nonatomic, readwrite) BOOL offloadBatching;
 
