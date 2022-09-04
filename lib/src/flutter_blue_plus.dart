@@ -133,10 +133,12 @@ class FlutterBluePlus {
     List<String> macAddresses = const [],
     Duration? timeout,
     bool allowDuplicates = false,
+    bool offloadBatching = false,
   }) async* {
     var settings = protos.ScanSettings.create()
       ..androidScanMode = scanMode.value
       ..allowDuplicates = allowDuplicates
+      ..offloadBatching = offloadBatching
       ..macAddresses.addAll(macAddresses)
       ..serviceUuids.addAll(withServices.map((g) => g.toString()).toList());
 
@@ -202,6 +204,7 @@ class FlutterBluePlus {
     List<String> macAddresses = const [],
     Duration? timeout,
     bool allowDuplicates = false,
+    bool offloadBatching = false,
   }) async {
     await scan(
             scanMode: scanMode,
@@ -209,7 +212,8 @@ class FlutterBluePlus {
             withDevices: withDevices,
             macAddresses: macAddresses,
             timeout: timeout,
-            allowDuplicates: allowDuplicates)
+            allowDuplicates: allowDuplicates,
+            offloadBatching: offloadBatching)
         .drain();
     return _scanResults.value;
   }
