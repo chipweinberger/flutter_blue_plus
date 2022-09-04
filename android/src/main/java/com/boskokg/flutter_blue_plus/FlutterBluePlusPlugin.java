@@ -863,7 +863,18 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
         @Override
         public void onBatchScanResults(List<ScanResult> results) {
           super.onBatchScanResults(results);
-
+          if(results != null){
+            for(int i = 0; i < results.size(); i++) {
+              if (!allowDuplicates && results.get(i).getDevice() != null && results.get(i).getDevice().getAddress() != null) {
+                if (macDeviceScanned.contains(results.get(i).getDevice().getAddress())) {
+                  return;
+                }
+                macDeviceScanned.add(results.get(i).getDevice().getAddress());
+              }
+              Protos.ScanResult scanResult = ProtoMaker.from(results.get(i).getDevice(), results.get(i));
+              invokeMethodUIThread("ScanResult", scanResult.toByteArray());
+            }
+          }
         }
 
         @Override
