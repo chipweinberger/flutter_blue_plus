@@ -70,10 +70,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
   }
   if (self.centralManager == nil) {
     self.centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
-  }
-  if ([@"state" isEqualToString:call.method]) {
     FlutterStandardTypedData *data = [self toFlutterData:[self toBluetoothStateProto:self->_centralManager.state]];
-    result(data);
+    self.stateStreamHandler.cachedBluetoothState = data;
+  }
+  if ([@"ensureCentralManagerCreated" isEqualToString:call.method]) {
+    result(nil); // created above
   } else if([@"isAvailable" isEqualToString:call.method]) {
     if(self.centralManager.state != CBManagerStateUnsupported && self.centralManager.state != CBManagerStateUnknown) {
       result(@(YES));
@@ -385,9 +386,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 // CBCentralManagerDelegate methods
 //
 - (void)centralManagerDidUpdateState:(nonnull CBCentralManager *)central {
+  FlutterStandardTypedData *data = [self toFlutterData:[self toBluetoothStateProto:self->_centralManager.state]];
   if(_stateStreamHandler.sink != nil) {
-    FlutterStandardTypedData *data = [self toFlutterData:[self toBluetoothStateProto:self->_centralManager.state]];
     self.stateStreamHandler.sink(data);
+  } else {
+    self.stateStreamHandler.cachedBluetoothState = data;
   }
 }
 
@@ -797,6 +800,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
 - (FlutterError*)onListenWithArguments:(id)arguments eventSink:(FlutterEventSink)eventSink {
   self.sink = eventSink;
+  if (self.cachedBluetoothState != nil) {
+    self.sink(self.cachedBluetoothState);
+  }
   return nil;
 }
 
