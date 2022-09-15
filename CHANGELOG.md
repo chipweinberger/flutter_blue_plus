@@ -1,6 +1,6 @@
 ## 1.4.0
 **Breaking Change**
-* Opt-out of the `neverForLocation` permission flag for the `BLUETOOTH_SCAN` permission on Android.
+* Android: Opt-out of the `neverForLocation` permission flag for the `BLUETOOTH_SCAN` permission.
 
   If `neverForLocation` is desired,
   opt back into the old behavior by adding an explicit entry to your Android Manifest:
