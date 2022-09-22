@@ -28,3 +28,8 @@
 .packages
 build/
 .pub/
+**/Flutter/ephemeral/
+**/Pods/
+
+# Xcode-related
+**/xcuserdata/
