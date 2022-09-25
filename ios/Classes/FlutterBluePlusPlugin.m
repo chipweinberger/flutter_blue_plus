@@ -277,6 +277,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     } @catch(FlutterError *e) {
       result(e);
     }
+  } else if([@"requestConnectionPriority" isEqualToString:call.method]) {
+    result([FlutterError errorWithCode:@"requestConnectionPriority" message:@"iOS does not allow connection priority requests to the peripheral" details:NULL]);
   } else {
     result(FlutterMethodNotImplemented);
   }

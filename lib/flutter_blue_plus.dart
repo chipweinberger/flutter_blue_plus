@@ -11,6 +11,7 @@ import 'package:collection/collection.dart';
 import 'package:convert/convert.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_blue_plus/gen/flutterblueplus.pbserver.dart';
 import 'package:rxdart/rxdart.dart';
 
 import 'gen/flutterblueplus.pb.dart' as protos;

@@ -175,10 +175,17 @@ class FindDevicesScreen extends StatelessWidget {
   }
 }
 
-class DeviceScreen extends StatelessWidget {
+class DeviceScreen extends StatefulWidget {
   const DeviceScreen({Key? key, required this.device}) : super(key: key);
 
   final BluetoothDevice device;
+
+  @override
+  State<DeviceScreen> createState() => _DeviceScreenState();
+}
+
+class _DeviceScreenState extends State<DeviceScreen> {
+  ConnectionPriority? connectionPriority;
 
   List<int> _getRandomBytes() {
     final math = Random();
@@ -229,21 +236,21 @@ class DeviceScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(device.name),
+        title: Text(widget.device.name),
         actions: <Widget>[
           StreamBuilder<BluetoothDeviceState>(
-            stream: device.state,
+            stream: widget.device.state,
             initialData: BluetoothDeviceState.connecting,
             builder: (c, snapshot) {
               VoidCallback? onPressed;
               String text;
               switch (snapshot.data) {
                 case BluetoothDeviceState.connected:
-                  onPressed = () => device.disconnect();
+                  onPressed = () => widget.device.disconnect();
                   text = 'DISCONNECT';
                   break;
                 case BluetoothDeviceState.disconnected:
-                  onPressed = () => device.connect();
+                  onPressed = () => widget.device.connect();
                   text = 'CONNECT';
                   break;
                 default:
@@ -268,7 +275,7 @@ class DeviceScreen extends StatelessWidget {
         child: Column(
           children: <Widget>[
             StreamBuilder<BluetoothDeviceState>(
-              stream: device.state,
+              stream: widget.device.state,
               initialData: BluetoothDeviceState.connecting,
               builder: (c, snapshot) => ListTile(
                 leading: Column(
@@ -279,26 +286,27 @@ class DeviceScreen extends StatelessWidget {
                         : const Icon(Icons.bluetooth_disabled),
                     snapshot.data == BluetoothDeviceState.connected
                         ? StreamBuilder<int>(
-                        stream: rssiStream(),
-                        builder: (context, snapshot) {
-                          return Text(snapshot.hasData ? '${snapshot.data}dBm' : '',
-                              style: Theme.of(context).textTheme.caption);
-                        })
+                            stream: rssiStream(),
+                            builder: (context, snapshot) {
+                              return Text(
+                                  snapshot.hasData ? '${snapshot.data}dBm' : '',
+                                  style: Theme.of(context).textTheme.caption);
+                            })
                         : Text('', style: Theme.of(context).textTheme.caption),
                   ],
                 ),
                 title: Text(
                     'Device is ${snapshot.data.toString().split('.')[1]}.'),
-                subtitle: Text('${device.id}'),
+                subtitle: Text('${widget.device.id}'),
                 trailing: StreamBuilder<bool>(
-                  stream: device.isDiscoveringServices,
+                  stream: widget.device.isDiscoveringServices,
                   initialData: false,
                   builder: (c, snapshot) => IndexedStack(
                     index: snapshot.data! ? 1 : 0,
                     children: <Widget>[
                       IconButton(
                         icon: const Icon(Icons.refresh),
-                        onPressed: () => device.discoverServices(),
+                        onPressed: () => widget.device.discoverServices(),
                       ),
                       const IconButton(
                         icon: SizedBox(
@@ -316,19 +324,97 @@ class DeviceScreen extends StatelessWidget {
               ),
             ),
             StreamBuilder<int>(
-              stream: device.mtu,
+              stream: widget.device.mtu,
               initialData: 0,
               builder: (c, snapshot) => ListTile(
                 title: const Text('MTU Size'),
                 subtitle: Text('${snapshot.data} bytes'),
                 trailing: IconButton(
                   icon: const Icon(Icons.edit),
-                  onPressed: () => device.requestMtu(223),
+                  onPressed: () => widget.device.requestMtu(223),
                 ),
               ),
             ),
+            ListTile(
+              onTap: () async {
+                showDialog(
+                    context: context,
+                    builder: ((context) {
+                      return Dialog(
+                        alignment: Alignment.center,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const ListTile(
+                              title:
+                                  Text('Choose connection parameter update:'),
+                            ),
+                            ListTile(
+                              title: const Text('Connection Priority Balanced'),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.edit),
+                                onPressed: () async => await widget.device
+                                    .requestConnectionPriority(
+                                  connectionPriorityRequest:
+                                      ConnectionPriority.balanced,
+                                )
+                                    .whenComplete(() {
+                                  connectionPriority =
+                                      ConnectionPriority.balanced;
+                                  setState(() {});
+
+                                  Navigator.pop(context);
+                                }),
+                              ),
+                            ),
+                            ListTile(
+                              title: const Text('Connection Priority High'),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.edit),
+                                onPressed: () async => await widget.device
+                                    .requestConnectionPriority(
+                                  connectionPriorityRequest:
+                                      ConnectionPriority.high,
+                                )
+                                    .whenComplete(() {
+                                  connectionPriority = ConnectionPriority.high;
+                                  setState(() {});
+
+                                  Navigator.pop(context);
+                                }),
+                              ),
+                            ),
+                            ListTile(
+                              title:
+                                  const Text('Connection Priority Low Power'),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.edit),
+                                onPressed: () async => await widget.device
+                                    .requestConnectionPriority(
+                                  connectionPriorityRequest:
+                                      ConnectionPriority.lowPower,
+                                )
+                                    .whenComplete(() {
+                                  connectionPriority =
+                                      ConnectionPriority.lowPower;
+                                  setState(() {});
+                                  Navigator.pop(context);
+                                }),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }));
+              },
+              title: const Text(' Request Connection Priority'),
+              subtitle: connectionPriority != null
+                  ? Text('Connection priority status: $connectionPriority')
+                  : null,
+              trailing: const Icon(Icons.connect_without_contact),
+            ),
             StreamBuilder<List<BluetoothService>>(
-              stream: device.services,
+              stream: widget.device.services,
               initialData: const [],
               builder: (c, snapshot) {
                 return Column(
@@ -341,14 +427,14 @@ class DeviceScreen extends StatelessWidget {
       ),
     );
   }
-  
+
   Stream<int> rssiStream() async* {
     var isConnected = true;
-    final subscription = device.state.listen((state) {
+    final subscription = widget.device.state.listen((state) {
       isConnected = state == BluetoothDeviceState.connected;
     });
     while (isConnected) {
-      yield await device.readRssi();
+      yield await widget.device.readRssi();
       await Future.delayed(const Duration(seconds: 1));
     }
     subscription.cancel();
