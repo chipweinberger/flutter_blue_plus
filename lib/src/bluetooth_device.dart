@@ -63,6 +63,16 @@ class BluetoothDevice {
     }
   }
 
+  /// Refresh Gatt Device Cache
+  /// Emergency method to reload ble services & characteristics
+  /// Currently only implemented on Android.
+  Future<void> clearGattCache() async {
+    if (Platform.isAndroid) {
+      return FlutterBluePlus.instance._channel
+          .invokeMethod('clearGattCache', id.toString());
+    }
+  }
+
   /// Cancels connection to the Bluetooth Device
   Future disconnect() => FlutterBluePlus.instance._channel
       .invokeMethod('disconnect', id.toString());
