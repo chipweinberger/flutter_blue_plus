@@ -881,7 +881,16 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
     if(scanner == null) throw new IllegalStateException("getBluetoothLeScanner() is null. Is the Adapter on?");
     int scanMode = proto.getAndroidScanMode();
     List<ScanFilter> filters = fetchFilters(proto);
-    ScanSettings settings = new ScanSettings.Builder().setScanMode(scanMode).build();
+    ScanSettings settings;
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      settings = new ScanSettings.Builder()
+              .setPhy(ScanSettings.PHY_LE_ALL_SUPPORTED)
+              .setLegacy(false)
+              .setScanMode(scanMode)
+              .build();
+    } else {
+      settings = new ScanSettings.Builder().setScanMode(scanMode).build();
+    }
     scanner.startScan(filters, settings, getScanCallback21());
   }
 
@@ -932,6 +941,7 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
     return scanCallback18;
   }
 
+  @SuppressWarnings("deprecation")
   private void startScan18(Protos.ScanSettings proto) throws IllegalStateException {
     List<String> serviceUuids = proto.getServiceUuidsList();
     UUID[] uuids = new UUID[serviceUuids.size()];
@@ -942,6 +952,7 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
     if(!success) throw new IllegalStateException("getBluetoothLeScanner() is null. Is the Adapter on?");
   }
 
+  @SuppressWarnings("deprecation")
   private void stopScan18() {
     mBluetoothAdapter.stopLeScan(getScanCallback18());
   }

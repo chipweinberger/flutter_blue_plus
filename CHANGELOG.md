@@ -1,5 +1,4 @@
 ## 1.4.0
-**Breaking Change**
 * Android: Opt-out of the `neverForLocation` permission flag for the `BLUETOOTH_SCAN` permission.
 
   If `neverForLocation` is desired,
@@ -8,6 +7,9 @@
   <uses-permission android:name="android.permission.BLUETOOTH_SCAN"
     android:usesPermissionFlags="neverForLocation" />
   ```
+* Android: Scan BLE long range -devices #139 (thanks to jonik-dev)
+* Android: Prevent deprecation warnings #107 (thanks to sqcsabbey)
+* Allow native implementation to handle pairing request #109 (thanks to JRazek)
 
 ## 1.3.1
 * Reverted: Ios: fixed manufacturer data parsing #104 (thanks to sqcsabbey)
