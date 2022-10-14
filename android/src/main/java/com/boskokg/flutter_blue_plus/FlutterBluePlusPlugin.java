@@ -941,6 +941,7 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
     return scanCallback18;
   }
 
+  @SuppressWarnings("deprecation")
   private void startScan18(Protos.ScanSettings proto) throws IllegalStateException {
     List<String> serviceUuids = proto.getServiceUuidsList();
     UUID[] uuids = new UUID[serviceUuids.size()];
@@ -951,6 +952,7 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
     if(!success) throw new IllegalStateException("getBluetoothLeScanner() is null. Is the Adapter on?");
   }
 
+  @SuppressWarnings("deprecation")
   private void stopScan18() {
     mBluetoothAdapter.stopLeScan(getScanCallback18());
   }
