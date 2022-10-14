@@ -1,6 +1,6 @@
 ## 1.4.0
 * Android: Add clear gatt cache method #142 (thanks to joistaus)
-* Android: Opt-out of the `neverForLocation` permission flag for the `BLUETOOTH_SCAN` permission.
+* Android: Opt-out of the `neverForLocation` permission flag for the `BLUETOOTH_SCAN` permission. (thanks to navaronbracke)
 
   If `neverForLocation` is desired,
   opt back into the old behavior by adding an explicit entry to your Android Manifest:
