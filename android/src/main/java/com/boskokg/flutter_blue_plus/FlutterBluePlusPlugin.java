@@ -43,6 +43,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import java.lang.reflect.Method;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
@@ -366,6 +368,33 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
         BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(deviceId);
         device.createBond();
         result.success(null);
+        break;
+      }
+
+      case "clearGattCache":
+      {
+        String deviceId = (String)call.arguments;
+        BluetoothDeviceCache cache = mDevices.get(deviceId);
+
+        Boolean hasCleared = false;
+
+        if (cache != null) {
+          BluetoothGatt gattServer = cache.gatt;
+          try {
+            final Method refresh = gattServer.getClass().getMethod("refresh");
+            if (refresh != null){
+              hasCleared = (Boolean) refresh.invoke(gattServer);
+            }
+          }catch (Exception e){
+            Log.d("clearGattCache", e.toString());
+          }
+
+          Log.d("clearGattCache", "CLEAR GATT CACHE: " + hasCleared);
+          result.success(null);
+        } else {
+          result.error("clearGattCache", "no instance of BluetoothGatt, have you connected first?", null);
+        }
+
         break;
       }
 
