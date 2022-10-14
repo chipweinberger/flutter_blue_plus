@@ -1,6 +1,7 @@
 ## 1.4.0
 * Android: Scan BLE long range -devices #139 (thanks to jonik-dev)
 * Android: Prevent deprecation warnings #107 (thanks to sqcsabbey)
+* Allow native implementation to handle pairing request #109 (thanks to JRazek)
 
 ## 1.3.1
 * Reverted: Ios: fixed manufacturer data parsing #104 (thanks to sqcsabbey)
