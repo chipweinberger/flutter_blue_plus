@@ -911,13 +911,13 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
     int scanMode = proto.getAndroidScanMode();
     List<ScanFilter> filters = fetchFilters(proto);
     ScanSettings settings;
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
       settings = new ScanSettings.Builder()
-              .setPhy(ScanSettings.PHY_LE_ALL_SUPPORTED)
-              .setLegacy(false)
               .setScanMode(scanMode)
+              .setNumOfMatches(ScanSettings.MATCH_NUM_ONE_ADVERTISEMENT)
               .build();
-    } else {
+    }
+    else {
       settings = new ScanSettings.Builder().setScanMode(scanMode).build();
     }
     scanner.startScan(filters, settings, getScanCallback21());
