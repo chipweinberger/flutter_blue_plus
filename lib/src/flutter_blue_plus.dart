@@ -193,7 +193,7 @@ class FlutterBluePlus {
   ///
   /// To observe the results while the scan is in progress, listen to the [scanResults] stream,
   /// or call [scan] instead.
-  Future startScan({
+  Future<List<ScanResult>> startScan({
     ScanMode scanMode = ScanMode.lowLatency,
     List<Guid> withServices = const [],
     List<Guid> withDevices = const [],
@@ -212,8 +212,8 @@ class FlutterBluePlus {
     return _scanResults.value;
   }
 
-  /// Stops a scan for Bluetooth Low Energy devices
-  Future stopScan() async {
+  /// Stops a scan for Bluetooth Low Energy devices.
+  Future<void> stopScan() async {
     await _channel.invokeMethod('stopScan');
     _isScanning.add(false);
   }
