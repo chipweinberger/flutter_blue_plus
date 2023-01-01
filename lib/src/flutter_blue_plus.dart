@@ -37,15 +37,13 @@ class FlutterBluePlus {
   LogLevel get logLevel => _logLevel;
 
   /// Checks whether the device supports Bluetooth
-  Future<bool> get isAvailable =>
-      _channel.invokeMethod('isAvailable').then<bool>((d) => d);
+  Future<bool> get isAvailable => _channel.invokeMethod<bool>('isAvailable');
 
   /// Return the friendly Bluetooth name of the local Bluetooth adapter
-  Future<String> get name =>
-      _channel.invokeMethod('name').then<String>((d) => d);
+  Future<String> get name => _channel.invokeMethod<String>('name');
 
   /// Checks if Bluetooth functionality is turned on
-  Future<bool> get isOn => _channel.invokeMethod('isOn').then<bool>((d) => d);
+  Future<bool> get isOn => _channel.invokeMethod<bool>('isOn');
 
   /// Tries to turn on Bluetooth (Android only),
   ///
@@ -70,10 +68,14 @@ class FlutterBluePlus {
   }
 
   final BehaviorSubject<bool> _isScanning = BehaviorSubject(false);
-  Stream<bool> get isScanning => _isScanning.stream;
 
-  final BehaviorSubject<List<ScanResult>> _scanResults =
-      BehaviorSubject([]);
+  /// Returns whether the scanner is currently scanning.
+  bool get isScanning => _isScanning.value;
+
+  /// Returns the [Stream] of changes for the [isScanning] state.
+  Stream<bool> get isScanningStream => _isScanning.stream;
+
+  final BehaviorSubject<List<ScanResult>> _scanResults = BehaviorSubject([]);
 
   /// Returns a stream that is a list of [ScanResult] results while a scan is in progress.
   ///
