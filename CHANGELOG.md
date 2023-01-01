@@ -1,3 +1,13 @@
+## 1.4.1
+
+* Replace uses of `Null` with `void`.
+* Fix bug in `BluetoothDescriptor.write` not guarding the async gap.
+* Fix return types for `startScan()` & `stopScan()`.
+* Fix `stopScan()` not returning early if not currently scanning.
+* Changed return type of `isScanning` from `Stream<bool>` to `bool`.
+  This getter now returns the current value for the scanning state.
+  To access a stream of changes, use the new `isScanningStream` getter instead.
+
 ## 1.4.0
 * Android: Add clear gatt cache method #142 (thanks to joistaus)
 * Android: Opt-out of the `neverForLocation` permission flag for the `BLUETOOTH_SCAN` permission. (thanks to navaronbracke)
