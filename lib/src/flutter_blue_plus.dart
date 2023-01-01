@@ -213,7 +213,13 @@ class FlutterBluePlus {
   }
 
   /// Stops a scan for Bluetooth Low Energy devices.
+  ///
+  /// Does nothing if currently not scanning.
   Future<void> stopScan() async {
+    if (!_isScanning.value) {
+      return;
+    }
+
     await _channel.invokeMethod('stopScan');
     _isScanning.add(false);
   }
