@@ -70,7 +70,12 @@ class FlutterBluePlus {
   }
 
   final BehaviorSubject<bool> _isScanning = BehaviorSubject.seeded(false);
-  Stream<bool> get isScanning => _isScanning.stream;
+
+  /// Returns whether the scanner is currently scanning.
+  bool get isScanning => _isScanning.value;
+
+  /// Returns the [Stream] of changes for the [isScanning] state.
+  Stream<bool> get isScanningStream => _isScanning;
 
   final BehaviorSubject<List<ScanResult>> _scanResults =
       BehaviorSubject.seeded([]);
