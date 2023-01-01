@@ -8,3 +8,7 @@ analyzer:
     - /**.pbjson.dart
     - /**.pb.dart
     - /**.pbenum.dart
+
+linter:
+  rules:
+    - always_declare_return_types
