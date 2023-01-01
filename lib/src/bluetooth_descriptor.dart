@@ -52,19 +52,21 @@ class BluetoothDescriptor {
     });
   }
 
-  /// Writes the value of a descriptor
-  Future<Null> write(List<int> value) async {
-    var request = protos.WriteDescriptorRequest.create()
+  /// Writes the value of a descriptor.
+  Future<void> write(List<int> value) async {
+    final request = protos.WriteDescriptorRequest.create()
       ..remoteId = deviceId.toString()
       ..descriptorUuid = uuid.toString()
       ..characteristicUuid = characteristicUuid.toString()
       ..serviceUuid = serviceUuid.toString()
       ..value = value;
 
-    await FlutterBluePlus.instance._channel
-        .invokeMethod('writeDescriptor', request.writeToBuffer());
+    await FlutterBluePlus.instance._channel.invokeMethod(
+      'writeDescriptor',
+      request.writeToBuffer(),
+    );
 
-    return FlutterBluePlus.instance._methodStream
+    final result = await FlutterBluePlus.instance._methodStream
         .where((m) => m.method == "WriteDescriptorResponse")
         .map((m) => m.arguments)
         .map((buffer) => protos.WriteDescriptorResponse.fromBuffer(buffer))
@@ -73,13 +75,15 @@ class BluetoothDescriptor {
             (p.request.descriptorUuid == request.descriptorUuid) &&
             (p.request.characteristicUuid == request.characteristicUuid) &&
             (p.request.serviceUuid == request.serviceUuid))
-        .first
-        .then((w) => w.success)
-        .then((success) => (!success)
-            ? throw Exception('Failed to write the descriptor')
-            : null)
-        .then((_) => _value.add(value))
-        .then((_) => null);
+        .first;
+
+    if (!result.success) {
+      throw Exception('Failed to write the descriptor');
+    }
+
+    if (!_value.isClosed) {
+      _value.add(value);
+    }
   }
 
   @override

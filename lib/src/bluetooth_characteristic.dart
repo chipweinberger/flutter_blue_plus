@@ -101,12 +101,12 @@ class BluetoothCharacteristic {
   /// guaranteed and will return immediately with success.
   /// [CharacteristicWriteType.withResponse]: the method will return after the
   /// write operation has either passed or failed.
-  Future<Null> write(List<int> value, {bool withoutResponse = false}) async {
+  Future<void> write(List<int> value, {bool withoutResponse = false}) async {
     final type = withoutResponse
         ? CharacteristicWriteType.withoutResponse
         : CharacteristicWriteType.withResponse;
 
-    var request = protos.WriteCharacteristicRequest.create()
+    final request = protos.WriteCharacteristicRequest.create()
       ..remoteId = deviceId.toString()
       ..characteristicUuid = uuid.toString()
       ..serviceUuid = serviceUuid.toString()
@@ -114,14 +114,16 @@ class BluetoothCharacteristic {
           protos.WriteCharacteristicRequest_WriteType.valueOf(type.index)!
       ..value = value;
 
-    var result = await FlutterBluePlus.instance._channel
-        .invokeMethod('writeCharacteristic', request.writeToBuffer());
+    await FlutterBluePlus.instance._channel.invokeMethod(
+      'writeCharacteristic',
+      request.writeToBuffer(),
+    );
 
     if (type == CharacteristicWriteType.withoutResponse) {
-      return result;
+      return;
     }
 
-    return FlutterBluePlus.instance._methodStream
+    final result = await FlutterBluePlus.instance._methodStream
         .where((m) => m.method == "WriteCharacteristicResponse")
         .map((m) => m.arguments)
         .map((buffer) => protos.WriteCharacteristicResponse.fromBuffer(buffer))
@@ -129,12 +131,11 @@ class BluetoothCharacteristic {
             (p.request.remoteId == request.remoteId) &&
             (p.request.characteristicUuid == request.characteristicUuid) &&
             (p.request.serviceUuid == request.serviceUuid))
-        .first
-        .then((w) => w.success)
-        .then((success) => (!success)
-            ? throw Exception('Failed to write the characteristic')
-            : null)
-        .then((_) => null);
+        .first;
+
+    if (!result.success) {
+      throw Exception('Failed to write the characteristic');
+    }
   }
 
   /// Sets notifications or indications for the value of a specified characteristic
