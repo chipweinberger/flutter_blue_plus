@@ -85,7 +85,7 @@ class Guid {
   }
 
   @override
-  operator ==(other) => other is Guid && hashCode == other.hashCode;
+  bool operator ==(Object other) => other is Guid && hashCode == other.hashCode;
 
   @override
   int get hashCode => _hashCode;

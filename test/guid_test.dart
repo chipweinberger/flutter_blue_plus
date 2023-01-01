@@ -5,7 +5,7 @@
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-main() {
+void main() {
   group("Guid", () {
     test('equality', () {
       var guid = Guid("{00002a43-0000-1000-8000-00805f9b34fb}");
