@@ -198,6 +198,34 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
         break;
       }
 
+      case "state":
+      {
+        Protos.BluetoothState.Builder p = Protos.BluetoothState.newBuilder();
+        try {
+          switch(mBluetoothAdapter.getState()) {
+            case BluetoothAdapter.STATE_OFF:
+              p.setState(Protos.BluetoothState.State.OFF);
+              break;
+            case BluetoothAdapter.STATE_ON:
+              p.setState(Protos.BluetoothState.State.ON);
+              break;
+            case BluetoothAdapter.STATE_TURNING_OFF:
+              p.setState(Protos.BluetoothState.State.TURNING_OFF);
+              break;
+            case BluetoothAdapter.STATE_TURNING_ON:
+              p.setState(Protos.BluetoothState.State.TURNING_ON);
+              break;
+            default:
+              p.setState(Protos.BluetoothState.State.UNKNOWN);
+              break;
+          }
+        } catch (SecurityException e) {
+          p.setState(Protos.BluetoothState.State.UNAUTHORIZED);
+        }
+        result.success(p.build().toByteArray());
+        break;
+      }
+
       case "isAvailable":
       {
         result.success(mBluetoothAdapter != null);
