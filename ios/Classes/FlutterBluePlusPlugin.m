@@ -91,8 +91,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
   } else if([@"name" isEqualToString:call.method]) {
     result([[UIDevice currentDevice] name]);
   } else if([@"startScan" isEqualToString:call.method]) {
-    // Clear any existing scan results
-    [self.scannedPeripherals removeAllObjects];
     // TODO: Request Permission?
     FlutterStandardTypedData *data = [call arguments];
     ProtosScanSettings *request = [[ProtosScanSettings alloc] initWithData:[data data] error:nil];
