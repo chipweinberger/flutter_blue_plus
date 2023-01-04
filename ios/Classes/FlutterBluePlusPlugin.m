@@ -73,8 +73,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     FlutterStandardTypedData *data = [self toFlutterData:[self toBluetoothStateProto:self->_centralManager.state]];
     self.stateStreamHandler.cachedBluetoothState = data;
   }
-  if ([@"ensureCentralManagerCreated" isEqualToString:call.method]) {
-    result(nil); // created above
+  if ([@"state" isEqualToString:call.method]) {
+    FlutterStandardTypedData *data = [self toFlutterData:[self toBluetoothStateProto:self->_centralManager.state]];
+    result(data);
   } else if([@"isAvailable" isEqualToString:call.method]) {
     if(self.centralManager.state != CBManagerStateUnsupported && self.centralManager.state != CBManagerStateUnknown) {
       result(@(YES));

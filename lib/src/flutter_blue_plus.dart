@@ -88,9 +88,10 @@ class FlutterBluePlus {
 
   /// Gets the current state of the Bluetooth module
   Stream<BluetoothState> get state async* {
-    if (Platform.isIOS) {
-      await _channel.invokeMethod('ensureCentralManagerCreated');
-    }
+    yield await _channel
+        .invokeMethod('state')
+        .then((buffer) => protos.BluetoothState.fromBuffer(buffer))
+        .then((s) => BluetoothState.values[s.state.value]);
 
     _stateStream ??= _stateChannel
         .receiveBroadcastStream()
