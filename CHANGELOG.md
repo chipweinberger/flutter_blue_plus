@@ -1,9 +1,12 @@
-## 1.4.1
+## 1.5.0
 
 * Replace uses of `Null` with `void`.
 * Fix bug in `BluetoothDescriptor.write` not guarding the async gap.
 * Fix return types for `startScan()` & `stopScan()`.
 * Fix `stopScan()` not returning early if not currently scanning.
+
+**Breaking Change**
+ 
 * Changed return type of `isScanning` from `Stream<bool>` to `bool`.
   This getter now returns the current value for the scanning state.
   To access a stream of changes, use the new `isScanningStream` getter instead.
