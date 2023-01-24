@@ -3,7 +3,7 @@
 //  source: flutterblueplus.proto
 //
 // @dart = 2.12
-// ignore_for_file: annotate_overrides,camel_case_types,unnecessary_const,non_constant_identifier_names,library_prefixes,unused_import,unused_shown_name,return_of_invalid_type,unnecessary_this,prefer_final_fields,deprecated_member_use_from_same_package
+// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,deprecated_member_use_from_same_package,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
 
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
@@ -79,6 +79,18 @@ const AdvertisementData_ServiceDataEntry$json = const {
 
 /// Descriptor for `AdvertisementData`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List advertisementDataDescriptor = $convert.base64Decode('ChFBZHZlcnRpc2VtZW50RGF0YRIdCgpsb2NhbF9uYW1lGAEgASgJUglsb2NhbE5hbWUSMQoOdHhfcG93ZXJfbGV2ZWwYAiABKAsyCy5JbnQzMlZhbHVlUgx0eFBvd2VyTGV2ZWwSIAoLY29ubmVjdGFibGUYAyABKAhSC2Nvbm5lY3RhYmxlElUKEW1hbnVmYWN0dXJlcl9kYXRhGAQgAygLMiguQWR2ZXJ0aXNlbWVudERhdGEuTWFudWZhY3R1cmVyRGF0YUVudHJ5UhBtYW51ZmFjdHVyZXJEYXRhEkYKDHNlcnZpY2VfZGF0YRgFIAMoCzIjLkFkdmVydGlzZW1lbnREYXRhLlNlcnZpY2VEYXRhRW50cnlSC3NlcnZpY2VEYXRhEiMKDXNlcnZpY2VfdXVpZHMYBiADKAlSDHNlcnZpY2VVdWlkcxpDChVNYW51ZmFjdHVyZXJEYXRhRW50cnkSEAoDa2V5GAEgASgFUgNrZXkSFAoFdmFsdWUYAiABKAxSBXZhbHVlOgI4ARo+ChBTZXJ2aWNlRGF0YUVudHJ5EhAKA2tleRgBIAEoCVIDa2V5EhQKBXZhbHVlGAIgASgMUgV2YWx1ZToCOAE=');
+@$core.Deprecated('Use manufacturerDataFilterDescriptor instead')
+const ManufacturerDataFilter$json = const {
+  '1': 'ManufacturerDataFilter',
+  '2': const [
+    const {'1': 'manufacturer_id', '3': 1, '4': 1, '5': 5, '10': 'manufacturerId'},
+    const {'1': 'manufacturer_data', '3': 2, '4': 1, '5': 12, '10': 'manufacturerData'},
+    const {'1': 'manufacturer_data_mask', '3': 3, '4': 1, '5': 12, '10': 'manufacturerDataMask'},
+  ],
+};
+
+/// Descriptor for `ManufacturerDataFilter`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List manufacturerDataFilterDescriptor = $convert.base64Decode('ChZNYW51ZmFjdHVyZXJEYXRhRmlsdGVyEicKD21hbnVmYWN0dXJlcl9pZBgBIAEoBVIObWFudWZhY3R1cmVySWQSKwoRbWFudWZhY3R1cmVyX2RhdGEYAiABKAxSEG1hbnVmYWN0dXJlckRhdGESNAoWbWFudWZhY3R1cmVyX2RhdGFfbWFzaxgDIAEoDFIUbWFudWZhY3R1cmVyRGF0YU1hc2s=');
 @$core.Deprecated('Use scanSettingsDescriptor instead')
 const ScanSettings$json = const {
   '1': 'ScanSettings',
@@ -87,11 +99,12 @@ const ScanSettings$json = const {
     const {'1': 'service_uuids', '3': 2, '4': 3, '5': 9, '10': 'serviceUuids'},
     const {'1': 'allow_duplicates', '3': 3, '4': 1, '5': 8, '10': 'allowDuplicates'},
     const {'1': 'mac_addresses', '3': 4, '4': 3, '5': 9, '10': 'macAddresses'},
+    const {'1': 'manufacturer_data_filters', '3': 5, '4': 3, '5': 11, '6': '.ManufacturerDataFilter', '10': 'manufacturerDataFilters'},
   ],
 };
 
 /// Descriptor for `ScanSettings`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List scanSettingsDescriptor = $convert.base64Decode('CgxTY2FuU2V0dGluZ3MSKgoRYW5kcm9pZF9zY2FuX21vZGUYASABKAVSD2FuZHJvaWRTY2FuTW9kZRIjCg1zZXJ2aWNlX3V1aWRzGAIgAygJUgxzZXJ2aWNlVXVpZHMSKQoQYWxsb3dfZHVwbGljYXRlcxgDIAEoCFIPYWxsb3dEdXBsaWNhdGVzEiMKDW1hY19hZGRyZXNzZXMYBCADKAlSDG1hY0FkZHJlc3Nlcw==');
+final $typed_data.Uint8List scanSettingsDescriptor = $convert.base64Decode('CgxTY2FuU2V0dGluZ3MSKgoRYW5kcm9pZF9zY2FuX21vZGUYASABKAVSD2FuZHJvaWRTY2FuTW9kZRIjCg1zZXJ2aWNlX3V1aWRzGAIgAygJUgxzZXJ2aWNlVXVpZHMSKQoQYWxsb3dfZHVwbGljYXRlcxgDIAEoCFIPYWxsb3dEdXBsaWNhdGVzEiMKDW1hY19hZGRyZXNzZXMYBCADKAlSDG1hY0FkZHJlc3NlcxJTChltYW51ZmFjdHVyZXJfZGF0YV9maWx0ZXJzGAUgAygLMhcuTWFudWZhY3R1cmVyRGF0YUZpbHRlclIXbWFudWZhY3R1cmVyRGF0YUZpbHRlcnM=');
 @$core.Deprecated('Use scanResultDescriptor instead')
 const ScanResult$json = const {
   '1': 'ScanResult',

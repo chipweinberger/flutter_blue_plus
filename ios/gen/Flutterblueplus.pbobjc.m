@@ -33,6 +33,7 @@ GPBObjCClassDeclaration(ProtosBluetoothDevice);
 GPBObjCClassDeclaration(ProtosBluetoothService);
 GPBObjCClassDeclaration(ProtosCharacteristicProperties);
 GPBObjCClassDeclaration(ProtosInt32Value);
+GPBObjCClassDeclaration(ProtosManufacturerDataFilter);
 GPBObjCClassDeclaration(ProtosReadDescriptorRequest);
 GPBObjCClassDeclaration(ProtosWriteCharacteristicRequest);
 GPBObjCClassDeclaration(ProtosWriteDescriptorRequest);
@@ -308,6 +309,73 @@ typedef struct ProtosAdvertisementData__storage_ {
 
 @end
 
+#pragma mark - ProtosManufacturerDataFilter
+
+@implementation ProtosManufacturerDataFilter
+
+@dynamic manufacturerId;
+@dynamic manufacturerData;
+@dynamic manufacturerDataMask;
+
+typedef struct ProtosManufacturerDataFilter__storage_ {
+  uint32_t _has_storage_[1];
+  int32_t manufacturerId;
+  NSData *manufacturerData;
+  NSData *manufacturerDataMask;
+} ProtosManufacturerDataFilter__storage_;
+
+// This method is threadsafe because it is initially called
+// in +initialize for each subclass.
++ (GPBDescriptor *)descriptor {
+  static GPBDescriptor *descriptor = nil;
+  if (!descriptor) {
+    static GPBMessageFieldDescription fields[] = {
+      {
+        .name = "manufacturerId",
+        .dataTypeSpecific.clazz = Nil,
+        .number = ProtosManufacturerDataFilter_FieldNumber_ManufacturerId,
+        .hasIndex = 0,
+        .offset = (uint32_t)offsetof(ProtosManufacturerDataFilter__storage_, manufacturerId),
+        .flags = (GPBFieldFlags)(GPBFieldOptional | GPBFieldClearHasIvarOnZero),
+        .dataType = GPBDataTypeInt32,
+      },
+      {
+        .name = "manufacturerData",
+        .dataTypeSpecific.clazz = Nil,
+        .number = ProtosManufacturerDataFilter_FieldNumber_ManufacturerData,
+        .hasIndex = 1,
+        .offset = (uint32_t)offsetof(ProtosManufacturerDataFilter__storage_, manufacturerData),
+        .flags = (GPBFieldFlags)(GPBFieldOptional | GPBFieldClearHasIvarOnZero),
+        .dataType = GPBDataTypeBytes,
+      },
+      {
+        .name = "manufacturerDataMask",
+        .dataTypeSpecific.clazz = Nil,
+        .number = ProtosManufacturerDataFilter_FieldNumber_ManufacturerDataMask,
+        .hasIndex = 2,
+        .offset = (uint32_t)offsetof(ProtosManufacturerDataFilter__storage_, manufacturerDataMask),
+        .flags = (GPBFieldFlags)(GPBFieldOptional | GPBFieldClearHasIvarOnZero),
+        .dataType = GPBDataTypeBytes,
+      },
+    };
+    GPBDescriptor *localDescriptor =
+        [GPBDescriptor allocDescriptorForClass:[ProtosManufacturerDataFilter class]
+                                     rootClass:[ProtosFlutterblueplusRoot class]
+                                          file:ProtosFlutterblueplusRoot_FileDescriptor()
+                                        fields:fields
+                                    fieldCount:(uint32_t)(sizeof(fields) / sizeof(GPBMessageFieldDescription))
+                                   storageSize:sizeof(ProtosManufacturerDataFilter__storage_)
+                                         flags:(GPBDescriptorInitializationFlags)(GPBDescriptorInitializationFlag_UsesClassRefs | GPBDescriptorInitializationFlag_Proto3OptionalKnown)];
+    #if defined(DEBUG) && DEBUG
+      NSAssert(descriptor == nil, @"Startup recursed!");
+    #endif  // DEBUG
+    descriptor = localDescriptor;
+  }
+  return descriptor;
+}
+
+@end
+
 #pragma mark - ProtosScanSettings
 
 @implementation ProtosScanSettings
@@ -315,11 +383,15 @@ typedef struct ProtosAdvertisementData__storage_ {
 @dynamic androidScanMode;
 @dynamic serviceUuidsArray, serviceUuidsArray_Count;
 @dynamic allowDuplicates;
+@dynamic macAddressesArray, macAddressesArray_Count;
+@dynamic manufacturerDataFiltersArray, manufacturerDataFiltersArray_Count;
 
 typedef struct ProtosScanSettings__storage_ {
   uint32_t _has_storage_[1];
   int32_t androidScanMode;
   NSMutableArray *serviceUuidsArray;
+  NSMutableArray *macAddressesArray;
+  NSMutableArray *manufacturerDataFiltersArray;
 } ProtosScanSettings__storage_;
 
 // This method is threadsafe because it is initially called
@@ -354,6 +426,24 @@ typedef struct ProtosScanSettings__storage_ {
         .offset = 2,  // Stored in _has_storage_ to save space.
         .flags = (GPBFieldFlags)(GPBFieldOptional | GPBFieldClearHasIvarOnZero),
         .dataType = GPBDataTypeBool,
+      },
+      {
+        .name = "macAddressesArray",
+        .dataTypeSpecific.clazz = Nil,
+        .number = ProtosScanSettings_FieldNumber_MacAddressesArray,
+        .hasIndex = GPBNoHasBit,
+        .offset = (uint32_t)offsetof(ProtosScanSettings__storage_, macAddressesArray),
+        .flags = GPBFieldRepeated,
+        .dataType = GPBDataTypeString,
+      },
+      {
+        .name = "manufacturerDataFiltersArray",
+        .dataTypeSpecific.clazz = GPBObjCClass(ProtosManufacturerDataFilter),
+        .number = ProtosScanSettings_FieldNumber_ManufacturerDataFiltersArray,
+        .hasIndex = GPBNoHasBit,
+        .offset = (uint32_t)offsetof(ProtosScanSettings__storage_, manufacturerDataFiltersArray),
+        .flags = GPBFieldRepeated,
+        .dataType = GPBDataTypeMessage,
       },
     };
     GPBDescriptor *localDescriptor =

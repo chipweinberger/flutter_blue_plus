@@ -3,7 +3,7 @@
 //  source: flutterblueplus.proto
 //
 // @dart = 2.12
-// ignore_for_file: annotate_overrides,camel_case_types,unnecessary_const,non_constant_identifier_names,library_prefixes,unused_import,unused_shown_name,return_of_invalid_type,unnecessary_this,prefer_final_fields
+// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
 
 import 'dart:core' as $core;
 
@@ -208,12 +208,88 @@ class AdvertisementData extends $pb.GeneratedMessage {
   $core.List<$core.String> get serviceUuids => $_getList(5);
 }
 
+class ManufacturerDataFilter extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ManufacturerDataFilter', createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'manufacturerId', $pb.PbFieldType.O3)
+    ..a<$core.List<$core.int>>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'manufacturerData', $pb.PbFieldType.OY)
+    ..a<$core.List<$core.int>>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'manufacturerDataMask', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
+
+  ManufacturerDataFilter._() : super();
+  factory ManufacturerDataFilter({
+    $core.int? manufacturerId,
+    $core.List<$core.int>? manufacturerData,
+    $core.List<$core.int>? manufacturerDataMask,
+  }) {
+    final _result = create();
+    if (manufacturerId != null) {
+      _result.manufacturerId = manufacturerId;
+    }
+    if (manufacturerData != null) {
+      _result.manufacturerData = manufacturerData;
+    }
+    if (manufacturerDataMask != null) {
+      _result.manufacturerDataMask = manufacturerDataMask;
+    }
+    return _result;
+  }
+  factory ManufacturerDataFilter.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ManufacturerDataFilter.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ManufacturerDataFilter clone() => ManufacturerDataFilter()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ManufacturerDataFilter copyWith(void Function(ManufacturerDataFilter) updates) => super.copyWith((message) => updates(message as ManufacturerDataFilter)) as ManufacturerDataFilter; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ManufacturerDataFilter create() => ManufacturerDataFilter._();
+  ManufacturerDataFilter createEmptyInstance() => create();
+  static $pb.PbList<ManufacturerDataFilter> createRepeated() => $pb.PbList<ManufacturerDataFilter>();
+  @$core.pragma('dart2js:noInline')
+  static ManufacturerDataFilter getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ManufacturerDataFilter>(create);
+  static ManufacturerDataFilter? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get manufacturerId => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set manufacturerId($core.int v) { $_setSignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasManufacturerId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearManufacturerId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.List<$core.int> get manufacturerData => $_getN(1);
+  @$pb.TagNumber(2)
+  set manufacturerData($core.List<$core.int> v) { $_setBytes(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasManufacturerData() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearManufacturerData() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.List<$core.int> get manufacturerDataMask => $_getN(2);
+  @$pb.TagNumber(3)
+  set manufacturerDataMask($core.List<$core.int> v) { $_setBytes(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasManufacturerDataMask() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearManufacturerDataMask() => clearField(3);
+}
+
 class ScanSettings extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ScanSettings', createEmptyInstance: create)
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'androidScanMode', $pb.PbFieldType.O3)
     ..pPS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'serviceUuids')
     ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'allowDuplicates')
     ..pPS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'macAddresses')
+    ..pc<ManufacturerDataFilter>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'manufacturerDataFilters', $pb.PbFieldType.PM, subBuilder: ManufacturerDataFilter.create)
     ..hasRequiredFields = false
   ;
 
@@ -223,6 +299,7 @@ class ScanSettings extends $pb.GeneratedMessage {
     $core.Iterable<$core.String>? serviceUuids,
     $core.bool? allowDuplicates,
     $core.Iterable<$core.String>? macAddresses,
+    $core.Iterable<ManufacturerDataFilter>? manufacturerDataFilters,
   }) {
     final _result = create();
     if (androidScanMode != null) {
@@ -236,6 +313,9 @@ class ScanSettings extends $pb.GeneratedMessage {
     }
     if (macAddresses != null) {
       _result.macAddresses.addAll(macAddresses);
+    }
+    if (manufacturerDataFilters != null) {
+      _result.manufacturerDataFilters.addAll(manufacturerDataFilters);
     }
     return _result;
   }
@@ -283,6 +363,9 @@ class ScanSettings extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(4)
   $core.List<$core.String> get macAddresses => $_getList(3);
+
+  @$pb.TagNumber(5)
+  $core.List<ManufacturerDataFilter> get manufacturerDataFilters => $_getList(4);
 }
 
 class ScanResult extends $pb.GeneratedMessage {

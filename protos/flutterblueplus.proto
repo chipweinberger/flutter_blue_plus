@@ -38,11 +38,18 @@ message AdvertisementData {
   repeated string service_uuids = 6;
 }
 
+message ManufacturerDataFilter {
+  int32 manufacturer_id = 1;
+  bytes manufacturer_data = 2;
+  bytes manufacturer_data_mask = 3;
+}
+
 message ScanSettings {
   int32 android_scan_mode = 1;
   repeated string service_uuids = 2;
   bool allow_duplicates = 3;
   repeated string mac_addresses = 4;
+  repeated ManufacturerDataFilter manufacturer_data_filters = 5;
 }
 
 message ScanResult {

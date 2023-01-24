@@ -130,6 +130,7 @@ class FlutterBluePlus {
     ScanMode scanMode = ScanMode.lowLatency,
     List<Guid> withServices = const [],
     List<Guid> withDevices = const [],
+    List<ManufacturerDataFilter> withManufacturerDataFilter = const [],
     List<String> macAddresses = const [],
     Duration? timeout,
     bool allowDuplicates = false,
@@ -138,6 +139,8 @@ class FlutterBluePlus {
       ..androidScanMode = scanMode.value
       ..allowDuplicates = allowDuplicates
       ..macAddresses.addAll(macAddresses)
+      ..manufacturerDataFilters
+          .addAll(withManufacturerDataFilter.map((g) => g.toProto()))
       ..serviceUuids.addAll(withServices.map((g) => g.toString()).toList());
 
     if (_isScanning.value == true) {
@@ -199,6 +202,7 @@ class FlutterBluePlus {
     ScanMode scanMode = ScanMode.lowLatency,
     List<Guid> withServices = const [],
     List<Guid> withDevices = const [],
+    List<ManufacturerDataFilter> withManufacturerDataFilter = const [],
     List<String> macAddresses = const [],
     Duration? timeout,
     bool allowDuplicates = false,
@@ -207,6 +211,7 @@ class FlutterBluePlus {
             scanMode: scanMode,
             withServices: withServices,
             withDevices: withDevices,
+            withManufacturerDataFilter: withManufacturerDataFilter,
             macAddresses: macAddresses,
             timeout: timeout,
             allowDuplicates: allowDuplicates)
@@ -341,5 +346,22 @@ class AdvertisementData {
   @override
   String toString() {
     return 'AdvertisementData{localName: $localName, txPowerLevel: $txPowerLevel, connectable: $connectable, manufacturerData: $manufacturerData, serviceData: $serviceData, serviceUuids: $serviceUuids}';
+  }
+}
+
+class ManufacturerDataFilter {
+  final int manufacturerId;
+  final Uint8List manufacturerData;
+  final Uint8List manufacturerDataMask;
+
+  ManufacturerDataFilter(
+      this.manufacturerId, this.manufacturerData, this.manufacturerDataMask);
+
+  protos.ManufacturerDataFilter toProto() {
+    var filter = protos.ManufacturerDataFilter.create()
+      ..manufacturerId = manufacturerId
+      ..manufacturerData = manufacturerData
+      ..manufacturerDataMask = manufacturerDataMask;
+    return filter;
   }
 }
