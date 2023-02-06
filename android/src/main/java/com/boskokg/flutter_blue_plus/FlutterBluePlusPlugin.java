@@ -80,7 +80,7 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
   private ActivityPluginBinding activityBinding;
 
   static final private UUID CCCD_ID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
-  private final Map<String, BluetoothDeviceCache> mDevices = new HashMap<>();
+  private static final Map<String, BluetoothDeviceCache> mDevices = new HashMap<>();
   private LogLevel logLevel = LogLevel.EMERGENCY;
 
   private interface OperationOnPermission {
@@ -88,12 +88,18 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
   }
 
   private int lastEventId = 1452;
-  private final Map<Integer, OperationOnPermission> operationsOnPermission = new HashMap<>();
+  private static final Map<Integer, OperationOnPermission> operationsOnPermission = new HashMap<>();
 
-  private final ArrayList<String> macDeviceScanned = new ArrayList<>();
+  private static final ArrayList<String> macDeviceScanned = new ArrayList<>();
   private boolean allowDuplicates = false;
 
-  public FlutterBluePlusPlugin() {}
+  private int instanceId;
+  private static int instanceCount=0;
+  private static final ArrayList<MethodChannel> channelsArray = new ArrayList<>();
+  public FlutterBluePlusPlugin() {
+    instanceId = instanceCount;
+    instanceCount++;
+  }
 
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
@@ -143,6 +149,7 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
       Log.d(TAG, "setup");
       this.context = application;
       channel = new MethodChannel(messenger, NAMESPACE + "/methods");
+      channelsArray.add(channel);
       channel.setMethodCallHandler(this);
       stateChannel = new EventChannel(messenger, NAMESPACE + "/state");
       stateChannel.setStreamHandler(stateHandler);
@@ -157,6 +164,7 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
       context = null;
       channel.setMethodCallHandler(null);
       channel = null;
+      channelsArray.set(instanceId,null);
       stateChannel.setStreamHandler(null);
       stateChannel = null;
       mBluetoothAdapter = null;
@@ -1135,10 +1143,12 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
     new Handler(Looper.getMainLooper()).post(() -> {
       synchronized (tearDownLock) {
         //Could already be teared down at this moment
-        if (channel != null) {
-          channel.invokeMethod(name, byteArray);
-        } else {
-          Log.w(TAG, "Tried to call " + name + " on closed channel");
+        for (int i=0;i<channelsArray.size();i++){
+          if (channelsArray.get(i) != null) {
+            channelsArray.get(i).invokeMethod(name, byteArray);
+          } else {
+            Log.w(TAG, "Tried to call " + name + " on closed channel");
+          }
         }
       }
     });
