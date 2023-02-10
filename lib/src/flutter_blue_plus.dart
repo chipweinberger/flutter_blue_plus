@@ -338,7 +338,8 @@ class AdvertisementData {
         manufacturerData = p.manufacturerData,
         serviceData = p.serviceData,
         serviceUuids = p.serviceUuids,
-        appearance = p.appearance;
+        appearance =
+            (p.appearance.hasValue()) ? p.appearance.value : null;
 
   @override
   String toString() {
