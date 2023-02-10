@@ -199,6 +199,7 @@ typedef GPB_ENUM(ProtosAdvertisementData_FieldNumber) {
   ProtosAdvertisementData_FieldNumber_ManufacturerData = 4,
   ProtosAdvertisementData_FieldNumber_ServiceData = 5,
   ProtosAdvertisementData_FieldNumber_ServiceUuidsArray = 6,
+  ProtosAdvertisementData_FieldNumber_Appearance = 7,
 };
 
 GPB_FINAL @interface ProtosAdvertisementData : GPBMessage
@@ -225,6 +226,10 @@ GPB_FINAL @interface ProtosAdvertisementData : GPBMessage
 /** The number of items in @c serviceUuidsArray without causing the array to be created. */
 @property(nonatomic, readonly) NSUInteger serviceUuidsArray_Count;
 
+@property(nonatomic, readwrite, strong, null_resettable) ProtosInt32Value *appearance;
+/** Test to see if @c appearance has been set. */
+@property(nonatomic, readwrite) BOOL hasAppearance;
+
 @end
 
 #pragma mark - ProtosScanSettings
@@ -233,6 +238,7 @@ typedef GPB_ENUM(ProtosScanSettings_FieldNumber) {
   ProtosScanSettings_FieldNumber_AndroidScanMode = 1,
   ProtosScanSettings_FieldNumber_ServiceUuidsArray = 2,
   ProtosScanSettings_FieldNumber_AllowDuplicates = 3,
+  ProtosScanSettings_FieldNumber_MacAddressesArray = 4,
 };
 
 GPB_FINAL @interface ProtosScanSettings : GPBMessage
@@ -244,6 +250,10 @@ GPB_FINAL @interface ProtosScanSettings : GPBMessage
 @property(nonatomic, readonly) NSUInteger serviceUuidsArray_Count;
 
 @property(nonatomic, readwrite) BOOL allowDuplicates;
+
+@property(nonatomic, readwrite, strong, null_resettable) NSMutableArray<NSString*> *macAddressesArray;
+/** The number of items in @c macAddressesArray without causing the array to be created. */
+@property(nonatomic, readonly) NSUInteger macAddressesArray_Count;
 
 @end
 

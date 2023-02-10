@@ -87,6 +87,10 @@ class AdvertisementParser {
           ret.setTxPowerLevel(Protos.Int32Value.newBuilder().setValue(data.get()));
           break;
         }
+        case 0x19: { // Appearance
+          ret.setAppearance(Protos.Int32Value.newBuilder().setValue(data.getShort()));
+          break;
+        }
         case 0x16: // Service Data with 16 bit UUID.
         case 0x20: // Service Data with 32 bit UUID.
         case 0x21: { // Service Data with 128 bit UUID.

@@ -328,6 +328,7 @@ class AdvertisementData {
   final Map<int, List<int>> manufacturerData;
   final Map<String, List<int>> serviceData;
   final List<String> serviceUuids;
+  final int? appearance;
 
   AdvertisementData.fromProto(protos.AdvertisementData p)
       : localName = p.localName,
@@ -336,10 +337,11 @@ class AdvertisementData {
         connectable = p.connectable,
         manufacturerData = p.manufacturerData,
         serviceData = p.serviceData,
-        serviceUuids = p.serviceUuids;
+        serviceUuids = p.serviceUuids,
+        appearance = p.appearance;
 
   @override
   String toString() {
-    return 'AdvertisementData{localName: $localName, txPowerLevel: $txPowerLevel, connectable: $connectable, manufacturerData: $manufacturerData, serviceData: $serviceData, serviceUuids: $serviceUuids}';
+    return 'AdvertisementData{localName: $localName, txPowerLevel: $txPowerLevel, connectable: $connectable, manufacturerData: $manufacturerData, serviceData: $serviceData, serviceUuids: $serviceUuids, appearance: $appearance}';
   }
 }

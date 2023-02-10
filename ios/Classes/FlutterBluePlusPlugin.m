@@ -637,6 +637,13 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
       [[ads serviceUuidsArray] addObject:uuid.UUIDString];
     }
   }
+  // Appearance
+  NSNumber *appearance = advertisementData[CBAdvertisementDataAppearanceKey];
+  if(appearance != nil) {
+    ProtosInt32Value *appearanceWrapper = [[ProtosInt32Value alloc] init];
+    [appearanceWrapper setValue:[appearance intValue]];
+    [ads setAppearance:appearanceWrapper];
+  }
   [result setAdvertisementData:ads];
   return result;
 }

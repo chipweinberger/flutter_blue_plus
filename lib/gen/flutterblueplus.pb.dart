@@ -3,7 +3,7 @@
 //  source: flutterblueplus.proto
 //
 // @dart = 2.12
-// ignore_for_file: annotate_overrides,camel_case_types,unnecessary_const,non_constant_identifier_names,library_prefixes,unused_import,unused_shown_name,return_of_invalid_type,unnecessary_this,prefer_final_fields
+// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
 
 import 'dart:core' as $core;
 
@@ -115,6 +115,7 @@ class AdvertisementData extends $pb.GeneratedMessage {
     ..m<$core.int, $core.List<$core.int>>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'manufacturerData', entryClassName: 'AdvertisementData.ManufacturerDataEntry', keyFieldType: $pb.PbFieldType.O3, valueFieldType: $pb.PbFieldType.OY)
     ..m<$core.String, $core.List<$core.int>>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'serviceData', entryClassName: 'AdvertisementData.ServiceDataEntry', keyFieldType: $pb.PbFieldType.OS, valueFieldType: $pb.PbFieldType.OY)
     ..pPS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'serviceUuids')
+    ..aOM<Int32Value>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'appearance', subBuilder: Int32Value.create)
     ..hasRequiredFields = false
   ;
 
@@ -126,6 +127,7 @@ class AdvertisementData extends $pb.GeneratedMessage {
     $core.Map<$core.int, $core.List<$core.int>>? manufacturerData,
     $core.Map<$core.String, $core.List<$core.int>>? serviceData,
     $core.Iterable<$core.String>? serviceUuids,
+    Int32Value? appearance,
   }) {
     final _result = create();
     if (localName != null) {
@@ -145,6 +147,9 @@ class AdvertisementData extends $pb.GeneratedMessage {
     }
     if (serviceUuids != null) {
       _result.serviceUuids.addAll(serviceUuids);
+    }
+    if (appearance != null) {
+      _result.appearance = appearance;
     }
     return _result;
   }
@@ -206,6 +211,17 @@ class AdvertisementData extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(6)
   $core.List<$core.String> get serviceUuids => $_getList(5);
+
+  @$pb.TagNumber(7)
+  Int32Value get appearance => $_getN(6);
+  @$pb.TagNumber(7)
+  set appearance(Int32Value v) { setField(7, v); }
+  @$pb.TagNumber(7)
+  $core.bool hasAppearance() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearAppearance() => clearField(7);
+  @$pb.TagNumber(7)
+  Int32Value ensureAppearance() => $_ensure(6);
 }
 
 class ScanSettings extends $pb.GeneratedMessage {
