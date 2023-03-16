@@ -16,6 +16,7 @@ import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
+import android.bluetooth.BluetoothStatusCodes;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
@@ -542,21 +543,17 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
           return;
         }
 
-        // Set characteristic to new value
-        if(!characteristic.setValue(request.getValue().toByteArray())){
-          result.error("write_characteristic_error", "could not set the local value of characteristic", null);
-        }
-
         // Apply the correct write type
         if(request.getWriteType() == Protos.WriteCharacteristicRequest.WriteType.WITHOUT_RESPONSE) {
-          characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
+          if ((gattServer.writeCharacteristic(characteristic, request.getValue().toByteArray(), BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE)) != BluetoothStatusCodes.SUCCESS) {
+            result.error("write_characteristic_error", "writeCharacteristic failed", null);
+            return;
+          }
         } else {
-          characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
-        }
-
-        if(!gattServer.writeCharacteristic(characteristic)){
-          result.error("write_characteristic_error", "writeCharacteristic failed", null);
-          return;
+          if ((gattServer.writeCharacteristic(characteristic, request.getValue().toByteArray(), BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)) != BluetoothStatusCodes.SUCCESS) {
+            result.error("write_characteristic_error", "writeCharacteristic failed", null);
+            return;
+          }
         }
 
         result.success(null);
@@ -586,13 +583,8 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
           return;
         }
 
-        // Set descriptor to new value
-        if(!descriptor.setValue(request.getValue().toByteArray())){
-          result.error("write_descriptor_error", "could not set the local value for descriptor", null);
-        }
-
-        if(!gattServer.writeDescriptor(descriptor)){
-          result.error("write_descriptor_error", "writeCharacteristic failed", null);
+        if(gattServer.writeDescriptor(descriptor, request.getValue().toByteArray()) != BluetoothStatusCodes.SUCCESS){
+          result.error("write_descriptor_error", "writeDescriptor failed", null);
           return;
         }
 
@@ -653,12 +645,7 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
         }
 
         if(cccDescriptor != null) {
-          if (!cccDescriptor.setValue(value)) {
-            result.error("set_notification_error", "error when setting the descriptor value to: " + Arrays.toString(value), null);
-            return;
-          }
-
-          if (!gattServer.writeDescriptor(cccDescriptor)) {
+          if (gattServer.writeDescriptor(cccDescriptor, value) != BluetoothStatusCodes.SUCCESS) {
             result.error("set_notification_error", "error when writing the descriptor", null);
             return;
           }
