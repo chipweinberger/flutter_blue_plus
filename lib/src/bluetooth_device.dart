@@ -178,8 +178,13 @@ class BluetoothDevice {
     });
   }
 
+  /// Only implemented on Android
   Future<bool> removeBond() async {
-    return FlutterBluePlus.instance._channel.invokeMethod('removeBond', id.toString()).then<bool>((value) => value);
+    if (Platform.isAndroid) {
+      return FlutterBluePlus.instance._channel.invokeMethod('removeBond', id.toString()).then<bool>((value) => value);
+    } else {
+      return false;
+    }
   }
 
   @override
