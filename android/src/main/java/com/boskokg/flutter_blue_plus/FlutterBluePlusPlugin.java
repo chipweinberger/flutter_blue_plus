@@ -363,6 +363,45 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
         break;
       }
 
+      case "setPreferedPhy2M":
+      {
+        String deviceId = (String)call.arguments;
+        try {
+          BluetoothGatt gatt;
+          gatt = locateGatt(deviceId);
+          gatt.setPreferredPhy(BluetoothDevice.PHY_LE_2M_MASK, BluetoothDevice.PHY_LE_2M_MASK, BluetoothDevice.PHY_OPTION_NO_PREFERRED);
+          result.success(null);
+        } catch(Exception e) {
+          result.error("setPreferredPhy", e.getMessage(), e);
+        }
+        break;
+      }
+
+      case "requestConnectionPriorityBalenced":
+      case "requestConnectionPriorityLowPower":
+      case "requestConnectionPriorityHigh":
+      {
+        String deviceId = (String)call.arguments;
+        int priority = BluetoothGatt.CONNECTION_PRIORITY_BALANCED;
+        if (call.method.equals("requestConnectionPriorityHigh")) {
+          priority = BluetoothGatt.CONNECTION_PRIORITY_HIGH;
+        } else if (call.method.equals("requestConnectionPriorityLowPower")) {
+          priority = BluetoothGatt.CONNECTION_PRIORITY_LOW_POWER;
+        }
+        try {
+          BluetoothGatt gatt;
+          gatt = locateGatt(deviceId);
+          if (gatt.requestConnectionPriority(priority)) {
+            result.success(null);
+          } else {
+              result.error("requestConnectionPriority", "gatt.requestConnectionPriority returned false", null);
+          }
+        } catch(Exception e) {
+          result.error("requestConnectionPriority", e.getMessage(), e);
+        }
+        break;
+      }
+
       case "pair":
       {
         String deviceId = (String)call.arguments;

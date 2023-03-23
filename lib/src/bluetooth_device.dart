@@ -54,11 +54,46 @@ class BluetoothDevice {
     }
   }
 
+  /// Set the prefered PY to LE_2M on Android
+  Future<void> setPreferedPhy2M() async {
+    if (Platform.isAndroid) {
+      return FlutterBluePlus.instance._channel
+          .invokeMethod('setPreferedPhy2M', id.toString());
+    }
+  }
+
+  /// Request default balenced priority on Andoird to return from high or low for example
+  Future<void> requestConnectionPriorityBalenced() async {
+    if (Platform.isAndroid) {
+      return FlutterBluePlus.instance._channel
+          .invokeMethod('requestConnectionPriorityBalenced', id.toString());
+    }
+  }
+
+  /// Request low power, reduced data rate connection parameters on Android
+  Future<void> requestConnectionPriorityLowPower() async {
+    if (Platform.isAndroid) {
+      return FlutterBluePlus.instance._channel
+          .invokeMethod('requestConnectionPriorityLowPower', id.toString());
+    }
+  }
+
+  /// Request connection priority high on Android
+  /// should be temporary for high data transfer and put back to balenced after complete
+  Future<void> requestConnectionPriorityHigh() async {
+    if (Platform.isAndroid) {
+      return FlutterBluePlus.instance._channel
+          .invokeMethod('requestConnectionPriorityHigh', id.toString());
+    }
+  }
+
   /// Send a pairing request to the device.
   /// Currently only implemented on Android.
   Future<void> pair() async {
-    return FlutterBluePlus.instance._channel
-        .invokeMethod('pair', id.toString());
+    if (Platform.isAndroid) {
+      return FlutterBluePlus.instance._channel
+          .invokeMethod('pair', id.toString());
+    }
   }
 
   /// Refresh Gatt Device Cache
