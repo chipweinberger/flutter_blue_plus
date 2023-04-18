@@ -5,12 +5,14 @@
 part of flutter_blue_plus;
 
 class BluetoothCharacteristic {
+
   final Guid uuid;
   final DeviceIdentifier deviceId;
   final Guid serviceUuid;
   final Guid? secondaryServiceUuid;
   final CharacteristicProperties properties;
   final List<BluetoothDescriptor> descriptors;
+
   bool get isNotifying {
     try {
       var cccd =
@@ -22,12 +24,13 @@ class BluetoothCharacteristic {
   }
 
   final BehaviorSubject<List<int>> _value;
-  Stream<List<int>> get value => Rx.merge([
+
+  Stream<List<int>> get value => mergeStreams([
         _value.stream,
         onValueChangedStream,
       ]);
 
-  List<int> get lastValue => _value.value;
+  List<int> get lastValue => _value.latestValue;
 
   BluetoothCharacteristic.fromProto(protos.BluetoothCharacteristic p)
       : uuid = Guid(p.uuid),
@@ -39,7 +42,7 @@ class BluetoothCharacteristic {
         descriptors =
             p.descriptors.map((d) => BluetoothDescriptor.fromProto(d)).toList(),
         properties = CharacteristicProperties.fromProto(p.properties),
-        _value = BehaviorSubject.seeded(p.value);
+        _value = BehaviorSubject(p.value);
 
   Stream<BluetoothCharacteristic> get _onCharacteristicChangedStream =>
       FlutterBluePlus.instance._methodStream

@@ -15,14 +15,14 @@ class BluetoothDescriptor {
   final BehaviorSubject<List<int>> _value;
   Stream<List<int>> get value => _value.stream;
 
-  List<int> get lastValue => _value.value;
+  List<int> get lastValue => _value.latestValue;
 
   BluetoothDescriptor.fromProto(protos.BluetoothDescriptor p)
       : uuid = Guid(p.uuid),
         deviceId = DeviceIdentifier(p.remoteId),
         serviceUuid = Guid(p.serviceUuid),
         characteristicUuid = Guid(p.characteristicUuid),
-        _value = BehaviorSubject.seeded(p.value);
+        _value = BehaviorSubject(p.value);
 
   /// Retrieves the value of a specified descriptor
   Future<List<int>> read() async {
