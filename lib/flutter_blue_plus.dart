@@ -9,7 +9,6 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:rxdart/rxdart.dart';
 
 import 'gen/flutterblueplus.pb.dart' as protos;
 

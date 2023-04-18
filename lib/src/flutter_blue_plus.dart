@@ -69,11 +69,11 @@ class FlutterBluePlus {
     return _channel.invokeMethod('turnOff').then<bool>((d) => d);
   }
 
-  final BehaviorSubject<bool> _isScanning = BehaviorSubject.seeded(false);
+  final BehaviorSubject<bool> _isScanning = BehaviorSubject(false);
   Stream<bool> get isScanning => _isScanning.stream;
 
   final BehaviorSubject<List<ScanResult>> _scanResults =
-      BehaviorSubject.seeded([]);
+      BehaviorSubject([]);
 
   /// Returns a stream that is a list of [ScanResult] results while a scan is in progress.
   ///
@@ -83,8 +83,6 @@ class FlutterBluePlus {
   /// One use for [scanResults] is as the stream in a StreamBuilder to display the
   /// results of a scan in real time while the scan is in progress.
   Stream<List<ScanResult>> get scanResults => _scanResults.stream;
-
-  final PublishSubject _stopScanPill = PublishSubject();
 
   /// Gets the current state of the Bluetooth module
   Stream<BluetoothState> get state async* {
@@ -147,10 +145,11 @@ class FlutterBluePlus {
     // Emit to isScanning
     _isScanning.add(true);
 
-    final killStreams = <Stream>[];
-    killStreams.add(_stopScanPill);
     if (timeout != null) {
-      killStreams.add(Rx.timer(null, timeout));
+      Future.delayed(timeout, () {
+        _isScanning.add(false);
+        _channel.invokeMethod('stopScan');
+      });
     }
 
     // Clear scan results list
@@ -162,7 +161,6 @@ class FlutterBluePlus {
       if (kDebugMode) {
         print('Error starting scan.');
       }
-      _stopScanPill.add(null);
       _isScanning.add(false);
       rethrow;
     }
@@ -170,7 +168,7 @@ class FlutterBluePlus {
     yield* FlutterBluePlus.instance._methodStream
         .where((m) => m.method == "ScanResult")
         .map((m) => m.arguments)
-        .takeUntil(Rx.merge(killStreams))
+        .takeWhile((element) => _isScanning.value)
         .doOnDone(stopScan)
         .map((buffer) => protos.ScanResult.fromBuffer(buffer))
         .map((p) {
@@ -217,7 +215,6 @@ class FlutterBluePlus {
   /// Stops a scan for Bluetooth Low Energy devices
   Future stopScan() async {
     await _channel.invokeMethod('stopScan');
-    _stopScanPill.add(null);
     _isScanning.add(false);
   }
 
