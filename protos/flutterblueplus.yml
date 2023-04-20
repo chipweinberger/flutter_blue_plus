@@ -5,7 +5,7 @@ info:
 paths: {} # Add the paths that correspond to the Protocol Buffer RPC services (if any)
 components:
   schemas:
-    BluetoothState:
+    SchemaBluetoothState:
       type: object
       properties:
         state:
@@ -14,7 +14,7 @@ components:
       required:
         - state
 
-    AdvertisementData:
+    SchemaAdvertisementData:
       type: object
       properties:
         local_name:
@@ -46,7 +46,7 @@ components:
         - service_data
         - service_uuids
 
-    ScanSettings:
+    SchemaScanSettings:
         type: object
         properties:
           android_scan_mode:
@@ -68,13 +68,13 @@ components:
           - allow_duplicates
           - mac_addresses
 
-    ScanResult:
+    SchemaScanResult:
       type: object
       properties:
         device:
-          $ref: '#/components/schemas/BluetoothDevice'
+          $ref: '#/components/schemas/SchemaBluetoothDevice'
         advertisement_data:
-          $ref: '#/components/schemas/AdvertisementData'
+          $ref: '#/components/schemas/SchemaAdvertisementData'
         rssi:
           type: integer
           format: int32
@@ -83,7 +83,7 @@ components:
         - advertisement_data
         - rssi
 
-    ConnectRequest:
+    SchemaConnectRequest:
       type: object
       properties:
         remote_id:
@@ -94,7 +94,7 @@ components:
         - remote_id
         - android_auto_connect
 
-    BluetoothDevice:
+    SchemaBluetoothDevice:
       type: object
       properties:
         remote_id:
@@ -109,7 +109,7 @@ components:
         - name
         - type
 
-    BluetoothService:
+    SchemaBluetoothService:
       type: object
       properties:
         uuid:
@@ -121,11 +121,11 @@ components:
         characteristics:
           type: array
           items:
-            $ref: '#/components/schemas/BluetoothCharacteristic'
+            $ref: '#/components/schemas/SchemaBluetoothCharacteristic'
         included_services:
           type: array
           items:
-            $ref: '#/components/schemas/BluetoothService'
+            $ref: '#/components/schemas/SchemaBluetoothService'
       required:
         - uuid
         - remote_id
@@ -133,7 +133,7 @@ components:
         - characteristics
         - included_services
 
-    BluetoothCharacteristic:
+    SchemaBluetoothCharacteristic:
       type: object
       properties:
         uuid:
@@ -147,9 +147,9 @@ components:
         descriptors:
           type: array
           items:
-            $ref: '#/components/schemas/BluetoothDescriptor'
+            $ref: '#/components/schemas/SchemaBluetoothDescriptor'
         properties:
-          $ref: '#/components/schemas/CharacteristicProperties'
+          $ref: '#/components/schemas/SchemaCharacteristicProperties'
         value:
           type: string
           format: byte
@@ -162,7 +162,7 @@ components:
         - properties
         - value
 
-    BluetoothDescriptor:
+    SchemaBluetoothDescriptor:
       type: object
       properties:
         uuid:
@@ -183,7 +183,7 @@ components:
         - characteristicUuid
         - value
 
-    CharacteristicProperties:
+    SchemaCharacteristicProperties:
       type: object
       properties:
         broadcast:
@@ -218,7 +218,7 @@ components:
         - notify_encryption_required
         - indicate_encryption_required
 
-    DiscoverServicesResult:
+    SchemaDiscoverServicesResult:
       type: object
       properties:
         remote_id:
@@ -226,12 +226,12 @@ components:
         services:
           type: array
           items:
-            $ref: '#/components/schemas/BluetoothService'
+            $ref: '#/components/schemas/SchemaBluetoothService'
       required:
         - remote_id
         - services
 
-    ReadCharacteristicRequest:
+    SchemaReadCharacteristicRequest:
       type: object
       properties:
         remote_id:
@@ -248,18 +248,18 @@ components:
         - service_uuid
         - secondary_service_uuid
 
-    ReadCharacteristicResponse:
+    SchemaReadCharacteristicResponse:
       type: object
       properties:
         remote_id:
           type: string
         characteristic:
-          $ref: '#/components/schemas/BluetoothCharacteristic'
+          $ref: '#/components/schemas/SchemaBluetoothCharacteristic'
       required:
         - remote_id
         - characteristic
 
-    ReadDescriptorRequest:
+    SchemaReadDescriptorRequest:
       type: object
       properties:
         remote_id:
@@ -279,11 +279,11 @@ components:
         - secondary_service_uuid
         - characteristic_uuid
 
-    ReadDescriptorResponse:
+    SchemaReadDescriptorResponse:
       type: object
       properties:
         request:
-          $ref: '#/components/schemas/ReadDescriptorRequest'
+          $ref: '#/components/schemas/SchemaReadDescriptorRequest'
         value:
           type: string
           format: byte
@@ -291,7 +291,7 @@ components:
         - request
         - value
 
-    WriteCharacteristicRequest:
+    SchemaWriteCharacteristicRequest:
       type: object
       properties:
         remote_id:
@@ -316,18 +316,18 @@ components:
         - write_type
         - value
 
-    WriteCharacteristicResponse:
+    SchemaWriteCharacteristicResponse:
       type: object
       properties:
         request:
-          $ref: '#/components/schemas/WriteCharacteristicRequest'
+          $ref: '#/components/schemas/SchemaWriteCharacteristicRequest'
         success:
           type: boolean
       required:
         - request
         - success
 
-    WriteDescriptorRequest:
+    SchemaWriteDescriptorRequest:
       type: object
       properties:
         remote_id:
@@ -351,18 +351,18 @@ components:
         - characteristic_uuid
         - value
 
-    WriteDescriptorResponse:
+    SchemaWriteDescriptorResponse:
       type: object
       properties:
         request:
-          $ref: '#/components/schemas/WriteDescriptorRequest'
+          $ref: '#/components/schemas/SchemaWriteDescriptorRequest'
         success:
           type: boolean
       required:
           - request
           - success
 
-    SetNotificationRequest:
+    SchemaSetNotificationRequest:
       type: object
       properties:
         remote_id:
@@ -383,13 +383,13 @@ components:
         - enable
 
 
-    SetNotificationResponse:
+    SchemaSetNotificationResponse:
       type: object
       properties:
         remote_id:
           type: string
         characteristic:
-          $ref: '#/components/schemas/BluetoothCharacteristic'
+          $ref: '#/components/schemas/SchemaBluetoothCharacteristic'
         success:
           type: boolean
       required:
@@ -397,18 +397,18 @@ components:
         - characteristic
         - success
 
-    OnCharacteristicChanged:
+    SchemaOnCharacteristicChanged:
       type: object
       properties:
         remote_id:
           type: string
         characteristic:
-          $ref: '#/components/schemas/BluetoothCharacteristic'
+          $ref: '#/components/schemas/SchemaBluetoothCharacteristic'
       required:
         - remote_id
         - characteristic
 
-    DeviceStateResponse:
+    SchemaDeviceStateResponse:
       type: object
       properties:
         remote_id:
@@ -420,17 +420,17 @@ components:
         - remote_id
         - state
 
-    ConnectedDevicesResponse:
+    SchemaConnectedDevicesResponse:
       type: object
       properties:
         devices:
           type: array
           items:
-            $ref: '#/components/schemas/BluetoothDevice'
+            $ref: '#/components/schemas/SchemaBluetoothDevice'
       required:
         - devices
 
-    MtuSizeRequest:
+    SchemaMtuSizeRequest:
       type: object
       properties:
         remote_id:
@@ -442,7 +442,7 @@ components:
         - remote_id
         - mtu
 
-    MtuSizeResponse:
+    SchemaMtuSizeResponse:
       type: object
       properties:
         remote_id:
@@ -454,7 +454,7 @@ components:
         - remote_id
         - mtu
 
-    ReadRssiResult:
+    SchemaReadRssiResult:
       type: object
       properties:
         remote_id:
