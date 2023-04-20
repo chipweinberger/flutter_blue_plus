@@ -1,0 +1,469 @@
+openapi: 3.0.2
+info:
+  title: Flutter Blue Plus API
+  version: 1.0.0
+paths: {} # Add the paths that correspond to the Protocol Buffer RPC services (if any)
+components:
+  schemas:
+    BluetoothState:
+      type: object
+      properties:
+        state:
+          type: string
+          enum: [UNKNOWN, UNAVAILABLE, UNAUTHORIZED, TURNING_ON, ON, TURNING_OFF, OFF]
+      required:
+        - state
+
+    AdvertisementData:
+      type: object
+      properties:
+        local_name:
+          type: string
+        tx_power_level:
+          type: integer
+          format: int32
+        connectable:
+          type: boolean
+        manufacturer_data:
+          type: object
+          additionalProperties:
+            type: string
+            format: byte
+        service_data:
+          type: object
+          additionalProperties:
+            type: string
+            format: byte
+        service_uuids:
+          type: array
+          items:
+            type: string
+      required:
+        - local_name
+        - tx_power_level
+        - connectable
+        - manufacturer_data
+        - service_data
+        - service_uuids
+
+    ScanSettings:
+        type: object
+        properties:
+          android_scan_mode:
+            type: integer
+            format: int32
+          service_uuids:
+            type: array
+            items:
+              type: string
+          allow_duplicates:
+            type: boolean
+          mac_addresses:
+            type: array
+            items:
+              type: string
+        required:
+          - android_scan_mode
+          - service_uuids
+          - allow_duplicates
+          - mac_addresses
+
+    ScanResult:
+      type: object
+      properties:
+        device:
+          $ref: '#/components/schemas/BluetoothDevice'
+        advertisement_data:
+          $ref: '#/components/schemas/AdvertisementData'
+        rssi:
+          type: integer
+          format: int32
+      required:
+        - device
+        - advertisement_data
+        - rssi
+
+    ConnectRequest:
+      type: object
+      properties:
+        remote_id:
+          type: string
+        android_auto_connect:
+          type: boolean
+      required:
+        - remote_id
+        - android_auto_connect
+
+    BluetoothDevice:
+      type: object
+      properties:
+        remote_id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+          enum: [UNKNOWN, CLASSIC, LE, DUAL]
+      required:
+        - remote_id
+        - name
+        - type
+
+    BluetoothService:
+      type: object
+      properties:
+        uuid:
+          type: string
+        remote_id:
+          type: string
+        is_primary:
+          type: boolean
+        characteristics:
+          type: array
+          items:
+            $ref: '#/components/schemas/BluetoothCharacteristic'
+        included_services:
+          type: array
+          items:
+            $ref: '#/components/schemas/BluetoothService'
+      required:
+        - uuid
+        - remote_id
+        - is_primary
+        - characteristics
+        - included_services
+
+    BluetoothCharacteristic:
+      type: object
+      properties:
+        uuid:
+          type: string
+        remote_id:
+          type: string
+        serviceUuid:
+          type: string
+        secondaryServiceUuid:
+          type: string
+        descriptors:
+          type: array
+          items:
+            $ref: '#/components/schemas/BluetoothDescriptor'
+        properties:
+          $ref: '#/components/schemas/CharacteristicProperties'
+        value:
+          type: string
+          format: byte
+      required:
+        - uuid
+        - remote_id
+        - serviceUuid
+        - secondaryServiceUuid
+        - descriptors
+        - properties
+        - value
+
+    BluetoothDescriptor:
+      type: object
+      properties:
+        uuid:
+          type: string
+        remote_id:
+          type: string
+        serviceUuid:
+          type: string
+        characteristicUuid:
+          type: string
+        value:
+          type: string
+          format: byte
+      required:
+        - uuid
+        - remote_id
+        - serviceUuid
+        - characteristicUuid
+        - value
+
+    CharacteristicProperties:
+      type: object
+      properties:
+        broadcast:
+          type: boolean
+        read:
+          type: boolean
+        write_without_response:
+          type: boolean
+        write:
+          type: boolean
+        notify:
+          type: boolean
+        indicate:
+          type: boolean
+        authenticated_signed_writes:
+          type: boolean
+        extended_properties:
+          type: boolean
+        notify_encryption_required:
+          type: boolean
+        indicate_encryption_required:
+          type: boolean
+      required:
+        - broadcast
+        - read
+        - write_without_response
+        - write
+        - notify
+        - indicate
+        - authenticated_signed_writes
+        - extended_properties
+        - notify_encryption_required
+        - indicate_encryption_required
+
+    DiscoverServicesResult:
+      type: object
+      properties:
+        remote_id:
+          type: string
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/BluetoothService'
+      required:
+        - remote_id
+        - services
+
+    ReadCharacteristicRequest:
+      type: object
+      properties:
+        remote_id:
+          type: string
+        characteristic_uuid:
+          type: string
+        service_uuid:
+          type: string
+        secondary_service_uuid:
+          type: string
+      required:
+        - remote_id
+        - characteristic_uuid
+        - service_uuid
+        - secondary_service_uuid
+
+    ReadCharacteristicResponse:
+      type: object
+      properties:
+        remote_id:
+          type: string
+        characteristic:
+          $ref: '#/components/schemas/BluetoothCharacteristic'
+      required:
+        - remote_id
+        - characteristic
+
+    ReadDescriptorRequest:
+      type: object
+      properties:
+        remote_id:
+          type: string
+        descriptor_uuid:
+          type: string
+        service_uuid:
+          type: string
+        secondary_service_uuid:
+          type: string
+        characteristic_uuid:
+          type: string
+      required:
+        - remote_id
+        - descriptor_uuid
+        - service_uuid
+        - secondary_service_uuid
+        - characteristic_uuid
+
+    ReadDescriptorResponse:
+      type: object
+      properties:
+        request:
+          $ref: '#/components/schemas/ReadDescriptorRequest'
+        value:
+          type: string
+          format: byte
+      required:
+        - request
+        - value
+
+    WriteCharacteristicRequest:
+      type: object
+      properties:
+        remote_id:
+          type: string
+        characteristic_uuid:
+          type: string
+        service_uuid:
+          type: string
+        secondary_service_uuid:
+          type: string
+        write_type:
+          type: string
+          enum: [WITH_RESPONSE, WITHOUT_RESPONSE]
+        value:
+          type: string
+          format: byte
+      required:
+        - remote_id
+        - characteristic_uuid
+        - service_uuid
+        - secondary_service_uuid
+        - write_type
+        - value
+
+    WriteCharacteristicResponse:
+      type: object
+      properties:
+        request:
+          $ref: '#/components/schemas/WriteCharacteristicRequest'
+        success:
+          type: boolean
+      required:
+        - request
+        - success
+
+    WriteDescriptorRequest:
+      type: object
+      properties:
+        remote_id:
+          type: string
+        descriptor_uuid:
+          type: string
+        service_uuid:
+          type: string
+        secondary_service_uuid:
+          type: string
+        characteristic_uuid:
+          type: string
+        value:
+          type: string
+          format: byte
+      required:
+        - remote_id
+        - descriptor_uuid
+        - service_uuid
+        - secondary_service_uuid
+        - characteristic_uuid
+        - value
+
+    WriteDescriptorResponse:
+      type: object
+      properties:
+        request:
+          $ref: '#/components/schemas/WriteDescriptorRequest'
+        success:
+          type: boolean
+      required:
+          - request
+          - success
+
+    SetNotificationRequest:
+      type: object
+      properties:
+        remote_id:
+          type: string
+        service_uuid:
+          type: string
+        secondary_service_uuid:
+          type: string
+        characteristic_uuid:
+          type: string
+        enable:
+          type: boolean
+      required:
+        - remote_id
+        - service_uuid
+        - secondary_service_uuid
+        - characteristic_uuid
+        - enable
+
+
+    SetNotificationResponse:
+      type: object
+      properties:
+        remote_id:
+          type: string
+        characteristic:
+          $ref: '#/components/schemas/BluetoothCharacteristic'
+        success:
+          type: boolean
+      required:
+        - remote_id
+        - characteristic
+        - success
+
+    OnCharacteristicChanged:
+      type: object
+      properties:
+        remote_id:
+          type: string
+        characteristic:
+          $ref: '#/components/schemas/BluetoothCharacteristic'
+      required:
+        - remote_id
+        - characteristic
+
+    DeviceStateResponse:
+      type: object
+      properties:
+        remote_id:
+          type: string
+        state:
+          type: string
+          enum: [DISCONNECTED, CONNECTING, CONNECTED, DISCONNECTING]
+      required:
+        - remote_id
+        - state
+
+    ConnectedDevicesResponse:
+      type: object
+      properties:
+        devices:
+          type: array
+          items:
+            $ref: '#/components/schemas/BluetoothDevice'
+      required:
+        - devices
+
+    MtuSizeRequest:
+      type: object
+      properties:
+        remote_id:
+          type: string
+        mtu:
+          type: integer
+          format: int32
+      required:
+        - remote_id
+        - mtu
+
+    MtuSizeResponse:
+      type: object
+      properties:
+        remote_id:
+          type: string
+        mtu:
+          type: integer
+          format: int32
+      required:
+        - remote_id
+        - mtu
+
+    ReadRssiResult:
+      type: object
+      properties:
+        remote_id:
+          type: string
+        rssi:
+          type: integer
+          format: int32
+      required:
+        - remote_id
+        - rssi
+        
+
