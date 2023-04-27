@@ -425,6 +425,12 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             result(e);
         }
     }
+    else if([@"requestConnectionPriority" isEqualToString:call.method])
+    {
+        result([FlutterError errorWithCode:@"requestConnectionPriority" 
+                                   message:@"iOS does not support connection priority requests"
+                                   details:NULL]);
+    }
     else
     {
         result(FlutterMethodNotImplemented);

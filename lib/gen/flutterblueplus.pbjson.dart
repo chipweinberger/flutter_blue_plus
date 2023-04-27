@@ -3,7 +3,7 @@
 //  source: flutterblueplus.proto
 //
 // @dart = 2.12
-// ignore_for_file: annotate_overrides,camel_case_types,unnecessary_const,non_constant_identifier_names,library_prefixes,unused_import,unused_shown_name,return_of_invalid_type,unnecessary_this,prefer_final_fields,deprecated_member_use_from_same_package
+// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,deprecated_member_use_from_same_package,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
 
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
@@ -427,3 +427,14 @@ const ReadRssiResult$json = const {
 
 /// Descriptor for `ReadRssiResult`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List readRssiResultDescriptor = $convert.base64Decode('Cg5SZWFkUnNzaVJlc3VsdBIbCglyZW1vdGVfaWQYASABKAlSCHJlbW90ZUlkEhIKBHJzc2kYAiABKAVSBHJzc2k=');
+@$core.Deprecated('Use connectionPriorityRequestDescriptor instead')
+const ConnectionPriorityRequest$json = const {
+  '1': 'ConnectionPriorityRequest',
+  '2': const [
+    const {'1': 'remote_id', '3': 1, '4': 1, '5': 9, '10': 'remoteId'},
+    const {'1': 'connectionPriority', '3': 2, '4': 1, '5': 5, '10': 'connectionPriority'},
+  ],
+};
+
+/// Descriptor for `ConnectionPriorityRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List connectionPriorityRequestDescriptor = $convert.base64Decode('ChlDb25uZWN0aW9uUHJpb3JpdHlSZXF1ZXN0EhsKCXJlbW90ZV9pZBgBIAEoCVIIcmVtb3RlSWQSLgoSY29ubmVjdGlvblByaW9yaXR5GAIgASgFUhJjb25uZWN0aW9uUHJpb3JpdHk=');
