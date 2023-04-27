@@ -190,6 +190,45 @@ class BluetoothDevice {
     });
   }
 
+  /// Request a connection parameter update.
+  ///
+  /// This function will send a connection parameter update request to the
+  /// remote device and is only available on Android.
+  ///
+  /// Request a specific connection priority. Must be one of
+  /// ConnectionPriority.balanced, BluetoothGatt#ConnectionPriority.high or
+  /// ConnectionPriority.lowPower.
+  Future<void> requestConnectionPriority({
+    required ConnectionPriority connectionPriorityRequest,
+  }) async {
+    int connectionPriority = 0;
+
+    switch (connectionPriorityRequest) {
+      case ConnectionPriority.balanced:
+        connectionPriority = 0;
+        break;
+      case ConnectionPriority.high:
+        connectionPriority = 1;
+
+        break;
+      case ConnectionPriority.lowPower:
+        connectionPriority = 2;
+
+        break;
+      default:
+        break;
+    }
+
+    var request = protos.ConnectionPriorityRequest.create()
+      ..remoteId = id.toString()
+      ..connectionPriority = connectionPriority;
+
+    await FlutterBluePlus.instance._channel.invokeMethod(
+      'requestConnectionPriority',
+      request.writeToBuffer(),
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -209,3 +248,5 @@ class BluetoothDevice {
 enum BluetoothDeviceType { unknown, classic, le, dual }
 
 enum BluetoothDeviceState { disconnected, connecting, connected, disconnecting }
+
+enum ConnectionPriority { balanced, high, lowPower }

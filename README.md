@@ -163,6 +163,7 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 | mtu                         |  :white_check_mark:  |  :white_check_mark:  | Stream of mtu size changes. |
 | requestMtu                  |  :white_check_mark:  |                      | Request to change the MTU for the device. |
 | readRssi                    |  :white_check_mark:  |  :white_check_mark:  | Read RSSI from a connected device. |
+| requestConnectionPriority   |  :white_check_mark:  |                      | Request to update a high priority, low latency connection. An application should only request high priority connection parameters to transfer large amounts of data over LE quickly. |
 
 ### BluetoothCharacteristic API
 |                             |       Android        |         iOS          |             Description            |
