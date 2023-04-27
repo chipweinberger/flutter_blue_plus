@@ -77,7 +77,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     }
     if (self.centralManager == nil)
     {
-        self.centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
+        self.centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil options:@{CBCentralManagerOptionShowPowerAlertKey: @(YES)}];
         FlutterStandardTypedData *data = [self toFlutterData:[self toBluetoothStateProto:self->_centralManager.state]];
         self.stateStreamHandler.cachedBluetoothState = data;
     }
