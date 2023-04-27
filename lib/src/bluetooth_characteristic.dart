@@ -113,7 +113,11 @@ class BluetoothCharacteristic {
       request.writeToBuffer(),
     );
 
-    final response = await FlutterBluePlus.instance._methodStream
+    if (type == CharacteristicWriteType.withoutResponse) {
+      return;
+    }
+
+    final result = await FlutterBluePlus.instance._methodStream
         .where((m) => m.method == "WriteCharacteristicResponse")
         .map((m) => m.arguments)
         .map((buffer) => protos.WriteCharacteristicResponse.fromBuffer(buffer))
@@ -123,11 +127,7 @@ class BluetoothCharacteristic {
             (p.request.serviceUuid == request.serviceUuid))
         .first;
 
-    if (type == CharacteristicWriteType.withoutResponse) {
-      return;
-    }
-
-    if (!response.success) {
+    if (!result.success) {
       throw Exception('Failed to write the characteristic');
     }
   }
