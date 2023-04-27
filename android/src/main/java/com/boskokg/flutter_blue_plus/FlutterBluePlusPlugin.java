@@ -148,12 +148,20 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
       stateChannel.setStreamHandler(stateHandler);
       mBluetoothManager = (BluetoothManager) application.getSystemService(Context.BLUETOOTH_SERVICE);
       mBluetoothAdapter = mBluetoothManager.getAdapter();
+      IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+      context.registerReceiver(mBluetoothStateReceiver, filter);
+      try {
+        stateHandler.setCachedBluetoothState(mBluetoothAdapter.getState());
+      } catch (SecurityException e) {
+        stateHandler.setCachedBluetoothStateUnauthorized();
+      }
     }
   }
 
   private void tearDown() {
     synchronized (tearDownLock) {
       Log.d(TAG, "teardown");
+      context.unregisterReceiver(mBluetoothStateReceiver);
       context = null;
       channel.setMethodCallHandler(null);
       channel = null;
@@ -260,8 +268,16 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
         ensurePermissionBeforeAction(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? Manifest.permission.BLUETOOTH_SCAN : Manifest.permission.ACCESS_FINE_LOCATION, (grantedScan, permissionScan) -> {
           if (grantedScan) {
             ensurePermissionBeforeAction(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? Manifest.permission.BLUETOOTH_CONNECT : null, (grantedConnect, permissionConnect) -> {
-              if (grantedConnect)
-                startScan(call, result);
+              if (grantedConnect) {
+                ensurePermissionBeforeAction(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? Manifest.permission.ACCESS_FINE_LOCATION : null, (grantedLocation, permissionLocation) -> {
+                  if (grantedLocation) {
+                    startScan(call, result);
+                  }
+                  else
+                    result.error(
+                            "no_permissions", String.format("flutter_blue plugin requires %s for scanning", permissionLocation), null);
+                });
+              }
               else
                 result.error(
                         "no_permissions", String.format("flutter_blue plugin requires %s for scanning", permissionConnect), null);
@@ -798,17 +814,19 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
     return descriptor;
   }
 
-  private final StreamHandler stateHandler = new StreamHandler() {
-    private EventSink sink;
+  private final BroadcastReceiver mBluetoothStateReceiver = new BroadcastReceiver() {
+    @Override
+    public void onReceive(Context context, Intent intent) {
+      final String action = intent.getAction();
 
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-      @Override
-      public void onReceive(Context context, Intent intent) {
-        final String action = intent.getAction();
-
-        if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
-          final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,
-                  BluetoothAdapter.ERROR);
+      if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
+        final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,
+                BluetoothAdapter.ERROR);
+        EventSink sink = stateHandler.getSink();
+        if (sink == null) {
+          stateHandler.setCachedBluetoothState(state);
+        }
+        else {
           switch (state) {
             case BluetoothAdapter.STATE_OFF:
               sink.success(Protos.BluetoothState.newBuilder().setState(Protos.BluetoothState.State.OFF).build().toByteArray());
@@ -825,21 +843,64 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
           }
         }
       }
-    };
+    }
+  };
+
+  private class MyStreamHandler implements StreamHandler {
+    private final int STATE_UNAUTHORIZED = -1;
+
+    private EventSink sink;
+
+    public EventSink getSink() {
+      return sink;
+    }
+
+    private int cachedBluetoothState;
+
+    public void setCachedBluetoothState(int value) {
+      cachedBluetoothState = value;
+    }
+
+    public void setCachedBluetoothStateUnauthorized() {
+      cachedBluetoothState = STATE_UNAUTHORIZED;
+    }
 
     @Override
     public void onListen(Object o, EventChannel.EventSink eventSink) {
       sink = eventSink;
-      IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-      context.registerReceiver(mReceiver, filter);
+      if (cachedBluetoothState != 0) {
+        Protos.BluetoothState.Builder p = Protos.BluetoothState.newBuilder();
+        switch (cachedBluetoothState) {
+          case BluetoothAdapter.STATE_OFF:
+            p.setState(Protos.BluetoothState.State.OFF);
+            break;
+          case BluetoothAdapter.STATE_ON:
+            p.setState(Protos.BluetoothState.State.ON);
+            break;
+          case BluetoothAdapter.STATE_TURNING_OFF:
+            p.setState(Protos.BluetoothState.State.TURNING_OFF);
+            break;
+          case BluetoothAdapter.STATE_TURNING_ON:
+            p.setState(Protos.BluetoothState.State.TURNING_ON);
+            break;
+          case STATE_UNAUTHORIZED:
+            p.setState(Protos.BluetoothState.State.UNAUTHORIZED);
+            break;
+          default:
+            p.setState(Protos.BluetoothState.State.UNKNOWN);
+            break;
+        }
+        sink.success(p.build().toByteArray());
+      }
     }
 
     @Override
     public void onCancel(Object o) {
       sink = null;
-      context.unregisterReceiver(mReceiver);
     }
   };
+
+  private final MyStreamHandler stateHandler = new MyStreamHandler();
 
   private void startScan(MethodCall call, Result result) {
     byte[] data = call.arguments();

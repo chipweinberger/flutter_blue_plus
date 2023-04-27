@@ -37,6 +37,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 @property(nonatomic) NSMutableDictionary *scannedPeripherals;
 @property(nonatomic) NSMutableArray *servicesThatNeedDiscovered;
 @property(nonatomic) NSMutableArray *characteristicsThatNeedDiscovered;
+@property(nonatomic) NSMutableDictionary *dataWaitingToWriteWithoutResponse;
 @property(nonatomic) LogLevel logLevel;
 @end
 
@@ -51,6 +52,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
   instance.scannedPeripherals = [NSMutableDictionary new];
   instance.servicesThatNeedDiscovered = [NSMutableArray new];
   instance.characteristicsThatNeedDiscovered = [NSMutableArray new];
+  instance.dataWaitingToWriteWithoutResponse = [NSMutableDictionary new];
   instance.logLevel = emergency;
 
   // STATE
@@ -70,6 +72,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
   }
   if (self.centralManager == nil) {
     self.centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
+    FlutterStandardTypedData *data = [self toFlutterData:[self toBluetoothStateProto:self->_centralManager.state]];
+    self.stateStreamHandler.cachedBluetoothState = data;
   }
   if ([@"state" isEqualToString:call.method]) {
     FlutterStandardTypedData *data = [self toFlutterData:[self toBluetoothStateProto:self->_centralManager.state]];
@@ -89,8 +93,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
   } else if([@"name" isEqualToString:call.method]) {
     result([[UIDevice currentDevice] name]);
   } else if([@"startScan" isEqualToString:call.method]) {
-    // Clear any existing scan results
-    [self.scannedPeripherals removeAllObjects];
     // TODO: Request Permission?
     FlutterStandardTypedData *data = [call arguments];
     ProtosScanSettings *request = [[ProtosScanSettings alloc] initWithData:[data data] error:nil];
@@ -215,13 +217,22 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     @try {
       // Find peripheral
       CBPeripheral *peripheral = [self findPeripheral:remoteId];
-      // Find characteristic
-      CBCharacteristic *characteristic = [self locateCharacteristic:[request characteristicUuid] peripheral:peripheral serviceId:[request serviceUuid] secondaryServiceId:[request secondaryServiceUuid]];
       // Get correct write type
       CBCharacteristicWriteType type = ([request writeType] == ProtosWriteCharacteristicRequest_WriteType_WithoutResponse) ? CBCharacteristicWriteWithoutResponse : CBCharacteristicWriteWithResponse;
-      // Write to characteristic
-      [peripheral writeValue:[request value] forCharacteristic:characteristic type:type];
-      result(nil);
+      if (type == CBCharacteristicWriteWithResponse || peripheral.canSendWriteWithoutResponse) {
+        // Find characteristic
+        CBCharacteristic *characteristic = [self locateCharacteristic:[request characteristicUuid] peripheral:peripheral serviceId:[request serviceUuid] secondaryServiceId:[request secondaryServiceUuid]];
+        // Write to characteristic
+        [peripheral writeValue:[request value] forCharacteristic:characteristic type:type];
+        if (type == CBCharacteristicWriteWithoutResponse) {
+          result(@(YES));
+        } else {
+          result(nil);
+        }
+      } else { // writing without response and peripheral not ready
+        [_dataWaitingToWriteWithoutResponse setObject:request forKey:remoteId];
+        result(nil);
+      }
     } @catch(FlutterError *e) {
       result(e);
     }
@@ -385,9 +396,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 // CBCentralManagerDelegate methods
 //
 - (void)centralManagerDidUpdateState:(nonnull CBCentralManager *)central {
+  FlutterStandardTypedData *data = [self toFlutterData:[self toBluetoothStateProto:self->_centralManager.state]];
   if(_stateStreamHandler.sink != nil) {
-    FlutterStandardTypedData *data = [self toFlutterData:[self toBluetoothStateProto:self->_centralManager.state]];
     self.stateStreamHandler.sink(data);
+  } else {
+    self.stateStreamHandler.cachedBluetoothState = data;
   }
 }
 
@@ -567,6 +580,21 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
   [result setRemoteId:[peripheral.identifier UUIDString]];
   [result setRssi:[rssi intValue]];
   [_channel invokeMethod:@"ReadRssiResult" arguments:[self toFlutterData:result]];
+}
+
+- (void)peripheralIsReadyToSendWriteWithoutResponse:(CBPeripheral *)peripheral {
+  ProtosWriteCharacteristicRequest *request = [_dataWaitingToWriteWithoutResponse objectForKey:[[peripheral identifier] UUIDString]];
+  if (request != nil) {
+    // Find characteristic
+    CBCharacteristic *characteristic = [self locateCharacteristic:[request characteristicUuid] peripheral:peripheral serviceId:[request serviceUuid] secondaryServiceId:[request secondaryServiceUuid]];
+    // Write to characteristic
+    [peripheral writeValue:[request value] forCharacteristic:characteristic type:CBCharacteristicWriteWithoutResponse];
+    ProtosWriteCharacteristicResponse *result = [[ProtosWriteCharacteristicResponse alloc] init];
+    [result setRequest:request];
+    [result setSuccess:true];
+    [_channel invokeMethod:@"WriteCharacteristicResponse" arguments:[self toFlutterData:result]];
+    [_dataWaitingToWriteWithoutResponse removeObjectForKey:[[peripheral identifier] UUIDString]];
+  }
 }
 
 //
@@ -797,6 +825,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
 - (FlutterError*)onListenWithArguments:(id)arguments eventSink:(FlutterEventSink)eventSink {
   self.sink = eventSink;
+  if (self.cachedBluetoothState != nil) {
+    self.sink(self.cachedBluetoothState);
+  }
   return nil;
 }
 

@@ -77,10 +77,7 @@ class BluetoothCharacteristic {
     FlutterBluePlus.instance._log(LogLevel.info,
         'remoteId: ${deviceId.toString()} characteristicUuid: ${uuid.toString()} serviceUuid: ${serviceUuid.toString()}');
 
-    await FlutterBluePlus.instance._channel
-        .invokeMethod('readCharacteristic', request.writeToBuffer());
-
-    return FlutterBluePlus.instance._methodStream
+    var response = FlutterBluePlus.instance._methodStream
         .where((m) => m.method == "ReadCharacteristicResponse")
         .map((m) => m.arguments)
         .map((buffer) => protos.ReadCharacteristicResponse.fromBuffer(buffer))
@@ -94,6 +91,11 @@ class BluetoothCharacteristic {
       _value.add(d);
       return d;
     });
+
+    await FlutterBluePlus.instance._channel
+        .invokeMethod('readCharacteristic', request.writeToBuffer());
+
+    return response;
   }
 
   /// Writes the value of a characteristic.
@@ -114,14 +116,7 @@ class BluetoothCharacteristic {
           protos.WriteCharacteristicRequest_WriteType.valueOf(type.index)!
       ..value = value;
 
-    var result = await FlutterBluePlus.instance._channel
-        .invokeMethod('writeCharacteristic', request.writeToBuffer());
-
-    if (type == CharacteristicWriteType.withoutResponse) {
-      return result;
-    }
-
-    return FlutterBluePlus.instance._methodStream
+    var response = FlutterBluePlus.instance._methodStream
         .where((m) => m.method == "WriteCharacteristicResponse")
         .map((m) => m.arguments)
         .map((buffer) => protos.WriteCharacteristicResponse.fromBuffer(buffer))
@@ -135,6 +130,15 @@ class BluetoothCharacteristic {
             ? throw Exception('Failed to write the characteristic')
             : null)
         .then((_) => null);
+
+    var result = await FlutterBluePlus.instance._channel
+        .invokeMethod('writeCharacteristic', request.writeToBuffer());
+
+    if (result is bool && result) {
+      return;
+    }
+
+    return response;
   }
 
   /// Sets notifications or indications for the value of a specified characteristic
@@ -145,10 +149,7 @@ class BluetoothCharacteristic {
       ..characteristicUuid = uuid.toString()
       ..enable = notify;
 
-    await FlutterBluePlus.instance._channel
-        .invokeMethod('setNotification', request.writeToBuffer());
-
-    return FlutterBluePlus.instance._methodStream
+    var response = FlutterBluePlus.instance._methodStream
         .where((m) => m.method == "SetNotificationResponse")
         .map((m) => m.arguments)
         .map((buffer) => protos.SetNotificationResponse.fromBuffer(buffer))
@@ -162,6 +163,11 @@ class BluetoothCharacteristic {
       _updateDescriptors(c.descriptors);
       return (c.isNotifying == notify);
     });
+
+    await FlutterBluePlus.instance._channel
+        .invokeMethod('setNotification', request.writeToBuffer());
+
+    return response;
   }
 
   @override
