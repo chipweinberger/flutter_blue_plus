@@ -5,12 +5,14 @@
 part of flutter_blue_plus;
 
 class BluetoothCharacteristic {
+
   final Guid uuid;
   final DeviceIdentifier deviceId;
   final Guid serviceUuid;
   final Guid? secondaryServiceUuid;
   final CharacteristicProperties properties;
   final List<BluetoothDescriptor> descriptors;
+
   bool get isNotifying {
     try {
       var cccd =
@@ -22,12 +24,13 @@ class BluetoothCharacteristic {
   }
 
   final BehaviorSubject<List<int>> _value;
-  Stream<List<int>> get value => Rx.merge([
+
+  Stream<List<int>> get value => mergeStreams([
         _value.stream,
         onValueChangedStream,
       ]);
 
-  List<int> get lastValue => _value.value;
+  List<int> get lastValue => _value.latestValue;
 
   BluetoothCharacteristic.fromProto(protos.BluetoothCharacteristic p)
       : uuid = Guid(p.uuid),
@@ -39,7 +42,7 @@ class BluetoothCharacteristic {
         descriptors =
             p.descriptors.map((d) => BluetoothDescriptor.fromProto(d)).toList(),
         properties = CharacteristicProperties.fromProto(p.properties),
-        _value = BehaviorSubject.seeded(p.value);
+        _value = BehaviorSubject(p.value);
 
   Stream<BluetoothCharacteristic> get _onCharacteristicChangedStream =>
       FlutterBluePlus.instance._methodStream
@@ -77,10 +80,7 @@ class BluetoothCharacteristic {
     FlutterBluePlus.instance._log(LogLevel.info,
         'remoteId: ${deviceId.toString()} characteristicUuid: ${uuid.toString()} serviceUuid: ${serviceUuid.toString()}');
 
-    await FlutterBluePlus.instance._channel
-        .invokeMethod('readCharacteristic', request.writeToBuffer());
-
-    return FlutterBluePlus.instance._methodStream
+    var response = FlutterBluePlus.instance._methodStream
         .where((m) => m.method == "ReadCharacteristicResponse")
         .map((m) => m.arguments)
         .map((buffer) => protos.ReadCharacteristicResponse.fromBuffer(buffer))
@@ -94,6 +94,11 @@ class BluetoothCharacteristic {
       _value.add(d);
       return d;
     });
+
+    await FlutterBluePlus.instance._channel
+        .invokeMethod('readCharacteristic', request.writeToBuffer());
+
+    return response;
   }
 
   /// Writes the value of a characteristic.
@@ -114,14 +119,7 @@ class BluetoothCharacteristic {
           protos.WriteCharacteristicRequest_WriteType.valueOf(type.index)!
       ..value = value;
 
-    var result = await FlutterBluePlus.instance._channel
-        .invokeMethod('writeCharacteristic', request.writeToBuffer());
-
-    if (type == CharacteristicWriteType.withoutResponse) {
-      return result;
-    }
-
-    return FlutterBluePlus.instance._methodStream
+    var response = FlutterBluePlus.instance._methodStream
         .where((m) => m.method == "WriteCharacteristicResponse")
         .map((m) => m.arguments)
         .map((buffer) => protos.WriteCharacteristicResponse.fromBuffer(buffer))
@@ -135,6 +133,15 @@ class BluetoothCharacteristic {
             ? throw Exception('Failed to write the characteristic')
             : null)
         .then((_) => null);
+
+    var result = await FlutterBluePlus.instance._channel
+        .invokeMethod('writeCharacteristic', request.writeToBuffer());
+
+    if (result is bool && result) {
+      return;
+    }
+
+    return response;
   }
 
   /// Sets notifications or indications for the value of a specified characteristic
@@ -145,10 +152,7 @@ class BluetoothCharacteristic {
       ..characteristicUuid = uuid.toString()
       ..enable = notify;
 
-    await FlutterBluePlus.instance._channel
-        .invokeMethod('setNotification', request.writeToBuffer());
-
-    return FlutterBluePlus.instance._methodStream
+    var response = FlutterBluePlus.instance._methodStream
         .where((m) => m.method == "SetNotificationResponse")
         .map((m) => m.arguments)
         .map((buffer) => protos.SetNotificationResponse.fromBuffer(buffer))
@@ -162,6 +166,11 @@ class BluetoothCharacteristic {
       _updateDescriptors(c.descriptors);
       return (c.isNotifying == notify);
     });
+
+    await FlutterBluePlus.instance._channel
+        .invokeMethod('setNotification', request.writeToBuffer());
+
+    return response;
   }
 
   @override
@@ -172,7 +181,6 @@ class BluetoothCharacteristic {
 
 enum CharacteristicWriteType { withResponse, withoutResponse }
 
-@immutable
 class CharacteristicProperties {
   final bool broadcast;
   final bool read;

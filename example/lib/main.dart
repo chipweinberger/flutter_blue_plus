@@ -8,11 +8,26 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'widgets.dart';
 
 void main() {
-  runApp(const FlutterBlueApp());
+
+  if (Platform.isAndroid) {
+    WidgetsFlutterBinding.ensureInitialized();
+    [
+      Permission.location,
+      Permission.storage,
+      Permission.bluetooth,
+      Permission.bluetoothConnect,
+      Permission.bluetoothScan
+    ].request().then((status) {
+      runApp(const FlutterBlueApp());
+    });
+  } else {
+      runApp(const FlutterBlueApp());
+  }
 }
 
 class FlutterBlueApp extends StatelessWidget {

@@ -23,8 +23,8 @@ class BluetoothDevice {
         name = name ?? "Unknown name",
         type = type ?? BluetoothDeviceType.unknown;
 
-  final BehaviorSubject<bool> _isDiscoveringServices =
-      BehaviorSubject.seeded(false);
+  final BehaviorSubject<bool> _isDiscoveringServices = BehaviorSubject(false);
+  
   Stream<bool> get isDiscoveringServices => _isDiscoveringServices.stream;
 
   /// Establishes a connection to the Bluetooth Device.
@@ -57,9 +57,17 @@ class BluetoothDevice {
   /// Send a pairing request to the device.
   /// Currently only implemented on Android.
   Future<void> pair() async {
+    return FlutterBluePlus.instance._channel
+        .invokeMethod('pair', id.toString());
+  }
+
+  /// Refresh Gatt Device Cache
+  /// Emergency method to reload ble services & characteristics
+  /// Currently only implemented on Android.
+  Future<void> clearGattCache() async {
     if (Platform.isAndroid) {
       return FlutterBluePlus.instance._channel
-          .invokeMethod('pair', id.toString());
+          .invokeMethod('clearGattCache', id.toString());
     }
   }
 
@@ -67,8 +75,7 @@ class BluetoothDevice {
   Future disconnect() => FlutterBluePlus.instance._channel
       .invokeMethod('disconnect', id.toString());
 
-  final BehaviorSubject<List<BluetoothService>> _services =
-      BehaviorSubject.seeded([]);
+  final BehaviorSubject<List<BluetoothService>> _services = BehaviorSubject([]);
 
   /// Discovers services offered by the remote device as well as their characteristics and descriptors
   Future<List<BluetoothService>> discoverServices() async {
@@ -183,6 +190,45 @@ class BluetoothDevice {
     });
   }
 
+  /// Request a connection parameter update.
+  ///
+  /// This function will send a connection parameter update request to the
+  /// remote device and is only available on Android.
+  ///
+  /// Request a specific connection priority. Must be one of
+  /// ConnectionPriority.balanced, BluetoothGatt#ConnectionPriority.high or
+  /// ConnectionPriority.lowPower.
+  Future<void> requestConnectionPriority({
+    required ConnectionPriority connectionPriorityRequest,
+  }) async {
+    int connectionPriority = 0;
+
+    switch (connectionPriorityRequest) {
+      case ConnectionPriority.balanced:
+        connectionPriority = 0;
+        break;
+      case ConnectionPriority.high:
+        connectionPriority = 1;
+
+        break;
+      case ConnectionPriority.lowPower:
+        connectionPriority = 2;
+
+        break;
+      default:
+        break;
+    }
+
+    var request = protos.ConnectionPriorityRequest.create()
+      ..remoteId = id.toString()
+      ..connectionPriority = connectionPriority;
+
+    await FlutterBluePlus.instance._channel.invokeMethod(
+      'requestConnectionPriority',
+      request.writeToBuffer(),
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -202,3 +248,5 @@ class BluetoothDevice {
 enum BluetoothDeviceType { unknown, classic, le, dual }
 
 enum BluetoothDeviceState { disconnected, connecting, connected, disconnecting }
+
+enum ConnectionPriority { balanced, high, lowPower }
