@@ -3,17 +3,18 @@
 // BSD-style license that can be found in the LICENSE file.
 
 #if TARGET_OS_OSX
- #import <FlutterMacOS/FlutterMacOS.h>
+#import <FlutterMacOS/FlutterMacOS.h>
 #else
- #import <Flutter/Flutter.h>
+#import <Flutter/Flutter.h>
 #endif
 #import <CoreBluetooth/CoreBluetooth.h>
 
 #define NAMESPACE @"flutter_blue_plus"
 
-@interface FlutterBluePlusPlugin : NSObject<FlutterPlugin, CBCentralManagerDelegate, CBPeripheralDelegate>
+@interface FlutterBluePlusPlugin
+    : NSObject <FlutterPlugin, CBCentralManagerDelegate, CBPeripheralDelegate>
 @end
 
-@interface FlutterBluePlusStreamHandler : NSObject<FlutterStreamHandler>
+@interface FlutterBluePlusStreamHandler : NSObject <FlutterStreamHandler>
 @property FlutterEventSink sink;
 @end
