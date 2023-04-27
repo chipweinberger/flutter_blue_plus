@@ -23,8 +23,8 @@ class BluetoothDevice {
         name = name ?? "Unknown name",
         type = type ?? BluetoothDeviceType.unknown;
 
-  final BehaviorSubject<bool> _isDiscoveringServices =
-      BehaviorSubject.seeded(false);
+  final BehaviorSubject<bool> _isDiscoveringServices = BehaviorSubject(false);
+  
   Stream<bool> get isDiscoveringServices => _isDiscoveringServices.stream;
 
   /// Establishes a connection to the Bluetooth Device.
@@ -75,8 +75,7 @@ class BluetoothDevice {
   Future disconnect() => FlutterBluePlus.instance._channel
       .invokeMethod('disconnect', id.toString());
 
-  final BehaviorSubject<List<BluetoothService>> _services =
-      BehaviorSubject.seeded([]);
+  final BehaviorSubject<List<BluetoothService>> _services = BehaviorSubject([]);
 
   /// Discovers services offered by the remote device as well as their characteristics and descriptors
   Future<List<BluetoothService>> discoverServices() async {
