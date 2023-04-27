@@ -42,7 +42,9 @@ int compareAsciiLowerCase(String a, String b) {
   return defaultResult.sign;
 }
 
-
+// This is a reimpplementation of BehaviorSubject from RxDart library.
+// 1. Caches the latestValue of a stream
+// 2. the "latestValue" is emitted when a stream is first listened to 
 class BehaviorSubject<T> {
 
   T latestValue;
@@ -70,6 +72,7 @@ class BehaviorSubject<T> {
   }
 }
 
+// helper for 'doOnDone' method for streams.
 class OnDoneTransformer<T> extends StreamTransformerBase<T, T> {
   final Function onDone;
 
@@ -107,12 +110,7 @@ class OnDoneTransformer<T> extends StreamTransformerBase<T, T> {
   }
 }
 
-extension StreamDoOnDone<T> on Stream<T> {
-  Stream<T> doOnDone(void Function() onDone) {
-    return transform(OnDoneTransformer(onDone: onDone));
-  }
-}
-
+// helper for 'doOnCancel' method for streams.
 class OnCancelTransformer<T> extends StreamTransformerBase<T, T> {
   final Function onCancel;
 
@@ -145,6 +143,12 @@ class OnCancelTransformer<T> extends StreamTransformerBase<T, T> {
     );
 
     return controller.stream;
+  }
+}
+
+extension StreamDoOnDone<T> on Stream<T> {
+  Stream<T> doOnDone(void Function() onDone) {
+    return transform(OnDoneTransformer(onDone: onDone));
   }
 }
 
