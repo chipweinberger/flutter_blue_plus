@@ -178,7 +178,6 @@ class BluetoothCharacteristic {
 
 enum CharacteristicWriteType { withResponse, withoutResponse }
 
-@immutable
 class CharacteristicProperties {
   final bool broadcast;
   final bool read;
