@@ -990,18 +990,18 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
 
     int macCount = proto.getMacAddressesCount();
     int serviceCount = proto.getServiceUuidsCount();
-    int count = macCount > 0 ? macCount : serviceCount;
+    int count = macCount + serviceCount;
     filters = new ArrayList<>(count);
 
-    for (int i = 0; i < count; i++) {
-      ScanFilter f;
-      if (macCount > 0) {
-        String macAddress = proto.getMacAddresses(i);
-        f = new ScanFilter.Builder().setDeviceAddress(macAddress).build();
-      } else {
-        String uuid = proto.getServiceUuids(i);
-        f = new ScanFilter.Builder().setServiceUuid(ParcelUuid.fromString(uuid)).build();
-      }
+    for (int i = 0; i < macCount; i++) {
+      String macAddress = proto.getMacAddresses(i);
+      ScanFilter f = new ScanFilter.Builder().setDeviceAddress(macAddress).build();
+      filters.add(f);
+    }
+
+    for (int i = 0; i < serviceCount; i++) {
+      String uuid = proto.getServiceUuids(i);
+      ScanFilter f = new ScanFilter.Builder().setServiceUuid(ParcelUuid.fromString(uuid)).build();
       filters.add(f);
     }
 
