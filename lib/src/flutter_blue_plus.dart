@@ -70,7 +70,10 @@ class FlutterBluePlus {
   }
 
   final BehaviorSubject<bool> _isScanning = BehaviorSubject(false);
+
   Stream<bool> get isScanning => _isScanning.stream;
+
+  bool get isScanningNow => _isScanning.latestValue;
 
   final BehaviorSubject<List<ScanResult>> _scanResults =
       BehaviorSubject([]);
