@@ -63,8 +63,8 @@ class BehaviorSubject<T> {
   }
 
   void listen(Function(T) onData, {Function? onError, void Function()? onDone, bool? cancelOnError}) {
-    _controller.stream.listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
     onData(latestValue);
+    _controller.stream.listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
   }
 
   Future<void> close() {
