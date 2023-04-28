@@ -408,7 +408,8 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
           Log.d("clearGattCache", "CLEAR GATT CACHE: " + hasCleared);
           result.success(null);
         } else {
-          result.error("clearGattCache", "no instance of BluetoothGatt, have you connected first?", null);
+          // no work to do 
+          result.success(null);
         }
 
         break;
