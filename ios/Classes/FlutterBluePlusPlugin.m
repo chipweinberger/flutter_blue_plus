@@ -176,7 +176,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             [_centralManager connectPeripheral:peripheral options:nil];
             result(nil);
         }
-        @catch (FlutterError *e)
+        @catch (NSException *e)
         {
             result(e);
         }
@@ -190,7 +190,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             [_centralManager cancelPeripheralConnection:peripheral];
             result(nil);
         }
-        @catch (FlutterError *e)
+        @catch (NSException *e)
         {
             result(e);
         }
@@ -203,7 +203,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             CBPeripheral *peripheral = [self findPeripheral:remoteId];
             result([self toFlutterData:[self toDeviceStateProto:peripheral state:peripheral.state]]);
         }
-        @catch (FlutterError *e)
+        @catch (NSException *e)
         {
             result(e);
         }
@@ -220,7 +220,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             [peripheral discoverServices:nil];
             result(nil);
         }
-        @catch (FlutterError *e)
+        @catch (NSException *e)
         {
             result(e);
         }
@@ -233,7 +233,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             CBPeripheral *peripheral = [self findPeripheral:remoteId];
             result([self toFlutterData:[self toServicesResultProto:peripheral]]);
         }
-        @catch (FlutterError *e)
+        @catch (NSException *e)
         {
             result(e);
         }
@@ -259,7 +259,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             [peripheral readValueForCharacteristic:characteristic];
             result(nil);
         }
-        @catch (FlutterError *e)
+        @catch (NSException *e)
         {
             result(e);
         }
@@ -285,7 +285,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             [peripheral readValueForDescriptor:descriptor];
             result(nil);
         }
-        @catch (FlutterError *e)
+        @catch (NSException *e)
         {
             result(e);
         }
@@ -307,8 +307,12 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                     ? CBCharacteristicWriteWithoutResponse
                     : CBCharacteristicWriteWithResponse;
 
-            if (type == CBCharacteristicWriteWithResponse || peripheral.canSendWriteWithoutResponse)
-            {
+            if (type == CBCharacteristicWriteWithoutResponse && !peripheral.canSendWriteWithoutResponse) {
+                // canSendWriteWithoutResponse represents the current readiness of the peripheral to accept
+                // more write requests. If the peripheral isn't ready, we queue the request for later.
+                [_dataWaitingToWriteWithoutResponse setObject:request forKey:remoteId];
+                result(nil);
+            } else {
                 // Find characteristic
                 CBCharacteristic *characteristic = [self locateCharacteristic:[request characteristicUuid]
                                                                    peripheral:peripheral
@@ -316,22 +320,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                                                            secondaryServiceId:[request secondaryServiceUuid]];
                 // Write to characteristic
                 [peripheral writeValue:[request value] forCharacteristic:characteristic type:type];
-                if (type == CBCharacteristicWriteWithoutResponse)
-                {
-                    result(@(YES));
-                }
-                else
-                {
-                    result(nil);
-                }
-            }
-            else
-            { // writing without response and peripheral not ready
-                [_dataWaitingToWriteWithoutResponse setObject:request forKey:remoteId];
-                result(nil);
+                result(@(YES));
             }
         }
-        @catch (FlutterError *e)
+        @catch (NSException *e)
         {
             result(e);
         }
@@ -360,7 +352,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             [peripheral writeValue:[request value] forDescriptor:descriptor];
             result(nil);
         }
-        @catch (FlutterError *e)
+        @catch (NSException *e)
         {
             result(e);
         }
@@ -386,7 +378,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             [peripheral setNotifyValue:[request enable] forCharacteristic:characteristic];
             result(nil);
         }
-        @catch (FlutterError *e)
+        @catch (NSException *e)
         {
             result(e);
         }
@@ -400,7 +392,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             uint32_t mtu = [self getMtu:peripheral];
             result([self toFlutterData:[self toMtuSizeResponseProto:peripheral mtu:mtu]]);
         }
-        @catch (FlutterError *e)
+        @catch (NSException *e)
         {
             result(e);
         }
@@ -420,7 +412,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             [peripheral readRSSI];
             result(nil);
         }
-        @catch (FlutterError *e)
+        @catch (NSException *e)
         {
             result(e);
         }
