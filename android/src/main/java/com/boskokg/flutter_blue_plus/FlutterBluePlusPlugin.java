@@ -786,23 +786,19 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
       }
 
       case "removeBond":
-      {
         String deviceId = (String)call.arguments;
         BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(deviceId);
-        int bondState = device.getBondState();
-
-          if (bondState == BluetoothDevice.BOND_BONDED) {
-            try {
-              Method removeBondMethod = device.getClass().getMethod("removeBond");
-              removeBondMethod.invoke(device);
-              result.success(true);
-            } catch (Exception e) {
-              Log.e(TAG, "Error removing bond: " + e.getMessage());
-              result.success(false);
-            }
-          } else {
-            result.success(false);
+        if (device.getBondState() == BluetoothDevice.BOND_BONDED) {
+          try {
+            Method removeBondMethod = device.getClass().getMethod("removeBond");
+            removeBondMethod.invoke(device);
+            result.success(true);
+          } catch (Exception e) {
+            result.error("requestConnectionPriority", "Error removing bond: " + e.getMessage(), null);
           }
+        } else {
+          result.success(false);
+        }
 
         break;
       }
