@@ -794,7 +794,7 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
             removeBondMethod.invoke(device);
             result.success(true);
           } catch (Exception e) {
-            result.error("requestConnectionPriority", "Error removing bond: " + e.getMessage(), null);
+            result.error("removeBond", "Error removing bond: " + e.getMessage(), null);
           }
         } else {
           result.success(false);
