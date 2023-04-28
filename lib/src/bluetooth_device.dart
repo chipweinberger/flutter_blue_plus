@@ -31,7 +31,13 @@ class BluetoothDevice {
   Future<void> connect({
     Duration? timeout,
     bool autoConnect = true,
+    bool shouldClearGattCache = true,
   }) async {
+
+    if (Platform.isAndroid && shouldClearGattCache) {
+      clearGattCache();
+    }
+
     var request = protos.ConnectRequest.create()
       ..remoteId = id.toString()
       ..androidAutoConnect = autoConnect;
