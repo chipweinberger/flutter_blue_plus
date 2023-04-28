@@ -431,6 +431,12 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                                    message:@"iOS does not support connection priority requests"
                                    details:NULL]);
     }
+    else if([@"removeBond" isEqualToString:call.method])
+    {
+        result([FlutterError errorWithCode:@"removeBond" 
+                                message:@"plugin does not support removeBond function on iOS"
+                                details:NULL]);
+    }
     else
     {
         result(FlutterMethodNotImplemented);

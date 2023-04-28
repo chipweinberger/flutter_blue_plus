@@ -229,6 +229,17 @@ class BluetoothDevice {
     );
   }
 
+  /// Only implemented on Android, for now
+  Future<bool> removeBond() async {
+    if (Platform.isAndroid) {
+      return FlutterBluePlus.instance._channel
+          .invokeMethod('removeBond', id.toString())
+          .then<bool>((value) => value);
+    } else {
+      return false;
+    }
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
