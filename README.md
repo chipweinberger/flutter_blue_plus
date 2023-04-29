@@ -1,10 +1,14 @@
 [![pub package](https://img.shields.io/pub/v/flutter_blue_plus.svg)](https://pub.dartlang.org/packages/flutter_blue_plus)
 
+
+
 <br>
 <p align="center">
 <img alt="FlutterBlue" src="https://github.com/boskokg/flutter_blue_plus/blob/master/site/flutterblue.png?raw=true" />
 </p>
 <br><br>
+
+**Flutter Blue is simple way to add BLE to any app, however for new projects [flutter_reactive_ble](https://flutter.dev)[https://github.com/PhilipsHue/flutter_reactive_ble] is generally recommended. See (#264)[https://github.com/boskokg/flutter_blue_plus/issues/264]**
 
 ## Introduction
 
