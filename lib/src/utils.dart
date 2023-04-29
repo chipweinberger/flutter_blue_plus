@@ -194,30 +194,3 @@ Stream<T> mergeStreams<T>(List<Stream<T>> streams) {
 
   return controller.stream;
 }
-
-// caches all items received
-// this lets us access the items at a later time
-class StreamBuf<T> {
-  final Stream<T> _stream;
-  final List<T> _buffer = [];
-  Completer<void> _completer = Completer<void>();
-
-  StreamBuf(this._stream) {
-    _stream.listen((event) {
-      _buffer.add(event);
-      if (!_completer.isCompleted) {
-        _completer.complete();
-      }
-    });
-  }
-
-  Future<T> next() async {
-    if (_buffer.isNotEmpty) {
-      return _buffer.removeAt(0);
-    } else {
-      await _completer.future;
-      _completer = Completer<void>();
-      return _buffer.removeAt(0);
-    }
-  }
-}

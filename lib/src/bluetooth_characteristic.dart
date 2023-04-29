@@ -94,14 +94,13 @@ class BluetoothCharacteristic {
             (p.characteristic.serviceUuid == request.serviceUuid))
         .map((p) => p.characteristic.value);
 
-    // Important: to not miss the result, we must listen
-    // for results *before* invoking 'readCharacteristic'
-    StreamBuf<List<int>> queue = StreamBuf(responseStream);
+    // Start listening now to ensure we don't miss the response
+    Future<List<int>> futureResponse = responseStream.first;
 
     await FlutterBluePlus.instance._channel
         .invokeMethod('readCharacteristic', request.writeToBuffer());
 
-    List<int> responseValue = await queue.next();
+    List<int> responseValue = await futureResponse;
 
     // Update the _value
     _value.add(responseValue);
@@ -137,15 +136,14 @@ class BluetoothCharacteristic {
             (p.request.characteristicUuid == request.characteristicUuid) &&
             (p.request.serviceUuid == request.serviceUuid));
 
-      // Important: to not miss the result, we must listen
-      // for results *before* invoking 'writeCharacteristic'
-      StreamBuf<protos.WriteCharacteristicResponse> queue = StreamBuf(responseStream);
+      // Start listening now to ensure we don't miss the response
+      Future<protos.WriteCharacteristicResponse> futureResponse = responseStream.first;
 
       await FlutterBluePlus.instance._channel
         .invokeMethod('writeCharacteristic', request.writeToBuffer());
 
       // wait for response, so that we can check for success
-      protos.WriteCharacteristicResponse response = await queue.next();
+      protos.WriteCharacteristicResponse response = await futureResponse;
       if (!response.success) {
         throw Exception('Failed to write the characteristic');
       }
