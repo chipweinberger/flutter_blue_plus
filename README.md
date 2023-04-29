@@ -8,7 +8,7 @@
 </p>
 <br><br>
 
-**Flutter Blue is simple way to add BLE to any app, however [flutter_reactive_ble](https://github.com/PhilipsHue/flutter_reactive_ble) is generally recommended for for apps that need the highest relibaility. See https://github.com/boskokg/flutter_blue_plus/issues/264**
+**Flutter Blue is simple way to add BLE to any app, however [flutter_reactive_ble](https://github.com/PhilipsHue/flutter_reactive_ble) is generally recommended for for apps that need the highest reliability. See https://github.com/boskokg/flutter_blue_plus/issues/264**
 
 ## Introduction
 
