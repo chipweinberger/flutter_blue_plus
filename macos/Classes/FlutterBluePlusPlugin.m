@@ -111,7 +111,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     }
     else if ([@"name" isEqualToString:call.method])
     {
-        result([[UIDevice currentDevice] name]);
+        result([FlutterError errorWithCode:@"name"
+                                   message:@"macOS does not support device name"
+                                   details:NULL]);
     }
     else if ([@"startScan" isEqualToString:call.method])
     {
