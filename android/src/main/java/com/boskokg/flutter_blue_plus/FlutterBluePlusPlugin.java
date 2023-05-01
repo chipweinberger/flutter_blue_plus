@@ -408,7 +408,8 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
           Log.d("clearGattCache", "CLEAR GATT CACHE: " + hasCleared);
           result.success(null);
         } else {
-          result.error("clearGattCache", "no instance of BluetoothGatt, have you connected first?", null);
+          // no work to do 
+          result.success(null);
         }
 
         break;
@@ -785,6 +786,23 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
         }
       }
 
+      case "removeBond":
+        String deviceId = (String)call.arguments;
+        BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(deviceId);
+        if (device.getBondState() == BluetoothDevice.BOND_BONDED) {
+          try {
+            Method removeBondMethod = device.getClass().getMethod("removeBond");
+            removeBondMethod.invoke(device);
+            result.success(true);
+          } catch (Exception e) {
+            result.error("removeBond", "Error removing bond: " + e.getMessage(), null);
+          }
+        } else {
+          result.success(false);
+        }
+
+        break;
+      }
 
       default:
       {

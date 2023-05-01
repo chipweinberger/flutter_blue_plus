@@ -32,28 +32,35 @@ class BluetoothDescriptor {
       ..characteristicUuid = characteristicUuid.toString()
       ..serviceUuid = serviceUuid.toString();
 
-    await FlutterBluePlus.instance._channel
-        .invokeMethod('readDescriptor', request.writeToBuffer());
+    Stream<protos.ReadDescriptorResponse> responseStream =
+        FlutterBluePlus.instance._methodStream
+            .where((m) => m.method == "ReadDescriptorResponse")
+            .map((m) => m.arguments)
+            .map((buffer) => protos.ReadDescriptorResponse.fromBuffer(buffer))
+            .where((p) =>
+                (p.request.remoteId == request.remoteId) &&
+                (p.request.descriptorUuid == request.descriptorUuid) &&
+                (p.request.characteristicUuid == request.characteristicUuid) &&
+                (p.request.serviceUuid == request.serviceUuid));
 
-    return FlutterBluePlus.instance._methodStream
-        .where((m) => m.method == "ReadDescriptorResponse")
-        .map((m) => m.arguments)
-        .map((buffer) => protos.ReadDescriptorResponse.fromBuffer(buffer))
-        .where((p) =>
-            (p.request.remoteId == request.remoteId) &&
-            (p.request.descriptorUuid == request.descriptorUuid) &&
-            (p.request.characteristicUuid == request.characteristicUuid) &&
-            (p.request.serviceUuid == request.serviceUuid))
-        .map((d) => d.value)
-        .first
-        .then((d) {
-      _value.add(d);
-      return d;
-    });
+    // Start listening now to ensure we don't miss the response
+    Future<protos.ReadDescriptorResponse> futureResponse = responseStream.first;
+
+    await FlutterBluePlus.instance._channel
+      .invokeMethod('readDescriptor', request.writeToBuffer());
+
+    protos.ReadDescriptorResponse response = await futureResponse;
+
+    List<int> readValue = response.value;
+
+    _value.add(readValue);
+
+    return readValue;
   }
 
+
   /// Writes the value of a descriptor
-  Future<Null> write(List<int> value) async {
+  Future<void> write(List<int> value) async {
     var request = protos.WriteDescriptorRequest.create()
       ..remoteId = deviceId.toString()
       ..descriptorUuid = uuid.toString()
@@ -61,26 +68,34 @@ class BluetoothDescriptor {
       ..serviceUuid = serviceUuid.toString()
       ..value = value;
 
-    await FlutterBluePlus.instance._channel
-        .invokeMethod('writeDescriptor', request.writeToBuffer());
+    Stream<protos.WriteDescriptorResponse> responseStream =
+        FlutterBluePlus.instance._methodStream
+            .where((m) => m.method == "WriteDescriptorResponse")
+            .map((m) => m.arguments)
+            .map((buffer) => protos.WriteDescriptorResponse.fromBuffer(buffer))
+            .where((p) =>
+                (p.request.remoteId == request.remoteId) &&
+                (p.request.descriptorUuid == request.descriptorUuid) &&
+                (p.request.characteristicUuid == request.characteristicUuid) &&
+                (p.request.serviceUuid == request.serviceUuid));
 
-    return FlutterBluePlus.instance._methodStream
-        .where((m) => m.method == "WriteDescriptorResponse")
-        .map((m) => m.arguments)
-        .map((buffer) => protos.WriteDescriptorResponse.fromBuffer(buffer))
-        .where((p) =>
-            (p.request.remoteId == request.remoteId) &&
-            (p.request.descriptorUuid == request.descriptorUuid) &&
-            (p.request.characteristicUuid == request.characteristicUuid) &&
-            (p.request.serviceUuid == request.serviceUuid))
-        .first
-        .then((w) => w.success)
-        .then((success) => (!success)
-            ? throw Exception('Failed to write the descriptor')
-            : null)
-        .then((_) => _value.add(value))
-        .then((_) => null);
+    // Start listening now to ensure we don't miss the response
+    Future<protos.WriteDescriptorResponse> futureResponse = responseStream.first;
+
+    await FlutterBluePlus.instance._channel
+          .invokeMethod('writeDescriptor', request.writeToBuffer());
+
+    protos.WriteDescriptorResponse response = await futureResponse;
+
+    if (!response.success) {
+      throw Exception('Failed to write the descriptor');
+    }
+
+    _value.add(value);
+
+    return Future.value();
   }
+
 
   @override
   String toString() {

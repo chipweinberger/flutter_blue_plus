@@ -1,10 +1,14 @@
 [![pub package](https://img.shields.io/pub/v/flutter_blue_plus.svg)](https://pub.dartlang.org/packages/flutter_blue_plus)
 
+
+
 <br>
 <p align="center">
 <img alt="FlutterBlue" src="https://github.com/boskokg/flutter_blue_plus/blob/master/site/flutterblue.png?raw=true" />
 </p>
 <br><br>
+
+**Flutter Blue is simple way to add BLE to any app, however [flutter_reactive_ble](https://github.com/PhilipsHue/flutter_reactive_ble) is generally best for apps that need the highest reliability. See https://github.com/boskokg/flutter_blue_plus/issues/264**
 
 ## Introduction
 
@@ -164,6 +168,7 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 | requestMtu                  |  :white_check_mark:  |                      | Request to change the MTU for the device. |
 | readRssi                    |  :white_check_mark:  |  :white_check_mark:  | Read RSSI from a connected device. |
 | requestConnectionPriority   |  :white_check_mark:  |                      | Request to update a high priority, low latency connection. An application should only request high priority connection parameters to transfer large amounts of data over LE quickly. |
+| removeBond                  |  :white_check_mark:  |                      | Remove Bluetooth Bond of device |
 
 ### BluetoothCharacteristic API
 |                             |       Android        |         iOS          |             Description            |

@@ -11,10 +11,10 @@
 
 #define NAMESPACE @"flutter_blue_plus"
 
-@interface FlutterBluePlusPlugin
-    : NSObject <FlutterPlugin, CBCentralManagerDelegate, CBPeripheralDelegate>
+@interface FlutterBluePlusPlugin : NSObject<FlutterPlugin, CBCentralManagerDelegate, CBPeripheralDelegate>
 @end
 
-@interface FlutterBluePlusStreamHandler : NSObject <FlutterStreamHandler>
+@interface FlutterBluePlusStreamHandler : NSObject<FlutterStreamHandler>
 @property FlutterEventSink sink;
+@property FlutterStandardTypedData *cachedBluetoothState;
 @end

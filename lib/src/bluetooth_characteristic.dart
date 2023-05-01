@@ -73,14 +73,18 @@ class BluetoothCharacteristic {
 
   /// Retrieves the value of the characteristic
   Future<List<int>> read() async {
+
     var request = protos.ReadCharacteristicRequest.create()
       ..remoteId = deviceId.toString()
       ..characteristicUuid = uuid.toString()
       ..serviceUuid = serviceUuid.toString();
-    FlutterBluePlus.instance._log(LogLevel.info,
-        'remoteId: ${deviceId.toString()} characteristicUuid: ${uuid.toString()} serviceUuid: ${serviceUuid.toString()}');
 
-    var response = FlutterBluePlus.instance._methodStream
+    FlutterBluePlus.instance._log(LogLevel.info,
+      'remoteId: ${deviceId.toString()}' 
+      'characteristicUuid: ${uuid.toString()}'
+      'serviceUuid: ${serviceUuid.toString()}');
+
+    var responseStream = FlutterBluePlus.instance._methodStream
         .where((m) => m.method == "ReadCharacteristicResponse")
         .map((m) => m.arguments)
         .map((buffer) => protos.ReadCharacteristicResponse.fromBuffer(buffer))
@@ -88,17 +92,20 @@ class BluetoothCharacteristic {
             (p.remoteId == request.remoteId) &&
             (p.characteristic.uuid == request.characteristicUuid) &&
             (p.characteristic.serviceUuid == request.serviceUuid))
-        .map((p) => p.characteristic.value)
-        .first
-        .then((d) {
-      _value.add(d);
-      return d;
-    });
+        .map((p) => p.characteristic.value);
+
+    // Start listening now to ensure we don't miss the response
+    Future<List<int>> futureResponse = responseStream.first;
 
     await FlutterBluePlus.instance._channel
         .invokeMethod('readCharacteristic', request.writeToBuffer());
 
-    return response;
+    List<int> responseValue = await futureResponse;
+
+    // Update the _value
+    _value.add(responseValue);
+
+    return responseValue;
   }
 
   /// Writes the value of a characteristic.
@@ -106,7 +113,7 @@ class BluetoothCharacteristic {
   /// guaranteed and will return immediately with success.
   /// [CharacteristicWriteType.withResponse]: the method will return after the
   /// write operation has either passed or failed.
-  Future<Null> write(List<int> value, {bool withoutResponse = false}) async {
+  Future<void> write(List<int> value, {bool withoutResponse = false}) async {
     final type = withoutResponse
         ? CharacteristicWriteType.withoutResponse
         : CharacteristicWriteType.withResponse;
@@ -115,33 +122,39 @@ class BluetoothCharacteristic {
       ..remoteId = deviceId.toString()
       ..characteristicUuid = uuid.toString()
       ..serviceUuid = serviceUuid.toString()
-      ..writeType =
-          protos.WriteCharacteristicRequest_WriteType.valueOf(type.index)!
+      ..writeType = protos.WriteCharacteristicRequest_WriteType.valueOf(type.index)!
       ..value = value;
 
-    var response = FlutterBluePlus.instance._methodStream
+    if (type == CharacteristicWriteType.withResponse) {
+
+      var responseStream = FlutterBluePlus.instance._methodStream
         .where((m) => m.method == "WriteCharacteristicResponse")
         .map((m) => m.arguments)
         .map((buffer) => protos.WriteCharacteristicResponse.fromBuffer(buffer))
         .where((p) =>
             (p.request.remoteId == request.remoteId) &&
             (p.request.characteristicUuid == request.characteristicUuid) &&
-            (p.request.serviceUuid == request.serviceUuid))
-        .first
-        .then((w) => w.success)
-        .then((success) => (!success)
-            ? throw Exception('Failed to write the characteristic')
-            : null)
-        .then((_) => null);
+            (p.request.serviceUuid == request.serviceUuid));
 
-    var result = await FlutterBluePlus.instance._channel
+      // Start listening now to ensure we don't miss the response
+      Future<protos.WriteCharacteristicResponse> futureResponse = responseStream.first;
+
+      await FlutterBluePlus.instance._channel
         .invokeMethod('writeCharacteristic', request.writeToBuffer());
 
-    if (result is bool && result) {
-      return;
-    }
+      // wait for response, so that we can check for success
+      protos.WriteCharacteristicResponse response = await futureResponse;
+      if (!response.success) {
+        throw Exception('Failed to write the characteristic');
+      }
 
-    return response;
+      return Future.value();
+
+    } else {
+      // invoke without waiting for reply
+      return FlutterBluePlus.instance._channel
+        .invokeMethod('writeCharacteristic', request.writeToBuffer());
+    }
   }
 
   /// Sets notifications or indications for the value of a specified characteristic

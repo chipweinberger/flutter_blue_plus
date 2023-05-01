@@ -31,7 +31,13 @@ class BluetoothDevice {
   Future<void> connect({
     Duration? timeout,
     bool autoConnect = true,
+    bool shouldClearGattCache = true,
   }) async {
+
+    if (Platform.isAndroid && shouldClearGattCache) {
+      clearGattCache();
+    }
+
     var request = protos.ConnectRequest.create()
       ..remoteId = id.toString()
       ..androidAutoConnect = autoConnect;
@@ -227,6 +233,17 @@ class BluetoothDevice {
       'requestConnectionPriority',
       request.writeToBuffer(),
     );
+  }
+
+  /// Only implemented on Android, for now
+  Future<bool> removeBond() async {
+    if (Platform.isAndroid) {
+      return FlutterBluePlus.instance._channel
+          .invokeMethod('removeBond', id.toString())
+          .then<bool>((value) => value);
+    } else {
+      return false;
+    }
   }
 
   @override
