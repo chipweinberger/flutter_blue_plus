@@ -25,3 +25,5 @@ flutter:
         pluginClass: FlutterBluePlusPlugin
       ios:
         pluginClass: FlutterBluePlusPlugin
+      macos:
+        pluginClass: FlutterBluePlusPlugin
