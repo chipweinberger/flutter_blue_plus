@@ -8,8 +8,6 @@
 </p>
 <br><br>
 
-**Flutter Blue is simple way to add BLE to any app, however [flutter_reactive_ble](https://github.com/PhilipsHue/flutter_reactive_ble) is generally best for apps that need the highest reliability. See https://github.com/boskokg/flutter_blue_plus/issues/264**
-
 ## Introduction
 
 FlutterBluePlus is a bluetooth plugin for [Flutter](https://flutter.dev), a new app SDK to help developers build modern multi-platform apps. Note: this plugin is continuous work from FlutterBlue since maintaince stoped.
