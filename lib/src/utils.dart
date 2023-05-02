@@ -194,3 +194,25 @@ Stream<T> mergeStreams<T>(List<Stream<T>> streams) {
 
   return controller.stream;
 }
+
+
+class Mutex {
+  Future<void> _lastOperation = Future.value();
+
+  Future<void> synchronized(Function() operation) async {
+    final previousOperation = _lastOperation;
+    final currentOperation = Completer<void>();
+
+    _lastOperation = currentOperation.future;
+
+    await previousOperation;
+
+    try {
+      await operation();
+      currentOperation.complete();
+    } catch (e, st) {
+      currentOperation.completeError(e, st);
+      rethrow;
+    }
+  }
+}
