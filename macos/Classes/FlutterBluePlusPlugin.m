@@ -111,7 +111,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     }
     else if ([@"name" isEqualToString:call.method])
     {
-        result([[UIDevice currentDevice] name]);
+        // TODO support this via hostname? Returns UIDevice.current.name on iOS
+        result([FlutterError errorWithCode:@"name"
+                                   message:@"macOS does not support device name"
+                                   details:NULL]);
     }
     else if ([@"startScan" isEqualToString:call.method])
     {
@@ -841,11 +844,15 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
 - (void)peripheral:(CBPeripheral *)peripheral didReadRSSI:(NSNumber *)rssi error:(NSError *)error
 {
-    ProtosReadRssiResult *result = [[ProtosReadRssiResult alloc] init];
+    // TODO gen protos need re-generating for macOS but protobuf version breaks if copied from iOS
+    @throw [FlutterError errorWithCode:@"didReadRSSI"
+                               message:@"macOS does not support method"
+                               details:NULL];
+    /*ProtosReadRssiResult *result = [[ProtosReadRssiResult alloc] init];
     [result setRemoteId:[peripheral.identifier UUIDString]];
     [result setRssi:[rssi intValue]];
 
-    [_channel invokeMethod:@"ReadRssiResult" arguments:[self toFlutterData:result]];
+    [_channel invokeMethod:@"ReadRssiResult" arguments:[self toFlutterData:result]];*/
 }
 
 - (void)peripheralIsReadyToSendWriteWithoutResponse:(CBPeripheral *)peripheral
