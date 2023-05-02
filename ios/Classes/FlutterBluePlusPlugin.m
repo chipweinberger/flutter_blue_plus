@@ -423,6 +423,12 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                                    message:@"iOS does not support connection priority requests"
                                    details:NULL]);
     }
+    else if([@"setPreferredPhy" isEqualToString:call.method])
+    {
+        result([FlutterError errorWithCode:@"setPreferredPhy" 
+                                   message:@"iOS does not support set preferred phy requests"
+                                   details:NULL]);
+    }
     else if([@"removeBond" isEqualToString:call.method])
     {
         result([FlutterError errorWithCode:@"removeBond" 

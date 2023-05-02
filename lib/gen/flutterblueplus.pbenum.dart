@@ -86,3 +86,4 @@ class DeviceStateResponse_BluetoothDeviceState extends $pb.ProtobufEnum {
 
   const DeviceStateResponse_BluetoothDeviceState._($core.int v, $core.String n) : super(v, n);
 }
+

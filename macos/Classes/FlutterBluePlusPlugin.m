@@ -408,7 +408,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     else if ([@"requestMtu" isEqualToString:call.method])
     {
         result([FlutterError errorWithCode:@"requestMtu"
-                                   message:@"iOS does not allow mtu requests to the peripheral"
+                                   message:@"macOS does not allow mtu requests to the peripheral"
                                    details:NULL]);
     }
     else if ([@"readRssi" isEqualToString:call.method])
@@ -428,8 +428,20 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     else if([@"requestConnectionPriority" isEqualToString:call.method])
     {
         result([FlutterError errorWithCode:@"requestConnectionPriority" 
-                                   message:@"iOS does not support connection priority requests"
+                                   message:@"macOS does not support connection priority requests"
                                    details:NULL]);
+    }
+    else if([@"setPreferredPhy" isEqualToString:call.method])
+    {
+        result([FlutterError errorWithCode:@"setPreferredPhy" 
+                                   message:@"macOS does not support set preferred phy requests"
+                                   details:NULL]);
+    }
+    else if([@"removeBond" isEqualToString:call.method])
+    {
+        result([FlutterError errorWithCode:@"removeBond" 
+                                message:@"plugin does not support removeBond function on macOS"
+                                details:NULL]);
     }
     else
     {

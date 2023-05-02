@@ -438,3 +438,16 @@ const ConnectionPriorityRequest$json = const {
 
 /// Descriptor for `ConnectionPriorityRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List connectionPriorityRequestDescriptor = $convert.base64Decode('ChlDb25uZWN0aW9uUHJpb3JpdHlSZXF1ZXN0EhsKCXJlbW90ZV9pZBgBIAEoCVIIcmVtb3RlSWQSLgoSY29ubmVjdGlvblByaW9yaXR5GAIgASgFUhJjb25uZWN0aW9uUHJpb3JpdHk=');
+@$core.Deprecated('Use preferredPhyDescriptor instead')
+const PreferredPhy$json = const {
+  '1': 'PreferredPhy',
+  '2': const [
+    const {'1': 'remote_id', '3': 1, '4': 1, '5': 9, '10': 'remoteId'},
+    const {'1': 'txPhy', '3': 2, '4': 1, '5': 13, '10': 'txPhy'},
+    const {'1': 'rxPhy', '3': 3, '4': 1, '5': 13, '10': 'rxPhy'},
+    const {'1': 'phyOptions', '3': 4, '4': 1, '5': 13, '10': 'phyOptions'},
+  ],
+};
+
+/// Descriptor for `PreferredPhy`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List preferredPhyDescriptor = $convert.base64Decode('CgxQcmVmZXJyZWRQaHkSGwoJcmVtb3RlX2lkGAEgASgJUghyZW1vdGVJZBIUCgV0eFBoeRgCIAEoDVIFdHhQaHkSFAoFcnhQaHkYAyABKA1SBXJ4UGh5Eh4KCnBoeU9wdGlvbnMYBCABKA1SCnBoeU9wdGlvbnM=');
