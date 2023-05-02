@@ -235,6 +235,32 @@ class BluetoothDevice {
     );
   }
 
+  /// Set the preferred connection [txPhy], [rxPhy] and Phy [option] for this
+  /// app. [txPhy] and [rxPhy] are int to be passed a masked value from the
+  /// [PhyType] enum, eg `(PhyType.le1m.mask | PhyType.le2m.mask)`.
+  ///
+  /// Please note that this is just a recommendation, whether the PHY change
+  /// will happen depends on other applications preferences, local and remote
+  /// controller capabilities. Controller can override these settings. 
+  Future<void> setPreferredPhy({
+    required int txPhy,
+    required int rxPhy,
+    required PhyOption option,
+  }) async {
+    int phyOptionInt = option.index;
+
+    var request = protos.PreferredPhy.create()
+      ..remoteId = id.toString()
+      ..txPhy = txPhy
+      ..rxPhy = rxPhy
+      ..phyOptions = phyOptionInt;
+
+    await FlutterBluePlus.instance._channel.invokeMethod(
+      'setPreferredPhy',
+      request.writeToBuffer(),
+    );
+  }
+
   /// Only implemented on Android, for now
   Future<bool> removeBond() async {
     if (Platform.isAndroid) {
@@ -267,3 +293,22 @@ enum BluetoothDeviceType { unknown, classic, le, dual }
 enum BluetoothDeviceState { disconnected, connecting, connected, disconnecting }
 
 enum ConnectionPriority { balanced, high, lowPower }
+
+enum PhyType { le1m, le2m, leCoded }
+
+extension PhyTypeExt on PhyType {
+  int get mask {
+    switch (this) {
+      case PhyType.le1m:
+        return 1;
+      case PhyType.le2m:
+        return 2;
+      case PhyType.leCoded:
+        return 3;
+      default:
+        return 1;
+    }
+  }
+}
+
+enum PhyOption { noPreferred, S2, S8 }

@@ -2341,6 +2341,89 @@ typedef struct ProtosConnectionPriorityRequest__storage_ {
 
 @end
 
+#pragma mark - ProtosPreferredPhy
+
+@implementation ProtosPreferredPhy
+
+@dynamic remoteId;
+@dynamic txPhy;
+@dynamic rxPhy;
+@dynamic phyOptions;
+
+typedef struct ProtosPreferredPhy__storage_ {
+  uint32_t _has_storage_[1];
+  uint32_t txPhy;
+  uint32_t rxPhy;
+  uint32_t phyOptions;
+  NSString *remoteId;
+} ProtosPreferredPhy__storage_;
+
+// This method is threadsafe because it is initially called
+// in +initialize for each subclass.
++ (GPBDescriptor *)descriptor {
+  static GPBDescriptor *descriptor = nil;
+  if (!descriptor) {
+    static GPBMessageFieldDescription fields[] = {
+      {
+        .name = "remoteId",
+        .dataTypeSpecific.clazz = Nil,
+        .number = ProtosPreferredPhy_FieldNumber_RemoteId,
+        .hasIndex = 0,
+        .offset = (uint32_t)offsetof(ProtosPreferredPhy__storage_, remoteId),
+        .flags = (GPBFieldFlags)(GPBFieldOptional | GPBFieldClearHasIvarOnZero),
+        .dataType = GPBDataTypeString,
+      },
+      {
+        .name = "txPhy",
+        .dataTypeSpecific.clazz = Nil,
+        .number = ProtosPreferredPhy_FieldNumber_TxPhy,
+        .hasIndex = 1,
+        .offset = (uint32_t)offsetof(ProtosPreferredPhy__storage_, txPhy),
+        .flags = (GPBFieldFlags)(GPBFieldOptional | GPBFieldTextFormatNameCustom | GPBFieldClearHasIvarOnZero),
+        .dataType = GPBDataTypeUInt32,
+      },
+      {
+        .name = "rxPhy",
+        .dataTypeSpecific.clazz = Nil,
+        .number = ProtosPreferredPhy_FieldNumber_RxPhy,
+        .hasIndex = 2,
+        .offset = (uint32_t)offsetof(ProtosPreferredPhy__storage_, rxPhy),
+        .flags = (GPBFieldFlags)(GPBFieldOptional | GPBFieldTextFormatNameCustom | GPBFieldClearHasIvarOnZero),
+        .dataType = GPBDataTypeUInt32,
+      },
+      {
+        .name = "phyOptions",
+        .dataTypeSpecific.clazz = Nil,
+        .number = ProtosPreferredPhy_FieldNumber_PhyOptions,
+        .hasIndex = 3,
+        .offset = (uint32_t)offsetof(ProtosPreferredPhy__storage_, phyOptions),
+        .flags = (GPBFieldFlags)(GPBFieldOptional | GPBFieldTextFormatNameCustom | GPBFieldClearHasIvarOnZero),
+        .dataType = GPBDataTypeUInt32,
+      },
+    };
+    GPBDescriptor *localDescriptor =
+        [GPBDescriptor allocDescriptorForClass:[ProtosPreferredPhy class]
+                                     rootClass:[ProtosFlutterblueplusRoot class]
+                                          file:ProtosFlutterblueplusRoot_FileDescriptor()
+                                        fields:fields
+                                    fieldCount:(uint32_t)(sizeof(fields) / sizeof(GPBMessageFieldDescription))
+                                   storageSize:sizeof(ProtosPreferredPhy__storage_)
+                                         flags:(GPBDescriptorInitializationFlags)(GPBDescriptorInitializationFlag_UsesClassRefs | GPBDescriptorInitializationFlag_Proto3OptionalKnown)];
+#if !GPBOBJC_SKIP_MESSAGE_TEXTFORMAT_EXTRAS
+    static const char *extraTextFormatInfo =
+        "\003\002\005\000\003\005\000\004\n\000";
+    [localDescriptor setupExtraTextInfo:extraTextFormatInfo];
+#endif  // !GPBOBJC_SKIP_MESSAGE_TEXTFORMAT_EXTRAS
+    #if defined(DEBUG) && DEBUG
+      NSAssert(descriptor == nil, @"Startup recursed!");
+    #endif  // DEBUG
+    descriptor = localDescriptor;
+  }
+  return descriptor;
+}
+
+@end
+
 
 #pragma clang diagnostic pop
 

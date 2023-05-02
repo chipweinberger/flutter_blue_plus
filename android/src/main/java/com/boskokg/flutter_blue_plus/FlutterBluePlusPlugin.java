@@ -786,7 +786,42 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
         }
       }
 
+      case "setPreferredPhy":
+      {
+        byte[] data = call.arguments();
+        Protos.PreferredPhy request;
+
+        try {
+          request = Protos.PreferredPhy.newBuilder().mergeFrom(data).build();
+        } catch (InvalidProtocolBufferException e) {
+          result.error("RuntimeException", e.getMessage(), e);
+          break;
+        }
+
+        BluetoothGatt gatt;
+
+        try {
+          gatt = locateGatt(request.getRemoteId());
+          int txPhy = request.getTxPhy();
+          int rxPhy = request.getRxPhy();
+          int phyOptions = request.getPhyOptions();
+
+          if(Build.VERSION.SDK_INT >= 26) {
+            gatt.setPreferredPhy(txPhy, rxPhy, phyOptions);
+            result.success(null);
+            break;
+           } else {
+            result.error("setPreferredPhy", "Only supported on devices >= API 26. This device == " + Build.VERSION.SDK_INT, null);
+            break;
+          }
+        } catch(Exception e) {
+          result.error("setPreferredPhy", e.getMessage(), e);
+          break;
+        }
+      }
+
       case "removeBond":
+      {
         String deviceId = (String)call.arguments;
         BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(deviceId);
         if (device.getBondState() == BluetoothDevice.BOND_BONDED) {

@@ -812,6 +812,27 @@ GPB_FINAL @interface ProtosConnectionPriorityRequest : GPBMessage
 
 @end
 
+#pragma mark - ProtosPreferredPhy
+
+typedef GPB_ENUM(ProtosPreferredPhy_FieldNumber) {
+  ProtosPreferredPhy_FieldNumber_RemoteId = 1,
+  ProtosPreferredPhy_FieldNumber_TxPhy = 2,
+  ProtosPreferredPhy_FieldNumber_RxPhy = 3,
+  ProtosPreferredPhy_FieldNumber_PhyOptions = 4,
+};
+
+GPB_FINAL @interface ProtosPreferredPhy : GPBMessage
+
+@property(nonatomic, readwrite, copy, null_resettable) NSString *remoteId;
+
+@property(nonatomic, readwrite) uint32_t txPhy;
+
+@property(nonatomic, readwrite) uint32_t rxPhy;
+
+@property(nonatomic, readwrite) uint32_t phyOptions;
+
+@end
+
 NS_ASSUME_NONNULL_END
 
 CF_EXTERN_C_END

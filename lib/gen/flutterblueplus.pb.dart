@@ -2315,3 +2315,93 @@ class ConnectionPriorityRequest extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   void clearConnectionPriority() => clearField(2);
 }
+
+class PreferredPhy extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'PreferredPhy', createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'remoteId')
+    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'txPhy', $pb.PbFieldType.OU3, protoName: 'txPhy')
+    ..a<$core.int>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rxPhy', $pb.PbFieldType.OU3, protoName: 'rxPhy')
+    ..a<$core.int>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'phyOptions', $pb.PbFieldType.OU3, protoName: 'phyOptions')
+    ..hasRequiredFields = false
+  ;
+
+  PreferredPhy._() : super();
+  factory PreferredPhy({
+    $core.String? remoteId,
+    $core.int? txPhy,
+    $core.int? rxPhy,
+    $core.int? phyOptions,
+  }) {
+    final _result = create();
+    if (remoteId != null) {
+      _result.remoteId = remoteId;
+    }
+    if (txPhy != null) {
+      _result.txPhy = txPhy;
+    }
+    if (rxPhy != null) {
+      _result.rxPhy = rxPhy;
+    }
+    if (phyOptions != null) {
+      _result.phyOptions = phyOptions;
+    }
+    return _result;
+  }
+  factory PreferredPhy.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory PreferredPhy.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  PreferredPhy clone() => PreferredPhy()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  PreferredPhy copyWith(void Function(PreferredPhy) updates) => super.copyWith((message) => updates(message as PreferredPhy)) as PreferredPhy; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static PreferredPhy create() => PreferredPhy._();
+  PreferredPhy createEmptyInstance() => create();
+  static $pb.PbList<PreferredPhy> createRepeated() => $pb.PbList<PreferredPhy>();
+  @$core.pragma('dart2js:noInline')
+  static PreferredPhy getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<PreferredPhy>(create);
+  static PreferredPhy? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get remoteId => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set remoteId($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasRemoteId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearRemoteId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get txPhy => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set txPhy($core.int v) { $_setUnsignedInt32(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasTxPhy() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearTxPhy() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.int get rxPhy => $_getIZ(2);
+  @$pb.TagNumber(3)
+  set rxPhy($core.int v) { $_setUnsignedInt32(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasRxPhy() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearRxPhy() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.int get phyOptions => $_getIZ(3);
+  @$pb.TagNumber(4)
+  set phyOptions($core.int v) { $_setUnsignedInt32(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasPhyOptions() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearPhyOptions() => clearField(4);
+}
+
