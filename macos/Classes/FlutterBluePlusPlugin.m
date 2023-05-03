@@ -844,15 +844,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
 - (void)peripheral:(CBPeripheral *)peripheral didReadRSSI:(NSNumber *)rssi error:(NSError *)error
 {
-    // TODO gen protos need re-generating for macOS but protobuf version breaks if copied from iOS
-    @throw [FlutterError errorWithCode:@"didReadRSSI"
-                               message:@"macOS does not support method"
-                               details:NULL];
-    /*ProtosReadRssiResult *result = [[ProtosReadRssiResult alloc] init];
+    ProtosReadRssiResult *result = [[ProtosReadRssiResult alloc] init];
     [result setRemoteId:[peripheral.identifier UUIDString]];
     [result setRssi:[rssi intValue]];
 
-    [_channel invokeMethod:@"ReadRssiResult" arguments:[self toFlutterData:result]];*/
+    [_channel invokeMethod:@"ReadRssiResult" arguments:[self toFlutterData:result]];
 }
 
 - (void)peripheralIsReadyToSendWriteWithoutResponse:(CBPeripheral *)peripheral
