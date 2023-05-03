@@ -121,6 +121,9 @@ class FlutterBluePlus {
         .then((p) => p.map((d) => BluetoothDevice.fromProto(d)).toList());
   }
 
+  // timeout for scanning that can be cancelled by stopScan
+  Timer? _scanTimeout;
+
   /// Starts a scan for Bluetooth Low Energy devices and returns a stream
   /// of the [ScanResult] results as they are received.
   ///
@@ -149,7 +152,7 @@ class FlutterBluePlus {
     _isScanning.add(true);
 
     if (timeout != null) {
-      Future.delayed(timeout, () {
+      _scanTimeout = Timer(timeout, () {
         _isScanning.add(false);
         _channel.invokeMethod('stopScan');
       });
@@ -218,6 +221,7 @@ class FlutterBluePlus {
   /// Stops a scan for Bluetooth Low Energy devices
   Future stopScan() async {
     await _channel.invokeMethod('stopScan');
+    _scanTimeout?.cancel();
     _isScanning.add(false);
   }
 
