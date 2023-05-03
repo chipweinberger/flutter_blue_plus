@@ -2,6 +2,8 @@
 // All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+// ignore_for_file: avoid_print
+
 part of flutter_blue_plus;
 
 class FlutterBluePlus {
@@ -161,9 +163,7 @@ class FlutterBluePlus {
     try {
       await _channel.invokeMethod('startScan', settings.writeToBuffer());
     } catch (e) {
-      if (kDebugMode) {
-        print('Error starting scan.');
-      }
+      print('Error starting scan.');
       _isScanning.add(false);
       rethrow;
     }
@@ -176,9 +176,10 @@ class FlutterBluePlus {
         .map((buffer) => protos.ScanResult.fromBuffer(buffer))
         .map((p) {
       final result = ScanResult.fromProto(p);
-      final list = _scanResults.value;
-      int index = list.indexOf(result);
-      if (index != -1) {
+      List<ScanResult> list = List<ScanResult>.from(_scanResults.value);
+      if (list.contains(result)) {
+         // update advertising data
+         int index = list.indexOf(result);
         list[index] = result;
       } else {
         list.add(result);
