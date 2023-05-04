@@ -23,7 +23,7 @@ Flutter plugin for connecting and communicationg with Bluetooth Low Energy devic
     ss.source_files = "gen/*.pbobjc.{h,m}", "gen/**/*.pbobjc.{h,m}"
     ss.header_mappings_dir = "gen"
     ss.requires_arc = false
-    ss.dependency "Protobuf", '~> 3.11'
+    ss.dependency "Protobuf", '~> 3.21'
   end
 
   # Flutter.framework does not contain a i386 slice.
