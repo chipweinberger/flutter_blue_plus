@@ -46,22 +46,19 @@ class BluetoothCharacteristic {
         properties = CharacteristicProperties.fromProto(p.properties),
         _value = BehaviorSubject(p.value);
 
-  Stream<BluetoothCharacteristic> get _onCharacteristicChangedStream =>
-      FlutterBluePlus.instance._methodStream
-          .where((m) => m.method == "OnCharacteristicChanged")
-          .map((m) => m.arguments)
-          .map((buffer) => protos.OnCharacteristicChanged.fromBuffer(buffer))
-          .where((p) => p.remoteId == deviceId.toString())
-          .map((p) => BluetoothCharacteristic.fromProto(p.characteristic))
-          .where((c) => c.uuid == uuid)
-          .map((c) {
-        // Update the characteristic with the new values
-        _updateDescriptors(c.descriptors);
-        return c;
-      });
-
   Stream<List<int>> get onValueChangedStream =>
-      _onCharacteristicChangedStream.map((c) => c.lastValue);
+    FlutterBluePlus.instance._methodStream
+        .where((m) => m.method == "OnCharacteristicChanged")
+        .map((m) => m.arguments)
+        .map((buffer) => protos.OnCharacteristicChanged.fromBuffer(buffer))
+        .where((p) => p.remoteId == deviceId.toString())
+        .map((p) => BluetoothCharacteristic.fromProto(p.characteristic))
+        .where((c) => c.uuid == uuid)
+        .map((c) {
+      // Update the characteristic with the new values
+      _updateDescriptors(c.descriptors);
+      return c.lastValue;
+    });
 
   void _updateDescriptors(List<BluetoothDescriptor> newDescriptors) {
     for (var d in descriptors) {
