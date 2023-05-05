@@ -25,14 +25,42 @@ class BluetoothCharacteristic {
     }
   }
 
-  final BehaviorSubject<List<int>> _value;
+  /// This variable is updated *live* if:
+  ///   - you call value.listen() 
+  ///   - or, you call onValueChangedStream.listen()
+  /// And updated *once* if:
+  ///   - you call read()
+  List<int> lastValue;
 
+  /// This stream is pushed to:
+  ///   - the first time it is listened to
+  ///   - after 'read' is called
+  ///   - if setNotifyValue(true) and the operating system receives a change to the characteristic
   Stream<List<int>> get value => mergeStreams([
-        _value.stream,
-        onValueChangedStream,
-      ]);
+    _readValueController.stream, 
+    onValueChangedStream
+  ]);
 
-  List<int> get lastValue => _value.latestValue;
+  /// This stream is pushed to when:
+  ///   - if setNotifyValue(true) and the operating system receives a change
+  Stream<List<int>> get onValueChangedStream =>
+    FlutterBluePlus.instance._methodStream
+        .where((m) => m.method == "OnCharacteristicChanged")
+        .map((m) => m.arguments)
+        .map((buffer) => protos.OnCharacteristicChanged.fromBuffer(buffer))
+        .where((p) => p.remoteId == deviceId.toString())
+        .map((p) => BluetoothCharacteristic.fromProto(p.characteristic))
+        .where((c) => c.uuid == uuid)
+        .map((c) {
+      _updateDescriptors(c.descriptors); // Update descriptors
+      lastValue = c.lastValue; // Update cache of lastValue
+      return c.lastValue;
+    });
+
+  /// this stream is pushed to:
+  ///   - the first time it is listened to (see: BehaviorSubject)
+  ///   - after 'read' is called
+  final BehaviorSubject<List<int>> _readValueController;
 
   BluetoothCharacteristic.fromProto(protos.BluetoothCharacteristic p)
       : uuid = Guid(p.uuid),
@@ -44,21 +72,8 @@ class BluetoothCharacteristic {
         descriptors =
             p.descriptors.map((d) => BluetoothDescriptor.fromProto(d)).toList(),
         properties = CharacteristicProperties.fromProto(p.properties),
-        _value = BehaviorSubject(p.value);
-
-  Stream<List<int>> get onValueChangedStream =>
-    FlutterBluePlus.instance._methodStream
-        .where((m) => m.method == "OnCharacteristicChanged")
-        .map((m) => m.arguments)
-        .map((buffer) => protos.OnCharacteristicChanged.fromBuffer(buffer))
-        .where((p) => p.remoteId == deviceId.toString())
-        .map((p) => BluetoothCharacteristic.fromProto(p.characteristic))
-        .where((c) => c.uuid == uuid)
-        .map((c) {
-      // Update the characteristic with the new values
-      _updateDescriptors(c.descriptors);
-      return c.lastValue;
-    });
+        lastValue = p.value,
+        _readValueController = BehaviorSubject<List<int>>(p.value);
 
   void _updateDescriptors(List<BluetoothDescriptor> newDescriptors) {
     for (var d in descriptors) {
@@ -107,8 +122,11 @@ class BluetoothCharacteristic {
 
       responseValue = await futureResponse;
 
-      // Update the _value
-      _value.add(responseValue);
+      // push to stream
+      _readValueController.add(responseValue);
+
+      // cache latest value
+      lastValue = responseValue;
     });
 
     return responseValue;
