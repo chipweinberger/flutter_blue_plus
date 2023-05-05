@@ -80,6 +80,14 @@ class OnDoneTransformer<T> extends StreamTransformerBase<T, T> {
 
   @override
   Stream<T> bind(Stream<T> stream) {
+    if (stream.isBroadcast) {
+      return _bindBroadcast(stream);
+    }
+
+    return _bindSingleSubscription(stream);
+  }
+
+  Stream<T> _bindSingleSubscription(Stream<T> stream) {
     StreamController<T>? controller;
     StreamSubscription<T>? subscription;
 
@@ -108,7 +116,32 @@ class OnDoneTransformer<T> extends StreamTransformerBase<T, T> {
 
     return controller.stream;
   }
+
+  Stream<T> _bindBroadcast(Stream<T> stream) {
+    StreamController<T>? controller;
+    StreamSubscription<T>? subscription;
+
+    controller = StreamController<T>.broadcast(
+      onListen: () {
+        subscription = stream.listen(
+          controller?.add,
+          onError: controller?.addError,
+          onDone: () {
+            onDone();
+            controller?.close();
+          }
+        );
+      },
+      onCancel: () {
+        subscription?.cancel();
+      },
+      sync: true,
+    );
+
+    return controller.stream;
+  }
 }
+
 
 // helper for 'doOnCancel' method for streams.
 class OnCancelTransformer<T> extends StreamTransformerBase<T, T> {
@@ -118,6 +151,14 @@ class OnCancelTransformer<T> extends StreamTransformerBase<T, T> {
 
   @override
   Stream<T> bind(Stream<T> stream) {
+    if (stream.isBroadcast) {
+      return _bindBroadcast(stream);
+    }
+
+    return _bindSingleSubscription(stream);
+  }
+
+  Stream<T> _bindSingleSubscription(Stream<T> stream) {
     StreamController<T>? controller;
     StreamSubscription<T>? subscription;
 
@@ -144,7 +185,30 @@ class OnCancelTransformer<T> extends StreamTransformerBase<T, T> {
 
     return controller.stream;
   }
+
+  Stream<T> _bindBroadcast(Stream<T> stream) {
+    StreamController<T>? controller;
+    StreamSubscription<T>? subscription;
+
+    controller = StreamController<T>.broadcast(
+      onListen: () {
+        subscription = stream.listen(
+          controller?.add,
+          onError: controller?.addError,
+          onDone: controller?.close,
+        );
+      },
+      onCancel: () {
+        onCancel();
+        subscription?.cancel();
+      },
+      sync: true,
+    );
+
+    return controller.stream;
+  }
 }
+
 
 extension StreamDoOnDone<T> on Stream<T> {
   Stream<T> doOnDone(void Function() onDone) {
