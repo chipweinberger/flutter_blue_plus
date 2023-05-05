@@ -174,36 +174,50 @@ class BluetoothCharacteristic {
 
   /// Sets notifications or indications for the value of a specified characteristic
   Future<bool> setNotifyValue(bool notify) async {
+
     var request = protos.SetNotificationRequest.create()
       ..remoteId = deviceId.toString()
       ..serviceUuid = serviceUuid.toString()
       ..characteristicUuid = uuid.toString()
       ..enable = notify;
 
-    var response = FlutterBluePlus.instance._methodStream
+    Stream<protos.SetNotificationResponse> responseStream = FlutterBluePlus.instance._methodStream
         .where((m) => m.method == "SetNotificationResponse")
         .map((m) => m.arguments)
         .map((buffer) => protos.SetNotificationResponse.fromBuffer(buffer))
         .where((p) =>
             (p.remoteId == request.remoteId) &&
             (p.characteristic.uuid == request.characteristicUuid) &&
-            (p.characteristic.serviceUuid == request.serviceUuid))
-        .first
-        .then((p) => BluetoothCharacteristic.fromProto(p.characteristic))
-        .then((c) {
-      _updateDescriptors(c.descriptors);
-      return (c.isNotifying == notify);
-    });
+            (p.characteristic.serviceUuid == request.serviceUuid));
+
+    // Start listening now, before invokeMethod, to ensure we don't miss the response
+    Future<protos.SetNotificationResponse> futureResponse = responseStream.first;
 
     await FlutterBluePlus.instance._channel
         .invokeMethod('setNotification', request.writeToBuffer());
 
-    return response;
+    // wait for response, so that we can check for success
+    protos.SetNotificationResponse response = await futureResponse;
+    if (!response.success) {
+      throw Exception('setNotifyValue failed');
+    }
+
+    BluetoothCharacteristic c = BluetoothCharacteristic.fromProto(response.characteristic);
+    _updateDescriptors(c.descriptors);
+    return c.isNotifying == notify;
   }
 
   @override
   String toString() {
-    return 'BluetoothCharacteristic{uuid: $uuid, deviceId: $deviceId, serviceUuid: $serviceUuid, secondaryServiceUuid: $secondaryServiceUuid, properties: $properties, descriptors: $descriptors, value: ${_value.value}';
+    return 'BluetoothCharacteristic{'
+      'uuid: $uuid, '
+      'deviceId: $deviceId, '
+      'serviceUuid: $serviceUuid, '
+      'secondaryServiceUuid: $secondaryServiceUuid, '
+      'properties: $properties, '
+      'descriptors: $descriptors, '
+      'value: $lastValue'
+      '}';
   }
 }
 
@@ -247,6 +261,17 @@ class CharacteristicProperties {
 
   @override
   String toString() {
-    return 'CharacteristicProperties{broadcast: $broadcast, read: $read, writeWithoutResponse: $writeWithoutResponse, write: $write, notify: $notify, indicate: $indicate, authenticatedSignedWrites: $authenticatedSignedWrites, extendedProperties: $extendedProperties, notifyEncryptionRequired: $notifyEncryptionRequired, indicateEncryptionRequired: $indicateEncryptionRequired}';
+    return 'CharacteristicProperties{'
+      'broadcast: $broadcast, '
+      'read: $read, '
+      'writeWithoutResponse: $writeWithoutResponse, '
+      'write: $write, '
+      'notify: $notify, '
+      'indicate: $indicate, '
+      'authenticatedSignedWrites: $authenticatedSignedWrites, '
+      'extendedProperties: $extendedProperties, '
+      'notifyEncryptionRequired: $notifyEncryptionRequired, '
+      'indicateEncryptionRequired: $indicateEncryptionRequired'
+    '}';
   }
 }
