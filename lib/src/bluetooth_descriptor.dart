@@ -13,6 +13,7 @@ class BluetoothDescriptor {
   final Guid characteristicUuid;
 
   final BehaviorSubject<List<int>> _value;
+  
   Stream<List<int>> get value => _value.stream;
 
   List<int> get lastValue => _value.latestValue;
@@ -115,6 +116,12 @@ class BluetoothDescriptor {
 
   @override
   String toString() {
-    return 'BluetoothDescriptor{uuid: $uuid, deviceId: $deviceId, serviceUuid: $serviceUuid, characteristicUuid: $characteristicUuid, value: ${_value.value}}';
+    return 'BluetoothDescriptor{'
+    'uuid: $uuid, '
+    'deviceId: $deviceId, '
+    'serviceUuid: $serviceUuid, '
+    'characteristicUuid: $characteristicUuid, '
+    'value: ${_value.value}'
+    '}';
   }
 }
