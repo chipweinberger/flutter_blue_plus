@@ -93,6 +93,8 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
   private final ArrayList<String> macDeviceScanned = new ArrayList<>();
   private boolean allowDuplicates = false;
 
+  private final int enableBluetoothRequestCode = 1879842617;
+
   public FlutterBluePlusPlugin() {}
 
   @Override
@@ -250,7 +252,11 @@ public class FlutterBluePlusPlugin implements FlutterPlugin, MethodCallHandler, 
       case "turnOn":
       {
         if (!mBluetoothAdapter.isEnabled()) {
-          result.success(mBluetoothAdapter.enable());
+          Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+          activityBinding.getActivity().startActivityForResult(enableBtIntent, enableBluetoothRequestCode);
+          result.success(true);
+        } else {
+          result.success(false);
         }
         break;
       }
