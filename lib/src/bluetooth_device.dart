@@ -132,6 +132,7 @@ class BluetoothDevice
             .invokeMethod('services', id.toString())
             .then((buffer) => protos.DiscoverServicesResult.fromBuffer(buffer).services)
             .then((i) => i.map((s) => BluetoothService.fromProto(s)).toList());
+            
         yield* _services.stream;
     }
   

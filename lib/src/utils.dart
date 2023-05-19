@@ -78,6 +78,39 @@ class _BehaviorSubject<T>
     }
 }
 
+// imediately starts listening to a broadcast stream and 
+// buffering it in a new single-subscription stream
+class _BufferStream<T>
+{
+    final Stream<T> _inputStream;
+    late final StreamSubscription? _subscription;
+    late final StreamController<T> _controller;
+  
+    _BufferStream.listen(this._inputStream) {
+
+        _controller = StreamController<T>(
+            onCancel: () {_subscription?.cancel();},
+            onPause:() {_subscription?.pause();},
+            onResume: () {_subscription?.resume();},
+            onListen: () {}, // inputStream is already listened to
+        );
+
+        // immediately start listening to the inputStream
+        _subscription = _inputStream.listen(
+            (data) {_controller.add(data);},
+            onError: (e) {_controller.addError(e);},
+            onDone: () {_controller.close();},
+            cancelOnError: false,
+        );
+    }
+  
+    Stream<T> get stream async* {
+        yield* _controller.stream;
+    }
+}
+
+
+
 // helper for 'doOnDone' method for streams.
 class _OnDoneTransformer<T> extends StreamTransformerBase<T, T>
 {
