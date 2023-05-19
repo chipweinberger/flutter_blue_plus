@@ -1,3 +1,25 @@
+
+
+## 1.5.0
+* api: Add isScanningNow variable
+* fix: writeCharacteristic (and other similar functions) exception could be missed
+* fix: setNotifyValue should check for success and throw error on failure
+* fix: race conditions in connect(), disconnect(), readRssi(), writeCharacteristic(), readCharacteristic()
+* macOS: add support for macOS
+* android: replace deprecated bluetooth enable with 'Enable-Intent'
+* android: Removed maxSdkVersion=30 in manifest
+* android: Add function: setPreferredPh
+* android: Add function: removeBond
+* android: Add function: requestConnectionPriority 
+* android: allow for simultaneous MAC and ServiceUuid ScanFilters
+* android: request location permission on Android 12+ when scanning (needed on some phones)
+* ios: Fixed Bluetooth adapter being stuck in unknown state
+* ios: Fixed dropping packets during bulk write without response
+* ios: Use CBCentralManagerOptionShowPowerAlertKey for better UI popups
+* example: fix android permissions
+* dart: Removed RxDart and other dependencies
+
+
 ## 1.4.0
 * Android: Add clear gatt cache method #142 (thanks to joistaus)
 * Android: Opt-out of the `neverForLocation` permission flag for the `BLUETOOTH_SCAN` permission. (thanks to navaronbracke)
