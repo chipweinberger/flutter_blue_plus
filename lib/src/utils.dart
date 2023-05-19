@@ -2,12 +2,12 @@
 
 part of flutter_blue_plus;
 
-String hexEncode(List<int> numbers)
+String _hexEncode(List<int> numbers)
 {
     return numbers.map((n) => n.toRadixString(16).padLeft(2, '0')).join();
 }
 
-List<int> hexDecode(String hex)
+List<int> _hexDecode(String hex)
 {
     List<int> numbers = [];
     for (int i = 0; i < hex.length; i += 2) {
@@ -18,7 +18,7 @@ List<int> hexDecode(String hex)
     return numbers;
 }
 
-int compareAsciiLowerCase(String a, String b)
+int _compareAsciiLowerCase(String a, String b)
 {
     const int upperCaseA = 0x41;
     const int upperCaseZ = 0x5a;
@@ -48,13 +48,13 @@ int compareAsciiLowerCase(String a, String b)
 // This is a reimpplementation of BehaviorSubject from RxDart library.
 // 1. Caches the latestValue of a stream
 // 2. the "latestValue" is re-emitted when a stream is listened to 
-class BehaviorSubject<T>
+class _BehaviorSubject<T>
 {
     T latestValue;
 
     final StreamController<T> _controller = StreamController<T>.broadcast();
 
-    BehaviorSubject(this.latestValue);
+    _BehaviorSubject(this.latestValue);
 
     Stream<T> get stream => _controller.stream;
 
@@ -79,11 +79,11 @@ class BehaviorSubject<T>
 }
 
 // helper for 'doOnDone' method for streams.
-class OnDoneTransformer<T> extends StreamTransformerBase<T, T>
+class _OnDoneTransformer<T> extends StreamTransformerBase<T, T>
 {
     final Function onDone;
 
-    OnDoneTransformer({required this.onDone});
+    _OnDoneTransformer({required this.onDone});
 
     @override
     Stream<T> bind(Stream<T> stream) {
@@ -144,11 +144,11 @@ class OnDoneTransformer<T> extends StreamTransformerBase<T, T>
 
 
 // helper for 'doOnCancel' method for streams.
-class OnCancelTransformer<T> extends StreamTransformerBase<T, T>
+class _OnCancelTransformer<T> extends StreamTransformerBase<T, T>
 {
     final Function onCancel;
 
-    OnCancelTransformer({required this.onCancel});
+    _OnCancelTransformer({required this.onCancel});
 
     @override
     Stream<T> bind(Stream<T> stream)
@@ -205,24 +205,24 @@ class OnCancelTransformer<T> extends StreamTransformerBase<T, T>
 }
 
 
-extension StreamDoOnDone<T> on Stream<T>
+extension _StreamDoOnDone<T> on Stream<T>
 {
     Stream<T> doOnDone(void Function() onDone)
     {
-        return transform(OnDoneTransformer(onDone: onDone));
+        return transform(_OnDoneTransformer(onDone: onDone));
     }
 }
 
-extension StreamDoOnCancel<T> on Stream<T>
+extension _StreamDoOnCancel<T> on Stream<T>
 {
     Stream<T> doOnCancel(void Function() onCancel)
     {
-        return transform(OnCancelTransformer(onCancel: onCancel));
+        return transform(_OnCancelTransformer(onCancel: onCancel));
     }
 }
 
 
-Stream<T> mergeStreams<T>(List<Stream<T>> streams)
+Stream<T> _mergeStreams<T>(List<Stream<T>> streams)
 {
     StreamController<T> controller = StreamController<T>();
     List<StreamSubscription<T>> subscriptions = [];
@@ -260,7 +260,7 @@ Stream<T> mergeStreams<T>(List<Stream<T>> streams)
 }
 
 
-class Mutex
+class _Mutex
 {
     Future<void> _lastOperation = Future.value();
 

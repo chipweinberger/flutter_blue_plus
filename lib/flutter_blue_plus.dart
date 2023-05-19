@@ -17,5 +17,5 @@ part 'src/bluetooth_descriptor.dart';
 part 'src/bluetooth_device.dart';
 part 'src/bluetooth_service.dart';
 part 'src/flutter_blue_plus.dart';
-part 'src/utils.dart';
 part 'src/guid.dart';
+part 'src/utils.dart';

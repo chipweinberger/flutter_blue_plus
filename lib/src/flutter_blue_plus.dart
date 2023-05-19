@@ -15,9 +15,9 @@ class FlutterBluePlus
     final EventChannel _stateChannel = const EventChannel('flutter_blue_plus/state');
     final StreamController<MethodCall> _methodStreamController = StreamController.broadcast(); // ignore: close_sinks
 
-    final BehaviorSubject<bool> _isScanning = BehaviorSubject(false);
+    final _BehaviorSubject<bool> _isScanning = _BehaviorSubject(false);
 
-    final BehaviorSubject<List<ScanResult>> _scanResults = BehaviorSubject([]);
+    final _BehaviorSubject<List<ScanResult>> _scanResults = _BehaviorSubject([]);
 
     // timeout for scanning that can be cancelled by stopScan
     Timer? _scanTimeout;
@@ -168,7 +168,7 @@ class FlutterBluePlus
         _scanResults.add(<ScanResult>[]);
 
         try {
-              await _channel.invokeMethod('startScan', settings.writeToBuffer());
+            await _channel.invokeMethod('startScan', settings.writeToBuffer());
         } catch (e) {
             print('Error starting scan.');
             _isScanning.add(false);
@@ -306,7 +306,7 @@ class DeviceIdentifier
     int get hashCode => id.hashCode;
 
     @override
-    bool operator ==(other) => other is DeviceIdentifier && compareAsciiLowerCase(id, other.id) == 0;
+    bool operator ==(other) => other is DeviceIdentifier && _compareAsciiLowerCase(id, other.id) == 0;
 }
 
 class ScanResult

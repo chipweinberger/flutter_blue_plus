@@ -22,7 +22,7 @@ class Guid
     static List<int> _fromMacString(String input)
     {
         input = _removeNonHexCharacters(input);
-        final bytes = hexDecode(input);
+        final bytes = _hexDecode(input);
 
         if (bytes.length != 6) {
               throw FormatException("The format is invalid: $input");
@@ -34,7 +34,7 @@ class Guid
     static List<int> _fromString(String input)
     {
         input = _removeNonHexCharacters(input);
-        final bytes = hexDecode(input);
+        final bytes = _hexDecode(input);
 
         if (bytes.length != 16) {
             throw const FormatException("The format is invalid");
@@ -65,22 +65,22 @@ class Guid
     @override
     String toString()
     {
-        String one = hexEncode(_bytes.sublist(0, 4));
-        String two = hexEncode(_bytes.sublist(4, 6));
-        String three = hexEncode(_bytes.sublist(6, 8));
-        String four = hexEncode(_bytes.sublist(8, 10));
-        String five = hexEncode(_bytes.sublist(10, 16));
+        String one = _hexEncode(_bytes.sublist(0, 4));
+        String two = _hexEncode(_bytes.sublist(4, 6));
+        String three = _hexEncode(_bytes.sublist(6, 8));
+        String four = _hexEncode(_bytes.sublist(8, 10));
+        String five = _hexEncode(_bytes.sublist(10, 16));
         return "$one-$two-$three-$four-$five";
     }
 
     String toMac()
     {
-        String one = hexEncode(_bytes.sublist(0, 1));
-        String two = hexEncode(_bytes.sublist(1, 2));
-        String three = hexEncode(_bytes.sublist(2, 3));
-        String four = hexEncode(_bytes.sublist(3, 4));
-        String five = hexEncode(_bytes.sublist(4, 5));
-        String six = hexEncode(_bytes.sublist(5, 6));
+        String one = _hexEncode(_bytes.sublist(0, 1));
+        String two = _hexEncode(_bytes.sublist(1, 2));
+        String three = _hexEncode(_bytes.sublist(2, 3));
+        String four = _hexEncode(_bytes.sublist(3, 4));
+        String five = _hexEncode(_bytes.sublist(4, 5));
+        String six = _hexEncode(_bytes.sublist(5, 6));
         return "$one:$two:$three:$four:$five:$six".toUpperCase();
     }
 
