@@ -42,21 +42,21 @@ class BluetoothDevice {
       ..remoteId = id.toString()
       ..androidAutoConnect = autoConnect;
 
+    var responseStream = state.where((s) => s == BluetoothDeviceState.connected);
+
+    // Start listening now, before invokeMethod, to ensure we don't miss the response
+    Future<BluetoothDeviceState> futureState = responseStream.first;
+
     await FlutterBluePlus.instance._channel
         .invokeMethod('connect', request.writeToBuffer());
 
-    if (timeout == null) {
-      await state.firstWhere((s) => s == BluetoothDeviceState.connected);
+    // wait for connection
+    if (timeout != null) {
+      await futureState.timeout(timeout, onTimeout: () {
+        throw TimeoutException('Failed to connect in time.', timeout);
+      });
     } else {
-      await state
-          .firstWhere((s) => s == BluetoothDeviceState.connected)
-          .timeout(
-        timeout,
-        onTimeout: () {
-          disconnect();
-          throw TimeoutException('Failed to connect in time.', timeout);
-        },
-      );
+      await futureState;
     }
   }
 
@@ -85,31 +85,37 @@ class BluetoothDevice {
 
   /// Discovers services offered by the remote device as well as their characteristics and descriptors
   Future<List<BluetoothService>> discoverServices() async {
+
     final s = await state.first;
     if (s != BluetoothDeviceState.connected) {
       return Future.error(Exception(
           'Cannot discoverServices while device is not connected. State == $s'));
     }
-    var response = FlutterBluePlus.instance._methodStream
+
+    // signal that we have started
+    _isDiscoveringServices.add(true);
+
+    var responseStream = FlutterBluePlus.instance._methodStream
         .where((m) => m.method == "DiscoverServicesResult")
         .map((m) => m.arguments)
         .map((buffer) => protos.DiscoverServicesResult.fromBuffer(buffer))
         .where((p) => p.remoteId == id.toString())
         .map((p) => p.services)
-        .map((s) => s.map((p) => BluetoothService.fromProto(p)).toList())
-        .first
-        .then((list) {
-      _services.add(list);
-      _isDiscoveringServices.add(false);
-      return list;
-    });
+        .map((s) => s.map((p) => BluetoothService.fromProto(p)).toList());
+
+    // Start listening now, before invokeMethod, to ensure we don't miss the response
+    Future<List<BluetoothService>> futureResponse = responseStream.first;
 
     await FlutterBluePlus.instance._channel
         .invokeMethod('discoverServices', id.toString());
 
-    _isDiscoveringServices.add(true);
+    // wait for response
+    List<BluetoothService> services = await futureResponse;
 
-    return response;
+    _isDiscoveringServices.add(false);
+    _services.add(services);
+
+    return services;
   }
 
   /// Returns a list of Bluetooth GATT services offered by the remote device
@@ -162,18 +168,22 @@ class BluetoothDevice {
       ..remoteId = id.toString()
       ..mtu = desiredMtu;
 
-    var response = FlutterBluePlus.instance._methodStream
+    var responseStream = FlutterBluePlus.instance._methodStream
         .where((m) => m.method == "MtuSize")
         .map((m) => m.arguments)
         .map((buffer) => protos.MtuSizeResponse.fromBuffer(buffer))
         .where((p) => p.remoteId == id.toString())
-        .map((p) => p.mtu)
-        .first;
+        .map((p) => p.mtu);
+
+    // Start listening now, before invokeMethod, to ensure we don't miss the response
+    Future<int> futureResponse = responseStream.first;
 
     await FlutterBluePlus.instance._channel
         .invokeMethod('requestMtu', request.writeToBuffer());
 
-    return response;
+    var mtu = await futureResponse;
+
+    return mtu;
   }
 
   /// Indicates whether the Bluetooth Device can send a write without response
@@ -182,18 +192,25 @@ class BluetoothDevice {
 
   /// Read the RSSI for a connected remote device
   Future<int> readRssi() async {
-    final remoteId = id.toString();
-    await FlutterBluePlus.instance._channel.invokeMethod('readRssi', remoteId);
 
-    return FlutterBluePlus.instance._methodStream
+    final remoteId = id.toString();
+
+    var responseStream = FlutterBluePlus.instance._methodStream
         .where((m) => m.method == "ReadRssiResult")
         .map((m) => m.arguments)
         .map((buffer) => protos.ReadRssiResult.fromBuffer(buffer))
         .where((p) => (p.remoteId == remoteId))
-        .first
-        .then((c) {
-      return (c.rssi);
-    });
+        .map((result) => result.rssi);
+
+    // Start listening now, before invokeMethod, to ensure we don't miss the response
+    Future<int> futureRssi = responseStream.first;
+
+    await FlutterBluePlus.instance._channel.invokeMethod('readRssi', remoteId);
+
+    // wait for response
+    int rssi = await futureRssi;
+
+    return rssi;
   }
 
   /// Request a connection parameter update.
@@ -229,10 +246,7 @@ class BluetoothDevice {
       ..remoteId = id.toString()
       ..connectionPriority = connectionPriority;
 
-    await FlutterBluePlus.instance._channel.invokeMethod(
-      'requestConnectionPriority',
-      request.writeToBuffer(),
-    );
+    await FlutterBluePlus.instance._channel.invokeMethod('requestConnectionPriority',request.writeToBuffer(),);
   }
 
   /// Set the preferred connection [txPhy], [rxPhy] and Phy [option] for this

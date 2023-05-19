@@ -150,7 +150,7 @@ class FlutterBluePlus {
       throw Exception('Another scan is already in progress.');
     }
 
-    // Emit to isScanning
+    // push to isScanning stream
     _isScanning.add(true);
 
     if (timeout != null) {

@@ -1047,7 +1047,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     [result setProperties:[self toCharacteristicPropsProto:characteristic.properties]];
     [result setValue:[characteristic value]];
 
-    NSLog(@"uuid: %@ value: %@", [characteristic.UUID fullUUIDString], [characteristic value]);
     NSMutableArray *descriptorProtos = [NSMutableArray new];
     for (CBDescriptor *d in [characteristic descriptors])
     {

@@ -35,14 +35,14 @@ class BluetoothCharacteristic {
   /// This stream is pushed to:
   ///   - the first time it is listened to
   ///   - after 'read' is called
-  ///   - if setNotifyValue(true) and the operating system receives a change to the characteristic
+  ///   - if setNotifyValue(true) and the operating system receives a change
   Stream<List<int>> get value => mergeStreams([
     _readValueController.stream, 
     onValueChangedStream
   ]);
 
   /// This stream is pushed to when:
-  ///   - if setNotifyValue(true) and the operating system receives a change
+  ///   - setNotifyValue(true) and the operating system receives a change
   Stream<List<int>> get onValueChangedStream =>
     FlutterBluePlus.instance._methodStream
         .where((m) => m.method == "OnCharacteristicChanged")
