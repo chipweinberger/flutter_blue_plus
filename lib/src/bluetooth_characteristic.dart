@@ -13,7 +13,7 @@ class BluetoothCharacteristic
     final CharacteristicProperties properties;
     final List<BluetoothDescriptor> descriptors;
 
-    final Mutex _readWriteMutex = Mutex();
+    final _Mutex _readWriteMutex = _Mutex();
 
     /// This variable is updated *live* if:
     ///   - you call value.listen() 
@@ -25,7 +25,7 @@ class BluetoothCharacteristic
     /// this stream is pushed to:
     ///   - the first time it is listened to (see: BehaviorSubject)
     ///   - after 'read' is called
-    final BehaviorSubject<List<int>> _readValueController;
+    final _BehaviorSubject<List<int>> _readValueController;
 
     BluetoothCharacteristic.fromProto(protos.BluetoothCharacteristic p)
         : uuid = Guid(p.uuid),
@@ -35,13 +35,13 @@ class BluetoothCharacteristic
         descriptors = p.descriptors.map((d) => BluetoothDescriptor.fromProto(d)).toList(),
         properties = CharacteristicProperties.fromProto(p.properties),
         lastValue = p.value,
-        _readValueController = BehaviorSubject<List<int>>(p.value);
+        _readValueController = _BehaviorSubject<List<int>>(p.value);
 
     /// This stream is pushed to:
     ///   - the first time it is listened to
     ///   - after 'read' is called
     ///   - if setNotifyValue(true) and the operating system receives a change
-    Stream<List<int>> get value => mergeStreams([
+    Stream<List<int>> get value => _mergeStreams([
         _readValueController.stream, 
         onValueChangedStream
     ]);

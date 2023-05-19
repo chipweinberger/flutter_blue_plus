@@ -13,20 +13,20 @@ class BluetoothDescriptor
     final Guid serviceUuid;
     final Guid characteristicUuid;
 
-    final BehaviorSubject<List<int>> _value;
+    final _BehaviorSubject<List<int>> _value;
       
     Stream<List<int>> get value => _value.stream;
 
     List<int> get lastValue => _value.latestValue;
 
-    final Mutex _readWriteMutex = Mutex();
+    final _Mutex _readWriteMutex = _Mutex();
 
     BluetoothDescriptor.fromProto(protos.BluetoothDescriptor p)
         : uuid = Guid(p.uuid),
         deviceId = DeviceIdentifier(p.remoteId),
         serviceUuid = Guid(p.serviceUuid),
         characteristicUuid = Guid(p.characteristicUuid),
-        _value = BehaviorSubject(p.value);
+        _value = _BehaviorSubject(p.value);
 
     /// Retrieves the value of a specified descriptor
     Future<List<int>> read() async
