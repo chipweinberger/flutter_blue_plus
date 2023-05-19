@@ -167,6 +167,17 @@ class FlutterBluePlus
         // Clear scan results list
         _scanResults.add(<ScanResult>[]);
 
+        Stream<ScanResult> scanResultsStream = FlutterBluePlus.instance._methodStream
+            .where((m) => m.method == "ScanResult")
+            .map((m) => m.arguments)
+            .takeWhile((element) => _isScanning.value)
+            .doOnDone(stopScan)
+            .map((buffer) => protos.ScanResult.fromBuffer(buffer))
+            .map((p) => ScanResult.fromProto(p));
+
+        // Start listening now, before invokeMethod, to ensure we don't miss any results
+        _BufferStream<ScanResult> buffer = _BufferStream.listen(scanResultsStream);
+
         try {
             await _channel.invokeMethod('startScan', settings.writeToBuffer());
         } catch (e) {
@@ -175,25 +186,21 @@ class FlutterBluePlus
             rethrow;
         }
 
-        yield* FlutterBluePlus.instance._methodStream
-            .where((m) => m.method == "ScanResult")
-            .map((m) => m.arguments)
-            .takeWhile((element) => _isScanning.value)
-            .doOnDone(stopScan)
-            .map((buffer) => protos.ScanResult.fromBuffer(buffer))
-            .map((p) {
-                final result = ScanResult.fromProto(p);
-                List<ScanResult> list = List<ScanResult>.from(_scanResults.value);
-                if (list.contains(result)) {
-                    // update advertising data
-                    int index = list.indexOf(result);
-                    list[index] = result;
-                } else {
-                    list.add(result);
-                }
-                _scanResults.add(list);
-                return result;
-        });
+        await for (ScanResult item in buffer.stream) {
+
+            // update list of devices
+            List<ScanResult> list = List<ScanResult>.from(_scanResults.value);
+            if (list.contains(item)) {
+                int index = list.indexOf(item);
+                list[index] = item;
+            } else {
+                list.add(item);
+            }
+
+            _scanResults.add(list);
+
+            yield item;
+        }
     }
 
     /// Starts a scan and returns a future that will complete once the scan has finished.
