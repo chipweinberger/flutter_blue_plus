@@ -157,26 +157,28 @@ class FlutterBluePlus
         // push to isScanning stream
         _isScanning.add(true);
 
-        if (timeout != null) {
-            _scanTimeout = Timer(timeout, () {
-                _isScanning.add(false);
-                _channel.invokeMethod('stopScan');
-            });
-        }
-
         // Clear scan results list
         _scanResults.add(<ScanResult>[]);
 
         Stream<ScanResult> scanResultsStream = FlutterBluePlus.instance._methodStream
             .where((m) => m.method == "ScanResult")
             .map((m) => m.arguments)
-            .takeWhile((element) => _isScanning.value)
-            .doOnDone(stopScan)
             .map((buffer) => protos.ScanResult.fromBuffer(buffer))
-            .map((p) => ScanResult.fromProto(p));
+            .map((p) => ScanResult.fromProto(p))
+            .takeWhile((element) => _isScanning.value)
+            .doOnDone(stopScan);
 
         // Start listening now, before invokeMethod, to ensure we don't miss any results
         _BufferStream<ScanResult> buffer = _BufferStream.listen(scanResultsStream);
+
+        // Start timer *after* stream is being listened to, to make sure we don't miss the timeout 
+        if (timeout != null) {
+            _scanTimeout = Timer(timeout, () {
+                buffer.close();
+                _isScanning.add(false);
+                _channel.invokeMethod('stopScan');
+            });
+        }
 
         try {
             await _channel.invokeMethod('startScan', settings.writeToBuffer());
