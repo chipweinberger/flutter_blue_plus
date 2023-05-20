@@ -103,6 +103,10 @@ class _BufferStream<T>
             cancelOnError: false,
         );
     }
+
+    void close() {
+        _controller.close();
+    }
   
     Stream<T> get stream async* {
         yield* _controller.stream;
