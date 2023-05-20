@@ -608,7 +608,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 - (void)centralManager:(CBCentralManager *)central didConnectPeripheral:(CBPeripheral *)peripheral
 {
     if (_logLevel >= debug) {
-        NSLog(@"didConnectPeripheral");
+        NSLog(@"[FBP-iOS] didConnectPeripheral");
     }
 
     // Register self as delegate for peripheral
@@ -628,9 +628,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                       error:(NSError *)error
 {
     if (error) {
-        NSLog(@"didDisconnectPeripheral: [Error] %@", [error localizedDescription]);
+        NSLog(@"[FBP-iOS] didDisconnectPeripheral: [Error] %@", [error localizedDescription]);
     } else if (_logLevel >= debug) {
-        NSLog(@"didDisconnectPeripheral");
+        NSLog(@"[FBP-iOS] didDisconnectPeripheral");
     }
 
     // Unregister self as delegate for peripheral, not working #42
@@ -646,9 +646,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                          error:(NSError *)error
 {
     if (error) {
-        NSLog(@"didFailToConnectPeripheral: [Error] %@", [error localizedDescription]);
+        NSLog(@"[FBP-iOS] didFailToConnectPeripheral: [Error] %@", [error localizedDescription]);
     } else if (_logLevel >= debug) {
-        NSLog(@"didFailToConnectPeripheral");
+        NSLog(@"[FBP-iOS] didFailToConnectPeripheral");
     }
 
     // Send connection state
@@ -662,9 +662,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 - (void)peripheral:(CBPeripheral *)peripheral didDiscoverServices:(NSError *)error
 {
     if (error) {
-        NSLog(@"didDiscoverServices: [Error] %@", [error localizedDescription]);
+        NSLog(@"[FBP-iOS] didDiscoverServices: [Error] %@", [error localizedDescription]);
     } else if (_logLevel >= debug) {
-        NSLog(@"didDiscoverServices");
+        NSLog(@"[FBP-iOS] didDiscoverServices");
     }
 
     // Send negotiated mtu size
@@ -675,7 +675,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     [_servicesThatNeedDiscovered addObjectsFromArray:peripheral.services];
     for (CBService *s in [peripheral services])
     {
-        NSLog(@"Found service: %@", [s.UUID UUIDString]);
+        NSLog(@"[FBP-iOS] Found service: %@", [s.UUID UUIDString]);
         [peripheral discoverCharacteristics:nil forService:s];
         // [peripheral discoverIncludedServices:nil forService:s]; // Secondary services in the future (#8)
     }
@@ -686,9 +686,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                                    error:(NSError *)error
 {
     if (error) {
-        NSLog(@"didDiscoverCharacteristicsForService: [Error] %@", [error localizedDescription]);
+        NSLog(@"[FBP-iOS] didDiscoverCharacteristicsForService: [Error] %@", [error localizedDescription]);
     } else if (_logLevel >= debug) {
-        NSLog(@"didDiscoverCharacteristicsForService");
+        NSLog(@"[FBP-iOS] didDiscoverCharacteristicsForService");
     }
 
     // Loop through and discover descriptors for characteristics
@@ -705,9 +705,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                                       error:(NSError *)error
 {
     if (error) {
-        NSLog(@"didDiscoverDescriptorsForCharacteristic: [Error] %@", [error localizedDescription]);
+        NSLog(@"[FBP-iOS] didDiscoverDescriptorsForCharacteristic: [Error] %@", [error localizedDescription]);
     } else if (_logLevel >= debug) {
-        NSLog(@"didDiscoverDescriptorsForCharacteristic");
+        NSLog(@"[FBP-iOS] didDiscoverDescriptorsForCharacteristic");
     }
 
     [_characteristicsThatNeedDiscovered removeObject:characteristic];
@@ -728,9 +728,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                                     error:(NSError *)error
 {
     if (error) {
-        NSLog(@"didDiscoverIncludedServicesForService: [Error] %@", [error localizedDescription]);
+        NSLog(@"[FBP-iOS] didDiscoverIncludedServicesForService: [Error] %@", [error localizedDescription]);
     } else if (_logLevel >= debug) {
-        NSLog(@"didDiscoverIncludedServicesForService");
+        NSLog(@"[FBP-iOS] didDiscoverIncludedServicesForService");
     }
 
     // Loop through and discover characteristics for secondary services
@@ -745,9 +745,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                               error:(NSError *)error
 {
     if (error) {
-        NSLog(@"didUpdateValueForCharacteristic: [Error] %@", [error localizedDescription]);
+        NSLog(@"[FBP-iOS] didUpdateValueForCharacteristic: [Error] %@", [error localizedDescription]);
     } else if (_logLevel >= debug) {
-        NSLog(@"didUpdateValueForCharacteristic %@", [peripheral.identifier UUIDString]);
+        NSLog(@"[FBP-iOS] didUpdateValueForCharacteristic %@", [peripheral.identifier UUIDString]);
     }
 
     ProtosReadCharacteristicResponse *result = [[ProtosReadCharacteristicResponse alloc] init];
@@ -769,9 +769,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                              error:(NSError *)error
 {
     if (error) {
-        NSLog(@"didWriteValueForCharacteristic: [Error] %@", [error localizedDescription]);
+        NSLog(@"[FBP-iOS] didWriteValueForCharacteristic: [Error] %@", [error localizedDescription]);
     } else if (_logLevel >= debug) {
-        NSLog(@"didWriteValueForCharacteristic");
+        NSLog(@"[FBP-iOS] didWriteValueForCharacteristic");
     }
 
     ProtosWriteCharacteristicRequest *request = [[ProtosWriteCharacteristicRequest alloc] init];
@@ -791,9 +791,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                                           error:(NSError *)error
 {
     if (error) {
-        NSLog(@"didUpdateNotificationStateForCharacteristic: [Error] %@", [error localizedDescription]);
+        NSLog(@"[FBP-iOS] didUpdateNotificationStateForCharacteristic: [Error] %@", [error localizedDescription]);
     } else if (_logLevel >= debug) {
-        NSLog(@"didUpdateNotificationStateForCharacteristic");
+        NSLog(@"[FBP-iOS] didUpdateNotificationStateForCharacteristic");
     }
 
     // Read CCC descriptor of characteristic
@@ -818,9 +818,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                           error:(NSError *)error
 {
     if (error) {
-        NSLog(@"didUpdateValueForDescriptor: [Error] %@", [error localizedDescription]);
+        NSLog(@"[FBP-iOS] didUpdateValueForDescriptor: [Error] %@", [error localizedDescription]);
     } else if (_logLevel >= debug) {
-        NSLog(@"didUpdateValueForDescriptor");
+        NSLog(@"[FBP-iOS] didUpdateValueForDescriptor");
     }
 
     ProtosReadDescriptorRequest *q = [[ProtosReadDescriptorRequest alloc] init];
@@ -864,9 +864,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                          error:(NSError *)error
 {
     if (error) {
-        NSLog(@"didWriteValueForDescriptor: [Error] %@", [error localizedDescription]);
+        NSLog(@"[FBP-iOS] didWriteValueForDescriptor: [Error] %@", [error localizedDescription]);
     } else if (_logLevel >= debug) {
-        NSLog(@"didWriteValueForDescriptor");
+        NSLog(@"[FBP-iOS] didWriteValueForDescriptor");
     }
 
     ProtosWriteDescriptorRequest *request = [[ProtosWriteDescriptorRequest alloc] init];
@@ -895,9 +895,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 - (void)peripheral:(CBPeripheral *)peripheral didReadRSSI:(NSNumber *)rssi error:(NSError *)error
 {
     if (error) {
-        NSLog(@"didReadRSSI: [Error] %@", [error localizedDescription]);
+        NSLog(@"[FBP-iOS] didReadRSSI: [Error] %@", [error localizedDescription]);
     } else if (_logLevel >= debug) {
-        NSLog(@"didReadRSSI");
+        NSLog(@"[FBP-iOS] didReadRSSI");
     }
 
     ProtosReadRssiResult *result = [[ProtosReadRssiResult alloc] init];
