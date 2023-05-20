@@ -1,4 +1,10 @@
-
+## 1.5.1
+* fix: fix issue where startScan can hang forever (regression)
+* fix: some scanResults could be missed due to race condition (theoretically)
+* api: dont export util classes & functions. they've been made library-private.
+* iOS: prepend all ios logs with '[FBP-iOS]' prefix
+* iOS: log errors on failure
+* iOS: logs now adhere to logLevel
 
 ## 1.5.0
 * api: Add isScanningNow variable
