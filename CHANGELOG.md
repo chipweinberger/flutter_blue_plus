@@ -1,3 +1,6 @@
+## 1.5.2
+* fix: android setNotification was throwing exception (regression)
+
 ## 1.5.1
 * fix: fix issue where startScan can hang forever (regression)
 * fix: some scanResults could be missed due to race condition (theoretically)
