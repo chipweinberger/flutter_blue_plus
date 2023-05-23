@@ -142,6 +142,15 @@ In the **ios/Runner/Info.plist** let’s add:
 
 For location permissions on iOS see more at: [https://developer.apple.com/documentation/corelocation/requesting_authorization_for_location_services](https://developer.apple.com/documentation/corelocation/requesting_authorization_for_location_services)
 
+### Android ProGuard rules
+
+In case you are using ProGuard add the following snippet to your `proguard-rules.pro` file:
+
+```
+-keep public class * extends com.google.protobuf.** { *; }
+```
+
+This will prevent issues like [#300](https://github.com/boskokg/flutter_blue_plus/issues/300).
 
 ## Reference
 ### FlutterBlue API
