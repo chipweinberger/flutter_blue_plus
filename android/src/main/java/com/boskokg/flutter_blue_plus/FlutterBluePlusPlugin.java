@@ -417,7 +417,10 @@ public class FlutterBluePlusPlugin implements
 
                 ensurePermissions(permissions, (granted, perm) -> {
                     try {
-                        if (granted == false) {
+                        if (granted == false && perm == Manifest.permission.ACCESS_FINE_LOCATION) {
+                            log(LogLevel.WARNING, "flutter_blue scanning initiated without ACCESS_FINE_LOCATION permission which may fail");
+                        }
+                        else if (granted == false) {
                             result.error("startScan", String.format("FlutterBluePlus requires %s permission", perm), null);
                             return;
                         }
