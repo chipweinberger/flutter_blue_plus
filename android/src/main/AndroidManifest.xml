@@ -2,13 +2,21 @@
   package="com.boskokg.flutter_blue_plus">
 
     <!-- New Bluetooth permissions in Android 12
-           https://developer.android.com/about/versions/12/features/bluetooth-permissions
+          https://developer.android.com/about/versions/12/features/bluetooth-permissions
       -->
-    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"
+      android:usesPermissionFlags="neverForLocation" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <!-- Not needed if "neverForLocation" is set on BLUETOOTH_SCAN
+          https://developer.android.com/guide/topics/connectivity/bluetooth/permissions#assert-never-for-location
+      -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <!-- Request legacy Bluetooth permissions on older devices. -->
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.BLUETOOTH"
+      android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"
+      android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"
+      android:maxSdkVersion="30" />
 </manifest>

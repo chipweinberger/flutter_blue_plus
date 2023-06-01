@@ -125,13 +125,27 @@ Android {
 We need to add the permission to use Bluetooth and access location:
 
 #### **Android**
-In the **android/app/src/main/AndroidManifest.xml** let’s add:
+Specify the following in **android/app/src/main/AndroidManifest.xml**:
 
-```xml 
-	 <uses-permission android:name="android.permission.BLUETOOTH" />  
-	 <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />  
-	 <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>  
- <application
+Android 12 and above:
+
+```xml
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:usesPermissionFlags="neverForLocation" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <!-- Not needed if "neverForLocation" is set on BLUETOOTH_SCAN
+          https://developer.android.com/guide/topics/connectivity/bluetooth/permissions#assert-never-for-location
+      -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+```
+
+Android 11 and below:
+
+```xml
+
+    <!-- Request legacy Bluetooth permissions on older devices. -->
+    <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" android:maxSdkVersion="30" />
 ```
 #### **IOS**
 In the **ios/Runner/Info.plist** let’s add:
