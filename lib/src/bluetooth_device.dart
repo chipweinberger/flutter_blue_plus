@@ -128,10 +128,12 @@ class BluetoothDevice
     /// This function requires that discoverServices has been completed for this device
     Stream<List<BluetoothService>> get services async*
     {
-        yield await FlutterBluePlus.instance._channel
+        List<BluetoothService> initialServices = await FlutterBluePlus.instance._channel
             .invokeMethod('services', id.toString())
             .then((buffer) => protos.DiscoverServicesResult.fromBuffer(buffer).services)
             .then((i) => i.map((s) => BluetoothService.fromProto(s)).toList());
+
+        yield initialServices;
             
         yield* _services.stream;
     }
@@ -139,10 +141,12 @@ class BluetoothDevice
     /// The current connection state of the device
     Stream<BluetoothDeviceState> get state async*
     {
-        yield await FlutterBluePlus.instance._channel
+        BluetoothDeviceState initialState = await FlutterBluePlus.instance._channel
             .invokeMethod('deviceState', id.toString())
             .then((buffer) => protos.DeviceStateResponse.fromBuffer(buffer))
             .then((p) => BluetoothDeviceState.values[p.state.value]);
+
+        yield initialState;
   
         yield* FlutterBluePlus.instance._methodStream
             .where((m) => m.method == "DeviceState")
@@ -155,10 +159,12 @@ class BluetoothDevice
     /// The MTU size in bytes
     Stream<int> get mtu async*
     {
-        yield await FlutterBluePlus.instance._channel
+        int initialMtu = await FlutterBluePlus.instance._channel
             .invokeMethod('mtu', id.toString())
             .then((buffer) => protos.MtuSizeResponse.fromBuffer(buffer))
             .then((p) => p.mtu);
+
+        yield initialMtu;
   
         yield* FlutterBluePlus.instance._methodStream
             .where((m) => m.method == "MtuSize")
