@@ -315,7 +315,8 @@ class _Mutex
             currentOperation.complete();
         } catch (e, st) {
             currentOperation.completeError(e, st);
-            rethrow;
         }
+
+        return currentOperation.future;
     }
 }
