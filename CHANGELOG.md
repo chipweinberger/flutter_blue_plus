@@ -1,3 +1,12 @@
+## 1.6.0
+* Dart: close BufferStream listen on stopScan
+* Dart: don't repropogate Mutex error
+* Dart: Characteristic Read/Write: improve stacktrace on error
+* Windows: add support for windows. thanks @Yongle-Fu
+* MacOS: use symbolic links to iOS version, to keep internal code in sync
+* Android: reformat code
+
+
 ## 1.5.2
 * fix: android setNotification was throwing exception (regression)
 
