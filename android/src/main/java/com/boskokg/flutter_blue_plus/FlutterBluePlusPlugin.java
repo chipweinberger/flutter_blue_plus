@@ -2,6 +2,42 @@
 // All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+/////////////////////////////////////////////
+// ██   ██ ███████ ██      ██       ██████  
+// ██   ██ ██      ██      ██      ██    ██ 
+// ███████ █████   ██      ██      ██    ██ 
+// ██   ██ ██      ██      ██      ██    ██ 
+// ██   ██ ███████ ███████ ███████  ██████  
+/*
+
+Please Read!!!!!
+
+ANDROID CODE NEEDS TO BE UPDATED TO REMOVE PROTOBUF DEPENDENCY
+
+For example, we have to replace:
+
+            Protos.WriteDescriptorRequest.Builder request = Protos.WriteDescriptorRequest.newBuilder();
+            request.setRemoteId(gatt.getDevice().getAddress());
+            request.setDescriptorUuid(descriptor.getUuid().toString());
+            request.setCharacteristicUuid(descriptor.getCharacteristic().getUuid().toString());
+            request.setServiceUuid(descriptor.getCharacteristic().getService().getUuid().toString());
+
+With
+
+        HashMap<String, Integer> map = new HashMap<>();
+        map.put("remote_id", gatt.getDevice().getAddress());
+        map.put("descriptor_uuidd", descriptor.getUuid().toString());
+        map.put("characteristic_uuid", descriptor.getCharacteristic().getUuid().toString());
+        map.put("uuid", descriptor.getCharacteristic().getService().getUuid().toString();
+
+For more information
+    - see /lib/bluetooth_msg.dart for more details on the keys and values.
+    - see iOS code for another example.
+    - see flutter docs for supported types https://docs.flutter.dev/platform-integration/platform-channels?tab=type-mappings-java-tab
+
+*/
+/////////////////////////////////////////////
+
 package com.boskokg.flutter_blue_plus;
 
 import android.Manifest;
