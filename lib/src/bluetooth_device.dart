@@ -16,10 +16,10 @@ class BluetoothDevice
     
     Stream<bool> get isDiscoveringServices => _isDiscoveringServices.stream;
   
-    BluetoothDevice.fromProto(protos.BluetoothDevice p)
+    BluetoothDevice.fromProto(BmBluetoothDevice p)
         : id = DeviceIdentifier(p.remoteId),
-        name = p.name,
-        type = BluetoothDeviceType.values[p.type.value];
+        name = p.name ?? "",
+        type = bmToBluetoothDeviceType(p.type);
   
     /// Use on Android when the MAC address is known.
     /// This constructor enables the Android to connect to a specific device
@@ -40,9 +40,10 @@ class BluetoothDevice
             clearGattCache();
         }
   
-        var request = protos.ConnectRequest.create()
-            ..remoteId = id.toString()
-            ..androidAutoConnect = autoConnect;
+        var request = BmConnectRequest(
+            remoteId: id.toString(),
+            androidAutoConnect: autoConnect,
+        );
   
         var responseStream = state.where((s) => s == BluetoothDeviceState.connected);
   
@@ -50,7 +51,7 @@ class BluetoothDevice
         Future<BluetoothDeviceState> futureState = responseStream.first;
   
         await FlutterBluePlus.instance._channel
-              .invokeMethod('connect', request.writeToBuffer());
+              .invokeMethod('connect', request.toJson());
   
         // wait for connection
         if (timeout != null) {
@@ -104,7 +105,7 @@ class BluetoothDevice
         var responseStream = FlutterBluePlus.instance._methodStream
             .where((m) => m.method == "DiscoverServicesResult")
             .map((m) => m.arguments)
-            .map((buffer) => protos.DiscoverServicesResult.fromBuffer(buffer))
+            .map((buffer) => BmDiscoverServicesResult.fromJson(buffer))
             .where((p) => p.remoteId == id.toString())
             .map((p) => p.services)
             .map((s) => s.map((p) => BluetoothService.fromProto(p)).toList());
@@ -130,7 +131,7 @@ class BluetoothDevice
     {
         List<BluetoothService> initialServices = await FlutterBluePlus.instance._channel
             .invokeMethod('services', id.toString())
-            .then((buffer) => protos.DiscoverServicesResult.fromBuffer(buffer).services)
+            .then((buffer) => BmDiscoverServicesResult.fromJson(buffer).services)
             .then((i) => i.map((s) => BluetoothService.fromProto(s)).toList());
 
         yield initialServices;
@@ -143,17 +144,17 @@ class BluetoothDevice
     {
         BluetoothDeviceState initialState = await FlutterBluePlus.instance._channel
             .invokeMethod('deviceState', id.toString())
-            .then((buffer) => protos.DeviceStateResponse.fromBuffer(buffer))
-            .then((p) => BluetoothDeviceState.values[p.state.value]);
+            .then((buffer) => BmConnectionStateResponse.fromJson(buffer))
+            .then((p) => bmToBluetoothDeviceState(p.state));
 
         yield initialState;
   
         yield* FlutterBluePlus.instance._methodStream
             .where((m) => m.method == "DeviceState")
             .map((m) => m.arguments)
-            .map((buffer) => protos.DeviceStateResponse.fromBuffer(buffer))
+            .map((buffer) => BmConnectionStateResponse.fromJson(buffer))
             .where((p) => p.remoteId == id.toString())
-            .map((p) => BluetoothDeviceState.values[p.state.value]);
+            .map((p) => bmToBluetoothDeviceState(p.state));
     }
   
     /// The MTU size in bytes
@@ -161,7 +162,7 @@ class BluetoothDevice
     {
         int initialMtu = await FlutterBluePlus.instance._channel
             .invokeMethod('mtu', id.toString())
-            .then((buffer) => protos.MtuSizeResponse.fromBuffer(buffer))
+            .then((buffer) => BmMtuSizeResponse.fromJson(buffer))
             .then((p) => p.mtu);
 
         yield initialMtu;
@@ -169,7 +170,7 @@ class BluetoothDevice
         yield* FlutterBluePlus.instance._methodStream
             .where((m) => m.method == "MtuSize")
             .map((m) => m.arguments)
-            .map((buffer) => protos.MtuSizeResponse.fromBuffer(buffer))
+            .map((buffer) => BmMtuSizeResponse.fromJson(buffer))
             .where((p) => p.remoteId == id.toString())
             .map((p) => p.mtu);
     }
@@ -180,14 +181,15 @@ class BluetoothDevice
     /// Throws error if request did not complete successfully
     Future<int> requestMtu(int desiredMtu) async
     {
-        var request = protos.MtuSizeRequest.create()
-        ..remoteId = id.toString()
-        ..mtu = desiredMtu;
+        var request = BmMtuSizeRequest(
+            remoteId: id.toString(),
+            mtu: desiredMtu,
+        );
   
         var responseStream = FlutterBluePlus.instance._methodStream
             .where((m) => m.method == "MtuSize")
             .map((m) => m.arguments)
-            .map((buffer) => protos.MtuSizeResponse.fromBuffer(buffer))
+            .map((buffer) => BmMtuSizeResponse.fromJson(buffer))
             .where((p) => p.remoteId == id.toString())
             .map((p) => p.mtu);
   
@@ -195,7 +197,7 @@ class BluetoothDevice
         Future<int> futureResponse = responseStream.first;
   
         await FlutterBluePlus.instance._channel
-            .invokeMethod('requestMtu', request.writeToBuffer());
+            .invokeMethod('requestMtu', request.toJson());
   
         var mtu = await futureResponse;
   
@@ -215,7 +217,7 @@ class BluetoothDevice
         var responseStream = FlutterBluePlus.instance._methodStream
             .where((m) => m.method == "ReadRssiResult")
             .map((m) => m.arguments)
-            .map((buffer) => protos.ReadRssiResult.fromBuffer(buffer))
+            .map((buffer) => BmReadRssiResult.fromJson(buffer))
             .where((p) => (p.remoteId == remoteId))
             .map((result) => result.rssi);
   
@@ -244,16 +246,17 @@ class BluetoothDevice
   
         switch (connectionPriorityRequest) {
             case ConnectionPriority.balanced: connectionPriority = 0; break;
-            case ConnectionPriority.high: connectionPriority = 1; break;
+            case ConnectionPriority.high:     connectionPriority = 1; break;
             case ConnectionPriority.lowPower: connectionPriority = 2; break;
             default: break;
         }
   
-        var request = protos.ConnectionPriorityRequest.create()
-        ..remoteId = id.toString()
-        ..connectionPriority = connectionPriority;
+        var request = BmConnectionPriorityRequest(
+            remoteId: id.toString(),
+            connectionPriority: connectionPriority,
+        );
   
-        await FlutterBluePlus.instance._channel.invokeMethod('requestConnectionPriority',request.writeToBuffer(),);
+        await FlutterBluePlus.instance._channel.invokeMethod('requestConnectionPriority',request.toJson(),);
     }
   
     /// Set the preferred connection [txPhy], [rxPhy] and Phy [option] for this
@@ -269,17 +272,16 @@ class BluetoothDevice
         required PhyOption option,
     }) async
     {
-        int phyOptionInt = option.index;
-  
-        var request = protos.PreferredPhy.create()
-        ..remoteId = id.toString()
-        ..txPhy = txPhy
-        ..rxPhy = rxPhy
-        ..phyOptions = phyOptionInt;
+        var request = BmPreferredPhy(
+            remoteId: id.toString(),
+            txPhy: txPhy,
+            rxPhy: rxPhy,
+            phyOptions: option.index,
+        );
   
         await FlutterBluePlus.instance._channel.invokeMethod(
             'setPreferredPhy',
-            request.writeToBuffer(),
+            request.toJson(),
         );
     }
   
@@ -326,6 +328,15 @@ enum BluetoothDeviceType
     dual 
 }
 
+BluetoothDeviceType bmToBluetoothDeviceType(BmBluetoothSpecEnum value) {
+    switch(value) {
+        case BmBluetoothSpecEnum.unknown: return BluetoothDeviceType.unknown;
+        case BmBluetoothSpecEnum.classic: return BluetoothDeviceType.classic;
+        case BmBluetoothSpecEnum.le:      return BluetoothDeviceType.le;
+        case BmBluetoothSpecEnum.dual:    return BluetoothDeviceType.dual;
+    }
+}
+
 enum BluetoothDeviceState
 {
     disconnected, 
@@ -333,6 +344,16 @@ enum BluetoothDeviceState
     connected, 
     disconnecting
 }
+
+BluetoothDeviceState bmToBluetoothDeviceState(BmConnectionStateEnum value) {
+    switch(value) {
+        case BmConnectionStateEnum.disconnected:  return BluetoothDeviceState.disconnected;
+        case BmConnectionStateEnum.connecting:    return BluetoothDeviceState.connecting;
+        case BmConnectionStateEnum.connected:     return BluetoothDeviceState.connected;
+        case BmConnectionStateEnum.disconnecting: return BluetoothDeviceState.disconnecting;
+    }
+}
+
 
 enum ConnectionPriority
 {

@@ -21,7 +21,7 @@ class BluetoothDescriptor
 
     final _Mutex _readWriteMutex = _Mutex();
 
-    BluetoothDescriptor.fromProto(protos.BluetoothDescriptor p)
+    BluetoothDescriptor.fromProto(BmBluetoothDescriptor p)
         : uuid = Guid(p.uuid),
         deviceId = DeviceIdentifier(p.remoteId),
         serviceUuid = Guid(p.serviceUuid),
@@ -37,16 +37,18 @@ class BluetoothDescriptor
         // at a time, to prevent race conditions.
         await _readWriteMutex.synchronized(() async {
 
-            var request = protos.ReadDescriptorRequest.create()
-            ..remoteId = deviceId.toString()
-            ..descriptorUuid = uuid.toString()
-            ..characteristicUuid = characteristicUuid.toString()
-            ..serviceUuid = serviceUuid.toString();
+            var request = BmReadDescriptorRequest(
+                remoteId: deviceId.toString(),
+                descriptorUuid: uuid.toString(),
+                characteristicUuid: characteristicUuid.toString(),
+                secondaryServiceUuid: null,
+                serviceUuid: serviceUuid.toString(),
+            );
 
-            Stream<protos.ReadDescriptorResponse> responseStream = FlutterBluePlus.instance._methodStream
+            Stream<BmReadDescriptorResponse> responseStream = FlutterBluePlus.instance._methodStream
                 .where((m) => m.method == "ReadDescriptorResponse")
                 .map((m) => m.arguments)
-                .map((buffer) => protos.ReadDescriptorResponse.fromBuffer(buffer))
+                .map((buffer) => BmReadDescriptorResponse.fromJson(buffer))
                 .where((p) =>
                     (p.request.remoteId == request.remoteId) &&
                     (p.request.descriptorUuid == request.descriptorUuid) &&
@@ -54,12 +56,12 @@ class BluetoothDescriptor
                     (p.request.serviceUuid == request.serviceUuid));
 
             // Start listening now, before invokeMethod, to ensure we don't miss the response
-            Future<protos.ReadDescriptorResponse> futureResponse = responseStream.first;
+            Future<BmReadDescriptorResponse> futureResponse = responseStream.first;
 
             await FlutterBluePlus.instance._channel
-                .invokeMethod('readDescriptor', request.writeToBuffer());
+                .invokeMethod('readDescriptor', request.toJson());
 
-            protos.ReadDescriptorResponse response = await futureResponse;
+            BmReadDescriptorResponse response = await futureResponse;
 
             readValue = response.value;
 
@@ -79,17 +81,19 @@ class BluetoothDescriptor
         // at a time, to prevent race conditions.
         await _readWriteMutex.synchronized(() async {
 
-            var request = protos.WriteDescriptorRequest.create()
-            ..remoteId = deviceId.toString()
-            ..descriptorUuid = uuid.toString()
-            ..characteristicUuid = characteristicUuid.toString()
-            ..serviceUuid = serviceUuid.toString()
-            ..value = value;
+            var request = BmWriteDescriptorRequest(
+                remoteId: deviceId.toString(),
+                descriptorUuid: uuid.toString(),
+                characteristicUuid: characteristicUuid.toString(),
+                serviceUuid: serviceUuid.toString(),
+                secondaryServiceUuid: null,
+                value: value,
+            );
 
-            Stream<protos.WriteDescriptorResponse> responseStream = FlutterBluePlus.instance._methodStream
+            Stream<BmWriteDescriptorResponse> responseStream = FlutterBluePlus.instance._methodStream
                 .where((m) => m.method == "WriteDescriptorResponse")
                 .map((m) => m.arguments)
-                .map((buffer) => protos.WriteDescriptorResponse.fromBuffer(buffer))
+                .map((buffer) => BmWriteDescriptorResponse.fromJson(buffer))
                 .where((p) =>
                     (p.request.remoteId == request.remoteId) &&
                     (p.request.descriptorUuid == request.descriptorUuid) &&
@@ -97,12 +101,12 @@ class BluetoothDescriptor
                     (p.request.serviceUuid == request.serviceUuid));
 
             // Start listening now, before invokeMethod, to ensure we don't miss the response
-            Future<protos.WriteDescriptorResponse> futureResponse = responseStream.first;
+            Future<BmWriteDescriptorResponse> futureResponse = responseStream.first;
 
             await FlutterBluePlus.instance._channel
-                .invokeMethod('writeDescriptor', request.writeToBuffer());
+                .invokeMethod('writeDescriptor', request.toJson());
 
-            protos.WriteDescriptorResponse response = await futureResponse;
+            BmWriteDescriptorResponse response = await futureResponse;
 
             if (!response.success) {
                 throw Exception('Failed to write the descriptor');

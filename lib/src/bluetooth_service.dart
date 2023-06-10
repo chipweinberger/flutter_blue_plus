@@ -12,7 +12,7 @@ class BluetoothService
     final List<BluetoothCharacteristic> characteristics;
     final List<BluetoothService> includedServices;
 
-    BluetoothService.fromProto(protos.BluetoothService p)
+    BluetoothService.fromProto(BmBluetoothService p)
         : uuid = Guid(p.uuid),
         deviceId = DeviceIdentifier(p.remoteId),
         isPrimary = p.isPrimary,

@@ -10,11 +10,10 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import 'gen/flutterblueplus.pb.dart' as protos;
-
 part 'src/bluetooth_characteristic.dart';
 part 'src/bluetooth_descriptor.dart';
 part 'src/bluetooth_device.dart';
+part 'src/bluetooth_msgs.dart';
 part 'src/bluetooth_service.dart';
 part 'src/flutter_blue_plus.dart';
 part 'src/guid.dart';

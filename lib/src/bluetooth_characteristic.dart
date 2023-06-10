@@ -27,11 +27,11 @@ class BluetoothCharacteristic
     ///   - after 'read' is called
     final _BehaviorSubject<List<int>> _readValueController;
 
-    BluetoothCharacteristic.fromProto(protos.BluetoothCharacteristic p)
+    BluetoothCharacteristic.fromProto(BmBluetoothCharacteristic p)
         : uuid = Guid(p.uuid),
         deviceId = DeviceIdentifier(p.remoteId),
         serviceUuid = Guid(p.serviceUuid),
-        secondaryServiceUuid = (p.secondaryServiceUuid.isNotEmpty) ? Guid(p.secondaryServiceUuid) : null,
+        secondaryServiceUuid = p.secondaryServiceUuid != null ? Guid(p.secondaryServiceUuid!) : null,
         descriptors = p.descriptors.map((d) => BluetoothDescriptor.fromProto(d)).toList(),
         properties = CharacteristicProperties.fromProto(p.properties),
         lastValue = p.value,
@@ -51,7 +51,7 @@ class BluetoothCharacteristic
     Stream<List<int>> get onValueChangedStream => FlutterBluePlus.instance._methodStream
         .where((m) => m.method == "OnCharacteristicChanged")
         .map((m) => m.arguments)
-        .map((buffer) => protos.OnCharacteristicChanged.fromBuffer(buffer))
+        .map((buffer) => BmOnCharacteristicChanged.fromJson(buffer))
         .where((p) => p.remoteId == deviceId.toString())
         .map((p) => BluetoothCharacteristic.fromProto(p.characteristic))
         .where((c) => c.uuid == uuid)
@@ -91,10 +91,12 @@ class BluetoothCharacteristic
         // at a time, to prevent race conditions.
         await _readWriteMutex.synchronized(() async {
 
-            var request = protos.ReadCharacteristicRequest.create()
-            ..remoteId = deviceId.toString()
-            ..characteristicUuid = uuid.toString()
-            ..serviceUuid = serviceUuid.toString();
+            var request = BmReadCharacteristicRequest(
+              remoteId: deviceId.toString(), 
+              characteristicUuid: uuid.toString(),
+              serviceUuid: serviceUuid.toString(), 
+              secondaryServiceUuid: null,
+            );
 
             FlutterBluePlus.instance._log(LogLevel.info,
                 'remoteId: ${deviceId.toString()}' 
@@ -104,7 +106,7 @@ class BluetoothCharacteristic
             var responseStream = FlutterBluePlus.instance._methodStream
                 .where((m) => m.method == "ReadCharacteristicResponse")
                 .map((m) => m.arguments)
-                .map((buffer) => protos.ReadCharacteristicResponse.fromBuffer(buffer))
+                .map((buffer) => BmReadCharacteristicResponse.fromJson(buffer))
                 .where((p) =>
                     (p.remoteId == request.remoteId) &&
                     (p.characteristic.uuid == request.characteristicUuid) &&
@@ -115,7 +117,7 @@ class BluetoothCharacteristic
             Future<List<int>> futureResponse = responseStream.first;
 
             await FlutterBluePlus.instance._channel
-                .invokeMethod('readCharacteristic', request.writeToBuffer());
+                .invokeMethod('readCharacteristic', request.toJson());
 
             responseValue = await futureResponse;
 
@@ -142,36 +144,38 @@ class BluetoothCharacteristic
         // at a time, to prevent race conditions.
         await _readWriteMutex.synchronized(() async {
 
-            final type = withoutResponse
-                ? CharacteristicWriteType.withoutResponse
-                : CharacteristicWriteType.withResponse;
+            final writeType = withoutResponse
+                ? BmWriteType.withoutResponse
+                : BmWriteType.withResponse;
 
-            var request = protos.WriteCharacteristicRequest.create()
-            ..remoteId = deviceId.toString()
-            ..characteristicUuid = uuid.toString()
-            ..serviceUuid = serviceUuid.toString()
-            ..writeType = protos.WriteCharacteristicRequest_WriteType.valueOf(type.index)!
-            ..value = value;
+            var request = BmWriteCharacteristicRequest(
+                remoteId: deviceId.toString(),
+                characteristicUuid: uuid.toString(),
+                serviceUuid: serviceUuid.toString(),
+                secondaryServiceUuid: null,
+                writeType: writeType,
+                value: value,
+            );
 
-            if (type == CharacteristicWriteType.withResponse) {
+            if (writeType == BmWriteType.withResponse) {
 
                 var responseStream = FlutterBluePlus.instance._methodStream
                     .where((m) => m.method == "WriteCharacteristicResponse")
                     .map((m) => m.arguments)
-                    .map((buffer) => protos.WriteCharacteristicResponse.fromBuffer(buffer))
+                    .map((buffer) => BmWriteCharacteristicResponse.fromJson(buffer))
                     .where((p) =>
                         (p.request.remoteId == request.remoteId) &&
                         (p.request.characteristicUuid == request.characteristicUuid) &&
                         (p.request.serviceUuid == request.serviceUuid));
 
                 // Start listening now, before invokeMethod, to ensure we don't miss the response
-                Future<protos.WriteCharacteristicResponse> futureResponse = responseStream.first;
+                Future<BmWriteCharacteristicResponse> futureResponse = responseStream.first;
 
                 await FlutterBluePlus.instance._channel
-                    .invokeMethod('writeCharacteristic', request.writeToBuffer());
+                    .invokeMethod('writeCharacteristic', request.toJson());
 
                 // wait for response, so that we can check for success
-                protos.WriteCharacteristicResponse response = await futureResponse;
+                BmWriteCharacteristicResponse response = await futureResponse;
                 if (!response.success) {
                     throw Exception('Failed to write the characteristic');
                 }
@@ -181,7 +185,7 @@ class BluetoothCharacteristic
             } else {
                 // invoke without waiting for reply
                 return FlutterBluePlus.instance._channel
-                    .invokeMethod('writeCharacteristic', request.writeToBuffer());
+                    .invokeMethod('writeCharacteristic', request.toJson());
             }
         }).catchError((e, stacktrace) {
             throw Exception("$e $stacktrace");
@@ -191,29 +195,31 @@ class BluetoothCharacteristic
     /// Sets notifications or indications for the value of a specified characteristic
     Future<bool> setNotifyValue(bool notify) async
     {
-        var request = protos.SetNotificationRequest.create()
-        ..remoteId = deviceId.toString()
-        ..serviceUuid = serviceUuid.toString()
-        ..characteristicUuid = uuid.toString()
-        ..enable = notify;
+        var request = BmSetNotificationRequest(
+            remoteId: deviceId.toString(),
+            serviceUuid: serviceUuid.toString(),
+            characteristicUuid: uuid.toString(),
+            secondaryServiceUuid: null,
+            enable: notify,
+        );
 
-        Stream<protos.SetNotificationResponse> responseStream = FlutterBluePlus.instance._methodStream
+        Stream<BmSetNotificationResponse> responseStream = FlutterBluePlus.instance._methodStream
             .where((m) => m.method == "SetNotificationResponse")
             .map((m) => m.arguments)
-            .map((buffer) => protos.SetNotificationResponse.fromBuffer(buffer))
+            .map((buffer) => BmSetNotificationResponse.fromJson(buffer))
             .where((p) =>
                 (p.remoteId == request.remoteId) &&
                 (p.characteristic.uuid == request.characteristicUuid) &&
                 (p.characteristic.serviceUuid == request.serviceUuid));
 
         // Start listening now, before invokeMethod, to ensure we don't miss the response
-        Future<protos.SetNotificationResponse> futureResponse = responseStream.first;
+        Future<BmSetNotificationResponse> futureResponse = responseStream.first;
 
         await FlutterBluePlus.instance._channel
-            .invokeMethod('setNotification', request.writeToBuffer());
+            .invokeMethod('setNotification', request.toJson());
 
         // wait for response, so that we can check for success
-        protos.SetNotificationResponse response = await futureResponse;
+        BmSetNotificationResponse response = await futureResponse;
         if (!response.success) {
               throw Exception('setNotifyValue failed');
         }
@@ -236,12 +242,6 @@ class BluetoothCharacteristic
         'value: $lastValue'
         '}';
     }
-}
-
-enum CharacteristicWriteType
-{
-    withResponse, 
-    withoutResponse
 }
 
 class CharacteristicProperties
@@ -270,7 +270,7 @@ class CharacteristicProperties
         this.indicateEncryptionRequired = false
     });
 
-    CharacteristicProperties.fromProto(protos.CharacteristicProperties p)
+    CharacteristicProperties.fromProto(BmCharacteristicProperties p)
         : broadcast = p.broadcast,
         read = p.read,
         writeWithoutResponse = p.writeWithoutResponse,
