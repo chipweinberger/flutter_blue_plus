@@ -6,9 +6,19 @@
 </p>
 <br><br>
 
+## Foreward
+
+I highly recommend QuickBlue (https://pub.dev/packages/quick_blue) in favor of FlutterBlue. It has a simpler, cleaner API, and supports iOS, MacOS, Android, Windows, and partial Linux support.
+
+Note: this plugin is continuous work from FlutterBlue since maintaince stoped. 
+
 ## Introduction
 
-FlutterBluePlus is a bluetooth plugin for [Flutter](https://flutter.dev), a new app SDK to help developers build modern multi-platform apps. Note: this plugin is continuous work from FlutterBlue since maintaince stoped.
+FlutterBluePlus is a bluetooth plugin for [Flutter](https://flutter.dev), a new app SDK to help developers build modern multi-platform apps. 
+
+## Windows Support
+
+Was copied from QuickBlue (https://pub.dev/packages/quick_blue), but is not yet functional and requires changes to fit the FlutterBlue api. 
 
 ## Alpha version
 
