@@ -1,3 +1,7 @@
+## 1.6.1
+* Android: fix compile error (regression in 1.6.0)
+* Adnroid: significantly clean up all code
+
 ## 1.6.0
 * Dart: close BufferStream listen on stopScan
 * Dart: don't repropogate Mutex error
