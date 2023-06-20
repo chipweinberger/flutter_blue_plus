@@ -68,9 +68,6 @@ import android.os.Looper;
 import android.os.ParcelUuid;
 import android.util.Log;
 
-import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -303,20 +300,19 @@ public class FlutterBluePlusPlugin implements
                         state = mBluetoothAdapter.getState();
                     } catch (Exception e) {}
                     
-                    // convert to protobuf enum
-                    Protos.BluetoothState.State pbs;
-                    switch(state) {
-                        case BluetoothAdapter.STATE_OFF:          pbs = Protos.BluetoothState.State.OFF;         break;
-                        case BluetoothAdapter.STATE_ON:           pbs = Protos.BluetoothState.State.ON;          break;
-                        case BluetoothAdapter.STATE_TURNING_OFF:  pbs = Protos.BluetoothState.State.TURNING_OFF; break;
-                        case BluetoothAdapter.STATE_TURNING_ON:   pbs = Protos.BluetoothState.State.TURNING_ON;  break;
-                        default:                                  pbs = Protos.BluetoothState.State.UNKNOWN;     break;
+                    int convertedState;
+                    switch (state) {
+                        case BluetoothAdapter.STATE_OFF:          convertedState = 6;           break;
+                        case BluetoothAdapter.STATE_ON:           convertedState = 4;           break;
+                        case BluetoothAdapter.STATE_TURNING_OFF:  convertedState = 5;           break;
+                        case BluetoothAdapter.STATE_TURNING_ON:   convertedState = 3;           break;
+                        default:                                  convertedState = 0;           break;
                     }
 
-                    Protos.BluetoothState.Builder p = Protos.BluetoothState.newBuilder();
-                    p.setState(pbs);
+                    HashMap<String, Object> map = new HashMap<>();
+                    map.put("state", convertedState);
 
-                    result.success(p.build().toByteArray());
+                    result.success(map);
 
                 } catch(Exception e) {
                     result.error("state", e.getMessage(), e);
@@ -422,10 +418,7 @@ public class FlutterBluePlusPlugin implements
                             return;
                         }
 
-                        byte[] data = call.arguments();
-
-                        Protos.ScanSettings p = 
-                            Protos.ScanSettings.newBuilder().mergeFrom(data).build();
+                        HashMap<String, Object> data = call.arguments();
 
                         macDeviceScanned.clear();
 
@@ -434,11 +427,10 @@ public class FlutterBluePlusPlugin implements
                             throw new Exception("getBluetoothLeScanner() is null. Is the Adapter on?");
                         }
 
-                        int scanMode = p.getAndroidScanMode();
+                        int scanMode = (int)data.get("android_scan_mode");
 
-                        List<ScanFilter> filters = fetchFilters(p);
+//                        List<ScanFilter> filters = fetchFilters(p);
 
-                        // scan settings
                         ScanSettings settings;
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             settings = new ScanSettings.Builder()
@@ -451,7 +443,9 @@ public class FlutterBluePlusPlugin implements
                                 .setScanMode(scanMode).build();
                         }
 
-                        scanner.startScan(filters, settings, getScanCallback());
+                        scanner.startScan(null, settings, getScanCallback());
+
+//                        scanner.startScan(filters, settings, getScanCallback());
 
                         result.success(null);
 
@@ -499,12 +493,14 @@ public class FlutterBluePlusPlugin implements
 
                         List<BluetoothDevice> devices = mBluetoothManager.getConnectedDevices(BluetoothProfile.GATT);
 
-                        Protos.ConnectedDevicesResponse.Builder p = Protos.ConnectedDevicesResponse.newBuilder();
+                        HashMap<String, Object> response = new HashMap<String, Object>();
+                        List<HashMap<String, Object>> responseDevices = new ArrayList<HashMap<String, Object>>();
                         for (BluetoothDevice d : devices) {
-                            p.addDevices(ProtoMaker.from(d));
+                            responseDevices.add(MessageMaker.from(d));
                         }
+                        response.put("devices", responseDevices);
 
-                        result.success(p.build().toByteArray());
+                        result.success(response);
 
                     } catch(Exception e) {
                         result.error("getConnectedDevices", e.getMessage(), e);
@@ -518,12 +514,14 @@ public class FlutterBluePlusPlugin implements
                 try {
                     final Set<BluetoothDevice> bondedDevices = mBluetoothAdapter.getBondedDevices();
 
-                    Protos.ConnectedDevicesResponse.Builder p = Protos.ConnectedDevicesResponse.newBuilder();
+                    HashMap<String, Object> response = new HashMap<String, Object>();
+                    List<HashMap<String,Object>> devices = new ArrayList<HashMap<String,Object>>();
                     for (BluetoothDevice d : bondedDevices) {
-                        p.addDevices(ProtoMaker.from(d));
+                        devices.add(MessageMaker.from(d));
                     }
+                    response.put("devices", devices);
 
-                    result.success(p.build().toByteArray()); 
+                   result.success(response);
 
                 } catch(Exception e) {
                     result.error("getBondedDevices", e.getMessage(), e);
@@ -549,11 +547,11 @@ public class FlutterBluePlusPlugin implements
                             return;
                         }
 
-                        byte[] data = call.arguments();
-                        Protos.ConnectRequest options = Protos.ConnectRequest.newBuilder().mergeFrom(data).build();
-                        
-                        String deviceId = options.getRemoteId();
+                        HashMap<String, Object> args = call.arguments();
+                        String deviceId = (String)args.get("remote_id");
+                        boolean autoConnect = (boolean)args.get("android_auto_connect");
                         BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(deviceId);
+                        
                         boolean isConnected = mBluetoothManager.getConnectedDevices(BluetoothProfile.GATT).contains(device);
 
                         // If device is already connected, return error
@@ -576,11 +574,9 @@ public class FlutterBluePlusPlugin implements
                         // New request, connect and add gattServer to Map
                         BluetoothGatt gattServer;
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            gattServer = device.connectGatt(context, options.getAndroidAutoConnect(),
-                                mGattCallback, BluetoothDevice.TRANSPORT_LE);
+                            gattServer = device.connectGatt(context, autoConnect, mGattCallback, BluetoothDevice.TRANSPORT_LE);
                         } else {
-                            gattServer = device.connectGatt(context, options.getAndroidAutoConnect(),
-                                mGattCallback);
+                            gattServer = device.connectGatt(context, autoConnect, mGattCallback);
                         }
 
                         mDevices.put(deviceId, new BluetoothDeviceCache(gattServer));
@@ -675,7 +671,7 @@ public class FlutterBluePlusPlugin implements
 
                     int state = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
 
-                    result.success(ProtoMaker.from(device, state).toByteArray());
+                    result.success(MessageMaker.from(device, state));
 
                 } catch(Exception e) {
                     result.error("deviceState", e.getMessage(), e);
@@ -710,13 +706,16 @@ public class FlutterBluePlusPlugin implements
 
                     BluetoothGatt gatt = locateGatt(deviceId);
 
-                    Protos.DiscoverServicesResult.Builder p = Protos.DiscoverServicesResult.newBuilder();
-                    p.setRemoteId(deviceId);
+                    HashMap<String, Object> map = new HashMap<>();
+                    map.put("remote_id", deviceId);
+                    
+                    List<Object> services = new ArrayList<>();
                     for(BluetoothGattService s : gatt.getServices()){
-                        p.addServices(ProtoMaker.from(gatt.getDevice(), s, gatt));
+                        services.add(MessageMaker.from(gatt.getDevice(), s, gatt));
                     }
+                    map.put("services", services);
 
-                    result.success(p.build().toByteArray());
+                    result.success(map);
 
                 } catch(Exception e) {
                     result.error("services", e.getMessage(), e);
@@ -727,21 +726,21 @@ public class FlutterBluePlusPlugin implements
             case "readCharacteristic":
             {
                 try {
-                    byte[] data = call.arguments();
+                    HashMap<String, Object> data = call.arguments();
+                    String remoteId = (String)data.get("remote_id");
+                    String serviceUuid = (String)data.get("service_uuid");
+                    String secondaryServiceUuid = (String)data.get("secondary_service_uuid");
+                    String characteristicUuid = (String)data.get("characteristic_uuid");
 
-                    Protos.ReadCharacteristicRequest request = 
-                        Protos.ReadCharacteristicRequest.newBuilder().mergeFrom(data).build();
+                   BluetoothGatt gattServer = locateGatt(remoteId);
+                   BluetoothGattCharacteristic characteristic = locateCharacteristic(gattServer,
+                       serviceUuid, secondaryServiceUuid, characteristicUuid);
 
-                    BluetoothGatt gattServer = locateGatt(request.getRemoteId());
-
-                    BluetoothGattCharacteristic characteristic = locateCharacteristic(gattServer,
-                        request.getServiceUuid(), request.getSecondaryServiceUuid(), request.getCharacteristicUuid());
-
-                    if(gattServer.readCharacteristic(characteristic) == false) {
-                        result.error("read_characteristic_error", 
-                            "unknown reason, may occur if readCharacteristic was called before last read finished.", null);
-                        break;
-                    } 
+                   if(gattServer.readCharacteristic(characteristic) == false) {
+                       result.error("read_characteristic_error",
+                           "unknown reason, may occur if readCharacteristic was called before last read finished.", null);
+                       break;
+                   }
 
                     result.success(null);
 
@@ -755,17 +754,19 @@ public class FlutterBluePlusPlugin implements
             {
 
                 try {
-                    byte[] data = call.arguments();
+                    HashMap<String, Object> data = call.arguments();
+                    String remoteId = (String)data.get("remote_id");
+                    String serviceUuid = (String)data.get("service_uuid");
+                    String secondaryServiceUuid = (String)data.get("secondary_service_uuid");
+                    String characteristicUuid = (String)data.get("characteristic_uuid");
+                    String descriptorUuid = (String)data.get("descriptor_uuid");
 
-                    Protos.ReadDescriptorRequest request = 
-                        Protos.ReadDescriptorRequest.newBuilder().mergeFrom(data).build();
-
-                    BluetoothGatt gattServer = locateGatt(request.getRemoteId());
+                    BluetoothGatt gattServer = locateGatt(remoteId);
 
                     BluetoothGattCharacteristic characteristic = locateCharacteristic(gattServer,
-                        request.getServiceUuid(), request.getSecondaryServiceUuid(), request.getCharacteristicUuid());
+                       serviceUuid, secondaryServiceUuid, characteristicUuid);
 
-                    BluetoothGattDescriptor descriptor = locateDescriptor(characteristic, request.getDescriptorUuid());
+                    BluetoothGattDescriptor descriptor = locateDescriptor(characteristic, descriptorUuid);
 
                     if(gattServer.readDescriptor(descriptor) == false) {
                         result.error("readDescriptor",
@@ -783,23 +784,33 @@ public class FlutterBluePlusPlugin implements
             case "writeCharacteristic":
             {
                 try {
-                    byte[] data = call.arguments();
+                    HashMap<String, Object> data = call.arguments();
+                    String remoteId = (String)data.get("remote_id");
+                    String serviceUuid = (String)data.get("service_uuid");
+                    String secondaryServiceUuid = (String)data.get("secondary_service_uuid");
+                    String characteristicUuid = (String)data.get("characteristic_uuid");
+                    List<Byte> value = (List<Byte>)data.get("value");
+                    int writeType = (int)data.get("write_type");
 
-                    Protos.WriteCharacteristicRequest request = 
-                        Protos.WriteCharacteristicRequest.newBuilder().mergeFrom(data).build();
-
-                    BluetoothGatt gattServer = locateGatt(request.getRemoteId());
+                    BluetoothGatt gattServer = locateGatt(remoteId);
 
                     BluetoothGattCharacteristic characteristic = locateCharacteristic(gattServer,
-                        request.getServiceUuid(), request.getSecondaryServiceUuid(), request.getCharacteristicUuid());
+                       serviceUuid, secondaryServiceUuid, characteristicUuid);
 
                     // Set Value
-                    if(!characteristic.setValue(request.getValue().toByteArray())){
+
+
+                    byte[] val = new byte[value.size()];
+                    for(int i = 0; i < value.size(); i++) {
+                        val[i] = value.get(i).byteValue();
+                    }
+
+                    if(!characteristic.setValue(val)) {
                         result.error("writeCharacteristic", "could not set the local value of characteristic", null);
                     }
 
                     // Write type
-                    if(request.getWriteType() == Protos.WriteCharacteristicRequest.WriteType.WITHOUT_RESPONSE) {
+                    if(writeType == 1) {
                         characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
                     } else {
                         characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
@@ -822,18 +833,28 @@ public class FlutterBluePlusPlugin implements
             case "writeDescriptor":
             {
                 try {
-                    byte[] data = call.arguments();
-                    Protos.WriteDescriptorRequest request = Protos.WriteDescriptorRequest.newBuilder().mergeFrom(data).build();
+                    HashMap<String, Object> data = call.arguments();
+                    String remoteId = (String)data.get("remote_id");
+                    String serviceUuid = (String)data.get("service_uuid");
+                    String secondaryServiceUuid = (String)data.get("secondary_service_uuid");
+                    String characteristicUuid = (String)data.get("characteristic_uuid");
+                    String descriptorUuid = (String)data.get("descriptor_uuid");
+                    List<Byte> value = (List<Byte>)data.get("value");
 
-                    BluetoothGatt gattServer = locateGatt(request.getRemoteId());
+                    byte[] val = new byte[value.size()];
+                    for(int i = 0; i < value.size(); i++) {
+                        val[i] = value.get(i).byteValue();
+                    }
+
+                    BluetoothGatt gattServer = locateGatt(remoteId);
 
                     BluetoothGattCharacteristic characteristic = locateCharacteristic(gattServer,
-                        request.getServiceUuid(),   request.getSecondaryServiceUuid(), request.getCharacteristicUuid());
+                       serviceUuid, secondaryServiceUuid, characteristicUuid);
 
-                    BluetoothGattDescriptor descriptor = locateDescriptor(characteristic, request.getDescriptorUuid());
+                    BluetoothGattDescriptor descriptor = locateDescriptor(characteristic, descriptorUuid);
 
                     // Set descriptor
-                    if(!descriptor.setValue(request.getValue().toByteArray())){
+                    if(!descriptor.setValue(val)){
                         result.error("write_descriptor_error", "could not set the local value for descriptor", null);
                         break;
                     }
@@ -855,15 +876,20 @@ public class FlutterBluePlusPlugin implements
             case "setNotification":
             {
                 try {
-                    byte[] data = call.arguments();
+                    HashMap<String, Object> data = call.arguments();
+                    String remoteId = (String)data.get("remote_id");
+                    String serviceUuid = (String)data.get("service_uuid");
+                    String secondaryServiceUuid = (String)data.get("secondary_service_uuid");
+                    String characteristicUuid = (String)data.get("characteristic_uuid");
+                    String descriptorUuid = (String)data.get("descriptor_uuid");
+                    boolean enable = (boolean)data.get("enable");
+                    List<Byte> value = (List<Byte>)data.get("value");
+                    int properties = (int)data.get("properties");
 
-                    Protos.SetNotificationRequest request = 
-                        Protos.SetNotificationRequest.newBuilder().mergeFrom(data).build();
-
-                    BluetoothGatt gattServer = locateGatt(request.getRemoteId());
+                    BluetoothGatt gattServer = locateGatt(remoteId);
 
                     BluetoothGattCharacteristic characteristic = locateCharacteristic(gattServer,
-                        request.getServiceUuid(), request.getSecondaryServiceUuid(), request.getCharacteristicUuid());
+                        serviceUuid, secondaryServiceUuid, characteristicUuid);
 
                     BluetoothGattDescriptor cccDescriptor = characteristic.getDescriptor(CCCD_ID);
 
@@ -874,37 +900,37 @@ public class FlutterBluePlusPlugin implements
                     }
 
                     // start notifications
-                    if(!gattServer.setCharacteristicNotification(characteristic, request.getEnable())){
+                    if(!gattServer.setCharacteristicNotification(characteristic, enable)){
                         result.error("setNotification", 
-                            "could not set characteristic notifications to :" + request.getEnable(), null);
+                            "could not set characteristic notifications to :" + enable, null);
                         break;
                     }
 
                     // update descriptor value
                     if(cccDescriptor != null) {
 
-                        byte[] value = null;
+                        byte[] descriptorValue = null;
 
                         // determine value 
-                        if(request.getEnable()) {
+                        if(enable) {
 
-                            boolean canNotify = (characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0;
-                            boolean canIndicate = (characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE) > 0;
+                            boolean canNotify = (properties & BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0;
+                            boolean canIndicate = (properties & BluetoothGattCharacteristic.PROPERTY_INDICATE) > 0;
 
                             if(!canIndicate && !canNotify) {
                                 result.error("setNotification", "characteristic cannot notify or indicate", null);
                                 break;
                             }
 
-                            if(canIndicate) {value = BluetoothGattDescriptor.ENABLE_INDICATION_VALUE;}
-                            if(canNotify)   {value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE;}
+                            if(canIndicate) {descriptorValue = BluetoothGattDescriptor.ENABLE_INDICATION_VALUE;}
+                            if(canNotify)   {descriptorValue = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE;}
 
                         } else {
-                            value  = BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE;
+                            descriptorValue  = BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE;
                         }
                         
-                        if (!cccDescriptor.setValue(value)) {
-                            result.error("setNotification", "error setting descriptor value to: " + Arrays.toString(value), null);
+                        if (!cccDescriptor.setValue(descriptorValue)) {
+                            result.error("setNotification", "error setting descriptor value to: " + Arrays.toString(descriptorValue), null);
                             break;
                         }
 
@@ -933,11 +959,11 @@ public class FlutterBluePlusPlugin implements
                         break;
                     }
 
-                    Protos.MtuSizeResponse.Builder p = Protos.MtuSizeResponse.newBuilder();
-                    p.setRemoteId(deviceId);
-                    p.setMtu(cache.mtu);
+                    HashMap<String, Object> response = new HashMap<String, Object>();
+                    response.put("remote_id", deviceId);
+                    response.put("mtu", cache.mtu);
 
-                    result.success(p.build().toByteArray());
+                    result.success(response);
 
                 } catch(Exception e) {
                     result.error("mtu", e.getMessage(), e);
@@ -948,13 +974,11 @@ public class FlutterBluePlusPlugin implements
             case "requestMtu":
             {
                 try {
-                    byte[] data = call.arguments();
+                    HashMap<String, Object> data = call.arguments();
+                    String remoteId = (String)data.get("remote_id");
+                    int mtu = (int)data.get("mtu");
 
-                    Protos.MtuSizeRequest request = Protos.MtuSizeRequest.newBuilder().mergeFrom(data).build();
-
-                    BluetoothGatt gatt = locateGatt(request.getRemoteId());
-
-                    int mtu = request.getMtu();
+                    BluetoothGatt gatt = locateGatt(remoteId);
 
                     result.success(null);
 
@@ -985,14 +1009,11 @@ public class FlutterBluePlusPlugin implements
             case "requestConnectionPriority":
             {
                 try {
-                    byte[] data = call.arguments();
+                    HashMap<String, Object> data = call.arguments();
+                    String remoteId = (String)data.get("remote_id");
+                    int connectionPriority = (int)data.get("connection_priority");
 
-                    Protos.ConnectionPriorityRequest request = 
-                        Protos.ConnectionPriorityRequest.newBuilder().mergeFrom(data).build();
-
-                    BluetoothGatt gatt = locateGatt(request.getRemoteId());
-
-                    int connectionPriority = request.getConnectionPriority();
+                    BluetoothGatt gatt = locateGatt(remoteId);
 
                     if(gatt.requestConnectionPriority(connectionPriority) == false) {
                         result.error("requestConnectionPriority", "returned false", null);
@@ -1018,14 +1039,13 @@ public class FlutterBluePlusPlugin implements
                         break;
                     }
 
-                    byte[] data = call.arguments();
+                    HashMap<String, Object> data = call.arguments();
+                    String remoteId = (String)data.get("remote_id");
+                    int txPhy = (int)data.get("tx_phy");
+                    int rxPhy = (int)data.get("rx_phy");
+                    int phyOptions = (int)data.get("phy_options");
 
-                    Protos.PreferredPhy request = Protos.PreferredPhy.newBuilder().mergeFrom(data).build();
-
-                    BluetoothGatt gatt = locateGatt(request.getRemoteId());
-                    int txPhy = request.getTxPhy();
-                    int rxPhy = request.getRxPhy();
-                    int phyOptions = request.getPhyOptions();
+                    BluetoothGatt gatt = locateGatt(remoteId);
 
                     gatt.setPreferredPhy(txPhy, rxPhy, phyOptions);
                     result.success(null);
@@ -1235,19 +1255,19 @@ public class FlutterBluePlusPlugin implements
             }
 
             // convert to Protobuf enum
-            Protos.BluetoothState.State pbs;
+            int convertedState;
             switch (state) {
-                case BluetoothAdapter.STATE_OFF:          pbs = Protos.BluetoothState.State.OFF;         break;
-                case BluetoothAdapter.STATE_ON:           pbs = Protos.BluetoothState.State.ON;          break;
-                case BluetoothAdapter.STATE_TURNING_OFF:  pbs = Protos.BluetoothState.State.TURNING_OFF; break;
-                case BluetoothAdapter.STATE_TURNING_ON:   pbs = Protos.BluetoothState.State.TURNING_ON;  break;
-                default:                                  pbs = Protos.BluetoothState.State.UNKNOWN;     break;
+                case BluetoothAdapter.STATE_OFF:          convertedState = 6;           break;
+                case BluetoothAdapter.STATE_ON:           convertedState = 4;           break;
+                case BluetoothAdapter.STATE_TURNING_OFF:  convertedState = 5;           break;
+                case BluetoothAdapter.STATE_TURNING_ON:   convertedState = 3;           break;
+                default:                                  convertedState = 0;           break;
             }
 
-            Protos.BluetoothState.Builder p = Protos.BluetoothState.newBuilder();
-            p.setState(pbs);
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("state", convertedState);
 
-            sink.success(p);
+            // sink.success(map);
         }
     };
 
@@ -1291,20 +1311,20 @@ public class FlutterBluePlusPlugin implements
             if (cachedBluetoothState != 0) {
 
                 // convert to Protobuf enum
-                Protos.BluetoothState.State pbs;
+                int convertedState;
                 switch (cachedBluetoothState) {
-                    case BluetoothAdapter.STATE_OFF:          pbs = Protos.BluetoothState.State.OFF;         break;
-                    case BluetoothAdapter.STATE_ON:           pbs = Protos.BluetoothState.State.ON;          break;
-                    case BluetoothAdapter.STATE_TURNING_OFF:  pbs = Protos.BluetoothState.State.TURNING_OFF; break;
-                    case BluetoothAdapter.STATE_TURNING_ON:   pbs = Protos.BluetoothState.State.TURNING_ON;  break;
-                    case STATE_UNAUTHORIZED:                  pbs = Protos.BluetoothState.State.OFF;         break;
-                    default:                                  pbs = Protos.BluetoothState.State.UNKNOWN;     break;
+                    case BluetoothAdapter.STATE_OFF:          convertedState = 6;           break;
+                    case BluetoothAdapter.STATE_ON:           convertedState = 4;           break;
+                    case BluetoothAdapter.STATE_TURNING_OFF:  convertedState = 5;           break;
+                    case BluetoothAdapter.STATE_TURNING_ON:   convertedState = 3;           break;
+                    case STATE_UNAUTHORIZED:                  convertedState = 2;           break;
+                    default:                                  convertedState = 0;           break;
                 }
 
-                Protos.BluetoothState.Builder p = Protos.BluetoothState.newBuilder();
-                p.setState(pbs);
+                HashMap<String, Object> map = new HashMap<>();
+                map.put("state", convertedState);
 
-                sink.success(p.build().toByteArray());
+                // sink.success(map);
             }
         }
 
@@ -1327,25 +1347,27 @@ public class FlutterBluePlusPlugin implements
     // ██       ██  ██          ██     ██       ██   ██       ██ 
     // ██       ██  ███████     ██     ███████  ██   ██  ███████
 
-    private List<ScanFilter> fetchFilters(Protos.ScanSettings proto)
+    private List<ScanFilter> fetchFilters(HashMap<String, Object> scanSettings)
     {
         List<ScanFilter> filters;
 
-        int macCount = proto.getMacAddressesCount();
-        int serviceCount = proto.getServiceUuidsCount();
-
+        List<String> servicesUuids = (List<String>)scanSettings.get("service_uuids");
+        int macCount = (int)scanSettings.get("mac_count");
+        int serviceCount = servicesUuids.size();
         int count = macCount + serviceCount;
 
         filters = new ArrayList<>(count);
 
+        List<String> macAddresses = (List<String>)scanSettings.get("mac_addresses");
+
         for (int i = 0; i < macCount; i++) {
-            String macAddress = proto.getMacAddresses(i);
+            String macAddress = macAddresses.get(i);
             ScanFilter f = new ScanFilter.Builder().setDeviceAddress(macAddress).build();
             filters.add(f);
         }
 
         for (int i = 0; i < serviceCount; i++) {
-            String uuid = proto.getServiceUuids(i);
+            String uuid = servicesUuids.get(i);
             ScanFilter f = new ScanFilter.Builder().setServiceUuid(ParcelUuid.fromString(uuid)).build();
             filters.add(f);
         }
@@ -1391,9 +1413,7 @@ public class FlutterBluePlusPlugin implements
                             macDeviceScanned.add(result.getDevice().getAddress());
                         }
 
-                        Protos.ScanResult scanResult = ProtoMaker.from(result.getDevice(), result);
-
-                        invokeMethodUIThread("ScanResult", scanResult.toByteArray());
+                        invokeMethodUIThread("ScanResult", MessageMaker.from(result.getDevice(), result));
                     }
                 }
 
@@ -1441,7 +1461,7 @@ public class FlutterBluePlusPlugin implements
                 }
             }
 
-            invokeMethodUIThread("DeviceState", ProtoMaker.from(gatt.getDevice(), newState).toByteArray());
+            invokeMethodUIThread("DeviceState", MessageMaker.from(gatt.getDevice(), newState));
         }
 
         @Override
@@ -1449,14 +1469,17 @@ public class FlutterBluePlusPlugin implements
         {
             log(LogLevel.DEBUG, "[onServicesDiscovered] count: " + gatt.getServices().size() + " status: " + status);
 
-            Protos.DiscoverServicesResult.Builder p = Protos.DiscoverServicesResult.newBuilder();
-            p.setRemoteId(gatt.getDevice().getAddress());
+            // Protos.DiscoverServicesResult.Builder p = Protos.DiscoverServicesResult.newBuilder();
+            HashMap<String, Object> response = new HashMap<>();
+            response.put("remote_id", gatt.getDevice().getAddress());
+            List<Object> services = new ArrayList<Object>();
 
             for(BluetoothGattService s : gatt.getServices()) {
-                p.addServices(ProtoMaker.from(gatt.getDevice(), s, gatt));
+                services.add(MessageMaker.from(gatt.getDevice(), s, gatt));
             }
+            response.put("services", services);
 
-            invokeMethodUIThread("DiscoverServicesResult", p.build().toByteArray());
+            invokeMethodUIThread("DiscoverServicesResult", response);
         }
 
         @Override
@@ -1464,11 +1487,11 @@ public class FlutterBluePlusPlugin implements
         {
             log(LogLevel.DEBUG, "[onCharacteristicRead] uuid: " + characteristic.getUuid().toString() + " status: " + status);
 
-            Protos.ReadCharacteristicResponse.Builder p = Protos.ReadCharacteristicResponse.newBuilder();
-            p.setRemoteId(gatt.getDevice().getAddress());
-            p.setCharacteristic(ProtoMaker.from(gatt.getDevice(), characteristic, gatt));
+            HashMap<String, Object> response = new HashMap<>();
+            response.put("remote_id", gatt.getDevice().getAddress());
+            response.put("characteristic", MessageMaker.from(gatt.getDevice(), characteristic, gatt));
 
-            invokeMethodUIThread("ReadCharacteristicResponse", p.build().toByteArray());
+            invokeMethodUIThread("ReadCharacteristicResponse", response);
         }
 
         @Override
@@ -1476,16 +1499,16 @@ public class FlutterBluePlusPlugin implements
         {
             log(LogLevel.DEBUG, "[onCharacteristicWrite] uuid: " + characteristic.getUuid().toString() + " status: " + status);
 
-            Protos.WriteCharacteristicRequest.Builder request = Protos.WriteCharacteristicRequest.newBuilder();
-            request.setRemoteId(gatt.getDevice().getAddress());
-            request.setCharacteristicUuid(characteristic.getUuid().toString());
-            request.setServiceUuid(characteristic.getService().getUuid().toString());
+            HashMap<String, Object> request = new HashMap<>();
+            request.put("remote_id", gatt.getDevice().getAddress());
+            request.put("characteristic_uuid", characteristic.getUuid().toString());
+            request.put("service_uuid", characteristic.getService().getUuid().toString());
 
-            Protos.WriteCharacteristicResponse.Builder p = Protos.WriteCharacteristicResponse.newBuilder();
-            p.setRequest(request);
-            p.setSuccess(status == BluetoothGatt.GATT_SUCCESS);
+            HashMap<String, Object> response = new HashMap<>();
+            response.put("request", request);
+            response.put("success", status == BluetoothGatt.GATT_SUCCESS);
 
-            invokeMethodUIThread("WriteCharacteristicResponse", p.build().toByteArray());
+            invokeMethodUIThread("WriteCharacteristicResponse", response);
         }
 
         @Override
@@ -1493,11 +1516,11 @@ public class FlutterBluePlusPlugin implements
         {
             log(LogLevel.DEBUG, "[onCharacteristicChanged] uuid: " + characteristic.getUuid().toString());
 
-            Protos.OnCharacteristicChanged.Builder p = Protos.OnCharacteristicChanged.newBuilder();
-            p.setRemoteId(gatt.getDevice().getAddress());
-            p.setCharacteristic(ProtoMaker.from(gatt.getDevice(), characteristic, gatt));
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("remote_id", gatt.getDevice().getAddress());
+            map.put("characteristic", MessageMaker.from(gatt.getDevice(), characteristic, gatt));
 
-            invokeMethodUIThread("OnCharacteristicChanged", p.build().toByteArray());
+             invokeMethodUIThread("OnCharacteristicChanged", map);
         }
 
         @Override
@@ -1506,14 +1529,14 @@ public class FlutterBluePlusPlugin implements
             log(LogLevel.DEBUG, "[onDescriptorRead] uuid: " + descriptor.getUuid().toString() + " status: " + status);
 
             // Rebuild the ReadAttributeRequest and send back along with response
-            Protos.ReadDescriptorRequest.Builder r = Protos.ReadDescriptorRequest.newBuilder();
-            r.setRemoteId(gatt.getDevice().getAddress());
-            r.setCharacteristicUuid(descriptor.getCharacteristic().getUuid().toString());
-            r.setDescriptorUuid(descriptor.getUuid().toString());
+            HashMap<String, Object> request = new HashMap<>();
+            request.put("remote_id", gatt.getDevice().getAddress());
+            request.put("characteristic_uuid", descriptor.getCharacteristic().getUuid().toString());
+            request.put("descriptor_uuid", descriptor.getUuid().toString());
 
             if(descriptor.getCharacteristic().getService().getType() == BluetoothGattService.SERVICE_TYPE_PRIMARY) {
 
-                r.setServiceUuid(descriptor.getCharacteristic().getService().getUuid().toString());
+                request.put("service_uuid", descriptor.getCharacteristic().getService().getUuid().toString());
 
             } else {
 
@@ -1523,8 +1546,8 @@ public class FlutterBluePlusPlugin implements
 
                         if(ss.getUuid().equals(descriptor.getCharacteristic().getService().getUuid())) {
 
-                            r.setServiceUuid(s.getUuid().toString());
-                            r.setSecondaryServiceUuid(ss.getUuid().toString());
+                            request.put("service_uuid", s.getUuid().toString());
+                            request.put("secondary_service_uuid", ss.getUuid().toString());
 
                             break;
                         }
@@ -1532,11 +1555,11 @@ public class FlutterBluePlusPlugin implements
                 }
             }
 
-            Protos.ReadDescriptorResponse.Builder p = Protos.ReadDescriptorResponse.newBuilder();
-            p.setRequest(r);
-            p.setValue(ByteString.copyFrom(descriptor.getValue()));
+            HashMap<String, Object> response = new HashMap<>();
+            response.put("request", request);
+            response.put("value", descriptor.getValue());
 
-            invokeMethodUIThread("ReadDescriptorResponse", p.build().toByteArray());
+            invokeMethodUIThread("ReadDescriptorResponse", response);
         }
 
         @Override
@@ -1544,27 +1567,27 @@ public class FlutterBluePlusPlugin implements
         {
             log(LogLevel.DEBUG, "[onDescriptorWrite] uuid: " + descriptor.getUuid().toString() + " status: " + status);
 
-            Protos.WriteDescriptorRequest.Builder request = Protos.WriteDescriptorRequest.newBuilder();
-            request.setRemoteId(gatt.getDevice().getAddress());
-            request.setDescriptorUuid(descriptor.getUuid().toString());
-            request.setCharacteristicUuid(descriptor.getCharacteristic().getUuid().toString());
-            request.setServiceUuid(descriptor.getCharacteristic().getService().getUuid().toString());
+            HashMap<String, Object> request = new HashMap<>();
+            request.put("remote_id", gatt.getDevice().getAddress());
+            request.put("descriptor_uuid", descriptor.getUuid().toString());
+            request.put("characteristic_uuid", descriptor.getCharacteristic().getUuid().toString());
+            request.put("uuid", descriptor.getCharacteristic().getService().getUuid().toString());
 
-            Protos.WriteDescriptorResponse.Builder p = Protos.WriteDescriptorResponse.newBuilder();
-            p.setRequest(request);
-            p.setSuccess(status == BluetoothGatt.GATT_SUCCESS);
+            HashMap<String, Object> response = new HashMap<>();
+            response.put("request", request);
+            response.put("success", status == BluetoothGatt.GATT_SUCCESS);
 
-            invokeMethodUIThread("WriteDescriptorResponse", p.build().toByteArray());
+            // invokeMethodUIThread("WriteDescriptorResponse", p.build().toByteArray());
 
             if(descriptor.getUuid().compareTo(CCCD_ID) == 0) {
 
                 // SetNotificationResponse
-                Protos.SetNotificationResponse.Builder q = Protos.SetNotificationResponse.newBuilder();
-                q.setRemoteId(gatt.getDevice().getAddress());
-                q.setCharacteristic(ProtoMaker.from(gatt.getDevice(), descriptor.getCharacteristic(), gatt));
-                q.setSuccess(status == BluetoothGatt.GATT_SUCCESS);
+                HashMap<String, Object> notificationResponse = new HashMap<>();
+                notificationResponse.put("remote_id", gatt.getDevice().getAddress());
+                notificationResponse.put("characteristic", MessageMaker.from(gatt.getDevice(), descriptor.getCharacteristic(), gatt));
+                notificationResponse.put("success", status == BluetoothGatt.GATT_SUCCESS);
 
-                invokeMethodUIThread("SetNotificationResponse", q.build().toByteArray());
+                invokeMethodUIThread("SetNotificationResponse", notificationResponse);
             }
         }
 
@@ -1581,11 +1604,11 @@ public class FlutterBluePlusPlugin implements
 
             if(status == BluetoothGatt.GATT_SUCCESS) {
 
-                Protos.ReadRssiResult.Builder p = Protos.ReadRssiResult.newBuilder();
-                p.setRemoteId(gatt.getDevice().getAddress());
-                p.setRssi(rssi);
+                HashMap<String, Object> result = new HashMap<>();
+                result.put("remote_id", gatt.getDevice().getAddress());
+                result.put("rssi", rssi);
 
-                invokeMethodUIThread("ReadRssiResult", p.build().toByteArray());
+                invokeMethodUIThread("ReadRssiResult", result);
             }
         }
 
@@ -1603,11 +1626,11 @@ public class FlutterBluePlusPlugin implements
                         cache.mtu = mtu;
                     }
 
-                    Protos.MtuSizeResponse.Builder p = Protos.MtuSizeResponse.newBuilder();
-                    p.setRemoteId(gatt.getDevice().getAddress());
-                    p.setMtu(mtu);
+                    HashMap<String, Object> result = new HashMap<>();
+                    result.put("remote_id", gatt.getDevice().getAddress());
+                    result.put("mtu", mtu);
 
-                    invokeMethodUIThread("MtuSize", p.build().toByteArray());
+                    invokeMethodUIThread("MtuSize", result);
                 }
             }
         }
@@ -1627,13 +1650,13 @@ public class FlutterBluePlusPlugin implements
         }
     }
 
-    private void invokeMethodUIThread(final String name, final byte[] byteArray)
+    private void invokeMethodUIThread(final String name, HashMap<String, Object> data)
     {
         new Handler(Looper.getMainLooper()).post(() -> {
             synchronized (tearDownLock) {
                 //Could already be teared down at this moment
                 if (channel != null) {
-                    channel.invokeMethod(name, byteArray);
+//                    channel.invokeMethod(name, data);
                 } else {
                     Log.w(TAG, "Tried to call " + name + " on closed channel");
                 }
