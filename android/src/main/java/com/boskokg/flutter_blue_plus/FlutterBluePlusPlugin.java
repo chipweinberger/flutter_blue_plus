@@ -429,7 +429,7 @@ public class FlutterBluePlusPlugin implements
 
                         int scanMode = (int)data.get("android_scan_mode");
 
-//                        List<ScanFilter> filters = fetchFilters(p);
+                        List<ScanFilter> filters = fetchFilters(data);
 
                         ScanSettings settings;
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -443,9 +443,7 @@ public class FlutterBluePlusPlugin implements
                                 .setScanMode(scanMode).build();
                         }
 
-                        scanner.startScan(null, settings, getScanCallback());
-
-//                        scanner.startScan(filters, settings, getScanCallback());
+                        scanner.startScan(filters, settings, getScanCallback());
 
                         result.success(null);
 
@@ -1352,13 +1350,14 @@ public class FlutterBluePlusPlugin implements
         List<ScanFilter> filters;
 
         List<String> servicesUuids = (List<String>)scanSettings.get("service_uuids");
-        int macCount = (int)scanSettings.get("mac_count");
+        int macCount = (int)scanSettings.getOrDefault("mac_count", 0);
         int serviceCount = servicesUuids.size();
         int count = macCount + serviceCount;
 
         filters = new ArrayList<>(count);
 
-        List<String> macAddresses = (List<String>)scanSettings.get("mac_addresses");
+        List<String> noMacAddresses = new ArrayList<String>();
+        List<String> macAddresses = (List<String>)scanSettings.getOrDefault("mac_addresses", noMacAddresses);
 
         for (int i = 0; i < macCount; i++) {
             String macAddress = macAddresses.get(i);
