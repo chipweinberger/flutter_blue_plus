@@ -40,6 +40,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 @property(nonatomic) NSMutableArray *characteristicsThatNeedDiscovered;
 @property(nonatomic) NSMutableDictionary *dataWaitingToWriteWithoutResponse;
 @property(nonatomic) LogLevel logLevel;
+@property(nonatomic, strong) CBPeripheral *fxPeripheral;
 @end
 
 @implementation FlutterBluePlusPlugin
@@ -203,12 +204,21 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             }
             if (peripheral == nil)
             {
+                NSLog(@"findPeripheral --");
+                peripheral = [self findPeripheral:remoteId];
+                NSLog(@"findPeripheral %@", [peripheral.identifier UUIDString]);
+            }
+            if (peripheral == nil)
+            {
                 result([FlutterError errorWithCode:@"connect" message:@"Peripheral not found" details:nil]);
                 return;
             }
 
             // TODO: Implement Connect options (#36)
-            [_centralManager connectPeripheral:peripheral options:nil];
+            NSLog(@"connecting -- %@", [peripheral.identifier UUIDString]);
+            self.fxPeripheral = peripheral;
+
+            [_centralManager connectPeripheral:self.fxPeripheral options:nil];
             result(@(true));
         }
         @catch (NSException *e)
