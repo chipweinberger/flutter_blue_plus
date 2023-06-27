@@ -435,6 +435,7 @@ public class FlutterBluePlusPlugin implements
                         }
 
                         int scanMode = p.getAndroidScanMode();
+                        allowDuplicates = p.getAllowDuplicates();
 
                         List<ScanFilter> filters = fetchFilters(p);
 
