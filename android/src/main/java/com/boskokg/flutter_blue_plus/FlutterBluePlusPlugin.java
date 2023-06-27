@@ -892,7 +892,7 @@ public class FlutterBluePlusPlugin implements
                     String deviceId = (String)call.arguments;
                     
                     BluetoothDeviceCache cache = mDevices.get(deviceId);
-                    if(cache != null) {
+                    if(cache == null) {
                         result.error("mtu", "no instance of BluetoothGatt, have you connected first?", null);
                         break;
                     }
@@ -920,7 +920,15 @@ public class FlutterBluePlusPlugin implements
 
                     int mtu = request.getMtu();
 
-                    result.success(null);
+                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        if(gatt.requestMtu(mtu)) {
+                            result.success(null);
+                        } else {
+                            result.error("requestMtu", "gatt.requestMtu returned false", null);
+                        }
+                    } else {
+                        result.error("requestMtu", "Only supported on devices >= API 21 (Lollipop). This device == " + Build.VERSION.SDK_INT, null);
+                    }
 
                 } catch(Exception e) {
                     result.error("requestMtu", e.getMessage(), e);
