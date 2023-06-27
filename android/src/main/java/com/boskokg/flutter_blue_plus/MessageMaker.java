@@ -136,7 +136,7 @@ public class MessageMaker {
 
     static HashMap<String, Object> from(BluetoothDevice device, BluetoothGattCharacteristic characteristic, BluetoothGatt gatt) {
         HashMap<String, Object> ch = new HashMap<>();
-        ch.put("remoteId", device.getAddress());
+        ch.put("remote_id", device.getAddress());
         ch.put("uuid", characteristic.getUuid().toString());
         ch.put("properties", from(characteristic.getProperties()));
         if(characteristic.getValue() != null)
