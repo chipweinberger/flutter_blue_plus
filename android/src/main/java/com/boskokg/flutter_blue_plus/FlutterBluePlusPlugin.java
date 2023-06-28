@@ -920,14 +920,10 @@ public class FlutterBluePlusPlugin implements
 
                     int mtu = request.getMtu();
 
-                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        if(gatt.requestMtu(mtu)) {
-                            result.success(null);
-                        } else {
-                            result.error("requestMtu", "gatt.requestMtu returned false", null);
-                        }
+                    if(gatt.requestMtu(mtu)) {
+                        result.success(null);
                     } else {
-                        result.error("requestMtu", "Only supported on devices >= API 21 (Lollipop). This device == " + Build.VERSION.SDK_INT, null);
+                        result.error("requestMtu", "gatt.requestMtu returned false", null);
                     }
 
                 } catch(Exception e) {
