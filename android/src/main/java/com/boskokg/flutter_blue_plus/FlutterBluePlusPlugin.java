@@ -426,8 +426,9 @@ public class FlutterBluePlusPlugin implements
                         if(scanner == null) {
                             throw new Exception("getBluetoothLeScanner() is null. Is the Adapter on?");
                         }
-
+                        
                         int scanMode = (int)data.get("android_scan_mode");
+                        allowDuplicates = (boolean)data.get("allow_duplicates");
 
                         List<ScanFilter> filters = fetchFilters(data);
 
