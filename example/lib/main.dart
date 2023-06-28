@@ -13,7 +13,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'widgets.dart';
 
 void main() {
-
   if (Platform.isAndroid) {
     WidgetsFlutterBinding.ensureInitialized();
     [
@@ -26,7 +25,7 @@ void main() {
       runApp(const FlutterBlueApp());
     });
   } else {
-      runApp(const FlutterBlueApp());
+    runApp(const FlutterBlueApp());
   }
 }
 
@@ -73,7 +72,7 @@ class BluetoothOffScreen extends StatelessWidget {
               'Bluetooth Adapter is ${state != null ? state.toString().substring(15) : 'not available'}.',
               style: Theme.of(context)
                   .primaryTextTheme
-                  .subtitle2
+                  .titleSmall
                   ?.copyWith(color: Colors.white),
             ),
             ElevatedButton(
@@ -101,8 +100,8 @@ class FindDevicesScreen extends StatelessWidget {
           ElevatedButton(
             child: const Text('TURN OFF'),
             style: ElevatedButton.styleFrom(
-              primary: Colors.black,
-              onPrimary: Colors.white,
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
             ),
             onPressed: Platform.isAndroid
                 ? () => FlutterBluePlus.instance.turnOff()
@@ -112,7 +111,7 @@ class FindDevicesScreen extends StatelessWidget {
       ),
       body: RefreshIndicator(
         onRefresh: () => FlutterBluePlus.instance
-            .startScan(timeout: const Duration(seconds: 4)),
+            .startScan(timeout: const Duration(seconds: 15)),
         child: SingleChildScrollView(
           child: Column(
             children: <Widget>[
@@ -181,8 +180,7 @@ class FindDevicesScreen extends StatelessWidget {
           } else {
             return FloatingActionButton(
                 child: const Icon(Icons.search),
-                onPressed: () => FlutterBluePlus.instance
-                    .startScan(timeout: const Duration(seconds: 4)));
+                onPressed: () => FlutterBluePlus.instance.startScan());
           }
         },
       ),
@@ -294,12 +292,14 @@ class DeviceScreen extends StatelessWidget {
                         : const Icon(Icons.bluetooth_disabled),
                     snapshot.data == BluetoothDeviceState.connected
                         ? StreamBuilder<int>(
-                        stream: rssiStream(),
-                        builder: (context, snapshot) {
-                          return Text(snapshot.hasData ? '${snapshot.data}dBm' : '',
-                              style: Theme.of(context).textTheme.caption);
-                        })
-                        : Text('', style: Theme.of(context).textTheme.caption),
+                            stream: rssiStream(),
+                            builder: (context, snapshot) {
+                              return Text(
+                                  snapshot.hasData ? '${snapshot.data}dBm' : '',
+                                  style: Theme.of(context).textTheme.bodySmall);
+                            })
+                        : Text('',
+                            style: Theme.of(context).textTheme.bodySmall),
                   ],
                 ),
                 title: Text(
@@ -356,7 +356,7 @@ class DeviceScreen extends StatelessWidget {
       ),
     );
   }
-  
+
   Stream<int> rssiStream() async* {
     var isConnected = true;
     final subscription = device.state.listen((state) {

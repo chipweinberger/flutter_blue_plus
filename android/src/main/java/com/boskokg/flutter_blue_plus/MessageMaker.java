@@ -35,6 +35,17 @@ public class MessageMaker {
 
     private static final UUID CCCD_UUID = UUID.fromString("000002902-0000-1000-8000-00805f9b34fb");
 
+    private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+    public static String toHexString(byte[] bytes) {
+        char[] hexChars = new char[bytes.length * 2];
+        for (int j = 0; j < bytes.length; j++) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
+            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
+        }
+        return new String(hexChars);
+    }
+
     static HashMap<String, Object> from(BluetoothDevice device, byte[] advertisementData, int rssi) {
         HashMap<String, Object> scanResult = new HashMap<>();
         scanResult.put("device", from(device));
@@ -71,11 +82,11 @@ public class MessageMaker {
             // Manufacturer Specific Data
             SparseArray<byte[]> msd = scanRecord.getManufacturerSpecificData();
             if(msd != null) {
-                HashMap<String, Object> manufacturerData = new HashMap<String, Object>();
+                HashMap<Integer, String> manufacturerData = new HashMap<Integer, String>();
                 for (int i = 0; i < msd.size(); i++) {
                     int key = msd.keyAt(i);
                     byte[] value = msd.valueAt(i);
-                    manufacturerData.put(Integer.toString(key), value);
+                    manufacturerData.put(key, toHexString(value));
                 }
                 advertisementData.put("manufacturer_data", manufacturerData);
             }
@@ -86,7 +97,7 @@ public class MessageMaker {
                 for (Map.Entry<ParcelUuid, byte[]> entry : serviceData.entrySet()) {
                     ParcelUuid key = entry.getKey();
                     byte[] value = entry.getValue();
-                    serviceDataMap.put(key.getUuid().toString(), value);
+                    serviceDataMap.put(key.getUuid().toString(), toHexString(value));
                 }
                 advertisementData.put("service_data", serviceDataMap);
             }

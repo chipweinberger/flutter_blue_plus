@@ -1576,7 +1576,7 @@ public class FlutterBluePlusPlugin implements
             response.put("request", request);
             response.put("success", status == BluetoothGatt.GATT_SUCCESS);
 
-            // invokeMethodUIThread("WriteDescriptorResponse", p.build().toByteArray());
+            invokeMethodUIThread("WriteDescriptorResponse", response);
 
             if(descriptor.getUuid().compareTo(CCCD_ID) == 0) {
 
@@ -1655,7 +1655,7 @@ public class FlutterBluePlusPlugin implements
             synchronized (tearDownLock) {
                 //Could already be teared down at this moment
                 if (channel != null) {
-//                    channel.invokeMethod(name, data);
+                   channel.invokeMethod(name, data);
                 } else {
                     Log.w(TAG, "Tried to call " + name + " on closed channel");
                 }

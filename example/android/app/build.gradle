@@ -22,10 +22,13 @@ if (flutterVersionName == null) {
 }
 
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
+    namespace "com.boskokg.flutter_blue_plus_example"
     compileSdkVersion 33
+    ndkVersion flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -34,7 +37,7 @@ android {
 
     defaultConfig {
         applicationId "com.boskokg.flutter_blue_plus_example"
-        minSdkVersion 19
+        minSdkVersion 26
         targetSdkVersion 33
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
