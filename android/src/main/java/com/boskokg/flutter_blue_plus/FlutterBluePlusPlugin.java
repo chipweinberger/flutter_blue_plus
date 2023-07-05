@@ -241,117 +241,75 @@ public class FlutterBluePlusPlugin implements
 
             case "setLogLevel":
             {
-                try {
-                    int idx = (int)call.arguments;
+                int idx = (int)call.arguments;
 
-                    // set global var
-                    logLevel = LogLevel.values()[idx];
+                // set global var
+                logLevel = LogLevel.values()[idx];
 
-                    result.success(null);
-
-                } catch(Exception e) {
-                    result.error("setLogLevel", e.getMessage(), e);
-                }
-                break;
+                result.success(null);
             }
 
             case "state":
             {
+                // get state, if we can
+                int state = -1;
                 try {
-                    // get state, if we can
-                    int state = -1;
-                    try {
-                        state = mBluetoothAdapter.getState();
-                    } catch (Exception e) {}
-                    
-                    int convertedState;
-                    switch (state) {
-                        case BluetoothAdapter.STATE_OFF:          convertedState = 6;           break;
-                        case BluetoothAdapter.STATE_ON:           convertedState = 4;           break;
-                        case BluetoothAdapter.STATE_TURNING_OFF:  convertedState = 5;           break;
-                        case BluetoothAdapter.STATE_TURNING_ON:   convertedState = 3;           break;
-                        default:                                  convertedState = 0;           break;
-                    }
-
-                    HashMap<String, Object> map = new HashMap<>();
-                    map.put("state", convertedState);
-
-                    result.success(map);
-
-                } catch(Exception e) {
-                    result.error("state", e.getMessage(), e);
+                    state = mBluetoothAdapter.getState();
+                } catch (Exception e) {}
+                
+                int convertedState;
+                switch (state) {
+                    case BluetoothAdapter.STATE_OFF:          convertedState = 6;           break;
+                    case BluetoothAdapter.STATE_ON:           convertedState = 4;           break;
+                    case BluetoothAdapter.STATE_TURNING_OFF:  convertedState = 5;           break;
+                    case BluetoothAdapter.STATE_TURNING_ON:   convertedState = 3;           break;
+                    default:                                  convertedState = 0;           break;
                 }
-                break;
+
+                HashMap<String, Object> map = new HashMap<>();
+                map.put("state", convertedState);
+
+                result.success(map);
             }
 
             case "isAvailable":
             {
-                try {
-                    result.success(mBluetoothAdapter != null);
-                } catch(Exception e) {
-                    result.error("isAvailable", e.getMessage(), e);
-                }
-                break;
+                result.success(mBluetoothAdapter != null);
             }
 
             case "isOn":
             {
-                try {
-                    result.success(mBluetoothAdapter.isEnabled());
-                } catch(Exception e) {
-                    result.error("isOn", e.getMessage(), e);
-                }
-                break;
+                result.success(mBluetoothAdapter.isEnabled());
             }
 
             case "name":
             {
-                try {
-
-                    String name = mBluetoothAdapter.getName();
-
-                    result.success(name != null ? name : "");
-
-                } catch(Exception e) {
-                    result.error("name", e.getMessage(), e);
-                }
-                break;
+                String name = mBluetoothAdapter.getName();
+                result.success(name != null ? name : "");
             }
 
             case "turnOn":
             {
-                try {
-                    if (mBluetoothAdapter.isEnabled()) {
-                        result.success(true); // no work to do
-                    }
-
-                    Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-
-                    activityBinding.getActivity().startActivityForResult(enableBtIntent, enableBluetoothRequestCode);
-
-                    result.success(true);
-
-                } catch(Exception e) {
-                    result.error("turnOn", e.getMessage(), e);
+                if (mBluetoothAdapter.isEnabled()) {
+                    result.success(true); // no work to do
                 }
-                break;
+
+                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+
+                activityBinding.getActivity().startActivityForResult(enableBtIntent, enableBluetoothRequestCode);
+
+                result.success(true);
             }
 
             case "turnOff":
             {
-                try {
-                    if (mBluetoothAdapter.isEnabled() == false) {
-                        result.success(true); // no work to do
-                    }
-
-                    boolean disabled = mBluetoothAdapter.disable();
-
-                    result.success(disabled);
-
-                } catch(Exception e) {
-                    result.error("turnOff", e.getMessage(), e);
+                if (mBluetoothAdapter.isEnabled() == false) {
+                    result.success(true); // no work to do
                 }
-                break;
+
+                boolean disabled = mBluetoothAdapter.disable();
+
+                result.success(disabled);
             }
 
             case "startScan":
@@ -421,20 +379,13 @@ public class FlutterBluePlusPlugin implements
 
             case "stopScan":
             {
-                try {
-
-                    BluetoothLeScanner scanner = mBluetoothAdapter.getBluetoothLeScanner();
-                    
-                    if(scanner != null) {
-                        scanner.stopScan(getScanCallback());
-                    }
-
-                    result.success(null);
-
-                } catch(Exception e) {
-                    result.error("stopScan", e.getMessage(), e);
+                BluetoothLeScanner scanner = mBluetoothAdapter.getBluetoothLeScanner();
+                
+                if(scanner != null) {
+                    scanner.stopScan(getScanCallback());
                 }
-                break;
+
+                result.success(null);
             }
 
             case "getConnectedDevices":
@@ -474,22 +425,16 @@ public class FlutterBluePlusPlugin implements
 
             case "getBondedDevices":
             {
-                try {
-                    final Set<BluetoothDevice> bondedDevices = mBluetoothAdapter.getBondedDevices();
+                final Set<BluetoothDevice> bondedDevices = mBluetoothAdapter.getBondedDevices();
 
-                    HashMap<String, Object> response = new HashMap<String, Object>();
-                    List<HashMap<String,Object>> devices = new ArrayList<HashMap<String,Object>>();
-                    for (BluetoothDevice d : bondedDevices) {
-                        devices.add(MessageMaker.from(d));
-                    }
-                    response.put("devices", devices);
-
-                    result.success(response);
-
-                } catch(Exception e) {
-                    result.error("getBondedDevices", e.getMessage(), e);
+                HashMap<String, Object> response = new HashMap<String, Object>();
+                List<HashMap<String,Object>> devices = new ArrayList<HashMap<String,Object>>();
+                for (BluetoothDevice d : bondedDevices) {
+                    devices.add(MessageMaker.from(d));
                 }
-                break;
+                response.put("devices", devices);
+
+                result.success(response);
             }
 
             case "connect":
@@ -555,499 +500,394 @@ public class FlutterBluePlusPlugin implements
 
             case "pair":
             {
-                try {
-                    String deviceId = (String)call.arguments;
+                String deviceId = (String)call.arguments;
 
-                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(deviceId);
+                BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(deviceId);
 
-                    device.createBond();
+                device.createBond();
 
-                    result.success(null);
-                    
-                } catch(Exception e) {
-                    result.error("pair", e.getMessage(), e);
-                }
-                break;
+                result.success(null);
             }
 
             case "clearGattCache":
             {
-                try {
-                    String deviceId = (String)call.arguments;
+                String deviceId = (String)call.arguments;
 
-                    BluetoothDeviceCache cache = mDevices.get(deviceId);
-                    if (cache == null) {
-                        result.success(null); // no work to do 
-                        break;
-                    }
-
-                    BluetoothGatt gattServer = cache.gatt;
-                    final Method refreshMethod = gattServer.getClass().getMethod("refresh");
-                    if (refreshMethod == null) {
-                        result.error("clearGattCache", "unsupported on this android version", null);
-                        break;
-                    }
-
-                    refreshMethod.invoke(gattServer);
-
-                    result.success(null);
-
-                } catch(Exception e) {
-                    result.error("clearGattCache", e.getMessage(), e);
+                BluetoothDeviceCache cache = mDevices.get(deviceId);
+                if (cache == null) {
+                    result.success(null); // no work to do 
+                    break;
                 }
-                break;
+
+                BluetoothGatt gattServer = cache.gatt;
+                final Method refreshMethod = gattServer.getClass().getMethod("refresh");
+                if (refreshMethod == null) {
+                    result.error("clearGattCache", "unsupported on this android version", null);
+                    break;
+                }
+
+                refreshMethod.invoke(gattServer);
+
+                result.success(null);
             }
 
             case "disconnect":
             {
-                try {
-                    String deviceId = (String)call.arguments;
-                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(deviceId);
-                    BluetoothDeviceCache cache = mDevices.remove(deviceId);
+                String deviceId = (String)call.arguments;
+                BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(deviceId);
+                BluetoothDeviceCache cache = mDevices.remove(deviceId);
 
-                    if(cache != null) {
+                if(cache != null) {
 
-                        BluetoothGatt gattServer = cache.gatt;
+                    BluetoothGatt gattServer = cache.gatt;
 
-                        gattServer.disconnect();
+                    gattServer.disconnect();
 
-                        int state = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
-                        if(state == BluetoothProfile.STATE_DISCONNECTED) {
-                            gattServer.close();
-                        }
+                    int state = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
+                    if(state == BluetoothProfile.STATE_DISCONNECTED) {
+                        gattServer.close();
                     }
-
-                    result.success(null);
-
-                } catch(Exception e) {
-                    result.error("disconnect", e.getMessage(), e);
                 }
-                break;
+
+                result.success(null);
             }
 
             case "deviceState":
             {
-                try {
-                    String deviceId = (String)call.arguments;
+                String deviceId = (String)call.arguments;
 
-                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(deviceId);
+                BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(deviceId);
 
-                    int state = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
+                int state = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
 
-                    result.success(MessageMaker.from(device, state));
-
-                } catch(Exception e) {
-                    result.error("deviceState", e.getMessage(), e);
-                }
-                break;
+                result.success(MessageMaker.from(device, state));
             }
 
             case "discoverServices":
             {
-                try {
-                    String deviceId = (String)call.arguments;
+                String deviceId = (String)call.arguments;
 
-                    BluetoothGatt gatt = locateGatt(deviceId);
+                BluetoothGatt gatt = locateGatt(deviceId);
 
-                    if(gatt.discoverServices() == false) {
-                        result.error("discoverServices", "unknown reason", null);
-                        break;
-                    }
-
-                    result.success(null);
-
-                } catch(Exception e) {
-                    result.error("discoverServices", e.getMessage(), e);
+                if(gatt.discoverServices() == false) {
+                    result.error("discoverServices", "unknown reason", null);
+                    break;
                 }
-                break;
+
+                result.success(null);
             }
 
             case "services":
             {
-                try {
-                    String deviceId = (String)call.arguments;
+                String deviceId = (String)call.arguments;
 
-                    BluetoothGatt gatt = locateGatt(deviceId);
+                BluetoothGatt gatt = locateGatt(deviceId);
 
-                    HashMap<String, Object> map = new HashMap<>();
-                    map.put("remote_id", deviceId);
-                    
-                    List<Object> services = new ArrayList<>();
-                    for(BluetoothGattService s : gatt.getServices()){
-                        services.add(MessageMaker.from(gatt.getDevice(), s, gatt));
-                    }
-                    map.put("services", services);
-
-                    result.success(map);
-
-                } catch(Exception e) {
-                    result.error("services", e.getMessage(), e);
+                HashMap<String, Object> map = new HashMap<>();
+                map.put("remote_id", deviceId);
+                
+                List<Object> services = new ArrayList<>();
+                for(BluetoothGattService s : gatt.getServices()){
+                    services.add(MessageMaker.from(gatt.getDevice(), s, gatt));
                 }
-                break;
+                map.put("services", services);
+
+                result.success(map);
             }
 
             case "readCharacteristic":
             {
-                try {
-                    HashMap<String, Object> data = call.arguments();
-                    String remoteId =             (String) data.get("remote_id");
-                    String serviceUuid =          (String) data.get("service_uuid");
-                    String secondaryServiceUuid = (String) data.get("secondary_service_uuid");
-                    String characteristicUuid =   (String) data.get("characteristic_uuid");
+                HashMap<String, Object> data = call.arguments();
+                String remoteId =             (String) data.get("remote_id");
+                String serviceUuid =          (String) data.get("service_uuid");
+                String secondaryServiceUuid = (String) data.get("secondary_service_uuid");
+                String characteristicUuid =   (String) data.get("characteristic_uuid");
 
-                    BluetoothGatt gattServer = locateGatt(remoteId);
-                    BluetoothGattCharacteristic characteristic = locateCharacteristic(gattServer,
-                        serviceUuid, secondaryServiceUuid, characteristicUuid);
+                BluetoothGatt gattServer = locateGatt(remoteId);
+                BluetoothGattCharacteristic characteristic = locateCharacteristic(gattServer,
+                    serviceUuid, secondaryServiceUuid, characteristicUuid);
 
-                    if(gattServer.readCharacteristic(characteristic) == false) {
-                        result.error("read_characteristic_error",
-                            "unknown reason, may occur if readCharacteristic was called before last read finished.", null);
-                        break;
-                    }
-
-                    result.success(null);
-
-                } catch(Exception e) {
-                    result.error("read_characteristic_error", e.getMessage(), null);
+                if(gattServer.readCharacteristic(characteristic) == false) {
+                    result.error("read_characteristic_error",
+                        "unknown reason, may occur if readCharacteristic was called before last read finished.", null);
+                    break;
                 }
-                break;
+
+                result.success(null);
             }
 
             case "readDescriptor":
             {
+                HashMap<String, Object> data = call.arguments();
+                String remoteId =             (String) data.get("remote_id");
+                String serviceUuid =          (String) data.get("service_uuid");
+                String secondaryServiceUuid = (String) data.get("secondary_service_uuid");
+                String characteristicUuid =   (String) data.get("characteristic_uuid");
+                String descriptorUuid =       (String) data.get("descriptor_uuid");
 
-                try {
-                    HashMap<String, Object> data = call.arguments();
-                    String remoteId =             (String) data.get("remote_id");
-                    String serviceUuid =          (String) data.get("service_uuid");
-                    String secondaryServiceUuid = (String) data.get("secondary_service_uuid");
-                    String characteristicUuid =   (String) data.get("characteristic_uuid");
-                    String descriptorUuid =       (String) data.get("descriptor_uuid");
+                BluetoothGatt gattServer = locateGatt(remoteId);
 
-                    BluetoothGatt gattServer = locateGatt(remoteId);
+                BluetoothGattCharacteristic characteristic = locateCharacteristic(gattServer,
+                    serviceUuid, secondaryServiceUuid, characteristicUuid);
 
-                    BluetoothGattCharacteristic characteristic = locateCharacteristic(gattServer,
-                       serviceUuid, secondaryServiceUuid, characteristicUuid);
+                BluetoothGattDescriptor descriptor = locateDescriptor(characteristic, descriptorUuid);
 
-                    BluetoothGattDescriptor descriptor = locateDescriptor(characteristic, descriptorUuid);
-
-                    if(gattServer.readDescriptor(descriptor) == false) {
-                        result.error("readDescriptor",
-                            "unknown reason, may occur if readDescriptor was called before last read finished.", null);
-                        break;
-                    }
-
-                    result.success(null);
-
-                } catch(Exception e) {
-                    result.error("readDescriptor", e.getMessage(), null);
+                if(gattServer.readDescriptor(descriptor) == false) {
+                    result.error("readDescriptor",
+                        "unknown reason, may occur if readDescriptor was called before last read finished.", null);
+                    break;
                 }
-                break;
+
+                result.success(null);
             }
 
             case "writeCharacteristic":
             {
-                try {
-                    HashMap<String, Object> data = call.arguments();
-                    String remoteId =             (String) data.get("remote_id");
-                    String serviceUuid =          (String) data.get("service_uuid");
-                    String secondaryServiceUuid = (String) data.get("secondary_service_uuid");
-                    String characteristicUuid =   (String) data.get("characteristic_uuid");
-                    List<Byte> value =        (List<Byte>) data.get("value");
-                    int writeType =                  (int) data.get("write_type");
+                HashMap<String, Object> data = call.arguments();
+                String remoteId =             (String) data.get("remote_id");
+                String serviceUuid =          (String) data.get("service_uuid");
+                String secondaryServiceUuid = (String) data.get("secondary_service_uuid");
+                String characteristicUuid =   (String) data.get("characteristic_uuid");
+                List<Byte> value =        (List<Byte>) data.get("value");
+                int writeType =                  (int) data.get("write_type");
 
-                    BluetoothGatt gattServer = locateGatt(remoteId);
+                BluetoothGatt gattServer = locateGatt(remoteId);
 
-                    BluetoothGattCharacteristic characteristic = locateCharacteristic(gattServer,
-                       serviceUuid, secondaryServiceUuid, characteristicUuid);
+                BluetoothGattCharacteristic characteristic = locateCharacteristic(gattServer,
+                    serviceUuid, secondaryServiceUuid, characteristicUuid);
 
-                    // Set Value
-
-
-                    byte[] val = new byte[value.size()];
-                    for(int i = 0; i < value.size(); i++) {
-                        val[i] = value.get(i).byteValue();
-                    }
-
-                    if(!characteristic.setValue(val)) {
-                        result.error("writeCharacteristic", "could not set the local value of characteristic", null);
-                        break;
-                    }
-
-                    // Write type
-                    if(writeType == 1) {
-                        characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
-                    } else {
-                        characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
-                    }
-
-                    // Write Char
-                    if(!gattServer.writeCharacteristic(characteristic)){
-                        result.error("writeCharacteristic", "writeCharacteristic failed", null);
-                        break;
-                    }
-
-                    result.success(null);
-
-                } catch(Exception e) {
-                    result.error("writeCharacteristic", e.getMessage(), null);
+                byte[] val = new byte[value.size()];
+                for(int i = 0; i < value.size(); i++) {
+                    val[i] = value.get(i).byteValue();
                 }
-                break;
+
+                if(!characteristic.setValue(val)) {
+                    result.error("writeCharacteristic", "could not set the local value of characteristic", null);
+                    break;
+                }
+
+                // Write type
+                if(writeType == 1) {
+                    characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
+                } else {
+                    characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
+                }
+
+                // Write Char
+                if(!gattServer.writeCharacteristic(characteristic)){
+                    result.error("writeCharacteristic", "writeCharacteristic failed", null);
+                    break;
+                }
+
+                result.success(null);
             }
 
             case "writeDescriptor":
             {
-                try {
-                    HashMap<String, Object> data = call.arguments();
-                    String remoteId =             (String) data.get("remote_id");
-                    String serviceUuid =          (String) data.get("service_uuid");
-                    String secondaryServiceUuid = (String) data.get("secondary_service_uuid");
-                    String characteristicUuid =   (String) data.get("characteristic_uuid");
-                    String descriptorUuid =       (String) data.get("descriptor_uuid");
-                    List<Byte> value =        (List<Byte>) data.get("value");
+                HashMap<String, Object> data = call.arguments();
+                String remoteId =             (String) data.get("remote_id");
+                String serviceUuid =          (String) data.get("service_uuid");
+                String secondaryServiceUuid = (String) data.get("secondary_service_uuid");
+                String characteristicUuid =   (String) data.get("characteristic_uuid");
+                String descriptorUuid =       (String) data.get("descriptor_uuid");
+                List<Byte> value =        (List<Byte>) data.get("value");
 
-                    byte[] val = new byte[value.size()];
-                    for(int i = 0; i < value.size(); i++) {
-                        val[i] = value.get(i).byteValue();
-                    }
+                byte[] val = new byte[value.size()];
+                for(int i = 0; i < value.size(); i++) {
+                    val[i] = value.get(i).byteValue();
+                }
 
-                    BluetoothGatt gattServer = locateGatt(remoteId);
+                BluetoothGatt gattServer = locateGatt(remoteId);
 
-                    BluetoothGattCharacteristic characteristic = locateCharacteristic(gattServer,
-                       serviceUuid, secondaryServiceUuid, characteristicUuid);
+                BluetoothGattCharacteristic characteristic = locateCharacteristic(gattServer,
+                    serviceUuid, secondaryServiceUuid, characteristicUuid);
 
-                    BluetoothGattDescriptor descriptor = locateDescriptor(characteristic, descriptorUuid);
+                BluetoothGattDescriptor descriptor = locateDescriptor(characteristic, descriptorUuid);
 
-                    // Set descriptor
-                    if(!descriptor.setValue(val)){
-                        result.error("write_descriptor_error", "could not set the local value for descriptor", null);
-                        break;
-                    }
+                // Set descriptor
+                if(!descriptor.setValue(val)){
+                    result.error("write_descriptor_error", "could not set the local value for descriptor", null);
+                    break;
+                }
 
-                    // Write descriptor
-                    if(!gattServer.writeDescriptor(descriptor)){
-                        result.error("write_descriptor_error", "writeCharacteristic failed", null);
-                        break;
-                    }
-
-                } catch(Exception e) {
-                    result.error("writeDescriptor", e.getMessage(), null);
+                // Write descriptor
+                if(!gattServer.writeDescriptor(descriptor)){
+                    result.error("write_descriptor_error", "writeCharacteristic failed", null);
+                    break;
                 }
 
                 result.success(null);
-                break;
             }
 
             case "setNotification":
             {
-                try {
-                    HashMap<String, Object> data = call.arguments();
-                    String remoteId =             (String) data.get("remote_id");
-                    String serviceUuid =          (String) data.get("service_uuid");
-                    String secondaryServiceUuid = (String) data.get("secondary_service_uuid");
-                    String characteristicUuid =   (String) data.get("characteristic_uuid");
-                    String descriptorUuid =       (String) data.get("descriptor_uuid");
-                    boolean enable =             (boolean) data.get("enable");
-                    List<Byte> value =        (List<Byte>) data.get("value");
-                    int properties =                 (int) data.get("properties");
+                HashMap<String, Object> data = call.arguments();
+                String remoteId =             (String) data.get("remote_id");
+                String serviceUuid =          (String) data.get("service_uuid");
+                String secondaryServiceUuid = (String) data.get("secondary_service_uuid");
+                String characteristicUuid =   (String) data.get("characteristic_uuid");
+                String descriptorUuid =       (String) data.get("descriptor_uuid");
+                boolean enable =             (boolean) data.get("enable");
+                List<Byte> value =        (List<Byte>) data.get("value");
+                int properties =                 (int) data.get("properties");
 
-                    BluetoothGatt gattServer = locateGatt(remoteId);
+                BluetoothGatt gattServer = locateGatt(remoteId);
 
-                    BluetoothGattCharacteristic characteristic = locateCharacteristic(gattServer,
-                        serviceUuid, secondaryServiceUuid, characteristicUuid);
+                BluetoothGattCharacteristic characteristic = locateCharacteristic(gattServer,
+                    serviceUuid, secondaryServiceUuid, characteristicUuid);
 
-                    BluetoothGattDescriptor cccDescriptor = characteristic.getDescriptor(CCCD_ID);
+                BluetoothGattDescriptor cccDescriptor = characteristic.getDescriptor(CCCD_ID);
 
-                    if(cccDescriptor == null) {
-                        //Some devices - including the widely used Bluno do not actually set the CCCD_ID.
-                        //thus setNotifications works perfectly (tested on Bluno) without cccDescriptor
-                        log(LogLevel.INFO, "could not locate CCCD descriptor for characteristic: " + characteristic.getUuid().toString());
+                if(cccDescriptor == null) {
+                    //Some devices - including the widely used Bluno do not actually set the CCCD_ID.
+                    //thus setNotifications works perfectly (tested on Bluno) without cccDescriptor
+                    log(LogLevel.INFO, "could not locate CCCD descriptor for characteristic: " + characteristic.getUuid().toString());
+                }
+
+                // start notifications
+                if(!gattServer.setCharacteristicNotification(characteristic, enable)){
+                    result.error("setNotification", 
+                        "could not set characteristic notifications to :" + enable, null);
+                    break;
+                }
+
+                // update descriptor value
+                if(cccDescriptor != null) {
+
+                    byte[] descriptorValue = null;
+
+                    // determine value 
+                    if(enable) {
+
+                        boolean canNotify = (properties & BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0;
+                        boolean canIndicate = (properties & BluetoothGattCharacteristic.PROPERTY_INDICATE) > 0;
+
+                        if(!canIndicate && !canNotify) {
+                            result.error("setNotification", "characteristic cannot notify or indicate", null);
+                            break;
+                        }
+
+                        if(canIndicate) {descriptorValue = BluetoothGattDescriptor.ENABLE_INDICATION_VALUE;}
+                        if(canNotify)   {descriptorValue = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE;}
+
+                    } else {
+                        descriptorValue  = BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE;
                     }
-
-                    // start notifications
-                    if(!gattServer.setCharacteristicNotification(characteristic, enable)){
-                        result.error("setNotification", 
-                            "could not set characteristic notifications to :" + enable, null);
+                    
+                    if (!cccDescriptor.setValue(descriptorValue)) {
+                        result.error("setNotification", "error setting descriptor value to: " + Arrays.toString(descriptorValue), null);
                         break;
                     }
 
-                    // update descriptor value
-                    if(cccDescriptor != null) {
-
-                        byte[] descriptorValue = null;
-
-                        // determine value 
-                        if(enable) {
-
-                            boolean canNotify = (properties & BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0;
-                            boolean canIndicate = (properties & BluetoothGattCharacteristic.PROPERTY_INDICATE) > 0;
-
-                            if(!canIndicate && !canNotify) {
-                                result.error("setNotification", "characteristic cannot notify or indicate", null);
-                                break;
-                            }
-
-                            if(canIndicate) {descriptorValue = BluetoothGattDescriptor.ENABLE_INDICATION_VALUE;}
-                            if(canNotify)   {descriptorValue = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE;}
-
-                        } else {
-                            descriptorValue  = BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE;
-                        }
-                        
-                        if (!cccDescriptor.setValue(descriptorValue)) {
-                            result.error("setNotification", "error setting descriptor value to: " + Arrays.toString(descriptorValue), null);
-                            break;
-                        }
-
-                        if (!gattServer.writeDescriptor(cccDescriptor)) {
-                            result.error("setNotification", "error writing descriptor", null);
-                            break;
-                        }
+                    if (!gattServer.writeDescriptor(cccDescriptor)) {
+                        result.error("setNotification", "error writing descriptor", null);
+                        break;
                     }
-
-                    result.success(null);
-
-                } catch(Exception e) {
-                    result.error("setNotification", e.getMessage(), null);
                 }
-                break;
+
+                result.success(null);
             }
 
             case "mtu":
             {
-                try {
-                    String deviceId = (String)call.arguments;
-                    
-                    BluetoothDeviceCache cache = mDevices.get(deviceId);
-                    if(cache == null) {
-                        result.error("mtu", "no instance of BluetoothGatt, have you connected first?", null);
-                        break;
-                    }
-
-                    HashMap<String, Object> response = new HashMap<String, Object>();
-                    response.put("remote_id", deviceId);
-                    response.put("mtu", cache.mtu);
-
-                    result.success(response);
-
-                } catch(Exception e) {
-                    result.error("mtu", e.getMessage(), e);
+                String deviceId = (String)call.arguments;
+                
+                BluetoothDeviceCache cache = mDevices.get(deviceId);
+                if(cache == null) {
+                    result.error("mtu", "no instance of BluetoothGatt, have you connected first?", null);
+                    break;
                 }
-                break;
+
+                HashMap<String, Object> response = new HashMap<String, Object>();
+                response.put("remote_id", deviceId);
+                response.put("mtu", cache.mtu);
+
+                result.success(response);
             }
 
             case "requestMtu":
             {
-                try {
-                    HashMap<String, Object> data = call.arguments();
-                    String remoteId = (String) data.get("remote_id");
-                    int mtu =            (int) data.get("mtu");
+                HashMap<String, Object> data = call.arguments();
+                String remoteId = (String) data.get("remote_id");
+                int mtu =            (int) data.get("mtu");
 
-                    BluetoothGatt gatt = locateGatt(remoteId);
+                BluetoothGatt gatt = locateGatt(remoteId);
 
-                    if(gatt.requestMtu(mtu) == false) {
-                        result.error("requestMtu", "gatt.requestMtu returned false", null);
-                        break;
-                    }
-
-                    result.success(null);
-
-                } catch(Exception e) {
-                    result.error("requestMtu", e.getMessage(), e);
+                if(gatt.requestMtu(mtu) == false) {
+                    result.error("requestMtu", "gatt.requestMtu returned false", null);
+                    break;
                 }
-                break;
+
+                result.success(null);
             }
 
             case "readRssi":
             {
-                try {
-                    String remoteId = (String)call.arguments;
-                    BluetoothGatt gatt = locateGatt(remoteId);
+                String remoteId = (String)call.arguments;
+                BluetoothGatt gatt = locateGatt(remoteId);
 
-                    if(gatt.readRemoteRssi() == false) {
-                        result.error("readRssi", "gatt.readRemoteRssi returned false", null);
-                        break;
-                    } 
+                if(gatt.readRemoteRssi() == false) {
+                    result.error("readRssi", "gatt.readRemoteRssi returned false", null);
+                    break;
+                } 
 
-                    result.success(null);
-
-                } catch(Exception e) {
-                    result.error("readRssi", e.getMessage(), e);
-                }
-                break;
+                result.success(null);
             }
 
             case "requestConnectionPriority":
             {
-                try {
-                    HashMap<String, Object> data = call.arguments();
-                    String remoteId =     (String) data.get("remote_id");
-                    int connectionPriority = (int) data.get("connection_priority");
+                HashMap<String, Object> data = call.arguments();
+                String remoteId =     (String) data.get("remote_id");
+                int connectionPriority = (int) data.get("connection_priority");
 
-                    BluetoothGatt gatt = locateGatt(remoteId);
+                BluetoothGatt gatt = locateGatt(remoteId);
 
-                    if(gatt.requestConnectionPriority(connectionPriority) == false) {
-                        result.error("requestConnectionPriority", "returned false", null);
-                        break;
-                    }
-
-                    result.success(null);
-
-                } catch(Exception e) {
-                    result.error("requestConnectionPriority", e.getMessage(), e);
+                if(gatt.requestConnectionPriority(connectionPriority) == false) {
+                    result.error("requestConnectionPriority", "returned false", null);
+                    break;
                 }
-                break;
+
+                result.success(null);
             }
 
             case "setPreferredPhy":
             {
-                try {
-                    // check version
-                    if(Build.VERSION.SDK_INT < 26) {
-                        result.error("setPreferredPhy", 
-                            "Only supported on devices >= API 26. This device == " + 
-                            Build.VERSION.SDK_INT, null);
-                        break;
-                    }
-
-                    HashMap<String, Object> data = call.arguments();
-                    String remoteId = (String) data.get("remote_id");
-                    int txPhy =          (int) data.get("tx_phy");
-                    int rxPhy =          (int) data.get("rx_phy");
-                    int phyOptions =     (int) data.get("phy_options");
-
-                    BluetoothGatt gatt = locateGatt(remoteId);
-
-                    gatt.setPreferredPhy(txPhy, rxPhy, phyOptions);
-                    result.success(null);
+                // check version
+                if(Build.VERSION.SDK_INT < 26) {
+                    result.error("setPreferredPhy", 
+                        "Only supported on devices >= API 26. This device == " + 
+                        Build.VERSION.SDK_INT, null);
                     break;
-
-                } catch(Exception e) {
-                    result.error("setPreferredPhy", e.getMessage(), e);
                 }
+
+                HashMap<String, Object> data = call.arguments();
+                String remoteId = (String) data.get("remote_id");
+                int txPhy =          (int) data.get("tx_phy");
+                int rxPhy =          (int) data.get("rx_phy");
+                int phyOptions =     (int) data.get("phy_options");
+
+                BluetoothGatt gatt = locateGatt(remoteId);
+
+                gatt.setPreferredPhy(txPhy, rxPhy, phyOptions);
+
+                result.success(null);
             }
 
             case "removeBond":
             {
-                try {
-                    String deviceId = (String)call.arguments;
-                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(deviceId);
+                String deviceId = (String)call.arguments;
+                BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(deviceId);
 
-                    // not bonded?
-                    if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
-                        result.success(false);
-                        break;
-                    }
-
-                    Method removeBondMethod = device.getClass().getMethod("removeBond");
-                    removeBondMethod.invoke(device);
-
-                    result.success(true);
-
-                } catch (Exception e) {
-                    result.error("removeBond", e.getMessage(), null);
+                // not bonded?
+                if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
+                    result.success(false);
+                    break;
                 }
-                break;
+
+                Method removeBondMethod = device.getClass().getMethod("removeBond");
+                removeBondMethod.invoke(device);
+
+                result.success(true);
             }
 
             default:
