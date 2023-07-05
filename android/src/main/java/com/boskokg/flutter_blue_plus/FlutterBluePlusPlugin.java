@@ -770,6 +770,7 @@ public class FlutterBluePlusPlugin implements
                     if(gattServer.readDescriptor(descriptor) == false) {
                         result.error("readDescriptor",
                             "unknown reason, may occur if readDescriptor was called before last read finished.", null);
+                        break;
                     }
 
                     result.success(null);
@@ -806,6 +807,7 @@ public class FlutterBluePlusPlugin implements
 
                     if(!characteristic.setValue(val)) {
                         result.error("writeCharacteristic", "could not set the local value of characteristic", null);
+                        break;
                     }
 
                     // Write type
@@ -953,7 +955,7 @@ public class FlutterBluePlusPlugin implements
                     String deviceId = (String)call.arguments;
                     
                     BluetoothDeviceCache cache = mDevices.get(deviceId);
-                    if(cache != null) {
+                    if(cache == null) {
                         result.error("mtu", "no instance of BluetoothGatt, have you connected first?", null);
                         break;
                     }
@@ -979,6 +981,11 @@ public class FlutterBluePlusPlugin implements
 
                     BluetoothGatt gatt = locateGatt(remoteId);
 
+                    if(gatt.requestMtu(mtu) == false) {
+                        result.error("requestMtu", "gatt.requestMtu returned false", null);
+                        break;
+                    }
+
                     result.success(null);
 
                 } catch(Exception e) {
@@ -995,6 +1002,7 @@ public class FlutterBluePlusPlugin implements
 
                     if(gatt.readRemoteRssi() == false) {
                         result.error("readRssi", "gatt.readRemoteRssi returned false", null);
+                        break;
                     } 
 
                     result.success(null);
