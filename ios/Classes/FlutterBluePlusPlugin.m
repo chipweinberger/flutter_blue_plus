@@ -188,7 +188,15 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
         @try
         {
-            CBPeripheral *peripheral = [_scannedPeripherals objectForKey:remoteId];
+            CBPeripheral *peripheral = nil; 
+            if (peripheral == nil)
+            {
+                peripheral = [self findPeripheral:remoteId];
+            }
+            if (peripheral == nil)
+            {
+                peripheral = [_scannedPeripherals objectForKey:remoteId];
+            }
             if (peripheral == nil)
             {
                 NSArray *periphs = [self->_centralManager
