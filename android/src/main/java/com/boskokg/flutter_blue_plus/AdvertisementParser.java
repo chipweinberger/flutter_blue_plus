@@ -27,12 +27,10 @@
 
 package com.boskokg.flutter_blue_plus;
 
-import com.google.protobuf.ByteString;
-import com.boskokg.flutter_blue_plus.Protos.AdvertisementData;
-
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.HashMap;
 import java.util.UUID;
 
 /**
@@ -41,16 +39,18 @@ import java.util.UUID;
 class AdvertisementParser {
 
   /**
-   * Parses packet data into {@link AdvertisementData} structure.
+   * Parses packet data into {@link HashMap<String, Object>} structure.
    *
    * @param rawData The scan record data.
    * @return An AdvertisementData proto object.
    * @throws ArrayIndexOutOfBoundsException if the input is truncated.
    */
-  static AdvertisementData parse(byte[] rawData) {
+  static HashMap<String, Object> parse(byte[] rawData) {
     ByteBuffer data = ByteBuffer.wrap(rawData).asReadOnlyBuffer().order(ByteOrder.LITTLE_ENDIAN);
-    AdvertisementData.Builder ret = AdvertisementData.newBuilder();
+    HashMap<String, Object> response = new HashMap<>();
     boolean seenLongLocalName = false;
+    HashMap<String, Object> serviceData = new HashMap<>();
+    HashMap<String, Object> manufacturerData = new HashMap<>();
     do {
       int length = data.get() & 0xFF;
       if (length == 0) {
@@ -74,7 +74,7 @@ class AdvertisementParser {
           byte[] name = new byte[length];
           data.get(name);
           try {
-            ret.setLocalName(new String(name, "UTF-8"));
+            response.put("local_name", new String(name, "UTF-8"));
           } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
           }
@@ -84,7 +84,7 @@ class AdvertisementParser {
           break;
         }
         case 0x0A: { // Power level.
-          ret.setTxPowerLevel(Protos.Int32Value.newBuilder().setValue(data.get()));
+          response.put("tx_power_level", data.get());
           break;
         }
         case 0x16: // Service Data with 16 bit UUID.
@@ -110,7 +110,9 @@ class AdvertisementParser {
           }
           byte[] remainingData = new byte[remainingDataLength];
           data.get(remainingData);
-          ret.putServiceData(uuid.toString(), ByteString.copyFrom(remainingData));
+
+          serviceData.put(uuid.toString(), remainingData);
+          response.put("service_data", serviceData);
           break;
         }
         case 0xFF: {// Manufacturer specific data.
@@ -121,7 +123,8 @@ class AdvertisementParser {
           if((length - 2) > 0) {
             byte[] msd = new byte[length - 2];
             data.get(msd);
-            ret.putManufacturerData(manufacturerId, ByteString.copyFrom(msd));
+            manufacturerData.put(Integer.toString(manufacturerId), msd);
+            response.put("manufacturer_data", manufacturerId);
           }
           break;
         }
@@ -131,6 +134,6 @@ class AdvertisementParser {
         }
       }
     } while (true);
-    return ret.build();
+    return response;
   }
 }
