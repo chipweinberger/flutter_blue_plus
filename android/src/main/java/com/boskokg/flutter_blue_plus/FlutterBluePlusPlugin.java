@@ -391,8 +391,8 @@ public class FlutterBluePlusPlugin implements
                             throw new Exception("getBluetoothLeScanner() is null. Is the Adapter on?");
                         }
                         
-                        int scanMode = (int)data.get("android_scan_mode");
-                        allowDuplicates = (boolean)data.get("allow_duplicates");
+                        int scanMode =        (int) data.get("android_scan_mode");
+                        allowDuplicates = (boolean) data.get("allow_duplicates");
 
                         List<ScanFilter> filters = fetchFilters(data);
 
@@ -690,10 +690,10 @@ public class FlutterBluePlusPlugin implements
             {
                 try {
                     HashMap<String, Object> data = call.arguments();
-                    String remoteId = (String) data.get("remote_id");
-                    String serviceUuid = (String) data.get("service_uuid");
+                    String remoteId =             (String) data.get("remote_id");
+                    String serviceUuid =          (String) data.get("service_uuid");
                     String secondaryServiceUuid = (String) data.get("secondary_service_uuid");
-                    String characteristicUuid = (String) data.get("characteristic_uuid");
+                    String characteristicUuid =   (String) data.get("characteristic_uuid");
 
                     BluetoothGatt gattServer = locateGatt(remoteId);
                     BluetoothGattCharacteristic characteristic = locateCharacteristic(gattServer,
@@ -718,11 +718,11 @@ public class FlutterBluePlusPlugin implements
 
                 try {
                     HashMap<String, Object> data = call.arguments();
-                    String remoteId = (String) data.get("remote_id");
-                    String serviceUuid = (String) data.get("service_uuid");
+                    String remoteId =             (String) data.get("remote_id");
+                    String serviceUuid =          (String) data.get("service_uuid");
                     String secondaryServiceUuid = (String) data.get("secondary_service_uuid");
-                    String characteristicUuid = (String) data.get("characteristic_uuid");
-                    String descriptorUuid = (String) data.get("descriptor_uuid");
+                    String characteristicUuid =   (String) data.get("characteristic_uuid");
+                    String descriptorUuid =       (String) data.get("descriptor_uuid");
 
                     BluetoothGatt gattServer = locateGatt(remoteId);
 
@@ -749,12 +749,12 @@ public class FlutterBluePlusPlugin implements
             {
                 try {
                     HashMap<String, Object> data = call.arguments();
-                    String remoteId = (String) data.get("remote_id");
-                    String serviceUuid = (String) data.get("service_uuid");
+                    String remoteId =             (String) data.get("remote_id");
+                    String serviceUuid =          (String) data.get("service_uuid");
                     String secondaryServiceUuid = (String) data.get("secondary_service_uuid");
-                    String characteristicUuid = (String) data.get("characteristic_uuid");
-                    List<Byte> value = (List<Byte>)data.get("value");
-                    int writeType = (int)data.get("write_type");
+                    String characteristicUuid =   (String) data.get("characteristic_uuid");
+                    List<Byte> value =        (List<Byte>) data.get("value");
+                    int writeType =                  (int) data.get("write_type");
 
                     BluetoothGatt gattServer = locateGatt(remoteId);
 
@@ -799,12 +799,12 @@ public class FlutterBluePlusPlugin implements
             {
                 try {
                     HashMap<String, Object> data = call.arguments();
-                    String remoteId = (String) data.get("remote_id");
-                    String serviceUuid = (String) data.get("service_uuid");
+                    String remoteId =             (String) data.get("remote_id");
+                    String serviceUuid =          (String) data.get("service_uuid");
                     String secondaryServiceUuid = (String) data.get("secondary_service_uuid");
-                    String characteristicUuid = (String) data.get("characteristic_uuid");
-                    String descriptorUuid = (String) data.get("descriptor_uuid");
-                    List<Byte> value = (List<Byte>)data.get("value");
+                    String characteristicUuid =   (String) data.get("characteristic_uuid");
+                    String descriptorUuid =       (String) data.get("descriptor_uuid");
+                    List<Byte> value =        (List<Byte>) data.get("value");
 
                     byte[] val = new byte[value.size()];
                     for(int i = 0; i < value.size(); i++) {
@@ -842,14 +842,14 @@ public class FlutterBluePlusPlugin implements
             {
                 try {
                     HashMap<String, Object> data = call.arguments();
-                    String remoteId = (String) data.get("remote_id");
-                    String serviceUuid = (String) data.get("service_uuid");
+                    String remoteId =             (String) data.get("remote_id");
+                    String serviceUuid =          (String) data.get("service_uuid");
                     String secondaryServiceUuid = (String) data.get("secondary_service_uuid");
-                    String characteristicUuid = (String) data.get("characteristic_uuid");
-                    String descriptorUuid = (String) data.get("descriptor_uuid");
-                    boolean enable = (boolean)data.get("enable");
-                    List<Byte> value = (List<Byte>)data.get("value");
-                    int properties = (int)data.get("properties");
+                    String characteristicUuid =   (String) data.get("characteristic_uuid");
+                    String descriptorUuid =       (String) data.get("descriptor_uuid");
+                    boolean enable =             (boolean) data.get("enable");
+                    List<Byte> value =        (List<Byte>) data.get("value");
+                    int properties =                 (int) data.get("properties");
 
                     BluetoothGatt gattServer = locateGatt(remoteId);
 
@@ -941,7 +941,7 @@ public class FlutterBluePlusPlugin implements
                 try {
                     HashMap<String, Object> data = call.arguments();
                     String remoteId = (String) data.get("remote_id");
-                    int mtu = (int)data.get("mtu");
+                    int mtu =            (int) data.get("mtu");
 
                     BluetoothGatt gatt = locateGatt(remoteId);
 
@@ -981,8 +981,8 @@ public class FlutterBluePlusPlugin implements
             {
                 try {
                     HashMap<String, Object> data = call.arguments();
-                    String remoteId = (String) data.get("remote_id");
-                    int connectionPriority = (int)data.get("connection_priority");
+                    String remoteId =     (String) data.get("remote_id");
+                    int connectionPriority = (int) data.get("connection_priority");
 
                     BluetoothGatt gatt = locateGatt(remoteId);
 
@@ -1012,9 +1012,9 @@ public class FlutterBluePlusPlugin implements
 
                     HashMap<String, Object> data = call.arguments();
                     String remoteId = (String) data.get("remote_id");
-                    int txPhy = (int)data.get("tx_phy");
-                    int rxPhy = (int)data.get("rx_phy");
-                    int phyOptions = (int)data.get("phy_options");
+                    int txPhy =          (int) data.get("tx_phy");
+                    int rxPhy =          (int) data.get("rx_phy");
+                    int phyOptions =     (int) data.get("phy_options");
 
                     BluetoothGatt gatt = locateGatt(remoteId);
 
