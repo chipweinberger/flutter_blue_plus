@@ -100,14 +100,14 @@ class FlutterBluePlus {
   Stream<BluetoothState> get state async* {
     BluetoothState initialState = await _channel
         .invokeMethod('state')
-        .then((buffer) => BmBluetoothPowerState.fromJson(buffer))
+        .then((buffer) => BmBluetoothPowerState.fromMap(buffer))
         .then((s) => bmToBluetoothState(s.state));
 
     yield initialState;
 
     _stateStream ??= _stateChannel
         .receiveBroadcastStream()
-        .map((buffer) => BmBluetoothPowerState.fromJson(buffer))
+        .map((buffer) => BmBluetoothPowerState.fromMap(buffer))
         .map((s) => bmToBluetoothState(s.state))
         .doOnCancel(() => _stateStream = null);
 
@@ -118,7 +118,7 @@ class FlutterBluePlus {
   Future<List<BluetoothDevice>> get connectedDevices {
     return _channel
         .invokeMethod('getConnectedDevices')
-        .then((buffer) => BmConnectedDevicesResponse.fromJson(buffer))
+        .then((buffer) => BmConnectedDevicesResponse.fromMap(buffer))
         .then((p) => p.devices)
         .then((p) => p.map((d) => BluetoothDevice.fromProto(d)).toList());
   }
@@ -127,7 +127,7 @@ class FlutterBluePlus {
   Future<List<BluetoothDevice>> get bondedDevices {
     return _channel
         .invokeMethod('getBondedDevices')
-        .then((buffer) => BmConnectedDevicesResponse.fromJson(buffer))
+        .then((buffer) => BmConnectedDevicesResponse.fromMap(buffer))
         .then((p) => p.devices)
         .then((p) => p.map((d) => BluetoothDevice.fromProto(d)).toList());
   }
@@ -167,7 +167,7 @@ class FlutterBluePlus {
         .instance._methodStream
         .where((m) => m.method == "ScanResult")
         .map((m) => m.arguments)
-        .map((buffer) => BmScanResult.fromJson(buffer))
+        .map((buffer) => BmScanResult.fromMap(buffer))
         .map((p) => ScanResult.fromProto(p))
         .takeWhile((element) => _isScanning.value)
         .doOnDone(stopScan);
@@ -185,7 +185,7 @@ class FlutterBluePlus {
     }
 
     try {
-      await _channel.invokeMethod('startScan', settings.toJson());
+      await _channel.invokeMethod('startScan', settings.toMap());
     } catch (e) {
       print('Error starting scan.');
       _isScanning.add(false);
@@ -261,9 +261,9 @@ class FlutterBluePlus {
 
   void _log(LogLevel level, String message) {
     if (level.index <= _logLevel.index) {
-      // if (kDebugMode) {
-      // print(message);
-      // }
+      if (kDebugMode) {
+        print(message);
+      }
     }
   }
 }

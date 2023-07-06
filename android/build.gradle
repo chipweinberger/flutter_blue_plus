@@ -32,8 +32,4 @@ android {
     defaultConfig {
         minSdkVersion 21
     }
-    sourceSets {
-        main {
-        }
-    }
 }
