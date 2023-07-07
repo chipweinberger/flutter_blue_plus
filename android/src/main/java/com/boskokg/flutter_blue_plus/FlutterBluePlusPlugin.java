@@ -292,6 +292,7 @@ public class FlutterBluePlusPlugin implements
             {
                 if (mBluetoothAdapter.isEnabled()) {
                     result.success(true); // no work to do
+                    break;
                 }
 
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -305,6 +306,7 @@ public class FlutterBluePlusPlugin implements
             {
                 if (mBluetoothAdapter.isEnabled() == false) {
                     result.success(true); // no work to do
+                    break;
                 }
 
                 boolean disabled = mBluetoothAdapter.disable();
