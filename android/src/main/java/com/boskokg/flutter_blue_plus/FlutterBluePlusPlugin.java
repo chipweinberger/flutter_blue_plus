@@ -247,6 +247,7 @@ public class FlutterBluePlusPlugin implements
                 logLevel = LogLevel.values()[idx];
 
                 result.success(null);
+                break;
             }
 
             case "state":
@@ -270,22 +271,26 @@ public class FlutterBluePlusPlugin implements
                 map.put("state", convertedState);
 
                 result.success(map);
+                break;
             }
 
             case "isAvailable":
             {
                 result.success(mBluetoothAdapter != null);
+                break;
             }
 
             case "isOn":
             {
                 result.success(mBluetoothAdapter.isEnabled());
+                break;
             }
 
             case "name":
             {
                 String name = mBluetoothAdapter.getName();
                 result.success(name != null ? name : "");
+                break;
             }
 
             case "turnOn":
@@ -300,6 +305,7 @@ public class FlutterBluePlusPlugin implements
                 activityBinding.getActivity().startActivityForResult(enableBtIntent, enableBluetoothRequestCode);
 
                 result.success(true);
+                break;
             }
 
             case "turnOff":
@@ -312,6 +318,7 @@ public class FlutterBluePlusPlugin implements
                 boolean disabled = mBluetoothAdapter.disable();
 
                 result.success(disabled);
+                break;
             }
 
             case "startScan":
@@ -388,6 +395,7 @@ public class FlutterBluePlusPlugin implements
                 }
 
                 result.success(null);
+                break;
             }
 
             case "getConnectedDevices":
@@ -437,6 +445,7 @@ public class FlutterBluePlusPlugin implements
                 response.put("devices", devices);
 
                 result.success(response);
+                break;
             }
 
             case "connect":
@@ -476,6 +485,7 @@ public class FlutterBluePlusPlugin implements
                         if(bluetoothDeviceCache != null && !isConnected) {
                             if(bluetoothDeviceCache.gatt.connect() == false) {
                                 result.error("connect", "error when reconnecting to device", null);
+                                break;
                             }
                             result.success(null);
                             return;
@@ -509,6 +519,7 @@ public class FlutterBluePlusPlugin implements
                 device.createBond();
 
                 result.success(null);
+                break;
             }
 
             case "clearGattCache":
@@ -531,6 +542,7 @@ public class FlutterBluePlusPlugin implements
                 refreshMethod.invoke(gattServer);
 
                 result.success(null);
+                break;
             }
 
             case "disconnect":
@@ -552,6 +564,7 @@ public class FlutterBluePlusPlugin implements
                 }
 
                 result.success(null);
+                break;
             }
 
             case "deviceState":
@@ -563,6 +576,7 @@ public class FlutterBluePlusPlugin implements
                 int state = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
 
                 result.success(MessageMaker.from(device, state));
+                break;
             }
 
             case "discoverServices":
@@ -577,6 +591,7 @@ public class FlutterBluePlusPlugin implements
                 }
 
                 result.success(null);
+                break;
             }
 
             case "services":
@@ -595,6 +610,7 @@ public class FlutterBluePlusPlugin implements
                 map.put("services", services);
 
                 result.success(map);
+                break;
             }
 
             case "readCharacteristic":
@@ -616,6 +632,7 @@ public class FlutterBluePlusPlugin implements
                 }
 
                 result.success(null);
+                break;
             }
 
             case "readDescriptor":
@@ -641,6 +658,7 @@ public class FlutterBluePlusPlugin implements
                 }
 
                 result.success(null);
+                break;
             }
 
             case "writeCharacteristic":
@@ -682,6 +700,7 @@ public class FlutterBluePlusPlugin implements
                 }
 
                 result.success(null);
+                break;
             }
 
             case "writeDescriptor":
@@ -719,6 +738,7 @@ public class FlutterBluePlusPlugin implements
                 }
 
                 result.success(null);
+                break;
             }
 
             case "setNotification":
@@ -788,6 +808,7 @@ public class FlutterBluePlusPlugin implements
                 }
 
                 result.success(null);
+                break;
             }
 
             case "mtu":
@@ -805,6 +826,7 @@ public class FlutterBluePlusPlugin implements
                 response.put("mtu", cache.mtu);
 
                 result.success(response);
+                break;
             }
 
             case "requestMtu":
@@ -821,6 +843,7 @@ public class FlutterBluePlusPlugin implements
                 }
 
                 result.success(null);
+                break;
             }
 
             case "readRssi":
@@ -834,6 +857,7 @@ public class FlutterBluePlusPlugin implements
                 } 
 
                 result.success(null);
+                break;
             }
 
             case "requestConnectionPriority":
@@ -850,6 +874,7 @@ public class FlutterBluePlusPlugin implements
                 }
 
                 result.success(null);
+                break;
             }
 
             case "setPreferredPhy":
@@ -873,6 +898,7 @@ public class FlutterBluePlusPlugin implements
                 gatt.setPreferredPhy(txPhy, rxPhy, phyOptions);
 
                 result.success(null);
+                break;
             }
 
             case "removeBond":
@@ -890,6 +916,7 @@ public class FlutterBluePlusPlugin implements
                 removeBondMethod.invoke(device);
 
                 result.success(true);
+                break;
             }
 
             default:
