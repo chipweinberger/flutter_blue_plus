@@ -48,7 +48,7 @@ public class MessageMaker {
 
     static HashMap<String, Object> bmAdvertisementData(BluetoothDevice device, byte[] advertisementData, int rssi) {
         HashMap<String, Object> scanResult = new HashMap<>();
-        scanResult.put("device", from(device));
+        scanResult.put("device", bmBluetoothDevice(device));
         if(advertisementData != null && advertisementData.length > 0)
             scanResult.put("advertisement_data", AdvertisementParser.parse(advertisementData));
         scanResult.put("rssi", rssi);
@@ -58,7 +58,7 @@ public class MessageMaker {
     @TargetApi(21)
     static HashMap<String, Object> bmScanResult(BluetoothDevice device, ScanResult result) {
         HashMap<String, Object> scanResult = new HashMap<>();
-        scanResult.put("device", from(device));
+        scanResult.put("device",  bmBluetoothDevice(device));
 
         HashMap<String, Object> advertisementData = new HashMap<>();
         ScanRecord scanRecord = result.getScanRecord();
@@ -134,12 +134,12 @@ public class MessageMaker {
         dev.put("is_primary", service.getType() == BluetoothGattService.SERVICE_TYPE_PRIMARY);
         List<Object> characteristics = new ArrayList<Object>();
         for(BluetoothGattCharacteristic c : service.getCharacteristics()) {
-            characteristics.add(from(device, c, gatt));
+            characteristics.add(bmBluetoothCharacteristic(device, c, gatt));
         }
         dev.put("characteristics", characteristics);
         List<Object> includedServices = new ArrayList<Object>();
         for(BluetoothGattService s : service.getIncludedServices()) {
-            includedServices.add(from(device, s, gatt));
+            includedServices.add(bmBluetoothService(device, s, gatt));
         }
         dev.put("included_services", includedServices);
         return dev;
@@ -149,13 +149,13 @@ public class MessageMaker {
         HashMap<String, Object> ch = new HashMap<>();
         ch.put("remote_id", device.getAddress());
         ch.put("uuid", characteristic.getUuid().toString());
-        ch.put("properties", from(characteristic.getProperties()));
+        ch.put("properties", bmCharacteristicProperties(characteristic.getProperties()));
         if(characteristic.getValue() != null) {
             ch.put("value", toHexString(characteristic.getValue()));
         }
         List<Object> descriptors = new ArrayList<Object>();
         for(BluetoothGattDescriptor d : characteristic.getDescriptors()) {
-            descriptors.add(from(device, d));
+            descriptors.add(bmBluetoothDescriptor(device, d));
         }
         ch.put("descriptors", descriptors);
         if(characteristic.getService().getType() == BluetoothGattService.SERVICE_TYPE_PRIMARY) {
