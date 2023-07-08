@@ -46,7 +46,7 @@ public class MessageMaker {
         return new String(hexChars);
     }
 
-    static HashMap<String, Object> from(BluetoothDevice device, byte[] advertisementData, int rssi) {
+    static HashMap<String, Object> bmAdvertisementData(BluetoothDevice device, byte[] advertisementData, int rssi) {
         HashMap<String, Object> scanResult = new HashMap<>();
         scanResult.put("device", from(device));
         if(advertisementData != null && advertisementData.length > 0)
@@ -56,7 +56,7 @@ public class MessageMaker {
     }
 
     @TargetApi(21)
-    static HashMap<String, Object> from(BluetoothDevice device, ScanResult result) {
+    static HashMap<String, Object> bmScanResult(BluetoothDevice device, ScanResult result) {
         HashMap<String, Object> scanResult = new HashMap<>();
         scanResult.put("device", from(device));
 
@@ -116,7 +116,7 @@ public class MessageMaker {
         return scanResult;
     }
 
-    static HashMap<String, Object> from(BluetoothDevice device) {
+    static HashMap<String, Object> bmBluetoothDevice(BluetoothDevice device) {
         HashMap<String, Object> dev = new HashMap<>();
         dev.put("remote_id", device.getAddress());
         String name = device.getName();
@@ -127,7 +127,7 @@ public class MessageMaker {
         return dev;
     }
 
-    static HashMap<String, Object> from(BluetoothDevice device, BluetoothGattService service, BluetoothGatt gatt) {
+    static HashMap<String, Object> bmBluetoothService(BluetoothDevice device, BluetoothGattService service, BluetoothGatt gatt) {
         HashMap<String, Object> dev = new HashMap<>();
         dev.put("remote_id", device.getAddress());
         dev.put("uuid", service.getUuid().toString());
@@ -145,13 +145,14 @@ public class MessageMaker {
         return dev;
     }
 
-    static HashMap<String, Object> from(BluetoothDevice device, BluetoothGattCharacteristic characteristic, BluetoothGatt gatt) {
+    static HashMap<String, Object> bmBluetoothCharacteristic(BluetoothDevice device, BluetoothGattCharacteristic characteristic, BluetoothGatt gatt) {
         HashMap<String, Object> ch = new HashMap<>();
         ch.put("remote_id", device.getAddress());
         ch.put("uuid", characteristic.getUuid().toString());
         ch.put("properties", from(characteristic.getProperties()));
-        if(characteristic.getValue() != null)
-            ch.put("value", characteristic.getValue());
+        if(characteristic.getValue() != null) {
+            ch.put("value", toHexString(characteristic.getValue()));
+        }
         List<Object> descriptors = new ArrayList<Object>();
         for(BluetoothGattDescriptor d : characteristic.getDescriptors()) {
             descriptors.add(from(device, d));
@@ -174,18 +175,19 @@ public class MessageMaker {
         return ch;
     }
 
-    static HashMap<String, Object> from(BluetoothDevice device, BluetoothGattDescriptor descriptor) {
+    static HashMap<String, Object> bmBluetoothDescriptor(BluetoothDevice device, BluetoothGattDescriptor descriptor) {
         HashMap<String, Object> desc = new HashMap<>();
         desc.put("remote_id", device.getAddress());
         desc.put("uuid", descriptor.getUuid().toString());
         desc.put("characteristic_uuid", descriptor.getCharacteristic().getUuid().toString());
         desc.put("service_uuid", descriptor.getCharacteristic().getService().getUuid().toString());
-        if(descriptor.getValue() != null)
-            desc.put("value", descriptor.getValue());
+        if(descriptor.getValue() != null) {
+            desc.put("value", toHexString(descriptor.getValue()));
+        }
         return desc;
     }
 
-    static HashMap<String, Object> from(int properties) {
+    static HashMap<String, Object> bmCharacteristicProperties(int properties) {
         HashMap<String, Object> props = new HashMap<>();
         props.put("broadcast", (properties & 1) != 0);
         props.put("read", (properties & 2) != 0);
@@ -200,7 +202,7 @@ public class MessageMaker {
         return props;
     }
 
-    static HashMap<String, Object> from(BluetoothDevice device, int state) {
+    static HashMap<String, Object> bmConnectionStateResponse(BluetoothDevice device, int state) {
         HashMap<String, Object> deviceState = new HashMap<>();
         deviceState.put("state", state);
         deviceState.put("remote_id", device.getAddress());
