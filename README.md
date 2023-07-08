@@ -10,7 +10,7 @@
 
 ## Foreward
 
-I highly recommend QuickBlue (https://pub.dev/packages/quick_blue) in favor of FlutterBlue. It has a simpler API, a much smaller codebase, and supports iOS, MacOS, Android, Windows, and partial Linux support. 
+I highly recommend QuickBlue (https://pub.dev/packages/quick_blue) in favor of FlutterBlue. It has a simpler API, a much smaller codebase, and supports iOS, MacOS, Android, Windows, and partial Linux support. However, it is less feature-rich.
 
 ## Introduction
 
