@@ -145,13 +145,14 @@ class FlutterBluePlus {
     List<String> macAddresses = const [],
     Duration? timeout,
     bool allowDuplicates = false,
+    bool androidUsesFineLocation = true,
   }) async* {
     var settings = BmScanSettings(
-      androidScanMode: scanMode.value,
-      allowDuplicates: allowDuplicates,
-      macAddresses: macAddresses,
-      serviceUuids: withServices.map((g) => g.toString()).toList(),
-    );
+        serviceUuids: withServices.map((g) => g.toString()).toList(),
+        macAddresses: macAddresses,
+        allowDuplicates: allowDuplicates,
+        androidScanMode: scanMode.value,
+        androidUsesFineLocation: androidUsesFineLocation);
 
     if (_isScanning.value == true) {
       throw Exception('Another scan is already in progress.');
@@ -223,6 +224,7 @@ class FlutterBluePlus {
     List<String> macAddresses = const [],
     Duration? timeout,
     bool allowDuplicates = false,
+    bool androidUsesFineLocation = true,
   }) async {
     await scan(
             scanMode: scanMode,
@@ -230,7 +232,8 @@ class FlutterBluePlus {
             withDevices: withDevices,
             macAddresses: macAddresses,
             timeout: timeout,
-            allowDuplicates: allowDuplicates)
+            allowDuplicates: allowDuplicates,
+            androidUsesFineLocation: androidUsesFineLocation)
         .drain();
     return _scanResults.value;
   }

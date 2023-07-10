@@ -84,24 +84,27 @@ class BmAdvertisementData {
 }
 
 class BmScanSettings {
-  int androidScanMode;
   List<String> serviceUuids;
-  bool allowDuplicates;
   List<String> macAddresses;
+  bool allowDuplicates;
+  int androidScanMode;
+  bool androidUsesFineLocation;
 
   BmScanSettings({
-    required this.androidScanMode,
     required this.serviceUuids,
-    required this.allowDuplicates,
     required this.macAddresses,
+    required this.allowDuplicates,
+    required this.androidScanMode,
+    required this.androidUsesFineLocation,
   });
 
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> data = {};
-    data['android_scan_mode'] = androidScanMode;
     data['service_uuids'] = serviceUuids;
-    data['allow_duplicates'] = allowDuplicates;
     data['mac_addresses'] = macAddresses;
+    data['allow_duplicates'] = allowDuplicates;
+    data['android_scan_mode'] = androidScanMode;
+    data['android_uses_fine_location'] = androidUsesFineLocation;
     _printDbg("\nBmScanSettings $data");
     return data;
   }

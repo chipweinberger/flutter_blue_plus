@@ -215,7 +215,7 @@ public class FlutterBluePlusPlugin implements
                                  @NonNull Result result)
     {
         try {
-              
+
             if(mBluetoothAdapter == null && !"isAvailable".equals(call.method)) {
                 result.error("bluetooth_unavailable", "the device does not have bluetooth", null);
                 return;
@@ -309,6 +309,12 @@ public class FlutterBluePlusPlugin implements
                 {
                     ArrayList<String> permissions = new ArrayList<>();
 
+                    HashMap<String, Object> data = call.arguments();
+                    List<ScanFilter> filters = fetchFilters(data);
+                    allowDuplicates =          (boolean) data.get("allow_duplicates");
+                    int scanMode =                 (int) data.get("android_scan_mode");
+                    boolean usesFineLocation = (boolean) data.get("android_uses_fine_location");
+
                     // scan
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                         permissions.add(Manifest.permission.BLUETOOTH_SCAN);
@@ -323,7 +329,9 @@ public class FlutterBluePlusPlugin implements
 
                     // fine location
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
+                        if (usesFineLocation) {
+                            permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
+                        }
                     }
 
                     ensurePermissions(permissions, (granted, perm) -> {
@@ -333,8 +341,6 @@ public class FlutterBluePlusPlugin implements
                             return;
                         }
 
-                        HashMap<String, Object> data = call.arguments();
-
                         macDeviceScanned.clear();
 
                         BluetoothLeScanner scanner = mBluetoothAdapter.getBluetoothLeScanner();
@@ -342,11 +348,6 @@ public class FlutterBluePlusPlugin implements
                             result.error("startScan", String.format("getBluetoothLeScanner() is null. Is the Adapter on?"), null);
                             return;
                         }
-                        
-                        int scanMode =        (int) data.get("android_scan_mode");
-                        allowDuplicates = (boolean) data.get("allow_duplicates");
-
-                        List<ScanFilter> filters = fetchFilters(data);
 
                         ScanSettings settings;
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
