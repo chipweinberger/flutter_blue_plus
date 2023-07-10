@@ -48,7 +48,7 @@ public class MessageMaker {
 
     static HashMap<String, Object> bmAdvertisementData(BluetoothDevice device, byte[] advertisementData, int rssi) {
         HashMap<String, Object> scanResult = new HashMap<>();
-        scanResult.put("device", from(device));
+        scanResult.put("device", bmBluetoothDevice(device));
         if(advertisementData != null && advertisementData.length > 0)
             scanResult.put("advertisement_data", AdvertisementParser.parse(advertisementData));
         scanResult.put("rssi", rssi);
@@ -58,7 +58,7 @@ public class MessageMaker {
     @TargetApi(21)
     static HashMap<String, Object> bmScanResult(BluetoothDevice device, ScanResult result) {
         HashMap<String, Object> scanResult = new HashMap<>();
-        scanResult.put("device", from(device));
+        scanResult.put("device", bmBluetoothDevice(device));
 
         HashMap<String, Object> advertisementData = new HashMap<>();
         ScanRecord scanRecord = result.getScanRecord();
@@ -149,7 +149,7 @@ public class MessageMaker {
         HashMap<String, Object> ch = new HashMap<>();
         ch.put("remote_id", device.getAddress());
         ch.put("uuid", characteristic.getUuid().toString());
-        ch.put("properties", from(characteristic.getProperties()));
+        ch.put("properties", bmCharacteristicProperties(characteristic.getProperties()));
         if(characteristic.getValue() != null) {
             ch.put("value", toHexString(characteristic.getValue()));
         }

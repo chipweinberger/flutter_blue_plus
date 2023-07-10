@@ -214,6 +214,8 @@ public class FlutterBluePlusPlugin implements
     public void onMethodCall(@NonNull MethodCall call,
                                  @NonNull Result result)
     {
+        try {
+                
         if(mBluetoothAdapter == null && !"isAvailable".equals(call.method)) {
             result.error("bluetooth_unavailable", "the device does not have bluetooth", null);
             return;
@@ -337,7 +339,7 @@ public class FlutterBluePlusPlugin implements
 
                     BluetoothLeScanner scanner = mBluetoothAdapter.getBluetoothLeScanner();
                     if(scanner == null) {
-                        result.error("startScan", String.format("getBluetoothLeScanner() is null. Is the Adapter on?", null);
+                        result.error("startScan", String.format("getBluetoothLeScanner() is null. Is the Adapter on?"), null);
                         return;
                     }
                     
@@ -459,7 +461,7 @@ public class FlutterBluePlusPlugin implements
                     if(bluetoothDeviceCache != null && !isConnected) {
                         if(bluetoothDeviceCache.gatt.connect() == false) {
                             result.error("connect", "error when reconnecting to device", null);
-                            break;
+                            return;
                         }
                         result.success(null);
                         return;
@@ -743,8 +745,8 @@ public class FlutterBluePlusPlugin implements
                     // determine value 
                     if(enable) {
 
-                        boolean canNotify = (properties & BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0;
-                        boolean canIndicate = (properties & BluetoothGattCharacteristic.PROPERTY_INDICATE) > 0;
+                        boolean canNotify = (characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0;
+                        boolean canIndicate = (characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE) > 0;
 
                         if(!canIndicate && !canNotify) {
                             result.error("setNotification", "characteristic cannot notify or indicate", null);
@@ -887,6 +889,10 @@ public class FlutterBluePlusPlugin implements
                 break;
             }
         }
+        } catch (Exception e) {
+            result.error("platformException", e.toString(), null);
+            return;
+        }
     }
 
     //////////////////////////////////////////////////////////////////////////////////////
@@ -904,10 +910,8 @@ public class FlutterBluePlusPlugin implements
         OperationOnPermission operation = operationsOnPermission.get(requestCode);
 
         if (operation != null && grantResults.length > 0) {
-            
             operation.op(grantResults[0] == PackageManager.PERMISSION_GRANTED, permissions[0]);
             return true;
-
         } else {
             return false;
         }
