@@ -644,7 +644,7 @@ public class FlutterBluePlusPlugin implements
                     String serviceUuid =          (String) data.get("service_uuid");
                     String secondaryServiceUuid = (String) data.get("secondary_service_uuid");
                     String characteristicUuid =   (String) data.get("characteristic_uuid");
-                    List<Byte> value =        (List<Byte>) data.get("value");
+                    String value =                (String) data.get("value");
                     int writeType =                  (int) data.get("write_type");
 
                     BluetoothGatt gattServer = locateGatt(remoteId);
@@ -652,12 +652,7 @@ public class FlutterBluePlusPlugin implements
                     BluetoothGattCharacteristic characteristic = locateCharacteristic(gattServer,
                         serviceUuid, secondaryServiceUuid, characteristicUuid);
 
-                    byte[] val = new byte[value.size()];
-                    for(int i = 0; i < value.size(); i++) {
-                        val[i] = value.get(i).byteValue();
-                    }
-
-                    if(!characteristic.setValue(val)) {
+                    if(!characteristic.setValue(hexToBytes(value))) {
                         result.error("writeCharacteristic", "could not set the local value of characteristic", null);
                         break;
                     }
