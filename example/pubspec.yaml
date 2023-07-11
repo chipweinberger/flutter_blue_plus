@@ -21,14 +21,7 @@ dependencies:
     path: ../
 
   cupertino_icons: ^1.0.2
-
   permission_handler: ^10.2.0
-
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-
-  flutter_lints: ^1.0.4
 
 flutter:
   uses-material-design: true
