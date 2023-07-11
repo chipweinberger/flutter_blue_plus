@@ -1011,7 +1011,7 @@ public class FlutterBluePlusPlugin implements
 
         BluetoothGattService secondaryService = null;
 
-        if(secondaryServiceId.length() > 0) {
+        if(secondaryServiceId != null && secondaryServiceId.length() > 0) {
 
             for(BluetoothGattService s : primaryService.getIncludedServices()){
                 if(s.getUuid().equals(UUID.fromString(secondaryServiceId))){
