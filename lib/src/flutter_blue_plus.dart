@@ -379,12 +379,12 @@ class AdvertisementData {
   final List<String> serviceUuids;
 
   AdvertisementData.fromProto(BmAdvertisementData p)
-      : localName = p.localName ?? "",
+      : localName = p.localName,
         txPowerLevel = p.txPowerLevel,
-        connectable = p.connectable ?? false,
-        manufacturerData = p.manufacturerData ?? {},
-        serviceData = p.serviceData ?? {},
-        serviceUuids = p.serviceUuids ?? [];
+        connectable = p.connectable,
+        manufacturerData = p.manufacturerData,
+        serviceData = p.serviceData,
+        serviceUuids = p.serviceUuids;
 
   @override
   String toString() {
