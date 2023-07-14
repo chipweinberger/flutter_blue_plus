@@ -191,7 +191,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             CBPeripheral *peripheral = nil; 
             if (peripheral == nil)
             {
-                peripheral = [self findPeripheral:remoteId];
+                @try {peripheral = [self findPeripheral:remoteId];}
+                @catch (NSException *e){} // we don't always expect to find it
             }
             if (peripheral == nil)
             {

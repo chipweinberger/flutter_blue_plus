@@ -1,4 +1,7 @@
 
+## 1.7.1
+* iOS: fix regression in 1.7.0 when connecting, exception is thrown
+
 ## 1.7.0
 * internal: removed protobuf dependency 
 * Android: compileSdkVersion 31 -> 33

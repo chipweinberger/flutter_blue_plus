@@ -36,7 +36,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "1.7.0"
+    version: "1.7.1"
   js:
     dependency: transitive
     description:
