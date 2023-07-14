@@ -1,3 +1,13 @@
+
+## 1.7.0
+* internal: removed protobuf dependency 
+* Android: compileSdkVersion 31 -> 33
+* Android: increase minSdkVersion 19 -> 21 to remove lollipop checks
+* Android: FineLocation permission is now optional. See startScan
+* Android: fix turnOn and turnOff regression in 1.6.1
+* iOS: allow connecting without scanning if you save and reuse the remote_id
+* dart: fix guid exception with serviceUUID is empty
+
 ## 1.6.1
 * Android: fix compile error (regression in 1.6.0)
 * Adnroid: significantly clean up all code
