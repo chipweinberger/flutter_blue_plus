@@ -125,8 +125,7 @@ class BmScanResult {
     _printDbg("\nBmScanResult $json");
     return BmScanResult(
       device: BmBluetoothDevice.fromMap(json['device']),
-      advertisementData:
-          BmAdvertisementData.fromMap(json['advertisement_data']),
+      advertisementData: BmAdvertisementData.fromMap(json['advertisement_data']),
       rssi: json['rssi'],
     );
   }
@@ -208,12 +207,9 @@ class BmBluetoothService {
       uuid: json['uuid'],
       remoteId: json['remote_id'],
       isPrimary: json['is_primary'],
-      characteristics: (json['characteristics'] as List<dynamic>)
-          .map((v) => BmBluetoothCharacteristic.fromMap(v))
-          .toList(),
-      includedServices: (json['included_services'] as List<dynamic>)
-          .map((v) => BmBluetoothService.fromMap(v))
-          .toList(),
+      characteristics:
+          (json['characteristics'] as List<dynamic>).map((v) => BmBluetoothCharacteristic.fromMap(v)).toList(),
+      includedServices: (json['included_services'] as List<dynamic>).map((v) => BmBluetoothService.fromMap(v)).toList(),
     );
   }
 }
@@ -244,9 +240,7 @@ class BmBluetoothCharacteristic {
       remoteId: json['remote_id'],
       serviceUuid: json['service_uuid'],
       secondaryServiceUuid: json['secondary_service_uuid'],
-      descriptors: (json['descriptors'] as List<dynamic>)
-          .map((v) => BmBluetoothDescriptor.fromMap(v))
-          .toList(),
+      descriptors: (json['descriptors'] as List<dynamic>).map((v) => BmBluetoothDescriptor.fromMap(v)).toList(),
       properties: BmCharacteristicProperties.fromMap(json['properties']),
       value: _hexDecode(json['value'] ?? ""),
     );
@@ -369,15 +363,12 @@ class BmReadCharacteristicResponse {
   final String remoteId;
   final BmBluetoothCharacteristic characteristic;
 
-  BmReadCharacteristicResponse(
-      {required this.remoteId, required this.characteristic});
+  BmReadCharacteristicResponse({required this.remoteId, required this.characteristic});
 
   factory BmReadCharacteristicResponse.fromMap(Map<dynamic, dynamic> json) {
     _printDbg("\nBmReadCharacteristicResponse $json");
     return BmReadCharacteristicResponse(
-        remoteId: json['remote_id'],
-        characteristic:
-            BmBluetoothCharacteristic.fromMap(json['characteristic']));
+        remoteId: json['remote_id'], characteristic: BmBluetoothCharacteristic.fromMap(json['characteristic']));
   }
 }
 
@@ -487,7 +478,7 @@ class BmWriteCharacteristicRequest {
       characteristicUuid: json['characteristic_uuid'],
       serviceUuid: json['service_uuid'],
       secondaryServiceUuid: json['secondary_service_uuid'],
-      writeType: BmWriteType.values[json['write_type'] as int],
+      writeType: BmWriteType.values[json['write_type'] ?? 0],
       value: _hexDecode(json['value'] ?? ""),
     );
   }
@@ -629,8 +620,7 @@ class BmOnCharacteristicChanged {
   final String remoteId;
   final BmBluetoothCharacteristic characteristic;
 
-  BmOnCharacteristicChanged(
-      {required this.remoteId, required this.characteristic});
+  BmOnCharacteristicChanged({required this.remoteId, required this.characteristic});
 
   factory BmOnCharacteristicChanged.fromMap(Map<dynamic, dynamic> json) {
     _printDbg("\nBmOnCharacteristicChanged $json");
@@ -679,9 +669,7 @@ class BmConnectedDevicesResponse {
   factory BmConnectedDevicesResponse.fromMap(Map<dynamic, dynamic> json) {
     _printDbg("\nBmConnectedDevicesResponse $json");
     return BmConnectedDevicesResponse(
-        devices: (json['devices'] as List)
-            .map((i) => BmBluetoothDevice.fromMap(i))
-            .toList());
+        devices: (json['devices'] as List).map((i) => BmBluetoothDevice.fromMap(i)).toList());
   }
 }
 
@@ -734,8 +722,7 @@ class BmConnectionPriorityRequest {
   final String remoteId;
   final int connectionPriority;
 
-  BmConnectionPriorityRequest(
-      {required this.remoteId, required this.connectionPriority});
+  BmConnectionPriorityRequest({required this.remoteId, required this.connectionPriority});
 
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> data = {};
@@ -752,11 +739,7 @@ class BmPreferredPhy {
   final int rxPhy;
   final int phyOptions;
 
-  BmPreferredPhy(
-      {required this.remoteId,
-      required this.txPhy,
-      required this.rxPhy,
-      required this.phyOptions});
+  BmPreferredPhy({required this.remoteId, required this.txPhy, required this.rxPhy, required this.phyOptions});
 
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> data = {};
