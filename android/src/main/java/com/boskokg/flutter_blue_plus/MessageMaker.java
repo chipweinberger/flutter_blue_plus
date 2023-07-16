@@ -189,16 +189,16 @@ public class MessageMaker {
 
     static HashMap<String, Object> bmCharacteristicProperties(int properties) {
         HashMap<String, Object> props = new HashMap<>();
-        props.put("broadcast", (properties & 1) != 0);
-        props.put("read", (properties & 2) != 0);
-        props.put("write_without_response", (properties & 4) != 0);
-        props.put("write", (properties & 8) != 0);
-        props.put("notify", (properties & 16) != 0);
-        props.put("indicate", (properties & 32) != 0);
-        props.put("authenticated_signed_writes", (properties & 64) != 0);
-        props.put("extended_properties", (properties & 128) != 0);
-        props.put("notify_encryption_required", (properties & 256) != 0);
-        props.put("indicate_encryption_required", (properties & 512) != 0);
+        props.put("broadcast",                      (properties & 1)   != 0 ? 1 : 0);
+        props.put("read",                           (properties & 2)   != 0 ? 1 : 0);
+        props.put("write_without_response",         (properties & 4)   != 0 ? 1 : 0);
+        props.put("write",                          (properties & 8)   != 0 ? 1 : 0);
+        props.put("notify",                         (properties & 16)  != 0 ? 1 : 0);
+        props.put("indicate",                       (properties & 32)  != 0 ? 1 : 0);
+        props.put("authenticated_signed_writes",    (properties & 64)  != 0 ? 1 : 0);
+        props.put("extended_properties",            (properties & 128) != 0 ? 1 : 0);
+        props.put("notify_encryption_required",     (properties & 256) != 0 ? 1 : 0);
+        props.put("indicate_encryption_required",   (properties & 512) != 0 ? 1 : 0);
         return props;
     }
 
