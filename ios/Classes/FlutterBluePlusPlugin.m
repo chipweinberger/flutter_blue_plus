@@ -355,7 +355,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         NSString  *serviceUuid          = args[@"service_uuid"];
         NSString  *secondaryServiceUuid = args[@"secondary_service_uuid"];
         NSNumber  *writeType            = args[@"write_type"];
-        NSString   *value               = args[@"value"];
+        NSString  *value                = args[@"value"];
         
         @try
         {
