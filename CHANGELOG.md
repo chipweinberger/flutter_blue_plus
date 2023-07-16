@@ -1,6 +1,11 @@
 
+
+## 1.7.2
+* android: fix exception thrown when characteristic.write is called (regression in 1.7.0)
+* android: bmCharacteristicProperties was not being set correctly (regression in 1.7.0)
+
 ## 1.7.1
-* iOS: fix regression in 1.7.0 when connecting, exception is thrown
+* iOS: fix when connecting, exception is thrown (regression in 1.7.0)
 
 ## 1.7.0
 * internal: removed protobuf dependency 
