@@ -1343,6 +1343,8 @@ public class FlutterBluePlusPlugin implements
             request.put("remote_id", gatt.getDevice().getAddress());
             request.put("characteristic_uuid", characteristic.getUuid().toString());
             request.put("service_uuid", characteristic.getService().getUuid().toString());
+            request.put("write_type", 0);
+            request.put("value", "");
 
             // see: bmWriteCharacteristicResponse
             HashMap<String, Object> response = new HashMap<>();
