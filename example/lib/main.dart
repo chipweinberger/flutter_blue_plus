@@ -13,7 +13,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'widgets.dart';
 
 void main() {
-
   if (Platform.isAndroid) {
     WidgetsFlutterBinding.ensureInitialized();
     [
@@ -26,7 +25,7 @@ void main() {
       runApp(const FlutterBlueApp());
     });
   } else {
-      runApp(const FlutterBlueApp());
+    runApp(const FlutterBlueApp());
   }
 }
 
@@ -294,11 +293,12 @@ class DeviceScreen extends StatelessWidget {
                         : const Icon(Icons.bluetooth_disabled),
                     snapshot.data == BluetoothDeviceState.connected
                         ? StreamBuilder<int>(
-                        stream: rssiStream(),
-                        builder: (context, snapshot) {
-                          return Text(snapshot.hasData ? '${snapshot.data}dBm' : '',
-                              style: Theme.of(context).textTheme.caption);
-                        })
+                            stream: rssiStream(),
+                            builder: (context, snapshot) {
+                              return Text(
+                                  snapshot.hasData ? '${snapshot.data}dBm' : '',
+                                  style: Theme.of(context).textTheme.caption);
+                            })
                         : Text('', style: Theme.of(context).textTheme.caption),
                   ],
                 ),
@@ -356,7 +356,7 @@ class DeviceScreen extends StatelessWidget {
       ),
     );
   }
-  
+
   Stream<int> rssiStream() async* {
     var isConnected = true;
     final subscription = device.state.listen((state) {

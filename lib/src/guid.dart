@@ -30,11 +30,11 @@ class Guid {
   }
 
   static List<int> _fromString(String input) {
-    // If input has empty value assign a default value 
-    if(input.isEmpty) {
+    // If input has empty value assign a default value
+    if (input.isEmpty) {
       input = "00000000-0000-0000-0000-000000000000";
     }
-    
+
     input = _removeNonHexCharacters(input);
     final bytes = _hexDecode(input);
 
