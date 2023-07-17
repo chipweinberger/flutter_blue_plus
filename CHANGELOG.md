@@ -1,4 +1,7 @@
 
+## 1.7.4
+* android: fix Android 13 access fine location error
+
 ## 1.7.3
 * android: fix exception thrown when descriptor.write is called (regression in 1.7.0)
 
