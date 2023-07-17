@@ -254,7 +254,7 @@ public class FlutterBluePlusPlugin implements
                         default:                                  convertedState = 0;           break;
                     }
 
-                    // see: bmBluetoothState
+                    // see: BmBluetoothState
                     HashMap<String, Object> map = new HashMap<>();
                     map.put("state", convertedState);
 
@@ -313,7 +313,7 @@ public class FlutterBluePlusPlugin implements
                 {
                     ArrayList<String> permissions = new ArrayList<>();
 
-                    // see: bmScanSettings
+                    // see: BmScanSettings
                     HashMap<String, Object> data = call.arguments();
                     List<ScanFilter> filters = fetchFilters(data);
                     allowDuplicates =          (boolean) data.get("allow_duplicates");
@@ -448,7 +448,7 @@ public class FlutterBluePlusPlugin implements
                             return;
                         }
 
-                        // see: bmConnectRequest
+                        // see: BmConnectRequest
                         HashMap<String, Object> args = call.arguments();
                         String remoteId =      (String) args.get("remote_id");
                         boolean autoConnect = (boolean) args.get("android_auto_connect");
@@ -580,7 +580,7 @@ public class FlutterBluePlusPlugin implements
 
                     BluetoothGatt gatt = locateGatt(remoteId);
 
-                    // see: bmDiscoverServicesResult
+                    // see: BmDiscoverServicesResult
                     HashMap<String, Object> map = new HashMap<>();
                     map.put("remote_id", remoteId);
                     
@@ -596,7 +596,7 @@ public class FlutterBluePlusPlugin implements
 
                 case "readCharacteristic":
                 {
-                    // see: bmReadCharacteristicRequest
+                    // see: BmReadCharacteristicRequest
                     HashMap<String, Object> data = call.arguments();
                     String remoteId =             (String) data.get("remote_id");
                     String serviceUuid =          (String) data.get("service_uuid");
@@ -619,7 +619,7 @@ public class FlutterBluePlusPlugin implements
 
                 case "readDescriptor":
                 {
-                    // see: bmReadDescriptorRequest
+                    // see: BmReadDescriptorRequest
                     HashMap<String, Object> data = call.arguments();
                     String remoteId =             (String) data.get("remote_id");
                     String serviceUuid =          (String) data.get("service_uuid");
@@ -646,7 +646,7 @@ public class FlutterBluePlusPlugin implements
 
                 case "writeCharacteristic":
                 {
-                    // see: bmWriteCharacteristicRequest
+                    // see: BmWriteCharacteristicRequest
                     HashMap<String, Object> data = call.arguments();
                     String remoteId =             (String) data.get("remote_id");
                     String serviceUuid =          (String) data.get("service_uuid");
@@ -684,7 +684,7 @@ public class FlutterBluePlusPlugin implements
 
                 case "writeDescriptor":
                 {
-                    // see: bmWriteDescriptorRequest
+                    // see: BmWriteDescriptorRequest
                     HashMap<String, Object> data = call.arguments();
                     String remoteId =             (String) data.get("remote_id");
                     String serviceUuid =          (String) data.get("service_uuid");
@@ -718,7 +718,7 @@ public class FlutterBluePlusPlugin implements
 
                 case "setNotification":
                 {
-                    // see: bmSetNotificationRequest
+                    // see: BmSetNotificationRequest
                     HashMap<String, Object> data = call.arguments();
                     String remoteId =             (String) data.get("remote_id");
                     String serviceUuid =          (String) data.get("service_uuid");
@@ -804,7 +804,7 @@ public class FlutterBluePlusPlugin implements
 
                 case "requestMtu":
                 {
-                    // see: bmMtuSizeRequest
+                    // see: BmMtuSizeRequest
                     HashMap<String, Object> data = call.arguments();
                     String remoteId = (String) data.get("remote_id");
                     int mtu =            (int) data.get("mtu");
@@ -836,7 +836,7 @@ public class FlutterBluePlusPlugin implements
 
                 case "requestConnectionPriority":
                 {
-                    // see: bmConnectionPriorityRequest
+                    // see: BmConnectionPriorityRequest
                     HashMap<String, Object> data = call.arguments();
                     String remoteId =     (String) data.get("remote_id");
                     int connectionPriority = (int) data.get("connection_priority");
@@ -862,7 +862,7 @@ public class FlutterBluePlusPlugin implements
                         break;
                     }
 
-                    // see: bmPreferredPhy
+                    // see: BmPreferredPhy
                     HashMap<String, Object> data = call.arguments();
                     String remoteId = (String) data.get("remote_id");
                     int txPhy =          (int) data.get("tx_phy");
@@ -1103,7 +1103,7 @@ public class FlutterBluePlusPlugin implements
                 default:                                  convertedState = 0;           break;
             }
 
-            // see: bmBluetoothState
+            // see: BmBluetoothState
             HashMap<String, Object> map = new HashMap<>();
             map.put("state", convertedState);
         }
@@ -1159,7 +1159,7 @@ public class FlutterBluePlusPlugin implements
                     default:                                  convertedState = 0;           break;
                 }
 
-                // see: bmBluetoothState
+                // see: BmBluetoothState
                 HashMap<String, Object> map = new HashMap<>();
                 map.put("state", convertedState);
             }
@@ -1307,7 +1307,7 @@ public class FlutterBluePlusPlugin implements
         {
             log(LogLevel.DEBUG, "[onServicesDiscovered] count: " + gatt.getServices().size() + " status: " + status);
 
-            // see: bmDiscoverServicesResult
+            // see: BmDiscoverServicesResult
             HashMap<String, Object> response = new HashMap<>();
             response.put("remote_id", gatt.getDevice().getAddress());
             List<Object> services = new ArrayList<Object>();
@@ -1325,7 +1325,7 @@ public class FlutterBluePlusPlugin implements
         {
             log(LogLevel.DEBUG, "[onCharacteristicRead] uuid: " + characteristic.getUuid().toString() + " status: " + status);
 
-            // see: bmReadCharacteristicResponse
+            // see: BmReadCharacteristicResponse
             HashMap<String, Object> response = new HashMap<>();
             response.put("remote_id", gatt.getDevice().getAddress());
             response.put("characteristic", MessageMaker.bmBluetoothCharacteristic(gatt.getDevice(), characteristic, gatt));
@@ -1338,7 +1338,7 @@ public class FlutterBluePlusPlugin implements
         {
             log(LogLevel.DEBUG, "[onCharacteristicWrite] uuid: " + characteristic.getUuid().toString() + " status: " + status);
 
-            // see: bmWriteCharacteristicRequest
+            // see: BmWriteCharacteristicRequest
             HashMap<String, Object> request = new HashMap<>();
             request.put("remote_id", gatt.getDevice().getAddress());
             request.put("characteristic_uuid", characteristic.getUuid().toString());
@@ -1346,7 +1346,7 @@ public class FlutterBluePlusPlugin implements
             request.put("write_type", 0);
             request.put("value", "");
 
-            // see: bmWriteCharacteristicResponse
+            // see: BmWriteCharacteristicResponse
             HashMap<String, Object> response = new HashMap<>();
             response.put("request", request);
             response.put("success", status == BluetoothGatt.GATT_SUCCESS);
@@ -1359,7 +1359,7 @@ public class FlutterBluePlusPlugin implements
         {
             log(LogLevel.DEBUG, "[onCharacteristicChanged] uuid: " + characteristic.getUuid().toString());
 
-            // see: bmOnCharacteristicChanged
+            // see: BmOnCharacteristicChanged
             HashMap<String, Object> map = new HashMap<>();
             map.put("remote_id", gatt.getDevice().getAddress());
             map.put("characteristic", MessageMaker.bmBluetoothCharacteristic(gatt.getDevice(), characteristic, gatt));
@@ -1399,7 +1399,7 @@ public class FlutterBluePlusPlugin implements
                 }
             }
 
-            // see: bmReadDescriptorResponse
+            // see: BmReadDescriptorResponse
             HashMap<String, Object> response = new HashMap<>();
             response.put("request", request);
             response.put("value", bytesToHex(descriptor.getValue()));
@@ -1412,14 +1412,14 @@ public class FlutterBluePlusPlugin implements
         {
             log(LogLevel.DEBUG, "[onDescriptorWrite] uuid: " + descriptor.getUuid().toString() + " status: " + status);
 
-            // see: bmWriteDescriptorRequest
+            // see: BmWriteDescriptorRequest
             HashMap<String, Object> request = new HashMap<>();
             request.put("remote_id", gatt.getDevice().getAddress());
             request.put("descriptor_uuid", descriptor.getUuid().toString());
             request.put("characteristic_uuid", descriptor.getCharacteristic().getUuid().toString());
             request.put("uuid", descriptor.getCharacteristic().getService().getUuid().toString());
 
-            // see: bmWriteDescriptorResponse
+            // see: BmWriteDescriptorResponse
             HashMap<String, Object> response = new HashMap<>();
             response.put("request", request);
             response.put("success", status == BluetoothGatt.GATT_SUCCESS);
@@ -1428,7 +1428,7 @@ public class FlutterBluePlusPlugin implements
 
             if(descriptor.getUuid().compareTo(CCCD_ID) == 0) {
 
-                // see: bmSetNotificationResponse
+                // see: BmSetNotificationResponse
                 HashMap<String, Object> notificationResponse = new HashMap<>();
                 notificationResponse.put("remote_id", gatt.getDevice().getAddress());
                 notificationResponse.put("characteristic", MessageMaker.bmBluetoothCharacteristic(gatt.getDevice(), descriptor.getCharacteristic(), gatt));
@@ -1451,7 +1451,7 @@ public class FlutterBluePlusPlugin implements
 
             if(status == BluetoothGatt.GATT_SUCCESS) {
 
-                // see: bmReadRssiResult
+                // see: BmReadRssiResult
                 HashMap<String, Object> result = new HashMap<>();
                 result.put("remote_id", gatt.getDevice().getAddress());
                 result.put("rssi", rssi);
@@ -1474,7 +1474,7 @@ public class FlutterBluePlusPlugin implements
                         cache.mtu = mtu;
                     }
 
-                    // see: bmMtuSizeResponse
+                    // see: BmMtuSizeResponse
                     HashMap<String, Object> result = new HashMap<>();
                     result.put("remote_id", gatt.getDevice().getAddress());
                     result.put("mtu", mtu);
