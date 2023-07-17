@@ -1,4 +1,6 @@
 
+## 1.7.3
+* android: fix exception thrown when descriptor.write is called (regression in 1.7.0)
 
 ## 1.7.2
 * android: fix exception thrown when characteristic.write is called (regression in 1.7.0)
