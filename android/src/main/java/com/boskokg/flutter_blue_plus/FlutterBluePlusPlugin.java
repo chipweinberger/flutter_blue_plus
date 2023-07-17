@@ -254,7 +254,7 @@ public class FlutterBluePlusPlugin implements
                         default:                                  convertedState = 0;           break;
                     }
 
-                    // see: BmBluetoothState
+                    // see: BmBluetoothPowerState
                     HashMap<String, Object> map = new HashMap<>();
                     map.put("state", convertedState);
 
@@ -1103,9 +1103,11 @@ public class FlutterBluePlusPlugin implements
                 default:                                  convertedState = 0;           break;
             }
 
-            // see: BmBluetoothState
+            // see: BmBluetoothPowerState
             HashMap<String, Object> map = new HashMap<>();
             map.put("state", convertedState);
+
+            sink.success(map);
         }
     };
 
@@ -1159,9 +1161,11 @@ public class FlutterBluePlusPlugin implements
                     default:                                  convertedState = 0;           break;
                 }
 
-                // see: BmBluetoothState
+                // see: BmBluetoothPowerState
                 HashMap<String, Object> map = new HashMap<>();
                 map.put("state", convertedState);
+
+                sink.success(map);
             }
         }
 
