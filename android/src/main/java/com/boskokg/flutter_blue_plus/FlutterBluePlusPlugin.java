@@ -1416,8 +1416,9 @@ public class FlutterBluePlusPlugin implements
             HashMap<String, Object> request = new HashMap<>();
             request.put("remote_id", gatt.getDevice().getAddress());
             request.put("descriptor_uuid", descriptor.getUuid().toString());
+            request.put("service_uuid", descriptor.getCharacteristic().getService().getUuid().toString());
             request.put("characteristic_uuid", descriptor.getCharacteristic().getUuid().toString());
-            request.put("uuid", descriptor.getCharacteristic().getService().getUuid().toString());
+            request.put("value", "");
 
             // see: BmWriteDescriptorResponse
             HashMap<String, Object> response = new HashMap<>();
