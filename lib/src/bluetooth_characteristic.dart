@@ -30,11 +30,8 @@ class BluetoothCharacteristic {
       : uuid = Guid(p.uuid),
         deviceId = DeviceIdentifier(p.remoteId),
         serviceUuid = Guid(p.serviceUuid),
-        secondaryServiceUuid = p.secondaryServiceUuid != null
-            ? Guid(p.secondaryServiceUuid!)
-            : null,
-        descriptors =
-            p.descriptors.map((d) => BluetoothDescriptor.fromProto(d)).toList(),
+        secondaryServiceUuid = p.secondaryServiceUuid != null ? Guid(p.secondaryServiceUuid!) : null,
+        descriptors = p.descriptors.map((d) => BluetoothDescriptor.fromProto(d)).toList(),
         properties = CharacteristicProperties.fromProto(p.properties),
         lastValue = p.value,
         _readValueController = _BehaviorSubject<List<int>>(p.value);
@@ -43,13 +40,11 @@ class BluetoothCharacteristic {
   ///   - the first time it is listened to
   ///   - after 'read' is called
   ///   - if setNotifyValue(true) and the operating system receives a change
-  Stream<List<int>> get value =>
-      _mergeStreams([_readValueController.stream, onValueChangedStream]);
+  Stream<List<int>> get value => _mergeStreams([_readValueController.stream, onValueChangedStream]);
 
   /// This stream is pushed to when:
   ///   - setNotifyValue(true) and the operating system receives a change
-  Stream<List<int>> get onValueChangedStream =>
-      FlutterBluePlus.instance._methodStream
+  Stream<List<int>> get onValueChangedStream => FlutterBluePlus.instance._methodStream
           .where((m) => m.method == "OnCharacteristicChanged")
           .map((m) => m.arguments)
           .map((buffer) => BmOnCharacteristicChanged.fromMap(buffer))
@@ -64,8 +59,7 @@ class BluetoothCharacteristic {
 
   bool get isNotifying {
     try {
-      var cccd =
-          descriptors.singleWhere((d) => d.uuid == BluetoothDescriptor.cccd);
+      var cccd = descriptors.singleWhere((d) => d.uuid == BluetoothDescriptor.cccd);
       return ((cccd.lastValue[0] & 0x01) > 0 || (cccd.lastValue[0] & 0x02) > 0);
     } catch (e) {
       return false;
@@ -109,22 +103,23 @@ class BluetoothCharacteristic {
           .where((p) =>
               (p.remoteId == request.remoteId) &&
               (p.characteristic.uuid == request.characteristicUuid) &&
-              (p.characteristic.serviceUuid == request.serviceUuid))
-          .map((p) => p.characteristic.value);
+              (p.characteristic.serviceUuid == request.serviceUuid));
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
-      Future<List<int>> futureResponse = responseStream.first;
+      Future<BmReadCharacteristicResponse> futureResponse = responseStream.first;
 
-      await FlutterBluePlus.instance._channel
-          .invokeMethod('readCharacteristic', request.toMap());
+      await FlutterBluePlus.instance._channel.invokeMethod('readCharacteristic', request.toMap());
 
-      responseValue = await futureResponse;
+      BmReadCharacteristicResponse response = await futureResponse;
 
       // push to stream
-      _readValueController.add(responseValue);
+      _readValueController.add(response.characteristic.value);
 
       // cache latest value
-      lastValue = responseValue;
+      lastValue = response.characteristic.value;
+
+      // set return value
+      responseValue = response.characteristic.value;
     }).catchError((e, stacktrace) {
       throw Exception("$e $stacktrace");
     });
@@ -141,9 +136,7 @@ class BluetoothCharacteristic {
     // Only allow a single read or write operation
     // at a time, to prevent race conditions.
     await _readWriteMutex.synchronized(() async {
-      final writeType = withoutResponse
-          ? BmWriteType.withoutResponse
-          : BmWriteType.withResponse;
+      final writeType = withoutResponse ? BmWriteType.withoutResponse : BmWriteType.withResponse;
 
       var request = BmWriteCharacteristicRequest(
         remoteId: deviceId.toString(),
@@ -165,11 +158,9 @@ class BluetoothCharacteristic {
                 (p.request.serviceUuid == request.serviceUuid));
 
         // Start listening now, before invokeMethod, to ensure we don't miss the response
-        Future<BmWriteCharacteristicResponse> futureResponse =
-            responseStream.first;
+        Future<BmWriteCharacteristicResponse> futureResponse = responseStream.first;
 
-        await FlutterBluePlus.instance._channel
-            .invokeMethod('writeCharacteristic', request.toMap());
+        await FlutterBluePlus.instance._channel.invokeMethod('writeCharacteristic', request.toMap());
 
         // wait for response, so that we can check for success
         BmWriteCharacteristicResponse response = await futureResponse;
@@ -180,8 +171,7 @@ class BluetoothCharacteristic {
         return Future.value();
       } else {
         // invoke without waiting for reply
-        return FlutterBluePlus.instance._channel
-            .invokeMethod('writeCharacteristic', request.toMap());
+        return FlutterBluePlus.instance._channel.invokeMethod('writeCharacteristic', request.toMap());
       }
     }).catchError((e, stacktrace) {
       throw Exception("$e $stacktrace");
@@ -198,8 +188,7 @@ class BluetoothCharacteristic {
       enable: notify,
     );
 
-    Stream<BmSetNotificationResponse> responseStream = FlutterBluePlus
-        .instance._methodStream
+    Stream<BmSetNotificationResponse> responseStream = FlutterBluePlus.instance._methodStream
         .where((m) => m.method == "SetNotificationResponse")
         .map((m) => m.arguments)
         .map((buffer) => BmSetNotificationResponse.fromMap(buffer))
@@ -211,8 +200,7 @@ class BluetoothCharacteristic {
     // Start listening now, before invokeMethod, to ensure we don't miss the response
     Future<BmSetNotificationResponse> futureResponse = responseStream.first;
 
-    await FlutterBluePlus.instance._channel
-        .invokeMethod('setNotification', request.toMap());
+    await FlutterBluePlus.instance._channel.invokeMethod('setNotification', request.toMap());
 
     // wait for response, so that we can check for success
     BmSetNotificationResponse response = await futureResponse;
@@ -220,8 +208,7 @@ class BluetoothCharacteristic {
       throw Exception('setNotifyValue failed');
     }
 
-    BluetoothCharacteristic c =
-        BluetoothCharacteristic.fromProto(response.characteristic);
+    BluetoothCharacteristic c = BluetoothCharacteristic.fromProto(response.characteristic);
     _updateDescriptors(c.descriptors);
     return c.isNotifying == notify;
   }

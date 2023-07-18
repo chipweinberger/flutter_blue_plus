@@ -727,8 +727,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     NSDictionary *result = [self toScanResultProto:peripheral advertisementData:advertisementData RSSI:RSSI];
 
-    [_channel invokeMethod:@"ScanResult" 
-                arguments:result];
+    [_channel invokeMethod:@"ScanResult" arguments:result];
 }
 
 - (void)centralManager:(CBCentralManager *)central
@@ -755,6 +754,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                       error:(NSError *)error
 {
     if (error) {
+        // error contains the reason for the unexpected disconnection
         NSLog(@"[FBP-iOS] didDisconnectPeripheral: [Error] %@", [error localizedDescription]);
     } else if (_logLevel >= debug) {
         NSLog(@"[FBP-iOS] didDisconnectPeripheral");
@@ -773,6 +773,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                          error:(NSError *)error
 {
     if (error) {
+        // error contains the reason for the connection failure
         NSLog(@"[FBP-iOS] didFailToConnectPeripheral: [Error] %@", [error localizedDescription]);
     } else if (_logLevel >= debug) {
         NSLog(@"[FBP-iOS] didFailToConnectPeripheral");
@@ -783,9 +784,19 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                  arguments:[self toDeviceStateProto:peripheral state:peripheral.state]];
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+//  ██████  ██████   ██████   ███████  ██████   ██  ██████   ██   ██  ███████  ██████    █████   ██      
+// ██       ██   ██  ██   ██  ██       ██   ██  ██  ██   ██  ██   ██  ██       ██   ██  ██   ██  ██      
+// ██       ██████   ██████   █████    ██████   ██  ██████   ███████  █████    ██████   ███████  ██      
+// ██       ██   ██  ██       ██       ██   ██  ██  ██       ██   ██  ██       ██   ██  ██   ██  ██      
+//  ██████  ██████   ██       ███████  ██   ██  ██  ██       ██   ██  ███████  ██   ██  ██   ██  ███████
 //
-// CBPeripheralDelegate methods
-//
+// ██████   ███████  ██       ███████   ██████    █████   ████████  ███████          
+// ██   ██  ██       ██       ██       ██        ██   ██     ██     ██               
+// ██   ██  █████    ██       █████    ██   ███  ███████     ██     █████            
+// ██   ██  ██       ██       ██       ██    ██  ██   ██     ██     ██               
+// ██████   ███████  ███████  ███████   ██████   ██   ██     ██     ███████ 
+
 - (void)peripheral:(CBPeripheral *)peripheral didDiscoverServices:(NSError *)error
 {
     if (error) {
@@ -934,21 +945,31 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     }
 
     // Read CCC descriptor of characteristic
-    CBDescriptor *cccd = [self findCCCDescriptor:characteristic];
-    if (cccd == nil || error != nil)
-    {
+    CBDescriptor *cccd = nil;
+    if (error == nil) {
+        cccd = [self findCCCDescriptor:characteristic];
+        if (cccd == nil) { 
+            error = [NSError errorWithDomain:@"com.flutter_blue_plus" code:-1 
+                userInfo:@{ NSLocalizedDescriptionKey : @"findCCCDescriptor failed"}];
+        }
+    }
+
+    if (error) {
         // See BmSetNotificationResponse
         NSDictionary* response = @{
             @"remote_id":      [peripheral.identifier UUIDString],
             @"characteristic": [self toCharacteristicProto:peripheral characteristic:characteristic],
             @"success":        @(false),
         };
-        [_channel invokeMethod:@"SetNotificationResponse" arguments:response];
-        return;
-    }
 
-    // Request a read
-    [peripheral readValueForDescriptor:cccd];
+        [_channel invokeMethod:@"SetNotificationResponse" arguments:response];
+
+    } else {
+        // Request a read
+        // Note: invokeMethod:@"SetNotificationResponse" is invoked later
+        // in the didUpdateValueForDescriptor callback
+        [peripheral readValueForDescriptor:cccd]; 
+    }
 }
 
 - (void)peripheral:(CBPeripheral *)peripheral
@@ -1404,16 +1425,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
 - (uint32_t)getMtu:(CBPeripheral *)peripheral
 {
-    if (@available(iOS 9.0, *))
-    {
-        // Which type should we use? (issue #365)
-        return (uint32_t)[peripheral maximumWriteValueLengthForType:CBCharacteristicWriteWithoutResponse];
-    }
-    else
-    {
-        // Fallback to minimum on earlier versions. (issue #364)
-        return 20;
-    }
+    return (uint32_t)[peripheral maximumWriteValueLengthForType:CBCharacteristicWriteWithoutResponse];
 }
 
 @end
