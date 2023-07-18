@@ -138,6 +138,10 @@ class FlutterBluePlus {
   /// timeout calls stopStream after a specified [Duration].
   /// You can also get a list of ongoing results in the [scanResults] stream.
   /// If scanning is already in progress, this will throw an [Exception].
+  ///
+  /// set [androidUsesFineLocation] to true if you want to derive the physical location of the device
+  /// on Android Version >=31 (Android 12). You need to add the following permission to your AndroidManifest.xml:
+  /// <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
   Stream<ScanResult> scan({
     ScanMode scanMode = ScanMode.lowLatency,
     List<Guid> withServices = const [],
@@ -145,7 +149,7 @@ class FlutterBluePlus {
     List<String> macAddresses = const [],
     Duration? timeout,
     bool allowDuplicates = false,
-    bool androidUsesFineLocation = true,
+    bool androidUsesFineLocation = false,
   }) async* {
     var settings = BmScanSettings(
         serviceUuids: withServices.map((g) => g.toString()).toList(),
@@ -217,6 +221,10 @@ class FlutterBluePlus {
   ///
   /// To observe the results while the scan is in progress, listen to the [scanResults] stream,
   /// or call [scan] instead.
+  ///
+  /// set [androidUsesFineLocation] to true if you want to derive the physical location of the device
+  /// on Android Version >=31 (Android 12). You need to add the following permission to your AndroidManifest.xml:
+  /// <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
   Future startScan({
     ScanMode scanMode = ScanMode.lowLatency,
     List<Guid> withServices = const [],
@@ -224,7 +232,7 @@ class FlutterBluePlus {
     List<String> macAddresses = const [],
     Duration? timeout,
     bool allowDuplicates = false,
-    bool androidUsesFineLocation = true,
+    bool androidUsesFineLocation = false,
   }) async {
     await scan(
             scanMode: scanMode,

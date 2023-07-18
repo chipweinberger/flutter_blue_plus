@@ -110,8 +110,10 @@ class FindDevicesScreen extends StatelessWidget {
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: () => FlutterBluePlus.instance
-            .startScan(timeout: const Duration(seconds: 4)),
+        onRefresh: () => FlutterBluePlus.instance.startScan(
+            timeout: const Duration(seconds: 4),
+            androidUsesFineLocation:
+                false), // if set to true add permission ACCESS_FINE_LOCATION to AndroidManifest.xml
         child: SingleChildScrollView(
           child: Column(
             children: <Widget>[
@@ -180,8 +182,10 @@ class FindDevicesScreen extends StatelessWidget {
           } else {
             return FloatingActionButton(
                 child: const Icon(Icons.search),
-                onPressed: () => FlutterBluePlus.instance
-                    .startScan(timeout: const Duration(seconds: 4)));
+                onPressed: () => FlutterBluePlus.instance.startScan(
+                    timeout: const Duration(seconds: 4),
+                    androidUsesFineLocation:
+                        false)); // if set to true add permission ACCESS_FINE_LOCATION to AndroidManifest.xml
           }
         },
       ),
