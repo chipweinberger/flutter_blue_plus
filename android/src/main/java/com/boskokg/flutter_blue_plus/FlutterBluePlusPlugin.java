@@ -320,23 +320,18 @@ public class FlutterBluePlusPlugin implements
                     int scanMode =                 (int) data.get("android_scan_mode");
                     boolean usesFineLocation = (boolean) data.get("android_uses_fine_location");
 
-                    // scan
+                    // Android 12+
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                         permissions.add(Manifest.permission.BLUETOOTH_SCAN);
-                    } else {
-                        permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
-                    }
-
-                    // connect
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                         permissions.add(Manifest.permission.BLUETOOTH_CONNECT);
-                    }
-
-                    // fine location
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                         if (usesFineLocation) {
                             permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
                         }
+                    }
+
+                    // Android 11 or lower
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                        permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
                     }
 
                     ensurePermissions(permissions, (granted, perm) -> {
@@ -389,7 +384,7 @@ public class FlutterBluePlusPlugin implements
                 {
                     ArrayList<String> permissions = new ArrayList<>();
 
-                    // connect
+                    // Android 12+
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                         permissions.add(Manifest.permission.BLUETOOTH_CONNECT);
                     }
@@ -435,7 +430,7 @@ public class FlutterBluePlusPlugin implements
                 {
                     ArrayList<String> permissions = new ArrayList<>();
 
-                    // connect
+                    // Android 12+
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                         permissions.add(Manifest.permission.BLUETOOTH_CONNECT);
                     }
