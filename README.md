@@ -138,8 +138,25 @@ In the **android/app/src/main/AndroidManifest.xml** let’s add:
 ```xml
 	  <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:usesPermissionFlags="neverForLocation" />
 	  <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-	  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
  <application
+```
+
+By default the package does not request the ACCESS_FINE_LOCATION permission on Android 12+. In case you need to get the physical
+location of the device via Bluetooth, you need to add the permission to the **android/app/src/main/AndroidManifest.xml**:
+
+```xml
+	  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+ <application
+```
+
+and set the androidUsesFineLocation flag to true when scanning:
+
+```dart
+// Start scanning
+flutterBlue.startScan(timeout: Duration(seconds: 4), androidUsesFineLocation: true);
+
+// Stop scanning
+flutterBlue.stopScan();
 ```
 
 #### **IOS**
