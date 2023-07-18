@@ -1,4 +1,9 @@
 
+## 1.7.5
+* android: fix BluetoothState not being updated
+* Dart: remove analysis_options.yaml
+* Example: fix deprecations
+
 ## 1.7.4
 * android: fix Android 13 access fine location error
 
