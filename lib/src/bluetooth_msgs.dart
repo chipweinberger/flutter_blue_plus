@@ -570,7 +570,7 @@ class BmWriteDescriptorResponse {
     _printDbg("\nBmWriteDescriptorResponse $json");
     return BmWriteDescriptorResponse(
       request: BmWriteDescriptorRequest.fromMap(json['request']),
-      success: json['success'] != 0,
+      success: json['success'],
     );
   }
 }
