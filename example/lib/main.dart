@@ -180,12 +180,22 @@ class FindDevicesScreen extends StatelessWidget {
               backgroundColor: Colors.red,
             );
           } else {
+            /// previously method
+            // return FloatingActionButton(
+            //     child: const Icon(Icons.search),
+            //     onPressed: () => FlutterBluePlus.instance.startScan(
+            //         timeout: const Duration(seconds: 4),
+            //         androidUsesFineLocation:
+            //             false)); // if set to true add permission ACCESS_FINE_LOCATION to AndroidManifest.xml
+            /// Scan without timeout and with updateInterval.
             return FloatingActionButton(
                 child: const Icon(Icons.search),
                 onPressed: () => FlutterBluePlus.instance.startScan(
-                    timeout: const Duration(seconds: 4),
+                    updateInterval: const Duration(seconds: 1),
+                    expiredInterval: const Duration(seconds: 5),
+                    allowDuplicates: true,
                     androidUsesFineLocation:
-                        false)); // if set to true add permission ACCESS_FINE_LOCATION to AndroidManifest.xml
+                    false));
           }
         },
       ),

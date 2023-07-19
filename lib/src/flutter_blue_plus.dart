@@ -21,6 +21,12 @@ class FlutterBluePlus {
 
   final _BehaviorSubject<List<ScanResult>> _scanResults = _BehaviorSubject([]);
 
+  // For scan continuously, _updateInterval is interval for update discovered list
+  Duration? _updateInterval;
+  Duration? _expiredInterval;
+  Timer? _updateScanResultTimer;
+  final Map<String, ScanResultCache> _cachedDevices = {};
+
   // timeout for scanning that can be cancelled by stopScan
   Timer? _scanTimeout;
 
@@ -148,6 +154,8 @@ class FlutterBluePlus {
     List<Guid> withDevices = const [],
     List<String> macAddresses = const [],
     Duration? timeout,
+    Duration? updateInterval,
+    Duration? expiredInterval,
     bool allowDuplicates = false,
     bool androidUsesFineLocation = false,
   }) async* {
@@ -161,6 +169,16 @@ class FlutterBluePlus {
     if (_isScanning.value == true) {
       throw Exception('Another scan is already in progress.');
     }
+
+    // When use updateInterval, allowDuplicates must be true. Otherwise, When an already discovered device goes offline, we have no way to remove it from the scan results
+    if (updateInterval != null && allowDuplicates == false) {
+      throw Exception('When use updateInterval, allowDuplicates must be true');
+    }
+
+    _updateInterval = updateInterval;
+    _expiredInterval = expiredInterval;
+    _cachedDevices.clear();
+    _updateScanResultTimer?.cancel();
 
     // push to isScanning stream
     _isScanning.add(true);
@@ -197,20 +215,54 @@ class FlutterBluePlus {
       rethrow;
     }
 
-    await for (ScanResult item in _scanResultsBuffer!.stream) {
-      // update list of devices
-      List<ScanResult> list = List<ScanResult>.from(_scanResults.value);
-      if (list.contains(item)) {
-        int index = list.indexOf(item);
-        list[index] = item;
-      } else {
-        list.add(item);
+    // if _updateInterval not null, use it for scan continuously, otherwise use the mode before.
+    if (_updateInterval != null) {
+      /// This code not only for removing the discovered results which haven't been updated in [_updateInterval] seconds,
+      /// but also can update the rssi in scan results.
+      /// For fixing situations that may cause an exception:
+      /// 1. Discovered a ble device and it in scan results.
+      /// 2. Power-off the device to simulate the device have been leaved scene.
+      /// 3. The device still in discovered list(scan results). So user can connect the device, but will never get success.
+      _updateScanResultTimer = Timer.periodic(_updateInterval!, (t) {
+        // remove expired devices
+        if (_expiredInterval != null) {
+          int nowSec = DateTime.now().millisecondsSinceEpoch;
+          int diffTime = _expiredInterval!.inMilliseconds;
+          _cachedDevices.removeWhere((key, value) {
+            if ((nowSec - value.date.millisecondsSinceEpoch) > diffTime) {
+              return true;
+            }
+            return false;
+          });
+        }
+        final list = _cachedDevices.values.map((e) => e.result).toList();
+        list.sort((a, b) => b.rssi - a.rssi); // sort by RSSI.
+        _scanResults.add(list);
+      });
+
+      await for (ScanResult item in _scanResultsBuffer!.stream) {
+        _cachedDevices[item.device.id.toString()] = ScanResultCache(item);
+        /// If use [updateInterval], [allowDuplicates] always true, no need to update scan results every time when discovered a device.
+        /// do _scanResults.add(list) in _updateScanResultTimer callback
+        yield item;
       }
+    } else {
+      await for (ScanResult item in _scanResultsBuffer!.stream) {
+        // update list of devices
+        List<ScanResult> list = List<ScanResult>.from(_scanResults.value);
+        if (list.contains(item)) {
+          int index = list.indexOf(item);
+          list[index] = item;
+        } else {
+          list.add(item);
+        }
 
-      _scanResults.add(list);
+        _scanResults.add(list);
 
-      yield item;
+        yield item;
+      }
     }
+
   }
 
   /// Starts a scan and returns a future that will complete once the scan has finished.
@@ -231,6 +283,8 @@ class FlutterBluePlus {
     List<Guid> withDevices = const [],
     List<String> macAddresses = const [],
     Duration? timeout,
+    Duration? updateInterval,
+    Duration? expiredInterval,
     bool allowDuplicates = false,
     bool androidUsesFineLocation = false,
   }) async {
@@ -240,6 +294,8 @@ class FlutterBluePlus {
             withDevices: withDevices,
             macAddresses: macAddresses,
             timeout: timeout,
+            updateInterval: updateInterval,
+            expiredInterval: expiredInterval,
             allowDuplicates: allowDuplicates,
             androidUsesFineLocation: androidUsesFineLocation)
         .drain();
@@ -249,6 +305,7 @@ class FlutterBluePlus {
   /// Stops a scan for Bluetooth Low Energy devices
   Future stopScan() async {
     await _channel.invokeMethod('stopScan');
+    _updateScanResultTimer?.cancel();
     _scanResultsBuffer?.close();
     _scanTimeout?.cancel();
     _isScanning.add(false);
@@ -404,5 +461,14 @@ class AdvertisementData {
         'serviceData: $serviceData, '
         'serviceUuids: $serviceUuids'
         '}';
+  }
+}
+
+class ScanResultCache {
+  final ScanResult result;
+  late DateTime date;
+
+  ScanResultCache(this.result, {DateTime? date}) {
+    this.date = date ?? DateTime.now();
   }
 }
