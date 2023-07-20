@@ -50,8 +50,11 @@ class FlutterBluePlus {
   /// Checks whether the device supports Bluetooth
   Future<bool> get isAvailable => _channel.invokeMethod('isAvailable').then<bool>((d) => d);
 
+  @Deprecated('Use adapterName instead')
+  Future<String> get name => adapterName;
+
   /// Return the friendly Bluetooth name of the local Bluetooth adapter
-  Future<String> get name => _channel.invokeMethod('name').then<String>((d) => d);
+  Future<String> get adapterName => _channel.invokeMethod('getAdapterName').then<String>((d) => d);
 
   /// Checks if Bluetooth functionality is turned on
   Future<bool> get isOn => _channel.invokeMethod('isOn').then<bool>((d) => d);
@@ -395,14 +398,14 @@ class AdvertisementData {
 }
 
 class FlutterBluePlusException implements Exception {
-  final String name;
+  final String errorName;
   final int? errorCode;
   final String? errorString;
 
-  FlutterBluePlusException(this.name, this.errorCode, this.errorString);
+  FlutterBluePlusException(this.errorName, this.errorCode, this.errorString);
 
   @override
   String toString() {
-    return 'FlutterBluePlusException: name:$name errorCode:$errorCode, errorString:$errorString';
+    return 'FlutterBluePlusException: name:$errorName errorCode:$errorCode, errorString:$errorString';
   }
 }

@@ -71,9 +71,9 @@ public class MessageMaker {
             }
         }
         if(scanRecord != null) {
-            String deviceName = scanRecord.getDeviceName();
-            if(deviceName != null) {
-                advertisementData.put("local_name", deviceName);
+            String localName = scanRecord.getDeviceName();
+            if(localName != null) {
+                advertisementData.put("local_name", localName);
             }
             int txPower = scanRecord.getTxPowerLevel();
             if(txPower != Integer.MIN_VALUE) {
@@ -119,9 +119,9 @@ public class MessageMaker {
     static HashMap<String, Object> bmBluetoothDevice(BluetoothDevice device) {
         HashMap<String, Object> dev = new HashMap<>();
         dev.put("remote_id", device.getAddress());
-        String name = device.getName();
-        if(name != null) {
-            dev.put("name", name);
+        String localName = device.getName();
+        if(localName != null) {
+            dev.put("local_name", localName);
         }
         dev.put("type", device.getType());
         return dev;

@@ -140,13 +140,13 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 result(@(NO));
             }
         }
-        else if ([@"name" isEqualToString:call.method])
+        else if ([@"getAdapterName" isEqualToString:call.method])
         {
     #if TARGET_OS_IOS
             result([[UIDevice currentDevice] name]);
     #else // MacOS
             // TODO: support this via hostname?
-            result([FlutterError errorWithCode:@"name" message:@"macOS does not support device name" details:NULL]);
+            result(@"Mac Bluetooth Adapter");
     #endif
         }
         else if ([@"startScan" isEqualToString:call.method])
@@ -1412,9 +1412,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 {
     // See BmBluetoothDevice
     return @{
-        @"remote_id": [[peripheral identifier] UUIDString],
-        @"name":      [peripheral name] ? [peripheral name] : [NSNull null],
-        @"type":      @(2), // hardcode to BLE. Does iOS differentiate?
+        @"remote_id":   [[peripheral identifier] UUIDString],
+        @"local_name":  [peripheral name] ? [peripheral name] : [NSNull null],
+        @"type":        @(2), // hardcode to BLE. Does iOS differentiate?
     };
 }
 

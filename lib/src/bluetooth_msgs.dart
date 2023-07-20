@@ -158,19 +158,19 @@ enum BmBluetoothSpecEnum {
 
 class BmBluetoothDevice {
   String remoteId;
-  String? name;
+  String? localName;
   BmBluetoothSpecEnum type;
 
   BmBluetoothDevice({
     required this.remoteId,
-    required this.name,
+    required this.localName,
     required this.type,
   });
 
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> data = {};
     data['remote_id'] = remoteId;
-    data['name'] = name;
+    data['local_name'] = localName;
     data['type'] = type.index;
     _printDbg("\nBmBluetoothDevice $data");
     return data;
@@ -180,7 +180,7 @@ class BmBluetoothDevice {
     _printDbg("\nBmBluetoothDevice $json");
     return BmBluetoothDevice(
       remoteId: json['remote_id'],
-      name: json['name'],
+      localName: json['local_name'],
       type: BmBluetoothSpecEnum.values[json['type']],
     );
   }

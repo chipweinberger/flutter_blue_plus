@@ -71,10 +71,10 @@ class AdvertisementParser {
             data.position(data.position() + length);
             break;
           }
-          byte[] name = new byte[length];
-          data.get(name);
+          byte[] localName = new byte[length];
+          data.get(localName);
           try {
-            response.put("local_name", new String(name, "UTF-8"));
+            response.put("local_name", new String(localName, "UTF-8"));
           } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
           }

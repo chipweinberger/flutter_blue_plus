@@ -6,8 +6,11 @@ part of flutter_blue_plus;
 
 class BluetoothDevice {
   final DeviceIdentifier id;
-  final String name;
+  final String localName;
   final BluetoothDeviceType type;
+
+  @Deprecated('Use localName instead')
+  String get name => localName;
 
   final _BehaviorSubject<List<BluetoothService>> _services = _BehaviorSubject([]);
 
@@ -17,15 +20,15 @@ class BluetoothDevice {
 
   BluetoothDevice.fromProto(BmBluetoothDevice p)
       : id = DeviceIdentifier(p.remoteId),
-        name = p.name ?? "",
+        localName = p.localName ?? "",
         type = bmToBluetoothDeviceType(p.type);
 
   /// Use on Android when the MAC address is known.
   /// This constructor enables the Android to connect to a specific device
   /// as soon as it becomes available on the bluetooth "network".
-  BluetoothDevice.fromId(String id, {String? name, BluetoothDeviceType? type})
+  BluetoothDevice.fromId(String id, {String? localName, BluetoothDeviceType? type})
       : id = DeviceIdentifier(id),
-        name = name ?? "Unknown name",
+        localName = localName ?? "Unknown localName",
         type = type ?? BluetoothDeviceType.unknown;
 
   /// Establishes a connection to the Bluetooth Device.
@@ -315,7 +318,7 @@ class BluetoothDevice {
   String toString() {
     return 'BluetoothDevice{'
         'id: $id, '
-        'name: $name, '
+        'localName: $localName, '
         'type: $type, '
         'isDiscoveringServices: ${_isDiscoveringServices.value}, '
         '_services: ${_services.value}'

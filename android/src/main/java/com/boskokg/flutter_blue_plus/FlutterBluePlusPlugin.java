@@ -288,10 +288,10 @@ public class FlutterBluePlusPlugin implements
                     break;
                 }
 
-                case "name":
+                case "getAdapterName":
                 {
-                    String name = mBluetoothAdapter.getName();
-                    result.success(name != null ? name : "");
+                    String adapterName = mBluetoothAdapter.getName();
+                    result.success(adapterName != null ? adapterName : "");
                     break;
                 }
 
@@ -1700,15 +1700,15 @@ public class FlutterBluePlusPlugin implements
         }
     }
 
-    private void invokeMethodUIThread(final String name, HashMap<String, Object> data)
+    private void invokeMethodUIThread(final String method, HashMap<String, Object> data)
     {
         new Handler(Looper.getMainLooper()).post(() -> {
             synchronized (tearDownLock) {
                 //Could already be teared down at this moment
                 if (methodChannel != null) {
-                   methodChannel.invokeMethod(name, data);
+                   methodChannel.invokeMethod(method, data);
                 } else {
-                    Log.w(TAG, "invokeMethodUIThread: tried to call method on closed channel: " + name);
+                    Log.w(TAG, "invokeMethodUIThread: tried to call method on closed channel: " + method);
                 }
             }
         });

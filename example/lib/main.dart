@@ -124,7 +124,7 @@ class FindDevicesScreen extends StatelessWidget {
                 builder: (c, snapshot) => Column(
                   children: snapshot.data!
                       .map((d) => ListTile(
-                            title: Text(d.name),
+                            title: Text(d.localName),
                             subtitle: Text(d.id.toString()),
                             trailing: StreamBuilder<BluetoothConnectionState>(
                               stream: d.connectionState,
@@ -247,7 +247,7 @@ class DeviceScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(device.name),
+        title: Text(device.localName),
         actions: <Widget>[
           StreamBuilder<BluetoothConnectionState>(
             stream: device.connectionState,
