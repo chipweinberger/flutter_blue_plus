@@ -452,9 +452,9 @@ public class FlutterBluePlusPlugin implements
                         
                         boolean isConnected = mBluetoothManager.getConnectedDevices(BluetoothProfile.GATT).contains(device);
 
-                        // If device is already connected, return error
+                        // already connected?
                         if(mDevices.containsKey(remoteId) && isConnected) {
-                            result.error("connect", "connection with device already exists", null);
+                            result.success(null); // no work to do
                             return;
                         }
 
