@@ -1,4 +1,11 @@
 
+## 1.7.6
+* dart: BmBluetoothService.is_primary was not set (regression in 1.7.0)
+* android: BmAdvertisementData.connectable was not set (regression in 1.7.0)
+* android: success was not set for writeCharacteristic, setNotification, writeDescriptor  (regression in 1.7.0) 
+* android: update to gradle 8
+* android: dont request ACCESS_FINE_LOCATION by default (Android 12+)
+
 ## 1.7.5
 * android: fix BluetoothState not being updated
 * Dart: remove analysis_options.yaml
