@@ -3,7 +3,9 @@
 
 ## 1.8.3
 * android: writeCharacteristic: return error if longer than mtu
-* iOS: add mtu size checks and device connection checks
+* android: add device connection checks
+* iOS: add mtu size checks
+* iOS: add device connection checks
 * iOS: refactor: unify try catch blocks
 
 ## 1.8.2

@@ -1317,7 +1317,7 @@ public class FlutterBluePlusPlugin implements
 
             if (cachedBluetoothState != 0) {
 
-                // convert to Protobuf enum
+                // see: BmPowerEnum
                 int convertedState;
                 switch (cachedBluetoothState) {
                     case BluetoothAdapter.STATE_OFF:          convertedState = 6;           break;
