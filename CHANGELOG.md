@@ -1,4 +1,7 @@
 
+## 1.8.2
+* android:  support sdk 33 for writeCharacteristic and writeDescriptor
+
 ## 1.8.1
 * android: characteristic properties check was incorrect (regression in 1.7.8)
 
