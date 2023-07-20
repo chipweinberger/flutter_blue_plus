@@ -1,4 +1,7 @@
 
+## 1.8.1
+* android: characteristic properties check was incorrect (regression in 1.7.8)
+
 ## 1.8.0
 * android/ios: check errors - charactersticRead
 * android/ios: check errors - readDescriptor
