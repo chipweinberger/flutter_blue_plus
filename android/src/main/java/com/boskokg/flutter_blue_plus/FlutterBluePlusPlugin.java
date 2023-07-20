@@ -592,15 +592,17 @@ public class FlutterBluePlusPlugin implements
 
                     BluetoothGatt gatt = locateGatt(remoteId);
 
-                    // see: BmDiscoverServicesResult
-                    HashMap<String, Object> map = new HashMap<>();
-                    map.put("remote_id", remoteId);
-                    
                     List<Object> services = new ArrayList<>();
                     for(BluetoothGattService s : gatt.getServices()){
                         services.add(MessageMaker.bmBluetoothService(gatt.getDevice(), s, gatt));
                     }
+
+                    // see: BmDiscoverServicesResult
+                    HashMap<String, Object> map = new HashMap<>();
+                    map.put("remote_id", remoteId);
                     map.put("services", services);
+                    map.put("success", 1);
+                    map.put("error", "SUCCESS");
 
                     result.success(map);
                     break;
@@ -1423,14 +1425,14 @@ public class FlutterBluePlusPlugin implements
         {
             log(LogLevel.DEBUG, "[onServicesDiscovered] count: " + gatt.getServices().size() + " status: " + status);
 
-            // see: BmDiscoverServicesResult
-            HashMap<String, Object> response = new HashMap<>();
-            response.put("remote_id", gatt.getDevice().getAddress());
             List<Object> services = new ArrayList<Object>();
-
             for(BluetoothGattService s : gatt.getServices()) {
                 services.add(MessageMaker.bmBluetoothService(gatt.getDevice(), s, gatt));
             }
+
+            // see: BmDiscoverServicesResult
+            HashMap<String, Object> response = new HashMap<>();
+            response.put("remote_id", gatt.getDevice().getAddress());
             response.put("services", services);
             response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
             response.put("error", gattErrorString(status));
@@ -1493,31 +1495,35 @@ public class FlutterBluePlusPlugin implements
         {
             log(LogLevel.DEBUG, "[onDescriptorRead] uuid: " + descriptor.getUuid().toString() + " status: " + status);
 
+            boolean hasSecondary = false;
+            String serviceUuid = "";
+            String secondaryServiceUuid = "";
+
+            // find service uuid
+            if(descriptor.getCharacteristic().getService().getType() == BluetoothGattService.SERVICE_TYPE_PRIMARY) {
+                serviceUuid = descriptor.getCharacteristic().getService().getUuid().toString();
+            } else {
+                // Reverse search to find service
+                for(BluetoothGattService s : gatt.getServices()) {
+                    for(BluetoothGattService ss : s.getIncludedServices()) {
+                        if(ss.getUuid().equals(descriptor.getCharacteristic().getService().getUuid())) {
+                            serviceUuid = s.getUuid().toString();
+                            secondaryServiceUuid = ss.getUuid().toString();
+                            hasSecondary = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
             // see:bmReadAttributeRequest
             HashMap<String, Object> request = new HashMap<>();
             request.put("remote_id", gatt.getDevice().getAddress());
             request.put("characteristic_uuid", descriptor.getCharacteristic().getUuid().toString());
             request.put("descriptor_uuid", descriptor.getUuid().toString());
-
-            if(descriptor.getCharacteristic().getService().getType() == BluetoothGattService.SERVICE_TYPE_PRIMARY) {
-
-                request.put("service_uuid", descriptor.getCharacteristic().getService().getUuid().toString());
-
-            } else {
-
-                // Reverse search to find service
-                for(BluetoothGattService s : gatt.getServices()) {
-                    for(BluetoothGattService ss : s.getIncludedServices()) {
-
-                        if(ss.getUuid().equals(descriptor.getCharacteristic().getService().getUuid())) {
-
-                            request.put("service_uuid", s.getUuid().toString());
-                            request.put("secondary_service_uuid", ss.getUuid().toString());
-
-                            break;
-                        }
-                    }
-                }
+            request.put("service_uuid", serviceUuid);
+            if (hasSecondary) {
+                request.put("secondary_service_uuid", secondaryServiceUuid);
             }
 
             // see: BmReadDescriptorResponse
@@ -1576,7 +1582,7 @@ public class FlutterBluePlusPlugin implements
             log(LogLevel.DEBUG, "[onReadRemoteRssi] rssi: " + rssi + " status: " + status);
 
             if(status == BluetoothGatt.GATT_SUCCESS) {
-
+                
                 // see: BmReadRssiResult
                 HashMap<String, Object> result = new HashMap<>();
                 result.put("remote_id", gatt.getDevice().getAddress());
