@@ -1348,7 +1348,7 @@ public class FlutterBluePlusPlugin implements
             // see: BmWriteCharacteristicResponse
             HashMap<String, Object> response = new HashMap<>();
             response.put("request", request);
-            response.put("success", status == BluetoothGatt.GATT_SUCCESS);
+            response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
 
             invokeMethodUIThread("WriteCharacteristicResponse", response);
         }
@@ -1422,7 +1422,7 @@ public class FlutterBluePlusPlugin implements
             // see: BmWriteDescriptorResponse
             HashMap<String, Object> response = new HashMap<>();
             response.put("request", request);
-            response.put("success", status == BluetoothGatt.GATT_SUCCESS);
+            response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
 
             invokeMethodUIThread("WriteDescriptorResponse", response);
 
@@ -1432,7 +1432,7 @@ public class FlutterBluePlusPlugin implements
                 HashMap<String, Object> notificationResponse = new HashMap<>();
                 notificationResponse.put("remote_id", gatt.getDevice().getAddress());
                 notificationResponse.put("characteristic", MessageMaker.bmBluetoothCharacteristic(gatt.getDevice(), descriptor.getCharacteristic(), gatt));
-                notificationResponse.put("success", status == BluetoothGatt.GATT_SUCCESS);
+                notificationResponse.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
 
                 invokeMethodUIThread("SetNotificationResponse", notificationResponse);
             }
