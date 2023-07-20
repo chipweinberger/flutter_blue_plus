@@ -63,11 +63,11 @@ public class MessageMaker {
         HashMap<String, Object> advertisementData = new HashMap<>();
         ScanRecord scanRecord = result.getScanRecord();
         if(Build.VERSION.SDK_INT >= 26) {
-            advertisementData.put("connectable", result.isConnectable());
+            advertisementData.put("connectable", result.isConnectable() ? 1 : 0);
         } else {
             if(scanRecord != null) {
                 int flags = scanRecord.getAdvertiseFlags();
-                advertisementData.put("connectable", (flags & 0x2) > 0);
+                advertisementData.put("connectable", (flags & 0x2) > 0 ? 1 : 0);
             }
         }
         if(scanRecord != null) {
@@ -131,7 +131,7 @@ public class MessageMaker {
         HashMap<String, Object> dev = new HashMap<>();
         dev.put("remote_id", device.getAddress());
         dev.put("uuid", service.getUuid().toString());
-        dev.put("is_primary", service.getType() == BluetoothGattService.SERVICE_TYPE_PRIMARY);
+        dev.put("is_primary", service.getType() == BluetoothGattService.SERVICE_TYPE_PRIMARY ? 1 : 0);
         List<Object> characteristics = new ArrayList<Object>();
         for(BluetoothGattCharacteristic c : service.getCharacteristics()) {
             characteristics.add(bmBluetoothCharacteristic(device, c, gatt));

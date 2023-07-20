@@ -207,7 +207,7 @@ class BmBluetoothService {
     return BmBluetoothService(
       uuid: json['uuid'],
       remoteId: json['remote_id'],
-      isPrimary: json['is_primary'],
+      isPrimary: json['is_primary'] != 0,
       characteristics: (json['characteristics'] as List<dynamic>)
           .map((v) => BmBluetoothCharacteristic.fromMap(v))
           .toList(),
