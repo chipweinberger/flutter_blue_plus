@@ -64,8 +64,8 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry.RequestPermissionsResultListener;
 
-public class FlutterBluePlusPlugin implements 
-    FlutterPlugin, 
+public class FlutterBluePlusPlugin implements
+    FlutterPlugin,
     MethodCallHandler,
     RequestPermissionsResultListener,
     ActivityAware
@@ -215,17 +215,17 @@ public class FlutterBluePlusPlugin implements
     }
 
     ////////////////////////////////////////////////////////////
-    // ███    ███  ███████  ████████  ██   ██   ██████   ██████     
-    // ████  ████  ██          ██     ██   ██  ██    ██  ██   ██    
-    // ██ ████ ██  █████       ██     ███████  ██    ██  ██   ██    
-    // ██  ██  ██  ██          ██     ██   ██  ██    ██  ██   ██    
-    // ██      ██  ███████     ██     ██   ██   ██████   ██████     
+    // ███    ███  ███████  ████████  ██   ██   ██████   ██████
+    // ████  ████  ██          ██     ██   ██  ██    ██  ██   ██
+    // ██ ████ ██  █████       ██     ███████  ██    ██  ██   ██
+    // ██  ██  ██  ██          ██     ██   ██  ██    ██  ██   ██
+    // ██      ██  ███████     ██     ██   ██   ██████   ██████
     //
-    //  ██████   █████   ██       ██      
-    // ██       ██   ██  ██       ██      
-    // ██       ███████  ██       ██      
-    // ██       ██   ██  ██       ██      
-    //  ██████  ██   ██  ███████  ███████ 
+    //  ██████   █████   ██       ██
+    // ██       ██   ██  ██       ██
+    // ██       ███████  ██       ██
+    // ██       ██   ██  ██       ██
+    //  ██████  ██   ██  ███████  ███████
 
     @Override
     public void onMethodCall(@NonNull MethodCall call,
@@ -258,7 +258,7 @@ public class FlutterBluePlusPlugin implements
                     try {
                         state = mBluetoothAdapter.getState();
                     } catch (Exception e) {}
-                    
+
                     int convertedState;
                     switch (state) {
                         case BluetoothAdapter.STATE_OFF:          convertedState = 6;           break;
@@ -385,7 +385,7 @@ public class FlutterBluePlusPlugin implements
                 case "stopScan":
                 {
                     BluetoothLeScanner scanner = mBluetoothAdapter.getBluetoothLeScanner();
-                    
+
                     if(scanner != null) {
                         scanner.stopScan(getScanCallback());
                     }
@@ -406,7 +406,7 @@ public class FlutterBluePlusPlugin implements
                     ensurePermissions(permissions, (granted, perm) -> {
 
                         if (!granted) {
-                            result.error("getConnectedDevices", 
+                            result.error("getConnectedDevices",
                                 String.format("FlutterBluePlus requires %s permission", perm), null);
                             return;
                         }
@@ -454,7 +454,7 @@ public class FlutterBluePlusPlugin implements
                     ensurePermissions(permissions, (granted, perm) -> {
 
                         if (!granted) {
-                            result.error("connect", 
+                            result.error("connect",
                                 String.format("FlutterBluePlus requires %s for new connection", perm), null);
                             return;
                         }
@@ -463,9 +463,9 @@ public class FlutterBluePlusPlugin implements
                         HashMap<String, Object> args = call.arguments();
                         String remoteId =       args.get("remote_id");
                         boolean autoConnect =   args.get("auto_connect") != 0;
-                        
+
                         BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
-                        
+
                         boolean isConnected = mBluetoothManager.getConnectedDevices(BluetoothProfile.GATT).contains(device);
 
                         // already connected?
@@ -528,7 +528,7 @@ public class FlutterBluePlusPlugin implements
 
                     BluetoothDeviceCache cache = mDevices.get(remoteId);
                     if (cache == null) {
-                        result.success(null); // no work to do 
+                        result.success(null); // no work to do
                         break;
                     }
 
@@ -650,13 +650,13 @@ public class FlutterBluePlusPlugin implements
                         serviceUuid, secondaryServiceUuid, characteristicUuid);
 
                     if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_READ) == 0) {
-                        result.error("read_characteristic_error", 
+                        result.error("read_characteristic_error",
                             "The READ property is not supported by this BLE characteristic", null);
                         break;
                     }
 
                     if(gattServer.readCharacteristic(characteristic) == false) {
-                        result.error("read_characteristic_error", 
+                        result.error("read_characteristic_error",
                             "gattServer.readCharacteristic() returned false", null);
                         break;
                     }
@@ -710,7 +710,7 @@ public class FlutterBluePlusPlugin implements
                     String value =                (String) data.get("value");
                     int writeTypeInt =               (int) data.get("write_type");
 
-                    int writeType = writeTypeInt == 0 ? 
+                    int writeType = writeTypeInt == 0 ?
                         BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT :
                         BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE;
 
@@ -730,13 +730,13 @@ public class FlutterBluePlusPlugin implements
                     // check writeable
                     if(writeType == 1) {
                         if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE) == 0) {
-                            result.error("write_characteristic_error", 
+                            result.error("write_characteristic_error",
                                 "The WRITE_NO_RESPONSE property is not supported by this BLE characteristic", null);
                             break;
                         }
                     } else {
                          if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_WRITE) == 0) {
-                            result.error("write_characteristic_error", 
+                            result.error("write_characteristic_error",
                                 "The WRITE property is not supported by this BLE characteristic", null);
                             break;
                         }
@@ -745,13 +745,13 @@ public class FlutterBluePlusPlugin implements
                     // check mtu
                     BluetoothDeviceCache cache = mDevices.get(remoteId);
                     if ((cache.mtu-3) < hexToBytes(value).length) {
-                        String s = "data longer than mtu allows. dataLength: " + 
+                        String s = "data longer than mtu allows. dataLength: " +
                             hexToBytes(value).length + "> max: " + (cache.mtu-3);
                         result.error("write_characteristic_error", s, null);
                         break;
                     }
 
-                    // Version 33 
+                    // Version 33
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
 
                         int rv = gattServer.writeCharacteristic(characteristic, hexToBytes(value), writeType);
@@ -812,13 +812,13 @@ public class FlutterBluePlusPlugin implements
                     // check mtu
                     BluetoothDeviceCache cache = mDevices.get(remoteId);
                     if ((cache.mtu-3) < hexToBytes(value).length) {
-                        String s = "data longer than mtu allows. dataLength: " + 
+                        String s = "data longer than mtu allows. dataLength: " +
                             hexToBytes(value).length + "> max: " + (cache.mtu-3);
                         result.error("write_characteristic_error", s, null);
                         break;
                     }
 
-                    // Version 33 
+                    // Version 33
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
 
                         int rv = gattServer.writeDescriptor(descriptor, hexToBytes(value));
@@ -881,7 +881,7 @@ public class FlutterBluePlusPlugin implements
 
                     // start notifications
                     if(!gattServer.setCharacteristicNotification(characteristic, enable)){
-                        result.error("set_notification_error", 
+                        result.error("set_notification_error",
                             "gattServer.setCharacteristicNotification(" + enable + ") returned false", null);
                         break;
                     }
@@ -891,14 +891,14 @@ public class FlutterBluePlusPlugin implements
 
                         byte[] descriptorValue = null;
 
-                        // determine value 
+                        // determine value
                         if(enable) {
 
                             boolean canNotify = (characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0;
                             boolean canIndicate = (characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE) > 0;
 
                             if(!canIndicate && !canNotify) {
-                                result.error("set_notification_error", 
+                                result.error("set_notification_error",
                                     "neither NOTIFY nor INDICATE properties are supported by this BLE characteristic", null);
                                 break;
                             }
@@ -909,7 +909,7 @@ public class FlutterBluePlusPlugin implements
                         } else {
                             descriptorValue  = BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE;
                         }
-                        
+
                         if (!cccDescriptor.setValue(descriptorValue)) {
                             result.error("set_notification_error", "cccDescriptor.setValue() returned false", null);
                             break;
@@ -928,7 +928,7 @@ public class FlutterBluePlusPlugin implements
                 case "mtu":
                 {
                     String remoteId = (String) call.arguments;
-                    
+
                     BluetoothDeviceCache cache = mDevices.get(remoteId);
                     if(cache == null) {
                         result.error("mtu", "no instance of BluetoothGatt, have you connected first?", null);
@@ -986,7 +986,7 @@ public class FlutterBluePlusPlugin implements
                     if(gatt.readRemoteRssi() == false) {
                         result.error("read_rssi", "gatt.readRemoteRssi() returned false", null);
                         break;
-                    } 
+                    }
 
                     result.success(null);
                     break;
@@ -1022,8 +1022,8 @@ public class FlutterBluePlusPlugin implements
                 {
                     // check version
                     if(Build.VERSION.SDK_INT < 26) {
-                        result.error("setPreferredPhy", 
-                            "Only supported on devices >= API 26. This device == " + 
+                        result.error("setPreferredPhy",
+                            "Only supported on devices >= API 26. This device == " +
                             Build.VERSION.SDK_INT, null);
                         break;
                     }
@@ -1086,10 +1086,10 @@ public class FlutterBluePlusPlugin implements
     }
 
     //////////////////////////////////////////////////////////////////////////////////////
-    // ██████   ███████  ██████   ███    ███  ██  ███████  ███████  ██   ██████   ███    ██ 
-    // ██   ██  ██       ██   ██  ████  ████  ██  ██       ██       ██  ██    ██  ████   ██ 
-    // ██████   █████    ██████   ██ ████ ██  ██  ███████  ███████  ██  ██    ██  ██ ██  ██ 
-    // ██       ██       ██   ██  ██  ██  ██  ██       ██       ██  ██  ██    ██  ██  ██ ██ 
+    // ██████   ███████  ██████   ███    ███  ██  ███████  ███████  ██   ██████   ███    ██
+    // ██   ██  ██       ██   ██  ████  ████  ██  ██       ██       ██  ██    ██  ████   ██
+    // ██████   █████    ██████   ██ ████ ██  ██  ███████  ███████  ██  ██    ██  ██ ██  ██
+    // ██       ██       ██   ██  ██  ██  ██  ██       ██       ██  ██  ██    ██  ██  ██ ██
     // ██       ███████  ██   ██  ██      ██  ██  ███████  ███████  ██   ██████   ██   ████
 
     @Override
@@ -1156,16 +1156,16 @@ public class FlutterBluePlusPlugin implements
     }
 
     //////////////////////////////////////////////
-    // ██████   ██       ███████    
-    // ██   ██  ██       ██         
-    // ██████   ██       █████      
-    // ██   ██  ██       ██         
-    // ██████   ███████  ███████    
+    // ██████   ██       ███████
+    // ██   ██  ██       ██
+    // ██████   ██       █████
+    // ██   ██  ██       ██
+    // ██████   ███████  ███████
     //
-    // ██    ██  ████████  ██  ██       ███████ 
-    // ██    ██     ██     ██  ██       ██      
-    // ██    ██     ██     ██  ██       ███████ 
-    // ██    ██     ██     ██  ██            ██ 
+    // ██    ██  ████████  ██  ██       ███████
+    // ██    ██     ██     ██  ██       ██
+    // ██    ██     ██     ██  ██       ███████
+    // ██    ██     ██     ██  ██            ██
     //  ██████      ██     ██  ███████  ███████
 
     private BluetoothGatt locateGatt(String remoteId) throws Exception
@@ -1181,10 +1181,10 @@ public class FlutterBluePlusPlugin implements
         }
     }
 
-    private BluetoothGattCharacteristic locateCharacteristic(BluetoothGatt gattServer, 
+    private BluetoothGattCharacteristic locateCharacteristic(BluetoothGatt gattServer,
                                                                     String serviceId,
                                                                     String secondaryServiceId,
-                                                                    String characteristicId) 
+                                                                    String characteristicId)
                                                                     throws Exception
     {
         BluetoothGattService primaryService = gattServer.getService(UUID.fromString(serviceId));
@@ -1211,10 +1211,10 @@ public class FlutterBluePlusPlugin implements
         }
 
         BluetoothGattService service = (secondaryService != null) ?
-            secondaryService : 
+            secondaryService :
             primaryService;
 
-        BluetoothGattCharacteristic characteristic = 
+        BluetoothGattCharacteristic characteristic =
             service.getCharacteristic(UUID.fromString(characteristicId));
 
         if(characteristic == null) {
@@ -1226,7 +1226,7 @@ public class FlutterBluePlusPlugin implements
         return characteristic;
     }
 
-    private BluetoothGattDescriptor locateDescriptor(BluetoothGattCharacteristic characteristic, 
+    private BluetoothGattDescriptor locateDescriptor(BluetoothGattCharacteristic characteristic,
                                                                           String descriptorId) throws Exception
     {
         BluetoothGattDescriptor descriptor = characteristic.getDescriptor(UUID.fromString(descriptorId));
@@ -1241,17 +1241,17 @@ public class FlutterBluePlusPlugin implements
     }
 
     /////////////////////////////////////////////////////////////////////////////////////
-    // ██████   ██████    ██████    █████   ██████    ██████   █████   ███████  ████████     
-    // ██   ██  ██   ██  ██    ██  ██   ██  ██   ██  ██       ██   ██  ██          ██        
-    // ██████   ██████   ██    ██  ███████  ██   ██  ██       ███████  ███████     ██        
-    // ██   ██  ██   ██  ██    ██  ██   ██  ██   ██  ██       ██   ██       ██     ██        
-    // ██████   ██   ██   ██████   ██   ██  ██████    ██████  ██   ██  ███████     ██        
-    //  
-    // ██████   ███████   ██████  ███████  ██  ██    ██  ███████  ██████  
-    // ██   ██  ██       ██       ██       ██  ██    ██  ██       ██   ██ 
-    // ██████   █████    ██       █████    ██  ██    ██  █████    ██████  
-    // ██   ██  ██       ██       ██       ██   ██  ██   ██       ██   ██ 
-    // ██   ██  ███████   ██████  ███████  ██    ████    ███████  ██   ██ 
+    // ██████   ██████    ██████    █████   ██████    ██████   █████   ███████  ████████
+    // ██   ██  ██   ██  ██    ██  ██   ██  ██   ██  ██       ██   ██  ██          ██
+    // ██████   ██████   ██    ██  ███████  ██   ██  ██       ███████  ███████     ██
+    // ██   ██  ██   ██  ██    ██  ██   ██  ██   ██  ██       ██   ██       ██     ██
+    // ██████   ██   ██   ██████   ██   ██  ██████    ██████  ██   ██  ███████     ██
+    //
+    // ██████   ███████   ██████  ███████  ██  ██    ██  ███████  ██████
+    // ██   ██  ██       ██       ██       ██  ██    ██  ██       ██   ██
+    // ██████   █████    ██       █████    ██  ██    ██  █████    ██████
+    // ██   ██  ██       ██       ██       ██   ██  ██   ██       ██   ██
+    // ██   ██  ███████   ██████  ███████  ██    ████    ███████  ██   ██
 
     private final BroadcastReceiver mBluetoothStateReceiver = new BroadcastReceiver()
     {
@@ -1292,15 +1292,15 @@ public class FlutterBluePlusPlugin implements
     };
 
     /////////////////////////////////////////////////////////////////////////////
-    // ███████  ███████   ██████   ███████   █████   ███    ███    
-    // ██          ██     ██   ██  ██       ██   ██  ████  ████    
-    // ███████     ██     ██████   █████    ███████  ██ ████ ██    
-    //      ██     ██     ██   ██  ██       ██   ██  ██  ██  ██    
-    // ███████     ██     ██   ██  ███████  ██   ██  ██      ██    
-    //  
-    // ██   ██   █████   ███    ██  ██████   ██       ███████  ██████ 
+    // ███████  ███████   ██████   ███████   █████   ███    ███
+    // ██          ██     ██   ██  ██       ██   ██  ████  ████
+    // ███████     ██     ██████   █████    ███████  ██ ████ ██
+    //      ██     ██     ██   ██  ██       ██   ██  ██  ██  ██
+    // ███████     ██     ██   ██  ███████  ██   ██  ██      ██
+    //
+    // ██   ██   █████   ███    ██  ██████   ██       ███████  ██████
     // ██   ██  ██   ██  ████   ██  ██   ██  ██       ██       ██   ██
-    // ███████  ███████  ██ ██  ██  ██   ██  ██       █████    ██████ 
+    // ███████  ███████  ██ ██  ██  ██   ██  ██       █████    ██████
     // ██   ██  ██   ██  ██  ██ ██  ██   ██  ██       ██       ██   ██
     // ██   ██  ██   ██  ██   ████  ██████   ███████  ███████  ██   ██
 
@@ -1356,16 +1356,16 @@ public class FlutterBluePlusPlugin implements
     };
 
      ////////////////////////////////////////////////////////////////
-    // ███████  ███████  ████████   ██████  ██   ██     
-    // ██       ██          ██     ██       ██   ██     
-    // █████    █████       ██     ██       ███████     
-    // ██       ██          ██     ██       ██   ██     
-    // ██       ███████     ██      ██████  ██   ██     
-    // 
-    // ███████  ██  ██       ████████  ███████  ██████   ███████ 
-    // ██       ██  ██          ██     ██       ██   ██  ██      
-    // █████    ██  ██          ██     █████    ██████   ███████ 
-    // ██       ██  ██          ██     ██       ██   ██       ██ 
+    // ███████  ███████  ████████   ██████  ██   ██
+    // ██       ██          ██     ██       ██   ██
+    // █████    █████       ██     ██       ███████
+    // ██       ██          ██     ██       ██   ██
+    // ██       ███████     ██      ██████  ██   ██
+    //
+    // ███████  ██  ██       ████████  ███████  ██████   ███████
+    // ██       ██  ██          ██     ██       ██   ██  ██
+    // █████    ██  ██          ██     █████    ██████   ███████
+    // ██       ██  ██          ██     ██       ██   ██       ██
     // ██       ██  ███████     ██     ███████  ██   ██  ███████
 
     private List<ScanFilter> fetchFilters(HashMap<String, Object> scanSettings)
@@ -1398,17 +1398,17 @@ public class FlutterBluePlusPlugin implements
     }
 
     /////////////////////////////////////////////////////////////////////////////
-    // ███████   ██████   █████   ███    ██    
-    // ██       ██       ██   ██  ████   ██    
-    // ███████  ██       ███████  ██ ██  ██    
-    //      ██  ██       ██   ██  ██  ██ ██    
-    // ███████   ██████  ██   ██  ██   ████    
+    // ███████   ██████   █████   ███    ██
+    // ██       ██       ██   ██  ████   ██
+    // ███████  ██       ███████  ██ ██  ██
+    //      ██  ██       ██   ██  ██  ██ ██
+    // ███████   ██████  ██   ██  ██   ████
     //
-    //  ██████   █████   ██       ██       ██████    █████    ██████  ██   ██ 
-    // ██       ██   ██  ██       ██       ██   ██  ██   ██  ██       ██  ██  
-    // ██       ███████  ██       ██       ██████   ███████  ██       █████   
-    // ██       ██   ██  ██       ██       ██   ██  ██   ██  ██       ██  ██  
-    //  ██████  ██   ██  ███████  ███████  ██████   ██   ██   ██████  ██   ██ 
+    //  ██████   █████   ██       ██       ██████    █████    ██████  ██   ██
+    // ██       ██   ██  ██       ██       ██   ██  ██   ██  ██       ██  ██
+    // ██       ███████  ██       ██       ██████   ███████  ██       █████
+    // ██       ██   ██  ██       ██       ██   ██  ██   ██  ██       ██  ██
+    //  ██████  ██   ██  ███████  ███████  ██████   ██   ██   ██████  ██   ██
 
     private ScanCallback scanCallback;
 
@@ -1456,16 +1456,16 @@ public class FlutterBluePlusPlugin implements
     }
 
     /////////////////////////////////////////////////////////////////////////////
-    //  ██████    █████   ████████  ████████      
-    // ██        ██   ██     ██        ██         
-    // ██   ███  ███████     ██        ██         
-    // ██    ██  ██   ██     ██        ██         
-    //  ██████   ██   ██     ██        ██         
+    //  ██████    █████   ████████  ████████
+    // ██        ██   ██     ██        ██
+    // ██   ███  ███████     ██        ██
+    // ██    ██  ██   ██     ██        ██
+    //  ██████   ██   ██     ██        ██
     //
-    //  ██████   █████   ██       ██       ██████    █████    ██████  ██   ██ 
-    // ██       ██   ██  ██       ██       ██   ██  ██   ██  ██       ██  ██  
-    // ██       ███████  ██       ██       ██████   ███████  ██       █████   
-    // ██       ██   ██  ██       ██       ██   ██  ██   ██  ██       ██  ██  
+    //  ██████   █████   ██       ██       ██████    █████    ██████  ██   ██
+    // ██       ██   ██  ██       ██       ██   ██  ██   ██  ██       ██  ██
+    // ██       ███████  ██       ██       ██████   ███████  ██       █████
+    // ██       ██   ██  ██       ██       ██   ██  ██   ██  ██       ██  ██
     //  ██████  ██   ██  ███████  ███████  ██████   ██   ██   ██████  ██   ██
 
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback()
@@ -1687,11 +1687,11 @@ public class FlutterBluePlusPlugin implements
     }; // BluetoothGattCallback
 
     //////////////////////////////////////////
-    // ██    ██ ████████  ██  ██       ███████ 
-    // ██    ██    ██     ██  ██       ██      
-    // ██    ██    ██     ██  ██       ███████ 
-    // ██    ██    ██     ██  ██            ██ 
-    //  ██████     ██     ██  ███████  ███████ 
+    // ██    ██ ████████  ██  ██       ███████
+    // ██    ██    ██     ██  ██       ██
+    // ██    ██    ██     ██  ██       ███████
+    // ██    ██    ██     ██  ██            ██
+    //  ██████     ██     ██  ███████  ███████
 
     private void log(LogLevel level, String message)
     {
@@ -1717,12 +1717,12 @@ public class FlutterBluePlusPlugin implements
     private static byte[] hexToBytes(String s) {
         int len = s.length();
         byte[] data = new byte[len / 2];
-        
+
         for (int i = 0; i < len; i += 2) {
             data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
                                 + Character.digit(s.charAt(i+1), 16));
         }
-        
+
         return data;
     }
 
