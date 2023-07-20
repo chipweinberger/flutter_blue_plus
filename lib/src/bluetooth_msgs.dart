@@ -5,7 +5,7 @@ void _printDbg(String s) {
   //print(s);
 }
 
-enum BmPowerEnum {
+enum BmAdapterStateEnum {
   unknown,
   unavailable,
   unauthorized,
@@ -15,22 +15,22 @@ enum BmPowerEnum {
   off,
 }
 
-class BmBluetoothPowerState {
-  BmPowerEnum state;
+class BmBluetoothAdapterState {
+  BmAdapterStateEnum adapterState;
 
-  BmBluetoothPowerState({required this.state});
+  BmBluetoothAdapterState({required this.adapterState});
 
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> data = {};
-    data['state'] = state.index;
-    _printDbg("\nBmBluetoothPowerState $data");
+    data['adapter_state'] = adapterState.index;
+    _printDbg("\nBmBluetoothAdapterState $data");
     return data;
   }
 
-  factory BmBluetoothPowerState.fromMap(Map<dynamic, dynamic> json) {
-    _printDbg("\nBmBluetoothPowerState $json");
-    return BmBluetoothPowerState(
-      state: BmPowerEnum.values[json['state']],
+  factory BmBluetoothAdapterState.fromMap(Map<dynamic, dynamic> json) {
+    _printDbg("\nBmBluetoothAdapterState $json");
+    return BmBluetoothAdapterState(
+      adapterState: BmAdapterStateEnum.values[json['adapter_state']],
     );
   }
 }
@@ -707,17 +707,17 @@ enum BmConnectionStateEnum {
 
 class BmConnectionStateResponse {
   final String remoteId;
-  final BmConnectionStateEnum state;
+  final BmConnectionStateEnum connectionState;
 
   BmConnectionStateResponse({
     required this.remoteId,
-    required this.state,
+    required this.connectionState,
   });
 
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> data = {};
     data['remote_id'] = remoteId;
-    data['state'] = state.index;
+    data['connection_state'] = connectionState.index;
     _printDbg("\nBmConnectionStateResponse $data");
     return data;
   }
@@ -726,7 +726,7 @@ class BmConnectionStateResponse {
     _printDbg("\nBmConnectionStateResponse $json");
     return BmConnectionStateResponse(
       remoteId: json['remote_id'],
-      state: BmConnectionStateEnum.values[json['state'] as int],
+      connectionState: BmConnectionStateEnum.values[json['connection_state'] as int],
     );
   }
 }

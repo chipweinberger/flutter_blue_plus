@@ -202,10 +202,10 @@ public class MessageMaker {
         return props;
     }
 
-    static HashMap<String, Object> bmConnectionStateResponse(BluetoothDevice device, int state) {
-        HashMap<String, Object> deviceState = new HashMap<>();
-        deviceState.put("state", state);
-        deviceState.put("remote_id", device.getAddress());
-        return deviceState;
+    static HashMap<String, Object> bmConnectionStateResponse(BluetoothDevice device, int connectionState) {
+        HashMap<String, Object> connectionState = new HashMap<>();
+        connectionState.put("connection_state", connectionState);
+        connectionState.put("remote_id", device.getAddress());
+        return connectionState;
     }
 }

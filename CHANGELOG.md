@@ -48,7 +48,7 @@
 * android: dont request ACCESS_FINE_LOCATION by default (Android 12+)
 
 ## 1.7.5
-* android: fix BluetoothState not being updated
+* android: fix BluetoothAdapterState not being updated
 * Dart: remove analysis_options.yaml
 * Example: fix deprecations
 

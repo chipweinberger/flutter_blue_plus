@@ -171,12 +171,12 @@ public class FlutterBluePlusPlugin implements
 
             IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
 
-            context.registerReceiver(mBluetoothStateReceiver, filter);
+            context.registerReceiver(mBluetoothAdapterStateReceiver, filter);
 
             try {
-                stateHandler.setCachedBluetoothState(mBluetoothAdapter.getState());
+                stateHandler.setCachedBluetoothAdapterState(mBluetoothAdapter.getState());
             } catch (SecurityException e) {
-                stateHandler.setCachedBluetoothStateUnauthorized();
+                stateHandler.setCachedBluetoothAdapterStateUnauthorized();
             }
         }
     }
@@ -200,7 +200,7 @@ public class FlutterBluePlusPlugin implements
             }
             mDevices.clear();
 
-            context.unregisterReceiver(mBluetoothStateReceiver);
+            context.unregisterReceiver(mBluetoothAdapterStateReceiver);
             context = null;
 
             methodChannel.setMethodCallHandler(null);
@@ -251,16 +251,16 @@ public class FlutterBluePlusPlugin implements
                     break;
                 }
 
-                case "state":
+                case "adapterState":
                 {
-                    // get state, if we can
-                    int state = -1;
+                    // get adapterState, if we can
+                    int adapterState = -1;
                     try {
-                        state = mBluetoothAdapter.getState();
+                        adapterState = mBluetoothAdapter.getState();
                     } catch (Exception e) {}
 
                     int convertedState;
-                    switch (state) {
+                    switch (adapterState) {
                         case BluetoothAdapter.STATE_OFF:          convertedState = 6;           break;
                         case BluetoothAdapter.STATE_ON:           convertedState = 4;           break;
                         case BluetoothAdapter.STATE_TURNING_OFF:  convertedState = 5;           break;
@@ -268,9 +268,9 @@ public class FlutterBluePlusPlugin implements
                         default:                                  convertedState = 0;           break;
                     }
 
-                    // see: BmBluetoothPowerState
+                    // see: BmBluetoothAdapterState
                     HashMap<String, Object> map = new HashMap<>();
-                    map.put("state", convertedState);
+                    map.put("adapter_state", convertedState);
 
                     result.success(map);
                     break;
@@ -507,8 +507,8 @@ public class FlutterBluePlusPlugin implements
 
                     // check connection
                     BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
-                    int state = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
-                    if(state != BluetoothProfile.STATE_CONNECTED) {
+                    int connState = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
+                    if(connState != BluetoothProfile.STATE_CONNECTED) {
                         result.error("pair", "The device is not connected", null);
                         break;
                     }
@@ -557,9 +557,9 @@ public class FlutterBluePlusPlugin implements
 
                         gattServer.disconnect();
 
-                        int state = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
-                        if(state == BluetoothProfile.STATE_DISCONNECTED ||
-                           state == BluetoothProfile.STATE_DISCONNECTING)
+                        int connState = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
+                        if(connState == BluetoothProfile.STATE_DISCONNECTED ||
+                           connState == BluetoothProfile.STATE_DISCONNECTING)
                         {
                             gattServer.close();
                         }
@@ -569,15 +569,15 @@ public class FlutterBluePlusPlugin implements
                     break;
                 }
 
-                case "deviceState":
+                case "getConnectionState":
                 {
                     String remoteId = (String) call.arguments;
 
                     BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
 
-                    int state = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
+                    int connState = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
 
-                    result.success(MessageMaker.bmConnectionStateResponse(device, state));
+                    result.success(MessageMaker.bmConnectionStateResponse(device, connectionState));
                     break;
                 }
 
@@ -587,8 +587,8 @@ public class FlutterBluePlusPlugin implements
 
                     // check connection
                     BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
-                    int state = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
-                    if(state != BluetoothProfile.STATE_CONNECTED) {
+                    int connState = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
+                    if(connState != BluetoothProfile.STATE_CONNECTED) {
                         result.error("discover_services", "The device is not connected", null);
                         break;
                     }
@@ -638,8 +638,8 @@ public class FlutterBluePlusPlugin implements
 
                     // check connection
                     BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
-                    int state = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
-                    if(state != BluetoothProfile.STATE_CONNECTED) {
+                    int connState = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
+                    if(connState != BluetoothProfile.STATE_CONNECTED) {
                         result.error("read_characteristic_error", "The device is not connected", null);
                         break;
                     }
@@ -677,8 +677,8 @@ public class FlutterBluePlusPlugin implements
 
                     // check connection
                     BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
-                    int state = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
-                    if(state != BluetoothProfile.STATE_CONNECTED) {
+                    int connState = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
+                    if(connState != BluetoothProfile.STATE_CONNECTED) {
                         result.error("read_descriptor_error", "The device is not connected", null);
                         break;
                     }
@@ -716,8 +716,8 @@ public class FlutterBluePlusPlugin implements
 
                     // check connection
                     BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
-                    int state = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
-                    if(state != BluetoothProfile.STATE_CONNECTED) {
+                    int connState = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
+                    if(connState != BluetoothProfile.STATE_CONNECTED) {
                         result.error("write_characteristic_error", "The device is not connected", null);
                         break;
                     }
@@ -796,8 +796,8 @@ public class FlutterBluePlusPlugin implements
 
                     // check connection
                     BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
-                    int state = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
-                    if(state != BluetoothProfile.STATE_CONNECTED) {
+                    int connState = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
+                    if(connState != BluetoothProfile.STATE_CONNECTED) {
                         result.error("write_descriptor_error", "The device is not connected", null);
                         break;
                     }
@@ -860,8 +860,8 @@ public class FlutterBluePlusPlugin implements
 
                     // check connection
                     BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
-                    int state = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
-                    if(state != BluetoothProfile.STATE_CONNECTED) {
+                    int connState = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
+                    if(connState != BluetoothProfile.STATE_CONNECTED) {
                         result.error("set_notification_error", "The device is not connected", null);
                         break;
                     }
@@ -952,8 +952,8 @@ public class FlutterBluePlusPlugin implements
 
                     // check connection
                     BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
-                    int state = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
-                    if(state != BluetoothProfile.STATE_CONNECTED) {
+                    int connState = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
+                    if(connState != BluetoothProfile.STATE_CONNECTED) {
                         result.error("request_mtu", "The device is not connected", null);
                         break;
                     }
@@ -977,8 +977,8 @@ public class FlutterBluePlusPlugin implements
 
                     // check connection
                     BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
-                    int state = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
-                    if(state != BluetoothProfile.STATE_CONNECTED) {
+                    int connState = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
+                    if(connState != BluetoothProfile.STATE_CONNECTED) {
                         result.error("read_rssi", "The device is not connected", null);
                         break;
                     }
@@ -1001,8 +1001,8 @@ public class FlutterBluePlusPlugin implements
 
                     // check connection
                     BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
-                    int state = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
-                    if(state != BluetoothProfile.STATE_CONNECTED) {
+                    int connState = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
+                    if(connState != BluetoothProfile.STATE_CONNECTED) {
                         result.error("request_connection_priority", "The device is not connected", null);
                         break;
                     }
@@ -1037,8 +1037,8 @@ public class FlutterBluePlusPlugin implements
 
                     // check connection
                     BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
-                    int state = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
-                    if(state != BluetoothProfile.STATE_CONNECTED) {
+                    int connState = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
+                    if(connState != BluetoothProfile.STATE_CONNECTED) {
                         result.error("set_preferred_phy", "The device is not connected", null);
                         break;
                     }
@@ -1253,7 +1253,7 @@ public class FlutterBluePlusPlugin implements
     // ██   ██  ██       ██       ██       ██   ██  ██   ██       ██   ██
     // ██   ██  ███████   ██████  ███████  ██    ████    ███████  ██   ██
 
-    private final BroadcastReceiver mBluetoothStateReceiver = new BroadcastReceiver()
+    private final BroadcastReceiver mBluetoothAdapterStateReceiver = new BroadcastReceiver()
     {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -1265,17 +1265,17 @@ public class FlutterBluePlusPlugin implements
                 return;
             }
 
-            final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
+            final int adapterState = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
 
             EventSink sink = stateHandler.getSink();
             if (sink == null) {
-                stateHandler.setCachedBluetoothState(state);
+                stateHandler.setCachedBluetoothAdapterState(adapterState);
                 return;
             }
 
             // convert to Protobuf enum
             int convertedState;
-            switch (state) {
+            switch (adapterState) {
                 case BluetoothAdapter.STATE_OFF:          convertedState = 6;           break;
                 case BluetoothAdapter.STATE_ON:           convertedState = 4;           break;
                 case BluetoothAdapter.STATE_TURNING_OFF:  convertedState = 5;           break;
@@ -1283,9 +1283,9 @@ public class FlutterBluePlusPlugin implements
                 default:                                  convertedState = 0;           break;
             }
 
-            // see: BmBluetoothPowerState
+            // see: BmBluetoothAdapterState
             HashMap<String, Object> map = new HashMap<>();
-            map.put("state", convertedState);
+            map.put("adapter_state", convertedState);
 
             sink.success(map);
         }
@@ -1313,14 +1313,14 @@ public class FlutterBluePlusPlugin implements
             return sink;
         }
 
-        private int cachedBluetoothState;
+        private int cachedBluetoothAdapterState;
 
-        public void setCachedBluetoothState(int value) {
-            cachedBluetoothState = value;
+        public void setCachedBluetoothAdapterState(int value) {
+            cachedBluetoothAdapterState = value;
         }
 
-        public void setCachedBluetoothStateUnauthorized() {
-            cachedBluetoothState = STATE_UNAUTHORIZED;
+        public void setCachedBluetoothAdapterStateUnauthorized() {
+            cachedBluetoothAdapterState = STATE_UNAUTHORIZED;
         }
 
         @Override
@@ -1328,11 +1328,11 @@ public class FlutterBluePlusPlugin implements
 
             sink = eventSink;
 
-            if (cachedBluetoothState != 0) {
+            if (cachedBluetoothAdapterState != 0) {
 
-                // see: BmPowerEnum
+                // see: BmAdapterStateEnum
                 int convertedState;
-                switch (cachedBluetoothState) {
+                switch (cachedBluetoothAdapterState) {
                     case BluetoothAdapter.STATE_OFF:          convertedState = 6;           break;
                     case BluetoothAdapter.STATE_ON:           convertedState = 4;           break;
                     case BluetoothAdapter.STATE_TURNING_OFF:  convertedState = 5;           break;
@@ -1341,9 +1341,9 @@ public class FlutterBluePlusPlugin implements
                     default:                                  convertedState = 0;           break;
                 }
 
-                // see: BmBluetoothPowerState
+                // see: BmBluetoothAdapterState
                 HashMap<String, Object> map = new HashMap<>();
-                map.put("state", convertedState);
+                map.put("adapter_state", convertedState);
 
                 sink.success(map);
             }

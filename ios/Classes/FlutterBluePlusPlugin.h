@@ -16,5 +16,5 @@
 
 @interface FlutterBluePlusStreamHandler : NSObject<FlutterStreamHandler>
 @property FlutterEventSink sink;
-@property NSDictionary *cachedBluetoothState;
+@property NSDictionary *cachedBluetoothAdapterState;
 @end

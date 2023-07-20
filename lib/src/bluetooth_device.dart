@@ -39,10 +39,10 @@ class BluetoothDevice {
       autoConnect: autoConnect,
     );
 
-    var responseStream = state.where((s) => s == BluetoothDeviceState.connected);
+    var responseStream = connectionState.where((s) => s == BluetoothConnectionState.connected);
 
     // Start listening now, before invokeMethod, to ensure we don't miss the response
-    Future<BluetoothDeviceState> futureState = responseStream.first;
+    Future<BluetoothConnectionState> futureState = responseStream.first;
 
     await FlutterBluePlus.instance._channel.invokeMethod('connect', request.toMap());
 
@@ -83,8 +83,8 @@ class BluetoothDevice {
   /// Discovers services offered by the remote device
   /// as well as their characteristics and descriptors
   Future<List<BluetoothService>> discoverServices() async {
-    final s = await state.first;
-    if (s != BluetoothDeviceState.connected) {
+    final s = await connectionState.first;
+    if (s != BluetoothConnectionState.connected) {
       return Future.error(Exception('Cannot discoverServices while'
           'device is not connected. State == $s'));
     }
@@ -132,21 +132,26 @@ class BluetoothDevice {
     yield* _services.stream;
   }
 
+  @Deprecated('Use connectionState instead')
+  Stream<BluetoothConnectionState> get state async* {
+    yield* connectionState;
+  }
+
   /// The current connection state of the device
-  Stream<BluetoothDeviceState> get state async* {
-    BluetoothDeviceState initialState = await FlutterBluePlus.instance._channel
-        .invokeMethod('deviceState', id.toString())
+  Stream<BluetoothConnectionState> get connectionState async* {
+    BluetoothConnectionState initialState = await FlutterBluePlus.instance._channel
+        .invokeMethod('getConnectionState', id.toString())
         .then((buffer) => BmConnectionStateResponse.fromMap(buffer))
-        .then((p) => bmToBluetoothDeviceState(p.state));
+        .then((p) => bmToBluetoothConnectionState(p.connectionState));
 
     yield initialState;
 
     yield* FlutterBluePlus.instance._methodStream
-        .where((m) => m.method == "DeviceState")
+        .where((m) => m.method == "getConnectionState")
         .map((m) => m.arguments)
         .map((buffer) => BmConnectionStateResponse.fromMap(buffer))
         .where((p) => p.remoteId == id.toString())
-        .map((p) => bmToBluetoothDeviceState(p.state));
+        .map((p) => bmToBluetoothConnectionState(p.connectionState));
   }
 
   /// The MTU size in bytes
@@ -333,18 +338,18 @@ BluetoothDeviceType bmToBluetoothDeviceType(BmBluetoothSpecEnum value) {
   }
 }
 
-enum BluetoothDeviceState { disconnected, connecting, connected, disconnecting }
+enum BluetoothConnectionState { disconnected, connecting, connected, disconnecting }
 
-BluetoothDeviceState bmToBluetoothDeviceState(BmConnectionStateEnum value) {
+BluetoothConnectionState bmToBluetoothConnectionState(BmConnectionStateEnum value) {
   switch (value) {
     case BmConnectionStateEnum.disconnected:
-      return BluetoothDeviceState.disconnected;
+      return BluetoothConnectionState.disconnected;
     case BmConnectionStateEnum.connecting:
-      return BluetoothDeviceState.connecting;
+      return BluetoothConnectionState.connecting;
     case BmConnectionStateEnum.connected:
-      return BluetoothDeviceState.connected;
+      return BluetoothConnectionState.connected;
     case BmConnectionStateEnum.disconnecting:
-      return BluetoothDeviceState.disconnecting;
+      return BluetoothConnectionState.disconnecting;
   }
 }
 

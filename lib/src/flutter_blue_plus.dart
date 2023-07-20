@@ -31,7 +31,7 @@ class FlutterBluePlus {
   /// Caching this stream allows for more than one listener to subscribe
   /// and unsubscribe apart from each other,
   /// while allowing events to still be sent to others that are subscribed
-  Stream<BluetoothState>? _stateStream;
+  Stream<BluetoothAdapterState>? _adapterStateStream;
 
   /// Singleton boilerplate
   FlutterBluePlus._() {
@@ -91,22 +91,27 @@ class FlutterBluePlus {
   /// results of a scan in real time while the scan is in progress.
   Stream<List<ScanResult>> get scanResults => _scanResults.stream;
 
+  @Deprecated('Use adapterState instead')
+  Stream<BluetoothAdapterState> get state async* {
+    yield* adapterState;
+  }
+
   /// Gets the current state of the Bluetooth module
-  Stream<BluetoothState> get state async* {
-    BluetoothState initialState = await _channel
-        .invokeMethod('state')
-        .then((buffer) => BmBluetoothPowerState.fromMap(buffer))
-        .then((s) => bmToBluetoothState(s.state));
+  Stream<BluetoothAdapterState> get adapterState async* {
+    BluetoothAdapterState initialState = await _channel
+        .invokeMethod('getAdapterState')
+        .then((buffer) => BmBluetoothAdapterState.fromMap(buffer))
+        .then((s) => bmToBluetoothAdapterState(s.adapterState));
 
     yield initialState;
 
-    _stateStream ??= _stateChannel
+    _adapterStateStream ??= _stateChannel
         .receiveBroadcastStream()
-        .map((buffer) => BmBluetoothPowerState.fromMap(buffer))
-        .map((s) => bmToBluetoothState(s.state))
-        .doOnCancel(() => _stateStream = null);
+        .map((buffer) => BmBluetoothAdapterState.fromMap(buffer))
+        .map((s) => bmToBluetoothAdapterState(s.adapterState))
+        .doOnCancel(() => _adapterStateStream = null);
 
-    yield* _stateStream!;
+    yield* _adapterStateStream!;
   }
 
   /// Retrieve a list of connected devices
@@ -286,24 +291,24 @@ enum LogLevel {
 }
 
 /// State of the bluetooth adapter.
-enum BluetoothState { unknown, unavailable, unauthorized, turningOn, on, turningOff, off }
+enum BluetoothAdapterState { unknown, unavailable, unauthorized, turningOn, on, turningOff, off }
 
-BluetoothState bmToBluetoothState(BmPowerEnum value) {
+BluetoothAdapterState bmToBluetoothAdapterState(BmAdapterStateEnum value) {
   switch (value) {
-    case BmPowerEnum.unknown:
-      return BluetoothState.unknown;
-    case BmPowerEnum.unavailable:
-      return BluetoothState.unavailable;
-    case BmPowerEnum.unauthorized:
-      return BluetoothState.unauthorized;
-    case BmPowerEnum.turningOn:
-      return BluetoothState.turningOn;
-    case BmPowerEnum.on:
-      return BluetoothState.on;
-    case BmPowerEnum.turningOff:
-      return BluetoothState.turningOff;
-    case BmPowerEnum.off:
-      return BluetoothState.off;
+    case BmAdapterStateEnum.unknown:
+      return BluetoothAdapterState.unknown;
+    case BmAdapterStateEnum.unavailable:
+      return BluetoothAdapterState.unavailable;
+    case BmAdapterStateEnum.unauthorized:
+      return BluetoothAdapterState.unauthorized;
+    case BmAdapterStateEnum.turningOn:
+      return BluetoothAdapterState.turningOn;
+    case BmAdapterStateEnum.on:
+      return BluetoothAdapterState.on;
+    case BmAdapterStateEnum.turningOff:
+      return BluetoothAdapterState.turningOff;
+    case BmAdapterStateEnum.off:
+      return BluetoothAdapterState.off;
   }
 }
 

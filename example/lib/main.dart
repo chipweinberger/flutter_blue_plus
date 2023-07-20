@@ -36,24 +36,24 @@ class FlutterBlueApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       color: Colors.lightBlue,
-      home: StreamBuilder<BluetoothState>(
-          stream: FlutterBluePlus.instance.state,
-          initialData: BluetoothState.unknown,
+      home: StreamBuilder<BluetoothAdapterState>(
+          stream: FlutterBluePlus.instance.adapterState,
+          initialData: BluetoothAdapterState.unknown,
           builder: (c, snapshot) {
-            final state = snapshot.data;
-            if (state == BluetoothState.on) {
+            final adapterState = snapshot.data;
+            if (adapterState == BluetoothAdapterState.on) {
               return const FindDevicesScreen();
             }
-            return BluetoothOffScreen(state: state);
+            return BluetoothOffScreen(adapterState: adapterState);
           }),
     );
   }
 }
 
 class BluetoothOffScreen extends StatelessWidget {
-  const BluetoothOffScreen({Key? key, this.state}) : super(key: key);
+  const BluetoothOffScreen({Key? key, this.adapterState}) : super(key: key);
 
-  final BluetoothState? state;
+  final BluetoothAdapterState? adapterState;
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +69,7 @@ class BluetoothOffScreen extends StatelessWidget {
               color: Colors.white54,
             ),
             Text(
-              'Bluetooth Adapter is ${state != null ? state.toString().substring(15) : 'not available'}.',
+              'Bluetooth Adapter is ${adapterState != null ? adapterState.toString().substring(15) : 'not available'}.',
               style: Theme.of(context)
                   .primaryTextTheme
                   .titleSmall
@@ -126,12 +126,12 @@ class FindDevicesScreen extends StatelessWidget {
                       .map((d) => ListTile(
                             title: Text(d.name),
                             subtitle: Text(d.id.toString()),
-                            trailing: StreamBuilder<BluetoothDeviceState>(
-                              stream: d.state,
-                              initialData: BluetoothDeviceState.disconnected,
+                            trailing: StreamBuilder<BluetoothConnectionState>(
+                              stream: d.connectionState,
+                              initialData: BluetoothConnectionState.disconnected,
                               builder: (c, snapshot) {
                                 if (snapshot.data ==
-                                    BluetoothDeviceState.connected) {
+                                    BluetoothConnectionState.connected) {
                                   return ElevatedButton(
                                     child: const Text('OPEN'),
                                     onPressed: () => Navigator.of(context).push(
@@ -249,18 +249,18 @@ class DeviceScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(device.name),
         actions: <Widget>[
-          StreamBuilder<BluetoothDeviceState>(
-            stream: device.state,
-            initialData: BluetoothDeviceState.connecting,
+          StreamBuilder<BluetoothConnectionState>(
+            stream: device.connectionState,
+            initialData: BluetoothConnectionState.connecting,
             builder: (c, snapshot) {
               VoidCallback? onPressed;
               String text;
               switch (snapshot.data) {
-                case BluetoothDeviceState.connected:
+                case BluetoothConnectionState.connected:
                   onPressed = () => device.disconnect();
                   text = 'DISCONNECT';
                   break;
-                case BluetoothDeviceState.disconnected:
+                case BluetoothConnectionState.disconnected:
                   onPressed = () => device.connect();
                   text = 'CONNECT';
                   break;
@@ -285,17 +285,17 @@ class DeviceScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
-            StreamBuilder<BluetoothDeviceState>(
-              stream: device.state,
-              initialData: BluetoothDeviceState.connecting,
+            StreamBuilder<BluetoothConnectionState>(
+              stream: device.connectionState,
+              initialData: BluetoothConnectionState.connecting,
               builder: (c, snapshot) => ListTile(
                 leading: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    snapshot.data == BluetoothDeviceState.connected
+                    snapshot.data == BluetoothConnectionState.connected
                         ? const Icon(Icons.bluetooth_connected)
                         : const Icon(Icons.bluetooth_disabled),
-                    snapshot.data == BluetoothDeviceState.connected
+                    snapshot.data == BluetoothConnectionState.connected
                         ? StreamBuilder<int>(
                             stream: rssiStream(),
                             builder: (context, snapshot) {
@@ -364,8 +364,8 @@ class DeviceScreen extends StatelessWidget {
 
   Stream<int> rssiStream() async* {
     var isConnected = true;
-    final subscription = device.state.listen((state) {
-      isConnected = state == BluetoothDeviceState.connected;
+    final subscription = device.connectionState.listen((v) {
+      isConnected = v == BluetoothConnectionState.connected;
     });
     while (isConnected) {
       yield await device.readRssi();

@@ -278,9 +278,9 @@ class DescriptorTile extends StatelessWidget {
 }
 
 class AdapterStateTile extends StatelessWidget {
-  const AdapterStateTile({Key? key, required this.state}) : super(key: key);
+  const AdapterStateTile({Key? key, required this.adapterState}) : super(key: key);
 
-  final BluetoothState state;
+  final BluetoothAdapterState adapterState;
 
   @override
   Widget build(BuildContext context) {
@@ -288,7 +288,7 @@ class AdapterStateTile extends StatelessWidget {
       color: Colors.redAccent,
       child: ListTile(
         title: Text(
-          'Bluetooth adapter is ${state.toString().substring(15)}',
+          'Bluetooth adapter is ${adapterState.toString().substring(15)}',
           style: Theme.of(context).primaryTextTheme.titleSmall,
         ),
         trailing: Icon(
