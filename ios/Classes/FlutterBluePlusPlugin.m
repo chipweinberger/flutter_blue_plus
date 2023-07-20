@@ -101,7 +101,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         }
         if (self.centralManager == nil)
         {
-            self.centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil options:@{CBCentralManagerOptionShowPowerAlertKey: @(YES)}];
+            NSDictionary *options = @{
+                CBCentralManagerOptionShowPowerAlertKey: @(YES)
+            };
+
+            self.centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil options:options];
             
             NSDictionary *data = [self toBluetoothStateProto:self->_centralManager.state];
             
@@ -159,14 +163,13 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 uuids = [uuids arrayByAddingObject:[CBUUID UUIDWithString:u]];
             }
 
-            // Allow duplicates?
-            NSMutableDictionary<NSString *, id> *scanOpts = [NSMutableDictionary new];
-            if ([allowDuplicates boolValue]) {
-                [scanOpts setObject:[NSNumber numberWithBool:YES] forKey:CBCentralManagerScanOptionAllowDuplicatesKey];
-            }
+            // options
+            NSDictionary *options = @{
+                CBCentralManagerScanOptionAllowDuplicatesKey: allowDuplicates
+            };
 
             // Start scanning
-            [self->_centralManager scanForPeripheralsWithServices:uuids options:scanOpts];
+            [self->_centralManager scanForPeripheralsWithServices:uuids options:options];
 
             result(@(true));
         }
