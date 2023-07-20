@@ -695,9 +695,9 @@ public class FlutterBluePlusPlugin implements
                     String value =                (String) data.get("value");
                     int writeTypeInt =               (int) data.get("write_type");
 
-                    int writeType = writeTypeInt == 1 ? 
-                            BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE :
-                            BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT;
+                    int writeType = writeTypeInt == 0 ? 
+                        BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT :
+                        BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE;
 
                     // check connection
                     BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);

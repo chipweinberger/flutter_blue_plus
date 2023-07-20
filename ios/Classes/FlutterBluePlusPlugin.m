@@ -261,10 +261,21 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @try
         {
             CBPeripheral *peripheral = [self findPeripheral:remoteId];
+
+            // check connected
+            if (peripheral.state != CBPeripheralStateConnected) {
+                NSString* s = @"device is not connected";
+                result([FlutterError errorWithCode:@"discoverServices" message:s details:NULL]);
+                return;
+            }
+
             // Clear helper arrays
             [_servicesThatNeedDiscovered removeAllObjects];
             [_characteristicsThatNeedDiscovered removeAllObjects];
+
+            // start discovery
             [peripheral discoverServices:nil];
+
             result(@(true));
         }
         @catch (NSException *e)
@@ -317,6 +328,13 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // Find peripheral
             CBPeripheral *peripheral = [self findPeripheral:remoteId];
 
+            // check connected
+            if (peripheral.state != CBPeripheralStateConnected) {
+                NSString* s = @"device is not connected";
+                result([FlutterError errorWithCode:@"readCharacteristic" message:s details:NULL]);
+                return;
+            }
+
             // Find characteristic
             CBCharacteristic *characteristic = [self locateCharacteristic:characteristicUuid
                                                                peripheral:peripheral
@@ -325,6 +343,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             // Trigger a read
             [peripheral readValueForCharacteristic:characteristic];
+
             result(@(true));
         }
         @catch (NSException *e)
@@ -347,6 +366,13 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // Find peripheral
             CBPeripheral *peripheral = [self findPeripheral:remoteId];
 
+            // check connected
+            if (peripheral.state != CBPeripheralStateConnected) {
+                NSString* s = @"device is not connected";
+                result([FlutterError errorWithCode:@"readDescriptor" message:s details:NULL]);
+                return;
+            }
+
             // Find characteristic
             CBCharacteristic *characteristic = [self locateCharacteristic:characteristicUuid
                                                                peripheral:peripheral
@@ -355,7 +381,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             // Find descriptor
             CBDescriptor *descriptor = [self locateDescriptor:descriptorUuid characteristic:characteristic];
+
             [peripheral readValueForDescriptor:descriptor];
+
             result(@(true));
         }
         @catch (NSException *e)
@@ -379,30 +407,49 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // Find peripheral
             CBPeripheral *peripheral = [self findPeripheral:remoteId];
 
+            // check connected
+            if (peripheral.state != CBPeripheralStateConnected) {
+                NSString* s = @"device is not connected";
+                result([FlutterError errorWithCode:@"writeCharacteristic" message:s details:NULL]);
+                return;
+            }
+
             // Get correct write type
             CBCharacteristicWriteType type =
                 ([writeType intValue] == 0
                     ? CBCharacteristicWriteWithResponse
                     : CBCharacteristicWriteWithoutResponse);
 
+            // check mtu
+            int mtu = (int) [peripheral maximumWriteValueLengthForType:type];
+            int dataLen = (int) [self convertHexToData:value].length;
+            if ((mtu-3) < dataLen) {
+                NSString* f = @"data is longer than MTU allows. dataLen: %d > maxDataLen: %d";
+                NSString* s = [NSString stringWithFormat:f, dataLen, (mtu-3)];
+                result([FlutterError errorWithCode:@"writeCharacteristic" message:s details:NULL]);
+                return;
+            }
+
+            // device not ready?
             if (type == CBCharacteristicWriteWithoutResponse && !peripheral.canSendWriteWithoutResponse) {
-                // canSendWriteWithoutResponse represents the current readiness of the peripheral to accept
+                // canSendWriteWithoutResponse is the current readiness of the peripheral to accept
                 // more write requests. If the peripheral isn't ready, we queue the request for later.
                 [_dataWaitingToWriteWithoutResponse setObject:args forKey:remoteId];
                 result(@(true));
-            } else {
-                // Find characteristic
-                CBCharacteristic *characteristic = [self locateCharacteristic:characteristicUuid
-                                                                   peripheral:peripheral
-                                                                    serviceId:serviceUuid
-                                                           secondaryServiceId:secondaryServiceUuid];
+                return;
+            } 
 
-                                                           
-                // Write to characteristic
-                [peripheral writeValue:[self convertHexToData:value] forCharacteristic:characteristic type:type];
+            // Find characteristic
+            CBCharacteristic *characteristic = [self locateCharacteristic:characteristicUuid
+                                                                peripheral:peripheral
+                                                                serviceId:serviceUuid
+                                                        secondaryServiceId:secondaryServiceUuid];
 
-                result(@(YES));
-            }
+                                                        
+            // Write to characteristic
+            [peripheral writeValue:[self convertHexToData:value] forCharacteristic:characteristic type:type];
+
+            result(@(YES));
         }
         @catch (NSException *e)
         {
@@ -425,6 +472,23 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // Find peripheral
             CBPeripheral *peripheral = [self findPeripheral:remoteId];
 
+            // check connected
+            if (peripheral.state != CBPeripheralStateConnected) {
+                NSString* s = @"device is not connected";
+                result([FlutterError errorWithCode:@"writeDescriptor" message:s details:NULL]);
+                return;
+            }
+
+            // check mtu
+            int mtu = (int) [self getMtu:peripheral];
+            int dataLen = (int) [self convertHexToData:value].length;
+            if ((mtu-3) < dataLen) {
+                NSString* f = @"data is longer than MTU allows. dataLen: %d > maxDataLen: %d";
+                NSString* s = [NSString stringWithFormat:f, dataLen, (mtu-3)];
+                result([FlutterError errorWithCode:@"writeDescriptor" message:s details:NULL]);
+                return;
+            }
+
             // Find characteristic
             CBCharacteristic *characteristic = [self locateCharacteristic:characteristicUuid
                                                                peripheral:peripheral
@@ -436,6 +500,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             // Write descriptor
             [peripheral writeValue:[self convertHexToData:value] forDescriptor:descriptor];
+
             result(@(true));
         }
         @catch (NSException *e)
@@ -457,6 +522,13 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         {
             // Find peripheral
             CBPeripheral *peripheral = [self findPeripheral:remoteId];
+
+            // check connected
+            if (peripheral.state != CBPeripheralStateConnected) {
+                NSString* s = @"device is not connected";
+                result([FlutterError errorWithCode:@"setNotification" message:s details:NULL]);
+                return;
+            }
 
             // Find characteristic
             CBCharacteristic *characteristic = [self locateCharacteristic:characteristicUuid
@@ -502,7 +574,16 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @try
         {
             CBPeripheral *peripheral = [self findPeripheral:remoteId];
+
+            // check connected
+            if (peripheral.state != CBPeripheralStateConnected) {
+                NSString* s = @"device is not connected";
+                result([FlutterError errorWithCode:@"setNotification" message:s details:NULL]);
+                return;
+            }
+
             [peripheral readRSSI];
+
             result(@(true));
         }
         @catch (NSException *e)
