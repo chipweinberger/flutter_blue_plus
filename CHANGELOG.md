@@ -1,3 +1,8 @@
+
+## 1.8.5
+* iOS: check for nil peripheral. (regression in 1.8.3)
+* android: clean up gatt servers onDetachedFromEngine
+
 ## 1.8.4
 * android: make connectivity checks more robust
 
