@@ -496,7 +496,7 @@ public class FlutterBluePlusPlugin implements
                     BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
                     int state = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
                     if(state == BluetoothProfile.STATE_DISCONNECTED) {
-                        result.error("discover_services", "The device is not connected", null);
+                        result.error("pair", "The device is not connected", null);
                         break;
                     }
 
