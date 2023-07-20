@@ -59,11 +59,9 @@ class _BehaviorSubject<T> {
     _controller.add(newValue);
   }
 
-  void listen(Function(T) onData,
-      {Function? onError, void Function()? onDone, bool? cancelOnError}) {
+  void listen(Function(T) onData, {Function? onError, void Function()? onDone, bool? cancelOnError}) {
     onData(latestValue);
-    _controller.stream.listen(onData,
-        onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+    _controller.stream.listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
   }
 
   Future<void> close() {
@@ -108,6 +106,7 @@ class _BufferStream<T> {
   }
 
   void close() {
+    _subscription?.cancel();
     _controller.close();
   }
 
@@ -166,8 +165,7 @@ class _OnDoneTransformer<T> extends StreamTransformerBase<T, T> {
 
     controller = StreamController<T>.broadcast(
       onListen: () {
-        subscription = stream
-            .listen(controller?.add, onError: controller?.addError, onDone: () {
+        subscription = stream.listen(controller?.add, onError: controller?.addError, onDone: () {
           onDone();
           controller?.close();
         });
@@ -283,8 +281,7 @@ Stream<T> _mergeStreams<T>(List<Stream<T>> streams) {
   }
 
   void subscribeToStream(Stream<T> stream) {
-    final s =
-        stream.listen(handleData, onError: handleError, onDone: handleDone);
+    final s = stream.listen(handleData, onError: handleError, onDone: handleDone);
     subscriptions.add(s);
   }
 
