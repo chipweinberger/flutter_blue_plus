@@ -74,7 +74,7 @@ public class FlutterBluePlusPlugin implements
     private final Object initializationLock = new Object();
     private final Object tearDownLock = new Object();
     private Context context;
-    private MethodChannel channel;
+    private MethodChannel methodChannel;
     private static final String NAMESPACE = "flutter_blue_plus";
 
     private EventChannel stateChannel;
@@ -160,8 +160,8 @@ public class FlutterBluePlusPlugin implements
 
             this.context = application;
 
-            channel = new MethodChannel(messenger, NAMESPACE + "/methods");
-            channel.setMethodCallHandler(this);
+            methodChannel = new MethodChannel(messenger, NAMESPACE + "/methods");
+            methodChannel.setMethodCallHandler(this);
 
             stateChannel = new EventChannel(messenger, NAMESPACE + "/state");
             stateChannel.setStreamHandler(stateHandler);
@@ -187,11 +187,24 @@ public class FlutterBluePlusPlugin implements
         {
             Log.d(TAG, "teardown");
 
+            for (Map.Entry<String, BluetoothDeviceCache> entry : mDevices.entrySet()) {
+                String remoteId = entry.getKey();
+                BluetoothDeviceCache cache = entry.getValue();
+                BluetoothGatt gattServer = cache.gatt;
+                if(gattServer != null) {
+                    Log.d(TAG, "calling gattServer.disconnect() on device: " + remoteId);
+                    Log.d(TAG, "calling gattServer.close() on device: " + remoteId);
+                    gattServer.disconnect();
+                    gattServer.close();
+                }
+            }
+            mDevices.clear();
+
             context.unregisterReceiver(mBluetoothStateReceiver);
             context = null;
 
-            channel.setMethodCallHandler(null);
-            channel = null;
+            methodChannel.setMethodCallHandler(null);
+            methodChannel = null;
 
             stateChannel.setStreamHandler(null);
             stateChannel = null;
@@ -1692,10 +1705,10 @@ public class FlutterBluePlusPlugin implements
         new Handler(Looper.getMainLooper()).post(() -> {
             synchronized (tearDownLock) {
                 //Could already be teared down at this moment
-                if (channel != null) {
-                   channel.invokeMethod(name, data);
+                if (methodChannel != null) {
+                   methodChannel.invokeMethod(name, data);
                 } else {
-                    Log.w(TAG, "Tried to call " + name + " on closed channel");
+                    Log.w(TAG, "invokeMethodUIThread: tried to call method on closed channel: " + name);
                 }
             }
         });
