@@ -112,6 +112,10 @@ class BluetoothCharacteristic {
 
       BmReadCharacteristicResponse response = await futureResponse;
 
+      if (!response.success) {
+        throw Exception("charactersticReadFail::errorCode:${response.errorCode}, ${response.errorString}");
+      }
+
       // push to stream
       _readValueController.add(response.characteristic.value);
 
@@ -165,7 +169,7 @@ class BluetoothCharacteristic {
         // wait for response, so that we can check for success
         BmWriteCharacteristicResponse response = await futureResponse;
         if (!response.success) {
-          throw Exception('Failed to write the characteristic');
+          throw Exception("charactersticWriteFail::errorCode:${response.errorCode}, ${response.errorString}");
         }
 
         return Future.value();
@@ -205,7 +209,7 @@ class BluetoothCharacteristic {
     // wait for response, so that we can check for success
     BmSetNotificationResponse response = await futureResponse;
     if (!response.success) {
-      throw Exception('setNotifyValue failed');
+      throw Exception("setNotifyValueFail::errorCode:${response.errorCode}, ${response.errorString}");
     }
 
     BluetoothCharacteristic c = BluetoothCharacteristic.fromProto(response.characteristic);

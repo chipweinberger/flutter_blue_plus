@@ -61,6 +61,10 @@ class BluetoothDescriptor {
 
       BmReadDescriptorResponse response = await futureResponse;
 
+      if (!response.success) {
+        throw Exception("readDescriptorFail::errorCode:${response.errorCode}, ${response.errorString}");
+      }
+
       readValue = response.value;
 
       _value.add(readValue);
@@ -105,7 +109,7 @@ class BluetoothDescriptor {
       BmWriteDescriptorResponse response = await futureResponse;
 
       if (!response.success) {
-        throw Exception('Failed to write the descriptor');
+        throw Exception("writeDescriptorFail::errorCode:${response.errorCode}, ${response.errorString}");
       }
 
       _value.add(value);

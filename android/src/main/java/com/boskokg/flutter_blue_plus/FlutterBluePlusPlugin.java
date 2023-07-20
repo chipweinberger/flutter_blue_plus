@@ -1520,7 +1520,7 @@ public class FlutterBluePlusPlugin implements
                 }
             }
 
-            // see:bmReadAttributeRequest
+            // see: BmReadAttributeRequest
             HashMap<String, Object> request = new HashMap<>();
             request.put("remote_id", gatt.getDevice().getAddress());
             request.put("characteristic_uuid", descriptor.getCharacteristic().getUuid().toString());
