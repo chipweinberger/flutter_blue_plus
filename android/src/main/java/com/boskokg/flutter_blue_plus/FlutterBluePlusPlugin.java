@@ -489,9 +489,18 @@ public class FlutterBluePlusPlugin implements
                 {
                     String remoteId = (String) call.arguments;
 
+                    // check connection
                     BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
+                    int state = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
+                    if(state == BluetoothProfile.STATE_DISCONNECTED) {
+                        result.error("discover_services", "The device is not connected", null);
+                        break;
+                    }
 
-                    device.createBond();
+                    if(device.createBond() == false) {
+                        result.error("pair", "device.createBond() returned false", null);
+                        break;
+                    }
 
                     result.success(null);
                     break;
@@ -558,10 +567,18 @@ public class FlutterBluePlusPlugin implements
                 {
                     String remoteId = (String) call.arguments;
 
+                    // check connection
+                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
+                    int state = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
+                    if(state == BluetoothProfile.STATE_DISCONNECTED) {
+                        result.error("discover_services", "The device is not connected", null);
+                        break;
+                    }
+
                     BluetoothGatt gatt = locateGatt(remoteId);
 
                     if(gatt.discoverServices() == false) {
-                        result.error("discoverServices", "unknown reason", null);
+                        result.error("discover_services", "unknown reason", null);
                         break;
                     }
 
@@ -598,13 +615,28 @@ public class FlutterBluePlusPlugin implements
                     String secondaryServiceUuid = (String) data.get("secondary_service_uuid");
                     String characteristicUuid =   (String) data.get("characteristic_uuid");
 
+                    // check connection
+                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
+                    int state = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
+                    if(state == BluetoothProfile.STATE_DISCONNECTED) {
+                        result.error("read_characteristic_error", "The device is not connected", null);
+                        break;
+                    }
+
                     BluetoothGatt gattServer = locateGatt(remoteId);
+
                     BluetoothGattCharacteristic characteristic = locateCharacteristic(gattServer,
                         serviceUuid, secondaryServiceUuid, characteristicUuid);
 
+                    if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_READ) == 0) {
+                        result.error("read_characteristic_error", 
+                            "The READ property is not supported by this BLE characteristic", null);
+                        break;
+                    }
+
                     if(gattServer.readCharacteristic(characteristic) == false) {
-                        result.error("read_characteristic_error",
-                            "unknown reason, may occur if readCharacteristic was called before last read finished.", null);
+                        result.error("read_characteristic_error", 
+                            "gattServer.readCharacteristic() returned false", null);
                         break;
                     }
 
@@ -622,6 +654,14 @@ public class FlutterBluePlusPlugin implements
                     String characteristicUuid =   (String) data.get("characteristic_uuid");
                     String descriptorUuid =       (String) data.get("descriptor_uuid");
 
+                    // check connection
+                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
+                    int state = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
+                    if(state == BluetoothProfile.STATE_DISCONNECTED) {
+                        result.error("read_descriptor_error", "The device is not connected", null);
+                        break;
+                    }
+
                     BluetoothGatt gattServer = locateGatt(remoteId);
 
                     BluetoothGattCharacteristic characteristic = locateCharacteristic(gattServer,
@@ -630,8 +670,7 @@ public class FlutterBluePlusPlugin implements
                     BluetoothGattDescriptor descriptor = locateDescriptor(characteristic, descriptorUuid);
 
                     if(gattServer.readDescriptor(descriptor) == false) {
-                        result.error("readDescriptor",
-                            "unknown reason, may occur if readDescriptor was called before last read finished.", null);
+                        result.error("read_descriptor_error", "gattServer.readDescriptor() returned false", null);
                         break;
                     }
 
@@ -650,13 +689,37 @@ public class FlutterBluePlusPlugin implements
                     String value =                (String) data.get("value");
                     int writeType =                  (int) data.get("write_type");
 
+                    // check connection
+                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
+                    int state = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
+                    if(state == BluetoothProfile.STATE_DISCONNECTED) {
+                        result.error("write_characteristic_error", "The device is not connected", null);
+                        break;
+                    }
+
                     BluetoothGatt gattServer = locateGatt(remoteId);
 
                     BluetoothGattCharacteristic characteristic = locateCharacteristic(gattServer,
                         serviceUuid, secondaryServiceUuid, characteristicUuid);
 
+                    // check writeable
+                    if(writeType == 1) {
+                        if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE) != 0) {
+                            result.error("write_characteristic_error", 
+                                "The WRITE_NO_RESPONSE property is not supported by this BLE characteristic", null);
+                            break;
+                        }
+                    } else {
+                         if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_WRITE) != 0) {
+                            result.error("write_characteristic_error", 
+                                "The WRITE property is not supported by this BLE characteristic", null);
+                            break;
+                        }
+                    }
+
+                    // set value
                     if(!characteristic.setValue(hexToBytes(value))) {
-                        result.error("writeCharacteristic", "could not set the local value of characteristic", null);
+                        result.error("write_characteristic_error", "characteristic.setValue() returned false", null);
                         break;
                     }
 
@@ -669,7 +732,7 @@ public class FlutterBluePlusPlugin implements
 
                     // Write Char
                     if(!gattServer.writeCharacteristic(characteristic)){
-                        result.error("writeCharacteristic", "writeCharacteristic failed", null);
+                        result.error("write_characteristic_error", "gattServer.writeCharacteristic() returned false", null);
                         break;
                     }
 
@@ -688,6 +751,14 @@ public class FlutterBluePlusPlugin implements
                     String descriptorUuid =       (String) data.get("descriptor_uuid");
                     String value =                (String) data.get("value");
 
+                    // check connection
+                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
+                    int state = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
+                    if(state == BluetoothProfile.STATE_DISCONNECTED) {
+                        result.error("write_descriptor_error", "The device is not connected", null);
+                        break;
+                    }
+
                     BluetoothGatt gattServer = locateGatt(remoteId);
 
                     BluetoothGattCharacteristic characteristic = locateCharacteristic(gattServer,
@@ -697,13 +768,13 @@ public class FlutterBluePlusPlugin implements
 
                     // Set descriptor
                     if(!descriptor.setValue(hexToBytes(value))){
-                        result.error("write_descriptor_error", "could not set the local value for descriptor", null);
+                        result.error("write_descriptor_error", "descriptor.setValue() returned false", null);
                         break;
                     }
 
                     // Write descriptor
                     if(!gattServer.writeDescriptor(descriptor)){
-                        result.error("write_descriptor_error", "writeCharacteristic failed", null);
+                        result.error("write_descriptor_error", "gattServer.writeDescriptor() returned false", null);
                         break;
                     }
 
@@ -721,6 +792,14 @@ public class FlutterBluePlusPlugin implements
                     String characteristicUuid =   (String) data.get("characteristic_uuid");
                     boolean enable =             (boolean) data.get("enable");
 
+                    // check connection
+                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
+                    int state = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
+                    if(state == BluetoothProfile.STATE_DISCONNECTED) {
+                        result.error("set_notification_error", "The device is not connected", null);
+                        break;
+                    }
+
                     BluetoothGatt gattServer = locateGatt(remoteId);
 
                     BluetoothGattCharacteristic characteristic = locateCharacteristic(gattServer,
@@ -736,8 +815,8 @@ public class FlutterBluePlusPlugin implements
 
                     // start notifications
                     if(!gattServer.setCharacteristicNotification(characteristic, enable)){
-                        result.error("setNotification", 
-                            "could not set characteristic notifications to :" + enable, null);
+                        result.error("set_notification_error", 
+                            "gattServer.setCharacteristicNotification(" + enable + ") returned false", null);
                         break;
                     }
 
@@ -753,7 +832,8 @@ public class FlutterBluePlusPlugin implements
                             boolean canIndicate = (characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE) > 0;
 
                             if(!canIndicate && !canNotify) {
-                                result.error("setNotification", "characteristic cannot notify or indicate", null);
+                                result.error("set_notification_error", 
+                                    "neither NOTIFY nor INDICATE properties are supported by this BLE characteristic", null);
                                 break;
                             }
 
@@ -765,12 +845,12 @@ public class FlutterBluePlusPlugin implements
                         }
                         
                         if (!cccDescriptor.setValue(descriptorValue)) {
-                            result.error("setNotification", "error setting descriptor value to: " + Arrays.toString(descriptorValue), null);
+                            result.error("set_notification_error", "cccDescriptor.setValue() returned false", null);
                             break;
                         }
 
                         if (!gattServer.writeDescriptor(cccDescriptor)) {
-                            result.error("setNotification", "error writing descriptor", null);
+                            result.error("set_notification_error", "gattServer.writeDescriptor() returned false", null);
                             break;
                         }
                     }
@@ -804,10 +884,18 @@ public class FlutterBluePlusPlugin implements
                     String remoteId = (String) data.get("remote_id");
                     int mtu =            (int) data.get("mtu");
 
+                    // check connection
+                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
+                    int state = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
+                    if(state == BluetoothProfile.STATE_DISCONNECTED) {
+                        result.error("request_mtu", "The device is not connected", null);
+                        break;
+                    }
+
                     BluetoothGatt gatt = locateGatt(remoteId);
 
                     if(gatt.requestMtu(mtu) == false) {
-                        result.error("requestMtu", "gatt.requestMtu returned false", null);
+                        result.error("request_mtu", "gatt.requestMtu() returned false", null);
                         break;
                     }
 
@@ -818,10 +906,19 @@ public class FlutterBluePlusPlugin implements
                 case "readRssi":
                 {
                     String remoteId = (String) call.arguments;
+
                     BluetoothGatt gatt = locateGatt(remoteId);
 
+                    // check connection
+                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
+                    int state = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
+                    if(state == BluetoothProfile.STATE_DISCONNECTED) {
+                        result.error("read_rssi", "The device is not connected", null);
+                        break;
+                    }
+
                     if(gatt.readRemoteRssi() == false) {
-                        result.error("readRssi", "gatt.readRemoteRssi returned false", null);
+                        result.error("read_rssi", "gatt.readRemoteRssi() returned false", null);
                         break;
                     } 
 
@@ -836,10 +933,18 @@ public class FlutterBluePlusPlugin implements
                     String remoteId =     (String) data.get("remote_id");
                     int connectionPriority = (int) data.get("connection_priority");
 
+                    // check connection
+                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
+                    int state = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
+                    if(state == BluetoothProfile.STATE_DISCONNECTED) {
+                        result.error("request_connection_priority", "The device is not connected", null);
+                        break;
+                    }
+
                     BluetoothGatt gatt = locateGatt(remoteId);
 
                     if(gatt.requestConnectionPriority(connectionPriority) == false) {
-                        result.error("requestConnectionPriority", "returned false", null);
+                        result.error("request_connection_priority", "gatt.requestConnectionPriority() returned false", null);
                         break;
                     }
 
@@ -864,6 +969,14 @@ public class FlutterBluePlusPlugin implements
                     int rxPhy =          (int) data.get("rx_phy");
                     int phyOptions =     (int) data.get("phy_options");
 
+                    // check connection
+                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
+                    int state = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
+                    if(state == BluetoothProfile.STATE_DISCONNECTED) {
+                        result.error("set_preferred_phy", "The device is not connected", null);
+                        break;
+                    }
+
                     BluetoothGatt gatt = locateGatt(remoteId);
 
                     gatt.setPreferredPhy(txPhy, rxPhy, phyOptions);
@@ -879,7 +992,7 @@ public class FlutterBluePlusPlugin implements
 
                     // not bonded?
                     if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
-                        result.success(false);
+                        result.success(true);
                         break;
                     }
 
