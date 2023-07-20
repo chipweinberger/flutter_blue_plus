@@ -1,4 +1,7 @@
 
+## 1.7.8
+* android: add more useful errors for read and write characterist errors
+
 ## 1.7.7
 * android: set autoConnect to false by default
 * dart: scanning: fix Bad state: Cannot add event after closing.
