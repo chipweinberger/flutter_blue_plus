@@ -1122,7 +1122,8 @@ public class FlutterBluePlusPlugin implements
         BluetoothGattService primaryService = gattServer.getService(UUID.fromString(serviceId));
 
         if(primaryService == null) {
-            throw new Exception("service (" + serviceId + ") could not be located on the device");
+            throw new Exception("service not found on this device \n" +
+                "service: "+ serviceId);
         }
 
         BluetoothGattService secondaryService = null;
@@ -1136,7 +1137,8 @@ public class FlutterBluePlusPlugin implements
             }
 
             if(secondaryService == null) {
-                throw new Exception("secondary service (" + secondaryServiceId + ") could not be located on the device");
+                throw new Exception("secondaryService not found on this device \n" +
+                    "secondaryService: " + secondaryServiceId);
             }
         }
 
@@ -1148,8 +1150,9 @@ public class FlutterBluePlusPlugin implements
             service.getCharacteristic(UUID.fromString(characteristicId));
 
         if(characteristic == null) {
-            throw new Exception("characteristic (" + characteristicId + ") " + 
-                "could not be located in the service ("+service.getUuid().toString()+")");
+            throw new Exception("characteristic not found in service \n" +
+                "characteristic: " + characteristicId + " \n" +
+                "service: "+ serviceId);
         }
 
         return characteristic;
@@ -1161,8 +1164,9 @@ public class FlutterBluePlusPlugin implements
         BluetoothGattDescriptor descriptor = characteristic.getDescriptor(UUID.fromString(descriptorId));
 
         if(descriptor == null) {
-            throw new Exception("descriptor (" + descriptorId + ") " + 
-                "could not be located in the characteristic ("+characteristic.getUuid().toString()+")");
+            throw new Exception("descriptor not found on this characteristic \n" +
+                "descriptor: " + descriptorId + " \n" +
+                "characteristic: " + characteristic.getUuid().toString());
         }
 
         return descriptor;
@@ -1428,6 +1432,8 @@ public class FlutterBluePlusPlugin implements
                 services.add(MessageMaker.bmBluetoothService(gatt.getDevice(), s, gatt));
             }
             response.put("services", services);
+            response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
+            response.put("error", gattErrorString(status));
 
             invokeMethodUIThread("DiscoverServicesResult", response);
         }
@@ -1441,6 +1447,8 @@ public class FlutterBluePlusPlugin implements
             HashMap<String, Object> response = new HashMap<>();
             response.put("remote_id", gatt.getDevice().getAddress());
             response.put("characteristic", MessageMaker.bmBluetoothCharacteristic(gatt.getDevice(), characteristic, gatt));
+            response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
+            response.put("error", gattErrorString(status));
 
             invokeMethodUIThread("ReadCharacteristicResponse", response);
         }
@@ -1462,6 +1470,7 @@ public class FlutterBluePlusPlugin implements
             HashMap<String, Object> response = new HashMap<>();
             response.put("request", request);
             response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
+            response.put("error", gattErrorString(status));
 
             invokeMethodUIThread("WriteCharacteristicResponse", response);
         }
@@ -1515,6 +1524,8 @@ public class FlutterBluePlusPlugin implements
             HashMap<String, Object> response = new HashMap<>();
             response.put("request", request);
             response.put("value", bytesToHex(descriptor.getValue()));
+            response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
+            response.put("error", gattErrorString(status));
 
             invokeMethodUIThread("ReadDescriptorResponse", response);
         }
@@ -1536,6 +1547,7 @@ public class FlutterBluePlusPlugin implements
             HashMap<String, Object> response = new HashMap<>();
             response.put("request", request);
             response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
+            response.put("error", gattErrorString(status));
 
             invokeMethodUIThread("WriteDescriptorResponse", response);
 
@@ -1546,6 +1558,7 @@ public class FlutterBluePlusPlugin implements
                 notificationResponse.put("remote_id", gatt.getDevice().getAddress());
                 notificationResponse.put("characteristic", MessageMaker.bmBluetoothCharacteristic(gatt.getDevice(), descriptor.getCharacteristic(), gatt));
                 notificationResponse.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
+                notificationResponse.put("error", gattErrorString(status));
 
                 invokeMethodUIThread("SetNotificationResponse", notificationResponse);
             }
@@ -1568,6 +1581,8 @@ public class FlutterBluePlusPlugin implements
                 HashMap<String, Object> result = new HashMap<>();
                 result.put("remote_id", gatt.getDevice().getAddress());
                 result.put("rssi", rssi);
+                result.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
+                result.put("error", gattErrorString(status));
 
                 invokeMethodUIThread("ReadRssiResult", result);
             }
@@ -1578,23 +1593,19 @@ public class FlutterBluePlusPlugin implements
         {
             log(LogLevel.DEBUG, "[onMtuChanged] mtu: " + mtu + " status: " + status);
 
-            if(status == BluetoothGatt.GATT_SUCCESS) {
-
-                if(mDevices.containsKey(gatt.getDevice().getAddress())) {
-
-                    BluetoothDeviceCache cache = mDevices.get(gatt.getDevice().getAddress());
-                    if (cache != null) {
-                        cache.mtu = mtu;
-                    }
-
-                    // see: BmMtuSizeResponse
-                    HashMap<String, Object> result = new HashMap<>();
-                    result.put("remote_id", gatt.getDevice().getAddress());
-                    result.put("mtu", mtu);
-
-                    invokeMethodUIThread("MtuSize", result);
-                }
+            BluetoothDeviceCache cache = mDevices.get(gatt.getDevice().getAddress());
+            if (cache != null) {
+                cache.mtu = mtu;
             }
+
+            // see: BmMtuSizeResponse
+            HashMap<String, Object> result = new HashMap<>();
+            result.put("remote_id", gatt.getDevice().getAddress());
+            result.put("mtu", mtu);
+            result.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
+            result.put("error", gattErrorString(status));
+
+            invokeMethodUIThread("MtuSize", result);
         }
     }; // BluetoothGattCallback
 
@@ -1644,6 +1655,23 @@ public class FlutterBluePlusPlugin implements
             sb.append(String.format("%02x", b));
         }
         return sb.toString();
+    }
+
+    private static String gattErrorString(int value) {
+        switch(value) {
+            case BluetoothGatt.GATT_SUCCESS                     : return "GATT_SUCCESS";
+            case BluetoothGatt.GATT_CONNECTION_CONGESTED        : return "GATT_CONNECTION_CONGESTED";
+            case BluetoothGatt.GATT_FAILURE                     : return "GATT_FAILURE";
+            case BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION : return "GATT_INSUFFICIENT_AUTHENTICATION";
+            case BluetoothGatt.GATT_INSUFFICIENT_AUTHORIZATION  : return "GATT_INSUFFICIENT_AUTHORIZATION";
+            case BluetoothGatt.GATT_INSUFFICIENT_ENCRYPTION     : return "GATT_INSUFFICIENT_ENCRYPTION";
+            case BluetoothGatt.GATT_INVALID_ATTRIBUTE_LENGTH    : return "GATT_INVALID_ATTRIBUTE_LENGTH";
+            case BluetoothGatt.GATT_INVALID_OFFSET              : return "GATT_INVALID_OFFSET";
+            case BluetoothGatt.GATT_READ_NOT_PERMITTED          : return "GATT_READ_NOT_PERMITTED";
+            case BluetoothGatt.GATT_REQUEST_NOT_SUPPORTED       : return "GATT_REQUEST_NOT_SUPPORTED";
+            case BluetoothGatt.GATT_WRITE_NOT_PERMITTED         : return "GATT_WRITE_NOT_PERMITTED";
+            default: return "UNKNOWN_ERROR (" + value + ")";
+        }
     }
 
     enum LogLevel
