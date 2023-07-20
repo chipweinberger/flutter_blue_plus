@@ -1581,17 +1581,14 @@ public class FlutterBluePlusPlugin implements
         {
             log(LogLevel.DEBUG, "[onReadRemoteRssi] rssi: " + rssi + " status: " + status);
 
-            if(status == BluetoothGatt.GATT_SUCCESS) {
-                
-                // see: BmReadRssiResult
-                HashMap<String, Object> result = new HashMap<>();
-                result.put("remote_id", gatt.getDevice().getAddress());
-                result.put("rssi", rssi);
-                result.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
-                result.put("error", gattErrorString(status));
+            // see: BmReadRssiResult
+            HashMap<String, Object> result = new HashMap<>();
+            result.put("remote_id", gatt.getDevice().getAddress());
+            result.put("rssi", rssi);
+            result.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
+            result.put("error", gattErrorString(status));
 
-                invokeMethodUIThread("ReadRssiResult", result);
-            }
+            invokeMethodUIThread("ReadRssiResult", result);
         }
 
         @Override
