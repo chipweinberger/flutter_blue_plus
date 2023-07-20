@@ -727,6 +727,15 @@ public class FlutterBluePlusPlugin implements
                         }
                     }
 
+                    // check mtu
+                    BluetoothDeviceCache cache = mDevices.get(remoteId);
+                    if ((cache.mtu-3) < hexToBytes(value).length) {
+                        String s = "data longer than mtu allows. dataLength: " + 
+                            hexToBytes(value).length + "> max: " + (cache.mtu-3);
+                        result.error("write_characteristic_error", s, null);
+                        break;
+                    }
+
                     // Version 33 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
 
@@ -784,6 +793,15 @@ public class FlutterBluePlusPlugin implements
                         serviceUuid, secondaryServiceUuid, characteristicUuid);
 
                     BluetoothGattDescriptor descriptor = locateDescriptor(characteristic, descriptorUuid);
+
+                    // check mtu
+                    BluetoothDeviceCache cache = mDevices.get(remoteId);
+                    if ((cache.mtu-3) < hexToBytes(value).length) {
+                        String s = "data longer than mtu allows. dataLength: " + 
+                            hexToBytes(value).length + "> max: " + (cache.mtu-3);
+                        result.error("write_characteristic_error", s, null);
+                        break;
+                    }
 
                     // Version 33 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
