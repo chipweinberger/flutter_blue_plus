@@ -24,6 +24,24 @@ Using the FlutterBluePlus instance, you can scan for and connect to nearby devic
 Once connected to a device, the BluetoothDevice object can discover services ([BluetoothService](lib/src/bluetooth_service.dart)), characteristics ([BluetoothCharacteristic](lib/src/bluetooth_characteristic.dart)), and descriptors ([BluetoothDescriptor](lib/src/bluetooth_descriptor.dart)).
 The BluetoothDevice object is then used to directly interact with characteristics and descriptors.
 
+## Troubleshooting
+
+The easiest way to debug issues in FlutterBluePlus is to first make local copy.
+
+```
+cd /user/downloads
+git clone https://github.com/boskokg/flutter_blue_plus.git
+```
+
+then in `pubspec.yaml` add the repo by path:
+
+```
+  flutter_blue_plus:
+    path: /user/downloads/flutter_blue_plus
+```
+
+Now you can edit FlutterBluePlus code and debug issues yourself. 
+
 ## Usage
 
 ### Obtain an instance
