@@ -34,10 +34,6 @@ class BluetoothDevice {
     bool autoConnect = false,
     bool shouldClearGattCache = true,
   }) async {
-    if (Platform.isAndroid && shouldClearGattCache) {
-      clearGattCache();
-    }
-
     var request = BmConnectRequest(
       remoteId: id.toString(),
       androidAutoConnect: autoConnect,
@@ -57,6 +53,10 @@ class BluetoothDevice {
       });
     } else {
       await futureState;
+    }
+
+    if (Platform.isAndroid && shouldClearGattCache) {
+      clearGattCache();
     }
   }
 
