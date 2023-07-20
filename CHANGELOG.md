@@ -1,3 +1,5 @@
+## 1.8.4
+* android: make connectivity checks more robust
 
 ## 1.8.3
 * android: writeCharacteristic: return error if longer than mtu
