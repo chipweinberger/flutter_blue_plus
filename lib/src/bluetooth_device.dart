@@ -32,7 +32,7 @@ class BluetoothDevice {
   /// Establishes a connection to the Bluetooth Device.
   Future<void> connect({
     Duration? timeout,
-    bool autoConnect = true,
+    bool autoConnect = false,
     bool shouldClearGattCache = true,
   }) async {
     if (Platform.isAndroid && shouldClearGattCache) {
