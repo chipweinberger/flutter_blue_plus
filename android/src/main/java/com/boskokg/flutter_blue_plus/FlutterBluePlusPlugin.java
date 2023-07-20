@@ -399,12 +399,13 @@ public class FlutterBluePlusPlugin implements
 
                         List<BluetoothDevice> devices = mBluetoothManager.getConnectedDevices(BluetoothProfile.GATT);
 
-                        HashMap<String, Object> response = new HashMap<String, Object>();
-                        List<HashMap<String, Object>> responseDevices = new ArrayList<HashMap<String, Object>>();
+                        List<HashMap<String, Object>> devList = new ArrayList<HashMap<String, Object>>();
                         for (BluetoothDevice d : devices) {
-                            responseDevices.add(MessageMaker.bmBluetoothDevice(d));
+                            devList.add(MessageMaker.bmBluetoothDevice(d));
                         }
-                        response.put("devices", responseDevices);
+
+                        HashMap<String, Object> response = new HashMap<>();
+                        response.put("devices", devList);
 
                         result.success(response);
                     });
@@ -415,12 +416,13 @@ public class FlutterBluePlusPlugin implements
                 {
                     final Set<BluetoothDevice> bondedDevices = mBluetoothAdapter.getBondedDevices();
 
-                    HashMap<String, Object> response = new HashMap<String, Object>();
-                    List<HashMap<String,Object>> devices = new ArrayList<HashMap<String,Object>>();
+                    List<HashMap<String,Object>> devList = new ArrayList<HashMap<String,Object>>();
                     for (BluetoothDevice d : bondedDevices) {
-                        devices.add(MessageMaker.bmBluetoothDevice(d));
+                        devList.add(MessageMaker.bmBluetoothDevice(d));
                     }
-                    response.put("devices", devices);
+
+                    HashMap<String, Object> response = new HashMap<String, Object>();
+                    response.put("devices", devList);
 
                     result.success(response);
                     break;
