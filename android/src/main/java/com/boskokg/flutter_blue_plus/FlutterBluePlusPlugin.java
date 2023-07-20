@@ -14,6 +14,7 @@ import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
+import android.bluetooth.BluetoothStatusCodes;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.le.BluetoothLeScanner;
@@ -692,7 +693,11 @@ public class FlutterBluePlusPlugin implements
                     String secondaryServiceUuid = (String) data.get("secondary_service_uuid");
                     String characteristicUuid =   (String) data.get("characteristic_uuid");
                     String value =                (String) data.get("value");
-                    int writeType =                  (int) data.get("write_type");
+                    int writeTypeInt =               (int) data.get("write_type");
+
+                    int writeType = writeTypeInt == 1 ? 
+                            BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE :
+                            BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT;
 
                     // check connection
                     BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
@@ -722,23 +727,32 @@ public class FlutterBluePlusPlugin implements
                         }
                     }
 
-                    // set value
-                    if(!characteristic.setValue(hexToBytes(value))) {
-                        result.error("write_characteristic_error", "characteristic.setValue() returned false", null);
-                        break;
-                    }
+                    // Version 33 
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
 
-                    // Write type
-                    if(writeType == 1) {
-                        characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
+                        int rv = gattServer.writeCharacteristic(characteristic, hexToBytes(value), writeType);
+
+                        if (rv != BluetoothStatusCodes.SUCCESS) {
+                            String s = "gattServer.writeCharacteristic() returned " + rv + " : " + bluetoothStatusString(rv);
+                            result.error("write_characteristic_error", s, null);
+                            return;
+                        }
+
                     } else {
-                        characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
-                    }
+                        // set value
+                        if(!characteristic.setValue(hexToBytes(value))) {
+                            result.error("write_characteristic_error", "characteristic.setValue() returned false", null);
+                            break;
+                        }
 
-                    // Write Char
-                    if(!gattServer.writeCharacteristic(characteristic)){
-                        result.error("write_characteristic_error", "gattServer.writeCharacteristic() returned false", null);
-                        break;
+                        // Write type
+                        characteristic.setWriteType(writeType);
+
+                        // Write Char
+                        if(!gattServer.writeCharacteristic(characteristic)){
+                            result.error("write_characteristic_error", "gattServer.writeCharacteristic() returned false", null);
+                            break;
+                        }
                     }
 
                     result.success(null);
@@ -771,16 +785,30 @@ public class FlutterBluePlusPlugin implements
 
                     BluetoothGattDescriptor descriptor = locateDescriptor(characteristic, descriptorUuid);
 
-                    // Set descriptor
-                    if(!descriptor.setValue(hexToBytes(value))){
-                        result.error("write_descriptor_error", "descriptor.setValue() returned false", null);
-                        break;
-                    }
+                    // Version 33 
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
 
-                    // Write descriptor
-                    if(!gattServer.writeDescriptor(descriptor)){
-                        result.error("write_descriptor_error", "gattServer.writeDescriptor() returned false", null);
-                        break;
+                        int rv = gattServer.writeDescriptor(descriptor, hexToBytes(value));
+
+                        if (rv != BluetoothStatusCodes.SUCCESS) {
+                            String s = "gattServer.writeDescriptor() returned " + rv + " : " + bluetoothStatusString(rv);
+                            result.error("write_characteristic_error", s, null);
+                            return;
+                        }
+
+                    } else {
+
+                        // Set descriptor
+                        if(!descriptor.setValue(hexToBytes(value))){
+                            result.error("write_descriptor_error", "descriptor.setValue() returned false", null);
+                            break;
+                        }
+
+                        // Write descriptor
+                        if(!gattServer.writeDescriptor(descriptor)){
+                            result.error("write_descriptor_error", "gattServer.writeDescriptor() returned false", null);
+                            break;
+                        }
                     }
 
                     result.success(null);
@@ -1686,6 +1714,24 @@ public class FlutterBluePlusPlugin implements
             case BluetoothGatt.GATT_READ_NOT_PERMITTED          : return "GATT_READ_NOT_PERMITTED";
             case BluetoothGatt.GATT_REQUEST_NOT_SUPPORTED       : return "GATT_REQUEST_NOT_SUPPORTED";
             case BluetoothGatt.GATT_WRITE_NOT_PERMITTED         : return "GATT_WRITE_NOT_PERMITTED";
+            default: return "UNKNOWN_ERROR (" + value + ")";
+        }
+    }
+
+    private static String bluetoothStatusString(int value) {
+        switch(value) {
+            case BluetoothStatusCodes.ERROR_BLUETOOTH_NOT_ALLOWED                : return "ERROR_BLUETOOTH_NOT_ALLOWED";
+            case BluetoothStatusCodes.ERROR_BLUETOOTH_NOT_ENABLED                : return "ERROR_BLUETOOTH_NOT_ENABLED";
+            case BluetoothStatusCodes.ERROR_DEVICE_NOT_BONDED                    : return "ERROR_DEVICE_NOT_BONDED";
+            case BluetoothStatusCodes.ERROR_GATT_WRITE_NOT_ALLOWED               : return "ERROR_GATT_WRITE_NOT_ALLOWED";
+            case BluetoothStatusCodes.ERROR_GATT_WRITE_REQUEST_BUSY              : return "ERROR_GATT_WRITE_REQUEST_BUSY";
+            case BluetoothStatusCodes.ERROR_MISSING_BLUETOOTH_CONNECT_PERMISSION : return "ERROR_MISSING_BLUETOOTH_CONNECT_PERMISSION";
+            case BluetoothStatusCodes.ERROR_PROFILE_SERVICE_NOT_BOUND            : return "ERROR_PROFILE_SERVICE_NOT_BOUND";
+            case BluetoothStatusCodes.ERROR_UNKNOWN                              : return "ERROR_UNKNOWN";
+            //case BluetoothStatusCodes.FEATURE_NOT_CONFIGURED                     : return "FEATURE_NOT_CONFIGURED";
+            case BluetoothStatusCodes.FEATURE_NOT_SUPPORTED                      : return "FEATURE_NOT_SUPPORTED";
+            case BluetoothStatusCodes.FEATURE_SUPPORTED                          : return "FEATURE_SUPPORTED";
+            case BluetoothStatusCodes.SUCCESS                                    : return "SUCCESS";
             default: return "UNKNOWN_ERROR (" + value + ")";
         }
     }
