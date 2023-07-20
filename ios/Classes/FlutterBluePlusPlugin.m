@@ -201,7 +201,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         {
             // See BmConnectRequest
             NSDictionary* args = (NSDictionary*)call.arguments;
-            NSString  *remoteId           = args[@"remote_id"];
+            NSString  *remoteId = args[@"remote_id"];
+            bool autoConnect    = args[@"auto_connect"] != 0;
 
             CBPeripheral *peripheral = nil; 
             if (peripheral == nil)
@@ -233,8 +234,15 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 return;
             }
 
-            // TODO: Implement Connect options (#36)
-            [_centralManager connectPeripheral:peripheral options:nil];
+            // options
+            NSMutableDictionary *options = [[NSMutableDictionary alloc] init];
+            if (@available(iOS 17, *)) {
+                // note: use CBConnectPeripheralOptionEnableAutoReconnect constant
+                // when iOS 17 is more widely available
+                [options setObject:@(autoConnect) forKey:@"kCBConnectOptionEnableAutoReconnect"];
+            } 
+
+            [_centralManager connectPeripheral:peripheral options:options];
             
             result(@(true));
         }

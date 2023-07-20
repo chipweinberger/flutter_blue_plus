@@ -133,17 +133,17 @@ class BmScanResult {
 
 class BmConnectRequest {
   String remoteId;
-  bool androidAutoConnect;
+  bool autoConnect;
 
   BmConnectRequest({
     required this.remoteId,
-    required this.androidAutoConnect,
+    required this.autoConnect,
   });
 
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> data = {};
     data['remote_id'] = remoteId;
-    data['android_auto_connect'] = androidAutoConnect;
+    data['auto_connect'] = autoConnect ? 1 : 0;
     _printDbg("\nBmConnectRequest $data");
     return data;
   }

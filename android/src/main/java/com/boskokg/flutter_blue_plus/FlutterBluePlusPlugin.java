@@ -461,8 +461,8 @@ public class FlutterBluePlusPlugin implements
 
                         // see: BmConnectRequest
                         HashMap<String, Object> args = call.arguments();
-                        String remoteId =      (String) args.get("remote_id");
-                        boolean autoConnect = (boolean) args.get("android_auto_connect");
+                        String remoteId =       args.get("remote_id");
+                        boolean autoConnect =   args.get("auto_connect") != 0;
                         
                         BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
                         

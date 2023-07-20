@@ -36,7 +36,7 @@ class BluetoothDevice {
   }) async {
     var request = BmConnectRequest(
       remoteId: id.toString(),
-      androidAutoConnect: autoConnect,
+      autoConnect: autoConnect,
     );
 
     var responseStream = state.where((s) => s == BluetoothDeviceState.connected);
