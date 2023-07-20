@@ -1,4 +1,9 @@
 
+## 1.7.7
+* android: set autoConnect to false by default
+* dart: scanning: fix Bad state: Cannot add event after closing.
+* example: remove pubspec.lock so users default to latest version
+
 ## 1.7.6
 * dart: BmBluetoothService.is_primary was not set (regression in 1.7.0)
 * android: BmAdvertisementData.connectable was not set (regression in 1.7.0)
