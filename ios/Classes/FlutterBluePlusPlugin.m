@@ -244,6 +244,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSString *remoteId = [call arguments];
 
             CBPeripheral *peripheral = [self findPeripheral:remoteId];
+            if (peripheral == nil) {
+                NSString* s = @"peripheral not found.";
+                result([FlutterError errorWithCode:@"disconnect" message:s details:NULL]);
+                return;
+            }
 
             [_centralManager cancelPeripheralConnection:peripheral];
             
@@ -255,6 +260,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSString *remoteId = [call arguments];
  
             CBPeripheral *peripheral = [self findPeripheral:remoteId];
+            if (peripheral == nil) {
+                NSString* s = @"peripheral not found. try reconnecting.";
+                result([FlutterError errorWithCode:@"deviceState" message:s details:NULL]);
+                return;
+            }
 
             NSDictionary* response = [self toDeviceStateProto:peripheral state:peripheral.state];
 
@@ -266,6 +276,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSString *remoteId = [call arguments];
 
             CBPeripheral *peripheral = [self findPeripheral:remoteId];
+            if (peripheral == nil) {
+                NSString* s = @"peripheral not found. try reconnecting.";
+                result([FlutterError errorWithCode:@"discoverServices" message:s details:NULL]);
+                return;
+            }
 
             // check connected
             if (peripheral.state != CBPeripheralStateConnected) {
@@ -289,6 +304,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSString *remoteId = [call arguments];
 
             CBPeripheral *peripheral = [self findPeripheral:remoteId];
+            if (peripheral == nil) {
+                NSString* s = @"peripheral not found. try reconnecting.";
+                result([FlutterError errorWithCode:@"services" message:s details:NULL]);
+                return;
+            }
 
             // Services
             NSMutableArray *services = [NSMutableArray new];
@@ -319,6 +339,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             // Find peripheral
             CBPeripheral *peripheral = [self findPeripheral:remoteId];
+            if (peripheral == nil) {
+                NSString* s = @"peripheral not found. try reconnecting.";
+                result([FlutterError errorWithCode:@"readCharacteristic" message:s details:NULL]);
+                return;
+            }
 
             // check connected
             if (peripheral.state != CBPeripheralStateConnected) {
@@ -350,6 +375,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             // Find peripheral
             CBPeripheral *peripheral = [self findPeripheral:remoteId];
+            if (peripheral == nil) {
+                NSString* s = @"peripheral not found. try reconnecting.";
+                result([FlutterError errorWithCode:@"readDescriptor" message:s details:NULL]);
+                return;
+            }
 
             // check connected
             if (peripheral.state != CBPeripheralStateConnected) {
@@ -384,6 +414,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             
             // Find peripheral
             CBPeripheral *peripheral = [self findPeripheral:remoteId];
+            if (peripheral == nil) {
+                NSString* s = @"peripheral not found. try reconnecting.";
+                result([FlutterError errorWithCode:@"writeCharacteristic" message:s details:NULL]);
+                return;
+            }
 
             // check connected
             if (peripheral.state != CBPeripheralStateConnected) {
@@ -442,6 +477,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             // Find peripheral
             CBPeripheral *peripheral = [self findPeripheral:remoteId];
+            if (peripheral == nil) {
+                NSString* s = @"peripheral not found. try reconnecting.";
+                result([FlutterError errorWithCode:@"writeDescriptor" message:s details:NULL]);
+                return;
+            }
 
             // check connected
             if (peripheral.state != CBPeripheralStateConnected) {
@@ -486,6 +526,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             // Find peripheral
             CBPeripheral *peripheral = [self findPeripheral:remoteId];
+            if (peripheral == nil) {
+                NSString* s = @"peripheral not found. try reconnecting.";
+                result([FlutterError errorWithCode:@"setNotification" message:s details:NULL]);
+                return;
+            }
 
             // check connected
             if (peripheral.state != CBPeripheralStateConnected) {
