@@ -66,23 +66,23 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 }
 
 ////////////////////////////////////////////////////////////
-// ██   ██   █████   ███    ██  ██████   ██       ███████    
-// ██   ██  ██   ██  ████   ██  ██   ██  ██       ██         
-// ███████  ███████  ██ ██  ██  ██   ██  ██       █████      
-// ██   ██  ██   ██  ██  ██ ██  ██   ██  ██       ██         
-// ██   ██  ██   ██  ██   ████  ██████   ███████  ███████                                                       
-//                                                      
-// ███    ███  ███████  ████████  ██   ██   ██████   ██████  
-// ████  ████  ██          ██     ██   ██  ██    ██  ██   ██ 
-// ██ ████ ██  █████       ██     ███████  ██    ██  ██   ██ 
-// ██  ██  ██  ██          ██     ██   ██  ██    ██  ██   ██ 
-// ██      ██  ███████     ██     ██   ██   ██████   ██████                                              
-//                                                      
-//  ██████   █████   ██       ██                           
-// ██       ██   ██  ██       ██                           
-// ██       ███████  ██       ██                           
-// ██       ██   ██  ██       ██                           
-//  ██████  ██   ██  ███████  ███████                     
+// ██   ██   █████   ███    ██  ██████   ██       ███████
+// ██   ██  ██   ██  ████   ██  ██   ██  ██       ██
+// ███████  ███████  ██ ██  ██  ██   ██  ██       █████
+// ██   ██  ██   ██  ██  ██ ██  ██   ██  ██       ██
+// ██   ██  ██   ██  ██   ████  ██████   ███████  ███████
+//
+// ███    ███  ███████  ████████  ██   ██   ██████   ██████
+// ████  ████  ██          ██     ██   ██  ██    ██  ██   ██
+// ██ ████ ██  █████       ██     ███████  ██    ██  ██   ██
+// ██  ██  ██  ██          ██     ██   ██  ██    ██  ██   ██
+// ██      ██  ███████     ██     ██   ██   ██████   ██████
+//
+//  ██████   █████   ██       ██
+// ██       ██   ██  ██       ██
+// ██       ███████  ██       ██
+// ██       ██   ██  ██       ██
+//  ██████  ██   ██  ███████  ███████
 
 - (void)handleMethodCall:(FlutterMethodCall *)call result:(FlutterResult)result
 {
@@ -91,7 +91,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         if (_logLevel >= debug) {
             NSLog(@"[FBP-iOS] handleMethodCall: %@", call.method);
         }
-        
+
         if ([@"setLogLevel" isEqualToString:call.method])
         {
             NSNumber *logLevelIndex = [call arguments];
@@ -106,15 +106,15 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             };
 
             self.centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil options:options];
-            
+
             NSDictionary *data = [self toBluetoothStateProto:self->_centralManager.state];
-            
+
             self.stateStreamHandler.cachedBluetoothState = data;
         }
         if ([@"state" isEqualToString:call.method])
         {
             NSDictionary *data = [self toBluetoothStateProto:self->_centralManager.state];
-            
+
             result(data);
         }
         else if ([@"isAvailable" isEqualToString:call.method])
@@ -207,7 +207,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSString  *remoteId = args[@"remote_id"];
             bool autoConnect    = args[@"auto_connect"] != 0;
 
-            CBPeripheral *peripheral = nil; 
+            CBPeripheral *peripheral = nil;
             if (peripheral == nil)
             {
                 peripheral = [self findPeripheral:remoteId];
@@ -243,10 +243,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 // note: use CBConnectPeripheralOptionEnableAutoReconnect constant
                 // when iOS 17 is more widely available
                 [options setObject:@(autoConnect) forKey:@"kCBConnectOptionEnableAutoReconnect"];
-            } 
+            }
 
             [_centralManager connectPeripheral:peripheral options:options];
-            
+
             result(@(true));
         }
         else if ([@"disconnect" isEqualToString:call.method])
@@ -262,14 +262,14 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             }
 
             [_centralManager cancelPeripheralConnection:peripheral];
-            
+
             result(@(true));
         }
         else if ([@"deviceState" isEqualToString:call.method])
         {
             // remoteId is passed raw, not in a NSDictionary
             NSString *remoteId = [call arguments];
- 
+
             CBPeripheral *peripheral = [self findPeripheral:remoteId];
             if (peripheral == nil) {
                 NSString* s = @"peripheral not found. try reconnecting.";
@@ -422,7 +422,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSString  *secondaryServiceUuid = args[@"secondary_service_uuid"];
             NSNumber  *writeType            = args[@"write_type"];
             NSString  *value                = args[@"value"];
-            
+
             // Find peripheral
             CBPeripheral *peripheral = [self findPeripheral:remoteId];
             if (peripheral == nil) {
@@ -461,7 +461,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 [_dataWaitingToWriteWithoutResponse setObject:args forKey:remoteId];
                 result(@(true));
                 return;
-            } 
+            }
 
             // Find characteristic
             CBCharacteristic *characteristic = [self locateCharacteristic:characteristicUuid
@@ -469,7 +469,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                                                                 serviceId:serviceUuid
                                                         secondaryServiceId:secondaryServiceUuid];
 
-                                                        
+
             // Write to characteristic
             [peripheral writeValue:[self convertHexToData:value] forCharacteristic:characteristic type:type];
 
@@ -558,7 +558,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             // Set notification value
             [peripheral setNotifyValue:[enable boolValue] forCharacteristic:characteristic];
-            
+
             result(@(true));
         }
         else if ([@"mtu" isEqualToString:call.method])
@@ -583,7 +583,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 @"mtu" : @(mtu),
                 @"success" : @(1),
             };
-            
+
             result(response);
         }
         else if ([@"requestMtu" isEqualToString:call.method])
@@ -618,19 +618,19 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         }
         else if([@"requestConnectionPriority" isEqualToString:call.method])
         {
-            result([FlutterError errorWithCode:@"requestConnectionPriority" 
+            result([FlutterError errorWithCode:@"requestConnectionPriority"
                                     message:@"iOS does not support connection priority requests"
                                     details:NULL]);
         }
         else if([@"setPreferredPhy" isEqualToString:call.method])
         {
-            result([FlutterError errorWithCode:@"setPreferredPhy" 
+            result([FlutterError errorWithCode:@"setPreferredPhy"
                                     message:@"iOS does not support set preferred phy requests"
                                     details:NULL]);
         }
         else if([@"removeBond" isEqualToString:call.method])
         {
-            result([FlutterError errorWithCode:@"removeBond" 
+            result([FlutterError errorWithCode:@"removeBond"
                                     message:@"plugin does not support removeBond function on iOS"
                                     details:NULL]);
         }
@@ -648,17 +648,17 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 }
 
 //////////////////////////////////////////////////////////////////////
-// ██████   ██████   ██  ██    ██   █████   ████████  ███████ 
-// ██   ██  ██   ██  ██  ██    ██  ██   ██     ██     ██      
-// ██████   ██████   ██  ██    ██  ███████     ██     █████   
-// ██       ██   ██  ██   ██  ██   ██   ██     ██     ██      
+// ██████   ██████   ██  ██    ██   █████   ████████  ███████
+// ██   ██  ██   ██  ██  ██    ██  ██   ██     ██     ██
+// ██████   ██████   ██  ██    ██  ███████     ██     █████
+// ██       ██   ██  ██   ██  ██   ██   ██     ██     ██
 // ██       ██   ██  ██    ████    ██   ██     ██     ███████
 //
-// ██    ██  ████████  ██  ██       ███████ 
-// ██    ██     ██     ██  ██       ██      
-// ██    ██     ██     ██  ██       ███████ 
-// ██    ██     ██     ██  ██            ██ 
-//  ██████      ██     ██  ███████  ███████ 
+// ██    ██  ████████  ██  ██       ███████
+// ██    ██     ██     ██  ██       ██
+// ██    ██     ██     ██  ██       ███████
+// ██    ██     ██     ██  ██            ██
+//  ██████      ██     ██  ███████  ███████
 
 - (NSData *)convertHexToData:(NSString *)hexString
 {
@@ -809,32 +809,32 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
 
 /////////////////////////////////////////////////////////////////////////////////////
-//  ██████  ██████    ██████  ███████  ███    ██  ████████  ██████    █████  ██      
-// ██       ██   ██  ██       ██       ████   ██     ██     ██   ██  ██   ██ ██      
-// ██       ██████   ██       █████    ██ ██  ██     ██     ██████   ███████ ██      
-// ██       ██   ██  ██       ██       ██  ██ ██     ██     ██   ██  ██   ██ ██      
-//  ██████  ██████    ██████  ███████  ██   ████     ██     ██   ██  ██   ██ ███████ 
-//                                                                                                                                          
-// ███    ███   █████   ███    ██   █████    ██████   ███████  ██████               
-// ████  ████  ██   ██  ████   ██  ██   ██  ██        ██       ██   ██              
-// ██ ████ ██  ███████  ██ ██  ██  ███████  ██   ███  █████    ██████               
-// ██  ██  ██  ██   ██  ██  ██ ██  ██   ██  ██    ██  ██       ██   ██              
-// ██      ██  ██   ██  ██   ████  ██   ██   ██████   ███████  ██   ██              
-//                                                                                                                                                   
-// ██████   ███████  ██       ███████   ██████    █████   ████████  ███████          
-// ██   ██  ██       ██       ██       ██        ██   ██     ██     ██               
-// ██   ██  █████    ██       █████    ██   ███  ███████     ██     █████            
-// ██   ██  ██       ██       ██       ██    ██  ██   ██     ██     ██               
-// ██████   ███████  ███████  ███████   ██████   ██   ██     ██     ███████ 
+//  ██████  ██████    ██████  ███████  ███    ██  ████████  ██████    █████  ██
+// ██       ██   ██  ██       ██       ████   ██     ██     ██   ██  ██   ██ ██
+// ██       ██████   ██       █████    ██ ██  ██     ██     ██████   ███████ ██
+// ██       ██   ██  ██       ██       ██  ██ ██     ██     ██   ██  ██   ██ ██
+//  ██████  ██████    ██████  ███████  ██   ████     ██     ██   ██  ██   ██ ███████
+//
+// ███    ███   █████   ███    ██   █████    ██████   ███████  ██████
+// ████  ████  ██   ██  ████   ██  ██   ██  ██        ██       ██   ██
+// ██ ████ ██  ███████  ██ ██  ██  ███████  ██   ███  █████    ██████
+// ██  ██  ██  ██   ██  ██  ██ ██  ██   ██  ██    ██  ██       ██   ██
+// ██      ██  ██   ██  ██   ████  ██   ██   ██████   ███████  ██   ██
+//
+// ██████   ███████  ██       ███████   ██████    █████   ████████  ███████
+// ██   ██  ██       ██       ██       ██        ██   ██     ██     ██
+// ██   ██  █████    ██       █████    ██   ███  ███████     ██     █████
+// ██   ██  ██       ██       ██       ██    ██  ██   ██     ██     ██
+// ██████   ███████  ███████  ███████   ██████   ██   ██     ██     ███████
 
 - (void)centralManagerDidUpdateState:(nonnull CBCentralManager *)central
 {
     if (_logLevel >= debug) {
         NSLog(@"[FBP-iOS] centralManagerDidUpdateState");
     }
-    
+
     NSDictionary *data = [self toBluetoothStateProto:self->_centralManager.state];
-    
+
     if (_stateStreamHandler.sink != nil) {
         self.stateStreamHandler.sink(data);
     } else {
@@ -850,7 +850,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     if (_logLevel >= debug) {
         //NSLog(@"[FBP-iOS] centralManager didDiscoverPeripheral");
     }
-    
+
     [self.scannedPeripherals setObject:peripheral forKey:[[peripheral identifier] UUIDString]];
 
     NSDictionary *result = [self toScanResultProto:peripheral advertisementData:advertisementData RSSI:RSSI];
@@ -918,17 +918,17 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  ██████  ██████   ██████   ███████  ██████   ██  ██████   ██   ██  ███████  ██████    █████   ██      
-// ██       ██   ██  ██   ██  ██       ██   ██  ██  ██   ██  ██   ██  ██       ██   ██  ██   ██  ██      
-// ██       ██████   ██████   █████    ██████   ██  ██████   ███████  █████    ██████   ███████  ██      
-// ██       ██   ██  ██       ██       ██   ██  ██  ██       ██   ██  ██       ██   ██  ██   ██  ██      
+//  ██████  ██████   ██████   ███████  ██████   ██  ██████   ██   ██  ███████  ██████    █████   ██
+// ██       ██   ██  ██   ██  ██       ██   ██  ██  ██   ██  ██   ██  ██       ██   ██  ██   ██  ██
+// ██       ██████   ██████   █████    ██████   ██  ██████   ███████  █████    ██████   ███████  ██
+// ██       ██   ██  ██       ██       ██   ██  ██  ██       ██   ██  ██       ██   ██  ██   ██  ██
 //  ██████  ██████   ██       ███████  ██   ██  ██  ██       ██   ██  ███████  ██   ██  ██   ██  ███████
 //
-// ██████   ███████  ██       ███████   ██████    █████   ████████  ███████          
-// ██   ██  ██       ██       ██       ██        ██   ██     ██     ██               
-// ██   ██  █████    ██       █████    ██   ███  ███████     ██     █████            
-// ██   ██  ██       ██       ██       ██    ██  ██   ██     ██     ██               
-// ██████   ███████  ███████  ███████   ██████   ██   ██     ██     ███████ 
+// ██████   ███████  ██       ███████   ██████    █████   ████████  ███████
+// ██   ██  ██       ██       ██       ██        ██   ██     ██     ██
+// ██   ██  █████    ██       █████    ██   ███  ███████     ██     █████
+// ██   ██  ██       ██       ██       ██    ██  ██   ██     ██     ██
+// ██████   ███████  ███████  ███████   ██████   ██   ██     ██     ███████
 
 - (void)peripheral:(CBPeripheral *)peripheral didDiscoverServices:(NSError *)error
 {
@@ -1105,8 +1105,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     CBDescriptor *cccd = nil;
     if (error == nil) {
         cccd = [self findCCCDescriptor:characteristic];
-        if (cccd == nil) { 
-            error = [NSError errorWithDomain:@"com.flutter_blue_plus" code:-1 
+        if (cccd == nil) {
+            error = [NSError errorWithDomain:@"com.flutter_blue_plus" code:-1
                 userInfo:@{ NSLocalizedDescriptionKey : @"findCCCDescriptor failed"}];
         }
     }
@@ -1127,7 +1127,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         // Request a read
         // Note: invokeMethod:@"SetNotificationResponse" is invoked later
         // in the didUpdateValueForDescriptor callback
-        [peripheral readValueForDescriptor:cccd]; 
+        [peripheral readValueForDescriptor:cccd];
     }
 }
 
@@ -1164,7 +1164,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     };
 
     int value = [descriptor.value intValue];
-    
+
     // See BmReadDescriptorResponse
     NSDictionary* result = @{
         @"request":         q,
@@ -1261,12 +1261,12 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     if (_logLevel >= debug) {
         NSLog(@"[FBP-iOS] peripheralIsReadyToSendWriteWithoutResponse");
     }
-    
+
     NSDictionary *request = [_dataWaitingToWriteWithoutResponse objectForKey:[[peripheral identifier] UUIDString]];
     if (request == nil) {
         return;
     }
-    
+
     // See BmWriteCharacteristicRequest
     NSString  *characteristicUuid   = request[@"characteristic_uuid"];
     NSString  *serviceUuid          = request[@"service_uuid"];
@@ -1295,20 +1295,20 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 }
 
 //////////////////////////////////////////////////////////////////////
-// ███    ███  ███████   ██████      
-// ████  ████  ██       ██           
-// ██ ████ ██  ███████  ██   ███     
-// ██  ██  ██       ██  ██    ██     
-// ██      ██  ███████   ██████ 
-//     
-// ██   ██  ███████  ██       ██████   ███████  ██████   ███████ 
-// ██   ██  ██       ██       ██   ██  ██       ██   ██  ██      
-// ███████  █████    ██       ██████   █████    ██████   ███████ 
-// ██   ██  ██       ██       ██       ██       ██   ██       ██ 
-// ██   ██  ███████  ███████  ██       ███████  ██   ██  ███████ 
+// ███    ███  ███████   ██████
+// ████  ████  ██       ██
+// ██ ████ ██  ███████  ██   ███
+// ██  ██  ██       ██  ██    ██
+// ██      ██  ███████   ██████
+//
+// ██   ██  ███████  ██       ██████   ███████  ██████   ███████
+// ██   ██  ██       ██       ██   ██  ██       ██   ██  ██
+// ███████  █████    ██       ██████   █████    ██████   ███████
+// ██   ██  ██       ██       ██       ██       ██   ██       ██
+// ██   ██  ███████  ███████  ██       ███████  ██   ██  ███████
 
 
-- (NSString *)convertDataToHex:(NSData *)data 
+- (NSString *)convertDataToHex:(NSData *)data
 {
     const unsigned char *bytes = (const unsigned char *)[data bytes];
     NSMutableString *hexString = [NSMutableString new];
@@ -1353,7 +1353,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // Manufacturer Data
     NSDictionary* manufDataB = nil;
     if (manufData != nil && manufData.length > 2) {
-        
+
         // first 2 bytes are manufacturerId
         unsigned short manufId = 0;
         [manufData getBytes:&manufId length:2];
@@ -1361,12 +1361,12 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         // trim off first 2 bytes
         NSData* trimmed = [manufData subdataWithRange:NSMakeRange(2, manufData.length - 2)];
         NSString* hex = [self convertDataToHex:trimmed];
-        
+
         manufDataB = @{
             @(manufId): hex,
         };
     }
-    
+
     // Service Uuids - convert from CBUUID's to UUID strings
     NSArray *serviceUuidsB = nil;
     if (serviceData != nil) {
@@ -1376,7 +1376,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         }
         serviceUuidsB = [mutable copy];
     }
-    
+
     // Service Data - convert from CBUUID's to UUID strings
     NSDictionary *serviceDataB = nil;
     if (serviceData != nil)
@@ -1398,7 +1398,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"service_uuids":      serviceUuidsB ? serviceUuidsB : [NSNull null],
         @"service_data":       serviceDataB  ? serviceDataB  : [NSNull null],
     };
-  
+
     // See BmScanResult
     return @{
         @"device":             [self toDeviceProto:peripheral],
@@ -1470,7 +1470,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     for (CBDescriptor *d in [characteristic descriptors])
     {
         int value = [d.value intValue];
-    
+
         // See: BmBluetoothDescriptor
         NSDictionary* desc = @{
             @"uuid":                   [d.UUID fullUUIDString],
@@ -1526,11 +1526,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 }
 
 //////////////////////////////////////////
-// ██    ██ ████████  ██  ██       ███████ 
-// ██    ██    ██     ██  ██       ██      
-// ██    ██    ██     ██  ██       ███████ 
-// ██    ██    ██     ██  ██            ██ 
-//  ██████     ██     ██  ███████  ███████ 
+// ██    ██ ████████  ██  ██       ███████
+// ██    ██    ██     ██  ██       ██
+// ██    ██    ██     ██  ██       ███████
+// ██    ██    ██     ██  ██            ██
+//  ██████     ██     ██  ███████  ███████
 
 - (void)log:(LogLevel)level
      format:(NSString *)format, ...
