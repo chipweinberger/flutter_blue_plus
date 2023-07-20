@@ -1,4 +1,14 @@
 
+## 1.8.0
+* android/ios: check errors - charactersticRead
+* android/ios: check errors - readDescriptor
+* android/ios: check errors - discoverServices
+* android/ios: check errors - mtu
+* android/ios: check errors - readRssi
+* android/ios: pass error string - setNotifyValue
+* android/ios: pass error string - charactersticWrite
+* android/ios: pass error string - writeDescriptor
+
 ## 1.7.8
 * android: add more useful errors for read and write characterist errors
 
