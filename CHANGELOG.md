@@ -1,4 +1,10 @@
 
+## 1.8.2
+* android: support sdk 33 for writeCharacteristic and writeDescriptor
+* android: calling connect() on already connected device is now considered success
+* android: return more specific error for locateGatt issue
+* android: shouldClearGattCache is now called after connection, not before
+
 ## 1.8.1
 * android: characteristic properties check was incorrect (regression in 1.7.8)
 
