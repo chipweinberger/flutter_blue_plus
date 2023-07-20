@@ -1109,8 +1109,10 @@ public class FlutterBluePlusPlugin implements
     {
         BluetoothDeviceCache cache = mDevices.get(remoteId);
 
-        if(cache == null || cache.gatt == null) {
-            throw new Exception("no instance of BluetoothGatt, have you connected first?");
+        if(cache == null) {
+            throw new Exception("locateGatt: BluetoothDeviceCache is null, have you connected first?");
+        } else if(cache.gatt == null) {
+            throw new Exception("locateGatt: no instance of BluetoothGatt, have you connected first?");
         } else {
             return cache.gatt;
         }
