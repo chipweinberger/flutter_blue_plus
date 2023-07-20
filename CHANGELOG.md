@@ -1,4 +1,9 @@
 
+## 1.8.3
+* android: writeCharacteristic: return error if longer than mtu
+* iOS: add mtu size checks and device connection checks
+* iOS: refactor: unify try catch blocks
+
 ## 1.8.2
 * android: support sdk 33 for writeCharacteristic and writeDescriptor
 * android: calling connect() on already connected device is now considered success
