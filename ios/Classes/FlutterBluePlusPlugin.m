@@ -279,7 +279,24 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @try
         {
             CBPeripheral *peripheral = [self findPeripheral:remoteId];
-            result([self toServicesResultProto:peripheral]);
+
+            // Services
+            NSMutableArray *services = [NSMutableArray new];
+            for (CBService *s in [peripheral services])
+            {
+                [services addObject:[self toServiceProto:peripheral service:s]];
+            }
+
+            // See BmDiscoverServicesResult
+            NSDictionary* response = @{
+                @"remote_id":       [peripheral.identifier UUIDString],
+                @"services":        services,
+                @"success":         @(1),
+                @"error_string":    [NSNull null],
+                @"error_code":      [NSNull null],
+            };
+
+            result(response);
         }
         @catch (NSException *e)
         {
@@ -855,9 +872,24 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         return;
     }
 
+    // Services
+    NSMutableArray *services = [NSMutableArray new];
+    for (CBService *s in [peripheral services])
+    {
+        [services addObject:[self toServiceProto:peripheral service:s]];
+    }
+
+    // See BmDiscoverServicesResult
+    NSDictionary* response = @{
+        @"remote_id":       [peripheral.identifier UUIDString],
+        @"services":        services,
+        @"success":         error == nil ? @(1) : @(0),
+        @"error_string":    error ? [error localizedDescription] : [NSNull null],
+        @"error_code":      error ? @(error.code) : [NSNull null],
+    };
+
     // Send updated tree
-    NSDictionary* result = [self toServicesResultProto:peripheral];
-    [_channel invokeMethod:@"DiscoverServicesResult" arguments:result];
+    [_channel invokeMethod:@"DiscoverServicesResult" arguments:response];
 }
 
 - (void)peripheral:(CBPeripheral *)peripheral
@@ -892,6 +924,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     NSDictionary* result = @{
         @"remote_id":       [peripheral.identifier UUIDString],
         @"characteristic":  [self toCharacteristicProto:peripheral characteristic:characteristic],
+        @"success":         error == nil ? @(1) : @(0),
+        @"error_string":    error ? [error localizedDescription] : [NSNull null],
+        @"error_code":      error ? @(error.code) : [NSNull null],
     };
 
     [_channel invokeMethod:@"ReadCharacteristicResponse" arguments:result];
@@ -927,8 +962,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     // See BmWriteCharacteristicResponse
     NSDictionary* result = @{
-        @"request": request,
-        @"success": @(error == nil),
+        @"request":         request,
+        @"success":         @(error == nil),
+        @"error_string":    error ? [error localizedDescription] : [NSNull null],
+        @"error_code":      error ? @(error.code) : [NSNull null],
     };
 
     [_channel invokeMethod:@"WriteCharacteristicResponse" arguments:result];
@@ -957,9 +994,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     if (error) {
         // See BmSetNotificationResponse
         NSDictionary* response = @{
-            @"remote_id":      [peripheral.identifier UUIDString],
-            @"characteristic": [self toCharacteristicProto:peripheral characteristic:characteristic],
-            @"success":        @(false),
+            @"remote_id":       [peripheral.identifier UUIDString],
+            @"characteristic":  [self toCharacteristicProto:peripheral characteristic:characteristic],
+            @"success":         @(false),
+            @"error_string":    error ? [error localizedDescription] : [NSNull null],
+            @"error_code":      error ? @(error.code) : [NSNull null],
         };
 
         [_channel invokeMethod:@"SetNotificationResponse" arguments:response];
@@ -1008,8 +1047,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     
     // See BmReadDescriptorResponse
     NSDictionary* result = @{
-        @"request": q,
-        @"value": [self convertDataToHex:[NSData dataWithBytes:&value length:sizeof(value)]],
+        @"request":         q,
+        @"value":           [self convertDataToHex:[NSData dataWithBytes:&value length:sizeof(value)]],
+        @"success":         @(error == nil),
+        @"error_string":    error ? [error localizedDescription] : [NSNull null],
+        @"error_code":      error ? @(error.code) : [NSNull null],
     };
 
     [_channel invokeMethod:@"ReadDescriptorResponse" arguments:result];
@@ -1019,9 +1061,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     {
         // See BmSetNotificationResponse
         NSDictionary* response = @{
-            @"remote_id":      [peripheral.identifier UUIDString],
-            @"characteristic": [self toCharacteristicProto:peripheral characteristic:descriptor.characteristic],
-            @"success":        @(true),
+            @"remote_id":       [peripheral.identifier UUIDString],
+            @"characteristic":  [self toCharacteristicProto:peripheral characteristic:descriptor.characteristic],
+            @"success":         @(true),
+            @"error_string":    error ? [error localizedDescription] : [NSNull null],
+            @"error_code":      error ? @(error.code) : [NSNull null],
         };
 
         [_channel invokeMethod:@"SetNotificationResponse" arguments:response];
@@ -1063,8 +1107,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     // See BmWriteDescriptorResponse
     NSDictionary* result = @{
-        @"request": request,
-        @"success": @(error == nil),
+        @"request":         request,
+        @"success":         @(error == nil),
+        @"error_string":    error ? [error localizedDescription] : [NSNull null],
+        @"error_code":      error ? @(error.code) : [NSNull null],
     };
 
     [_channel invokeMethod:@"WriteDescriptorResponse" arguments:result];
@@ -1080,8 +1126,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     // See BmReadRssiResult
     NSDictionary* result = @{
-        @"remote_id": [peripheral.identifier UUIDString],
-        @"rssi": rssi,
+        @"remote_id":       [peripheral.identifier UUIDString],
+        @"rssi":            rssi,
+        @"success":         @(error == nil),
+        @"error_string":    error ? [error localizedDescription] : [NSNull null],
+        @"error_code":      error ? @(error.code) : [NSNull null],
     };
 
     [_channel invokeMethod:@"ReadRssiResult" arguments:result];
@@ -1264,22 +1313,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     return @{
         @"remote_id": [[peripheral identifier] UUIDString],
         @"state":     @(stateIdx),
-    };
-}
-
-- (NSDictionary *)toServicesResultProto:(CBPeripheral *)peripheral
-{
-    // Services
-    NSMutableArray *servicesProtos = [NSMutableArray new];
-    for (CBService *s in [peripheral services])
-    {
-        [servicesProtos addObject:[self toServiceProto:peripheral service:s]];
-    }
-
-    // See BmDiscoverServicesResult
-    return @{
-        @"remote_id": [peripheral.identifier UUIDString],
-        @"services":  servicesProtos,
     };
 }
 

@@ -602,7 +602,8 @@ public class FlutterBluePlusPlugin implements
                     map.put("remote_id", remoteId);
                     map.put("services", services);
                     map.put("success", 1);
-                    map.put("error", "SUCCESS");
+                    map.put("error_code", 0);
+                    map.put("error_string", "");
 
                     result.success(map);
                     break;
@@ -1435,7 +1436,8 @@ public class FlutterBluePlusPlugin implements
             response.put("remote_id", gatt.getDevice().getAddress());
             response.put("services", services);
             response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
-            response.put("error", gattErrorString(status));
+            response.put("error_code", status);
+            response.put("error_string", gattErrorString(status));
 
             invokeMethodUIThread("DiscoverServicesResult", response);
         }
@@ -1450,7 +1452,8 @@ public class FlutterBluePlusPlugin implements
             response.put("remote_id", gatt.getDevice().getAddress());
             response.put("characteristic", MessageMaker.bmBluetoothCharacteristic(gatt.getDevice(), characteristic, gatt));
             response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
-            response.put("error", gattErrorString(status));
+            response.put("error_code", status);
+            response.put("error_string", gattErrorString(status));
 
             invokeMethodUIThread("ReadCharacteristicResponse", response);
         }
@@ -1472,7 +1475,8 @@ public class FlutterBluePlusPlugin implements
             HashMap<String, Object> response = new HashMap<>();
             response.put("request", request);
             response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
-            response.put("error", gattErrorString(status));
+            response.put("error_code", status);
+            response.put("error_string", gattErrorString(status));
 
             invokeMethodUIThread("WriteCharacteristicResponse", response);
         }
@@ -1531,7 +1535,8 @@ public class FlutterBluePlusPlugin implements
             response.put("request", request);
             response.put("value", bytesToHex(descriptor.getValue()));
             response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
-            response.put("error", gattErrorString(status));
+            response.put("error_code", status);
+            response.put("error_string", gattErrorString(status));
 
             invokeMethodUIThread("ReadDescriptorResponse", response);
         }
@@ -1553,7 +1558,8 @@ public class FlutterBluePlusPlugin implements
             HashMap<String, Object> response = new HashMap<>();
             response.put("request", request);
             response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
-            response.put("error", gattErrorString(status));
+            response.put("error_code", status);
+            response.put("error_string", gattErrorString(status));
 
             invokeMethodUIThread("WriteDescriptorResponse", response);
 
@@ -1564,7 +1570,8 @@ public class FlutterBluePlusPlugin implements
                 notificationResponse.put("remote_id", gatt.getDevice().getAddress());
                 notificationResponse.put("characteristic", MessageMaker.bmBluetoothCharacteristic(gatt.getDevice(), descriptor.getCharacteristic(), gatt));
                 notificationResponse.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
-                notificationResponse.put("error", gattErrorString(status));
+                notificationResponse.put("error_code", status);
+                notificationResponse.put("error_string", gattErrorString(status));
 
                 invokeMethodUIThread("SetNotificationResponse", notificationResponse);
             }
@@ -1582,13 +1589,14 @@ public class FlutterBluePlusPlugin implements
             log(LogLevel.DEBUG, "[onReadRemoteRssi] rssi: " + rssi + " status: " + status);
 
             // see: BmReadRssiResult
-            HashMap<String, Object> result = new HashMap<>();
-            result.put("remote_id", gatt.getDevice().getAddress());
-            result.put("rssi", rssi);
-            result.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
-            result.put("error", gattErrorString(status));
+            HashMap<String, Object> response = new HashMap<>();
+            response.put("remote_id", gatt.getDevice().getAddress());
+            response.put("rssi", rssi);
+            response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
+            response.put("error_code", status);
+            response.put("error_string", gattErrorString(status));
 
-            invokeMethodUIThread("ReadRssiResult", result);
+            invokeMethodUIThread("ReadRssiResult", response);
         }
 
         @Override
@@ -1602,13 +1610,14 @@ public class FlutterBluePlusPlugin implements
             }
 
             // see: BmMtuSizeResponse
-            HashMap<String, Object> result = new HashMap<>();
-            result.put("remote_id", gatt.getDevice().getAddress());
-            result.put("mtu", mtu);
-            result.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
-            result.put("error", gattErrorString(status));
+            HashMap<String, Object> response = new HashMap<>();
+            response.put("remote_id", gatt.getDevice().getAddress());
+            response.put("mtu", mtu);
+            response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
+            response.put("error_code", status);
+            response.put("error_string", gattErrorString(status));
 
-            invokeMethodUIThread("MtuSize", result);
+            invokeMethodUIThread("MtuSize", response);
         }
     }; // BluetoothGattCallback
 
