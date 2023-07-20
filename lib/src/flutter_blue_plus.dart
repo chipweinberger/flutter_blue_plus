@@ -10,12 +10,9 @@ class FlutterBluePlus {
   static final FlutterBluePlus _instance = FlutterBluePlus._();
   static FlutterBluePlus get instance => _instance;
 
-  final MethodChannel _channel =
-      const MethodChannel('flutter_blue_plus/methods');
-  final EventChannel _stateChannel =
-      const EventChannel('flutter_blue_plus/state');
-  final StreamController<MethodCall> _methodStreamController =
-      StreamController.broadcast(); // ignore: close_sinks
+  final MethodChannel _channel = const MethodChannel('flutter_blue_plus/methods');
+  final EventChannel _stateChannel = const EventChannel('flutter_blue_plus/state');
+  final StreamController<MethodCall> _methodStreamController = StreamController.broadcast(); // ignore: close_sinks
 
   final _BehaviorSubject<bool> _isScanning = _BehaviorSubject(false);
 
@@ -51,12 +48,10 @@ class FlutterBluePlus {
   LogLevel get logLevel => _logLevel;
 
   /// Checks whether the device supports Bluetooth
-  Future<bool> get isAvailable =>
-      _channel.invokeMethod('isAvailable').then<bool>((d) => d);
+  Future<bool> get isAvailable => _channel.invokeMethod('isAvailable').then<bool>((d) => d);
 
   /// Return the friendly Bluetooth name of the local Bluetooth adapter
-  Future<String> get name =>
-      _channel.invokeMethod('name').then<String>((d) => d);
+  Future<String> get name => _channel.invokeMethod('name').then<String>((d) => d);
 
   /// Checks if Bluetooth functionality is turned on
   Future<bool> get isOn => _channel.invokeMethod('isOn').then<bool>((d) => d);
@@ -168,8 +163,7 @@ class FlutterBluePlus {
     // Clear scan results list
     _scanResults.add(<ScanResult>[]);
 
-    Stream<ScanResult> scanResultsStream = FlutterBluePlus
-        .instance._methodStream
+    Stream<ScanResult> scanResultsStream = FlutterBluePlus.instance._methodStream
         .where((m) => m.method == "ScanResult")
         .map((m) => m.arguments)
         .map((buffer) => BmScanResult.fromMap(buffer))
@@ -292,15 +286,7 @@ enum LogLevel {
 }
 
 /// State of the bluetooth adapter.
-enum BluetoothState {
-  unknown,
-  unavailable,
-  unauthorized,
-  turningOn,
-  on,
-  turningOff,
-  off
-}
+enum BluetoothState { unknown, unavailable, unauthorized, turningOn, on, turningOff, off }
 
 BluetoothState bmToBluetoothState(BmPowerEnum value) {
   switch (value) {
@@ -341,8 +327,7 @@ class DeviceIdentifier {
   int get hashCode => id.hashCode;
 
   @override
-  bool operator ==(other) =>
-      other is DeviceIdentifier && _compareAsciiLowerCase(id, other.id) == 0;
+  bool operator ==(other) => other is DeviceIdentifier && _compareAsciiLowerCase(id, other.id) == 0;
 }
 
 class ScanResult {
@@ -359,10 +344,7 @@ class ScanResult {
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ScanResult &&
-          runtimeType == other.runtimeType &&
-          device == other.device;
+      identical(this, other) || other is ScanResult && runtimeType == other.runtimeType && device == other.device;
 
   @override
   int get hashCode => device.hashCode;
@@ -404,5 +386,18 @@ class AdvertisementData {
         'serviceData: $serviceData, '
         'serviceUuids: $serviceUuids'
         '}';
+  }
+}
+
+class FlutterBluePlusException implements Exception {
+  final String name;
+  final int? errorCode;
+  final String? errorString;
+
+  FlutterBluePlusException(this.name, this.errorCode, this.errorString);
+
+  @override
+  String toString() {
+    return 'FlutterBluePlusException: name:$name errorCode:$errorCode, errorString:$errorString';
   }
 }

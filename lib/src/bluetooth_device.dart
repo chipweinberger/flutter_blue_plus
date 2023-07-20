@@ -108,7 +108,7 @@ class BluetoothDevice {
 
     // failed?
     if (!response.success) {
-      throw Exception("discoverServicesFail::errorCode:${response.errorCode}, ${response.errorString}");
+      throw FlutterBluePlusException("discoverServicesFail", response.errorCode, response.errorString);
     }
 
     List<BluetoothService> servicesList = response.services.map((p) => BluetoothService.fromProto(p)).toList();
@@ -156,7 +156,7 @@ class BluetoothDevice {
         .then((buffer) => BmMtuSizeResponse.fromMap(buffer));
 
     if (!response.success) {
-      throw Exception("mtuFail::errorCode:${response.errorCode}, ${response.errorString}");
+      throw FlutterBluePlusException("mtuFail", response.errorCode, response.errorString);
     }
 
     // initial value
@@ -221,7 +221,7 @@ class BluetoothDevice {
     BmReadRssiResult response = await futureResponse;
 
     if (!response.success) {
-      throw Exception("readRssiFail::errorCode:${response.errorCode}, ${response.errorString}");
+      throw FlutterBluePlusException("readRssiFail", response.errorCode, response.errorString);
     }
 
     return response.rssi;

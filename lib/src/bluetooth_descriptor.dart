@@ -62,7 +62,7 @@ class BluetoothDescriptor {
       BmReadDescriptorResponse response = await futureResponse;
 
       if (!response.success) {
-        throw Exception("readDescriptorFail::errorCode:${response.errorCode}, ${response.errorString}");
+        throw FlutterBluePlusException("readDescriptorFail", response.errorCode, response.errorString);
       }
 
       readValue = response.value;
@@ -109,7 +109,7 @@ class BluetoothDescriptor {
       BmWriteDescriptorResponse response = await futureResponse;
 
       if (!response.success) {
-        throw Exception("writeDescriptorFail::errorCode:${response.errorCode}, ${response.errorString}");
+        throw FlutterBluePlusException("readDescriptorFail", response.errorCode, response.errorString);
       }
 
       _value.add(value);
