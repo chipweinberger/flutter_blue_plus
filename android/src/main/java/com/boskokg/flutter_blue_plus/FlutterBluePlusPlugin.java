@@ -707,13 +707,13 @@ public class FlutterBluePlusPlugin implements
 
                     // check writeable
                     if(writeType == 1) {
-                        if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE) != 0) {
+                        if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE) == 0) {
                             result.error("write_characteristic_error", 
                                 "The WRITE_NO_RESPONSE property is not supported by this BLE characteristic", null);
                             break;
                         }
                     } else {
-                         if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_WRITE) != 0) {
+                         if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_WRITE) == 0) {
                             result.error("write_characteristic_error", 
                                 "The WRITE property is not supported by this BLE characteristic", null);
                             break;
