@@ -33,8 +33,8 @@ class BluetoothCharacteristic {
         properties = CharacteristicProperties.fromProto(p.properties),
         lastValue = p.value;
 
-  // this stream is pushed to whenever
-  // the characteristic is manually read or notified
+  // this stream is pushed to whenever the
+  // characteristic is manually read or notified to
   Stream<List<int>> get value => FlutterBluePlus.instance._methodStream
           .where((m) => m.method == "OnCharacteristicResponse")
           .map((m) => m.arguments)
@@ -47,6 +47,9 @@ class BluetoothCharacteristic {
         lastValue = c.value; // Update cache of lastValue
         return c.value;
       });
+
+  @Deprecated('Use value instead')
+  Stream<List<int>> get onValueChangedStream => value;
 
   bool get isNotifying {
     try {
@@ -172,7 +175,7 @@ class BluetoothCharacteristic {
       enable: notify,
     );
 
-    // Notifications & Indications are configured by writing to the 
+    // Notifications & Indications are configured by writing to the
     // Client Characteristic Configuration Descriptor (CCCD)
     Stream<BmOnDescriptorResponse> responseStream = FlutterBluePlus.instance._methodStream
         .where((m) => m.method == "OnDescriptorResponse")
