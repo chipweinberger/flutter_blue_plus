@@ -879,7 +879,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     [_channel invokeMethod:@"MtuSize" arguments:response];
 
     // Send connection state
-    [_channel invokeMethod:@"getConnectionState"
+    [_channel invokeMethod:@"connectionStateChanged"
                  arguments:[self toConnectionStateProto:peripheral connectionState:peripheral.state]];
 }
 
@@ -898,7 +898,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     peripheral.delegate = nil;
 
     // Send connection state
-    [_channel invokeMethod:@"getConnectionState"
+    [_channel invokeMethod:@"connectionStateChanged"
                  arguments:[self toConnectionStateProto:peripheral connectionState:peripheral.state]];
 }
 
@@ -914,7 +914,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     }
 
     // Send connection state
-    [_channel invokeMethod:@"getConnectionState"
+    [_channel invokeMethod:@"connectionStateChanged"
                  arguments:[self toConnectionStateProto:peripheral connectionState:peripheral.state]];
 }
 

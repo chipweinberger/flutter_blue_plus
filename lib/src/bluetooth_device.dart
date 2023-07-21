@@ -153,7 +153,7 @@ class BluetoothDevice {
     yield initialState;
 
     yield* FlutterBluePlus.instance._methodStream
-        .where((m) => m.method == "getConnectionState")
+        .where((m) => m.method == "connectionStateChanged")
         .map((m) => m.arguments)
         .map((buffer) => BmConnectionStateResponse.fromMap(buffer))
         .where((p) => p.remoteId == remoteId.str)

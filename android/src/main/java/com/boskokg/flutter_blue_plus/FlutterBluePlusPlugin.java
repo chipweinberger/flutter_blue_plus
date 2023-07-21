@@ -1483,7 +1483,7 @@ public class FlutterBluePlusPlugin implements
                 }
             }
 
-            invokeMethodUIThread("DeviceState", MessageMaker.bmConnectionStateResponse(gatt.getDevice(), newState));
+            invokeMethodUIThread("connectionStateChanged", MessageMaker.bmConnectionStateResponse(gatt.getDevice(), newState));
         }
 
         @Override
