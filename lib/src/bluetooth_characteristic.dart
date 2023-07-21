@@ -5,12 +5,15 @@
 part of flutter_blue_plus;
 
 class BluetoothCharacteristic {
-  final Guid uuid;
+  final Guid characteristicUuid;
   final DeviceIdentifier deviceId;
   final Guid serviceUuid;
   final Guid? secondaryServiceUuid;
   final CharacteristicProperties properties;
   final List<BluetoothDescriptor> descriptors;
+
+  @Deprecated('Use characteristicUuid instead')
+  Guid get uuid => characteristicUuid;
 
   final _Mutex _readWriteMutex = _Mutex();
 
@@ -27,7 +30,7 @@ class BluetoothCharacteristic {
   final _BehaviorSubject<List<int>> _readValueController;
 
   BluetoothCharacteristic.fromProto(BmBluetoothCharacteristic p)
-      : uuid = Guid(p.uuid),
+      : characteristicUuid = Guid(p.characteristicUuid),
         deviceId = DeviceIdentifier(p.remoteId),
         serviceUuid = Guid(p.serviceUuid),
         secondaryServiceUuid = p.secondaryServiceUuid != null ? Guid(p.secondaryServiceUuid!) : null,
@@ -50,7 +53,7 @@ class BluetoothCharacteristic {
           .map((buffer) => BmOnCharacteristicChanged.fromMap(buffer))
           .where((p) => p.remoteId == deviceId.toString())
           .map((p) => BluetoothCharacteristic.fromProto(p.characteristic))
-          .where((c) => c.uuid == uuid)
+          .where((c) => c.characteristicUuid == characteristicUuid)
           .map((c) {
         _updateDescriptors(c.descriptors); // Update descriptors
         lastValue = c.lastValue; // Update cache of lastValue
@@ -59,7 +62,7 @@ class BluetoothCharacteristic {
 
   bool get isNotifying {
     try {
-      var cccd = descriptors.singleWhere((d) => d.uuid == BluetoothDescriptor.cccd);
+      var cccd = descriptors.singleWhere((d) => d.descriptorUuid == BluetoothDescriptor.cccd);
       return ((cccd.lastValue[0] & 0x01) > 0 || (cccd.lastValue[0] & 0x02) > 0);
     } catch (e) {
       return false;
@@ -69,7 +72,7 @@ class BluetoothCharacteristic {
   void _updateDescriptors(List<BluetoothDescriptor> newDescriptors) {
     for (var d in descriptors) {
       for (var newD in newDescriptors) {
-        if (d.uuid == newD.uuid) {
+        if (d.descriptorUuid == newD.descriptorUuid) {
           d._value.add(newD.lastValue);
         }
       }
@@ -85,7 +88,7 @@ class BluetoothCharacteristic {
     await _readWriteMutex.synchronized(() async {
       var request = BmReadCharacteristicRequest(
         remoteId: deviceId.toString(),
-        characteristicUuid: uuid.toString(),
+        characteristicUuid: characteristicUuid.toString(),
         serviceUuid: serviceUuid.toString(),
         secondaryServiceUuid: null,
       );
@@ -93,7 +96,7 @@ class BluetoothCharacteristic {
       FlutterBluePlus.instance._log(
           LogLevel.info,
           'remoteId: ${deviceId.toString()}'
-          'characteristicUuid: ${uuid.toString()}'
+          'characteristicUuid: ${characteristicUuid.toString()}'
           'serviceUuid: ${serviceUuid.toString()}');
 
       var responseStream = FlutterBluePlus.instance._methodStream
@@ -102,7 +105,7 @@ class BluetoothCharacteristic {
           .map((buffer) => BmReadCharacteristicResponse.fromMap(buffer))
           .where((p) =>
               (p.remoteId == request.remoteId) &&
-              (p.characteristic.uuid == request.characteristicUuid) &&
+              (p.characteristic.characteristicUuid == request.characteristicUuid) &&
               (p.characteristic.serviceUuid == request.serviceUuid));
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
@@ -187,7 +190,7 @@ class BluetoothCharacteristic {
     var request = BmSetNotificationRequest(
       remoteId: deviceId.toString(),
       serviceUuid: serviceUuid.toString(),
-      characteristicUuid: uuid.toString(),
+      characteristicUuid: characteristicUuid.toString(),
       secondaryServiceUuid: null,
       enable: notify,
     );
@@ -198,7 +201,7 @@ class BluetoothCharacteristic {
         .map((buffer) => BmSetNotificationResponse.fromMap(buffer))
         .where((p) =>
             (p.remoteId == request.remoteId) &&
-            (p.characteristic.uuid == request.characteristicUuid) &&
+            (p.characteristic.characteristicUuid == request.characteristicUuid) &&
             (p.characteristic.serviceUuid == request.serviceUuid));
 
     // Start listening now, before invokeMethod, to ensure we don't miss the response

@@ -187,14 +187,14 @@ class BmBluetoothDevice {
 }
 
 class BmBluetoothService {
-  String uuid;
+  String serviceUuid;
   String remoteId;
   bool isPrimary;
   List<BmBluetoothCharacteristic> characteristics;
   List<BmBluetoothService> includedServices;
 
   BmBluetoothService({
-    required this.uuid,
+    required this.serviceUuid,
     required this.remoteId,
     required this.isPrimary,
     required this.characteristics,
@@ -204,7 +204,7 @@ class BmBluetoothService {
   factory BmBluetoothService.fromMap(Map<dynamic, dynamic> json) {
     _printDbg("\nBmBluetoothService $json");
     return BmBluetoothService(
-      uuid: json['uuid'],
+      serviceUuid: json['service_uuid'],
       remoteId: json['remote_id'],
       isPrimary: json['is_primary'] != 0,
       characteristics:
@@ -215,7 +215,7 @@ class BmBluetoothService {
 }
 
 class BmBluetoothCharacteristic {
-  String uuid;
+  String characteristicUuid;
   String remoteId;
   String serviceUuid;
   String? secondaryServiceUuid;
@@ -224,7 +224,7 @@ class BmBluetoothCharacteristic {
   List<int> value;
 
   BmBluetoothCharacteristic({
-    required this.uuid,
+    required this.characteristicUuid,
     required this.remoteId,
     required this.serviceUuid,
     required this.secondaryServiceUuid,
@@ -236,7 +236,7 @@ class BmBluetoothCharacteristic {
   factory BmBluetoothCharacteristic.fromMap(Map<dynamic, dynamic> json) {
     _printDbg("\nBmBluetoothCharacteristic $json");
     return BmBluetoothCharacteristic(
-      uuid: json['uuid'],
+      characteristicUuid: json['characteristic_uuid'],
       remoteId: json['remote_id'],
       serviceUuid: json['service_uuid'],
       secondaryServiceUuid: json['secondary_service_uuid'],
@@ -248,14 +248,14 @@ class BmBluetoothCharacteristic {
 }
 
 class BmBluetoothDescriptor {
-  final String uuid;
+  final String descriptorUuid;
   final String remoteId;
   final String serviceUuid;
   final String characteristicUuid;
   final List<int> value;
 
   BmBluetoothDescriptor({
-    required this.uuid,
+    required this.descriptorUuid,
     required this.remoteId,
     required this.serviceUuid,
     required this.characteristicUuid,
@@ -265,7 +265,7 @@ class BmBluetoothDescriptor {
   factory BmBluetoothDescriptor.fromMap(Map<dynamic, dynamic> json) {
     _printDbg("\nBmBluetoothDescriptor $json");
     return BmBluetoothDescriptor(
-      uuid: json['uuid'],
+      descriptorUuid: json['descriptor_uuid'],
       remoteId: json['remote_id'],
       serviceUuid: json['service_uuid'],
       characteristicUuid: json['characteristic_uuid'],

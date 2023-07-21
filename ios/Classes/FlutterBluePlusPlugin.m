@@ -1455,7 +1455,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     // See BmBluetoothService
     return @{
-        @"uuid":                [service.UUID fullUUIDString],
+        @"service_uuid":        [service.UUID fullUUIDString],
         @"remote_id":           [peripheral.identifier UUIDString],
         @"is_primary":          @([service isPrimary]),
         @"characteristics":     characteristicProtos,
@@ -1474,7 +1474,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     
         // See: BmBluetoothDescriptor
         NSDictionary* desc = @{
-            @"uuid":                   [d.UUID fullUUIDString],
+            @"descriptor_uuid":        [d.UUID fullUUIDString],
             @"remote_id":              [peripheral.identifier UUIDString],
             @"characteristic_uuid":    [d.characteristic.UUID fullUUIDString],
             @"service_uuid":           [d.characteristic.service.UUID fullUUIDString],
@@ -1516,7 +1516,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     // See BmBluetoothCharacteristic
     return @{
-        @"uuid":                   [characteristic.UUID fullUUIDString],
+        @"characteristic_uuid":    [characteristic.UUID fullUUIDString],
         @"remote_id":              [peripheral.identifier UUIDString],
         @"service_uuid":           [primaryService.UUID fullUUIDString],
         @"secondary_service_uuid": secondaryService ? [secondaryService.UUID fullUUIDString] : [NSNull null],

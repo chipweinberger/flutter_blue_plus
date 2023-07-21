@@ -7,10 +7,13 @@ part of flutter_blue_plus;
 class BluetoothDescriptor {
   static final Guid cccd = Guid("00002902-0000-1000-8000-00805f9b34fb");
 
-  final Guid uuid;
+  final Guid descriptorUuid;
   final DeviceIdentifier deviceId;
   final Guid serviceUuid;
   final Guid characteristicUuid;
+
+  @Deprecated('Use descriptorUuid instead')
+  Guid get uuid => descriptorUuid;
 
   final _BehaviorSubject<List<int>> _value;
 
@@ -21,7 +24,7 @@ class BluetoothDescriptor {
   final _Mutex _readWriteMutex = _Mutex();
 
   BluetoothDescriptor.fromProto(BmBluetoothDescriptor p)
-      : uuid = Guid(p.uuid),
+      : descriptorUuid = Guid(p.descriptorUuid),
         deviceId = DeviceIdentifier(p.remoteId),
         serviceUuid = Guid(p.serviceUuid),
         characteristicUuid = Guid(p.characteristicUuid),

@@ -5,14 +5,17 @@
 part of flutter_blue_plus;
 
 class BluetoothService {
-  final Guid uuid;
+  final Guid serviceUuid;
   final DeviceIdentifier deviceId;
   final bool isPrimary;
   final List<BluetoothCharacteristic> characteristics;
   final List<BluetoothService> includedServices;
 
+  @Deprecated('Use serviceUuid instead')
+  Guid get uuid => serviceUuid;
+
   BluetoothService.fromProto(BmBluetoothService p)
-      : uuid = Guid(p.uuid),
+      : serviceUuid = Guid(p.serviceUuid),
         deviceId = DeviceIdentifier(p.remoteId),
         isPrimary = p.isPrimary,
         characteristics = p.characteristics

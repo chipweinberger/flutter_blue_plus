@@ -130,7 +130,7 @@ public class MessageMaker {
     static HashMap<String, Object> bmBluetoothService(BluetoothDevice device, BluetoothGattService service, BluetoothGatt gatt) {
         HashMap<String, Object> dev = new HashMap<>();
         dev.put("remote_id", device.getAddress());
-        dev.put("uuid", service.getUuid().toString());
+        dev.put("service_uuid", service.getUuid().toString());
         dev.put("is_primary", service.getType() == BluetoothGattService.SERVICE_TYPE_PRIMARY ? 1 : 0);
         List<Object> characteristics = new ArrayList<Object>();
         for(BluetoothGattCharacteristic c : service.getCharacteristics()) {
@@ -148,7 +148,7 @@ public class MessageMaker {
     static HashMap<String, Object> bmBluetoothCharacteristic(BluetoothDevice device, BluetoothGattCharacteristic characteristic, BluetoothGatt gatt) {
         HashMap<String, Object> ch = new HashMap<>();
         ch.put("remote_id", device.getAddress());
-        ch.put("uuid", characteristic.getUuid().toString());
+        ch.put("characteristic_uuid", characteristic.getUuid().toString());
         ch.put("properties", bmCharacteristicProperties(characteristic.getProperties()));
         if(characteristic.getValue() != null) {
             ch.put("value", toHexString(characteristic.getValue()));
@@ -178,7 +178,7 @@ public class MessageMaker {
     static HashMap<String, Object> bmBluetoothDescriptor(BluetoothDevice device, BluetoothGattDescriptor descriptor) {
         HashMap<String, Object> desc = new HashMap<>();
         desc.put("remote_id", device.getAddress());
-        desc.put("uuid", descriptor.getUuid().toString());
+        desc.put("descriptor_uuid", descriptor.getUuid().toString());
         desc.put("characteristic_uuid", descriptor.getCharacteristic().getUuid().toString());
         desc.put("service_uuid", descriptor.getCharacteristic().getService().getUuid().toString());
         if(descriptor.getValue() != null) {
