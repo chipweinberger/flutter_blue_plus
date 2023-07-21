@@ -1,3 +1,6 @@
+## 1.8.7
+* dart: add 15 seconds default timeout for ble communication  
+
 ## 1.8.6
 * dart: rename BluetoothDevice.id -> remoteId
 * dart: rename uuid -> characteristicUuid / serviceUuid / descriptorUuid
