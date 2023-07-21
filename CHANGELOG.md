@@ -1,3 +1,12 @@
+## 1.9.0
+* internal: refactor adapterState to use methodChannel
+* internal: refactor BmReadCharacteristicResponse & BmWriteCharacteristicResponse to have simpler structure
+* internal: refactor BmReadDescriptorResponse & BmWriteDescriptorResponse to have simpler structure
+* internal: refactor BmSetNotificationResponse, replaced by BmWriteDescriptorResponse
+* internal: refactor secondaryServiceUuid code its own getServicePair() function 
+* internal: refactor android MessageMaker to be a bit more legible
+* deprecated: BluetoothCharacteristic.onValueChangedStream replaced by value
+
 ## 1.8.8
 * android & iOS: fix connectionState not being updated (regression in 1.8.6)
 * android: fix "adapterState" to "getAdapterState"
