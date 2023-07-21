@@ -88,7 +88,7 @@ class BluetoothDevice {
 
   /// Discovers services offered by the remote device
   /// as well as their characteristics and descriptors
-  Future<List<BluetoothService>> discoverServices() async {
+  Future<List<BluetoothService>> discoverServices({int timeout = 15}) async {
     final s = await connectionState.first;
     if (s != BluetoothConnectionState.connected) {
       return Future.error(Exception('Cannot discoverServices while'
@@ -110,7 +110,7 @@ class BluetoothDevice {
     await FlutterBluePlus.instance._channel.invokeMethod('discoverServices', remoteId.str);
 
     // wait for response
-    BmDiscoverServicesResult response = await futureResponse;
+    BmDiscoverServicesResult response = await futureResponse.timeout(Duration(seconds: timeout));
 
     // failed?
     if (!response.success) {
@@ -185,7 +185,7 @@ class BluetoothDevice {
   /// Throws error if request did not complete successfully
   /// Request to change the MTU Size and returns the response back
   /// Throws error if request did not complete successfully
-  Future<int> requestMtu(int desiredMtu) async {
+  Future<int> requestMtu(int desiredMtu, {int timeout = 15}) async {
     var request = BmMtuSizeRequest(
       remoteId: remoteId.str,
       mtu: desiredMtu,
@@ -203,7 +203,7 @@ class BluetoothDevice {
 
     await FlutterBluePlus.instance._channel.invokeMethod('requestMtu', request.toMap());
 
-    var mtu = await futureResponse;
+    var mtu = await futureResponse.timeout(Duration(seconds: timeout));
 
     return mtu;
   }
@@ -213,8 +213,7 @@ class BluetoothDevice {
   Future<bool> get canSendWriteWithoutResponse => Future.error(UnimplementedError());
 
   /// Read the RSSI for a connected remote device
-  Future<int> readRssi() async {
-
+  Future<int> readRssi({int timeout = 15}) async {
     var responseStream = FlutterBluePlus.instance._methodStream
         .where((m) => m.method == "ReadRssiResult")
         .map((m) => m.arguments)
@@ -227,7 +226,7 @@ class BluetoothDevice {
     await FlutterBluePlus.instance._channel.invokeMethod('readRssi', remoteId);
 
     // wait for response
-    BmReadRssiResult response = await futureResponse;
+    BmReadRssiResult response = await futureResponse.timeout(Duration(seconds: timeout));
 
     if (!response.success) {
       throw FlutterBluePlusException("readRssiFail", response.errorCode, response.errorString);
@@ -311,9 +310,7 @@ class BluetoothDevice {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is BluetoothDevice && 
-       runtimeType == other.runtimeType && 
-       remoteId == other.remoteId);
+      (other is BluetoothDevice && runtimeType == other.runtimeType && remoteId == other.remoteId);
 
   @override
   int get hashCode => remoteId.hashCode;

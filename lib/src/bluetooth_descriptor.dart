@@ -34,7 +34,7 @@ class BluetoothDescriptor {
         _value = _BehaviorSubject(p.value);
 
   /// Retrieves the value of a specified descriptor
-  Future<List<int>> read() async {
+  Future<List<int>> read({int timeout = 15}) async {
     List<int> readValue = [];
 
     // Only allow a single read or write operation
@@ -65,7 +65,7 @@ class BluetoothDescriptor {
       await FlutterBluePlus.instance._channel
           .invokeMethod('readDescriptor', request.toMap());
 
-      BmReadDescriptorResponse response = await futureResponse;
+      BmReadDescriptorResponse response = await futureResponse.timeout(Duration(seconds: timeout));
 
       if (!response.success) {
         throw FlutterBluePlusException("readDescriptorFail", response.errorCode, response.errorString);
@@ -82,7 +82,7 @@ class BluetoothDescriptor {
   }
 
   /// Writes the value of a descriptor
-  Future<void> write(List<int> value) async {
+  Future<void> write(List<int> value, {int timeout = 15}) async {
     // Only allow a single read or write operation
     // at a time, to prevent race conditions.
     await _readWriteMutex.synchronized(() async {
@@ -112,7 +112,7 @@ class BluetoothDescriptor {
       await FlutterBluePlus.instance._channel
           .invokeMethod('writeDescriptor', request.toMap());
 
-      BmWriteDescriptorResponse response = await futureResponse;
+      BmWriteDescriptorResponse response = await futureResponse.timeout(Duration(seconds: timeout));
 
       if (!response.success) {
         throw FlutterBluePlusException("readDescriptorFail", response.errorCode, response.errorString);

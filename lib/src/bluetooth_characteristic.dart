@@ -83,7 +83,7 @@ class BluetoothCharacteristic {
   }
 
   /// Retrieves the value of the characteristic
-  Future<List<int>> read() async {
+  Future<List<int>> read({int timeout = 15}) async {
     List<int> responseValue = [];
 
     // Only allow a single read or write operation
@@ -116,7 +116,7 @@ class BluetoothCharacteristic {
 
       await FlutterBluePlus.instance._channel.invokeMethod('readCharacteristic', request.toMap());
 
-      BmReadCharacteristicResponse response = await futureResponse;
+      BmReadCharacteristicResponse response = await futureResponse.timeout(Duration(seconds: timeout));
 
       if (!response.success) {
         throw FlutterBluePlusException("charactersticReadFail", response.errorCode, response.errorString);
@@ -142,7 +142,7 @@ class BluetoothCharacteristic {
   /// guaranteed and will return immediately with success.
   /// [CharacteristicWriteType.withResponse]: the method will return after the
   /// write operation has either passed or failed.
-  Future<void> write(List<int> value, {bool withoutResponse = false}) async {
+  Future<void> write(List<int> value, {bool withoutResponse = false, int timeout = 15}) async {
     // Only allow a single read or write operation
     // at a time, to prevent race conditions.
     await _readWriteMutex.synchronized(() async {
@@ -173,7 +173,7 @@ class BluetoothCharacteristic {
         await FlutterBluePlus.instance._channel.invokeMethod('writeCharacteristic', request.toMap());
 
         // wait for response, so that we can check for success
-        BmWriteCharacteristicResponse response = await futureResponse;
+        BmWriteCharacteristicResponse response = await futureResponse.timeout(Duration(seconds: timeout));
         if (!response.success) {
           throw FlutterBluePlusException("charactersticWriteFail", response.errorCode, response.errorString);
         }
@@ -189,7 +189,7 @@ class BluetoothCharacteristic {
   }
 
   /// Sets notifications or indications for the value of a specified characteristic
-  Future<bool> setNotifyValue(bool notify) async {
+  Future<bool> setNotifyValue(bool notify, {int timeout = 15}) async {
     var request = BmSetNotificationRequest(
       remoteId: remoteId.toString(),
       serviceUuid: serviceUuid.toString(),
@@ -213,7 +213,7 @@ class BluetoothCharacteristic {
     await FlutterBluePlus.instance._channel.invokeMethod('setNotification', request.toMap());
 
     // wait for response, so that we can check for success
-    BmSetNotificationResponse response = await futureResponse;
+    BmSetNotificationResponse response = await futureResponse.timeout(Duration(seconds: timeout));
     if (!response.success) {
       throw FlutterBluePlusException("setNotifyValueFail", response.errorCode, response.errorString);
     }
