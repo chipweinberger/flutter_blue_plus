@@ -251,7 +251,7 @@ public class FlutterBluePlusPlugin implements
                     break;
                 }
 
-                case "adapterState":
+                case "getAdapterState":
                 {
                     // get adapterState, if we can
                     int adapterState = -1;
