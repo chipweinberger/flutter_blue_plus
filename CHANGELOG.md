@@ -1,3 +1,7 @@
+## 1.8.8
+* android & iOS: fix connectionState not being updated (regression in 1.8.6)
+* android: fix "adapterState" to "getAdapterState"
+
 ## 1.8.7
 * dart: add 15 seconds default timeout for ble communication  
 
