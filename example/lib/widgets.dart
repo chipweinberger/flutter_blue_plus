@@ -23,13 +23,13 @@ class ScanResultTile extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           Text(
-            result.device.id.toString(),
+            result.device.remoteId.toString(),
             style: Theme.of(context).textTheme.bodySmall,
           )
         ],
       );
     } else {
-      return Text(result.device.id.toString());
+      return Text(result.device.remoteId.toString());
     }
   }
 

@@ -155,7 +155,7 @@ class FlutterBluePlus {
     bool androidUsesFineLocation = false,
   }) async* {
     var settings = BmScanSettings(
-        serviceUuids: withServices.map((g) => g.toString()).toList(),
+        serviceUuids: withServices,
         macAddresses: macAddresses,
         allowDuplicates: allowDuplicates,
         androidScanMode: scanMode.value,
@@ -377,7 +377,7 @@ class AdvertisementData {
   final bool connectable;
   final Map<int, List<int>> manufacturerData;
   final Map<String, List<int>> serviceData;
-  final List<String> serviceUuids;
+  final List<Guid> serviceUuids;
 
   AdvertisementData.fromProto(BmAdvertisementData p)
       : localName = p.localName,

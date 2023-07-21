@@ -125,7 +125,7 @@ class FindDevicesScreen extends StatelessWidget {
                   children: snapshot.data!
                       .map((d) => ListTile(
                             title: Text(d.localName),
-                            subtitle: Text(d.id.toString()),
+                            subtitle: Text(d.remoteId.toString()),
                             trailing: StreamBuilder<BluetoothConnectionState>(
                               stream: d.connectionState,
                               initialData: BluetoothConnectionState.disconnected,
@@ -309,7 +309,7 @@ class DeviceScreen extends StatelessWidget {
                 ),
                 title: Text(
                     'Device is ${snapshot.data.toString().split('.')[1]}.'),
-                subtitle: Text('${device.id}'),
+                subtitle: Text('${device.remoteId}'),
                 trailing: StreamBuilder<bool>(
                   stream: device.isDiscoveringServices,
                   initialData: false,

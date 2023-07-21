@@ -47,144 +47,155 @@ public class MessageMaker {
     }
 
     static HashMap<String, Object> bmAdvertisementData(BluetoothDevice device, byte[] advertisementData, int rssi) {
-        HashMap<String, Object> scanResult = new HashMap<>();
-        scanResult.put("device", bmBluetoothDevice(device));
-        if(advertisementData != null && advertisementData.length > 0)
-            scanResult.put("advertisement_data", AdvertisementParser.parse(advertisementData));
-        scanResult.put("rssi", rssi);
-        return scanResult;
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("device", bmBluetoothDevice(device));
+        if(advertisementData != null && advertisementData.length > 0) {
+            map.put("advertisement_data", AdvertisementParser.parse(advertisementData));
+        }
+        map.put("rssi", rssi);
+        return map;
     }
 
     @TargetApi(21)
     static HashMap<String, Object> bmScanResult(BluetoothDevice device, ScanResult result) {
-        HashMap<String, Object> scanResult = new HashMap<>();
-        scanResult.put("device", bmBluetoothDevice(device));
+
+        ScanRecord scanRecord = result.getScanRecord();
 
         HashMap<String, Object> advertisementData = new HashMap<>();
-        ScanRecord scanRecord = result.getScanRecord();
+        
+        // connectable
         if(Build.VERSION.SDK_INT >= 26) {
             advertisementData.put("connectable", result.isConnectable() ? 1 : 0);
-        } else {
-            if(scanRecord != null) {
-                int flags = scanRecord.getAdvertiseFlags();
-                advertisementData.put("connectable", (flags & 0x2) > 0 ? 1 : 0);
-            }
+        } else if(scanRecord != null) {
+            int flags = scanRecord.getAdvertiseFlags();
+            advertisementData.put("connectable", (flags & 0x2) > 0 ? 1 : 0);
         }
+
         if(scanRecord != null) {
+
             String localName = scanRecord.getDeviceName();
-            if(localName != null) {
-                advertisementData.put("local_name", localName);
-            }
+
             int txPower = scanRecord.getTxPowerLevel();
-            if(txPower != Integer.MIN_VALUE) {
-                advertisementData.put("tx_power_level", txPower);
-            }
+
             // Manufacturer Specific Data
             SparseArray<byte[]> msd = scanRecord.getManufacturerSpecificData();
+            HashMap<Integer, String> msdMap = new HashMap<Integer, String>();
             if(msd != null) {
-                HashMap<Integer, String> manufacturerData = new HashMap<Integer, String>();
                 for (int i = 0; i < msd.size(); i++) {
                     int key = msd.keyAt(i);
                     byte[] value = msd.valueAt(i);
-                    manufacturerData.put(key, toHexString(value));
+                    msdMap.put(key, toHexString(value));
                 }
-                advertisementData.put("manufacturer_data", manufacturerData);
             }
+
             // Service Data
             Map<ParcelUuid, byte[]> serviceData = scanRecord.getServiceData();
+            HashMap<String, Object> serviceDataMap = new HashMap<>();
             if(serviceData != null) {
-                HashMap<String, Object> serviceDataMap = new HashMap<>();
                 for (Map.Entry<ParcelUuid, byte[]> entry : serviceData.entrySet()) {
                     ParcelUuid key = entry.getKey();
                     byte[] value = entry.getValue();
                     serviceDataMap.put(key.getUuid().toString(), toHexString(value));
                 }
-                advertisementData.put("service_data", serviceDataMap);
             }
+
             // Service UUIDs
             List<ParcelUuid> serviceUuids = scanRecord.getServiceUuids();
+            List<String> serviceUuidList = new ArrayList<String>();
             if(serviceUuids != null) {
-                List<String> serviceUuidList = new ArrayList<String>();
                 for (ParcelUuid s : serviceUuids) {
                     serviceUuidList.add(s.getUuid().toString());
                 }
+            }
+
+            // add to map
+            if(localName != null) {
+                advertisementData.put("local_name", localName);
+            }
+            if(txPower != Integer.MIN_VALUE) {
+                advertisementData.put("tx_power_level", txPower);
+            }
+            if(msd != null) {
+                advertisementData.put("manufacturer_data", msdMap);
+            }
+            if(serviceData != null) {
+                advertisementData.put("service_data", serviceDataMap);
+            }
+            if(serviceUuids != null) {
                 advertisementData.put("service_uuids", serviceUuidList);
             }
         }
-        scanResult.put("rssi", result.getRssi());
-        scanResult.put("advertisement_data", advertisementData);
-        return scanResult;
+
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("device", bmBluetoothDevice(device));
+        map.put("rssi", result.getRssi());
+        map.put("advertisement_data", advertisementData);
+        return map;
     }
 
     static HashMap<String, Object> bmBluetoothDevice(BluetoothDevice device) {
-        HashMap<String, Object> dev = new HashMap<>();
-        dev.put("remote_id", device.getAddress());
-        String localName = device.getName();
-        if(localName != null) {
-            dev.put("local_name", localName);
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("remote_id", device.getAddress());
+        if(device.getName() != null) {
+            map.put("local_name", device.getName());
         }
-        dev.put("type", device.getType());
-        return dev;
+        map.put("type", device.getType());
+        return map;
     }
 
     static HashMap<String, Object> bmBluetoothService(BluetoothDevice device, BluetoothGattService service, BluetoothGatt gatt) {
-        HashMap<String, Object> dev = new HashMap<>();
-        dev.put("remote_id", device.getAddress());
-        dev.put("service_uuid", service.getUuid().toString());
-        dev.put("is_primary", service.getType() == BluetoothGattService.SERVICE_TYPE_PRIMARY ? 1 : 0);
+
         List<Object> characteristics = new ArrayList<Object>();
         for(BluetoothGattCharacteristic c : service.getCharacteristics()) {
             characteristics.add(bmBluetoothCharacteristic(device, c, gatt));
         }
-        dev.put("characteristics", characteristics);
+
         List<Object> includedServices = new ArrayList<Object>();
         for(BluetoothGattService s : service.getIncludedServices()) {
             includedServices.add(bmBluetoothService(device, s, gatt));
         }
-        dev.put("included_services", includedServices);
-        return dev;
+
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("remote_id", device.getAddress());
+        map.put("service_uuid", service.getUuid().toString());
+        map.put("is_primary", service.getType() == BluetoothGattService.SERVICE_TYPE_PRIMARY ? 1 : 0);
+        map.put("characteristics", characteristics);
+        map.put("included_services", includedServices);
+        return map;
     }
 
     static HashMap<String, Object> bmBluetoothCharacteristic(BluetoothDevice device, BluetoothGattCharacteristic characteristic, BluetoothGatt gatt) {
-        HashMap<String, Object> ch = new HashMap<>();
-        ch.put("remote_id", device.getAddress());
-        ch.put("characteristic_uuid", characteristic.getUuid().toString());
-        ch.put("properties", bmCharacteristicProperties(characteristic.getProperties()));
-        if(characteristic.getValue() != null) {
-            ch.put("value", toHexString(characteristic.getValue()));
-        }
+
+        ServicePair pair = MessageMaker.getServicePair(gatt, characteristic);
+
         List<Object> descriptors = new ArrayList<Object>();
         for(BluetoothGattDescriptor d : characteristic.getDescriptors()) {
             descriptors.add(bmBluetoothDescriptor(device, d));
         }
-        ch.put("descriptors", descriptors);
-        if(characteristic.getService().getType() == BluetoothGattService.SERVICE_TYPE_PRIMARY) {
-            ch.put("service_uuid", characteristic.getService().getUuid().toString());
-        } else {
-            // Reverse search to find service
-            for(BluetoothGattService s : gatt.getServices()) {
-                for(BluetoothGattService ss : s.getIncludedServices()) {
-                    if(ss.getUuid().equals(characteristic.getService().getUuid())){
-                        ch.put("service_uuid", s.getUuid().toString());
-                        ch.put("secondary_service_uuid", ss.getUuid().toString());
-                        break;
-                    }
-                }
-            }
+
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("remote_id", device.getAddress());
+        map.put("service_uuid", pair.primary);
+        map.put("secondary_service_uuid", pair.secondary);
+        map.put("characteristic_uuid", characteristic.getUuid().toString());
+        map.put("descriptors", descriptors);
+        map.put("properties", bmCharacteristicProperties(characteristic.getProperties()));
+        if(characteristic.getValue() != null) {
+            map.put("value", toHexString(characteristic.getValue()));
         }
-        return ch;
+        return map;
     }
 
     static HashMap<String, Object> bmBluetoothDescriptor(BluetoothDevice device, BluetoothGattDescriptor descriptor) {
-        HashMap<String, Object> desc = new HashMap<>();
-        desc.put("remote_id", device.getAddress());
-        desc.put("descriptor_uuid", descriptor.getUuid().toString());
-        desc.put("characteristic_uuid", descriptor.getCharacteristic().getUuid().toString());
-        desc.put("service_uuid", descriptor.getCharacteristic().getService().getUuid().toString());
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("remote_id", device.getAddress());
+        map.put("descriptor_uuid", descriptor.getUuid().toString());
+        map.put("characteristic_uuid", descriptor.getCharacteristic().getUuid().toString());
+        map.put("service_uuid", descriptor.getCharacteristic().getService().getUuid().toString());
         if(descriptor.getValue() != null) {
-            desc.put("value", toHexString(descriptor.getValue()));
+            map.put("value", toHexString(descriptor.getValue()));
         }
-        return desc;
+        return map;
     }
 
     static HashMap<String, Object> bmCharacteristicProperties(int properties) {
@@ -202,10 +213,34 @@ public class MessageMaker {
         return props;
     }
 
-    static HashMap<String, Object> bmConnectionStateResponse(BluetoothDevice device, int connectionState) {
-        HashMap<String, Object> response = new HashMap<>();
-        response.put("connection_state", connectionState);
-        response.put("remote_id", device.getAddress());
-        return response;
+    public static class ServicePair {
+        public String primary;
+        public String secondary;
+    }
+
+    static ServicePair getServicePair(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
+
+        ServicePair result = new ServicePair();
+
+        BluetoothGattService service = characteristic.getService();
+
+        // is this a primary service?
+        if(service.getType() == BluetoothGattService.SERVICE_TYPE_PRIMARY) {
+            result.primary = service.getUuid().toString();
+            return result;
+        } 
+
+        // Otherwise, iterate all services until we find the primary service
+        for(BluetoothGattService primary : gatt.getServices()) {
+            for(BluetoothGattService secondary : primary.getIncludedServices()) {
+                if(secondary.getUuid().equals(service.getUuid())) {
+                    result.primary = primary.getUuid().toString();
+                    result.secondary = secondary.getUuid().toString();
+                    return result;
+                }
+            }
+        }
+
+        return result;
     }
 }

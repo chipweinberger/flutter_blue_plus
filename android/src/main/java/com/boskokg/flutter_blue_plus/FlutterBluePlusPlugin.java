@@ -577,7 +577,12 @@ public class FlutterBluePlusPlugin implements
 
                     int connectionState = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
 
-                    result.success(MessageMaker.bmConnectionStateResponse(device, connectionState));
+                    // see: BmConnectionStateResponse
+                    HashMap<String, Object> response = new HashMap<>();
+                    response.put("connection_state", connectionState);
+                    response.put("remote_id", device.getAddress());
+
+                    result.success(response);
                     break;
                 }
 
@@ -871,54 +876,56 @@ public class FlutterBluePlusPlugin implements
                     BluetoothGattCharacteristic characteristic = locateCharacteristic(gattServer,
                         serviceUuid, secondaryServiceUuid, characteristicUuid);
 
-                    BluetoothGattDescriptor cccDescriptor = characteristic.getDescriptor(CCCD_ID);
-
-                    if(cccDescriptor == null) {
-                        //Some devices - including the widely used Bluno do not actually set the CCCD_ID.
-                        //thus setNotifications works perfectly (tested on Bluno) without cccDescriptor
-                        log(LogLevel.INFO, "could not locate CCCD descriptor for characteristic: " + characteristic.getUuid().toString());
-                    }
-
-                    // start notifications
+                    // configure local Android device to listen for characteristic changes
                     if(!gattServer.setCharacteristicNotification(characteristic, enable)){
                         result.error("set_notification_error",
                             "gattServer.setCharacteristicNotification(" + enable + ") returned false", null);
                         break;
                     }
 
-                    // update descriptor value
-                    if(cccDescriptor != null) {
+                    BluetoothGattDescriptor cccDescriptor = characteristic.getDescriptor(CCCD_ID);
+                    if(cccDescriptor == null) {
+                        // Some ble devices do not actually need their CCCD updated.
+                        // thus setCharacteristicNotification() is all that is required to enable notifications.
+                        // The arduino "bluno" devices are an example.
+                        String chr = characteristic.getUuid().toString();
+                        log(LogLevel.WARNING, "CCCD descriptor for characteristic not found: " + chr);
+                        result.success(null);
+                        return;
+                    }
 
-                        byte[] descriptorValue = null;
+                    byte[] descriptorValue = null;
 
-                        // determine value
-                        if(enable) {
+                    // determine value
+                    if(enable) {
 
-                            boolean canNotify = (characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0;
-                            boolean canIndicate = (characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE) > 0;
+                        boolean canNotify = (characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0;
+                        boolean canIndicate = (characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE) > 0;
 
-                            if(!canIndicate && !canNotify) {
-                                result.error("set_notification_error",
-                                    "neither NOTIFY nor INDICATE properties are supported by this BLE characteristic", null);
-                                break;
-                            }
-
-                            if(canIndicate) {descriptorValue = BluetoothGattDescriptor.ENABLE_INDICATION_VALUE;}
-                            if(canNotify)   {descriptorValue = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE;}
-
-                        } else {
-                            descriptorValue  = BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE;
-                        }
-
-                        if (!cccDescriptor.setValue(descriptorValue)) {
-                            result.error("set_notification_error", "cccDescriptor.setValue() returned false", null);
+                        if(!canIndicate && !canNotify) {
+                            result.error("set_notification_error",
+                                "neither NOTIFY nor INDICATE properties are supported by this BLE characteristic", null);
                             break;
                         }
 
-                        if (!gattServer.writeDescriptor(cccDescriptor)) {
-                            result.error("set_notification_error", "gattServer.writeDescriptor() returned false", null);
-                            break;
-                        }
+                        // If a characteristic supports both notifications and indications,
+                        // we'll use notifications. This matches how CoreBluetooth works on iOS.
+                        if(canIndicate) {descriptorValue = BluetoothGattDescriptor.ENABLE_INDICATION_VALUE;}
+                        if(canNotify)   {descriptorValue = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE;}
+
+                    } else {
+                        descriptorValue  = BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE;
+                    }
+
+                    if (!cccDescriptor.setValue(descriptorValue)) {
+                        result.error("set_notification_error", "cccDescriptor.setValue() returned false", null);
+                        break;
+                    }
+
+                    // update notifications on remote BLE device
+                    if (!gattServer.writeDescriptor(cccDescriptor)) {
+                        result.error("set_notification_error", "gattServer.writeDescriptor() returned false", null);
+                        break;
                     }
 
                     result.success(null);
@@ -1483,7 +1490,12 @@ public class FlutterBluePlusPlugin implements
                 }
             }
 
-            invokeMethodUIThread("connectionStateChanged", MessageMaker.bmConnectionStateResponse(gatt.getDevice(), newState));
+            // see: BmConnectionStateResponse
+            HashMap<String, Object> response = new HashMap<>();
+            response.put("connection_state", newState);
+            response.put("remote_id", gatt.getDevice().getAddress());
+
+            invokeMethodUIThread("connectionStateChanged", response);
         }
 
         @Override
@@ -1508,19 +1520,47 @@ public class FlutterBluePlusPlugin implements
         }
 
         @Override
+        public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic)
+        {
+            log(LogLevel.DEBUG, "[onCharacteristicChanged] uuid: " + characteristic.getUuid().toString());
+
+            MessageMaker.ServicePair pair = MessageMaker.getServicePair(gatt, characteristic);
+
+            // see: BmOnCharacteristicResponse
+            HashMap<String, Object> response = new HashMap<>();
+            response.put("type", 0); // type: read
+            response.put("remote_id", gatt.getDevice().getAddress());
+            response.put("service_uuid", pair.primary);
+            response.put("secondary_service_uuid", pair.secondary);
+            response.put("characteristic_uuid", characteristic.getUuid().toString());
+            response.put("value", bytesToHex(characteristic.getValue()));
+            response.put("success", 1);
+            response.put("error_code", 0);
+            response.put("error_string", gattErrorString(0));
+
+            invokeMethodUIThread("OnCharacteristicResponse", response);
+        }
+
+        @Override
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status)
         {
             log(LogLevel.DEBUG, "[onCharacteristicRead] uuid: " + characteristic.getUuid().toString() + " status: " + status);
 
-            // see: BmReadCharacteristicResponse
+            MessageMaker.ServicePair pair = MessageMaker.getServicePair(gatt, characteristic);
+
+            // see: BmOnCharacteristicResponse
             HashMap<String, Object> response = new HashMap<>();
+            response.put("type", 0); // type: read
             response.put("remote_id", gatt.getDevice().getAddress());
-            response.put("characteristic", MessageMaker.bmBluetoothCharacteristic(gatt.getDevice(), characteristic, gatt));
+            response.put("service_uuid", pair.primary);
+            response.put("secondary_service_uuid", pair.secondary);
+            response.put("characteristic_uuid", characteristic.getUuid().toString());
+            response.put("value", bytesToHex(characteristic.getValue()));
             response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
             response.put("error_code", status);
             response.put("error_string", gattErrorString(status));
 
-            invokeMethodUIThread("ReadCharacteristicResponse", response);
+            invokeMethodUIThread("OnCharacteristicResponse", response);
         }
 
         @Override
@@ -1528,35 +1568,20 @@ public class FlutterBluePlusPlugin implements
         {
             log(LogLevel.DEBUG, "[onCharacteristicWrite] uuid: " + characteristic.getUuid().toString() + " status: " + status);
 
-            // see: BmWriteCharacteristicRequest
-            HashMap<String, Object> request = new HashMap<>();
-            request.put("remote_id", gatt.getDevice().getAddress());
-            request.put("characteristic_uuid", characteristic.getUuid().toString());
-            request.put("service_uuid", characteristic.getService().getUuid().toString());
-            request.put("write_type", 0);
-            request.put("value", "");
+            MessageMaker.ServicePair pair = MessageMaker.getServicePair(gatt, characteristic);
 
-            // see: BmWriteCharacteristicResponse
+            // see: BmOnCharacteristicResponse
             HashMap<String, Object> response = new HashMap<>();
-            response.put("request", request);
+            response.put("type", 1); // type: write
+            response.put("remote_id", gatt.getDevice().getAddress());
+            response.put("service_uuid", pair.primary);
+            response.put("secondary_service_uuid", pair.secondary);
+            response.put("characteristic_uuid", characteristic.getUuid().toString());
             response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
             response.put("error_code", status);
             response.put("error_string", gattErrorString(status));
 
-            invokeMethodUIThread("WriteCharacteristicResponse", response);
-        }
-
-        @Override
-        public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic)
-        {
-            log(LogLevel.DEBUG, "[onCharacteristicChanged] uuid: " + characteristic.getUuid().toString());
-
-            // see: BmOnCharacteristicChanged
-            HashMap<String, Object> map = new HashMap<>();
-            map.put("remote_id", gatt.getDevice().getAddress());
-            map.put("characteristic", MessageMaker.bmBluetoothCharacteristic(gatt.getDevice(), characteristic, gatt));
-
-            invokeMethodUIThread("OnCharacteristicChanged", map);
+            invokeMethodUIThread("OnCharacteristicResponse", response);
         }
 
         @Override
@@ -1564,46 +1589,22 @@ public class FlutterBluePlusPlugin implements
         {
             log(LogLevel.DEBUG, "[onDescriptorRead] uuid: " + descriptor.getUuid().toString() + " status: " + status);
 
-            boolean hasSecondary = false;
-            String serviceUuid = "";
-            String secondaryServiceUuid = "";
+            MessageMaker.ServicePair pair = MessageMaker.getServicePair(gatt, descriptor.getCharacteristic());
 
-            // find service uuid
-            if(descriptor.getCharacteristic().getService().getType() == BluetoothGattService.SERVICE_TYPE_PRIMARY) {
-                serviceUuid = descriptor.getCharacteristic().getService().getUuid().toString();
-            } else {
-                // Reverse search to find service
-                for(BluetoothGattService s : gatt.getServices()) {
-                    for(BluetoothGattService ss : s.getIncludedServices()) {
-                        if(ss.getUuid().equals(descriptor.getCharacteristic().getService().getUuid())) {
-                            serviceUuid = s.getUuid().toString();
-                            secondaryServiceUuid = ss.getUuid().toString();
-                            hasSecondary = true;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            // see: BmReadAttributeRequest
-            HashMap<String, Object> request = new HashMap<>();
-            request.put("remote_id", gatt.getDevice().getAddress());
-            request.put("characteristic_uuid", descriptor.getCharacteristic().getUuid().toString());
-            request.put("descriptor_uuid", descriptor.getUuid().toString());
-            request.put("service_uuid", serviceUuid);
-            if (hasSecondary) {
-                request.put("secondary_service_uuid", secondaryServiceUuid);
-            }
-
-            // see: BmReadDescriptorResponse
+            // see: BmOnDescriptorResponse
             HashMap<String, Object> response = new HashMap<>();
-            response.put("request", request);
+            response.put("type", 0); // type: read
+            response.put("remote_id", gatt.getDevice().getAddress());
+            response.put("service_uuid", pair.primary);
+            response.put("secondary_service_uuid", pair.secondary);
+            response.put("characteristic_uuid", descriptor.getCharacteristic().getUuid().toString());
+            response.put("descriptor_uuid", descriptor.getUuid().toString());
             response.put("value", bytesToHex(descriptor.getValue()));
             response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
             response.put("error_code", status);
             response.put("error_string", gattErrorString(status));
 
-            invokeMethodUIThread("ReadDescriptorResponse", response);
+            invokeMethodUIThread("OnDescriptorResponse", response);
         }
 
         @Override
@@ -1611,35 +1612,22 @@ public class FlutterBluePlusPlugin implements
         {
             log(LogLevel.DEBUG, "[onDescriptorWrite] uuid: " + descriptor.getUuid().toString() + " status: " + status);
 
-            // see: BmWriteDescriptorRequest
-            HashMap<String, Object> request = new HashMap<>();
-            request.put("remote_id", gatt.getDevice().getAddress());
-            request.put("descriptor_uuid", descriptor.getUuid().toString());
-            request.put("service_uuid", descriptor.getCharacteristic().getService().getUuid().toString());
-            request.put("characteristic_uuid", descriptor.getCharacteristic().getUuid().toString());
-            request.put("value", "");
+            MessageMaker.ServicePair pair = MessageMaker.getServicePair(gatt, descriptor.getCharacteristic());
 
-            // see: BmWriteDescriptorResponse
+            // see: BmOnDescriptorResponse
             HashMap<String, Object> response = new HashMap<>();
-            response.put("request", request);
+            response.put("type", 1); // type: write
+            response.put("remote_id", gatt.getDevice().getAddress());
+            response.put("service_uuid", pair.primary);
+            response.put("secondary_service_uuid", pair.secondary);
+            response.put("characteristic_uuid", descriptor.getCharacteristic().getUuid().toString());
+            response.put("descriptor_uuid", descriptor.getUuid().toString());
+            response.put("value", bytesToHex(descriptor.getValue()));
             response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
             response.put("error_code", status);
             response.put("error_string", gattErrorString(status));
 
-            invokeMethodUIThread("WriteDescriptorResponse", response);
-
-            if(descriptor.getUuid().compareTo(CCCD_ID) == 0) {
-
-                // see: BmSetNotificationResponse
-                HashMap<String, Object> notificationResponse = new HashMap<>();
-                notificationResponse.put("remote_id", gatt.getDevice().getAddress());
-                notificationResponse.put("characteristic", MessageMaker.bmBluetoothCharacteristic(gatt.getDevice(), descriptor.getCharacteristic(), gatt));
-                notificationResponse.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
-                notificationResponse.put("error_code", status);
-                notificationResponse.put("error_string", gattErrorString(status));
-
-                invokeMethodUIThread("SetNotificationResponse", notificationResponse);
-            }
+            invokeMethodUIThread("OnDescriptorResponse", response);
         }
 
         @Override

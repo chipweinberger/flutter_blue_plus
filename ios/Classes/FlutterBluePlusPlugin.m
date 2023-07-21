@@ -4,6 +4,14 @@
 
 #import "FlutterBluePlusPlugin.h"
 
+@interface ServicePair : NSObject
+@property (strong, nonatomic) CBService *primary;
+@property (strong, nonatomic) CBService *secondary;
+@end
+
+@implementation ServicePair
+@end
+
 @interface CBUUID (CBUUIDAdditionsFlutterBluePlus)
 - (NSString *)fullUUIDString;
 @end
@@ -744,34 +752,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     return descriptor;
 }
 
-// Reverse search to find primary service
-- (CBService *)findPrimaryService:(CBService *)secondaryService peripheral:(CBPeripheral *)peripheral
-{
-    for (CBService *s in [peripheral services])
-    {
-        for (CBService *ss in [s includedServices])
-        {
-            if ([[ss.UUID UUIDString] isEqualToString:[secondaryService.UUID UUIDString]])
-            {
-                return s;
-            }
-        }
-    }
-    return nil;
-}
-
-- (CBDescriptor *)findCCCDescriptor:(CBCharacteristic *)characteristic
-{
-    for (CBDescriptor *d in characteristic.descriptors)
-    {
-        if ([d.UUID.UUIDString isEqualToString:@"2902"])
-        {
-            return d;
-        }
-    }
-    return nil;
-}
-
 - (CBService *)getServiceFromArray:(NSString *)uuidString array:(NSArray<CBService *> *)array
 {
     for (CBService *s in array)
@@ -1041,24 +1021,21 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         NSLog(@"[FBP-iOS] didUpdateValueForCharacteristic %@", [peripheral.identifier UUIDString]);
     }
 
-    // See BmReadCharacteristicResponse
+    ServicePair *pair = [self getServicePair:peripheral characteristic:characteristic];
+
+    // See BmOnCharacteristicResponse
     NSDictionary* result = @{
-        @"remote_id":       [peripheral.identifier UUIDString],
-        @"characteristic":  [self toCharacteristicProto:peripheral characteristic:characteristic],
-        @"success":         error == nil ? @(1) : @(0),
-        @"error_string":    error ? [error localizedDescription] : [NSNull null],
-        @"error_code":      error ? @(error.code) : [NSNull null],
+        @"type":                    @(0), // type: read
+        @"remote_id":               [peripheral.identifier UUIDString],
+        @"service_uuid":            [pair.primary.UUID fullUUIDString],
+        @"secondary_service_uuid":  pair.secondary ? [pair.secondary.UUID fullUUIDString] : [NSNull null],
+        @"characteristic_uuid":     [characteristic.UUID fullUUIDString],
+        @"success":                 error == nil ? @(1) : @(0),
+        @"error_string":            error ? [error localizedDescription] : [NSNull null],
+        @"error_code":              error ? @(error.code) : [NSNull null],
     };
 
-    [_channel invokeMethod:@"ReadCharacteristicResponse" arguments:result];
-
-    // See: BmOnCharacteristicChanged
-    NSDictionary* onChangedResult = @{
-        @"remote_id":       [peripheral.identifier UUIDString],
-        @"characteristic":  [self toCharacteristicProto:peripheral characteristic:characteristic],
-    };
-
-    [_channel invokeMethod:@"OnCharacteristicChanged" arguments:onChangedResult];
+    [_channel invokeMethod:@"OnCharacteristicResponse" arguments:result];
 }
 
 - (void)peripheral:(CBPeripheral *)peripheral
@@ -1071,25 +1048,21 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         NSLog(@"[FBP-iOS] didWriteValueForCharacteristic");
     }
 
-    // See BmWriteCharacteristicRequest
-    NSDictionary* request = @{
-        @"remote_id":              [peripheral.identifier UUIDString],
-        @"characteristic_uuid":    [characteristic.UUID fullUUIDString],
-        @"service_uuid":           [characteristic.service.UUID fullUUIDString],
-        @"secondary_service_uuid": [NSNull null],
-        @"write_type":             @(0),
-        @"value":                  @"",
-    };
+    ServicePair *pair = [self getServicePair:peripheral characteristic:characteristic];
 
-    // See BmWriteCharacteristicResponse
+    // See BmOnCharacteristicResponse
     NSDictionary* result = @{
-        @"request":         request,
-        @"success":         @(error == nil),
-        @"error_string":    error ? [error localizedDescription] : [NSNull null],
-        @"error_code":      error ? @(error.code) : [NSNull null],
+        @"type":                    @(1), // type: write
+        @"remote_id":               [peripheral.identifier UUIDString],
+        @"service_uuid":            [pair.primary.UUID fullUUIDString],
+        @"secondary_service_uuid":  pair.secondary ? [pair.secondary.UUID fullUUIDString] : [NSNull null],
+        @"characteristic_uuid":     [characteristic.UUID fullUUIDString],
+        @"success":                 @(error == nil),
+        @"error_string":            error ? [error localizedDescription] : [NSNull null],
+        @"error_code":              error ? @(error.code) : [NSNull null],
     };
 
-    [_channel invokeMethod:@"WriteCharacteristicResponse" arguments:result];
+    [_channel invokeMethod:@"OnCharacteristicResponse" arguments:result];
 }
 
 - (void)peripheral:(CBPeripheral *)peripheral
@@ -1102,34 +1075,28 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         NSLog(@"[FBP-iOS] didUpdateNotificationStateForCharacteristic");
     }
 
-    // Read CCC descriptor of characteristic
-    CBDescriptor *cccd = nil;
-    if (error == nil) {
-        cccd = [self findCCCDescriptor:characteristic];
-        if (cccd == nil) { 
-            error = [NSError errorWithDomain:@"com.flutter_blue_plus" code:-1 
-                userInfo:@{ NSLocalizedDescriptionKey : @"findCCCDescriptor failed"}];
-        }
-    }
+    ServicePair *pair = [self getServicePair:peripheral characteristic:characteristic];
 
-    if (error) {
-        // See BmSetNotificationResponse
-        NSDictionary* response = @{
-            @"remote_id":       [peripheral.identifier UUIDString],
-            @"characteristic":  [self toCharacteristicProto:peripheral characteristic:characteristic],
-            @"success":         @(false),
-            @"error_string":    error ? [error localizedDescription] : [NSNull null],
-            @"error_code":      error ? @(error.code) : [NSNull null],
-        };
+    // Notifications & Indications are configured by writing to the 
+    // Client Characteristic Configuration Descriptor (CCCD)
+    CBDescriptor *descriptor = [self getCCCDForCharacteristic:characteristic];
+    int value = descriptor ? [descriptor.value intValue] : 0;
+    
+    // See BmOnDescriptorResponse
+    NSDictionary* result = @{
+        @"type":                   @(1), // type: write
+        @"remote_id":              [peripheral.identifier UUIDString],
+        @"descriptor_uuid":        @"00002902-0000-1000-8000-00805f9b34fb", // uuid of CCCD
+        @"service_uuid":           [pair.primary.UUID fullUUIDString],
+        @"secondary_service_uuid": pair.secondary ? [pair.secondary.UUID fullUUIDString] : [NSNull null],
+        @"characteristic_uuid":    [characteristic.UUID fullUUIDString],
+        @"value":                  [self convertDataToHex:[NSData dataWithBytes:&value length:sizeof(value)]],
+        @"success":                @(error == nil),
+        @"error_string":           error ? [error localizedDescription] : [NSNull null],
+        @"error_code":             error ? @(error.code) : [NSNull null],
+    };
 
-        [_channel invokeMethod:@"SetNotificationResponse" arguments:response];
-
-    } else {
-        // Request a read
-        // Note: invokeMethod:@"SetNotificationResponse" is invoked later
-        // in the didUpdateValueForDescriptor callback
-        [peripheral readValueForDescriptor:cccd]; 
-    }
+    [_channel invokeMethod:@"OnDescriptorResponse" arguments:result];
 }
 
 - (void)peripheral:(CBPeripheral *)peripheral
@@ -1142,55 +1109,25 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         NSLog(@"[FBP-iOS] didUpdateValueForDescriptor");
     }
 
-    // primary & secondary service
-    CBService *primaryService = NULL;
-    CBService *secondaryService = NULL;
-    if ([descriptor.characteristic.service isPrimary]) {
-        primaryService = descriptor.characteristic.service;
-        secondaryService = NULL;
-    } else {
-        // Reverse search to find service and secondary service UUID
-        secondaryService = descriptor.characteristic.service;
-        primaryService = [self findPrimaryService:[descriptor.characteristic service]
-                                       peripheral:[descriptor.characteristic.service peripheral]];
-    }
-
-    // See BmReadDescriptorRequest
-    NSDictionary* q = @{
-        @"remote_id":              [peripheral.identifier UUIDString],
-        @"descriptor_uuid":        [descriptor.UUID fullUUIDString],
-        @"service_uuid":           [primaryService.UUID fullUUIDString],
-        @"secondary_service_uuid": secondaryService ? [secondaryService.UUID fullUUIDString] : [NSNull null],
-        @"characteristic_uuid":    [descriptor.characteristic.UUID fullUUIDString],
-    };
+    ServicePair *pair = [self getServicePair:peripheral characteristic:descriptor.characteristic];
 
     int value = [descriptor.value intValue];
     
-    // See BmReadDescriptorResponse
+    // See BmOnDescriptorResponse
     NSDictionary* result = @{
-        @"request":         q,
-        @"value":           [self convertDataToHex:[NSData dataWithBytes:&value length:sizeof(value)]],
-        @"success":         @(error == nil),
-        @"error_string":    error ? [error localizedDescription] : [NSNull null],
-        @"error_code":      error ? @(error.code) : [NSNull null],
+        @"type":                   @(0), // type: read
+        @"remote_id":              [peripheral.identifier UUIDString],
+        @"characteristic_uuid":    [descriptor.characteristic.UUID fullUUIDString],
+        @"descriptor_uuid":        [descriptor.UUID fullUUIDString],
+        @"service_uuid":           [pair.primary.UUID fullUUIDString],
+        @"secondary_service_uuid": pair.secondary ? [pair.secondary.UUID fullUUIDString] : [NSNull null],
+        @"value":                  [self convertDataToHex:[NSData dataWithBytes:&value length:sizeof(value)]],
+        @"success":                @(error == nil),
+        @"error_string":           error ? [error localizedDescription] : [NSNull null],
+        @"error_code":             error ? @(error.code) : [NSNull null],
     };
 
-    [_channel invokeMethod:@"ReadDescriptorResponse" arguments:result];
-
-    // If descriptor is CCCD, send a SetNotificationResponse in case anything is awaiting
-    if ([descriptor.UUID.UUIDString isEqualToString:@"2902"])
-    {
-        // See BmSetNotificationResponse
-        NSDictionary* response = @{
-            @"remote_id":       [peripheral.identifier UUIDString],
-            @"characteristic":  [self toCharacteristicProto:peripheral characteristic:descriptor.characteristic],
-            @"success":         @(true),
-            @"error_string":    error ? [error localizedDescription] : [NSNull null],
-            @"error_code":      error ? @(error.code) : [NSNull null],
-        };
-
-        [_channel invokeMethod:@"SetNotificationResponse" arguments:response];
-    }
+    [_channel invokeMethod:@"OnDescriptorResponse" arguments:result];
 }
 
 - (void)peripheral:(CBPeripheral *)peripheral
@@ -1203,38 +1140,25 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         NSLog(@"[FBP-iOS] didWriteValueForDescriptor");
     }
 
-    // primary & secondary service
-    CBService *primaryService = NULL;
-    CBService *secondaryService = NULL;
-    if ([descriptor.characteristic.service isPrimary]) {
-        primaryService = descriptor.characteristic.service;
-        secondaryService = NULL;
-    } else {
-        // Reverse search to find service and secondary service UUID
-        secondaryService = descriptor.characteristic.service;
-        primaryService = [self findPrimaryService:[descriptor.characteristic service]
-                                       peripheral:[descriptor.characteristic.service peripheral]];
-    }
+    ServicePair *pair = [self getServicePair:peripheral characteristic:descriptor.characteristic];
 
-    // See BmWriteDescriptorRequest
-    NSDictionary* request = @{
-        @"remote_id":               [peripheral.identifier UUIDString],
-        @"descriptor_uuid":         [descriptor.UUID fullUUIDString],
-        @"service_uuid" :           [primaryService.UUID fullUUIDString],
-        @"secondary_service_uuid":  secondaryService ? [secondaryService.UUID fullUUIDString] : [NSNull null],
-        @"characteristic_uuid":     [descriptor.characteristic.UUID fullUUIDString],
-        @"value":                   @"",
-    };
-
-    // See BmWriteDescriptorResponse
+    int value = [descriptor.value intValue];
+    
+    // See BmOnDescriptorResponse
     NSDictionary* result = @{
-        @"request":         request,
-        @"success":         @(error == nil),
-        @"error_string":    error ? [error localizedDescription] : [NSNull null],
-        @"error_code":      error ? @(error.code) : [NSNull null],
+        @"type":                   @(1), // type: write
+        @"remote_id":              [peripheral.identifier UUIDString],
+        @"characteristic_uuid":    [descriptor.characteristic.UUID fullUUIDString],
+        @"descriptor_uuid":        [descriptor.UUID fullUUIDString],
+        @"service_uuid":           [pair.primary.UUID fullUUIDString],
+        @"secondary_service_uuid": pair.secondary ? [pair.secondary.UUID fullUUIDString] : [NSNull null],
+        @"value":                  [self convertDataToHex:[NSData dataWithBytes:&value length:sizeof(value)]],
+        @"success":                @(error == nil),
+        @"error_string":           error ? [error localizedDescription] : [NSNull null],
+        @"error_code":             error ? @(error.code) : [NSNull null],
     };
 
-    [_channel invokeMethod:@"WriteDescriptorResponse" arguments:result];
+    [_channel invokeMethod:@"OnDescriptorResponse" arguments:result];
 }
 
 - (void)peripheral:(CBPeripheral *)peripheral didReadRSSI:(NSNumber *)rssi error:(NSError *)error
@@ -1283,14 +1207,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     [peripheral writeValue:[self convertHexToData:value]
             forCharacteristic:characteristic
                         type:CBCharacteristicWriteWithoutResponse];
-
-    // See BmWriteCharacteristicResponse
-    NSDictionary* result = @{
-        @"request": request,
-        @"success": @(true),
-    };
-
-    [_channel invokeMethod:@"WriteCharacteristicResponse" arguments:result];
 
     [_dataWaitingToWriteWithoutResponse removeObjectForKey:[[peripheral identifier] UUIDString]];
 }
@@ -1485,18 +1401,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         [descriptorProtos addObject:desc];
     }
 
-    // primary & secondary service
-    CBService *primaryService = NULL;
-    CBService *secondaryService = NULL;
-    if ([characteristic.service isPrimary]) {
-        primaryService = characteristic.service;
-        secondaryService = NULL;
-    } else {
-        // Reverse search to find service and secondary service UUID
-        secondaryService = characteristic.service;
-        primaryService = [self findPrimaryService:[characteristic service]
-                                       peripheral:[characteristic.service peripheral]];
-    }
+    ServicePair *pair = [self getServicePair:peripheral characteristic:characteristic];
 
     CBCharacteristicProperties props = characteristic.properties;
 
@@ -1518,8 +1423,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     return @{
         @"characteristic_uuid":    [characteristic.UUID fullUUIDString],
         @"remote_id":              [peripheral.identifier UUIDString],
-        @"service_uuid":           [primaryService.UUID fullUUIDString],
-        @"secondary_service_uuid": secondaryService ? [secondaryService.UUID fullUUIDString] : [NSNull null],
+        @"service_uuid":           [pair.primary.UUID fullUUIDString],
+        @"secondary_service_uuid": pair.secondary ? [pair.secondary.UUID fullUUIDString] : [NSNull null],
         @"descriptors":            descriptorProtos,
         @"properties":             propsMap,
         @"value":                  [self convertDataToHex:[characteristic value]],
@@ -1551,6 +1456,48 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     return (uint32_t)[peripheral maximumWriteValueLengthForType:CBCharacteristicWriteWithoutResponse];
 }
 
+- (CBDescriptor *)getCCCDForCharacteristic:(CBCharacteristic *)characteristic
+{
+    for (CBDescriptor *descriptor in characteristic.descriptors) {
+        if ([descriptor.UUID isEqual:[CBUUID UUIDWithString:CBUUIDClientCharacteristicConfigurationString]]) {
+            return descriptor;
+        }
+    }
+
+    // No CCCD found for this characteristic
+    return nil;
+}
+
+- (ServicePair *)getServicePair:(CBPeripheral *)peripheral
+                 characteristic:(CBCharacteristic *)characteristic
+{
+    ServicePair* result = [[ServicePair alloc] init];
+
+    CBService *service = characteristic.service;
+
+    // is this a primary service?
+    if ([service isPrimary]) {
+        result.primary = service;
+        result.secondary = NULL;
+        return result;
+    } 
+
+    // Otherwise, iterate all services until we find the primary service
+    for (CBService *primary in [peripheral services])
+    {
+        for (CBService *secondary in [primary includedServices])
+        {
+            if ([[secondary.UUID UUIDString] isEqualToString:[service.UUID UUIDString]])
+            {
+                result.primary = primary;
+                result.secondary = secondary;
+                return result;
+            }
+        }
+    }
+
+    return result;
+}
 @end
 
 @implementation FlutterBluePlusStreamHandler
