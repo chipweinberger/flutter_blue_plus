@@ -40,8 +40,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
 @interface FlutterBluePlusPlugin ()
 @property(nonatomic, retain) NSObject<FlutterPluginRegistrar> *registrar;
-@property(nonatomic, retain) FlutterMethodChannel *channel;
-@property(nonatomic, retain) FlutterBluePlusStreamHandler *stateStreamHandler;
+@property(nonatomic, retain) FlutterMethodChannel *methodChannel;
 @property(nonatomic, retain) CBCentralManager *centralManager;
 @property(nonatomic) NSMutableDictionary *scannedPeripherals;
 @property(nonatomic) NSMutableArray *servicesThatNeedDiscovered;
@@ -53,24 +52,17 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 @implementation FlutterBluePlusPlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar> *)registrar
 {
-    FlutterMethodChannel *channel = [FlutterMethodChannel methodChannelWithName:NAMESPACE @"/methods"
+    FlutterMethodChannel *methodChannel = [FlutterMethodChannel methodChannelWithName:NAMESPACE @"/methods"
                                                                 binaryMessenger:[registrar messenger]];
-    FlutterEventChannel *stateChannel = [FlutterEventChannel eventChannelWithName:NAMESPACE @"/state"
-                                                                  binaryMessenger:[registrar messenger]];
     FlutterBluePlusPlugin *instance = [[FlutterBluePlusPlugin alloc] init];
-    instance.channel = channel;
+    instance.methodChannel = methodChannel;
     instance.scannedPeripherals = [NSMutableDictionary new];
     instance.servicesThatNeedDiscovered = [NSMutableArray new];
     instance.characteristicsThatNeedDiscovered = [NSMutableArray new];
     instance.dataWaitingToWriteWithoutResponse = [NSMutableDictionary new];
     instance.logLevel = emergency;
 
-    // STATE
-    FlutterBluePlusStreamHandler *stateStreamHandler = [[FlutterBluePlusStreamHandler alloc] init];
-    [stateChannel setStreamHandler:stateStreamHandler];
-    instance.stateStreamHandler = stateStreamHandler;
-
-    [registrar addMethodCallDelegate:instance channel:channel];
+    [registrar addMethodCallDelegate:instance channel:methodChannel];
 }
 
 ////////////////////////////////////////////////////////////
@@ -114,10 +106,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             };
 
             self.centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil options:options];
-            
-            NSDictionary *data = [self toBluetoothAdapterStateProto:self->_centralManager.state];
-            
-            self.stateStreamHandler.cachedBluetoothAdapterState = data;
         }
         if ([@"getAdapterState" isEqualToString:call.method])
         {
@@ -814,13 +802,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         NSLog(@"[FBP-iOS] centralManagerDidUpdateState");
     }
     
-    NSDictionary *data = [self toBluetoothAdapterStateProto:self->_centralManager.state];
-    
-    if (_stateStreamHandler.sink != nil) {
-        self.stateStreamHandler.sink(data);
-    } else {
-        self.stateStreamHandler.cachedBluetoothAdapterState = data;
-    }
+    NSDictionary *response = [self toBluetoothAdapterStateProto:self->_centralManager.state];
+
+    [_methodChannel invokeMethod:@"adapterStateChanged" arguments:response];
 }
 
 - (void)centralManager:(CBCentralManager *)central
@@ -836,7 +820,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     NSDictionary *result = [self toScanResultProto:peripheral advertisementData:advertisementData RSSI:RSSI];
 
-    [_channel invokeMethod:@"ScanResult" arguments:result];
+    [_methodChannel invokeMethod:@"ScanResult" arguments:result];
 }
 
 - (void)centralManager:(CBCentralManager *)central
@@ -856,10 +840,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"success" : @(1),
     };
 
-    [_channel invokeMethod:@"MtuSize" arguments:response];
+    [_methodChannel invokeMethod:@"MtuSize" arguments:response];
 
     // Send connection state
-    [_channel invokeMethod:@"connectionStateChanged"
+    [_methodChannel invokeMethod:@"connectionStateChanged"
                  arguments:[self toConnectionStateProto:peripheral connectionState:peripheral.state]];
 }
 
@@ -878,7 +862,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     peripheral.delegate = nil;
 
     // Send connection state
-    [_channel invokeMethod:@"connectionStateChanged"
+    [_methodChannel invokeMethod:@"connectionStateChanged"
                  arguments:[self toConnectionStateProto:peripheral connectionState:peripheral.state]];
 }
 
@@ -894,7 +878,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     }
 
     // Send connection state
-    [_channel invokeMethod:@"connectionStateChanged"
+    [_methodChannel invokeMethod:@"connectionStateChanged"
                  arguments:[self toConnectionStateProto:peripheral connectionState:peripheral.state]];
 }
 
@@ -926,7 +910,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"success" : @(1),
     };
 
-    [_channel invokeMethod:@"MtuSize" arguments:response];
+    [_methodChannel invokeMethod:@"MtuSize" arguments:response];
 
     // discover characteristics and secondary services
     [_servicesThatNeedDiscovered addObjectsFromArray:peripheral.services];
@@ -990,7 +974,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     };
 
     // Send updated tree
-    [_channel invokeMethod:@"DiscoverServicesResult" arguments:response];
+    [_methodChannel invokeMethod:@"DiscoverServicesResult" arguments:response];
 }
 
 - (void)peripheral:(CBPeripheral *)peripheral
@@ -1035,7 +1019,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"error_code":              error ? @(error.code) : [NSNull null],
     };
 
-    [_channel invokeMethod:@"OnCharacteristicResponse" arguments:result];
+    [_methodChannel invokeMethod:@"OnCharacteristicResponse" arguments:result];
 }
 
 - (void)peripheral:(CBPeripheral *)peripheral
@@ -1062,7 +1046,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"error_code":              error ? @(error.code) : [NSNull null],
     };
 
-    [_channel invokeMethod:@"OnCharacteristicResponse" arguments:result];
+    [_methodChannel invokeMethod:@"OnCharacteristicResponse" arguments:result];
 }
 
 - (void)peripheral:(CBPeripheral *)peripheral
@@ -1096,7 +1080,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"error_code":             error ? @(error.code) : [NSNull null],
     };
 
-    [_channel invokeMethod:@"OnDescriptorResponse" arguments:result];
+    [_methodChannel invokeMethod:@"OnDescriptorResponse" arguments:result];
 }
 
 - (void)peripheral:(CBPeripheral *)peripheral
@@ -1127,7 +1111,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"error_code":             error ? @(error.code) : [NSNull null],
     };
 
-    [_channel invokeMethod:@"OnDescriptorResponse" arguments:result];
+    [_methodChannel invokeMethod:@"OnDescriptorResponse" arguments:result];
 }
 
 - (void)peripheral:(CBPeripheral *)peripheral
@@ -1158,7 +1142,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"error_code":             error ? @(error.code) : [NSNull null],
     };
 
-    [_channel invokeMethod:@"OnDescriptorResponse" arguments:result];
+    [_methodChannel invokeMethod:@"OnDescriptorResponse" arguments:result];
 }
 
 - (void)peripheral:(CBPeripheral *)peripheral didReadRSSI:(NSNumber *)rssi error:(NSError *)error
@@ -1178,7 +1162,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"error_code":      error ? @(error.code) : [NSNull null],
     };
 
-    [_channel invokeMethod:@"ReadRssiResult" arguments:result];
+    [_methodChannel invokeMethod:@"ReadRssiResult" arguments:result];
 }
 
 - (void)peripheralIsReadyToSendWriteWithoutResponse:(CBPeripheral *)peripheral
@@ -1498,25 +1482,4 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     return result;
 }
-@end
-
-@implementation FlutterBluePlusStreamHandler
-
-- (FlutterError *)onListenWithArguments:(id)arguments
-                              eventSink:(FlutterEventSink)eventSink
-{
-    self.sink = eventSink;
-    if (self.cachedBluetoothAdapterState != nil)
-    {
-        self.sink(self.cachedBluetoothAdapterState);
-    }
-    return nil;
-}
-
-- (FlutterError *)onCancelWithArguments:(id)arguments
-{
-    self.sink = nil;
-    return nil;
-}
-
 @end

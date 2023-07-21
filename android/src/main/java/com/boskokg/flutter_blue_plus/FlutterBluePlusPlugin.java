@@ -77,7 +77,6 @@ public class FlutterBluePlusPlugin implements
     private MethodChannel methodChannel;
     private static final String NAMESPACE = "flutter_blue_plus";
 
-    private EventChannel stateChannel;
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
 
@@ -99,8 +98,6 @@ public class FlutterBluePlusPlugin implements
     private boolean allowDuplicates = false;
 
     private final int enableBluetoothRequestCode = 1879842617;
-
-    private final MyStreamHandler stateHandler = new MyStreamHandler();
 
     public FlutterBluePlusPlugin() {}
 
@@ -163,21 +160,12 @@ public class FlutterBluePlusPlugin implements
             methodChannel = new MethodChannel(messenger, NAMESPACE + "/methods");
             methodChannel.setMethodCallHandler(this);
 
-            stateChannel = new EventChannel(messenger, NAMESPACE + "/state");
-            stateChannel.setStreamHandler(stateHandler);
-
             mBluetoothManager = (BluetoothManager) application.getSystemService(Context.BLUETOOTH_SERVICE);
             mBluetoothAdapter = mBluetoothManager.getAdapter();
 
             IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
 
             context.registerReceiver(mBluetoothAdapterStateReceiver, filter);
-
-            try {
-                stateHandler.setCachedBluetoothAdapterState(mBluetoothAdapter.getState());
-            } catch (SecurityException e) {
-                stateHandler.setCachedBluetoothAdapterStateUnauthorized();
-            }
         }
     }
 
@@ -205,9 +193,6 @@ public class FlutterBluePlusPlugin implements
 
             methodChannel.setMethodCallHandler(null);
             methodChannel = null;
-
-            stateChannel.setStreamHandler(null);
-            stateChannel = null;
 
             mBluetoothAdapter = null;
             mBluetoothManager = null;
@@ -1274,12 +1259,6 @@ public class FlutterBluePlusPlugin implements
 
             final int adapterState = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
 
-            EventSink sink = stateHandler.getSink();
-            if (sink == null) {
-                stateHandler.setCachedBluetoothAdapterState(adapterState);
-                return;
-            }
-
             // convert to Protobuf enum
             int convertedState;
             switch (adapterState) {
@@ -1294,71 +1273,7 @@ public class FlutterBluePlusPlugin implements
             HashMap<String, Object> map = new HashMap<>();
             map.put("adapter_state", convertedState);
 
-            sink.success(map);
-        }
-    };
-
-    /////////////////////////////////////////////////////////////////////////////
-    // ███████  ███████   ██████   ███████   █████   ███    ███
-    // ██          ██     ██   ██  ██       ██   ██  ████  ████
-    // ███████     ██     ██████   █████    ███████  ██ ████ ██
-    //      ██     ██     ██   ██  ██       ██   ██  ██  ██  ██
-    // ███████     ██     ██   ██  ███████  ██   ██  ██      ██
-    //
-    // ██   ██   █████   ███    ██  ██████   ██       ███████  ██████
-    // ██   ██  ██   ██  ████   ██  ██   ██  ██       ██       ██   ██
-    // ███████  ███████  ██ ██  ██  ██   ██  ██       █████    ██████
-    // ██   ██  ██   ██  ██  ██ ██  ██   ██  ██       ██       ██   ██
-    // ██   ██  ██   ██  ██   ████  ██████   ███████  ███████  ██   ██
-
-    private class MyStreamHandler implements StreamHandler {
-        private final int STATE_UNAUTHORIZED = -1;
-
-        private EventSink sink;
-
-        public EventSink getSink() {
-            return sink;
-        }
-
-        private int cachedBluetoothAdapterState;
-
-        public void setCachedBluetoothAdapterState(int value) {
-            cachedBluetoothAdapterState = value;
-        }
-
-        public void setCachedBluetoothAdapterStateUnauthorized() {
-            cachedBluetoothAdapterState = STATE_UNAUTHORIZED;
-        }
-
-        @Override
-        public void onListen(Object o, EventChannel.EventSink eventSink) {
-
-            sink = eventSink;
-
-            if (cachedBluetoothAdapterState != 0) {
-
-                // see: BmAdapterStateEnum
-                int convertedState;
-                switch (cachedBluetoothAdapterState) {
-                    case BluetoothAdapter.STATE_OFF:          convertedState = 6;           break;
-                    case BluetoothAdapter.STATE_ON:           convertedState = 4;           break;
-                    case BluetoothAdapter.STATE_TURNING_OFF:  convertedState = 5;           break;
-                    case BluetoothAdapter.STATE_TURNING_ON:   convertedState = 3;           break;
-                    case STATE_UNAUTHORIZED:                  convertedState = 2;           break;
-                    default:                                  convertedState = 0;           break;
-                }
-
-                // see: BmBluetoothAdapterState
-                HashMap<String, Object> map = new HashMap<>();
-                map.put("adapter_state", convertedState);
-
-                sink.success(map);
-            }
-        }
-
-        @Override
-        public void onCancel(Object o) {
-            sink = null;
+            invokeMethodUIThread("adapterStateChanged", map);
         }
     };
 

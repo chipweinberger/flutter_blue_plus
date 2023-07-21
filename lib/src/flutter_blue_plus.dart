@@ -11,7 +11,6 @@ class FlutterBluePlus {
   static FlutterBluePlus get instance => _instance;
 
   final MethodChannel _channel = const MethodChannel('flutter_blue_plus/methods');
-  final EventChannel _stateChannel = const EventChannel('flutter_blue_plus/state');
   final StreamController<MethodCall> _methodStreamController = StreamController.broadcast(); // ignore: close_sinks
 
   final _BehaviorSubject<bool> _isScanning = _BehaviorSubject(false);
@@ -26,12 +25,6 @@ class FlutterBluePlus {
 
   /// Log level of the instance, default is all messages (debug).
   LogLevel _logLevel = LogLevel.debug;
-
-  /// Cached broadcast stream for FlutterBlue.state events
-  /// Caching this stream allows for more than one listener to subscribe
-  /// and unsubscribe apart from each other,
-  /// while allowing events to still be sent to others that are subscribed
-  Stream<BluetoothAdapterState>? _adapterStateStream;
 
   /// Singleton boilerplate
   FlutterBluePlus._() {
@@ -108,13 +101,13 @@ class FlutterBluePlus {
 
     yield initialState;
 
-    _adapterStateStream ??= _stateChannel
-        .receiveBroadcastStream()
+    Stream<BluetoothAdapterState> stream = FlutterBluePlus.instance._methodStream
+        .where((m) => m.method == "adapterStateChanged")
+        .map((m) => m.arguments)
         .map((buffer) => BmBluetoothAdapterState.fromMap(buffer))
-        .map((s) => bmToBluetoothAdapterState(s.adapterState))
-        .doOnCancel(() => _adapterStateStream = null);
+        .map((s) => bmToBluetoothAdapterState(s.adapterState));
 
-    yield* _adapterStateStream!;
+    yield* stream;
   }
 
   /// Retrieve a list of connected devices
