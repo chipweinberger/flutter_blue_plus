@@ -7,8 +7,15 @@
 part of flutter_blue_plus;
 
 class FlutterBluePlus {
+
+  ///////////////////
+  //  Internal
+  //
+
   static final FlutterBluePlus _instance = FlutterBluePlus._();
-  static FlutterBluePlus get instance => _instance;
+
+  // Used internally to dispatch methods from platform.
+  Stream<MethodCall> get _methodStream => _methodStreamController.stream;
 
   final MethodChannel _channel = const MethodChannel('flutter_blue_plus/methods');
   final StreamController<MethodCall> _methodStreamController = StreamController.broadcast(); // ignore: close_sinks
@@ -35,8 +42,11 @@ class FlutterBluePlus {
     setLogLevel(logLevel);
   }
 
-  // Used internally to dispatch methods from platform.
-  Stream<MethodCall> get _methodStream => _methodStreamController.stream;
+  ////////////////////
+  //  Public
+  //
+
+  static FlutterBluePlus get instance => _instance;
 
   LogLevel get logLevel => _logLevel;
 
