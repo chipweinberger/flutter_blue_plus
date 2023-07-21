@@ -36,6 +36,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 @property(nonatomic, retain) FlutterBluePlusStreamHandler *stateStreamHandler;
 @property(nonatomic, retain) CBCentralManager *centralManager;
 @property(nonatomic) NSMutableDictionary *scannedPeripherals;
+@property(nonatomic) NSMutableDictionary *knownPeripherals;
 @property(nonatomic) NSMutableArray *servicesThatNeedDiscovered;
 @property(nonatomic) NSMutableArray *characteristicsThatNeedDiscovered;
 @property(nonatomic) NSMutableDictionary *dataWaitingToWriteWithoutResponse;
@@ -52,6 +53,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     FlutterBluePlusPlugin *instance = [[FlutterBluePlusPlugin alloc] init];
     instance.channel = channel;
     instance.scannedPeripherals = [NSMutableDictionary new];
+    instance.knownPeripherals = [NSMutableDictionary new];
     instance.servicesThatNeedDiscovered = [NSMutableArray new];
     instance.characteristicsThatNeedDiscovered = [NSMutableArray new];
     instance.dataWaitingToWriteWithoutResponse = [NSMutableDictionary new];
@@ -245,6 +247,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 // when iOS 17 is more widely available
                 [options setObject:@(autoConnect) forKey:@"kCBConnectOptionEnableAutoReconnect"];
             } 
+
+            //Store Peripheral in strong reference array
+            [_knownPeripherals setObject:peripheral forKey:remoteId];
 
             [_centralManager connectPeripheral:peripheral options:options];
             
