@@ -310,7 +310,10 @@ class BluetoothDevice {
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) || other is BluetoothDevice && runtimeType == other.runtimeType && id == other.id;
+      identical(this, other) ||
+      (other is BluetoothDevice && 
+       runtimeType == other.runtimeType && 
+       remoteId == other.remoteId);
 
   @override
   int get hashCode => remoteId.hashCode;

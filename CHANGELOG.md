@@ -1,3 +1,11 @@
+## 1.8.6
+* dart: rename BluetoothDevice.id -> remoteId
+* dart: rename uuid -> characteristicUuid / serviceUuid / descriptorUuid
+* dart: rename FlutterBluePlus.name -> adapterName
+* dart: rename BluetoothDevice.name -> localName
+* dart: rename FlutterBluePlus.state -> adapterState 
+* dart: rename BluetoothDevice.state -> connectionState
+* iOS: add support for autoReconnect (iOS 17 only)
 
 ## 1.8.5
 * iOS: check for nil peripheral. (regression in 1.8.3)
