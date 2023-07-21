@@ -8,9 +8,12 @@ class BluetoothDescriptor {
   static final Guid cccd = Guid("00002902-0000-1000-8000-00805f9b34fb");
 
   final Guid descriptorUuid;
-  final DeviceIdentifier deviceId;
+  final DeviceIdentifier remoteId;
   final Guid serviceUuid;
   final Guid characteristicUuid;
+
+  @Deprecated('Use deviceId instead')
+  DeviceIdentifier get deviceId => remoteId;
 
   @Deprecated('Use descriptorUuid instead')
   Guid get uuid => descriptorUuid;
@@ -25,7 +28,7 @@ class BluetoothDescriptor {
 
   BluetoothDescriptor.fromProto(BmBluetoothDescriptor p)
       : descriptorUuid = Guid(p.descriptorUuid),
-        deviceId = DeviceIdentifier(p.remoteId),
+        remoteId = DeviceIdentifier(p.remoteId),
         serviceUuid = Guid(p.serviceUuid),
         characteristicUuid = Guid(p.characteristicUuid),
         _value = _BehaviorSubject(p.value);
@@ -38,8 +41,8 @@ class BluetoothDescriptor {
     // at a time, to prevent race conditions.
     await _readWriteMutex.synchronized(() async {
       var request = BmReadDescriptorRequest(
-        remoteId: deviceId.toString(),
-        descriptorUuid: uuid.toString(),
+        remoteId: remoteId.toString(),
+        descriptorUuid: descriptorUuid.toString(),
         characteristicUuid: characteristicUuid.toString(),
         secondaryServiceUuid: null,
         serviceUuid: serviceUuid.toString(),
@@ -84,8 +87,8 @@ class BluetoothDescriptor {
     // at a time, to prevent race conditions.
     await _readWriteMutex.synchronized(() async {
       var request = BmWriteDescriptorRequest(
-        remoteId: deviceId.toString(),
-        descriptorUuid: uuid.toString(),
+        remoteId: remoteId.toString(),
+        descriptorUuid: descriptorUuid.toString(),
         characteristicUuid: characteristicUuid.toString(),
         serviceUuid: serviceUuid.toString(),
         secondaryServiceUuid: null,
@@ -126,8 +129,8 @@ class BluetoothDescriptor {
   @override
   String toString() {
     return 'BluetoothDescriptor{'
-        'uuid: $uuid, '
-        'deviceId: $deviceId, '
+        'descriptorUuid: $descriptorUuid, '
+        'remoteId: $remoteId, '
         'serviceUuid: $serviceUuid, '
         'characteristicUuid: $characteristicUuid, '
         'value: ${_value.value}'

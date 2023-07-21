@@ -6,11 +6,14 @@ part of flutter_blue_plus;
 
 class BluetoothCharacteristic {
   final Guid characteristicUuid;
-  final DeviceIdentifier deviceId;
+  final DeviceIdentifier remoteId;
   final Guid serviceUuid;
   final Guid? secondaryServiceUuid;
   final CharacteristicProperties properties;
   final List<BluetoothDescriptor> descriptors;
+
+  @Deprecated('Use deviceId instead')
+  DeviceIdentifier get deviceId => remoteId;
 
   @Deprecated('Use characteristicUuid instead')
   Guid get uuid => characteristicUuid;
@@ -31,7 +34,7 @@ class BluetoothCharacteristic {
 
   BluetoothCharacteristic.fromProto(BmBluetoothCharacteristic p)
       : characteristicUuid = Guid(p.characteristicUuid),
-        deviceId = DeviceIdentifier(p.remoteId),
+        remoteId = DeviceIdentifier(p.remoteId),
         serviceUuid = Guid(p.serviceUuid),
         secondaryServiceUuid = p.secondaryServiceUuid != null ? Guid(p.secondaryServiceUuid!) : null,
         descriptors = p.descriptors.map((d) => BluetoothDescriptor.fromProto(d)).toList(),
@@ -51,7 +54,7 @@ class BluetoothCharacteristic {
           .where((m) => m.method == "OnCharacteristicChanged")
           .map((m) => m.arguments)
           .map((buffer) => BmOnCharacteristicChanged.fromMap(buffer))
-          .where((p) => p.remoteId == deviceId.toString())
+          .where((p) => p.remoteId == remoteId.toString())
           .map((p) => BluetoothCharacteristic.fromProto(p.characteristic))
           .where((c) => c.characteristicUuid == characteristicUuid)
           .map((c) {
@@ -87,7 +90,7 @@ class BluetoothCharacteristic {
     // at a time, to prevent race conditions.
     await _readWriteMutex.synchronized(() async {
       var request = BmReadCharacteristicRequest(
-        remoteId: deviceId.toString(),
+        remoteId: remoteId.toString(),
         characteristicUuid: characteristicUuid.toString(),
         serviceUuid: serviceUuid.toString(),
         secondaryServiceUuid: null,
@@ -95,7 +98,7 @@ class BluetoothCharacteristic {
 
       FlutterBluePlus.instance._log(
           LogLevel.info,
-          'remoteId: ${deviceId.toString()}'
+          'remoteId: ${remoteId.toString()}'
           'characteristicUuid: ${characteristicUuid.toString()}'
           'serviceUuid: ${serviceUuid.toString()}');
 
@@ -146,8 +149,8 @@ class BluetoothCharacteristic {
       final writeType = withoutResponse ? BmWriteType.withoutResponse : BmWriteType.withResponse;
 
       var request = BmWriteCharacteristicRequest(
-        remoteId: deviceId.toString(),
-        characteristicUuid: uuid.toString(),
+        remoteId: remoteId.toString(),
+        characteristicUuid: characteristicUuid.toString(),
         serviceUuid: serviceUuid.toString(),
         secondaryServiceUuid: null,
         writeType: writeType,
@@ -188,7 +191,7 @@ class BluetoothCharacteristic {
   /// Sets notifications or indications for the value of a specified characteristic
   Future<bool> setNotifyValue(bool notify) async {
     var request = BmSetNotificationRequest(
-      remoteId: deviceId.toString(),
+      remoteId: remoteId.toString(),
       serviceUuid: serviceUuid.toString(),
       characteristicUuid: characteristicUuid.toString(),
       secondaryServiceUuid: null,
@@ -223,8 +226,8 @@ class BluetoothCharacteristic {
   @override
   String toString() {
     return 'BluetoothCharacteristic{'
-        'uuid: $uuid, '
-        'deviceId: $deviceId, '
+        'characteristicUuid: $characteristicUuid, '
+        'remoteId: $remoteId, '
         'serviceUuid: $serviceUuid, '
         'secondaryServiceUuid: $secondaryServiceUuid, '
         'properties: $properties, '

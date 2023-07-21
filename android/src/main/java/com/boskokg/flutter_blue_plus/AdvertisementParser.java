@@ -90,28 +90,28 @@ class AdvertisementParser {
         case 0x16: // Service Data with 16 bit UUID.
         case 0x20: // Service Data with 32 bit UUID.
         case 0x21: { // Service Data with 128 bit UUID.
-          UUID uuid;
+          UUID svcUuid;
           int remainingDataLength = 0;
           if (type == 0x16 || type == 0x20) {
-            long uuidValue;
+            long svcUuidInteger;
             if (type == 0x16) {
-              uuidValue = data.getShort() & 0xFFFF;
+              svcUuidInteger = data.getShort() & 0xFFFF;
               remainingDataLength = length - 2;
             } else {
-              uuidValue = data.getInt() & 0xFFFFFFFF;
+              svcUuidInteger = data.getInt() & 0xFFFFFFFF;
               remainingDataLength = length - 4;
             }
-            uuid = UUID.fromString(String.format("%08x-0000-1000-8000-00805f9b34fb", uuidValue));
+            svcUuid = UUID.fromString(String.format("%08x-0000-1000-8000-00805f9b34fb", svcUuidInteger));
           } else {
             long msb = data.getLong();
             long lsb = data.getLong();
-            uuid = new UUID(msb, lsb);
+            svcUuid = new UUID(msb, lsb);
             remainingDataLength = length - 16;
           }
           byte[] remainingData = new byte[remainingDataLength];
           data.get(remainingData);
 
-          serviceData.put(uuid.toString(), remainingData);
+          serviceData.put(svcUuid.toString(), remainingData);
           response.put("service_data", serviceData);
           break;
         }

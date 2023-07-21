@@ -6,17 +6,20 @@ part of flutter_blue_plus;
 
 class BluetoothService {
   final Guid serviceUuid;
-  final DeviceIdentifier deviceId;
+  final DeviceIdentifier remoteId;
   final bool isPrimary;
   final List<BluetoothCharacteristic> characteristics;
   final List<BluetoothService> includedServices;
+
+  @Deprecated('Use deviceId instead')
+  DeviceIdentifier get deviceId => remoteId;
 
   @Deprecated('Use serviceUuid instead')
   Guid get uuid => serviceUuid;
 
   BluetoothService.fromProto(BmBluetoothService p)
       : serviceUuid = Guid(p.serviceUuid),
-        deviceId = DeviceIdentifier(p.remoteId),
+        remoteId = DeviceIdentifier(p.remoteId),
         isPrimary = p.isPrimary,
         characteristics = p.characteristics
             .map((c) => BluetoothCharacteristic.fromProto(c))
@@ -28,8 +31,8 @@ class BluetoothService {
   @override
   String toString() {
     return 'BluetoothService{'
-        'uuid: $uuid, '
-        'deviceId: $deviceId, '
+        'serviceUuid: $serviceUuid, '
+        'remoteId: $remoteId, '
         'isPrimary: $isPrimary, '
         'characteristics: $characteristics, '
         'includedServices: $includedServices'

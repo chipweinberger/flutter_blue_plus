@@ -203,9 +203,9 @@ public class MessageMaker {
     }
 
     static HashMap<String, Object> bmConnectionStateResponse(BluetoothDevice device, int connectionState) {
-        HashMap<String, Object> connectionState = new HashMap<>();
-        connectionState.put("connection_state", connectionState);
-        connectionState.put("remote_id", device.getAddress());
-        return connectionState;
+        HashMap<String, Object> response = new HashMap<>();
+        response.put("connection_state", connectionState);
+        response.put("remote_id", device.getAddress());
+        return response;
     }
 }
