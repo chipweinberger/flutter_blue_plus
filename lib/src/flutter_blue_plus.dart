@@ -325,17 +325,20 @@ class ScanMode {
 }
 
 class DeviceIdentifier {
-  final String id;
-  const DeviceIdentifier(this.id);
+  final String str;
+  const DeviceIdentifier(this.str);
+
+  @Deprecated('Use str instead')
+  String get id => str;
 
   @override
-  String toString() => id;
+  String toString() => str;
 
   @override
-  int get hashCode => id.hashCode;
+  int get hashCode => str.hashCode;
 
   @override
-  bool operator ==(other) => other is DeviceIdentifier && _compareAsciiLowerCase(id, other.id) == 0;
+  bool operator ==(other) => other is DeviceIdentifier && _compareAsciiLowerCase(str, other.str) == 0;
 }
 
 class ScanResult {
