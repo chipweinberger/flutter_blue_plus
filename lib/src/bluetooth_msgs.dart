@@ -229,7 +229,7 @@ class BmBluetoothService {
     }
 
     return BmBluetoothService(
-      serviceUuid: json['service_uuid'],
+      serviceUuid: Guid(json['service_uuid']),
       remoteId: json['remote_id'],
       isPrimary: json['is_primary'] != 0,
       characteristics: chrs,
@@ -269,7 +269,9 @@ class BmBluetoothCharacteristic {
     return BmBluetoothCharacteristic(
       remoteId: json['remote_id'],
       serviceUuid: Guid(json['service_uuid']),
-      secondaryServiceUuid: Guid(json['secondary_service_uuid']),
+      secondaryServiceUuid: json['secondary_service_uuid'] != null
+          ? Guid(json['secondary_service_uuid'])
+          : null,
       characteristicUuid: Guid(json['characteristic_uuid']),
       descriptors: descs,
       properties: BmCharacteristicProperties.fromMap(json['properties']),
@@ -445,9 +447,11 @@ class BmOnCharacteristicResponse {
       type: bmOnCharacteristicResponseTypeParse(json['type']),
       remoteId: json['remote_id'],
       serviceUuid: Guid(json['service_uuid']),
-      secondaryServiceUuid: Guid(json['secondary_service_uuid']),
+      secondaryServiceUuid: json['secondary_service_uuid'] != null
+          ? Guid(json['secondary_service_uuid'])
+          : null,
       characteristicUuid: Guid(json['characteristic_uuid']),
-      value: _hexDecode(json['value']),
+      value: _hexDecode(json['value'] ?? ""),
       success: json['success'] != 0,
       errorCode: json['error_code'],
       errorString: json['error_string'],
@@ -551,7 +555,9 @@ class BmWriteDescriptorRequest {
     return BmWriteDescriptorRequest(
       remoteId: json['remote_id'],
       serviceUuid: Guid(json['service_uuid']),
-      secondaryServiceUuid: Guid(json['secondary_service_uuid']),
+      secondaryServiceUuid: json['secondary_service_uuid'] != null
+          ? Guid(json['secondary_service_uuid'])
+          : null,
       characteristicUuid: Guid(json['characteristic_uuid']),
       descriptorUuid: Guid(json['descriptor_uuid']),
       value: _hexDecode(json['value'] ?? ""),
@@ -575,7 +581,7 @@ BmOnDescriptorResponseType bmOnDescriptorResponseParse(int i) {
 }
 
 class BmOnDescriptorResponse {
-  final BmOnDescriptorResponseType type; 
+  final BmOnDescriptorResponseType type;
   final String remoteId;
   final Guid serviceUuid;
   final Guid? secondaryServiceUuid;
@@ -605,10 +611,12 @@ class BmOnDescriptorResponse {
       type: bmOnDescriptorResponseParse(json['type']),
       remoteId: json['remote_id'],
       serviceUuid: Guid(json['service_uuid']),
-      secondaryServiceUuid: Guid(json['secondary_service_uuid']),
+      secondaryServiceUuid: json['secondary_service_uuid'] != null
+          ? Guid(json['secondary_service_uuid'])
+          : null,
       characteristicUuid: Guid(json['characteristic_uuid']),
       descriptorUuid: Guid(json['descriptor_uuid']),
-      value: _hexDecode(json['value']),
+      value: _hexDecode(json['value'] ?? ""),
       success: json['success'] != 0,
       errorCode: json['error_code'],
       errorString: json['error_string'],
