@@ -402,23 +402,7 @@ class BmReadCharacteristicRequest {
   }
 }
 
-enum BmOnCharacteristicResponseType {
-  read, // 0
-  write, // 1
-}
-
-BmOnCharacteristicResponseType bmOnCharacteristicResponseTypeParse(int i) {
-  switch (i) {
-    case 0:
-      return BmOnCharacteristicResponseType.read;
-    case 1:
-      return BmOnCharacteristicResponseType.write;
-  }
-  throw ("invalid BmOnCharacteristicResponse type: $i");
-}
-
-class BmOnCharacteristicResponse {
-  final BmOnCharacteristicResponseType type;
+class BmOnCharacteristicReceived {
   final String remoteId;
   final Guid serviceUuid;
   final Guid? secondaryServiceUuid;
@@ -428,8 +412,7 @@ class BmOnCharacteristicResponse {
   final int? errorCode;
   final String? errorString;
 
-  BmOnCharacteristicResponse({
-    required this.type,
+  BmOnCharacteristicReceived({
     required this.remoteId,
     required this.serviceUuid,
     required this.secondaryServiceUuid,
@@ -440,11 +423,10 @@ class BmOnCharacteristicResponse {
     required this.errorString,
   });
 
-  factory BmOnCharacteristicResponse.fromMap(Map<dynamic, dynamic> json) {
-    _printDbg("\nBmOnCharacteristicResponse $json");
+  factory BmOnCharacteristicReceived.fromMap(Map<dynamic, dynamic> json) {
+    _printDbg("\nBmOnCharacteristicReceived $json");
 
-    return BmOnCharacteristicResponse(
-      type: bmOnCharacteristicResponseTypeParse(json['type']),
+    return BmOnCharacteristicReceived(
       remoteId: json['remote_id'],
       serviceUuid: Guid(json['service_uuid']),
       secondaryServiceUuid: json['secondary_service_uuid'] != null
@@ -452,6 +434,42 @@ class BmOnCharacteristicResponse {
           : null,
       characteristicUuid: Guid(json['characteristic_uuid']),
       value: _hexDecode(json['value'] ?? ""),
+      success: json['success'] != 0,
+      errorCode: json['error_code'],
+      errorString: json['error_string'],
+    );
+  }
+}
+
+class BmOnCharacteristicWritten {
+  final String remoteId;
+  final Guid serviceUuid;
+  final Guid? secondaryServiceUuid;
+  final Guid characteristicUuid;
+  final bool success;
+  final int? errorCode;
+  final String? errorString;
+
+  BmOnCharacteristicWritten({
+    required this.remoteId,
+    required this.serviceUuid,
+    required this.secondaryServiceUuid,
+    required this.characteristicUuid,
+    required this.success,
+    required this.errorCode,
+    required this.errorString,
+  });
+
+  factory BmOnCharacteristicWritten.fromMap(Map<dynamic, dynamic> json) {
+    _printDbg("\BmOnCharacteristicWritten $json");
+
+    return BmOnCharacteristicWritten(
+      remoteId: json['remote_id'],
+      serviceUuid: Guid(json['service_uuid']),
+      secondaryServiceUuid: json['secondary_service_uuid'] != null
+          ? Guid(json['secondary_service_uuid'])
+          : null,
+      characteristicUuid: Guid(json['characteristic_uuid']),
       success: json['success'] != 0,
       errorCode: json['error_code'],
       errorString: json['error_string'],

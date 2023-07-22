@@ -1441,9 +1441,8 @@ public class FlutterBluePlusPlugin implements
 
             MessageMaker.ServicePair pair = MessageMaker.getServicePair(gatt, characteristic);
 
-            // see: BmOnCharacteristicResponse
+            // see: BmOnCharacteristicReceived
             HashMap<String, Object> response = new HashMap<>();
-            response.put("type", 0); // type: read
             response.put("remote_id", gatt.getDevice().getAddress());
             response.put("service_uuid", pair.primary);
             response.put("secondary_service_uuid", pair.secondary);
@@ -1453,7 +1452,7 @@ public class FlutterBluePlusPlugin implements
             response.put("error_code", 0);
             response.put("error_string", gattErrorString(0));
 
-            invokeMethodUIThread("OnCharacteristicResponse", response);
+            invokeMethodUIThread("OnCharacteristicReceived", response);
         }
 
         @Override
@@ -1463,9 +1462,8 @@ public class FlutterBluePlusPlugin implements
 
             MessageMaker.ServicePair pair = MessageMaker.getServicePair(gatt, characteristic);
 
-            // see: BmOnCharacteristicResponse
+            // see: BmOnCharacteristicReceived
             HashMap<String, Object> response = new HashMap<>();
-            response.put("type", 0); // type: read
             response.put("remote_id", gatt.getDevice().getAddress());
             response.put("service_uuid", pair.primary);
             response.put("secondary_service_uuid", pair.secondary);
@@ -1475,7 +1473,7 @@ public class FlutterBluePlusPlugin implements
             response.put("error_code", status);
             response.put("error_string", gattErrorString(status));
 
-            invokeMethodUIThread("OnCharacteristicResponse", response);
+            invokeMethodUIThread("OnCharacteristicReceived", response);
         }
 
         @Override
@@ -1485,9 +1483,8 @@ public class FlutterBluePlusPlugin implements
 
             MessageMaker.ServicePair pair = MessageMaker.getServicePair(gatt, characteristic);
 
-            // see: BmOnCharacteristicResponse
+            // see: BmOnCharacteristicWritten
             HashMap<String, Object> response = new HashMap<>();
-            response.put("type", 1); // type: write
             response.put("remote_id", gatt.getDevice().getAddress());
             response.put("service_uuid", pair.primary);
             response.put("secondary_service_uuid", pair.secondary);
@@ -1496,7 +1493,7 @@ public class FlutterBluePlusPlugin implements
             response.put("error_code", status);
             response.put("error_string", gattErrorString(status));
 
-            invokeMethodUIThread("OnCharacteristicResponse", response);
+            invokeMethodUIThread("OnCharacteristicWritten", response);
         }
 
         @Override

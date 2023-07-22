@@ -1007,7 +1007,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     ServicePair *pair = [self getServicePair:peripheral characteristic:characteristic];
 
-    // See BmOnCharacteristicResponse
+    // See BmOnCharacteristicReceived
     NSDictionary* result = @{
         @"type":                    @(0), // type: read
         @"remote_id":               [peripheral.identifier UUIDString],
@@ -1019,7 +1019,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"error_code":              error ? @(error.code) : [NSNull null],
     };
 
-    [_methodChannel invokeMethod:@"OnCharacteristicResponse" arguments:result];
+    [_methodChannel invokeMethod:@"OnCharacteristicReceived" arguments:result];
 }
 
 - (void)peripheral:(CBPeripheral *)peripheral
@@ -1034,7 +1034,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     ServicePair *pair = [self getServicePair:peripheral characteristic:characteristic];
 
-    // See BmOnCharacteristicResponse
+    // See BmOnCharacteristicWritten
     NSDictionary* result = @{
         @"type":                    @(1), // type: write
         @"remote_id":               [peripheral.identifier UUIDString],
@@ -1046,7 +1046,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"error_code":              error ? @(error.code) : [NSNull null],
     };
 
-    [_methodChannel invokeMethod:@"OnCharacteristicResponse" arguments:result];
+    [_methodChannel invokeMethod:@"OnCharacteristicWritten" arguments:result];
 }
 
 - (void)peripheral:(CBPeripheral *)peripheral
