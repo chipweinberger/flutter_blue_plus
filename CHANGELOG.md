@@ -1,3 +1,10 @@
+## 1.9.1
+* dart: fix crash in scanning due to assuming uuid is Guid format when it might not (Regression 1.9.0)
+* dart: BluetoothCharacteristic.onValueReceived should only stream successful reads (Bug in 1.9.0)
+* dart: add convenience accessors for BluetoothService.uuid and BluetoothCharacteristic.uuid as (formerly deprecated in 1.8.6)
+* example: add macos support
+
+
 ## 1.9.0
 
 This release marks the end of major work to improve reliability and
