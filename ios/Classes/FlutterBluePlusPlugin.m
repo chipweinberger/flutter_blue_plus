@@ -501,7 +501,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // check mtu
             int mtu = (int) [self getMtu:peripheral];
             int dataLen = (int) [self convertHexToData:value].length;
-            if ((mtu < dataLen) {
+            if (mtu < dataLen) {
                 NSString* f = @"data is longer than MTU allows. dataLen: %d > maxDataLen: %d";
                 NSString* s = [NSString stringWithFormat:f, dataLen, mtu];
                 result([FlutterError errorWithCode:@"writeDescriptor" message:s details:NULL]);
