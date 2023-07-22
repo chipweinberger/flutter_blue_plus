@@ -162,9 +162,6 @@ class FlutterBluePlus {
       throw Exception('Another scan is already in progress.');
     }
 
-    // push to isScanning stream
-    _isScanning.add(true);
-
     // Clear scan results list
     _scanResults.add(<ScanResult>[]);
 
@@ -179,7 +176,8 @@ class FlutterBluePlus {
     // Start listening now, before invokeMethod, to ensure we don't miss any results
     _scanResultsBuffer = _BufferStream.listen(scanResultsStream);
 
-    // Start timer *after* stream is being listened to, to make sure we don't miss the timeout
+    // Start timer *after* stream is being listened to, to make sure the 
+    // timeout does not fire before _scanResultsBuffer is set
     if (timeout != null) {
       _scanTimeout = Timer(timeout, () {
         _scanResultsBuffer?.close();
@@ -188,18 +186,18 @@ class FlutterBluePlus {
       });
     }
 
-    try {
-      await _channel.invokeMethod('startScan', settings.toMap());
-    } catch (e) {
-      print('Error starting scan.');
-      _isScanning.add(false);
-      rethrow;
-    }
+    await _channel.invokeMethod('startScan', settings.toMap());
+
+    // push to isScanning stream after invokeMethod('startScan') is called
+    _isScanning.add(true);
 
     await for (ScanResult item in _scanResultsBuffer!.stream) {
       // update list of devices
       List<ScanResult> list = List<ScanResult>.from(_scanResults.value);
       if (list.contains(item)) {
+        // the list will have duplicates if allowDuplicates is set.
+        // However, we only care to about the most recent advertisment
+        // so here we replace old advertisements. 1 per device.
         int index = list.indexOf(item);
         list[index] = item;
       } else {

@@ -40,7 +40,7 @@ int _compareAsciiLowerCase(String a, String b) {
   return defaultResult.sign;
 }
 
-// This is a reimpplementation of BehaviorSubject from RxDart library.
+// This is a reimplementation of BehaviorSubject from RxDart library.
 // It is essentially a stream but:
 //  1. we cache the latestValue of the stream
 //  2. the "latestValue" is re-emitted whenever the stream is listened to

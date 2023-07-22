@@ -150,6 +150,7 @@ class BluetoothDevice {
         .invokeMethod('mtu', remoteId.str)
         .then((buffer) => BmMtuSizeResponse.fromMap(buffer));
 
+    // failed?
     if (!response.success) {
       throw FlutterBluePlusException("mtuFail", response.errorCode, response.errorString);
     }
@@ -208,6 +209,7 @@ class BluetoothDevice {
     // wait for response
     BmReadRssiResult response = await futureResponse.timeout(Duration(seconds: timeout));
 
+    // failed?
     if (!response.success) {
       throw FlutterBluePlusException("readRssiFail", response.errorCode, response.errorString);
     }

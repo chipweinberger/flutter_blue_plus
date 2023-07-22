@@ -17,8 +17,9 @@ class BluetoothCharacteristic {
 
   final _Mutex _readWriteMutex = _Mutex();
 
-  /// This variable is updated *live* if you call value.listen()
-  /// And updated *once* if you call read()
+  /// this variable is updated:
+  ///   - *live* if you call onValueReceived.listen() or lastValueStream.listen()
+  ///   - *once* if you call read()
   List<int> lastValue;
 
   BluetoothCharacteristic.fromProto(BmBluetoothCharacteristic p)
@@ -31,12 +32,12 @@ class BluetoothCharacteristic {
         lastValue = p.value;
 
   // same as onValueReceived, but the stream starts
-  // with lastValue as its first value (so to not cause delay)
+  // with lastValue as its first value (to not cause delay)
   Stream<List<int>> get lastValueStream => onValueReceived.newStreamWithInitialValue(lastValue);
 
   // this stream is updated:
   //   1. after read() is called
-  //   2. or whenever the characteristic is received due to notifications
+  //   2. when a notification arrives
   Stream<List<int>> get onValueReceived => FlutterBluePlus.instance._methodStream
           .where((m) => m.method == "OnCharacteristicReceived")
           .map((m) => m.arguments)
@@ -96,6 +97,7 @@ class BluetoothCharacteristic {
 
       BmOnCharacteristicReceived response = await futureResponse.timeout(Duration(seconds: timeout));
 
+      // failed?
       if (!response.success) {
         throw FlutterBluePlusException("charactersticReadFail", response.errorCode, response.errorString);
       }
@@ -148,6 +150,8 @@ class BluetoothCharacteristic {
 
         // wait for response, so that we can check for success
         BmOnCharacteristicWritten response = await futureResponse.timeout(Duration(seconds: timeout));
+
+        // failed?
         if (!response.success) {
           throw FlutterBluePlusException("charactersticWriteFail", response.errorCode, response.errorString);
         }
@@ -191,6 +195,8 @@ class BluetoothCharacteristic {
 
     // wait for response, so that we can check for success
     BmOnDescriptorResponse response = await futureResponse.timeout(Duration(seconds: timeout));
+
+    // failed?
     if (!response.success) {
       throw FlutterBluePlusException("setNotifyValueFail", response.errorCode, response.errorString);
     }
