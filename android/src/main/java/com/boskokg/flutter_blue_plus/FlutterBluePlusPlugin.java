@@ -1686,7 +1686,7 @@ public class FlutterBluePlusPlugin implements
 
         BluetoothDeviceCache(BluetoothGatt gatt) {
             this.gatt = gatt;
-            mtu = 20;
+            mtu = 23;
         }
     }
 } // FlutterBluePlusPlugin
