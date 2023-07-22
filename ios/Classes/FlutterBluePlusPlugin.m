@@ -109,8 +109,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         }
         if ([@"getAdapterState" isEqualToString:call.method])
         {
-            NSDictionary *data = [self toBluetoothAdapterStateProto:self->_centralManager.state];
-            
+            NSDictionary *data = [self toBluetoothAdapterStateProto:self->_centralManager.state];      
             result(data);
         }
         else if ([@"isAvailable" isEqualToString:call.method])
@@ -799,7 +798,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 - (void)centralManagerDidUpdateState:(nonnull CBCentralManager *)central
 {
     if (_logLevel >= debug) {
-        NSLog(@"[FBP-iOS] centralManagerDidUpdateState");
+        NSLog(@"[FBP-iOS] centralManagerDidUpdateState %li", self->_centralManager.state);
     }
     
     NSDictionary *response = [self toBluetoothAdapterStateProto:self->_centralManager.state];
@@ -1232,6 +1231,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         case CBManagerStateUnauthorized: value = 2; break; // BmAdapterStateEnum.unauthorized
         case CBManagerStatePoweredOff:   value = 6; break; // BmAdapterStateEnum.off
         case CBManagerStatePoweredOn:    value = 4; break; // BmAdapterStateEnum.on
+        case CBManagerStateUnknown:      value = 0; break; // BmAdapterStateEnum.unknown
         default:                         value = 0; break; // BmAdapterStateEnum.unknown
     }
 
