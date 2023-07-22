@@ -259,9 +259,47 @@ extension _StreamDoOnDone<T> on Stream<T> {
 }
 
 extension _StreamDoOnCancel<T> on Stream<T> {
+  // ignore: unused_element
   Stream<T> doOnCancel(void Function() onCancel) {
     return transform(_OnCancelTransformer(onCancel: onCancel));
   }
+}
+
+// ignore: unused_element
+Stream<T> _mergeStreams<T>(List<Stream<T>> streams) {
+  StreamController<T> controller = StreamController<T>();
+  List<StreamSubscription<T>> subscriptions = [];
+
+  void handleData(T data) {
+    if (!controller.isClosed) {
+      controller.add(data);
+    }
+  }
+
+  void handleError(Object error, StackTrace stackTrace) {
+    if (!controller.isClosed) {
+      controller.addError(error, stackTrace);
+    }
+  }
+
+  void handleDone() {
+    if (subscriptions.every((s) => s.isPaused)) {
+      controller.close();
+    }
+  }
+
+  void subscribeToStream(Stream<T> stream) {
+    final s = stream.listen(handleData, onError: handleError, onDone: handleDone);
+    subscriptions.add(s);
+  }
+
+  streams.forEach(subscribeToStream);
+
+  controller.onCancel = () async {
+    await Future.wait(subscriptions.map((s) => s.cancel()));
+  };
+
+  return controller.stream;
 }
 
 class _Mutex {
