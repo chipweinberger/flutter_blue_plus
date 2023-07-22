@@ -12,6 +12,9 @@ class BluetoothCharacteristic {
   final CharacteristicProperties properties;
   final List<BluetoothDescriptor> descriptors;
 
+  // convenience accessor
+  Guid get uuid => characteristicUuid;
+
   final _Mutex _readWriteMutex = _Mutex();
 
   /// This variable is updated *live* if you call value.listen()
@@ -218,9 +221,6 @@ class BluetoothCharacteristic {
 
   @Deprecated('Use remoteId instead')
   DeviceIdentifier get deviceId => remoteId;
-
-  @Deprecated('Use characteristicUuid instead')
-  Guid get uuid => characteristicUuid;
 
   @Deprecated('Use lastValueStream instead')
   Stream<List<int>> get value => lastValueStream;
