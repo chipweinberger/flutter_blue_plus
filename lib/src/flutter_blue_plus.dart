@@ -7,7 +7,6 @@
 part of flutter_blue_plus;
 
 class FlutterBluePlus {
-
   ///////////////////
   //  Internal
   //
@@ -279,9 +278,7 @@ class FlutterBluePlus {
   Future<String> get name => adapterName;
 
   @Deprecated('Use adapterState instead')
-  Stream<BluetoothAdapterState> get state async* {
-    yield* adapterState;
-  }
+  Stream<BluetoothAdapterState> get state => adapterState;
 }
 
 /// Log levels for FlutterBlue
