@@ -36,12 +36,15 @@ class BmBluetoothAdapterState {
 }
 
 class BmAdvertisementData {
-  String localName;
+  String? localName;
   int? txPowerLevel;
   bool connectable;
   Map<int, List<int>> manufacturerData;
   Map<String, List<int>> serviceData;
-  List<Guid> serviceUuids;
+
+  // We use strings and not Guid because advertisement UUIDs can 
+  // be 32-bit UUIDs, 64-bit, etc i.e. "FE56"
+  List<String> serviceUuids; 
 
   BmAdvertisementData({
     required this.localName,
@@ -72,14 +75,16 @@ class BmAdvertisementData {
     }
 
     // Cast the data to the right type
-    List<Guid> serviceUuids = [];
+    // Note: we use strings and not Guid because advertisement UUIDs can 
+    // be 32-bit UUIDs, 64-bit, etc i.e. "FE56"
+    List<String> serviceUuids = [];
     for (var val in rawServiceUuids) {
-      serviceUuids.add(Guid(val));
+      serviceUuids.add(val);
     }
 
     // Construct the BmAdvertisementData
     return BmAdvertisementData(
-      localName: json['local_name'] ?? "",
+      localName: json['local_name'],
       txPowerLevel: json['tx_power_level'],
       connectable: json['connectable'] != 0,
       manufacturerData: manufacturerData,
@@ -269,9 +274,7 @@ class BmBluetoothCharacteristic {
     return BmBluetoothCharacteristic(
       remoteId: json['remote_id'],
       serviceUuid: Guid(json['service_uuid']),
-      secondaryServiceUuid: json['secondary_service_uuid'] != null
-          ? Guid(json['secondary_service_uuid'])
-          : null,
+      secondaryServiceUuid: json['secondary_service_uuid'] != null ? Guid(json['secondary_service_uuid']) : null,
       characteristicUuid: Guid(json['characteristic_uuid']),
       descriptors: descs,
       properties: BmCharacteristicProperties.fromMap(json['properties']),
@@ -429,9 +432,7 @@ class BmOnCharacteristicReceived {
     return BmOnCharacteristicReceived(
       remoteId: json['remote_id'],
       serviceUuid: Guid(json['service_uuid']),
-      secondaryServiceUuid: json['secondary_service_uuid'] != null
-          ? Guid(json['secondary_service_uuid'])
-          : null,
+      secondaryServiceUuid: json['secondary_service_uuid'] != null ? Guid(json['secondary_service_uuid']) : null,
       characteristicUuid: Guid(json['characteristic_uuid']),
       value: _hexDecode(json['value'] ?? ""),
       success: json['success'] != 0,
@@ -466,9 +467,7 @@ class BmOnCharacteristicWritten {
     return BmOnCharacteristicWritten(
       remoteId: json['remote_id'],
       serviceUuid: Guid(json['service_uuid']),
-      secondaryServiceUuid: json['secondary_service_uuid'] != null
-          ? Guid(json['secondary_service_uuid'])
-          : null,
+      secondaryServiceUuid: json['secondary_service_uuid'] != null ? Guid(json['secondary_service_uuid']) : null,
       characteristicUuid: Guid(json['characteristic_uuid']),
       success: json['success'] != 0,
       errorCode: json['error_code'],
@@ -573,9 +572,7 @@ class BmWriteDescriptorRequest {
     return BmWriteDescriptorRequest(
       remoteId: json['remote_id'],
       serviceUuid: Guid(json['service_uuid']),
-      secondaryServiceUuid: json['secondary_service_uuid'] != null
-          ? Guid(json['secondary_service_uuid'])
-          : null,
+      secondaryServiceUuid: json['secondary_service_uuid'] != null ? Guid(json['secondary_service_uuid']) : null,
       characteristicUuid: Guid(json['characteristic_uuid']),
       descriptorUuid: Guid(json['descriptor_uuid']),
       value: _hexDecode(json['value'] ?? ""),
@@ -629,9 +626,7 @@ class BmOnDescriptorResponse {
       type: bmOnDescriptorResponseParse(json['type']),
       remoteId: json['remote_id'],
       serviceUuid: Guid(json['service_uuid']),
-      secondaryServiceUuid: json['secondary_service_uuid'] != null
-          ? Guid(json['secondary_service_uuid'])
-          : null,
+      secondaryServiceUuid: json['secondary_service_uuid'] != null ? Guid(json['secondary_service_uuid']) : null,
       characteristicUuid: Guid(json['characteristic_uuid']),
       descriptorUuid: Guid(json['descriptor_uuid']),
       value: _hexDecode(json['value'] ?? ""),

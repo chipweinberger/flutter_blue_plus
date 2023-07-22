@@ -372,10 +372,13 @@ class AdvertisementData {
   final bool connectable;
   final Map<int, List<int>> manufacturerData;
   final Map<String, List<int>> serviceData;
-  final List<Guid> serviceUuids;
+
+  // Note: we use strings and not Guids because advertisement UUIDs can 
+  // be 32-bit UUIDs, 64-bit, etc i.e. "FE56"
+  final List<String> serviceUuids;
 
   AdvertisementData.fromProto(BmAdvertisementData p)
-      : localName = p.localName,
+      : localName = p.localName ?? "",
         txPowerLevel = p.txPowerLevel,
         connectable = p.connectable,
         manufacturerData = p.manufacturerData,
