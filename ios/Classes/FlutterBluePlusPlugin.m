@@ -998,7 +998,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic
                               error:(NSError *)error
 {
-    // on iOS, this method also handles notification values
+    // this callback is called for notifications as well as manual reads
     if (error) {
         NSLog(@"[FBP-iOS] didUpdateValueForCharacteristic: [Error] %@", [error localizedDescription]);
     } else if (_logLevel >= debug) {
@@ -1026,6 +1026,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     didWriteValueForCharacteristic:(CBCharacteristic *)characteristic
                              error:(NSError *)error
 {
+    // this callback is called after write() is explicitly called
     if (error) {
         NSLog(@"[FBP-iOS] didWriteValueForCharacteristic: [Error] %@", [error localizedDescription]);
     } else if (_logLevel >= debug) {

@@ -1437,6 +1437,7 @@ public class FlutterBluePlusPlugin implements
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic)
         {
+            // this callback is only for notifications & indications
             log(LogLevel.DEBUG, "[onCharacteristicChanged] uuid: " + characteristic.getUuid().toString());
 
             MessageMaker.ServicePair pair = MessageMaker.getServicePair(gatt, characteristic);
@@ -1458,6 +1459,7 @@ public class FlutterBluePlusPlugin implements
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status)
         {
+            // this callback is only for explicit characteristic reads
             log(LogLevel.DEBUG, "[onCharacteristicRead] uuid: " + characteristic.getUuid().toString() + " status: " + status);
 
             MessageMaker.ServicePair pair = MessageMaker.getServicePair(gatt, characteristic);
