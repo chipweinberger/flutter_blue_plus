@@ -50,13 +50,13 @@ class FlutterBluePlus {
   LogLevel get logLevel => _logLevel;
 
   /// Checks whether the device supports Bluetooth
-  Future<bool> get isAvailable => _channel.invokeMethod('isAvailable').then<bool>((d) => d);
+  Future<bool> get isAvailable async => await _channel.invokeMethod('isAvailable');
 
   /// Return the friendly Bluetooth name of the local Bluetooth adapter
-  Future<String> get adapterName => _channel.invokeMethod('getAdapterName').then<String>((d) => d);
+  Future<String> get adapterName async => await _channel.invokeMethod('getAdapterName');
 
   /// Checks if Bluetooth functionality is turned on
-  Future<bool> get isOn => _channel.invokeMethod('isOn').then<bool>((d) => d);
+  Future<bool> get isOn async => await _channel.invokeMethod('isOn');
 
   Stream<bool> get isScanning => _isScanning.stream;
 
@@ -67,10 +67,10 @@ class FlutterBluePlus {
   /// Returns true if bluetooth is being turned on.
   /// You have to listen for a stateChange to ON to ensure bluetooth is already running
   ///
-  /// Returns false if an error occured or bluetooth is already running
+  /// Returns false if an error occured
   ///
-  Future<bool> turnOn() {
-    return _channel.invokeMethod('turnOn').then<bool>((d) => d);
+  Future<bool> turnOn() async {
+    return await _channel.invokeMethod('turnOn');
   }
 
   /// Tries to turn off Bluetooth (Android only),
@@ -80,8 +80,8 @@ class FlutterBluePlus {
   ///
   /// Returns false if an error occured
   ///
-  Future<bool> turnOff() {
-    return _channel.invokeMethod('turnOff').then<bool>((d) => d);
+  Future<bool> turnOff() async {
+    return await _channel.invokeMethod('turnOff');
   }
 
   /// Returns a stream that is a list of [ScanResult] results while a scan is in progress.
@@ -112,6 +112,9 @@ class FlutterBluePlus {
   }
 
   /// Retrieve a list of connected devices
+  /// The list of connected peripherals can include those that are connected
+  /// by other apps and that will need to be connected locally using the
+  /// device.connect() method before they can be used.
   Future<List<BluetoothDevice>> get connectedDevices {
     return _channel
         .invokeMethod('getConnectedDevices')
@@ -136,7 +139,7 @@ class FlutterBluePlus {
   /// You can also get a list of ongoing results in the [scanResults] stream.
   /// If scanning is already in progress, this will throw an [Exception].
   ///
-  /// set [androidUsesFineLocation] to true if you want to derive the physical location of the device
+  /// set [androidUsesFineLocation] to true to request the ACCESS_FINE_LOCATION permission at runtime
   /// on Android Version >=31 (Android 12). You need to add the following permission to your AndroidManifest.xml:
   /// <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
   Stream<ScanResult> scan({
@@ -218,7 +221,7 @@ class FlutterBluePlus {
   /// To observe the results while the scan is in progress, listen to the [scanResults] stream,
   /// or call [scan] instead.
   ///
-  /// set [androidUsesFineLocation] to true if you want to derive the physical location of the device
+  /// set [androidUsesFineLocation] to true to request the ACCESS_FINE_LOCATION permission at runtime
   /// on Android Version >=31 (Android 12). You need to add the following permission to your AndroidManifest.xml:
   /// <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
   Future startScan({
@@ -249,14 +252,6 @@ class FlutterBluePlus {
     _scanTimeout?.cancel();
     _isScanning.add(false);
   }
-
-  /// The list of connected peripherals can include those that are connected
-  /// by other apps and that will need to be connected locally using the
-  /// device.connect() method before they can be used.
-  //      Stream<List<BluetoothDevice>> connectedDevices({
-  //            List<Guid> withServices = const [],
-  //      }) =>
-  //                  throw UnimplementedError();
 
   /// Sets the log level of the FlutterBlue instance
   /// Messages equal or below the log level specified are stored/forwarded,

@@ -30,7 +30,7 @@ class BluetoothDevice {
 
   /// Establishes a connection to the Bluetooth Device.
   Future<void> connect({
-    Duration? timeout,
+    Duration timeout = const Duration(seconds: 15),
     bool autoConnect = false,
     bool shouldClearGattCache = true,
   }) async {
@@ -47,13 +47,7 @@ class BluetoothDevice {
     await FlutterBluePlus.instance._channel.invokeMethod('connect', request.toMap());
 
     // wait for connection
-    if (timeout != null) {
-      await futureState.timeout(timeout, onTimeout: () {
-        throw TimeoutException('Failed to connect in time.', timeout);
-      });
-    } else {
-      await futureState;
-    }
+    await futureState.timeout(timeout);
 
     if (Platform.isAndroid && shouldClearGattCache) {
       clearGattCache();
@@ -63,7 +57,7 @@ class BluetoothDevice {
   /// Send a pairing request to the device.
   /// Currently only implemented on Android.
   Future<void> pair() async {
-    return FlutterBluePlus.instance._channel.invokeMethod('pair', remoteId.str);
+    return await FlutterBluePlus.instance._channel.invokeMethod('pair', remoteId.str);
   }
 
   /// Refresh Gatt Device Cache
@@ -71,7 +65,7 @@ class BluetoothDevice {
   /// Currently only implemented on Android.
   Future<void> clearGattCache() async {
     if (Platform.isAndroid) {
-      return FlutterBluePlus.instance._channel.invokeMethod('clearGattCache', remoteId.str);
+      return await FlutterBluePlus.instance._channel.invokeMethod('clearGattCache', remoteId.str);
     }
   }
 
@@ -127,6 +121,7 @@ class BluetoothDevice {
         .then((buffer) => BmDiscoverServicesResult.fromMap(buffer).services)
         .then((i) => i.map((s) => BluetoothService.fromProto(s)).toList());
 
+    // initial value
     yield initialServices;
 
     yield* _services.stream;
@@ -197,10 +192,6 @@ class BluetoothDevice {
     return mtu;
   }
 
-  /// Indicates whether the Bluetooth Device can
-  /// send a write without response
-  Future<bool> get canSendWriteWithoutResponse => Future.error(UnimplementedError());
-
   /// Read the RSSI for a connected remote device
   Future<int> readRssi({int timeout = 15}) async {
     var responseStream = FlutterBluePlus.instance._methodStream
@@ -231,7 +222,7 @@ class BluetoothDevice {
   ///
   /// Request a specific connection priority. Must be one of
   /// ConnectionPriority.balanced, BluetoothGatt#ConnectionPriority.high or
-  /// ConnectionPriority.lowPower.
+  /// ConnectionPriority.lowPower
   Future<void> requestConnectionPriority({required ConnectionPriority connectionPriorityRequest}) async {
     int connectionPriority = 0;
 

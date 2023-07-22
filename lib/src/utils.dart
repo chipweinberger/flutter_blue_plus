@@ -41,8 +41,9 @@ int _compareAsciiLowerCase(String a, String b) {
 }
 
 // This is a reimpplementation of BehaviorSubject from RxDart library.
-// 1. Caches the latestValue of a stream
-// 2. the "latestValue" is re-emitted when a stream is listened to
+// It is essentially a stream but:
+//  1. we cache the latestValue of the stream
+//  2. the "latestValue" is re-emitted whenever the stream is listened to
 class _BehaviorSubject<T> {
   T latestValue;
 

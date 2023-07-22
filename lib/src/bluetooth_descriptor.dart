@@ -20,8 +20,9 @@ class BluetoothDescriptor {
   // with lastValue as its first value (so to not cause delay)
   Stream<List<int>> get lastValueStream => onDescriptorReceived.newStreamWithInitialValue(lastValue);
 
-  // this stream is pushed to whenever
-  // the descriptor is read or written
+  // this stream is pushed to whenever:
+  //  1. the descriptor is successfully read
+  //  2. the descriptor is successfully written
   Stream<List<int>> get onDescriptorReceived => FlutterBluePlus.instance._methodStream
           .where((m) => m.method == "OnDescriptorResponse")
           .map((m) => m.arguments)
@@ -30,6 +31,7 @@ class BluetoothDescriptor {
           .where((p) => (p.descriptorUuid == descriptorUuid))
           .where((p) => (p.characteristicUuid == characteristicUuid))
           .where((p) => (p.serviceUuid == serviceUuid))
+          .where((p) => (p.success == true))
           .map((p) {
         lastValue = p.value; // cache latest value
         return p.value;
