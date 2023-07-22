@@ -1,3 +1,6 @@
+## 1.9.2
+* dart: readRssi: fix ArgumentError (Invalid argument: Instance of 'DeviceIdentifier') (Regression 1.9.0)
+
 ## 1.9.1
 * dart: fix crash in scanning due to assuming uuid is Guid format when it might not (Regression 1.9.0)
 * dart: BluetoothCharacteristic.onValueReceived should only stream successful reads (Bug in 1.9.0)
