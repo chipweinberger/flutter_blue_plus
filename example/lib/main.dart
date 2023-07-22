@@ -69,7 +69,7 @@ class BluetoothOffScreen extends StatelessWidget {
               color: Colors.white54,
             ),
             Text(
-              'Bluetooth Adapter is ${adapterState != null ? adapterState.toString().substring(22) : 'not available'}.',
+              'Bluetooth Adapter is ${adapterState != null ? adapterState.toString().split(".").last : 'not available'}.',
               style: Theme.of(context)
                   .primaryTextTheme
                   .titleSmall
@@ -266,7 +266,7 @@ class DeviceScreen extends StatelessWidget {
                   break;
                 default:
                   onPressed = null;
-                  text = snapshot.data.toString().substring(21).toUpperCase();
+                  text = snapshot.data.toString().split(".").last.toUpperCase();
                   break;
               }
               return TextButton(
