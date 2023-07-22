@@ -33,6 +33,10 @@ class BluetoothCharacteristic {
         properties = CharacteristicProperties.fromProto(p.properties),
         lastValue = p.value;
 
+  // same as onValueReceived, but the stream starts
+  // with lastValue as its first value (so to not cause delay)
+  Stream<List<int>> get lastValueStream => onValueReceived.newStreamWithInitialValue(lastValue);
+
   // this stream is updated:
   //   1. after read() is called
   //   2. or whenever the characteristic is received due to notifications
@@ -48,6 +52,9 @@ class BluetoothCharacteristic {
         lastValue = c.value; // Update cache of lastValue
         return c.value;
       });
+
+  @Deprecated('Use lastValueStream instead')
+  Stream<List<int>> get value => lastValueStream;
 
   @Deprecated('Use onValueReceived instead')
   Stream<List<int>> get onValueChangedStream => onValueReceived;
