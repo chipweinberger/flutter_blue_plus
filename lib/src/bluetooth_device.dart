@@ -322,9 +322,7 @@ class BluetoothDevice {
   String get name => localName;
 
   @Deprecated('Use connectionState instead')
-  Stream<BluetoothConnectionState> get state async* {
-    yield* connectionState;
-  }
+  Stream<BluetoothConnectionState> get state => connectionState;
 }
 
 enum BluetoothDeviceType { unknown, classic, le, dual }
