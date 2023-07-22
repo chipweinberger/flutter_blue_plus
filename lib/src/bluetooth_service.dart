@@ -11,12 +11,6 @@ class BluetoothService {
   final List<BluetoothCharacteristic> characteristics;
   final List<BluetoothService> includedServices;
 
-  @Deprecated('Use remoteId instead')
-  DeviceIdentifier get deviceId => remoteId;
-
-  @Deprecated('Use serviceUuid instead')
-  Guid get uuid => serviceUuid;
-
   BluetoothService.fromProto(BmBluetoothService p)
       : remoteId = DeviceIdentifier(p.remoteId),
         serviceUuid = p.serviceUuid,
@@ -38,4 +32,10 @@ class BluetoothService {
         'includedServices: $includedServices'
         '}';
   }
+
+  @Deprecated('Use remoteId instead')
+  DeviceIdentifier get deviceId => remoteId;
+
+  @Deprecated('Use serviceUuid instead')
+  Guid get uuid => serviceUuid;
 }

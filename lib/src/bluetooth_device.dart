@@ -9,12 +9,6 @@ class BluetoothDevice {
   final String localName;
   final BluetoothDeviceType type;
 
-  @Deprecated('Use remoteId instead')
-  DeviceIdentifier get id => remoteId;
-
-  @Deprecated('Use localName instead')
-  String get name => localName;
-
   final _BehaviorSubject<List<BluetoothService>> _services = _BehaviorSubject([]);
 
   final _BehaviorSubject<bool> _isDiscoveringServices = _BehaviorSubject(false);
@@ -136,11 +130,6 @@ class BluetoothDevice {
     yield initialServices;
 
     yield* _services.stream;
-  }
-
-  @Deprecated('Use connectionState instead')
-  Stream<BluetoothConnectionState> get state async* {
-    yield* connectionState;
   }
 
   /// The current connection state of the device
@@ -324,6 +313,17 @@ class BluetoothDevice {
         'isDiscoveringServices: ${_isDiscoveringServices.value}, '
         '_services: ${_services.value}'
         '}';
+  }
+
+  @Deprecated('Use remoteId instead')
+  DeviceIdentifier get id => remoteId;
+
+  @Deprecated('Use localName instead')
+  String get name => localName;
+
+  @Deprecated('Use connectionState instead')
+  Stream<BluetoothConnectionState> get state async* {
+    yield* connectionState;
   }
 }
 

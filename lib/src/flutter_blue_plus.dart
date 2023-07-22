@@ -53,9 +53,6 @@ class FlutterBluePlus {
   /// Checks whether the device supports Bluetooth
   Future<bool> get isAvailable => _channel.invokeMethod('isAvailable').then<bool>((d) => d);
 
-  @Deprecated('Use adapterName instead')
-  Future<String> get name => adapterName;
-
   /// Return the friendly Bluetooth name of the local Bluetooth adapter
   Future<String> get adapterName => _channel.invokeMethod('getAdapterName').then<String>((d) => d);
 
@@ -96,11 +93,6 @@ class FlutterBluePlus {
   /// One use for [scanResults] is as the stream in a StreamBuilder to display the
   /// results of a scan in real time while the scan is in progress.
   Stream<List<ScanResult>> get scanResults => _scanResults.stream;
-
-  @Deprecated('Use adapterState instead')
-  Stream<BluetoothAdapterState> get state async* {
-    yield* adapterState;
-  }
 
   /// Gets the current state of the Bluetooth module
   Stream<BluetoothAdapterState> get adapterState async* {
@@ -281,6 +273,14 @@ class FlutterBluePlus {
         print(message);
       }
     }
+  }
+
+  @Deprecated('Use adapterName instead')
+  Future<String> get name => adapterName;
+
+  @Deprecated('Use adapterState instead')
+  Stream<BluetoothAdapterState> get state async* {
+    yield* adapterState;
   }
 }
 

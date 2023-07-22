@@ -35,15 +35,6 @@ class BluetoothDescriptor {
         return p.value;
       });
 
-  @Deprecated('Use onDescriptorReceived instead')
-  Stream<List<int>> get value => onDescriptorReceived;
-
-  @Deprecated('Use deviceId instead')
-  DeviceIdentifier get deviceId => remoteId;
-
-  @Deprecated('Use descriptorUuid instead')
-  Guid get uuid => descriptorUuid;
-
   BluetoothDescriptor.fromProto(BmBluetoothDescriptor p)
       : remoteId = DeviceIdentifier(p.remoteId),
         serviceUuid = p.serviceUuid,
@@ -147,4 +138,13 @@ class BluetoothDescriptor {
         'lastValue: $lastValue'
         '}';
   }
+
+  @Deprecated('Use onDescriptorReceived instead')
+  Stream<List<int>> get value => onDescriptorReceived;
+
+  @Deprecated('Use remoteId instead')
+  DeviceIdentifier get deviceId => remoteId;
+
+  @Deprecated('Use descriptorUuid instead')
+  Guid get uuid => descriptorUuid;
 }
