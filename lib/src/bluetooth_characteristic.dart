@@ -44,6 +44,7 @@ class BluetoothCharacteristic {
           .where((p) => p.remoteId == remoteId.toString())
           .where((p) => p.serviceUuid == serviceUuid)
           .where((p) => p.characteristicUuid == characteristicUuid)
+          .where((p) => p.success == true)
           .map((c) {
         lastValue = c.value; // Update cache of lastValue
         return c.value;
