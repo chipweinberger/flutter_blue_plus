@@ -1,11 +1,20 @@
 ## 1.9.0
+
+This release marks the end of major work to improve reliability and
+simplicity of the FlutterBluePlus codebase. Please submit bug reports.
+
+* Adroid/iOS: fix mtu check minus 3 issue (reggression in 1.8.3)
+* deprecated: BluetoothCharacteristic.value -> lastValueStream
+* deprecated: BluetoothDescriptor.value -> lastValueStream
+* deprecated: BluetoothCharacteristic.onValueChangedStream -> onValueReceived
+* deprecated: BluetoothDescriptor.onValueChangedStream -> onValueReceived
+* dart: fix deprecated BluetoothCharacteristic.state variable not working (bug introduced 1.8.6)
+* dart: fix deprecated FlutterBluePlus.instance.state variable not working (bug introduced 1.8.6)
 * internal: refactor adapterState to use methodChannel
-* internal: refactor BmReadCharacteristicResponse & BmWriteCharacteristicResponse to have simpler structure
-* internal: refactor BmReadDescriptorResponse & BmWriteDescriptorResponse to have simpler structure
-* internal: refactor BmSetNotificationResponse, replaced by BmWriteDescriptorResponse
-* internal: refactor secondaryServiceUuid code its own getServicePair() function 
+* internal: refactor various 'bm' message schemas to use simpler characteristic structure
+* internal: refactor BmSetNotificationResponse removed. It is simpler to reuse BmWriteDescriptorResponse
+* internal: refactor move secondaryServiceUuid code its own getServicePair() function 
 * internal: refactor android MessageMaker to be a bit more legible
-* deprecated: BluetoothCharacteristic.onValueChangedStream replaced by value
 
 ## 1.8.8
 * android & iOS: fix connectionState not being updated (regression in 1.8.6)

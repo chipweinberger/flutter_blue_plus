@@ -16,14 +16,14 @@ class BluetoothDescriptor {
 
   List<int> lastValue = [];
 
-  // same as onDescriptorReceived, but the stream starts
+  // same as onValueReceived, but the stream starts
   // with lastValue as its first value (so to not cause delay)
-  Stream<List<int>> get lastValueStream => onDescriptorReceived.newStreamWithInitialValue(lastValue);
+  Stream<List<int>> get lastValueStream => onValueReceived.newStreamWithInitialValue(lastValue);
 
   // this stream is pushed to whenever:
   //  1. the descriptor is successfully read
   //  2. the descriptor is successfully written
-  Stream<List<int>> get onDescriptorReceived => FlutterBluePlus.instance._methodStream
+  Stream<List<int>> get onValueReceived => FlutterBluePlus.instance._methodStream
           .where((m) => m.method == "OnDescriptorResponse")
           .map((m) => m.arguments)
           .map((buffer) => BmOnDescriptorResponse.fromMap(buffer))
@@ -141,8 +141,8 @@ class BluetoothDescriptor {
         '}';
   }
 
-  @Deprecated('Use onDescriptorReceived instead')
-  Stream<List<int>> get value => onDescriptorReceived;
+  @Deprecated('Use onValueReceived instead')
+  Stream<List<int>> get value => onValueReceived;
 
   @Deprecated('Use remoteId instead')
   DeviceIdentifier get deviceId => remoteId;

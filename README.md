@@ -42,6 +42,11 @@ then in `pubspec.yaml` add the repo by path:
 
 Now you can edit FlutterBluePlus code and debug issues yourself. 
 
+### When I scan using a service UUID filter, it doesn't find any devices.
+
+Make sure the device is advertising which service UUID's it supports. This is found in the advertisement
+packet as **UUID 16 bit complete list** or **UUID 128 bit complete list**.
+
 ## Usage
 
 ### Obtain an instance
@@ -119,7 +124,7 @@ await d.write([0x12, 0x34])
 
 ```dart
 await characteristic.setNotifyValue(true);
-characteristic.value.listen((value) {
+characteristic.onValueReceived.listen((value) {
     // do something with new value
 });
 ```
@@ -226,23 +231,21 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 
 ### BluetoothCharacteristic API
 
-|                |      Android       |        iOS         | Description                                              |
-| :------------- | :----------------: | :----------------: | :------------------------------------------------------- |
-| read           | :white_check_mark: | :white_check_mark: | Retrieves the value of the characteristic.               |
-| write          | :white_check_mark: | :white_check_mark: | Writes the value of the characteristic.                  |
-| setNotifyValue | :white_check_mark: | :white_check_mark: | Sets notifications or indications on the characteristic. |
-| value          | :white_check_mark: | :white_check_mark: | Stream of characteristic's value when changed.           |
+|                 |      Android       |        iOS         | Description                                              |
+| :-------------  | :----------------: | :----------------: | :------------------------------------------------------- |
+| read            | :white_check_mark: | :white_check_mark: | Retrieves the value of the characteristic.               |
+| write           | :white_check_mark: | :white_check_mark: | Writes the value of the characteristic.                  |
+| setNotifyValue  | :white_check_mark: | :white_check_mark: | Sets notifications or indications on the characteristic. |
+| onValueReceived | :white_check_mark: | :white_check_mark: | Stream of characteristic value changes                   |
+| lastValueStream | :white_check_mark: | :white_check_mark: | Stream of lastValue + characteristic value changes       |
 
 ### BluetoothDescriptor API
 
-|       |      Android       |        iOS         | Description                            |
-| :---- | :----------------: | :----------------: | :------------------------------------- |
-| read  | :white_check_mark: | :white_check_mark: | Retrieves the value of the descriptor. |
-| write | :white_check_mark: | :white_check_mark: | Writes the value of the descriptor.    |
+|                 |      Android       |        iOS         | Description                                    |
+| :----           | :----------------: | :----------------: | :-------------------------------------         |
+| read            | :white_check_mark: | :white_check_mark: | Retrieves the value of the descriptor.         |
+| write           | :white_check_mark: | :white_check_mark: | Writes the value of the descriptor.            |
+| onValueReceived | :white_check_mark: | :white_check_mark: | Stream of descriptor value changes             |
+| lastValueStream | :white_check_mark: | :white_check_mark: | Stream of lastValue + descriptor value changes |
 
-## Troubleshooting
 
-### When I scan using a service UUID filter, it doesn't find any devices.
-
-Make sure the device is advertising which service UUID's it supports. This is found in the advertisement
-packet as **UUID 16 bit complete list** or **UUID 128 bit complete list**.
