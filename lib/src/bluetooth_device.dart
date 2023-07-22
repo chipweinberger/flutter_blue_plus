@@ -203,7 +203,7 @@ class BluetoothDevice {
     // Start listening now, before invokeMethod, to ensure we don't miss the response
     Future<BmReadRssiResult> futureResponse = responseStream.first;
 
-    await FlutterBluePlus.instance._channel.invokeMethod('readRssi', remoteId);
+    await FlutterBluePlus.instance._channel.invokeMethod('readRssi', remoteId.str);
 
     // wait for response
     BmReadRssiResult response = await futureResponse.timeout(Duration(seconds: timeout));
