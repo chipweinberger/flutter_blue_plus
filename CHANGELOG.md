@@ -1,3 +1,7 @@
+## 1.9.4
+* iOS: fix characteristic read not working. (regression in 1.9.0
+* dart: handle device.readRssi failure in rssiStream gracefully
+
 ## 1.9.3
 * iOS: fix setNotify returning error even though it succeeded (regression in 1.9.0)
 * dart: Characteristic.isNotifying was not working (regression in 1.9.0)
