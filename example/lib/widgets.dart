@@ -168,8 +168,8 @@ class _CharacteristicTileState extends State<CharacteristicTile> {
     return StreamBuilder<List<int>>(
       stream: widget.characteristic.lastValueStream,
       initialData: widget.characteristic.lastValue,
-      builder: (c, snapshot) {
-        final value = snapshot.data;
+      builder: (context, snapshot) {
+        final List<int>? value = snapshot.data;
         return ExpansionTile(
           title: ListTile(
             title: Row(

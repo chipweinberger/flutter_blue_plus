@@ -1099,7 +1099,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     ServicePair *pair = [self getServicePair:peripheral characteristic:descriptor.characteristic];
 
-    int value = [descriptor.value intValue];
+    NSData* data = nil;
+    if (descriptor.value) {
+        int value = [descriptor.value intValue];
+        data = [NSData dataWithBytes:&value length:sizeof(value)];
+    }
     
     // See BmOnDescriptorResponse
     NSDictionary* result = @{
@@ -1109,7 +1113,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"secondary_service_uuid": pair.secondary ? [pair.secondary.UUID fullUUIDString] : [NSNull null],
         @"characteristic_uuid":    [descriptor.characteristic.UUID fullUUIDString],
         @"descriptor_uuid":        [descriptor.UUID fullUUIDString],
-        @"value":                  [self convertDataToHex:[NSData dataWithBytes:&value length:sizeof(value)]],
+        @"value":                  [self convertDataToHex:data],
         @"success":                @(error == nil),
         @"error_string":           error ? [error localizedDescription] : [NSNull null],
         @"error_code":             error ? @(error.code) : [NSNull null],
@@ -1215,6 +1219,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
 - (NSString *)convertDataToHex:(NSData *)data 
 {
+    if (data == nil) {
+        return @"";
+    }
+
     const unsigned char *bytes = (const unsigned char *)[data bytes];
     NSMutableString *hexString = [NSMutableString new];
 
@@ -1375,7 +1383,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     NSMutableArray *descriptorProtos = [NSMutableArray new];
     for (CBDescriptor *d in [characteristic descriptors])
     {
-        int value = [d.value intValue];
+        NSData* data = nil;
+        if (d.value) {
+            int value = [d.value intValue];
+            data = [NSData dataWithBytes:&value length:sizeof(value)];
+        }
     
         // See: BmBluetoothDescriptor
         NSDictionary* desc = @{
@@ -1384,7 +1396,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             @"secondary_service_uuid": [NSNull null],
             @"characteristic_uuid":    [d.characteristic.UUID fullUUIDString],
             @"descriptor_uuid":        [d.UUID fullUUIDString],
-            @"value":                  [self convertDataToHex:[NSData dataWithBytes:&value length:sizeof(value)]],
+            @"value":                  [self convertDataToHex:data],
         };
 
         [descriptorProtos addObject:desc];
@@ -1416,7 +1428,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"characteristic_uuid":    [characteristic.UUID fullUUIDString],
         @"descriptors":            descriptorProtos,
         @"properties":             propsMap,
-        @"value":                  [self convertDataToHex:[characteristic value]],
+        @"value":                  [self convertDataToHex:characteristic.value],
     };
 }
 

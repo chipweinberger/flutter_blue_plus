@@ -37,6 +37,9 @@ public class MessageMaker {
 
     private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
     public static String toHexString(byte[] bytes) {
+        if (bytes == null) {
+            return "";
+        }
         char[] hexChars = new char[bytes.length * 2];
         for (int j = 0; j < bytes.length; j++) {
             int v = bytes[j] & 0xFF;
@@ -180,9 +183,7 @@ public class MessageMaker {
         map.put("characteristic_uuid", characteristic.getUuid().toString());
         map.put("descriptors", descriptors);
         map.put("properties", bmCharacteristicProperties(characteristic.getProperties()));
-        if(characteristic.getValue() != null) {
-            map.put("value", toHexString(characteristic.getValue()));
-        }
+        map.put("value", toHexString(characteristic.getValue()));
         return map;
     }
 
@@ -192,9 +193,7 @@ public class MessageMaker {
         map.put("descriptor_uuid", descriptor.getUuid().toString());
         map.put("characteristic_uuid", descriptor.getCharacteristic().getUuid().toString());
         map.put("service_uuid", descriptor.getCharacteristic().getService().getUuid().toString());
-        if(descriptor.getValue() != null) {
-            map.put("value", toHexString(descriptor.getValue()));
-        }
+        map.put("value", toHexString(descriptor.getValue()));
         return map;
     }
 

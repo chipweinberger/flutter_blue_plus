@@ -278,7 +278,7 @@ class BmBluetoothCharacteristic {
       characteristicUuid: Guid(json['characteristic_uuid']),
       descriptors: descs,
       properties: BmCharacteristicProperties.fromMap(json['properties']),
-      value: _hexDecode(json['value'] ?? ""),
+      value: _hexDecode(json['value']),
     );
   }
 }
@@ -305,7 +305,7 @@ class BmBluetoothDescriptor {
       serviceUuid: Guid(json['service_uuid']),
       characteristicUuid: Guid(json['characteristic_uuid']),
       descriptorUuid: Guid(json['descriptor_uuid']),
-      value: _hexDecode(json['value'] ?? ""),
+      value: _hexDecode(json['value']),
     );
   }
 }
@@ -434,7 +434,7 @@ class BmOnCharacteristicReceived {
       serviceUuid: Guid(json['service_uuid']),
       secondaryServiceUuid: json['secondary_service_uuid'] != null ? Guid(json['secondary_service_uuid']) : null,
       characteristicUuid: Guid(json['characteristic_uuid']),
-      value: _hexDecode(json['value'] ?? ""),
+      value: _hexDecode(json['value']),
       success: json['success'] != 0,
       errorCode: json['error_code'],
       errorString: json['error_string'],
@@ -566,18 +566,6 @@ class BmWriteDescriptorRequest {
     _printDbg("\nBmWriteDescriptorRequest $data");
     return data;
   }
-
-  factory BmWriteDescriptorRequest.fromMap(Map<dynamic, dynamic> json) {
-    _printDbg("\nBmWriteDescriptorRequest $json");
-    return BmWriteDescriptorRequest(
-      remoteId: json['remote_id'],
-      serviceUuid: Guid(json['service_uuid']),
-      secondaryServiceUuid: json['secondary_service_uuid'] != null ? Guid(json['secondary_service_uuid']) : null,
-      characteristicUuid: Guid(json['characteristic_uuid']),
-      descriptorUuid: Guid(json['descriptor_uuid']),
-      value: _hexDecode(json['value'] ?? ""),
-    );
-  }
 }
 
 enum BmOnDescriptorResponseType {
@@ -629,7 +617,7 @@ class BmOnDescriptorResponse {
       secondaryServiceUuid: json['secondary_service_uuid'] != null ? Guid(json['secondary_service_uuid']) : null,
       characteristicUuid: Guid(json['characteristic_uuid']),
       descriptorUuid: Guid(json['descriptor_uuid']),
-      value: _hexDecode(json['value'] ?? ""),
+      value: _hexDecode(json['value']),
       success: json['success'] != 0,
       errorCode: json['error_code'],
       errorString: json['error_string'],
