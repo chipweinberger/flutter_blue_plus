@@ -1012,6 +1012,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"service_uuid":            [pair.primary.UUID fullUUIDString],
         @"secondary_service_uuid":  pair.secondary ? [pair.secondary.UUID fullUUIDString] : [NSNull null],
         @"characteristic_uuid":     [characteristic.UUID fullUUIDString],
+        @"value":                   [self convertDataToHex:characteristic.value],
         @"success":                 error == nil ? @(1) : @(0),
         @"error_string":            error ? [error localizedDescription] : [NSNull null],
         @"error_code":              error ? @(error.code) : [NSNull null],
