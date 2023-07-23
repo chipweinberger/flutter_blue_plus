@@ -101,14 +101,15 @@ class FindDevicesScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Find Devices'),
         actions: [
-          ElevatedButton(
-            child: const Text('TURN OFF'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.black,
-              foregroundColor: Colors.white,
+          if (Platform.isAndroid)
+            ElevatedButton(
+              child: const Text('TURN OFF'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () => FlutterBluePlus.instance.turnOff(),
             ),
-            onPressed: Platform.isAndroid ? () => FlutterBluePlus.instance.turnOff() : null,
-          ),
         ],
       ),
       body: RefreshIndicator(
