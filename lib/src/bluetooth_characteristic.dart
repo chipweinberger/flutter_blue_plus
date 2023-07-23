@@ -210,6 +210,13 @@ class BluetoothCharacteristic {
       throw FlutterBluePlusException("setNotifyValueFail", -1, "notifications were not updated");
     }
 
+    // update descriptor
+    for (var d in descriptors) {
+      if (d.uuid == BluetoothDescriptor.cccd) {
+        d.lastValue = response.value;
+      }
+    }
+
     return notify == isEnabled;
   }
 
