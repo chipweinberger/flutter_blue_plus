@@ -1,5 +1,9 @@
+## 1.9.5
+* iOS: fix serviceUUIDs always null in scan results (regression in 1.7.0)
+* example: fix snackbar complaining about invalid contexts
+
 ## 1.9.4
-* iOS: fix characteristic read not working. (regression in 1.9.0
+* iOS: fix characteristic read not working. (regression in 1.9.0)
 * dart: handle device.readRssi failure in rssiStream gracefully
 
 ## 1.9.3
