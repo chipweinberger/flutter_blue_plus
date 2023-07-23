@@ -70,16 +70,20 @@ class BluetoothOffScreen extends StatelessWidget {
             ),
             Text(
               'Bluetooth Adapter is ${adapterState != null ? adapterState.toString().split(".").last : 'not available'}.',
-              style: Theme.of(context)
-                  .primaryTextTheme
-                  .titleSmall
-                  ?.copyWith(color: Colors.white),
+              style: Theme.of(context).primaryTextTheme.titleSmall?.copyWith(color: Colors.white),
             ),
             ElevatedButton(
               child: const Text('TURN ON'),
-              onPressed: Platform.isAndroid
-                  ? () => FlutterBluePlus.instance.turnOn()
-                  : null,
+              onPressed: () async {
+                try {
+                  if (Platform.isAndroid) {
+                    FlutterBluePlus.instance.turnOn();
+                  }
+                } catch (e) {
+                  final snackBar = SnackBar(content: Text('Error: [turnOn] ${e.toString()}'));
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                }
+              },
             ),
           ],
         ),
@@ -103,16 +107,13 @@ class FindDevicesScreen extends StatelessWidget {
               backgroundColor: Colors.black,
               foregroundColor: Colors.white,
             ),
-            onPressed: Platform.isAndroid
-                ? () => FlutterBluePlus.instance.turnOff()
-                : null,
+            onPressed: Platform.isAndroid ? () => FlutterBluePlus.instance.turnOff() : null,
           ),
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: () => FlutterBluePlus.instance.startScan(
-            timeout: const Duration(seconds: 15),
-            androidUsesFineLocation: false),
+        onRefresh: () =>
+            FlutterBluePlus.instance.startScan(timeout: const Duration(seconds: 15), androidUsesFineLocation: false),
         child: SingleChildScrollView(
           child: Column(
             children: <Widget>[
@@ -129,14 +130,11 @@ class FindDevicesScreen extends StatelessWidget {
                               stream: d.connectionState,
                               initialData: BluetoothConnectionState.disconnected,
                               builder: (c, snapshot) {
-                                if (snapshot.data ==
-                                    BluetoothConnectionState.connected) {
+                                if (snapshot.data == BluetoothConnectionState.connected) {
                                   return ElevatedButton(
                                     child: const Text('OPEN'),
-                                    onPressed: () => Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                DeviceScreen(device: d))),
+                                    onPressed: () => Navigator.of(context)
+                                        .push(MaterialPageRoute(builder: (context) => DeviceScreen(device: d))),
                                   );
                                 }
                                 return Text(snapshot.data.toString());
@@ -154,9 +152,11 @@ class FindDevicesScreen extends StatelessWidget {
                       .map(
                         (r) => ScanResultTile(
                           result: r,
-                          onTap: () => Navigator.of(context)
-                              .push(MaterialPageRoute(builder: (context) {
-                            r.device.connect();
+                          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                            r.device.connect().catchError((e) {
+                              final snackBar = SnackBar(content: Text('Error: [connect] ${e.toString()}'));
+                              ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                            });
                             return DeviceScreen(device: r.device);
                           })),
                         ),
@@ -175,15 +175,24 @@ class FindDevicesScreen extends StatelessWidget {
           if (snapshot.data!) {
             return FloatingActionButton(
               child: const Icon(Icons.stop),
-              onPressed: () => FlutterBluePlus.instance.stopScan(),
+              onPressed: () {
+                FlutterBluePlus.instance.stopScan().catchError((e){
+                  final snackBar = SnackBar(content: Text('Error: [stopScan] ${e.toString()}'));
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                });
+              },
               backgroundColor: Colors.red,
             );
           } else {
             return FloatingActionButton(
                 child: const Icon(Icons.search),
-                onPressed: () => FlutterBluePlus.instance.startScan(
-                    timeout: const Duration(seconds: 15),
-                    androidUsesFineLocation: false)); 
+                onPressed: () {
+                    FlutterBluePlus.instance
+                        .startScan(timeout: const Duration(seconds: 15), androidUsesFineLocation: false).catchError((e){
+                    final snackBar = SnackBar(content: Text('Error: [startScan] ${e.toString()}'));
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  });
+                });
           }
         },
       ),
@@ -198,15 +207,10 @@ class DeviceScreen extends StatelessWidget {
 
   List<int> _getRandomBytes() {
     final math = Random();
-    return [
-      math.nextInt(255),
-      math.nextInt(255),
-      math.nextInt(255),
-      math.nextInt(255)
-    ];
+    return [math.nextInt(255), math.nextInt(255), math.nextInt(255), math.nextInt(255)];
   }
 
-  List<Widget> _buildServiceTiles(List<BluetoothService> services) {
+  List<Widget> _buildServiceTiles(BuildContext context, List<BluetoothService> services) {
     return services
         .map(
           (s) => ServiceTile(
@@ -215,17 +219,34 @@ class DeviceScreen extends StatelessWidget {
                 .map(
                   (c) => CharacteristicTile(
                     characteristic: c,
-                    onReadPressed: () => c.read(),
-                    onWritePressed: () async {
-                      await c.write(_getRandomBytes(), withoutResponse: true);
-                      if (c.properties.read) {
+                    onReadPressed: () async {
+                      try {
                         await c.read();
+                      } catch (e) {
+                        final snackBar = SnackBar(content: Text('Error: [read] ${e.toString()}'));
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      }
+                    },
+                    onWritePressed: () async {
+                      try {
+                        await c.write(_getRandomBytes(), withoutResponse: true);
+                        if (c.properties.read) {
+                          await c.read();
+                        }
+                      } catch (e) {
+                        final snackBar = SnackBar(content: Text('Error: [write] ${e.toString()}'));
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
                       }
                     },
                     onNotificationPressed: () async {
-                      await c.setNotifyValue(!c.isNotifying);
-                      if (c.properties.read) {
-                        await c.read();
+                      try {
+                        await c.setNotifyValue(!c.isNotifying);
+                        if (c.properties.read) {
+                          await c.read();
+                        }
+                      } catch (e) {
+                        final snackBar = SnackBar(content: Text('Error: [setNotifyValue] ${e.toString()}'));
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
                       }
                     },
                     descriptorTiles: c.descriptors
@@ -259,11 +280,25 @@ class DeviceScreen extends StatelessWidget {
               String text;
               switch (snapshot.data) {
                 case BluetoothConnectionState.connected:
-                  onPressed = () => device.disconnect();
+                  onPressed = () async {
+                    try {
+                      await device.disconnect();
+                    } catch (e) {
+                      final snackBar = SnackBar(content: Text('Error: [disconnect] ${e.toString()}'));
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    }
+                  };
                   text = 'DISCONNECT';
                   break;
                 case BluetoothConnectionState.disconnected:
-                  onPressed = () => device.connect();
+                 onPressed = () async {
+                    try {
+                      await device.connect();
+                    } catch (e) {
+                      final snackBar = SnackBar(content: Text('Error: [connect] ${e.toString()}'));
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    }
+                  };
                   text = 'CONNECT';
                   break;
                 default:
@@ -275,10 +310,7 @@ class DeviceScreen extends StatelessWidget {
                   onPressed: onPressed,
                   child: Text(
                     text,
-                    style: Theme.of(context)
-                        .primaryTextTheme
-                        .labelLarge
-                        ?.copyWith(color: Colors.white),
+                    style: Theme.of(context).primaryTextTheme.labelLarge?.copyWith(color: Colors.white),
                   ));
             },
           )
@@ -301,16 +333,13 @@ class DeviceScreen extends StatelessWidget {
                         ? StreamBuilder<int>(
                             stream: rssiStream(),
                             builder: (context, snapshot) {
-                              return Text(
-                                  snapshot.hasData ? '${snapshot.data}dBm' : '',
+                              return Text(snapshot.hasData ? '${snapshot.data}dBm' : '',
                                   style: Theme.of(context).textTheme.bodySmall);
                             })
-                        : Text('',
-                            style: Theme.of(context).textTheme.bodySmall),
+                        : Text('', style: Theme.of(context).textTheme.bodySmall),
                   ],
                 ),
-                title: Text(
-                    'Device is ${snapshot.data.toString().split('.')[1]}.'),
+                title: Text('Device is ${snapshot.data.toString().split('.')[1]}.'),
                 subtitle: Text('${device.remoteId}'),
                 trailing: StreamBuilder<bool>(
                   stream: device.isDiscoveringServices,
@@ -320,7 +349,14 @@ class DeviceScreen extends StatelessWidget {
                     children: <Widget>[
                       IconButton(
                         icon: const Icon(Icons.refresh),
-                        onPressed: () => device.discoverServices(),
+                        onPressed: () async {
+                          try {
+                            await device.discoverServices();
+                          } catch (e) {
+                            final snackBar = SnackBar(content: Text('Error: [discoverServices] ${e.toString()}'));
+                            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                          }
+                        },
                       ),
                       const IconButton(
                         icon: SizedBox(
@@ -344,9 +380,15 @@ class DeviceScreen extends StatelessWidget {
                 title: const Text('MTU Size'),
                 subtitle: Text('${snapshot.data} bytes'),
                 trailing: IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () => device.requestMtu(223),
-                ),
+                    icon: const Icon(Icons.edit),
+                    onPressed: () async {
+                      try {
+                        await device.requestMtu(223);
+                      } catch (e) {
+                        final snackBar = SnackBar(content: Text('Error: [requestMtu] ${e.toString()}'));
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      }
+                    }),
               ),
             ),
             StreamBuilder<List<BluetoothService>>(
@@ -354,7 +396,7 @@ class DeviceScreen extends StatelessWidget {
               initialData: const [],
               builder: (c, snapshot) {
                 return Column(
-                  children: _buildServiceTiles(snapshot.data!),
+                  children: _buildServiceTiles(context, snapshot.data!),
                 );
               },
             ),
