@@ -347,8 +347,8 @@ class DeviceScreen extends StatelessWidget {
                   builder: (c, snapshot) => IndexedStack(
                     index: snapshot.data! ? 1 : 0,
                     children: <Widget>[
-                      IconButton(
-                        icon: const Icon(Icons.refresh),
+                      TextButton(
+                        child: const Text("Discover Services"),
                         onPressed: () async {
                           try {
                             await device.discoverServices();
