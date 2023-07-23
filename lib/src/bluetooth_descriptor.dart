@@ -12,6 +12,9 @@ class BluetoothDescriptor {
   final Guid characteristicUuid;
   final Guid descriptorUuid;
 
+  // convenience accessor
+  Guid get uuid => descriptorUuid;
+
   final _Mutex _readWriteMutex = _Mutex();
 
   List<int> lastValue = [];
@@ -146,7 +149,4 @@ class BluetoothDescriptor {
 
   @Deprecated('Use remoteId instead')
   DeviceIdentifier get deviceId => remoteId;
-
-  @Deprecated('Use descriptorUuid instead')
-  Guid get uuid => descriptorUuid;
 }
