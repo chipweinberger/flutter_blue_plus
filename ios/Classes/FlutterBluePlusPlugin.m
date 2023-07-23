@@ -1283,7 +1283,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     
     // Service Uuids - convert from CBUUID's to UUID strings
     NSArray *serviceUuidsB = nil;
-    if (serviceData != nil) {
+    if (serviceUuids != nil) {
         NSMutableArray *mutable = [[NSMutableArray alloc] init];
         for (CBUUID *uuid in serviceUuids) {
             [mutable addObject:uuid.UUIDString];
