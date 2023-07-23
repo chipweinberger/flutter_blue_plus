@@ -136,7 +136,7 @@ class ServiceTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             const Text('Service'),
-            Text('0x${service.serviceUuid.toString().toUpperCase().substring(4, 8)}',
+            Text('0x${service.serviceUuid.toString().toUpperCase()}',
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: Theme.of(context).textTheme.bodySmall?.color))
           ],
@@ -147,7 +147,7 @@ class ServiceTile extends StatelessWidget {
       return ListTile(
         title: const Text('Service'),
         subtitle:
-            Text('0x${service.serviceUuid.toString().toUpperCase().substring(4, 8)}'),
+            Text('0x${service.serviceUuid.toString().toUpperCase()}'),
       );
     }
   }
@@ -172,7 +172,7 @@ class CharacteristicTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<int>>(
-      stream: characteristic.value,
+      stream: characteristic.lastValueStream,
       initialData: characteristic.lastValue,
       builder: (c, snapshot) {
         final value = snapshot.data;
@@ -184,7 +184,7 @@ class CharacteristicTile extends StatelessWidget {
               children: <Widget>[
                 const Text('Characteristic'),
                 Text(
-                    '0x${characteristic.characteristicUuid.toString().toUpperCase().substring(4, 8)}',
+                    '0x${characteristic.characteristicUuid.toString().toUpperCase()}',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: Theme.of(context).textTheme.bodySmall?.color))
               ],
@@ -244,13 +244,13 @@ class DescriptorTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           const Text('Descriptor'),
-          Text('0x${descriptor.descriptorUuid.toString().toUpperCase().substring(4, 8)}',
+          Text('0x${descriptor.descriptorUuid.toString().toUpperCase()}',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color: Theme.of(context).textTheme.bodySmall?.color))
         ],
       ),
       subtitle: StreamBuilder<List<int>>(
-        stream: descriptor.value,
+        stream: descriptor.lastValueStream,
         initialData: descriptor.lastValue,
         builder: (c, snapshot) => Text(snapshot.data.toString()),
       ),

@@ -706,7 +706,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     }
 
     CBService *secondaryService;
-    if (secondaryServiceId.length)
+    if (secondaryServiceId && (NSNull*)secondaryServiceId != [NSNull null] && secondaryServiceId.length)
     {
         secondaryService = [self getServiceFromArray:secondaryServiceId array:[primaryService includedServices]];
         @throw [FlutterError errorWithCode:@"locateCharacteristic"
@@ -1059,10 +1059,15 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     ServicePair *pair = [self getServicePair:peripheral characteristic:characteristic];
 
-    // Notifications & Indications are configured by writing to the 
-    // Client Characteristic Configuration Descriptor (CCCD)
-    CBDescriptor *descriptor = [self getCCCDForCharacteristic:characteristic];
-    int value = descriptor ? [descriptor.value intValue] : 0;
+    int value = 0;
+    if(characteristic.isNotifying) {
+        // in iOS, if a characteristic supports both indications and notifications, 
+        // then CoreBluetooth will default to indications
+        bool supportsNotify = (characteristic.properties & CBCharacteristicPropertyNotify) != 0;
+        bool supportsIndicate = (characteristic.properties & CBCharacteristicPropertyIndicate) != 0;
+        if (characteristic.isNotifying && supportsIndicate) {value = 2;}
+        if (characteristic.isNotifying && supportsNotify) {value = 1;}
+    }
     
     // See BmOnDescriptorResponse
     NSDictionary* result = @{
@@ -1437,18 +1442,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 - (uint32_t)getMtu:(CBPeripheral *)peripheral
 {
     return (uint32_t)[peripheral maximumWriteValueLengthForType:CBCharacteristicWriteWithoutResponse];
-}
-
-- (CBDescriptor *)getCCCDForCharacteristic:(CBCharacteristic *)characteristic
-{
-    for (CBDescriptor *descriptor in characteristic.descriptors) {
-        if ([descriptor.UUID isEqual:[CBUUID UUIDWithString:CBUUIDClientCharacteristicConfigurationString]]) {
-            return descriptor;
-        }
-    }
-
-    // No CCCD found for this characteristic
-    return nil;
 }
 
 - (ServicePair *)getServicePair:(CBPeripheral *)peripheral
