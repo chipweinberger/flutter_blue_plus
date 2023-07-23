@@ -195,26 +195,25 @@ class CharacteristicTile extends StatelessWidget {
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              IconButton(
-                icon: Icon(
-                  Icons.file_download,
-                  color: Theme.of(context).iconTheme.color?.withOpacity(0.5),
+              if (characteristic.properties.read)
+                IconButton(
+                  icon: Icon(
+                    Icons.file_download,
+                    color: Theme.of(context).iconTheme.color?.withOpacity(0.5),
+                  ),
+                  onPressed: onReadPressed,
                 ),
-                onPressed: onReadPressed,
-              ),
-              IconButton(
-                icon: Icon(Icons.file_upload,
-                    color: Theme.of(context).iconTheme.color?.withOpacity(0.5)),
-                onPressed: onWritePressed,
-              ),
-              IconButton(
-                icon: Icon(
-                    characteristic.isNotifying
-                        ? Icons.sync_disabled
-                        : Icons.sync,
-                    color: Theme.of(context).iconTheme.color?.withOpacity(0.5)),
-                onPressed: onNotificationPressed,
-              )
+              if (characteristic.properties.write)
+                IconButton(
+                  icon: Icon(Icons.file_upload,
+                      color: Theme.of(context).iconTheme.color?.withOpacity(0.5)),
+                  onPressed: onWritePressed,
+                ),
+              if (characteristic.properties.notify || characteristic.properties.indicate)
+                TextButton(
+                  child: Text(characteristic.isNotifying ? "Unsubscribe" : "Subscribe"),
+                  onPressed: onNotificationPressed,
+                )
             ],
           ),
           children: descriptorTiles,
