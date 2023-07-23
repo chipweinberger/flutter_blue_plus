@@ -1,10 +1,17 @@
+## 1.9.3
+* iOS: fix setNotify returning error even though it succeeded (regression in 1.9.0)
+* dart: Characteristic.isNotifying was not working (regression in 1.9.0)
+* dart: add back uuid convenience variable for BluetoothDescriptor (deprecated in 1.8.6)
+* example: only show READ/WRITE/SUBSCRIBE buttons if the characteristic supports it
+* example: add error handling
+
 ## 1.9.2
 * dart: readRssi: fix ArgumentError (Invalid argument: Instance of 'DeviceIdentifier') (Regression 1.9.0)
 
 ## 1.9.1
 * dart: fix crash in scanning due to assuming uuid is Guid format when it might not (Regression 1.9.0)
 * dart: BluetoothCharacteristic.onValueReceived should only stream successful reads (Bug in 1.9.0)
-* dart: add convenience accessors for BluetoothService.uuid and BluetoothCharacteristic.uuid as (formerly deprecated in 1.8.6)
+* dart: add convenience accessors for BluetoothService.uuid and BluetoothCharacteristic.uuid as (deprecated in 1.8.6)
 * example: add macos support
 
 
