@@ -1008,7 +1008,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     // See BmOnCharacteristicReceived
     NSDictionary* result = @{
-        @"type":                    @(0), // type: read
         @"remote_id":               [peripheral.identifier UUIDString],
         @"service_uuid":            [pair.primary.UUID fullUUIDString],
         @"secondary_service_uuid":  pair.secondary ? [pair.secondary.UUID fullUUIDString] : [NSNull null],
@@ -1036,7 +1035,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     // See BmOnCharacteristicWritten
     NSDictionary* result = @{
-        @"type":                    @(1), // type: write
         @"remote_id":               [peripheral.identifier UUIDString],
         @"service_uuid":            [pair.primary.UUID fullUUIDString],
         @"secondary_service_uuid":  pair.secondary ? [pair.secondary.UUID fullUUIDString] : [NSNull null],
