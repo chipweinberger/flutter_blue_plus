@@ -84,7 +84,7 @@ class BluetoothOffScreen extends StatelessWidget {
                 onPressed: () async {
                   try {
                     if (Platform.isAndroid) {
-                      FlutterBluePlus.turnOn();
+                      await FlutterBluePlus.turnOn();
                     }
                   } catch (e) {
                     final snackBar = SnackBar(content: Text(prettyException("Error Turning On:", e)));
@@ -118,7 +118,16 @@ class FindDevicesScreen extends StatelessWidget {
                   backgroundColor: Colors.black,
                   foregroundColor: Colors.white,
                 ),
-                onPressed: () => FlutterBluePlus.turnOff(),
+                onPressed: () async {
+                  try {
+                    if (Platform.isAndroid) {
+                      await FlutterBluePlus.turnOff();
+                    }
+                  } catch (e) {
+                    final snackBar = SnackBar(content: Text(prettyException("Error Turning On:", e)));
+                    snackBarKeyB.currentState?.showSnackBar(snackBar);
+                  }
+                },
               ),
           ],
         ),

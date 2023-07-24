@@ -166,7 +166,7 @@ class _CharacteristicTileState extends State<CharacteristicTile> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<int>>(
-      stream: widget.characteristic.lastValueStream,
+      stream: widget.characteristic.onValueReceived,
       initialData: widget.characteristic.lastValue,
       builder: (context, snapshot) {
         final List<int>? value = snapshot.data;
@@ -244,7 +244,7 @@ class DescriptorTile extends StatelessWidget {
         ],
       ),
       subtitle: StreamBuilder<List<int>>(
-        stream: descriptor.lastValueStream,
+        stream: descriptor.onValueReceived,
         initialData: descriptor.lastValue,
         builder: (c, snapshot) => Text(snapshot.data.toString()),
       ),
