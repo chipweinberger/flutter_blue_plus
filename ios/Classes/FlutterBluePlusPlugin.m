@@ -383,10 +383,16 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             }
 
             // Find characteristic
+            NSError *error = nil;
             CBCharacteristic *characteristic = [self locateCharacteristic:characteristicUuid
-                                                            peripheral:peripheral
+                                                               peripheral:peripheral
                                                                 serviceId:serviceUuid
-                                                    secondaryServiceId:secondaryServiceUuid];
+                                                       secondaryServiceId:secondaryServiceUuid
+                                                                    error:&error];
+            if (characteristic == nil) {
+                result([FlutterError errorWithCode:@"readCharacteristic" message:error.localizedDescription details:NULL]);
+                return;
+            }
 
             // Trigger a read
             [peripheral readValueForCharacteristic:characteristic];
@@ -419,13 +425,23 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             }
 
             // Find characteristic
+            NSError *error = nil;
             CBCharacteristic *characteristic = [self locateCharacteristic:characteristicUuid
-                                                            peripheral:peripheral
+                                                               peripheral:peripheral
                                                                 serviceId:serviceUuid
-                                                    secondaryServiceId:secondaryServiceUuid];
+                                                       secondaryServiceId:secondaryServiceUuid
+                                                                    error:&error];
+            if (characteristic == nil) {
+                result([FlutterError errorWithCode:@"readDescriptor" message:error.localizedDescription details:NULL]);
+                return;
+            }
 
             // Find descriptor
-            CBDescriptor *descriptor = [self locateDescriptor:descriptorUuid characteristic:characteristic];
+            CBDescriptor *descriptor = [self locateDescriptor:descriptorUuid characteristic:characteristic error:&error];
+            if (descriptor == nil) {
+                result([FlutterError errorWithCode:@"readDescriptor" message:error.localizedDescription details:NULL]);
+                return;
+            }
 
             [peripheral readValueForDescriptor:descriptor];
 
@@ -483,12 +499,17 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             } 
 
             // Find characteristic
+            NSError *error = nil;
             CBCharacteristic *characteristic = [self locateCharacteristic:characteristicUuid
-                                                                peripheral:peripheral
+                                                               peripheral:peripheral
                                                                 serviceId:serviceUuid
-                                                        secondaryServiceId:secondaryServiceUuid];
-
-                                                        
+                                                       secondaryServiceId:secondaryServiceUuid
+                                                                    error:&error];
+            if (characteristic == nil) {
+                result([FlutterError errorWithCode:@"writeCharacteristic" message:error.localizedDescription details:NULL]);
+                return;
+            }
+                  
             // Write to characteristic
             [peripheral writeValue:[self convertHexToData:value] forCharacteristic:characteristic type:type];
 
@@ -531,13 +552,23 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             }
 
             // Find characteristic
+            NSError *error = nil;
             CBCharacteristic *characteristic = [self locateCharacteristic:characteristicUuid
-                                                            peripheral:peripheral
+                                                               peripheral:peripheral
                                                                 serviceId:serviceUuid
-                                                    secondaryServiceId:secondaryServiceUuid];
+                                                       secondaryServiceId:secondaryServiceUuid
+                                                                    error:&error];
+            if (characteristic == nil) {
+                result([FlutterError errorWithCode:@"writeDescriptor" message:error.localizedDescription details:NULL]);
+                return;
+            }
 
             // Find descriptor
-            CBDescriptor *descriptor = [self locateDescriptor:descriptorUuid characteristic:characteristic];
+            CBDescriptor *descriptor = [self locateDescriptor:descriptorUuid characteristic:characteristic error:&error];
+            if (descriptor == nil) {
+                result([FlutterError errorWithCode:@"writeDescriptor" message:error.localizedDescription details:NULL]);
+                return;
+            }
 
             // Write descriptor
             [peripheral writeValue:[self convertHexToData:value] forDescriptor:descriptor];
@@ -570,10 +601,16 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             }
 
             // Find characteristic
+            NSError *error = nil;
             CBCharacteristic *characteristic = [self locateCharacteristic:characteristicUuid
-                                                            peripheral:peripheral
+                                                               peripheral:peripheral
                                                                 serviceId:serviceUuid
-                                                    secondaryServiceId:secondaryServiceUuid];
+                                                       secondaryServiceId:secondaryServiceUuid
+                                                                    error:&error];
+            if (characteristic == nil) {
+                result([FlutterError errorWithCode:@"setNotification" message:error.localizedDescription details:NULL]);
+                return;
+            }
 
             // Set notification value
             [peripheral setNotifyValue:[enable boolValue] forCharacteristic:characteristic];
@@ -719,45 +756,49 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                                 peripheral:(CBPeripheral *)peripheral
                                  serviceId:(NSString *)serviceId
                         secondaryServiceId:(NSString *)secondaryServiceId
+                                     error:(NSError **)error
 {
     CBService *primaryService = [self getServiceFromArray:serviceId array:[peripheral services]];
     if (primaryService == nil || [primaryService isPrimary] == false)
     {
-        @throw [FlutterError errorWithCode:@"locateCharacteristic"
-                                   message:@"service could not be located on the device"
-                                   details:nil];
+        NSDictionary* d = @{NSLocalizedDescriptionKey : @"service could not be located on the device"};
+        *error = [NSError errorWithDomain:@"flutterBluePlus" code:1000 userInfo:d];
+        return nil;
     }
 
     CBService *secondaryService;
-    if (secondaryServiceId && (NSNull*)secondaryServiceId != [NSNull null] && secondaryServiceId.length)
+    if (secondaryServiceId && (NSNull*) secondaryServiceId != [NSNull null] && secondaryServiceId.length)
     {
         secondaryService = [self getServiceFromArray:secondaryServiceId array:[primaryService includedServices]];
-        @throw [FlutterError errorWithCode:@"locateCharacteristic"
-                                   message:@"secondary service could not be located on the device"
-                                   details:secondaryServiceId];
+        if (error && !secondaryService) {
+            NSString* s = [NSString stringWithFormat:@"secondary service '%@' could not be located on the device", secondaryServiceId];
+            NSDictionary* d = @{NSLocalizedDescriptionKey : s};
+            *error = [NSError errorWithDomain:@"flutterBluePlus" code:1001 userInfo:d];
+            return nil;
+        }
     }
 
     CBService *service = (secondaryService != nil) ? secondaryService : primaryService;
 
-    CBCharacteristic *characteristic = [self getCharacteristicFromArray:characteristicId
-                                                                  array:[service characteristics]];
+    CBCharacteristic *characteristic = [self getCharacteristicFromArray:characteristicId array:[service characteristics]];
     if (characteristic == nil)
     {
-        @throw [FlutterError errorWithCode:@"locateCharacteristic"
-                                   message:@"characteristic could not be located on the device"
-                                   details:nil];
+        NSDictionary* d = @{NSLocalizedDescriptionKey : @"characteristic could not be located on the device"};
+        *error = [NSError errorWithDomain:@"flutterBluePlus" code:1002 userInfo:d];
+        return nil;
     }
     return characteristic;
 }
 
-- (CBDescriptor *)locateDescriptor:(NSString *)descriptorId characteristic:(CBCharacteristic *)characteristic
+
+- (CBDescriptor *)locateDescriptor:(NSString *)descriptorId characteristic:(CBCharacteristic *)characteristic error:(NSError**)error
 {
     CBDescriptor *descriptor = [self getDescriptorFromArray:descriptorId array:[characteristic descriptors]];
     if (descriptor == nil)
     {
-        @throw [FlutterError errorWithCode:@"locateDescriptor"
-                                   message:@"descriptor could not be located on the device"
-                                   details:nil];
+        NSDictionary* d = @{NSLocalizedDescriptionKey : @"descriptor could not be located on the device"};
+        *error = [NSError errorWithDomain:@"flutterBluePlus" code:1002 userInfo:d];
+        return nil;
     }
     return descriptor;
 }
@@ -1228,10 +1269,17 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     NSString  *value                = request[@"value"];
 
     // Find characteristic
+    NSError *error = nil;
     CBCharacteristic *characteristic = [self locateCharacteristic:characteristicUuid
-                                                        peripheral:peripheral
+                                                       peripheral:peripheral
                                                         serviceId:serviceUuid
-                                                secondaryServiceId:secondaryServiceUuid];
+                                               secondaryServiceId:secondaryServiceUuid
+                                                            error:&error];
+    if (characteristic == nil) {
+        NSLog(@"Error: peripheralIsReadyToSendWriteWithoutResponse: %@", [error localizedDescription]);
+        return;
+    }
+
     // Write to characteristic
     [peripheral writeValue:[self convertHexToData:value]
             forCharacteristic:characteristic
