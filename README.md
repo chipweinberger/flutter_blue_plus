@@ -283,6 +283,17 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 | lastValue         | :white_check_mark: | :white_check_mark: |        | The most recent value of the descriptor        |
 | lastValueStream   | :white_check_mark: | :white_check_mark: |        | Stream of lastValue + onValueReceived          |
 
+## Proguard
+Add the following line in your `project/android/app/proguard-rules.pro` file:
+
+```
+-keep class com.boskokg.flutter_blue_plus.* { *; }
+```
+
+to avoid seeing the following kind errors in your `release` builds:
+```
+PlatformException(startScan, Field androidScanMode_ for m0.e0 not found. Known fields are [private int m0.e0.q, private b3.b0$i m0.e0.r, private boolean m0.e0.s, private static final m0.e0 m0.e0.t, private static volatile b3.a1 m0.e0.u], java.lang.RuntimeException: Field androidScanMode_ for m0.e0 not found
+```
 
 ## Debugging
 
