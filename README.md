@@ -20,34 +20,13 @@ FlutterBluePlus is a bluetooth plugin for [Flutter](https://flutter.dev), a new 
 
 FlutterBluePlus aims to offer the most from all supported platforms: iOS, macOS, Android. (Feel free to contribute Windows support!)
 
-Using the FlutterBluePlus instance, you can scan for and connect to nearby devices ([BluetoothDevice](#bluetoothdevice-api)).
-Once connected to a device, the BluetoothDevice object can discover services ([BluetoothService](lib/src/bluetooth_service.dart)), characteristics ([BluetoothCharacteristic](lib/src/bluetooth_characteristic.dart)), and descriptors ([BluetoothDescriptor](lib/src/bluetooth_descriptor.dart)).
-The BluetoothDevice object is then used to directly interact with characteristics and descriptors.
-
-## Troubleshooting
-
-The easiest way to debug issues in FlutterBluePlus is to first make local copy.
-
-```
-cd /user/downloads
-git clone https://github.com/boskokg/flutter_blue_plus.git
-```
-
-then in `pubspec.yaml` add the repo by path:
-
-```
-  flutter_blue_plus:
-    path: /user/downloads/flutter_blue_plus
-```
-
-Now you can edit FlutterBluePlus code and debug issues yourself. 
-
-### When I scan using a service UUID filter, it doesn't find any devices.
-
-Make sure the device is advertising which service UUID's it supports. This is found in the advertisement
-packet as **UUID 16 bit complete list** or **UUID 128 bit complete list**.
-
 ## Usage
+
+### Error Handling
+
+Flutter Blue Plus uses exceptions for error handling. Most functions can throw and must be handled. 
+
+**See the Reference section below for a complete list of throwing function.**
 
 ### Scan for devices
 
@@ -131,91 +110,6 @@ await device.requestMtu(512);
 ```
 
 Note that iOS will not allow requests of MTU size, and will always try to negotiate the highest possible MTU (iOS supports up to MTU size 185)
-
-## Error Handling
-
-**All functions in FlutterBluePlus will throw exceptions when they encounter errors.** 
-
- **You MUST handle exceptions for bluetooth communication:**
-- `BluetoothDevice.connect()`
-- `BluetoothDevice.disconnect()`
-- `BluetoothDevice.discoverServices()`
-- `BluetoothDevice.requestMtu()`
-- `BluetoothDevice.readRssi()`
-- `BluetoothDevice.pair()`
-- `BluetoothCharacteristic.read()`
-- `BluetoothCharacteristic.write()`
-- `BluetoothCharacteristic.setNotifyValue()`
-- `BluetoothDescriptor.read()`
-- `BluetoothDescriptor.read()`
-
- **These functions also THROW:**
-- `FlutterBluePlus.turnOn()`
-- `FlutterBluePlus.turnOff()`
-- `FlutterBluePlus.startScan()`
-- `FlutterBluePlus.stopScan()`
-- `FlutterBluePlus.scan()`
-- `BluetoothDevice.requestConnectionPriority`
-- `BluetoothDevice.mtu`
-- `BluetoothDevice.removeBond()`
-- `BluetoothDevice.clearGattCache()`
-
- **At the time of writing, these function DO NOT throw exceptions**
-- `FlutterBluePlus.isAvailable`
-- `FlutterBluePlus.isOn`
-- `FlutterBluePlus.adapterState`
-- `FlutterBluePlus.isScanning`
-- `FlutterBluePlus.isScanningNow`
-- `FlutterBluePlus.scanResults`
-- `FlutterBluePlus.setLogLevel()`
-- `BluetoothDevice.localName`
-- `BluetoothDevice.connectionState`
-- `BluetoothDevice.setPreferredPhy()`
-- `BluetoothCharacteristic.isNotifying`
-- `BluetoothCharacteristic.lastValue, uuid, & other simple accessors`
-- `BluetoothDescriptor.lastValue, uuid, & other simple accessors`
-
-**Example Code:**
-
-```dart
-try {
-    await characteristic.read();
-} catch (e) {
-    print(userFriendlyError(e))
-}
-
-String userFriendlyError(dynamic e) {
-  if (e is FlutterBluePlusException) {return e.errorString;}
-  if (e is PlatformException) {return e.message;}
-  return e.toString();
-}
-```
-
-### Bluetooth Streams
-
-The Bluetooth receive streams **do not** return errors or close. These include:
-- `BluetoothCharacteristic.onValueReceived`
-- `BluetoothCharacteristic.lastValueStream`
-- `BluetoothDescriptor.onValueReceived`
-- `BluetoothDescriptor.lastValueStream`
-
-This is a limitation of the bluetooth protocol.
-
-These streams stio receiving values after the connection is lost so make sure to listen to `BluetoothDevice.connectionState` and respond to it accordingly.
-
-### Other Streams
-
-These streams **never** encounter any errors of any kind.
-
-- `FlutterBluePlus.isScanning`
-- `FlutterBluePlus.scanResults`
-- `FlutterBluePlus.adapterState`
-- `BluetoothDevice.connectionState`
-- `BluetoothDevice.isDiscoveringServices`
-
-These streams **could** throw an exception when first called if the remoteId is no longer valid.
-- `BluetoothDevice.services`
-- `BluetoothDevices.mtu`
 
 ## Getting Started
 
@@ -326,5 +220,94 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 | write           | :white_check_mark: | :white_check_mark: | Writes the value of the descriptor.            |
 | onValueReceived | :white_check_mark: | :white_check_mark: | Stream of descriptor value changes             |
 | lastValueStream | :white_check_mark: | :white_check_mark: | Stream of lastValue + descriptor value changes |
+
+
+## Throwing functions
+
+**All functions in FlutterBluePlus will throw exceptions when they encounter errors.** 
+
+ **You MUST handle exceptions for bluetooth communication:**
+- `BluetoothDevice.connect()`
+- `BluetoothDevice.disconnect()`
+- `BluetoothDevice.discoverServices()`
+- `BluetoothDevice.requestMtu()`
+- `BluetoothDevice.readRssi()`
+- `BluetoothDevice.pair()`
+- `BluetoothCharacteristic.read()`
+- `BluetoothCharacteristic.write()`
+- `BluetoothCharacteristic.setNotifyValue()`
+- `BluetoothDescriptor.read()`
+- `BluetoothDescriptor.read()`
+
+ **These functions also THROW:**
+- `FlutterBluePlus.turnOn()`
+- `FlutterBluePlus.turnOff()`
+- `FlutterBluePlus.startScan()`
+- `FlutterBluePlus.stopScan()`
+- `FlutterBluePlus.scan()`
+- `BluetoothDevice.requestConnectionPriority
+- `BluetoothDevice.mtu`
+- `BluetoothDevice.removeBond()`
+- `BluetoothDevice.clearGattCache()`
+- `BluetoothDevice.services`
+- `BluetoothDevices.mtu`
+
+ **At the time of writing, these function DO NOT throw exceptions**
+- `FlutterBluePlus.isAvailable`
+- `FlutterBluePlus.isOn`
+- `FlutterBluePlus.adapterState`
+- `FlutterBluePlus.isScanning`
+- `FlutterBluePlus.isScanningNow`
+- `FlutterBluePlus.scanResults`
+- `FlutterBluePlus.setLogLevel()`
+- `BluetoothDevice.localName`
+- `BluetoothDevice.connectionState`
+- `BluetoothDevice.setPreferredPhy()`
+- `BluetoothCharacteristic.isNotifying`
+- `BluetoothCharacteristic.lastValue, uuid, & other simple accessors`
+- `BluetoothDescriptor.lastValue, uuid, & other simple accessors`
+
+### Streams
+
+**All of the Bluetooth receive streams NEVER emit errors and NEVER close. They only emit on success. These include:**
+- `BluetoothCharacteristic.onValueReceived`
+- `BluetoothCharacteristic.lastValueStream`
+- `BluetoothDescriptor.onValueReceived`
+- `BluetoothDescriptor.lastValueStream`
+
+You can listen to `BluetoothDevice.connectionState` to know when to stop listening.
+
+**These streams also NEVER emit any errors of any kind.**
+
+- `FlutterBluePlus.isScanning`
+- `FlutterBluePlus.scanResults`
+- `FlutterBluePlus.adapterState`
+- `BluetoothDevice.connectionState`
+- `BluetoothDevice.isDiscoveringServices`
+- `BluetoothDevice.services` (only throws on first call if remoteId is invalid)
+- `BluetoothDevices.mtu` (only throws on first call if remoteId is invalid)
+
+## Troubleshooting
+
+The easiest way to debug issues in FlutterBluePlus is to first make local copy.
+
+```
+cd /user/downloads
+git clone https://github.com/boskokg/flutter_blue_plus.git
+```
+
+then in `pubspec.yaml` add the repo by path:
+
+```
+  flutter_blue_plus:
+    path: /user/downloads/flutter_blue_plus
+```
+
+Now you can edit FlutterBluePlus code and debug issues yourself. 
+
+### When I scan using a service UUID filter, it doesn't find any devices.
+
+Make sure the device is advertising which service UUID's it supports. This is found in the advertisement
+packet as **UUID 16 bit complete list** or **UUID 128 bit complete list**.
 
 
