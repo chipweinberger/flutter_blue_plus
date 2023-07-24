@@ -134,11 +134,9 @@ Note that iOS will not allow requests of MTU size, and will always try to negoti
 
 ## Error Handling
 
-All functions in FlutterBluePlus throw exceptions when they encounter errors. 
+**All functions in FlutterBluePlus will throw exceptions when they encounter errors.** 
 
-To make robust software, **you should defensively assume all functions will throw.**
-
-This is **especially** true for functions that require bluetooth communication. You **MUST** handle exceptions for:
+ **You MUST handle exceptions for bluetooth communication:**
 - `BluetoothDevice.connect()`
 - `BluetoothDevice.disconnect()`
 - `BluetoothDevice.discoverServices()`
@@ -151,12 +149,18 @@ This is **especially** true for functions that require bluetooth communication. 
 - `BluetoothDescriptor.read()`
 - `BluetoothDescriptor.read()`
 
-These functions will also throw exceptions:
+ **These functions also THROW:**
 - `FlutterBluePlus.turnOn()`
 - `FlutterBluePlus.turnOff()`
+- `FlutterBluePlus.startScan()`
+- `FlutterBluePlus.stopScan()`
+- `FlutterBluePlus.scan()`
+- `BluetoothDevice.requestConnectionPriority`
+- `BluetoothDevice.mtu`
+- `BluetoothDevice.removeBond()`
+- `BluetoothDevice.clearGattCache()`
 
-At the time of writing, these function **do not** throw exceptions:
-
+ **At the time of writing, these function DO NOT throw exceptions**
 - `FlutterBluePlus.isAvailable`
 - `FlutterBluePlus.isOn`
 - `FlutterBluePlus.adapterState`
@@ -166,11 +170,10 @@ At the time of writing, these function **do not** throw exceptions:
 - `FlutterBluePlus.setLogLevel()`
 - `BluetoothDevice.localName`
 - `BluetoothDevice.connectionState`
+- `BluetoothDevice.setPreferredPhy()`
 - `BluetoothCharacteristic.isNotifying`
 - `BluetoothCharacteristic.lastValue, uuid, & other simple accessors`
 - `BluetoothDescriptor.lastValue, uuid, & other simple accessors`
-
-**Any functions not listed above should be treated as potentially throwing.**
 
 **Example Code:**
 
@@ -178,10 +181,10 @@ At the time of writing, these function **do not** throw exceptions:
 try {
     await characteristic.read();
 } catch (e) {
-    print(prettyPrint(e))
+    print(userFriendlyError(e))
 }
 
-String prettyPrint(dynamic e) {
+String userFriendlyError(dynamic e) {
   if (e is FlutterBluePlusException) {return e.errorString;}
   if (e is PlatformException) {return e.message;}
   return e.toString();
