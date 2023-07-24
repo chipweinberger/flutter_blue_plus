@@ -185,24 +185,28 @@ class FindDevicesScreen extends StatelessWidget {
             if (snapshot.data!) {
               return FloatingActionButton(
                 child: const Icon(Icons.stop),
-                onPressed: () {
-                  FlutterBluePlus.instance.stopScan().catchError((e) {
+                onPressed: () async {
+                  try {
+                    FlutterBluePlus.instance.stopScan();
+                  } catch (e) {
                     final snackBar = SnackBar(content: Text('Error: [stopScan] ${e.toString()}'));
                     snackBarKeyB.currentState?.showSnackBar(snackBar);
-                  });
+                  }
+                  ;
                 },
                 backgroundColor: Colors.red,
               );
             } else {
               return FloatingActionButton(
                   child: const Icon(Icons.search),
-                  onPressed: () {
-                    FlutterBluePlus.instance
-                        .startScan(timeout: const Duration(seconds: 15), androidUsesFineLocation: false)
-                        .catchError((e) {
+                  onPressed: () async {
+                    try {
+                      FlutterBluePlus.instance
+                          .startScan(timeout: const Duration(seconds: 15), androidUsesFineLocation: false);
+                    } catch (e) {
                       final snackBar = SnackBar(content: Text('Error: [startScan] ${e.toString()}'));
                       snackBarKeyB.currentState?.showSnackBar(snackBar);
-                    });
+                    }
                   });
             }
           },
