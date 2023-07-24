@@ -1060,14 +1060,17 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     ServicePair *pair = [self getServicePair:peripheral characteristic:characteristic];
 
+    // Oddly iOS does not update the CCCD descriptors when didUpdateNotificationState is called. 
+    // So instead of using characteristic.descriptors we have to manually recreate the
+    // CCCD descriptor using isNotifying & characteristic.properties
     int value = 0;
     if(characteristic.isNotifying) {
         // in iOS, if a characteristic supports both indications and notifications, 
         // then CoreBluetooth will default to indications
         bool supportsNotify = (characteristic.properties & CBCharacteristicPropertyNotify) != 0;
         bool supportsIndicate = (characteristic.properties & CBCharacteristicPropertyIndicate) != 0;
-        if (characteristic.isNotifying && supportsIndicate) {value = 2;}
-        if (characteristic.isNotifying && supportsNotify) {value = 1;}
+        if (characteristic.isNotifying && supportsIndicate) {value = 2;} // '2' comes from the CCCD BLE spec
+        if (characteristic.isNotifying && supportsNotify) {value = 1;} // '1' comes from the CCCD BLE spec
     }
     
     // See BmOnDescriptorResponse
