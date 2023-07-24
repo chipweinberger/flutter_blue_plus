@@ -79,12 +79,6 @@ class BluetoothCharacteristic {
         secondaryServiceUuid: null,
       );
 
-      FlutterBluePlus._log(
-          LogLevel.info,
-          'remoteId: ${remoteId.toString()}'
-          'characteristicUuid: ${characteristicUuid.toString()}'
-          'serviceUuid: ${serviceUuid.toString()}');
-
       var responseStream = FlutterBluePlus._methodStream.stream
           .where((m) => m.method == "OnCharacteristicReceived")
           .map((m) => m.arguments)
