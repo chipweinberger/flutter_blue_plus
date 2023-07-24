@@ -40,9 +40,9 @@ Streams only return valid results. Stream errors are not used & streams are neve
 
 ```dart
 // check availability
-if (!FlutterBluePlus.isAvailable()) {
+if (await FlutterBluePlus.isAvailable() == false) {
     print("Bluetooth not supported by this device");
-    return
+    return;
 }
 
 // turn on bluetooth ourself if we can
