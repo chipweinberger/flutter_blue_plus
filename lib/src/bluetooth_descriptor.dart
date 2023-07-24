@@ -26,7 +26,7 @@ class BluetoothDescriptor {
   // this stream is pushed to whenever:
   //  1. descriptor.read() succeeds
   //  2. descriptor.write() succeeds
-  Stream<List<int>> get onValueReceived => FlutterBluePlus.instance._methodStream
+  Stream<List<int>> get onValueReceived => FlutterBluePlus._methodStream.stream
           .where((m) => m.method == "OnDescriptorResponse")
           .map((m) => m.arguments)
           .map((buffer) => BmOnDescriptorResponse.fromMap(buffer))
@@ -61,7 +61,7 @@ class BluetoothDescriptor {
         descriptorUuid: descriptorUuid,
       );
 
-      Stream<BmOnDescriptorResponse> responseStream = FlutterBluePlus.instance._methodStream
+      Stream<BmOnDescriptorResponse> responseStream = FlutterBluePlus._methodStream.stream
           .where((m) => m.method == "OnDescriptorResponse")
           .map((m) => m.arguments)
           .map((buffer) => BmOnDescriptorResponse.fromMap(buffer))
@@ -74,7 +74,7 @@ class BluetoothDescriptor {
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmOnDescriptorResponse> futureResponse = responseStream.first;
 
-      await FlutterBluePlus.instance._channel.invokeMethod('readDescriptor', request.toMap());
+      await FlutterBluePlus._invokeMethod('readDescriptor', request.toMap());
 
       BmOnDescriptorResponse response = await futureResponse.timeout(Duration(seconds: timeout));
 
@@ -103,7 +103,7 @@ class BluetoothDescriptor {
         value: value,
       );
 
-      Stream<BmOnDescriptorResponse> responseStream = FlutterBluePlus.instance._methodStream
+      Stream<BmOnDescriptorResponse> responseStream = FlutterBluePlus._methodStream.stream
           .where((m) => m.method == "OnDescriptorResponse")
           .map((m) => m.arguments)
           .map((buffer) => BmOnDescriptorResponse.fromMap(buffer))
@@ -116,7 +116,7 @@ class BluetoothDescriptor {
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmOnDescriptorResponse> futureResponse = responseStream.first;
 
-      await FlutterBluePlus.instance._channel.invokeMethod('writeDescriptor', request.toMap());
+      await FlutterBluePlus._invokeMethod('writeDescriptor', request.toMap());
 
       BmOnDescriptorResponse response = await futureResponse.timeout(Duration(seconds: timeout));
 

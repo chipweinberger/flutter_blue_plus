@@ -42,7 +42,7 @@ class FlutterBlueApp extends StatelessWidget {
     return MaterialApp(
       color: Colors.lightBlue,
       home: StreamBuilder<BluetoothAdapterState>(
-          stream: FlutterBluePlus.instance.adapterState,
+          stream: FlutterBluePlus.adapterState,
           initialData: BluetoothAdapterState.unknown,
           builder: (c, snapshot) {
             final adapterState = snapshot.data;
@@ -84,7 +84,7 @@ class BluetoothOffScreen extends StatelessWidget {
                 onPressed: () async {
                   try {
                     if (Platform.isAndroid) {
-                      FlutterBluePlus.instance.turnOn();
+                      FlutterBluePlus.turnOn();
                     }
                   } catch (e) {
                     final snackBar = SnackBar(content: Text(prettyException("Error Turning On:", e)));
@@ -118,19 +118,19 @@ class FindDevicesScreen extends StatelessWidget {
                   backgroundColor: Colors.black,
                   foregroundColor: Colors.white,
                 ),
-                onPressed: () => FlutterBluePlus.instance.turnOff(),
+                onPressed: () => FlutterBluePlus.turnOff(),
               ),
           ],
         ),
         body: RefreshIndicator(
           onRefresh: () =>
-              FlutterBluePlus.instance.startScan(timeout: const Duration(seconds: 15), androidUsesFineLocation: false),
+              FlutterBluePlus.startScan(timeout: const Duration(seconds: 15), androidUsesFineLocation: false),
           child: SingleChildScrollView(
             child: Column(
               children: <Widget>[
                 StreamBuilder<List<BluetoothDevice>>(
                   stream: Stream.periodic(const Duration(seconds: 2))
-                      .asyncMap((_) => FlutterBluePlus.instance.connectedDevices),
+                      .asyncMap((_) => FlutterBluePlus.connectedDevices),
                   initialData: const [],
                   builder: (c, snapshot) => Column(
                     children: snapshot.data!
@@ -156,7 +156,7 @@ class FindDevicesScreen extends StatelessWidget {
                   ),
                 ),
                 StreamBuilder<List<ScanResult>>(
-                  stream: FlutterBluePlus.instance.scanResults,
+                  stream: FlutterBluePlus.scanResults,
                   initialData: const [],
                   builder: (c, snapshot) => Column(
                     children: snapshot.data!
@@ -180,7 +180,7 @@ class FindDevicesScreen extends StatelessWidget {
           ),
         ),
         floatingActionButton: StreamBuilder<bool>(
-          stream: FlutterBluePlus.instance.isScanning,
+          stream: FlutterBluePlus.isScanning,
           initialData: false,
           builder: (c, snapshot) {
             if (snapshot.data!) {
@@ -188,7 +188,7 @@ class FindDevicesScreen extends StatelessWidget {
                 child: const Icon(Icons.stop),
                 onPressed: () async {
                   try {
-                    FlutterBluePlus.instance.stopScan();
+                    FlutterBluePlus.stopScan();
                   } catch (e) {
                     final snackBar = SnackBar(content: Text(prettyException("Stop Scan Error:", e)));
                     snackBarKeyB.currentState?.showSnackBar(snackBar);
@@ -202,7 +202,7 @@ class FindDevicesScreen extends StatelessWidget {
                   child: const Icon(Icons.search),
                   onPressed: () async {
                     try {
-                      FlutterBluePlus.instance
+                      FlutterBluePlus
                           .startScan(timeout: const Duration(seconds: 15), androidUsesFineLocation: false);
                     } catch (e) {
                       final snackBar = SnackBar(content: Text(prettyException("Start Scan Error:", e)));

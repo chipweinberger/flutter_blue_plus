@@ -11,56 +11,46 @@ class FlutterBluePlus {
   //  Internal
   //
 
-  static final FlutterBluePlus _instance = FlutterBluePlus._();
+  static bool _initialized = false;
 
-  // Used internally to dispatch methods from platform.
-  Stream<MethodCall> get _methodStream => _methodStreamController.stream;
+  // native platform channel
+  static final MethodChannel _methods = const MethodChannel('flutter_blue_plus/methods');
 
-  final MethodChannel _channel = const MethodChannel('flutter_blue_plus/methods');
-  final StreamController<MethodCall> _methodStreamController = StreamController.broadcast(); // ignore: close_sinks
+  // presents the method chanel as a broadcast stream
+  // ignore: close_sinks
+  static final StreamController<MethodCall> _methodStream = StreamController.broadcast();
 
-  final _BehaviorSubject<bool> _isScanning = _BehaviorSubject(false);
+  static final _BehaviorSubject<bool> _isScanning = _BehaviorSubject(false);
 
-  final _BehaviorSubject<List<ScanResult>> _scanResults = _BehaviorSubject([]);
+  static final _BehaviorSubject<List<ScanResult>> _scanResults = _BehaviorSubject([]);
 
   // timeout for scanning that can be cancelled by stopScan
-  Timer? _scanTimeout;
+  static Timer? _scanTimeout;
 
-  // BufferStream for scanning that can be closed by stopScan
-  _BufferStream<ScanResult>? _scanResultsBuffer;
+  // buffer for scan results that can be closed by stopScan
+  static _BufferStream<ScanResult>? _scanResultsBuffer;
 
   /// Log level of the instance, default is all messages (debug).
-  LogLevel _logLevel = LogLevel.debug;
-
-  /// Singleton boilerplate
-  FlutterBluePlus._() {
-    _channel.setMethodCallHandler((MethodCall call) async {
-      _methodStreamController.add(call);
-    });
-
-    setLogLevel(logLevel);
-  }
+  static LogLevel _logLevel = LogLevel.debug;
 
   ////////////////////
   //  Public
   //
 
-  static FlutterBluePlus get instance => _instance;
-
-  LogLevel get logLevel => _logLevel;
+  static LogLevel get logLevel => _logLevel;
 
   /// Checks whether the device supports Bluetooth
-  Future<bool> get isAvailable async => await _channel.invokeMethod('isAvailable');
+  static Future<bool> get isAvailable async => await _invokeMethod('isAvailable');
 
   /// Return the friendly Bluetooth name of the local Bluetooth adapter
-  Future<String> get adapterName async => await _channel.invokeMethod('getAdapterName');
+  static Future<String> get adapterName async => await _invokeMethod('getAdapterName');
 
   /// Checks if Bluetooth functionality is turned on
-  Future<bool> get isOn async => await _channel.invokeMethod('isOn');
+  static Future<bool> get isOn async => await _invokeMethod('isOn');
 
-  Stream<bool> get isScanning => _isScanning.stream;
+  static Stream<bool> get isScanning => _isScanning.stream;
 
-  bool get isScanningNow => _isScanning.latestValue;
+  static bool get isScanningNow => _isScanning.latestValue;
 
   /// Tries to turn on Bluetooth (Android only),
   ///
@@ -69,8 +59,8 @@ class FlutterBluePlus {
   ///
   /// Returns false if an error occured
   ///
-  Future<bool> turnOn() async {
-    return await _channel.invokeMethod('turnOn');
+  static Future<bool> turnOn() async {
+    return await _invokeMethod('turnOn');
   }
 
   /// Tries to turn off Bluetooth (Android only),
@@ -80,8 +70,8 @@ class FlutterBluePlus {
   ///
   /// Returns false if an error occured
   ///
-  Future<bool> turnOff() async {
-    return await _channel.invokeMethod('turnOff');
+  static Future<bool> turnOff() async {
+    return await _invokeMethod('turnOff');
   }
 
   /// Returns a stream that is a list of [ScanResult] results while a scan is in progress.
@@ -91,18 +81,17 @@ class FlutterBluePlus {
   ///
   /// One use for [scanResults] is as the stream in a StreamBuilder to display the
   /// results of a scan in real time while the scan is in progress.
-  Stream<List<ScanResult>> get scanResults => _scanResults.stream;
+  static Stream<List<ScanResult>> get scanResults => _scanResults.stream;
 
   /// Gets the current state of the Bluetooth module
-  Stream<BluetoothAdapterState> get adapterState async* {
-    BluetoothAdapterState initialState = await _channel
-        .invokeMethod('getAdapterState')
+  static Stream<BluetoothAdapterState> get adapterState async* {
+    BluetoothAdapterState initialState = await _invokeMethod('getAdapterState')
         .then((buffer) => BmBluetoothAdapterState.fromMap(buffer))
         .then((s) => bmToBluetoothAdapterState(s.adapterState));
 
     yield initialState;
 
-    Stream<BluetoothAdapterState> stream = FlutterBluePlus.instance._methodStream
+    Stream<BluetoothAdapterState> stream = FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "adapterStateChanged")
         .map((m) => m.arguments)
         .map((buffer) => BmBluetoothAdapterState.fromMap(buffer))
@@ -115,18 +104,16 @@ class FlutterBluePlus {
   /// The list of connected peripherals can include those that are connected
   /// by other apps and that will need to be connected locally using the
   /// device.connect() method before they can be used.
-  Future<List<BluetoothDevice>> get connectedDevices {
-    return _channel
-        .invokeMethod('getConnectedDevices')
+  static Future<List<BluetoothDevice>> get connectedDevices {
+    return _invokeMethod('getConnectedDevices')
         .then((buffer) => BmConnectedDevicesResponse.fromMap(buffer))
         .then((p) => p.devices)
         .then((p) => p.map((d) => BluetoothDevice.fromProto(d)).toList());
   }
 
   /// Retrieve a list of bonded devices (Android only)
-  Future<List<BluetoothDevice>> get bondedDevices {
-    return _channel
-        .invokeMethod('getBondedDevices')
+  static Future<List<BluetoothDevice>> get bondedDevices {
+    return _invokeMethod('getBondedDevices')
         .then((buffer) => BmConnectedDevicesResponse.fromMap(buffer))
         .then((p) => p.devices)
         .then((p) => p.map((d) => BluetoothDevice.fromProto(d)).toList());
@@ -142,7 +129,7 @@ class FlutterBluePlus {
   /// set [androidUsesFineLocation] to true to request the ACCESS_FINE_LOCATION permission at runtime
   /// on Android Version >=31 (Android 12). You need to add the following permission to your AndroidManifest.xml:
   /// <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-  Stream<ScanResult> scan({
+  static Stream<ScanResult> scan({
     ScanMode scanMode = ScanMode.lowLatency,
     List<Guid> withServices = const [],
     List<Guid> withDevices = const [],
@@ -159,13 +146,13 @@ class FlutterBluePlus {
         androidUsesFineLocation: androidUsesFineLocation);
 
     if (_isScanning.value == true) {
-      throw FlutterBluePlusException('scan',-1,'Another scan is already in progress.');
+      throw FlutterBluePlusException('scan', -1, 'Another scan is already in progress.');
     }
 
     // Clear scan results list
     _scanResults.add(<ScanResult>[]);
 
-    Stream<ScanResult> scanResultsStream = FlutterBluePlus.instance._methodStream
+    Stream<ScanResult> scanResultsStream = FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "ScanResult")
         .map((m) => m.arguments)
         .map((buffer) => BmScanResult.fromMap(buffer))
@@ -176,17 +163,17 @@ class FlutterBluePlus {
     // Start listening now, before invokeMethod, to ensure we don't miss any results
     _scanResultsBuffer = _BufferStream.listen(scanResultsStream);
 
-    // Start timer *after* stream is being listened to, to make sure the 
+    // Start timer *after* stream is being listened to, to make sure the
     // timeout does not fire before _scanResultsBuffer is set
     if (timeout != null) {
       _scanTimeout = Timer(timeout, () {
         _scanResultsBuffer?.close();
         _isScanning.add(false);
-        _channel.invokeMethod('stopScan');
+        _invokeMethod('stopScan');
       });
     }
 
-    await _channel.invokeMethod('startScan', settings.toMap());
+    await _invokeMethod('startScan', settings.toMap());
 
     // push to isScanning stream after invokeMethod('startScan') is called
     _isScanning.add(true);
@@ -222,7 +209,7 @@ class FlutterBluePlus {
   /// set [androidUsesFineLocation] to true to request the ACCESS_FINE_LOCATION permission at runtime
   /// on Android Version >=31 (Android 12). You need to add the following permission to your AndroidManifest.xml:
   /// <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-  Future startScan({
+  static Future startScan({
     ScanMode scanMode = ScanMode.lowLatency,
     List<Guid> withServices = const [],
     List<Guid> withDevices = const [],
@@ -244,8 +231,8 @@ class FlutterBluePlus {
   }
 
   /// Stops a scan for Bluetooth Low Energy devices
-  Future stopScan() async {
-    await _channel.invokeMethod('stopScan');
+  static Future stopScan() async {
+    await _invokeMethod('stopScan');
     _scanResultsBuffer?.close();
     _scanTimeout?.cancel();
     _isScanning.add(false);
@@ -254,12 +241,12 @@ class FlutterBluePlus {
   /// Sets the log level of the FlutterBlue instance
   /// Messages equal or below the log level specified are stored/forwarded,
   /// messages above are dropped.
-  void setLogLevel(LogLevel level) async {
-    await _channel.invokeMethod('setLogLevel', level.index);
+  static void setLogLevel(LogLevel level) async {
+    await _invokeMethod('setLogLevel', level.index);
     _logLevel = level;
   }
 
-  void _log(LogLevel level, String message) {
+  static void _log(LogLevel level, String message) {
     if (level.index <= _logLevel.index) {
       if (kDebugMode) {
         print(message);
@@ -267,11 +254,29 @@ class FlutterBluePlus {
     }
   }
 
+  // invoke a platform method
+  static Future<dynamic> _invokeMethod(String method, [dynamic arguments]) {
+    if (_initialized == false) {
+      _methods.setMethodCallHandler((MethodCall call) async {
+        _methodStream.add(call);
+      });
+
+      setLogLevel(logLevel);
+
+      _initialized = true;
+    }
+
+    return _methods.invokeMethod(method, arguments);
+  }
+
   @Deprecated('Use adapterName instead')
-  Future<String> get name => adapterName;
+  static Future<String> get name => adapterName;
 
   @Deprecated('Use adapterState instead')
-  Stream<BluetoothAdapterState> get state => adapterState;
+  static Stream<BluetoothAdapterState> get state => adapterState;
+
+  @Deprecated('No longer needed, remove this from your code')
+  static void get instance => null;
 }
 
 /// Log levels for FlutterBlue
@@ -371,7 +376,7 @@ class AdvertisementData {
   final Map<int, List<int>> manufacturerData;
   final Map<String, List<int>> serviceData;
 
-  // Note: we use strings and not Guids because advertisement UUIDs can 
+  // Note: we use strings and not Guids because advertisement UUIDs can
   // be 32-bit UUIDs, 64-bit, etc i.e. "FE56"
   final List<String> serviceUuids;
 

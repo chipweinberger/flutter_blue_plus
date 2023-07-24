@@ -34,7 +34,7 @@ simplicity of the FlutterBluePlus codebase. Please submit bug reports.
 * deprecated: BluetoothCharacteristic.onValueChangedStream -> onValueReceived
 * deprecated: BluetoothDescriptor.onValueChangedStream -> onValueReceived
 * dart: fix deprecated BluetoothCharacteristic.state variable not working (bug introduced 1.8.6)
-* dart: fix deprecated FlutterBluePlus.instance.state variable not working (bug introduced 1.8.6)
+* dart: fix deprecated FlutterBluePlus.state variable not working (bug introduced 1.8.6)
 * internal: refactor adapterState to use methodChannel
 * internal: refactor various 'bm' message schemas to use simpler characteristic structure
 * internal: refactor BmSetNotificationResponse removed. It is simpler to reuse BmWriteDescriptorResponse

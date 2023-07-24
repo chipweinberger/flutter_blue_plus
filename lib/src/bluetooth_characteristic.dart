@@ -38,7 +38,7 @@ class BluetoothCharacteristic {
   // this stream is updated:
   //   1. after read() is called
   //   2. when a notification arrives
-  Stream<List<int>> get onValueReceived => FlutterBluePlus.instance._methodStream
+  Stream<List<int>> get onValueReceived => FlutterBluePlus._methodStream.stream
           .where((m) => m.method == "OnCharacteristicReceived")
           .map((m) => m.arguments)
           .map((buffer) => BmOnCharacteristicReceived.fromMap(buffer))
@@ -76,13 +76,13 @@ class BluetoothCharacteristic {
         secondaryServiceUuid: null,
       );
 
-      FlutterBluePlus.instance._log(
+      FlutterBluePlus._log(
           LogLevel.info,
           'remoteId: ${remoteId.toString()}'
           'characteristicUuid: ${characteristicUuid.toString()}'
           'serviceUuid: ${serviceUuid.toString()}');
 
-      var responseStream = FlutterBluePlus.instance._methodStream
+      var responseStream = FlutterBluePlus._methodStream.stream
           .where((m) => m.method == "OnCharacteristicReceived")
           .map((m) => m.arguments)
           .map((buffer) => BmOnCharacteristicReceived.fromMap(buffer))
@@ -93,7 +93,7 @@ class BluetoothCharacteristic {
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmOnCharacteristicReceived> futureResponse = responseStream.first;
 
-      await FlutterBluePlus.instance._channel.invokeMethod('readCharacteristic', request.toMap());
+      await FlutterBluePlus._invokeMethod('readCharacteristic', request.toMap());
 
       BmOnCharacteristicReceived response = await futureResponse.timeout(Duration(seconds: timeout));
 
@@ -133,7 +133,7 @@ class BluetoothCharacteristic {
       );
 
       if (writeType == BmWriteType.withResponse) {
-        var responseStream = FlutterBluePlus.instance._methodStream
+        var responseStream = FlutterBluePlus._methodStream.stream
             .where((m) => m.method == "OnCharacteristicWritten")
             .map((m) => m.arguments)
             .map((buffer) => BmOnCharacteristicWritten.fromMap(buffer))
@@ -144,7 +144,7 @@ class BluetoothCharacteristic {
         // Start listening now, before invokeMethod, to ensure we don't miss the response
         Future<BmOnCharacteristicWritten> futureResponse = responseStream.first;
 
-        await FlutterBluePlus.instance._channel.invokeMethod('writeCharacteristic', request.toMap());
+        await FlutterBluePlus._invokeMethod('writeCharacteristic', request.toMap());
 
         // wait for response, so that we can check for success
         BmOnCharacteristicWritten response = await futureResponse.timeout(Duration(seconds: timeout));
@@ -157,7 +157,7 @@ class BluetoothCharacteristic {
         return Future.value();
       } else {
         // invoke without waiting for reply
-        return FlutterBluePlus.instance._channel.invokeMethod('writeCharacteristic', request.toMap());
+        return FlutterBluePlus._invokeMethod('writeCharacteristic', request.toMap());
       }
     });
   }
@@ -174,7 +174,7 @@ class BluetoothCharacteristic {
 
     // Notifications & Indications are configured by writing to the
     // Client Characteristic Configuration Descriptor (CCCD)
-    Stream<BmOnDescriptorResponse> responseStream = FlutterBluePlus.instance._methodStream
+    Stream<BmOnDescriptorResponse> responseStream = FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnDescriptorResponse")
         .map((m) => m.arguments)
         .map((buffer) => BmOnDescriptorResponse.fromMap(buffer))
@@ -187,7 +187,7 @@ class BluetoothCharacteristic {
     // Start listening now, before invokeMethod, to ensure we don't miss the response
     Future<BmOnDescriptorResponse> futureResponse = responseStream.first;
 
-    await FlutterBluePlus.instance._channel.invokeMethod('setNotification', request.toMap());
+    await FlutterBluePlus._invokeMethod('setNotification', request.toMap());
 
     // wait for response, so that we can check for success
     BmOnDescriptorResponse response = await futureResponse.timeout(Duration(seconds: timeout));

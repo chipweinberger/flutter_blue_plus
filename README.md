@@ -49,20 +49,14 @@ packet as **UUID 16 bit complete list** or **UUID 128 bit complete list**.
 
 ## Usage
 
-### Obtain an instance
-
-```dart
-FlutterBluePlus flutterBlue = FlutterBluePlus.instance;
-```
-
 ### Scan for devices
 
 ```dart
 // Start scanning
-flutterBlue.startScan(timeout: Duration(seconds: 4));
+FlutterBluePlus.startScan(timeout: Duration(seconds: 4));
 
 // Listen to scan results
-var subscription = flutterBlue.scanResults.listen((results) {
+var subscription = FlutterBluePlus.scanResults.listen((results) {
     // do something with scan results
     for (ScanResult r in results) {
         print('${r.device.localName} found! rssi: ${r.rssi}');
@@ -70,7 +64,7 @@ var subscription = flutterBlue.scanResults.listen((results) {
 });
 
 // Stop scanning
-flutterBlue.stopScan();
+FlutterBluePlus.stopScan();
 ```
 
 ### Connect to a device
