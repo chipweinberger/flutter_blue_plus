@@ -8,17 +8,21 @@
 
 **Note: this plugin is continuous work from FlutterBlue since maintenance stopped.**
 
-## Foreward
-
-For simple BLE apps, you should also consider QuickBlue (https://pub.dev/packages/quick_blue). Fewer features, smaller codebase.
-
 ## Introduction
 
 FlutterBluePlus is a bluetooth plugin for [Flutter](https://flutter.dev), a new app SDK to help developers build modern multi-platform apps.
 
 ## Cross-Platform Bluetooth LE
 
-FlutterBluePlus aims to offer the most from all supported platforms: iOS, macOS, Android. (Feel free to contribute Windows support!)
+FlutterBluePlus aims to offer the most from all supported platforms: iOS, macOS, Android.
+
+The code is written to be simple, robust, and incredibly easy to understand.
+
+## No Dependencies
+
+FlutterBluePlus has zero dependencies besides Flutter, Android, and iOS themselves.
+
+This makes FlutterBluePlus incredibly stable.
 
 ## Usage
 
@@ -26,25 +30,43 @@ FlutterBluePlus aims to offer the most from all supported platforms: iOS, macOS,
 
 Flutter Blue Plus diligently uses exceptions for error handling.
 
-Stream errors are not used. Streams are never closed. Streams only return valid results.
+Streams only return valid results. Stream errors are not used & streams are never closed. So there's no need to handle onError or onDone.
 
 **See the Reference section below for a complete list of throwing function.**
 
 ---
 
+### Enable Bluetooth
+
+```dart
+// check availability
+if (!FlutterBluePlus.isAvailable()) {
+    print("Bluetooth not supported by this device");
+    return
+}
+
+// turn on bluetooth ourself if we can
+if (Platform.isAndroid) {
+    await FlutterBluePlus.turnOn();
+}
+
+// wait bluetooth to be on
+await FlutterBluePlus.adapterState.where((s) => s == BluetoothAdapterState.on).first;
+```
+
 ### Scan for devices
 
 ```dart
-// Start scanning
-FlutterBluePlus.startScan(timeout: Duration(seconds: 4));
-
-// Listen to scan results
+// Setup Listener for scan results
 var subscription = FlutterBluePlus.scanResults.listen((results) {
     // do something with scan results
     for (ScanResult r in results) {
         print('${r.device.localName} found! rssi: ${r.rssi}');
     }
 });
+
+// Start scanning
+FlutterBluePlus.startScan(timeout: Duration(seconds: 4));
 
 // Stop scanning
 FlutterBluePlus.stopScan();
@@ -100,10 +122,13 @@ await d.write([0x12, 0x34])
 ### Set notifications and listen to changes
 
 ```dart
-await characteristic.setNotifyValue(true);
+// Setup Listener for characteristic reads
 characteristic.onValueReceived.listen((value) {
     // do something with new value
 });
+
+// enable notifications
+await characteristic.setNotifyValue(true);
 ```
 
 ### Read the MTU and request larger size
@@ -181,20 +206,21 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 
 ### FlutterBlue API
 
-|               |      Android       |        iOS         | Throws | Description                                        |
-| :----------   | :----------------: | :----------------: | :----: | :------------------------------------------------- |
-| adapterState  | :white_check_mark: | :white_check_mark: |        | Stream of state changes for the bluetooth adapter  |
-| isAvailable   | :white_check_mark: | :white_check_mark: |        | Checks whether the device supports Bluetooth       |
-| isOn          | :white_check_mark: | :white_check_mark: |        | Checks if Bluetooth adapter is turned on           |
-| turnOn        | :white_check_mark: | :white_check_mark: | :fire: | Turns on the bluetooth adapter                     |
-| turnOff       | :white_check_mark: | :white_check_mark: | :fire: | Turns off the bluetooth adapter                    |
-| scan          | :white_check_mark: | :white_check_mark: | :fire: | Starts a scan for Ble devices and return a stream  |
-| startScan     | :white_check_mark: | :white_check_mark: | :fire: | Starts a scan for Ble devices with no return value |
-| stopScan      | :white_check_mark: | :white_check_mark: | :fire: | Stop an existing scan for Ble devices              |
-| scanResults   | :white_check_mark: | :white_check_mark: |        | Streams live scan results                          |
-| isScanning    | :white_check_mark: | :white_check_mark: |        | Returns stream of current scanning state           |
-| isScanningNow | :white_check_mark: | :white_check_mark: |        | Is a scan currently running?                       |
-| setLogLevel   | :white_check_mark: | :white_check_mark: |        | Configure plugin log level                         |
+|                 |      Android       |        iOS         | Throws | Description                                          |
+| :----------     | :----------------: | :----------------: | :----: | :----------------------------------------------------|
+| adapterState    | :white_check_mark: | :white_check_mark: |        | Stream of state changes for the bluetooth adapter    |
+| isAvailable     | :white_check_mark: | :white_check_mark: |        | Checks whether the device supports Bluetooth         |
+| isOn            | :white_check_mark: | :white_check_mark: |        | Checks if Bluetooth adapter is turned on             |
+| turnOn          | :white_check_mark: |                    | :fire: | Turns on the bluetooth adapter                       |
+| turnOff         | :white_check_mark: |                    | :fire: | Turns off the bluetooth adapter                      |
+| scan            | :white_check_mark: | :white_check_mark: | :fire: | Starts a scan for Ble devices and return a stream    |
+| startScan       | :white_check_mark: | :white_check_mark: | :fire: | Starts a scan for Ble devices with no return value   |
+| stopScan        | :white_check_mark: | :white_check_mark: | :fire: | Stop an existing scan for Ble devices                |
+| scanResults     | :white_check_mark: | :white_check_mark: |        | Streams live scan results                            |
+| isScanning      | :white_check_mark: | :white_check_mark: |        | Returns stream of current scanning state             |
+| isScanningNow   | :white_check_mark: | :white_check_mark: |        | Is a scan currently running?                         |
+| connectedDevices| :white_check_mark: | :white_check_mark: |        | List of already connected devices, even by other apps|
+| setLogLevel     | :white_check_mark: | :white_check_mark: |        | Configure plugin log level                           |
 
 ### BluetoothDevice API
 
