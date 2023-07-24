@@ -89,7 +89,7 @@ class FlutterBluePlus {
   }
 
   /// Returns a stream of List<ScanResult> results while a scan is in progress.
-  /// - The list contains all the results since the scan started. 
+  /// - The list contains all the results since the scan started.
   /// - When a scan is first started, an empty list is emitted.
   /// - The returned stream is never closed.
   static Stream<List<ScanResult>> get scanResults => _scanResults.stream;
@@ -135,7 +135,7 @@ class FlutterBluePlus {
   ///    - [timeout] calls stopScan after a specified duration
   ///    - [androidUsesFineLocation] requests ACCESS_FINE_LOCATION permission at runtime regardless
   ///    of Android version. On Android 11 and below (Sdk < 31), this permission is required
-  ///    and therefore we will always request it. Your AndroidManifest.xml must match.   
+  ///    and therefore we will always request it. Your AndroidManifest.xml must match.
   static Stream<ScanResult> scan({
     ScanMode scanMode = ScanMode.lowLatency,
     List<Guid> withServices = const [],
@@ -238,7 +238,7 @@ class FlutterBluePlus {
     _isScanning.add(false);
   }
 
-  /// Sets the internal FlutterBlue log level  
+  /// Sets the internal FlutterBlue log level
   static void setLogLevel(LogLevel level) async {
     await _invokeMethod('setLogLevel', level.index);
     _logLevel = level;
@@ -260,9 +260,10 @@ class FlutterBluePlus {
         _methodStream.add(call);
       });
 
-      setLogLevel(logLevel);
-
+      // avoid recursion: must set this before we call setLogLevel
       _initialized = true;
+
+      setLogLevel(logLevel);
     }
 
     return _methods.invokeMethod(method, arguments);
