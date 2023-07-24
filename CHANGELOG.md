@@ -1,3 +1,15 @@
+## 1.10.0
+This release is focused on improving error handling and reliability.
+There is 1 breaking changes. See below.
+* dart: BREAKING CHANGE: turnOn() & turnOff() now wait for completion, return void instead of bool, and can throw
+* dart: rename FlutterBluePlus.instance to FlutterBluePlus
+* readme: add error handling section
+* iOS: handle missing bluetooth adapter gracefully
+* iOS: getAdapterState && getConnectionState are more robust
+* android: log method call in debug, and more consistent log messages
+* example: show nicer looking errors
+* example: prefer try/catch over catchError as dart debugger doesn't work with catchError as well
+
 ## 1.9.5
 * iOS: fix serviceUUIDs always null in scan results (regression in 1.7.0)
 * example: fix snackbar complaining about invalid contexts
