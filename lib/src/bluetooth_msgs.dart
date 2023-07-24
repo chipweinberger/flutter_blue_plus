@@ -1,10 +1,7 @@
 part of flutter_blue_plus;
 
 void _printDbg(String s) {
-  if (FlutterBluePlus.logLevel.index >= LogLevel.verbose.index) {
-      //ignore: avoid_print
-      print(s);
-  }
+  FlutterBluePlus._log(LogLevel.verbose, s);
 }
 
 enum BmAdapterStateEnum {

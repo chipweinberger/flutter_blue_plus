@@ -1,3 +1,6 @@
+## 1.10.3
+* android: handle scan failure. also add verbose log level and remove unused log levels
+
 ## 1.10.2
 * Dart: fix setLogLevel recursion (Regression in 1.10.0)
 * iOS: use NSError instread of obj-c exceptions to avoid uncaught exceptions
