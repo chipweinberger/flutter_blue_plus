@@ -26,7 +26,7 @@ FlutterBluePlus aims to offer the most from all supported platforms: iOS, macOS,
 
 Flutter Blue Plus diligently uses exceptions for error handling.
 
-Stream errors are not used and streams are never closed. Streams only return valid results.
+Stream errors are not used. Streams are never closed. Streams only return valid results.
 
 **See the Reference section below for a complete list of throwing function.**
 
