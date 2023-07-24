@@ -1,5 +1,6 @@
 ## 1.10.3
-* android: handle scan failure. also add verbose log level and remove unused log levels
+* android: handle scan failure.
+* dart: add verbose log level and remove unused log levels
 
 ## 1.10.2
 * Dart: fix setLogLevel recursion (Regression in 1.10.0)
@@ -10,9 +11,9 @@
 
 ## 1.10.0
 This release is focused on improving error handling and reliability.
-There is 1 breaking changes. See below.
-* dart: BREAKING CHANGE: turnOn() & turnOff() now wait for completion, return void instead of bool, and can throw
-* dart: rename FlutterBluePlus.instance to FlutterBluePlus
+There are 2 small breaking changes. See below.
+* **BREAKING CHANGE:** dart: turnOn() & turnOff() now wait for completion, return void instead of bool, and can throw
+* **BREAKING CHANGE:** dart: use static functions for FlutterBluePlus instead of FlutterBluePlus.instance. Multiple instances is not supported by any platform.
 * readme: add error handling section
 * iOS: handle missing bluetooth adapter gracefully
 * iOS: getAdapterState && getConnectionState are more robust
@@ -49,6 +50,8 @@ There is 1 breaking changes. See below.
 
 This release marks the end of major work to improve reliability and
 simplicity of the FlutterBluePlus codebase. Please submit bug reports.
+
+* **ANDROID ONLY BREAKING CHANGE:** When `read()` is called `onValueChangedStream` is pushed to as well. This change was made to make both platforms behave the same way. It is an unavoidable limitation of iOS. See: https://github.com/boskokg/flutter_blue_plus/issues/419
 
 * Adroid/iOS: fix mtu check minus 3 issue (reggression in 1.8.3)
 * deprecated: BluetoothCharacteristic.value -> lastValueStream
