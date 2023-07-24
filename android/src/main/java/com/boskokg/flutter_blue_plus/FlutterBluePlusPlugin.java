@@ -70,7 +70,7 @@ public class FlutterBluePlusPlugin implements
     RequestPermissionsResultListener,
     ActivityAware
 {
-    private static final String TAG = "FlutterBluePlugin";
+    private static final String TAG = "[FBP-Android]";
     private final Object initializationLock = new Object();
     private final Object tearDownLock = new Object();
     private Context context;
@@ -180,7 +180,7 @@ public class FlutterBluePlusPlugin implements
                 BluetoothDeviceCache cache = entry.getValue();
                 BluetoothGatt gattServer = cache.gatt;
                 if(gattServer != null) {
-                    Log.d(TAG, "calling gattServer.disconnect() on device: " + remoteId);
+                    Log.d(TAG, "calling disconnect() on device: " + remoteId);
                     Log.d(TAG, "calling gattServer.close() on device: " + remoteId);
                     gattServer.disconnect();
                     gattServer.close();
@@ -217,6 +217,7 @@ public class FlutterBluePlusPlugin implements
                                  @NonNull Result result)
     {
         try {
+            log(LogLevel.DEBUG, "[FBP-Android] onMethodCall: " + call.method);
 
             if(mBluetoothAdapter == null && !"isAvailable".equals(call.method)) {
                 result.error("bluetooth_unavailable", "the device does not have bluetooth", null);
@@ -874,7 +875,7 @@ public class FlutterBluePlusPlugin implements
                         // thus setCharacteristicNotification() is all that is required to enable notifications.
                         // The arduino "bluno" devices are an example.
                         String chr = characteristic.getUuid().toString();
-                        log(LogLevel.WARNING, "CCCD descriptor for characteristic not found: " + chr);
+                        log(LogLevel.WARNING, "[FBP-Android] CCCD descriptor for characteristic not found: " + chr);
                         result.success(null);
                         return;
                     }
@@ -1395,7 +1396,7 @@ public class FlutterBluePlusPlugin implements
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState)
         {
-            log(LogLevel.DEBUG, "[onConnectionStateChange] status: " + status + " newState: " + newState);
+            log(LogLevel.DEBUG, "[FBP-Android] onConnectionStateChange: status: " + status + " newState: " + newState);
 
             if(newState == BluetoothProfile.STATE_DISCONNECTED) {
 
@@ -1416,7 +1417,7 @@ public class FlutterBluePlusPlugin implements
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status)
         {
-            log(LogLevel.DEBUG, "[onServicesDiscovered] count: " + gatt.getServices().size() + " status: " + status);
+            log(LogLevel.DEBUG, "[FBP-Android] onServicesDiscovered: count: " + gatt.getServices().size() + " status: " + status);
 
             List<Object> services = new ArrayList<Object>();
             for(BluetoothGattService s : gatt.getServices()) {
@@ -1438,7 +1439,7 @@ public class FlutterBluePlusPlugin implements
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic)
         {
             // this callback is only for notifications & indications
-            log(LogLevel.DEBUG, "[onCharacteristicChanged] uuid: " + characteristic.getUuid().toString());
+            log(LogLevel.DEBUG, "[FBP-Android] onCharacteristicChanged: uuid: " + characteristic.getUuid().toString());
 
             MessageMaker.ServicePair pair = MessageMaker.getServicePair(gatt, characteristic);
 
@@ -1460,7 +1461,7 @@ public class FlutterBluePlusPlugin implements
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status)
         {
             // this callback is only for explicit characteristic reads
-            log(LogLevel.DEBUG, "[onCharacteristicRead] uuid: " + characteristic.getUuid().toString() + " status: " + status);
+            log(LogLevel.DEBUG, "[FBP-Android] onCharacteristicRead: uuid: " + characteristic.getUuid().toString() + " status: " + status);
 
             MessageMaker.ServicePair pair = MessageMaker.getServicePair(gatt, characteristic);
 
@@ -1481,7 +1482,7 @@ public class FlutterBluePlusPlugin implements
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status)
         {
-            log(LogLevel.DEBUG, "[onCharacteristicWrite] uuid: " + characteristic.getUuid().toString() + " status: " + status);
+            log(LogLevel.DEBUG, "[FBP-Android] onCharacteristicWrite: uuid: " + characteristic.getUuid().toString() + " status: " + status);
 
             MessageMaker.ServicePair pair = MessageMaker.getServicePair(gatt, characteristic);
 
@@ -1501,7 +1502,7 @@ public class FlutterBluePlusPlugin implements
         @Override
         public void onDescriptorRead(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status)
         {
-            log(LogLevel.DEBUG, "[onDescriptorRead] uuid: " + descriptor.getUuid().toString() + " status: " + status);
+            log(LogLevel.DEBUG, "[FBP-Android] onDescriptorRead: uuid: " + descriptor.getUuid().toString() + " status: " + status);
 
             MessageMaker.ServicePair pair = MessageMaker.getServicePair(gatt, descriptor.getCharacteristic());
 
@@ -1524,7 +1525,7 @@ public class FlutterBluePlusPlugin implements
         @Override
         public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status)
         {
-            log(LogLevel.DEBUG, "[onDescriptorWrite] uuid: " + descriptor.getUuid().toString() + " status: " + status);
+            log(LogLevel.DEBUG, "[FBP-Android] onDescriptorWrite: uuid: " + descriptor.getUuid().toString() + " status: " + status);
 
             MessageMaker.ServicePair pair = MessageMaker.getServicePair(gatt, descriptor.getCharacteristic());
 
@@ -1547,13 +1548,13 @@ public class FlutterBluePlusPlugin implements
         @Override
         public void onReliableWriteCompleted(BluetoothGatt gatt, int status)
         {
-            log(LogLevel.DEBUG, "[onReliableWriteCompleted] status: " + status);
+            log(LogLevel.DEBUG, "[FBP-Android] onReliableWriteCompleted: status: " + status);
         }
 
         @Override
         public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status)
         {
-            log(LogLevel.DEBUG, "[onReadRemoteRssi] rssi: " + rssi + " status: " + status);
+            log(LogLevel.DEBUG, "[FBP-Android] onReadRemoteRssi: rssi: " + rssi + " status: " + status);
 
             // see: BmReadRssiResult
             HashMap<String, Object> response = new HashMap<>();
@@ -1569,7 +1570,7 @@ public class FlutterBluePlusPlugin implements
         @Override
         public void onMtuChanged(BluetoothGatt gatt, int mtu, int status)
         {
-            log(LogLevel.DEBUG, "[onMtuChanged] mtu: " + mtu + " status: " + status);
+            log(LogLevel.DEBUG, "[FBP-Android] onMtuChanged: mtu: " + mtu + " status: " + status);
 
             BluetoothDeviceCache cache = mDevices.get(gatt.getDevice().getAddress());
             if (cache != null) {
