@@ -28,14 +28,12 @@
 @end
 
 typedef NS_ENUM(NSUInteger, LogLevel) {
-    emergency = 0,
-    alert = 1,
-    critical = 2,
-    error = 3,
-    warning = 4,
-    notice = 5,
-    info = 6,
-    debug = 7
+    none = 0,
+    error = 1,
+    warning = 2,
+    info = 3,
+    debug = 4,
+    verbose = 5,
 };
 
 @interface FlutterBluePlusPlugin ()
@@ -60,7 +58,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     instance.servicesThatNeedDiscovered = [NSMutableArray new];
     instance.characteristicsThatNeedDiscovered = [NSMutableArray new];
     instance.dataWaitingToWriteWithoutResponse = [NSMutableDictionary new];
-    instance.logLevel = emergency;
+    instance.logLevel = debug;
 
     [registrar addMethodCallDelegate:instance channel:methodChannel];
 }
@@ -880,15 +878,21 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         advertisementData:(NSDictionary<NSString *, id> *)advertisementData
                      RSSI:(NSNumber *)RSSI
 {
-    if (_logLevel >= debug) {
-        //NSLog(@"[FBP-iOS] centralManager didDiscoverPeripheral");
+    if (_logLevel >= verbose) {
+        NSLog(@"[FBP-iOS] centralManager didDiscoverPeripheral");
     }
     
     [self.scannedPeripherals setObject:peripheral forKey:[[peripheral identifier] UUIDString]];
 
+    // See BmScanResult
     NSDictionary *result = [self toScanResultProto:peripheral advertisementData:advertisementData RSSI:RSSI];
 
-    [_methodChannel invokeMethod:@"ScanResult" arguments:result];
+    // See BmScanResponse
+    NSDictionary *response = @{
+        @"result": result,
+    };
+
+    [_methodChannel invokeMethod:@"ScanResponse" arguments:response];
 }
 
 - (void)centralManager:(CBCentralManager *)central

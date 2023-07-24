@@ -1,8 +1,10 @@
 part of flutter_blue_plus;
 
 void _printDbg(String s) {
-  // ignore: avoid_print
-  //print(s);
+  if (FlutterBluePlus.logLevel.index >= LogLevel.verbose.index) {
+      //ignore: avoid_print
+      print(s);
+  }
 }
 
 enum BmAdapterStateEnum {
@@ -36,15 +38,15 @@ class BmBluetoothAdapterState {
 }
 
 class BmAdvertisementData {
-  String? localName;
-  int? txPowerLevel;
-  bool connectable;
-  Map<int, List<int>> manufacturerData;
-  Map<String, List<int>> serviceData;
+  final String? localName;
+  final int? txPowerLevel;
+  final bool connectable;
+  final Map<int, List<int>> manufacturerData;
+  final Map<String, List<int>> serviceData;
 
-  // We use strings and not Guid because advertisement UUIDs can 
+  // We use strings and not Guid because advertisement UUIDs can
   // be 32-bit UUIDs, 64-bit, etc i.e. "FE56"
-  List<String> serviceUuids; 
+  List<String> serviceUuids;
 
   BmAdvertisementData({
     required this.localName,
@@ -75,7 +77,7 @@ class BmAdvertisementData {
     }
 
     // Cast the data to the right type
-    // Note: we use strings and not Guid because advertisement UUIDs can 
+    // Note: we use strings and not Guid because advertisement UUIDs can
     // be 32-bit UUIDs, 64-bit, etc i.e. "FE56"
     List<String> serviceUuids = [];
     for (var val in rawServiceUuids) {
@@ -95,11 +97,11 @@ class BmAdvertisementData {
 }
 
 class BmScanSettings {
-  List<Guid> serviceUuids;
-  List<String> macAddresses;
-  bool allowDuplicates;
-  int androidScanMode;
-  bool androidUsesFineLocation;
+  final List<Guid> serviceUuids;
+  final List<String> macAddresses;
+  final bool allowDuplicates;
+  final int androidScanMode;
+  final bool androidUsesFineLocation;
 
   BmScanSettings({
     required this.serviceUuids,
@@ -127,10 +129,31 @@ class BmScanSettings {
   }
 }
 
+class BmScanFailed {
+  final bool success;
+  final int? errorCode;
+  final String? errorString;
+
+  BmScanFailed({
+    required this.success,
+    required this.errorCode,
+    required this.errorString,
+  });
+
+  factory BmScanFailed.fromMap(Map<dynamic, dynamic> json) {
+    _printDbg("\BmScanFailed $json");
+    return BmScanFailed(
+      success: json['success'] != 0,
+      errorCode: json['error_code'],
+      errorString: json['error_string'],
+    );
+  }
+}
+
 class BmScanResult {
-  BmBluetoothDevice device;
-  BmAdvertisementData advertisementData;
-  int rssi;
+  final BmBluetoothDevice device;
+  final BmAdvertisementData advertisementData;
+  final int rssi;
 
   BmScanResult({
     required this.device,
@@ -144,6 +167,24 @@ class BmScanResult {
       device: BmBluetoothDevice.fromMap(json['device']),
       advertisementData: BmAdvertisementData.fromMap(json['advertisement_data']),
       rssi: json['rssi'],
+    );
+  }
+}
+
+class BmScanResponse {
+  final BmScanResult? result;
+  final BmScanFailed? failed;
+
+  BmScanResponse({
+    required this.result,
+    required this.failed,
+  });
+
+  factory BmScanResponse.fromMap(Map<dynamic, dynamic> json) {
+    _printDbg("\BmScanResponse $json");
+    return BmScanResponse(
+      result: json['result'] != null ? BmScanResult.fromMap(json['result']) : null,
+      failed: json['failed'] != null ? BmScanFailed.fromMap(json['failed']) : null,
     );
   }
 }

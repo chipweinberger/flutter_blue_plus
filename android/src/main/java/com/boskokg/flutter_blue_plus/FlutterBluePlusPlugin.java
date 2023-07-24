@@ -85,7 +85,7 @@ public class FlutterBluePlusPlugin implements
 
     static final private UUID CCCD_ID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
     private final Map<String, BluetoothDeviceCache> mDevices = new HashMap<>();
-    private LogLevel logLevel = LogLevel.EMERGENCY;
+    private LogLevel logLevel = LogLevel.DEBUG;
 
     private interface OperationOnPermission {
         void op(boolean granted, String permission);
@@ -1347,6 +1347,8 @@ public class FlutterBluePlusPlugin implements
                 @Override
                 public void onScanResult(int callbackType, ScanResult result)
                 {
+                    log(LogLevel.VERBOSE, "[FBP-Android] onScanResult");
+
                     super.onScanResult(callbackType, result);
 
                     if(result != null){
@@ -1360,7 +1362,14 @@ public class FlutterBluePlusPlugin implements
                             macDeviceScanned.add(result.getDevice().getAddress());
                         }
 
-                        invokeMethodUIThread("ScanResult", MessageMaker.bmScanResult(result.getDevice(), result));
+                        // see BmScanResult
+                        HashMap<String, Object> rr = MessageMaker.bmScanResult(result.getDevice(), result);
+
+                        // see BmScanResponse
+                        HashMap<String, Object> response = new HashMap<>();
+                        response.put("result", rr);
+
+                        invokeMethodUIThread("ScanResponse", response);
                     }
                 }
 
@@ -1373,7 +1382,21 @@ public class FlutterBluePlusPlugin implements
                 @Override
                 public void onScanFailed(int errorCode)
                 {
+                    log(LogLevel.ERROR, "[FBP-Android] onScanFailed: " + scanFailedString(errorCode));
+
                     super.onScanFailed(errorCode);
+
+                    // see: BmScanFailed
+                    HashMap<String, Object> failed = new HashMap<>();
+                    failed.put("success", 0);
+                    failed.put("error_code", errorCode);
+                    failed.put("error_string", scanFailedString(errorCode));
+
+                    // see BmScanResponse
+                    HashMap<String, Object> response = new HashMap<>();
+                    response.put("failed", failed);
+
+                    invokeMethodUIThread("ScanResponse", response);
                 }
             };
         }
@@ -1655,7 +1678,7 @@ public class FlutterBluePlusPlugin implements
             case BluetoothGatt.GATT_READ_NOT_PERMITTED          : return "GATT_READ_NOT_PERMITTED";
             case BluetoothGatt.GATT_REQUEST_NOT_SUPPORTED       : return "GATT_REQUEST_NOT_SUPPORTED";
             case BluetoothGatt.GATT_WRITE_NOT_PERMITTED         : return "GATT_WRITE_NOT_PERMITTED";
-            default: return "UNKNOWN_ERROR (" + value + ")";
+            default: return "UNKNOWN_GATT_ERROR (" + value + ")";
         }
     }
 
@@ -1673,13 +1696,30 @@ public class FlutterBluePlusPlugin implements
             case BluetoothStatusCodes.FEATURE_NOT_SUPPORTED                      : return "FEATURE_NOT_SUPPORTED";
             case BluetoothStatusCodes.FEATURE_SUPPORTED                          : return "FEATURE_SUPPORTED";
             case BluetoothStatusCodes.SUCCESS                                    : return "SUCCESS";
-            default: return "UNKNOWN_ERROR (" + value + ")";
+            default: return "UNKNOWN_BLE_ERROR (" + value + ")";
+        }
+    }
+
+    private static String scanFailedString(int value) {
+        switch(value) {
+            case ScanCallback.SCAN_FAILED_ALREADY_STARTED                : return "SCAN_FAILED_ALREADY_STARTED";
+            case ScanCallback.SCAN_FAILED_APPLICATION_REGISTRATION_FAILED: return "SCAN_FAILED_APPLICATION_REGISTRATION_FAILED";
+            case ScanCallback.SCAN_FAILED_FEATURE_UNSUPPORTED            : return "SCAN_FAILED_FEATURE_UNSUPPORTED";
+            case ScanCallback.SCAN_FAILED_INTERNAL_ERROR                 : return "SCAN_FAILED_INTERNAL_ERROR";
+            case ScanCallback.SCAN_FAILED_OUT_OF_HARDWARE_RESOURCES      : return "SCAN_FAILED_OUT_OF_HARDWARE_RESOURCES";
+            case ScanCallback.SCAN_FAILED_SCANNING_TOO_FREQUENTLY        : return "SCAN_FAILED_SCANNING_TOO_FREQUENTLY";
+            default: return "UNKNOWN_SCAN_ERROR (" + value + ")";
         }
     }
 
     enum LogLevel
     {
-        EMERGENCY, ALERT, CRITICAL, ERROR, WARNING, NOTICE, INFO, DEBUG
+        NONE,    // 0
+        ERROR,   // 1
+        WARNING, // 2
+        INFO,    // 3
+        DEBUG,   // 4
+        VERBOSE  // 5
     }
 
     // BluetoothDeviceCache contains any other cached information not stored in Android Bluetooth API

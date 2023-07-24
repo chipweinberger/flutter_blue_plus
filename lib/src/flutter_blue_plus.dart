@@ -24,10 +24,10 @@ class FlutterBluePlus {
   // stream used for the scanResults public api
   static final _StreamController<List<ScanResult>> _scanResults = _StreamController(initialValue: []);
 
-  // ScanResults are received from the system one-by-one from the method broadcast stream.
+  // ScanResponses are received from the system one-by-one from the method broadcast stream.
   // This variable buffers all the results into a single-subscription stream.
   // We store it at the top level so it can be closed by stopScan
-  static _BufferStream<ScanResult>? _scanResultsBuffer;
+  static _BufferStream<BmScanResponse>? _scanResponseBuffer;
 
   // timeout for scanning that can be cancelled by stopScan
   static Timer? _scanTimeout;
@@ -159,22 +159,21 @@ class FlutterBluePlus {
     // Clear scan results list
     _scanResults.add(<ScanResult>[]);
 
-    Stream<ScanResult> responseStream = FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "ScanResult")
+    Stream<BmScanResponse> responseStream = FlutterBluePlus._methodStream.stream
+        .where((m) => m.method == "ScanResponse")
         .map((m) => m.arguments)
-        .map((buffer) => BmScanResult.fromMap(buffer))
-        .map((p) => ScanResult.fromProto(p))
+        .map((buffer) => BmScanResponse.fromMap(buffer))
         .takeWhile((element) => _isScanning.value)
         .doOnDone(stopScan);
 
     // Start listening now, before invokeMethod, to ensure we don't miss any results
-    _scanResultsBuffer = _BufferStream.listen(responseStream);
+    _scanResponseBuffer = _BufferStream.listen(responseStream);
 
     // Start timer *after* stream is being listened to, to make sure the
-    // timeout does not fire before _scanResultsBuffer is set
+    // timeout does not fire before _scanResponseBuffer is set
     if (timeout != null) {
       _scanTimeout = Timer(timeout, () {
-        _scanResultsBuffer?.close();
+        _scanResponseBuffer?.close();
         _isScanning.add(false);
         _invokeMethod('stopScan');
       });
@@ -185,22 +184,31 @@ class FlutterBluePlus {
     // push to isScanning stream after invokeMethod('startScan') is called
     _isScanning.add(true);
 
-    await for (ScanResult item in _scanResultsBuffer!.stream) {
-      // update list of devices
-      List<ScanResult> list = List<ScanResult>.from(_scanResults.value);
-      if (list.contains(item)) {
-        // the list will have duplicates if allowDuplicates is set.
-        // However, we only care to about the most recent advertisment
-        // so here we replace old advertisements. 1 per device.
-        int index = list.indexOf(item);
-        list[index] = item;
-      } else {
-        list.add(item);
+    await for (BmScanResponse response in _scanResponseBuffer!.stream) {
+      // check for failure
+      if (response.failed != null) {
+        throw FlutterBluePlusException("scan", response.failed!.errorCode, response.failed!.errorString);
       }
 
-      _scanResults.add(list);
+      if (response.result != null) {
+        ScanResult item = ScanResult.fromProto(response.result!);
 
-      yield item;
+        // update list of devices
+        List<ScanResult> list = List<ScanResult>.from(_scanResults.value);
+        if (list.contains(item)) {
+          // the list will have duplicates if allowDuplicates is set.
+          // However, we only care to about the most recent advertisment
+          // so here we replace old advertisements. 1 per device.
+          int index = list.indexOf(item);
+          list[index] = item;
+        } else {
+          list.add(item);
+        }
+
+        _scanResults.add(list);
+
+        yield item;
+      }
     }
   }
 
@@ -233,7 +241,7 @@ class FlutterBluePlus {
   /// Stops a scan for Bluetooth Low Energy devices
   static Future stopScan() async {
     await _invokeMethod('stopScan');
-    _scanResultsBuffer?.close();
+    _scanResponseBuffer?.close();
     _scanTimeout?.cancel();
     _isScanning.add(false);
   }
@@ -281,14 +289,12 @@ class FlutterBluePlus {
 
 /// Log levels for FlutterBlue
 enum LogLevel {
-  emergency, // 0
-  alert, // 1
-  critical, // 2
-  error, // 3
-  warning, // 4
-  notice, // 5
-  info, // 6
-  debug, // 7
+  none, //0
+  error, // 1
+  warning, // 2
+  info, // 3
+  debug, // 4
+  verbose, //5
 }
 
 /// State of the bluetooth adapter.
