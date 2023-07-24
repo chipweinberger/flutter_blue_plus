@@ -91,14 +91,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         if (_logLevel >= debug) {
             NSLog(@"[FBP-iOS] handleMethodCall: %@", call.method);
         }
-        
-        if ([@"setLogLevel" isEqualToString:call.method])
-        {
-            NSNumber *logLevelIndex = [call arguments];
-            _logLevel = (LogLevel)[logLevelIndex integerValue];
-            result(@(true));
-            return;
-        }
+        // initialize adapter
         if (self.centralManager == nil)
         {
             NSDictionary *options = @{
@@ -106,6 +99,20 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             };
 
             self.centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil options:options];
+        }
+        // check that we have an adapter
+        if (self.centralManager == nil && [@"getAdapterState" isEqualToString:call.method] == false) {
+            NSString* s = @"the device does not have bluetooth";
+            result([FlutterError errorWithCode:@"bluetooth_unavailable" message:s details:NULL]);
+            return;
+        }
+        
+        if ([@"setLogLevel" isEqualToString:call.method])
+        {
+            NSNumber *logLevelIndex = [call arguments];
+            _logLevel = (LogLevel)[logLevelIndex integerValue];
+            result(@(true));
+            return;
         }
         if ([@"getAdapterState" isEqualToString:call.method])
         {
@@ -124,7 +131,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         }
         else if ([@"isAvailable" isEqualToString:call.method])
         {
-            if (self.centralManager.state != CBManagerStateUnsupported &&
+            if (self.centralManager &&
+                self.centralManager.state != CBManagerStateUnsupported &&
                 self.centralManager.state != CBManagerStateUnknown)
             {
                 result(@(YES));
