@@ -279,8 +279,22 @@ class DeviceScreen extends StatelessWidget {
                         .map(
                           (d) => DescriptorTile(
                             descriptor: d,
-                            onReadPressed: () => d.read(),
-                            onWritePressed: () => d.write(_getRandomBytes()),
+                            onReadPressed: () async {
+                              try {
+                                await d.read();
+                              } catch (e) {
+                                final snackBar = SnackBar(content: Text(prettyException("Read Error:", e)));
+                                snackBarKeyC.currentState?.showSnackBar(snackBar);
+                              }
+                            },
+                            onWritePressed: () async {
+                              try {
+                                await d.write(_getRandomBytes());
+                              } catch (e) {
+                                final snackBar = SnackBar(content: Text(prettyException("Write Error:", e)));
+                                snackBarKeyC.currentState?.showSnackBar(snackBar);
+                              }
+                            },
                           ),
                         )
                         .toList(),
