@@ -2,8 +2,6 @@
 // All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-// ignore_for_file: avoid_print
-
 part of flutter_blue_plus;
 
 class FlutterBluePlus {
@@ -16,7 +14,7 @@ class FlutterBluePlus {
   // native platform channel
   static final MethodChannel _methods = const MethodChannel('flutter_blue_plus/methods');
 
-  // presents the method chanel as a broadcast stream
+  // a broadcast stream version of the MethodChannel
   // ignore: close_sinks
   static final StreamController<MethodCall> _methodStream = StreamController.broadcast();
 
@@ -26,13 +24,15 @@ class FlutterBluePlus {
   // stream used for the scanResults public api
   static final _StreamController<List<ScanResult>> _scanResults = _StreamController(initialValue: []);
 
-  // buffer for scan results that can be closed by stopScan
+  // ScanResults are received from the system one-by-one from the method broadcast stream.
+  // This variable buffers all the results into a single-subscription stream.
+  // We store it at the top level so it can be closed by stopScan
   static _BufferStream<ScanResult>? _scanResultsBuffer;
 
   // timeout for scanning that can be cancelled by stopScan
   static Timer? _scanTimeout;
 
-  /// Log level of the instance, default is all messages (debug).
+  /// FlutterBluePlus log level
   static LogLevel _logLevel = LogLevel.debug;
 
   ////////////////////
@@ -50,39 +50,48 @@ class FlutterBluePlus {
   /// Checks if Bluetooth functionality is turned on
   static Future<bool> get isOn async => await _invokeMethod('isOn');
 
+  // returns whether we are scanning as a stream
   static Stream<bool> get isScanning => _isScanning.stream;
 
+  // are we scanning right now?
   static bool get isScanningNow => _isScanning.latestValue;
 
-  /// Tries to turn on Bluetooth (Android only),
-  ///
-  /// Returns true if bluetooth is being turned on.
-  /// You have to listen for a stateChange to ON to ensure bluetooth is already running
-  ///
-  /// Returns false if an error occured
-  ///
-  static Future<bool> turnOn() async {
-    return await _invokeMethod('turnOn');
+  /// Turn on Bluetooth (Android only),
+  static Future<void> turnOn({int timeout = 10}) async {
+    Stream<BmBluetoothAdapterState> responseStream = FlutterBluePlus._methodStream.stream
+        .where((m) => m.method == "adapterStateChanged")
+        .map((m) => m.arguments)
+        .map((buffer) => BmBluetoothAdapterState.fromMap(buffer))
+        .where((s) => s.adapterState == BmAdapterStateEnum.on);
+
+    // Start listening now, before invokeMethod, to ensure we don't miss the response
+    Future<BmBluetoothAdapterState> futureResponse = responseStream.first;
+
+    await _invokeMethod('turnOn');
+
+    await futureResponse.timeout(Duration(seconds: timeout));
   }
 
-  /// Tries to turn off Bluetooth (Android only),
-  ///
-  /// Returns true if bluetooth is being turned off.
-  /// You have to listen for a stateChange to OFF to ensure bluetooth is turned off
-  ///
-  /// Returns false if an error occured
-  ///
-  static Future<bool> turnOff() async {
-    return await _invokeMethod('turnOff');
+  /// Turn off Bluetooth (Android only),
+  static Future<void> turnOff({int timeout = 10}) async {
+    Stream<BmBluetoothAdapterState> responseStream = FlutterBluePlus._methodStream.stream
+        .where((m) => m.method == "adapterStateChanged")
+        .map((m) => m.arguments)
+        .map((buffer) => BmBluetoothAdapterState.fromMap(buffer))
+        .where((s) => s.adapterState == BmAdapterStateEnum.off);
+
+    // Start listening now, before invokeMethod, to ensure we don't miss the response
+    Future<BmBluetoothAdapterState> futureResponse = responseStream.first;
+
+    await _invokeMethod('turnOff');
+
+    await futureResponse.timeout(Duration(seconds: timeout));
   }
 
-  /// Returns a stream that is a list of [ScanResult] results while a scan is in progress.
-  ///
-  /// The list emitted is all the scanned results as of the last initiated scan. When a scan is
-  /// first started, an empty list is emitted. The returned stream is never closed.
-  ///
-  /// One use for [scanResults] is as the stream in a StreamBuilder to display the
-  /// results of a scan in real time while the scan is in progress.
+  /// Returns a stream of List<ScanResult> results while a scan is in progress.
+  /// - The list contains all the results since the scan started. 
+  /// - When a scan is first started, an empty list is emitted.
+  /// - The returned stream is never closed.
   static Stream<List<ScanResult>> get scanResults => _scanResults.stream;
 
   /// Gets the current state of the Bluetooth module
@@ -93,19 +102,18 @@ class FlutterBluePlus {
 
     yield initialState;
 
-    Stream<BluetoothAdapterState> stream = FlutterBluePlus._methodStream.stream
+    Stream<BluetoothAdapterState> responseStream = FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "adapterStateChanged")
         .map((m) => m.arguments)
         .map((buffer) => BmBluetoothAdapterState.fromMap(buffer))
         .map((s) => bmToBluetoothAdapterState(s.adapterState));
 
-    yield* stream;
+    yield* responseStream;
   }
 
   /// Retrieve a list of connected devices
-  /// The list of connected peripherals can include those that are connected
-  /// by other apps and that will need to be connected locally using the
-  /// device.connect() method before they can be used.
+  /// - The list includes devices connected by other apps
+  /// - You must call device.connect() before these devices can be used by FlutterBluePlus
   static Future<List<BluetoothDevice>> get connectedDevices {
     return _invokeMethod('getConnectedDevices')
         .then((buffer) => BmConnectedDevicesResponse.fromMap(buffer))
@@ -123,14 +131,11 @@ class FlutterBluePlus {
 
   /// Starts a scan for Bluetooth Low Energy devices and returns a stream
   /// of the [ScanResult] results as they are received.
-  ///
-  /// timeout calls stopStream after a specified [Duration].
-  /// You can also get a list of ongoing results in the [scanResults] stream.
-  /// If scanning is already in progress, this will throw an [Exception].
-  ///
-  /// set [androidUsesFineLocation] to true to request the ACCESS_FINE_LOCATION permission at runtime
-  /// on Android Version >=31 (Android 12). You need to add the following permission to your AndroidManifest.xml:
-  /// <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+  ///    - throws an exception if scanning is already in progress
+  ///    - [timeout] calls stopScan after a specified duration
+  ///    - [androidUsesFineLocation] requests ACCESS_FINE_LOCATION permission at runtime regardless
+  ///    of Android version. On Android 11 and below (Sdk < 31), this permission is required
+  ///    and therefore we will always request it. Your AndroidManifest.xml must match.   
   static Stream<ScanResult> scan({
     ScanMode scanMode = ScanMode.lowLatency,
     List<Guid> withServices = const [],
@@ -154,7 +159,7 @@ class FlutterBluePlus {
     // Clear scan results list
     _scanResults.add(<ScanResult>[]);
 
-    Stream<ScanResult> scanResultsStream = FlutterBluePlus._methodStream.stream
+    Stream<ScanResult> responseStream = FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "ScanResult")
         .map((m) => m.arguments)
         .map((buffer) => BmScanResult.fromMap(buffer))
@@ -163,7 +168,7 @@ class FlutterBluePlus {
         .doOnDone(stopScan);
 
     // Start listening now, before invokeMethod, to ensure we don't miss any results
-    _scanResultsBuffer = _BufferStream.listen(scanResultsStream);
+    _scanResultsBuffer = _BufferStream.listen(responseStream);
 
     // Start timer *after* stream is being listened to, to make sure the
     // timeout does not fire before _scanResultsBuffer is set
@@ -199,18 +204,11 @@ class FlutterBluePlus {
     }
   }
 
-  /// Starts a scan and returns a future that will complete once the scan has finished.
-  ///
-  /// Once a scan is started, call [stopScan] to stop the scan and complete the returned future.
-  ///
-  /// timeout automatically stops the scan after a specified [Duration].
-  ///
-  /// To observe the results while the scan is in progress, listen to the [scanResults] stream,
-  /// or call [scan] instead.
-  ///
-  /// set [androidUsesFineLocation] to true to request the ACCESS_FINE_LOCATION permission at runtime
-  /// on Android Version >=31 (Android 12). You need to add the following permission to your AndroidManifest.xml:
-  /// <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+  /// Start a scan
+  ///  - future completes when the scan is done.
+  ///  - To observe the results live, listen to the [scanResults] stream.
+  ///  - call [stopScan] to complete the returned future, or set [timeout]
+  ///  - see [scan] documentation for more details
   static Future startScan({
     ScanMode scanMode = ScanMode.lowLatency,
     List<Guid> withServices = const [],
@@ -240,9 +238,7 @@ class FlutterBluePlus {
     _isScanning.add(false);
   }
 
-  /// Sets the log level of the FlutterBlue instance
-  /// Messages equal or below the log level specified are stored/forwarded,
-  /// messages above are dropped.
+  /// Sets the internal FlutterBlue log level  
   static void setLogLevel(LogLevel level) async {
     await _invokeMethod('setLogLevel', level.index);
     _logLevel = level;
@@ -251,6 +247,7 @@ class FlutterBluePlus {
   static void _log(LogLevel level, String message) {
     if (level.index <= _logLevel.index) {
       if (kDebugMode) {
+        // ignore: avoid_print
         print(message);
       }
     }
