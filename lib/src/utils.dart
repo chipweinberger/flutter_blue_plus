@@ -44,12 +44,12 @@ int _compareAsciiLowerCase(String a, String b) {
 // It is essentially a stream but:
 //  1. we cache the latestValue of the stream
 //  2. the "latestValue" is re-emitted whenever the stream is listened to
-class _BehaviorSubject<T> {
+class _StreamController<T> {
   T latestValue;
 
   final StreamController<T> _controller = StreamController<T>.broadcast();
 
-  _BehaviorSubject(this.latestValue);
+  _StreamController({required T initialValue}) : this.latestValue = initialValue;
 
   Stream<T> get stream => _controller.stream;
 
@@ -316,7 +316,6 @@ extension _StreamNewStreamWithInitialValue<T> on Stream<T> {
     return transform(_NewStreamWithInitialValueTransformer(initialValue));
   }
 }
-
 
 // ignore: unused_element
 Stream<T> _mergeStreams<T>(List<Stream<T>> streams) {

@@ -9,9 +9,9 @@ class BluetoothDevice {
   final String localName;
   final BluetoothDeviceType type;
 
-  final _BehaviorSubject<List<BluetoothService>> _services = _BehaviorSubject([]);
+  final _StreamController<List<BluetoothService>> _services = _StreamController(initialValue:[]);
 
-  final _BehaviorSubject<bool> _isDiscoveringServices = _BehaviorSubject(false);
+  final _StreamController<bool> _isDiscoveringServices = _StreamController(initialValue:false);
 
   Stream<bool> get isDiscoveringServices => _isDiscoveringServices.stream;
 

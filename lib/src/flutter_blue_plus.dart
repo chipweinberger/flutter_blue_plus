@@ -20,15 +20,17 @@ class FlutterBluePlus {
   // ignore: close_sinks
   static final StreamController<MethodCall> _methodStream = StreamController.broadcast();
 
-  static final _BehaviorSubject<bool> _isScanning = _BehaviorSubject(false);
+  // stream used for the isScanning public api
+  static final _StreamController<bool> _isScanning = _StreamController(initialValue: false);
 
-  static final _BehaviorSubject<List<ScanResult>> _scanResults = _BehaviorSubject([]);
-
-  // timeout for scanning that can be cancelled by stopScan
-  static Timer? _scanTimeout;
+  // stream used for the scanResults public api
+  static final _StreamController<List<ScanResult>> _scanResults = _StreamController(initialValue: []);
 
   // buffer for scan results that can be closed by stopScan
   static _BufferStream<ScanResult>? _scanResultsBuffer;
+
+  // timeout for scanning that can be cancelled by stopScan
+  static Timer? _scanTimeout;
 
   /// Log level of the instance, default is all messages (debug).
   static LogLevel _logLevel = LogLevel.debug;
