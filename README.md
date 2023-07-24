@@ -134,18 +134,54 @@ Note that iOS will not allow requests of MTU size, and will always try to negoti
 
 ## Error Handling
 
-All functions can throw errors -- Bluetooth can fail at any time. 
+All functions in FlutterBluePlus throw exceptions when they encounter errors. 
 
-You **must** handle these exceptions.
+To make robust software, **you should defensively assume all functions will throw.**
+
+This is **especially** true for functions that require bluetooth communication. You **MUST** handle exceptions for:
+- `BluetoothDevice.connect()`
+- `BluetoothDevice.disconnect()`
+- `BluetoothDevice.discoverServices()`
+- `BluetoothDevice.requestMtu()`
+- `BluetoothDevice.readRssi()`
+- `BluetoothDevice.pair()`
+- `BluetoothCharacteristic.read()`
+- `BluetoothCharacteristic.write()`
+- `BluetoothCharacteristic.setNotifyValue()`
+- `BluetoothDescriptor.read()`
+- `BluetoothDescriptor.read()`
+
+These functions will also throw exceptions:
+- `FlutterBluePlus.turnOn()`
+- `FlutterBluePlus.turnOff()`
+
+At the time of writing, these function **do not** throw exceptions:
+
+- `FlutterBluePlus.isAvailable`
+- `FlutterBluePlus.isOn`
+- `FlutterBluePlus.adapterState`
+- `FlutterBluePlus.isScanning`
+- `FlutterBluePlus.isScanningNow`
+- `FlutterBluePlus.scanResults`
+- `FlutterBluePlus.setLogLevel()`
+- `BluetoothDevice.localName`
+- `BluetoothDevice.connectionState`
+- `BluetoothCharacteristic.isNotifying`
+- `BluetoothCharacteristic.lastValue, uuid, & other simple accessors`
+- `BluetoothDescriptor.lastValue, uuid, & other simple accessors`
+
+**Any functions not listed above should be treated as potentially throwing.**
+
+**Example Code:**
 
 ```dart
 try {
     await characteristic.read();
 } catch (e) {
-    print(pretty(e))
+    print(prettyPrint(e))
 }
 
-String pretty(dynamic e) {
+String prettyPrint(dynamic e) {
   if (e is FlutterBluePlusException) {return e.errorString;}
   if (e is PlatformException) {return e.message;}
   return e.toString();
@@ -166,14 +202,17 @@ These streams stio receiving values after the connection is lost so make sure to
 
 ### Other Streams
 
-FlutterBluePlus.isScanning
-FlutterBluePlus.scanResults
-FlutterBluePlus.adapterState
-BluetoothDevice.services
-BluetoothDevice.connectionState
-BluetoothDevice.isDiscoveringServices
+These streams **never** encounter any errors of any kind.
 
-BluetoothDevices.mtu will thow exception if the remoteId is unknown
+- `FlutterBluePlus.isScanning`
+- `FlutterBluePlus.scanResults`
+- `FlutterBluePlus.adapterState`
+- `BluetoothDevice.connectionState`
+- `BluetoothDevice.isDiscoveringServices`
+
+These streams **could** throw an exception when first called if the remoteId is no longer valid.
+- `BluetoothDevice.services`
+- `BluetoothDevices.mtu`
 
 ## Getting Started
 
