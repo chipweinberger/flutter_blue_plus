@@ -7,6 +7,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -86,7 +87,7 @@ class BluetoothOffScreen extends StatelessWidget {
                       FlutterBluePlus.instance.turnOn();
                     }
                   } catch (e) {
-                    final snackBar = SnackBar(content: Text('Error: [turnOn] ${e.toString()}'));
+                    final snackBar = SnackBar(content: Text(prettyException("Error Turning On:", e)));
                     snackBarKeyA.currentState?.showSnackBar(snackBar);
                   }
                 },
@@ -164,7 +165,7 @@ class FindDevicesScreen extends StatelessWidget {
                             result: r,
                             onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) {
                               r.device.connect().catchError((e) {
-                                final snackBar = SnackBar(content: Text('Error: [connect] ${e.toString()}'));
+                                final snackBar = SnackBar(content: Text(prettyException("Connect Error:", e)));
                                 snackBarKeyB.currentState?.showSnackBar(snackBar);
                               });
                               return DeviceScreen(device: r.device);
@@ -189,7 +190,7 @@ class FindDevicesScreen extends StatelessWidget {
                   try {
                     FlutterBluePlus.instance.stopScan();
                   } catch (e) {
-                    final snackBar = SnackBar(content: Text('Error: [stopScan] ${e.toString()}'));
+                    final snackBar = SnackBar(content: Text(prettyException("Stop Scan Error:", e)));
                     snackBarKeyB.currentState?.showSnackBar(snackBar);
                   }
                   ;
@@ -204,7 +205,7 @@ class FindDevicesScreen extends StatelessWidget {
                       FlutterBluePlus.instance
                           .startScan(timeout: const Duration(seconds: 15), androidUsesFineLocation: false);
                     } catch (e) {
-                      final snackBar = SnackBar(content: Text('Error: [startScan] ${e.toString()}'));
+                      final snackBar = SnackBar(content: Text(prettyException("Start Scan Error:", e)));
                       snackBarKeyB.currentState?.showSnackBar(snackBar);
                     }
                   });
@@ -239,7 +240,7 @@ class DeviceScreen extends StatelessWidget {
                       try {
                         await c.read();
                       } catch (e) {
-                        final snackBar = SnackBar(content: Text('Error: [read] ${e.toString()}'));
+                        final snackBar = SnackBar(content: Text(prettyException("Read Error:", e)));
                         snackBarKeyC.currentState?.showSnackBar(snackBar);
                       }
                     },
@@ -250,7 +251,7 @@ class DeviceScreen extends StatelessWidget {
                           await c.read();
                         }
                       } catch (e) {
-                        final snackBar = SnackBar(content: Text('Error: [write] ${e.toString()}'));
+                        final snackBar = SnackBar(content: Text(prettyException("Write Error:", e)));
                         snackBarKeyC.currentState?.showSnackBar(snackBar);
                       }
                     },
@@ -261,7 +262,7 @@ class DeviceScreen extends StatelessWidget {
                           await c.read();
                         }
                       } catch (e) {
-                        final snackBar = SnackBar(content: Text('Error: [setNotifyValue] ${e.toString()}'));
+                        final snackBar = SnackBar(content: Text(prettyException("Subscribe Error:", e)));
                         snackBarKeyC.currentState?.showSnackBar(snackBar);
                       }
                     },
@@ -302,7 +303,7 @@ class DeviceScreen extends StatelessWidget {
                       try {
                         await device.disconnect();
                       } catch (e) {
-                        final snackBar = SnackBar(content: Text('Error: [disconnect] ${e.toString()}'));
+                        final snackBar = SnackBar(content: Text(prettyException("Disconnect Error:", e)));
                         snackBarKeyC.currentState?.showSnackBar(snackBar);
                       }
                     };
@@ -313,7 +314,7 @@ class DeviceScreen extends StatelessWidget {
                       try {
                         await device.connect();
                       } catch (e) {
-                        final snackBar = SnackBar(content: Text('Error: [connect] ${e.toString()}'));
+                        final snackBar = SnackBar(content: Text(prettyException("Connect Error:", e)));
                         snackBarKeyC.currentState?.showSnackBar(snackBar);
                       }
                     };
@@ -371,7 +372,7 @@ class DeviceScreen extends StatelessWidget {
                             try {
                               await device.discoverServices();
                             } catch (e) {
-                              final snackBar = SnackBar(content: Text('Error: [discoverServices] ${e.toString()}'));
+                              final snackBar = SnackBar(content: Text(prettyException("Discover Services Error:", e)));
                               snackBarKeyC.currentState?.showSnackBar(snackBar);
                             }
                           },
@@ -403,7 +404,7 @@ class DeviceScreen extends StatelessWidget {
                         try {
                           await device.requestMtu(223);
                         } catch (e) {
-                          final snackBar = SnackBar(content: Text('Error: [requestMtu] ${e.toString()}'));
+                          final snackBar = SnackBar(content: Text(prettyException("Change Mtu Error:", e)));
                           snackBarKeyC.currentState?.showSnackBar(snackBar);
                         }
                       }),
@@ -442,4 +443,13 @@ class DeviceScreen extends StatelessWidget {
     // Device disconnected, stopping RSSI stream
     subscription.cancel();
   }
+}
+
+String prettyException(String prefix, dynamic e) {
+  if (e is FlutterBluePlusException) {
+    return "$prefix ${e.errorString}";
+  } else if (e is PlatformException) {
+    return "$prefix ${e.message}";
+  }
+  return e.toString();
 }
