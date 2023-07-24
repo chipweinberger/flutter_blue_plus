@@ -79,8 +79,7 @@ class BluetoothDevice {
   Future<List<BluetoothService>> discoverServices({int timeout = 15}) async {
     final s = await connectionState.first;
     if (s != BluetoothConnectionState.connected) {
-      return Future.error(Exception('Cannot discoverServices while'
-          'device is not connected. State == $s'));
+      throw FlutterBluePlusException('discoverServices', -1, 'device is not connected');
     }
 
     // signal that we have started
@@ -102,7 +101,7 @@ class BluetoothDevice {
 
     // failed?
     if (!response.success) {
-      throw FlutterBluePlusException("discoverServicesFail", response.errorCode, response.errorString);
+      throw FlutterBluePlusException("discoverServices", response.errorCode, response.errorString);
     }
 
     List<BluetoothService> servicesList = response.services.map((p) => BluetoothService.fromProto(p)).toList();
@@ -152,7 +151,7 @@ class BluetoothDevice {
 
     // failed?
     if (!response.success) {
-      throw FlutterBluePlusException("mtuFail", response.errorCode, response.errorString);
+      throw FlutterBluePlusException("mtu", response.errorCode, response.errorString);
     }
 
     // initial value
@@ -211,7 +210,7 @@ class BluetoothDevice {
 
     // failed?
     if (!response.success) {
-      throw FlutterBluePlusException("readRssiFail", response.errorCode, response.errorString);
+      throw FlutterBluePlusException("readRssi", response.errorCode, response.errorString);
     }
 
     return response.rssi;

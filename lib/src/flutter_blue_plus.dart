@@ -159,7 +159,7 @@ class FlutterBluePlus {
         androidUsesFineLocation: androidUsesFineLocation);
 
     if (_isScanning.value == true) {
-      throw Exception('Another scan is already in progress.');
+      throw FlutterBluePlusException('scan',-1,'Another scan is already in progress.');
     }
 
     // Clear scan results list

@@ -99,7 +99,7 @@ class BluetoothCharacteristic {
 
       // failed?
       if (!response.success) {
-        throw FlutterBluePlusException("charactersticReadFail", response.errorCode, response.errorString);
+        throw FlutterBluePlusException("readCharacteristic", response.errorCode, response.errorString);
       }
 
       // cache latest value
@@ -107,8 +107,6 @@ class BluetoothCharacteristic {
 
       // set return value
       responseValue = response.value;
-    }).catchError((e, stacktrace) {
-      throw Exception("$e $stacktrace");
     });
 
     return responseValue;
@@ -153,7 +151,7 @@ class BluetoothCharacteristic {
 
         // failed?
         if (!response.success) {
-          throw FlutterBluePlusException("charactersticWriteFail", response.errorCode, response.errorString);
+          throw FlutterBluePlusException("writeCharacteristic", response.errorCode, response.errorString);
         }
 
         return Future.value();
@@ -161,8 +159,6 @@ class BluetoothCharacteristic {
         // invoke without waiting for reply
         return FlutterBluePlus.instance._channel.invokeMethod('writeCharacteristic', request.toMap());
       }
-    }).catchError((e, stacktrace) {
-      throw Exception("$e $stacktrace");
     });
   }
 
@@ -198,7 +194,7 @@ class BluetoothCharacteristic {
 
     // failed?
     if (!response.success) {
-      throw FlutterBluePlusException("setNotifyValueFail", response.errorCode, response.errorString);
+      throw FlutterBluePlusException("setNotifyValue", response.errorCode, response.errorString);
     }
 
     // verify notifications were actually set correctly
@@ -207,7 +203,7 @@ class BluetoothCharacteristic {
     var hasIndicate = cccd.isNotEmpty && (cccd[0] & 0x02) > 0;
     var isEnabled = hasNotify || hasIndicate;
     if (notify != isEnabled) {
-      throw FlutterBluePlusException("setNotifyValueFail", -1, "notifications were not updated");
+      throw FlutterBluePlusException("setNotifyValue", -1, "notifications were not updated");
     }
 
     // update descriptor

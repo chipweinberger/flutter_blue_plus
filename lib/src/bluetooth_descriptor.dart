@@ -24,8 +24,8 @@ class BluetoothDescriptor {
   Stream<List<int>> get lastValueStream => onValueReceived.newStreamWithInitialValue(lastValue);
 
   // this stream is pushed to whenever:
-  //  1. descriptor.read() succeeds  
-  //  2. descriptor.write() succeeds  
+  //  1. descriptor.read() succeeds
+  //  2. descriptor.write() succeeds
   Stream<List<int>> get onValueReceived => FlutterBluePlus.instance._methodStream
           .where((m) => m.method == "OnDescriptorResponse")
           .map((m) => m.arguments)
@@ -80,12 +80,10 @@ class BluetoothDescriptor {
 
       // failed?
       if (!response.success) {
-        throw FlutterBluePlusException("readDescriptorFail", response.errorCode, response.errorString);
+        throw FlutterBluePlusException("readDescriptor", response.errorCode, response.errorString);
       }
 
       readValue = response.value;
-    }).catchError((e, stacktrace) {
-      throw Exception("$e $stacktrace");
     });
 
     return readValue;
@@ -124,10 +122,8 @@ class BluetoothDescriptor {
 
       // failed?
       if (!response.success) {
-        throw FlutterBluePlusException("writeDescriptorFail", response.errorCode, response.errorString);
+        throw FlutterBluePlusException("writeDescriptor", response.errorCode, response.errorString);
       }
-    }).catchError((e, stacktrace) {
-      throw Exception("$e $stacktrace");
     });
 
     return Future.value();
