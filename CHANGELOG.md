@@ -1,3 +1,6 @@
+## 1.10.1
+* example: add error handling to descriptor read & write
+
 ## 1.10.0
 This release is focused on improving error handling and reliability.
 There is 1 breaking changes. See below.
