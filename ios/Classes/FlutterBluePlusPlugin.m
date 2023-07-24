@@ -109,8 +109,18 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         }
         if ([@"getAdapterState" isEqualToString:call.method])
         {
-            NSDictionary *data = [self toBluetoothAdapterStateProto:self->_centralManager.state];      
-            result(data);
+            // get state
+            int adapterState = 0; // BmAdapterStateEnum.unknown
+            if (self->_centralManager) {
+                adapterState = [self toAdapterStateInt:self->_centralManager.state];    
+            }
+
+            // See BmBluetoothAdapterState
+            NSDictionary* response = @{
+                @"adapter_state" : @(adapterState),
+            };
+
+            result(response);
         }
         else if ([@"isAvailable" isEqualToString:call.method])
         {
@@ -805,8 +815,13 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     if (_logLevel >= debug) {
         NSLog(@"[FBP-iOS] centralManagerDidUpdateState %li", self->_centralManager.state);
     }
-    
-    NSDictionary *response = [self toBluetoothAdapterStateProto:self->_centralManager.state];
+
+    int adapterState = [self toAdapterStateInt:self->_centralManager.state];
+
+    // See BmBluetoothAdapterState
+    NSDictionary* response = @{
+        @"adapter_state" : @(adapterState),
+    };
 
     [_methodChannel invokeMethod:@"adapterStateChanged" arguments:response];
 }
@@ -1247,24 +1262,19 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     return [hexString copy];
 }
 
-- (NSDictionary *)toBluetoothAdapterStateProto:(CBManagerState)adapterState
+- (int)toAdapterStateInt:(CBManagerState)adapterState
 {
-    int value = 0;
     switch (adapterState)
     {
-        case CBManagerStateResetting:    value = 3; break; // BmAdapterStateEnum.turningOn
-        case CBManagerStateUnsupported:  value = 1; break; // BmAdapterStateEnum.unavailable
-        case CBManagerStateUnauthorized: value = 2; break; // BmAdapterStateEnum.unauthorized
-        case CBManagerStatePoweredOff:   value = 6; break; // BmAdapterStateEnum.off
-        case CBManagerStatePoweredOn:    value = 4; break; // BmAdapterStateEnum.on
-        case CBManagerStateUnknown:      value = 0; break; // BmAdapterStateEnum.unknown
-        default:                         value = 0; break; // BmAdapterStateEnum.unknown
+        case CBManagerStateUnknown:      return 0; // BmAdapterStateEnum.unknown
+        case CBManagerStateUnsupported:  return 1; // BmAdapterStateEnum.unavailable
+        case CBManagerStateUnauthorized: return 2; // BmAdapterStateEnum.unauthorized
+        case CBManagerStateResetting:    return 3; // BmAdapterStateEnum.turningOn
+        case CBManagerStatePoweredOn:    return 4; // BmAdapterStateEnum.on
+        case CBManagerStatePoweredOff:   return 6; // BmAdapterStateEnum.off
+        default:                         return 0; // BmAdapterStateEnum.unknown
     }
-
-    // See BmBluetoothAdapterState
-    return @{
-        @"adapter_state" : @(value),
-    };
+    return 0;
 }
 
 - (NSDictionary *)toScanResultProto:(CBPeripheral *)peripheral
@@ -1349,10 +1359,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 {
     switch (connectionState)
     {
-        case CBPeripheralStateDisconnected:  return 0; break; // BmConnectionStateEnum.disconnected
-        case CBPeripheralStateConnecting:    return 1; break; // BmConnectionStateEnum.connecting
-        case CBPeripheralStateConnected:     return 2; break; // BmConnectionStateEnum.connected
-        case CBPeripheralStateDisconnecting: return 3; break; // BmConnectionStateEnum.disconnecting
+        case CBPeripheralStateDisconnected:  return 0; // BmConnectionStateEnum.disconnected
+        case CBPeripheralStateConnecting:    return 1; // BmConnectionStateEnum.connecting
+        case CBPeripheralStateConnected:     return 2; // BmConnectionStateEnum.connected
+        case CBPeripheralStateDisconnecting: return 3; // BmConnectionStateEnum.disconnecting
     }
     return 0;
 }
