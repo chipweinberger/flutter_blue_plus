@@ -15,8 +15,6 @@ class BluetoothCharacteristic {
   // convenience accessor
   Guid get uuid => characteristicUuid;
 
-  final _Mutex _readWriteMutex = _Mutex();
-
   /// this variable is updated:
   ///   - *live* if you call onValueReceived.listen() or lastValueStream.listen()
   ///   - *once* if you call read()
@@ -31,13 +29,13 @@ class BluetoothCharacteristic {
         properties = CharacteristicProperties.fromProto(p.properties),
         lastValue = p.value;
 
-  // same as onValueReceived, but the stream starts
-  // with lastValue as its first value (to not cause delay)
+  // same as onValueReceived, but the stream immediately starts
+  // with lastValue as its first value to not cause delay
   Stream<List<int>> get lastValueStream => onValueReceived.newStreamWithInitialValue(lastValue);
 
   // this stream is updated:
-  //   1. after read() is called
-  //   2. when a notification arrives
+  //   - after read() is called
+  //   - when a notification arrives
   Stream<List<int>> get onValueReceived => FlutterBluePlus._methodStream.stream
           .where((m) => m.method == "OnCharacteristicReceived")
           .map((m) => m.arguments)
@@ -62,13 +60,18 @@ class BluetoothCharacteristic {
     }
   }
 
-  /// Retrieves the value of the characteristic
+  // only allows a single read or write to be underway at any time.
+  // otherwise, the calls can confuse each others platform response as theirs
+  final _Mutex _readMutex = _Mutex();
+  final _Mutex _writeMutex = _Mutex();
+
+  /// read a characteristic
   Future<List<int>> read({int timeout = 15}) async {
     List<int> responseValue = [];
 
-    // Only allow a single read or write operation
+    // Only allow a single read operation
     // at a time, to prevent race conditions.
-    await _readWriteMutex.synchronized(() async {
+    await _readMutex.synchronized(() async {
       var request = BmReadCharacteristicRequest(
         remoteId: remoteId.toString(),
         characteristicUuid: characteristicUuid,
@@ -112,15 +115,13 @@ class BluetoothCharacteristic {
     return responseValue;
   }
 
-  /// Writes the value of a characteristic.
-  /// [CharacteristicWriteType.withoutResponse]: the write is not
-  /// guaranteed and will return immediately with success.
-  /// [CharacteristicWriteType.withResponse]: the method will return after the
-  /// write operation has either passed or failed.
+  /// Writes a characteristic.
+  ///  - [withoutResponse]: the write is not guaranteed and always returns immediately with success.
+  ///  - [withResponse]: the write returns error on failure
   Future<void> write(List<int> value, {bool withoutResponse = false, int timeout = 15}) async {
-    // Only allow a single read or write operation
+    // Only allow a single write operation
     // at a time, to prevent race conditions.
-    await _readWriteMutex.synchronized(() async {
+    await _writeMutex.synchronized(() async {
       final writeType = withoutResponse ? BmWriteType.withoutResponse : BmWriteType.withResponse;
 
       var request = BmWriteCharacteristicRequest(
@@ -162,7 +163,9 @@ class BluetoothCharacteristic {
     });
   }
 
-  /// Sets notifications or indications for the value of a specified characteristic
+  /// Sets notifications or indications for the characteristic.
+  ///   - If a characteristic supports both notifications and indications,
+  ///     we'll use notifications. This is a limitation of CoreBluetooth on iOS.
   Future<bool> setNotifyValue(bool notify, {int timeout = 15}) async {
     var request = BmSetNotificationRequest(
       remoteId: remoteId.toString(),

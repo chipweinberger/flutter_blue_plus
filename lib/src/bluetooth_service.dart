@@ -28,8 +28,8 @@ class BluetoothService {
   @override
   String toString() {
     return 'BluetoothService{'
-        'serviceUuid: $serviceUuid, '
         'remoteId: $remoteId, '
+        'serviceUuid: $serviceUuid, '
         'isPrimary: $isPrimary, '
         'characteristics: $characteristics, '
         'includedServices: $includedServices'

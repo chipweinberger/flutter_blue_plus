@@ -15,17 +15,15 @@ class BluetoothDescriptor {
   // convenience accessor
   Guid get uuid => descriptorUuid;
 
-  final _Mutex _readWriteMutex = _Mutex();
-
   List<int> lastValue = [];
 
-  // same as onValueReceived, but the stream starts
-  // with lastValue as its first value (to not cause delay)
+  // same as onValueReceived, but the stream immediately starts
+  // with lastValue as its first value to not cause delay
   Stream<List<int>> get lastValueStream => onValueReceived.newStreamWithInitialValue(lastValue);
 
   // this stream is pushed to whenever:
-  //  1. descriptor.read() succeeds
-  //  2. descriptor.write() succeeds
+  //  - descriptor.read() succeeds
+  //  - descriptor.write() succeeds
   Stream<List<int>> get onValueReceived => FlutterBluePlus._methodStream.stream
           .where((m) => m.method == "OnDescriptorResponse")
           .map((m) => m.arguments)
@@ -46,13 +44,18 @@ class BluetoothDescriptor {
         characteristicUuid = p.characteristicUuid,
         descriptorUuid = p.descriptorUuid;
 
+  // only allows a single read or write to be underway at any time.
+  // otherwise, the calls can confuse each others platform response as theirs
+  final _Mutex _readMutex = _Mutex();
+  final _Mutex _writeMutex = _Mutex();
+
   /// Retrieves the value of a specified descriptor
   Future<List<int>> read({int timeout = 15}) async {
     List<int> readValue = [];
 
-    // Only allow a single read or write operation
+    // Only allow a single read operation
     // at a time, to prevent race conditions.
-    await _readWriteMutex.synchronized(() async {
+    await _readMutex.synchronized(() async {
       var request = BmReadDescriptorRequest(
         remoteId: remoteId.toString(),
         serviceUuid: serviceUuid,
@@ -91,9 +94,9 @@ class BluetoothDescriptor {
 
   /// Writes the value of a descriptor
   Future<void> write(List<int> value, {int timeout = 15}) async {
-    // Only allow a single read or write operation
+    // Only allow a single write operation
     // at a time, to prevent race conditions.
-    await _readWriteMutex.synchronized(() async {
+    await _writeMutex.synchronized(() async {
       var request = BmWriteDescriptorRequest(
         remoteId: remoteId.toString(),
         serviceUuid: serviceUuid,
@@ -132,10 +135,10 @@ class BluetoothDescriptor {
   @override
   String toString() {
     return 'BluetoothDescriptor{'
-        'descriptorUuid: $descriptorUuid, '
         'remoteId: $remoteId, '
         'serviceUuid: $serviceUuid, '
         'characteristicUuid: $characteristicUuid, '
+        'descriptorUuid: $descriptorUuid, '
         'lastValue: $lastValue'
         '}';
   }
