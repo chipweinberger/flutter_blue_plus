@@ -9,10 +9,13 @@ class BluetoothDevice {
   final String localName;
   final BluetoothDeviceType type;
 
+  // used for 'services' public api
   final _StreamController<List<BluetoothService>> _services = _StreamController(initialValue:[]);
 
+  // used for 'isDiscoveringServices' public api
   final _StreamController<bool> _isDiscoveringServices = _StreamController(initialValue:false);
 
+  // stream return whether or not we are currently discovering services
   Stream<bool> get isDiscoveringServices => _isDiscoveringServices.stream;
 
   BluetoothDevice.fromProto(BmBluetoothDevice p)
@@ -20,9 +23,7 @@ class BluetoothDevice {
         localName = p.localName ?? "",
         type = bmToBluetoothDeviceType(p.type);
 
-  /// Use on Android when the MAC address is known.
-  /// This constructor enables the Android to connect to a specific device
-  /// as soon as it becomes available on the bluetooth "network".
+  /// allows connecting to a known device without scanning
   BluetoothDevice.fromId(String remoteId, {String? localName, BluetoothDeviceType? type})
       : remoteId = DeviceIdentifier(remoteId),
         localName = localName ?? "Unknown localName",
@@ -54,15 +55,12 @@ class BluetoothDevice {
     }
   }
 
-  /// Send a pairing request to the device.
-  /// Currently only implemented on Android.
+  /// Send a pairing request to the device (Android Only)
   Future<void> pair() async {
     return await FlutterBluePlus._invokeMethod('pair', remoteId.str);
   }
 
-  /// Refresh Gatt Device Cache
-  /// Emergency method to reload ble services & characteristics
-  /// Currently only implemented on Android.
+  /// Refresh ble services & characteristics (Android Only)
   Future<void> clearGattCache() async {
     if (Platform.isAndroid) {
       return await FlutterBluePlus._invokeMethod('clearGattCache', remoteId.str);
@@ -74,8 +72,7 @@ class BluetoothDevice {
     await FlutterBluePlus._invokeMethod('disconnect', remoteId.str);
   }
 
-  /// Discovers services offered by the remote device
-  /// as well as their characteristics and descriptors
+  /// Discover services, characteristics, and descriptors of the remote device
   Future<List<BluetoothService>> discoverServices({int timeout = 15}) async {
     final s = await connectionState.first;
     if (s != BluetoothConnectionState.connected) {
@@ -112,8 +109,8 @@ class BluetoothDevice {
     return servicesList;
   }
 
-  /// Returns a list of Bluetooth GATT services offered by the remote device
-  /// This function requires that discoverServices has been completed for this device
+  /// Returns bluetooth services offered by the remote device
+  ///  - discoverServices must have already been called
   Stream<List<BluetoothService>> get services async* {
     List<BluetoothService> initialServices = await FlutterBluePlus._methods
         .invokeMethod('services', remoteId.str)
@@ -143,7 +140,7 @@ class BluetoothDevice {
         .map((p) => bmToBluetoothConnectionState(p.connectionState));
   }
 
-  /// The MTU size in bytes
+  /// The current MTU size in bytes
   Stream<int> get mtu async* {
     BmMtuSizeResponse response = await FlutterBluePlus._methods
         .invokeMethod('mtu', remoteId.str)
@@ -165,10 +162,8 @@ class BluetoothDevice {
         .map((p) => p.mtu);
   }
 
-  /// Request to change the MTU Size
-  /// Throws error if request did not complete successfully
-  /// Request to change the MTU Size and returns the response back
-  /// Throws error if request did not complete successfully
+  /// Request to change MTU
+  ///  - returns new MTU
   Future<int> requestMtu(int desiredMtu, {int timeout = 15}) async {
     var request = BmMtuSizeRequest(
       remoteId: remoteId.str,
@@ -192,7 +187,7 @@ class BluetoothDevice {
     return mtu;
   }
 
-  /// Read the RSSI for a connected remote device
+  /// Read the RSSI of connected remote device
   Future<int> readRssi({int timeout = 15}) async {
     var responseStream = FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "ReadRssiResult")
@@ -216,14 +211,7 @@ class BluetoothDevice {
     return response.rssi;
   }
 
-  /// Request a connection parameter update.
-  ///
-  /// This function will send a connection parameter update request to the
-  /// remote device and is only available on Android.
-  ///
-  /// Request a specific connection priority. Must be one of
-  /// ConnectionPriority.balanced, BluetoothGatt#ConnectionPriority.high or
-  /// ConnectionPriority.lowPower
+  /// Request connection priority update (Android only)
   Future<void> requestConnectionPriority({required ConnectionPriority connectionPriorityRequest}) async {
     int connectionPriority = 0;
 
@@ -252,17 +240,15 @@ class BluetoothDevice {
     );
   }
 
-  /// Set the preferred connection [txPhy], [rxPhy] and Phy [option] for this
-  /// app. [txPhy] and [rxPhy] are int to be passed a masked value from the
-  /// [PhyType] enum, eg `(PhyType.le1m.mask | PhyType.le2m.mask)`.
-  ///
-  /// Please note that this is just a recommendation, whether the PHY change
-  /// will happen depends on other applications preferences, local and remote
-  /// controller capabilities. Controller can override these settings.
+  /// Set the preferred connection
+  ///   - [txPhy] bitwise OR of all allowed phys for Tx, e.g. (Phy.le2m.mask | Phy.leCoded.mask)
+  ///   - [txPhy] bitwise OR of all allowed phys for Rx, e.g. (Phy.le2m.mask | Phy.leCoded.mask)
+  ///   - [option] preferred coding to use when transmitting on Phy.leCoded
+  /// Please note that this is just a recommendation given to the system.
   Future<void> setPreferredPhy({
     required int txPhy,
     required int rxPhy,
-    required PhyOption option,
+    required PhyCoding option,
   }) async {
     var request = BmPreferredPhy(
       remoteId: remoteId.str,
@@ -277,7 +263,7 @@ class BluetoothDevice {
     );
   }
 
-  /// Only implemented on Android, for now
+  /// Remove bond (Android Only)
   Future<bool> removeBond() async {
     if (Platform.isAndroid) {
       return await FlutterBluePlus._methods
@@ -349,16 +335,18 @@ BluetoothConnectionState bmToBluetoothConnectionState(BmConnectionStateEnum valu
 
 enum ConnectionPriority { balanced, high, lowPower }
 
-enum PhyType { le1m, le2m, leCoded }
+enum Phy { le1m, le2m, leCoded }
 
-extension PhyTypeExt on PhyType {
+enum PhyCoding { noPreferred, s2, s8 }
+
+extension PhyExt on Phy {
   int get mask {
     switch (this) {
-      case PhyType.le1m:
+      case Phy.le1m:
         return 1;
-      case PhyType.le2m:
+      case Phy.le2m:
         return 2;
-      case PhyType.leCoded:
+      case Phy.leCoded:
         return 3;
       default:
         return 1;
@@ -366,4 +354,8 @@ extension PhyTypeExt on PhyType {
   }
 }
 
+@Deprecated('Use PhyCoding instead')
 enum PhyOption { noPreferred, s2, s8 }
+
+@Deprecated('Use Phy instead')
+enum PhyType { le1m, le2m, leCoded }
