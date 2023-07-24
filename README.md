@@ -22,11 +22,15 @@ FlutterBluePlus aims to offer the most from all supported platforms: iOS, macOS,
 
 ## Usage
 
-### Error Handling
+### Error Handling :fire:
 
-Flutter Blue Plus uses exceptions for error handling. Most functions can throw and must be handled. 
+Flutter Blue Plus diligently uses exceptions for error handling.
+
+Stream errors are not used and streams are never closed. Streams only return valid results.
 
 **See the Reference section below for a complete list of throwing function.**
+
+---
 
 ### Scan for devices
 
