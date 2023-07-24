@@ -1,3 +1,6 @@
+## 1.10.4
+* iOS: add remoteId to error strings when connection fails, etc
+
 ## 1.10.3
 * android: handle scan failure.
 * dart: add verbose log level and remove unused log levels
