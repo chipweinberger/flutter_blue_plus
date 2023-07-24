@@ -132,6 +132,49 @@ await device.requestMtu(512);
 
 Note that iOS will not allow requests of MTU size, and will always try to negotiate the highest possible MTU (iOS supports up to MTU size 185)
 
+## Error Handling
+
+All functions can throw errors -- Bluetooth can fail at any time. 
+
+You **must** handle these exceptions.
+
+```dart
+try {
+    await characteristic.read();
+} catch (e) {
+    print(pretty(e))
+}
+
+String pretty(dynamic e) {
+  if (e is FlutterBluePlusException) {return e.errorString;}
+  if (e is PlatformException) {return e.message;}
+  return e.toString();
+}
+```
+
+### Bluetooth Streams
+
+The Bluetooth receive streams **do not** return errors or close. These include:
+- `BluetoothCharacteristic.onValueReceived`
+- `BluetoothCharacteristic.lastValueStream`
+- `BluetoothDescriptor.onValueReceived`
+- `BluetoothDescriptor.lastValueStream`
+
+This is a limitation of the bluetooth protocol.
+
+These streams stio receiving values after the connection is lost so make sure to listen to `BluetoothDevice.connectionState` and respond to it accordingly.
+
+### Other Streams
+
+FlutterBluePlus.isScanning
+FlutterBluePlus.scanResults
+FlutterBluePlus.adapterState
+BluetoothDevice.services
+BluetoothDevice.connectionState
+BluetoothDevice.isDiscoveringServices
+
+BluetoothDevices.mtu will thow exception if the remoteId is unknown
+
 ## Getting Started
 
 ### Change the minSdkVersion for Android
