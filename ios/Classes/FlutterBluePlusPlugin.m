@@ -266,14 +266,19 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // remoteId is passed raw, not in a NSDictionary
             NSString *remoteId = [call arguments];
  
+            // get the connection state
+            // note: if the peripheral is not found it is considered disconnected
+            CBPeripheralState connectionState = CBPeripheralStateDisconnected;
             CBPeripheral *peripheral = [self findPeripheral:remoteId];
-            if (peripheral == nil) {
-                NSString* s = @"peripheral not found. try reconnecting.";
-                result([FlutterError errorWithCode:@"getConnectionState" message:s details:NULL]);
-                return;
+            if (peripheral) {
+                connectionState = peripheral.state;
             }
 
-            NSDictionary* response = [self toConnectionStateProto:peripheral connectionState:peripheral.state];
+            // See BmConnectionStateResponse
+            NSDictionary* response = @{
+                @"remote_id":        remoteId,
+                @"connection_state": @([self connectionStateInt:connectionState]),
+            };
 
             result(response);
         }
@@ -832,18 +837,14 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // Register self as delegate for peripheral
     peripheral.delegate = self;
 
-    // See: BmMtuSizeResponse
-    NSDictionary* response = @{
-        @"remote_id" : [[peripheral identifier] UUIDString],
-        @"mtu" : @([self getMtu:peripheral]),
-        @"success" : @(1),
+    // See BmConnectionStateResponse
+    NSDictionary *result = @{
+        @"remote_id":        [[peripheral identifier] UUIDString],
+        @"connection_state": @([self connectionStateInt:peripheral.state]),
     };
 
-    [_methodChannel invokeMethod:@"MtuSize" arguments:response];
-
     // Send connection state
-    [_methodChannel invokeMethod:@"connectionStateChanged"
-                 arguments:[self toConnectionStateProto:peripheral connectionState:peripheral.state]];
+    [_methodChannel invokeMethod:@"connectionStateChanged" arguments:result];
 }
 
 - (void)centralManager:(CBCentralManager *)central
@@ -860,9 +861,14 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // Unregister self as delegate for peripheral, not working #42
     peripheral.delegate = nil;
 
+    // See BmConnectionStateResponse
+    NSDictionary *result = @{
+        @"remote_id":        [[peripheral identifier] UUIDString],
+        @"connection_state": @([self connectionStateInt:peripheral.state]),
+    };
+
     // Send connection state
-    [_methodChannel invokeMethod:@"connectionStateChanged"
-                 arguments:[self toConnectionStateProto:peripheral connectionState:peripheral.state]];
+    [_methodChannel invokeMethod:@"connectionStateChanged" arguments:result];
 }
 
 - (void)centralManager:(CBCentralManager *)central
@@ -876,9 +882,14 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         NSLog(@"[FBP-iOS] didFailToConnectPeripheral");
     }
 
+    // See BmConnectionStateResponse
+    NSDictionary *result = @{
+        @"remote_id":        [[peripheral identifier] UUIDString],
+        @"connection_state": @([self connectionStateInt:peripheral.state]),
+    };
+
     // Send connection state
-    [_methodChannel invokeMethod:@"connectionStateChanged"
-                 arguments:[self toConnectionStateProto:peripheral connectionState:peripheral.state]];
+    [_methodChannel invokeMethod:@"connectionStateChanged" arguments:result];
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1334,23 +1345,16 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     };
 }
 
-- (NSDictionary *)toConnectionStateProto:(CBPeripheral *)peripheral
-                     connectionState:(CBPeripheralState)connectionState
+- (int)connectionStateInt:(CBPeripheralState)connectionState
 {
-    int stateIdx = 0;
     switch (connectionState)
     {
-        case CBPeripheralStateDisconnected:  stateIdx = 0; break; // BmConnectionStateEnum.disconnected
-        case CBPeripheralStateConnecting:    stateIdx = 1; break; // BmConnectionStateEnum.connecting
-        case CBPeripheralStateConnected:     stateIdx = 2; break; // BmConnectionStateEnum.connected
-        case CBPeripheralStateDisconnecting: stateIdx = 3; break; // BmConnectionStateEnum.disconnecting
+        case CBPeripheralStateDisconnected:  return 0; break; // BmConnectionStateEnum.disconnected
+        case CBPeripheralStateConnecting:    return 1; break; // BmConnectionStateEnum.connecting
+        case CBPeripheralStateConnected:     return 2; break; // BmConnectionStateEnum.connected
+        case CBPeripheralStateDisconnecting: return 3; break; // BmConnectionStateEnum.disconnecting
     }
-
-    // See BmConnectionStateResponse
-    return @{
-        @"remote_id":        [[peripheral identifier] UUIDString],
-        @"connection_state": @(stateIdx),
-    };
+    return 0;
 }
 
 - (NSDictionary *)toServiceProto:(CBPeripheral *)peripheral service:(CBService *)service

@@ -559,6 +559,8 @@ public class FlutterBluePlusPlugin implements
                 {
                     String remoteId = (String) call.arguments;
 
+                    // Note: a valid BluetoothDevice is always returned even
+                    // if the remoteId has never been seen before
                     BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
 
                     int connectionState = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
@@ -566,7 +568,7 @@ public class FlutterBluePlusPlugin implements
                     // see: BmConnectionStateResponse
                     HashMap<String, Object> response = new HashMap<>();
                     response.put("connection_state", connectionState);
-                    response.put("remote_id", device.getAddress());
+                    response.put("remote_id", remoteId);
 
                     result.success(response);
                     break;
