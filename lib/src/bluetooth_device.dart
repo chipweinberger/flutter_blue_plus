@@ -45,9 +45,11 @@ class BluetoothDevice {
   // stream return whether or not we are currently discovering services
   Stream<bool> get isDiscoveringServices => _isDiscoveringServices.stream;
 
-  // get services 
+  // get services
+  //  - will call connect
   //  - will call discoverServices if needed
   Future<List<BluetoothService>> get servicesList async {
+    await connect(); // internally a no-op if already connected
     _knownServices[remoteId] ??= await discoverServices();
     return _knownServices[remoteId]!;
   }
@@ -140,7 +142,7 @@ class BluetoothDevice {
     return result;
   }
 
-  /// The current connection state of the device
+  /// The current connection state of the device to this application
   Stream<BluetoothConnectionState> get connectionState async* {
     BluetoothConnectionState initialState = await FlutterBluePlus._methods
         .invokeMethod('getConnectionState', remoteId.str)
