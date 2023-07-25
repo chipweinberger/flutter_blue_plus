@@ -271,7 +271,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             
             result(@(true));
         }
-        else if ([@"getConnectionState" isEqualToString:call.method])
+        else if ([@"getConnectionStateOfThisApp" isEqualToString:call.method])
         {
             // remoteId is passed raw, not in a NSDictionary
             NSString *remoteId = [call arguments];

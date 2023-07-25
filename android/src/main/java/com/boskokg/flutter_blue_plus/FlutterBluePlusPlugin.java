@@ -91,6 +91,7 @@ public class FlutterBluePlusPlugin implements
     static final private UUID CCCD_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
     private final Map<String, BluetoothGatt> mDevices = new HashMap<>();
     private final Map<String, Integer> mMtuCache = new HashMap<>();
+    private final Map<String, Integer> mConnectionState = new HashMap<>();
     private LogLevel logLevel = LogLevel.DEBUG;
 
     private interface OperationOnPermission {
@@ -454,29 +455,16 @@ public class FlutterBluePlusPlugin implements
                         String remoteId =  (String)  args.get("remote_id");
                         boolean autoConnect = ((int) args.get("auto_connect")) != 0;
 
-                        BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
-
-                        boolean isConnected = mBluetoothManager.getConnectedDevices(BluetoothProfile.GATT).contains(device);
-
-                        // already connected?
-                        BluetoothGatt gattServer = mDevices.get(remoteId);
-                        if(gattServer != null && isConnected) {
+                        // already connected by our app?
+                        int cs = connectionStateOfThisApp(remoteId);
+                        if(cs == BluetoothProfile.STATE_DISCONNECTED) {
                             result.success(null); // no work to do
                             return;
                         }
 
-                        // If device was connected to previously but
-                        // is now disconnected, attempt a reconnect
-                        if(gattServer != null && !isConnected) {
-                            if(gattServer.connect() == false) {
-                                result.error("connect", "error when reconnecting to device", null);
-                                return;
-                            }
-                            result.success(null);
-                            return;
-                        }
-
                         // connect with new gattServer
+                        BluetoothGatt gattServer;
+                        BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                             gattServer = device.connectGatt(context, autoConnect, mGattCallback, BluetoothDevice.TRANSPORT_LE);
                         } else {
@@ -494,14 +482,15 @@ public class FlutterBluePlusPlugin implements
                 {
                     String remoteId = (String) call.arguments;
 
-                    // check connection
-                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
-                    int cs = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
-                    if(cs != BluetoothProfile.STATE_CONNECTED) {
-                        result.error("pair", "The device is not connected", null);
-                        break;
+                    // check connected
+                    int cs = connectionStateOfThisApp(remoteId);
+                    if(cs == BluetoothProfile.STATE_DISCONNECTED) {
+                        result.error("pair", "you must call connect() first", null);
+                        return;
                     }
 
+                    // bond
+                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
                     if(device.createBond() == false) {
                         result.error("pair", "device.createBond() returned false", null);
                         break;
@@ -516,10 +505,6 @@ public class FlutterBluePlusPlugin implements
                     String remoteId = (String) call.arguments;
 
                     BluetoothGatt gattServer = locateGatt(remoteId);
-                    if (gattServer == null) {
-                        result.success(null); // no work to do
-                        break;
-                    }
 
                     final Method refreshMethod = gattServer.getClass().getMethod("refresh");
                     if (refreshMethod == null) {
@@ -537,10 +522,10 @@ public class FlutterBluePlusPlugin implements
                 {
                     String remoteId = (String) call.arguments;
                 
-                    // if no server, then our app never called connect()
-                    // so there's no need for diconnect()
-                    BluetoothGatt gattServer = mDevices.get(remoteId);
-                    if (gattServer != null) {
+                    // call disconnect if needed
+                    int cs = connectionStateOfThisApp(remoteId);
+                    if(cs != BluetoothProfile.STATE_DISCONNECTED) {
+                        BluetoothGatt gattServer = mDevices.get(remoteId);
                         gattServer.disconnect();
                     }
 
@@ -548,15 +533,13 @@ public class FlutterBluePlusPlugin implements
                     break;
                 }
 
-                case "getConnectionState":
+                case "getConnectionStateOfThisApp":
                 {
                     String remoteId = (String) call.arguments;
 
-                    // Note: a valid BluetoothDevice is always returned even
-                    // if the remoteId has never been seen before
-                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
-
-                    int cs = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
+                    // get the connection state of *our app*
+                    // We don't care if other apps are connected
+                    int cs = connectionStateOfThisApp(remoteId);
 
                     // see: BmConnectionStateResponse
                     HashMap<String, Object> response = new HashMap<>();
@@ -570,14 +553,6 @@ public class FlutterBluePlusPlugin implements
                 case "discoverServices":
                 {
                     String remoteId = (String) call.arguments;
-
-                    // check connection
-                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
-                    int cs = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
-                    if(cs != BluetoothProfile.STATE_CONNECTED) {
-                        result.error("discover_services", "The device is not connected", null);
-                        break;
-                    }
 
                     BluetoothGatt gatt = locateGatt(remoteId);
 
@@ -598,14 +573,6 @@ public class FlutterBluePlusPlugin implements
                     String serviceUuid =          (String) data.get("service_uuid");
                     String secondaryServiceUuid = (String) data.get("secondary_service_uuid");
                     String characteristicUuid =   (String) data.get("characteristic_uuid");
-
-                    // check connection
-                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
-                    int cs = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
-                    if(cs != BluetoothProfile.STATE_CONNECTED) {
-                        result.error("read_characteristic_error", "The device is not connected", null);
-                        break;
-                    }
 
                     BluetoothGatt gattServer = locateGatt(remoteId);
 
@@ -638,14 +605,6 @@ public class FlutterBluePlusPlugin implements
                     String characteristicUuid =   (String) data.get("characteristic_uuid");
                     String descriptorUuid =       (String) data.get("descriptor_uuid");
 
-                    // check connection
-                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
-                    int cs = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
-                    if(cs != BluetoothProfile.STATE_CONNECTED) {
-                        result.error("read_descriptor_error", "The device is not connected", null);
-                        break;
-                    }
-
                     BluetoothGatt gattServer = locateGatt(remoteId);
 
                     BluetoothGattCharacteristic characteristic = locateCharacteristic(gattServer,
@@ -676,14 +635,6 @@ public class FlutterBluePlusPlugin implements
                     int writeType = writeTypeInt == 0 ?
                         BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT :
                         BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE;
-
-                    // check connection
-                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
-                    int cs = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
-                    if(cs != BluetoothProfile.STATE_CONNECTED) {
-                        result.error("write_characteristic_error", "The device is not connected", null);
-                        break;
-                    }
 
                     BluetoothGatt gattServer = locateGatt(remoteId);
 
@@ -757,14 +708,6 @@ public class FlutterBluePlusPlugin implements
                     String descriptorUuid =       (String) data.get("descriptor_uuid");
                     String value =                (String) data.get("value");
 
-                    // check connection
-                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
-                    int cs = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
-                    if(cs != BluetoothProfile.STATE_CONNECTED) {
-                        result.error("write_descriptor_error", "The device is not connected", null);
-                        break;
-                    }
-
                     BluetoothGatt gattServer = locateGatt(remoteId);
 
                     BluetoothGattCharacteristic characteristic = locateCharacteristic(gattServer,
@@ -820,14 +763,6 @@ public class FlutterBluePlusPlugin implements
                     String secondaryServiceUuid = (String) data.get("secondary_service_uuid");
                     String characteristicUuid =   (String) data.get("characteristic_uuid");
                     boolean enable =             (boolean) data.get("enable");
-
-                    // check connection
-                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
-                    int cs = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
-                    if(cs != BluetoothProfile.STATE_CONNECTED) {
-                        result.error("set_notification_error", "The device is not connected", null);
-                        break;
-                    }
 
                     BluetoothGatt gattServer = locateGatt(remoteId);
 
@@ -915,14 +850,6 @@ public class FlutterBluePlusPlugin implements
                     String remoteId = (String) data.get("remote_id");
                     int mtu =            (int) data.get("mtu");
 
-                    // check connection
-                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
-                    int cs = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
-                    if(cs != BluetoothProfile.STATE_CONNECTED) {
-                        result.error("request_mtu", "The device is not connected", null);
-                        break;
-                    }
-
                     BluetoothGatt gatt = locateGatt(remoteId);
 
                     if(gatt.requestMtu(mtu) == false) {
@@ -940,14 +867,6 @@ public class FlutterBluePlusPlugin implements
 
                     BluetoothGatt gatt = locateGatt(remoteId);
 
-                    // check connection
-                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
-                    int cs = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
-                    if(cs != BluetoothProfile.STATE_CONNECTED) {
-                        result.error("read_rssi", "The device is not connected", null);
-                        break;
-                    }
-
                     if(gatt.readRemoteRssi() == false) {
                         result.error("read_rssi", "gatt.readRemoteRssi() returned false", null);
                         break;
@@ -963,14 +882,6 @@ public class FlutterBluePlusPlugin implements
                     HashMap<String, Object> data = call.arguments();
                     String remoteId =     (String) data.get("remote_id");
                     int connectionPriority = (int) data.get("connection_priority");
-
-                    // check connection
-                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
-                    int cs = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
-                    if(cs != BluetoothProfile.STATE_CONNECTED) {
-                        result.error("request_connection_priority", "The device is not connected", null);
-                        break;
-                    }
 
                     BluetoothGatt gatt = locateGatt(remoteId);
 
@@ -1132,6 +1043,15 @@ public class FlutterBluePlusPlugin implements
     // ██    ██     ██     ██  ██       ███████
     // ██    ██     ██     ██  ██            ██
     //  ██████      ██     ██  ███████  ███████
+
+    private int connectionStateOfThisApp(String remoteId)
+    {
+        if(mConnectionState.get(remoteId) == null) {
+            return BluetoothProfile.STATE_DISCONNECTED;
+        } else {
+            return mConnectionState.get(remoteId);
+        }
+    }
 
     private BluetoothGatt locateGatt(String remoteId) throws Exception
     {
@@ -1389,17 +1309,25 @@ public class FlutterBluePlusPlugin implements
         {
             log(LogLevel.DEBUG, "[FBP-Android] onConnectionStateChange: status: " + status + " newState: " + newState);
 
+            String remoteId = gatt.getDevice().getAddress();
+
+            // remember the connection state of this app
+            mConnectionState.put(remoteId, newState);
+
             // disconnection?
             if(newState == BluetoothProfile.STATE_DISCONNECTED) {
-                // it is important to close, so that we don't run out
-                // of bluetooth resources which prevents new connections
-                mDevices.remove(gatt.getDevice().getAddress());
+
+                // mDevices only keeps a value if our app is connected
+                mDevices.remove(remoteId);
+
+                // it is important to close, otherwise we could run out
+                // of bluetooth resources preventing new connections
                 gatt.close();
             }
 
             // see: BmConnectionStateResponse
             HashMap<String, Object> response = new HashMap<>();
-            response.put("remote_id", gatt.getDevice().getAddress());
+            response.put("remote_id", remoteId);
             response.put("connection_state", bmConnectionStateEnum(newState));
 
             invokeMethodUIThread("connectionStateChanged", response);
@@ -1563,12 +1491,14 @@ public class FlutterBluePlusPlugin implements
         {
             log(LogLevel.DEBUG, "[FBP-Android] onMtuChanged: mtu: " + mtu + " status: " + status);
 
+            String remoteId = gatt.getDevice().getAddress();
+
             // remember mtu
-            mMtuCache.put(gatt.getDevice().getAddress(), mtu);
+            mMtuCache.put(remoteId, mtu);
 
             // see: BmMtuChangedResponse
             HashMap<String, Object> response = new HashMap<>();
-            response.put("remote_id", gatt.getDevice().getAddress());
+            response.put("remote_id", remoteId);
             response.put("mtu", mtu);
             response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
             response.put("error_code", status);
