@@ -45,13 +45,14 @@ class BluetoothDevice {
   // stream return whether or not we are currently discovering services
   Stream<bool> get isDiscoveringServices => _isDiscoveringServices.stream;
 
-  // calls discoverServices if needed
+  // get services 
+  //  - will call discoverServices if needed
   Future<List<BluetoothService>> get servicesList async {
     _knownServices[remoteId] ??= await discoverServices();
     return _knownServices[remoteId]!;
   }
 
-  /// Returns bluetooth services offered by the remote device
+  /// Stream of bluetooth services offered by the remote device
   Stream<List<BluetoothService>> get servicesStream async* {
     if (_knownServices[remoteId] != null) {
       yield _knownServices[remoteId]!;
@@ -86,8 +87,16 @@ class BluetoothDevice {
   }
 
   /// Cancels connection to the Bluetooth Device
-  Future<void> disconnect() async {
+  Future<void> disconnect({int timeout = 15}) async {
+    var responseStream = connectionState.where((s) => s == BluetoothConnectionState.disconnected);
+
+    // Start listening now, before invokeMethod, to ensure we don't miss the response
+    Future<BluetoothConnectionState> futureState = responseStream.first;
+
     await FlutterBluePlus._invokeMethod('disconnect', remoteId.str);
+
+    // wait for disconnection
+    await futureState.timeout(Duration(seconds: timeout));
   }
 
   /// Discover services, characteristics, and descriptors of the remote device
