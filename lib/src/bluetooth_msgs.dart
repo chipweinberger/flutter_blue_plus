@@ -151,11 +151,13 @@ class BmScanResult {
   final BmBluetoothDevice device;
   final BmAdvertisementData advertisementData;
   final int rssi;
+  final BmConnectionStateEnum connectionState;
 
   BmScanResult({
     required this.device,
     required this.advertisementData,
     required this.rssi,
+    required this.connectionState,
   });
 
   factory BmScanResult.fromMap(Map<dynamic, dynamic> json) {
@@ -164,6 +166,7 @@ class BmScanResult {
       device: BmBluetoothDevice.fromMap(json['device']),
       advertisementData: BmAdvertisementData.fromMap(json['advertisement_data']),
       rssi: json['rssi'],
+      connectionState: BmConnectionStateEnum.values[json['connection_state'] as int],
     );
   }
 }
@@ -691,10 +694,10 @@ class BmSetNotificationRequest {
 }
 
 enum BmConnectionStateEnum {
-  disconnected,
-  connecting,
-  connected,
-  disconnecting,
+  disconnected, // 0
+  connecting, // 1
+  connected, // 2
+  disconnecting, // 3
 }
 
 class BmConnectionStateResponse {

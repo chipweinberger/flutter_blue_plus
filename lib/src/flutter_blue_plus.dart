@@ -165,7 +165,7 @@ class FlutterBluePlus {
       List<BluetoothDevice> devs = await connectedDevices;
       List<ScanResult> connected = [];
       for (var d in devs) {
-        connected.add(await _bluetoothDeviceToScanResult(d));
+        connected.add(await _bluetoothDeviceToScanResult(d, BluetoothConnectionState.connected));
       }
       _scanResultsList.add(connected);
     }
@@ -358,19 +358,22 @@ class ScanResult {
   final AdvertisementData advertisementData;
   final int rssi;
   final DateTime timeStamp;
+  final BluetoothConnectionState connectionState;
 
   ScanResult({
     required this.device,
     required this.advertisementData,
     required this.rssi,
     required this.timeStamp,
+    required this.connectionState,
   });
 
   ScanResult.fromProto(BmScanResult p)
       : device = BluetoothDevice.fromProto(p.device),
         advertisementData = AdvertisementData.fromProto(p.advertisementData),
         rssi = p.rssi,
-        timeStamp = DateTime.now();
+        timeStamp = DateTime.now(),
+        connectionState = bmToBluetoothConnectionState(p.connectionState);
 
   @override
   bool operator ==(Object other) =>
@@ -386,6 +389,7 @@ class ScanResult {
         'advertisementData: $advertisementData, '
         'rssi: $rssi, '
         'timeStamp: $timeStamp'
+        'connectionState: $connectionState'
         '}';
   }
 }
@@ -403,15 +407,8 @@ List<ScanResult> _addOrUpdate(List<ScanResult> results, ScanResult item) {
   return list;
 }
 
-Future<ScanResult> _bluetoothDeviceToScanResult(BluetoothDevice device) async {
-  // get services
-  List<String> serviceUuids = [];
-  try { // this would only throw if the remoteId is somehow forgotten by the system
-    List<BluetoothService> services = await device.services.first;
-    serviceUuids = services.map((e) => e.uuid.toString()).toList();
-  } catch (e) {
-    print("could not get services $e");
-  }
+Future<ScanResult> _bluetoothDeviceToScanResult(
+    BluetoothDevice device, BluetoothConnectionState connectionState) async {
   // adv data
   var advertisementData = AdvertisementData(
     localName: device.localName,
@@ -419,11 +416,15 @@ Future<ScanResult> _bluetoothDeviceToScanResult(BluetoothDevice device) async {
     connectable: true,
     manufacturerData: {},
     serviceData: {},
-    serviceUuids: serviceUuids,
+    serviceUuids: [],
   );
   // result
-  ScanResult scanResult =
-      ScanResult(device: device, advertisementData: advertisementData, rssi: 0, timeStamp: DateTime.now());
+  ScanResult scanResult = ScanResult(
+      device: device,
+      advertisementData: advertisementData,
+      rssi: 0,
+      timeStamp: DateTime.now(),
+      connectionState: connectionState);
   return scanResult;
 }
 
