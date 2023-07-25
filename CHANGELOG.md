@@ -1,3 +1,9 @@
+## 1.10.6
+* dart: for convenience, scan results now also include connected devices see: includeConnectedDevice
+* dart: add connectionState to ScanResult
+* dart: add BluetoothDevice.servicesList for convenience, which calls discoverServices automatically.
+* dart: rename BluetoothDevice.services -> BluetoothDevice.servicesStream
+
 ## 1.10.5
 * iOS: fix API MISUSE: Cancelling connection for unused peripheral.
 * iOS: remove unecessary search of already connected devices during connection
