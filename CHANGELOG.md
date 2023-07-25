@@ -1,3 +1,6 @@
+## 1.10.7
+* dart: disconnect will wait for disconnect to complete
+
 ## 1.10.6
 * dart: for convenience, scan results now also include connected devices see: includeConnectedDevice
 * dart: add connectionState to ScanResult
