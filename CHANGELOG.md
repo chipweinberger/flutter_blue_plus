@@ -1,3 +1,7 @@
+## 1.10.5
+* iOS: fix API MISUSE: Cancelling connection for unused peripheral.
+* iOS: remove unecessary search of already connected devices during connection
+
 ## 1.10.4
 * iOS: add remoteId to error strings when connection fails, etc
 
