@@ -28,9 +28,11 @@ This makes FlutterBluePlus very stable.
 
 ### Error Handling :fire:
 
-Flutter Blue Plus diligently uses exceptions for error handling.
+Flutter Blue Plus takes error handling very seriously. 
 
-Streams only return valid results. Stream errors are not used & streams are never closed -- so there's no need to handle onError or onDone. 
+Every error returned by the native platform is checked and thrown as an exception where appropriate.
+
+**Streams:** At the time of writing, streams returned by Flutter Blue Plus never emit any errors and never close. There's no need to handle `onError` or `onDone` for  `stream.listen(...)`.
 
 **See the Reference section below for a complete list of throwing function.**
 
