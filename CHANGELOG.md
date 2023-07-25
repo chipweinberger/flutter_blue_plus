@@ -1,3 +1,6 @@
+## 1.10.8
+* android: fix requestMtu (regression in 1.10.6)
+
 ## 1.10.7
 * dart: disconnect will wait for disconnect to complete
 
