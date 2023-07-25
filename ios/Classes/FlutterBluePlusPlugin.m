@@ -320,36 +320,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             result(@(true));
         }
-        else if ([@"services" isEqualToString:call.method])
-        {
-            // remoteId is passed raw, not in a NSDictionary
-            NSString *remoteId = [call arguments];
-
-            CBPeripheral *peripheral = [self findPeripheral:remoteId];
-            if (peripheral == nil) {
-                NSString* s = @"peripheral not found. try reconnecting.";
-                result([FlutterError errorWithCode:@"services" message:s details:remoteId]);
-                return;
-            }
-
-            // Services
-            NSMutableArray *services = [NSMutableArray new];
-            for (CBService *s in [peripheral services])
-            {
-                [services addObject:[self bmBluetoothService:peripheral service:s]];
-            }
-
-            // See BmDiscoverServicesResult
-            NSDictionary* response = @{
-                @"remote_id":       [peripheral.identifier UUIDString],
-                @"services":        services,
-                @"success":         @(1),
-                @"error_string":    [NSNull null],
-                @"error_code":      [NSNull null],
-            };
-
-            result(response);
-        }
         else if ([@"readCharacteristic" isEqualToString:call.method])
         {
             // See BmReadCharacteristicRequest
@@ -609,7 +579,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             
             result(@(true));
         }
-        else if ([@"mtu" isEqualToString:call.method])
+        else if ([@"getMtu" isEqualToString:call.method])
         {
             // remoteId is passed raw, not in a NSDictionary
             NSString *remoteId = [call arguments];
@@ -625,7 +595,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // get mtu
             uint32_t mtu = [self getMtu:peripheral];
 
-            // See: BmMtuSizeResponse
+            // See: BmMtuChangedResponse
             NSDictionary* response = @{
                 @"remote_id" : [[peripheral identifier] UUIDString],
                 @"mtu" : @(mtu),
@@ -976,21 +946,13 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         NSLog(@"[FBP-iOS] didDiscoverServices");
     }
 
-    // See: BmMtuSizeResponse
-    NSDictionary* response = @{
-        @"remote_id" : [[peripheral identifier] UUIDString],
-        @"mtu" : @([self getMtu:peripheral]),
-        @"success" : @(1),
-    };
-
-    [_methodChannel invokeMethod:@"MtuSize" arguments:response];
-
     // discover characteristics and secondary services
     [_servicesThatNeedDiscovered addObjectsFromArray:peripheral.services];
     for (CBService *s in [peripheral services]) {
         NSLog(@"[FBP-iOS] Found service: %@", [s.UUID UUIDString]);
         [peripheral discoverCharacteristics:nil forService:s];
-        // [peripheral discoverIncludedServices:nil forService:s]; // Secondary services in the future (#8)
+        // Secondary services in the future (#8)
+        // [peripheral discoverIncludedServices:nil forService:s];
     }
 }
 

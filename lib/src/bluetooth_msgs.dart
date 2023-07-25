@@ -759,14 +759,14 @@ class BmMtuSizeRequest {
   }
 }
 
-class BmMtuSizeResponse {
+class BmMtuChangedResponse {
   final String remoteId;
   final int mtu;
   final bool success;
   final int? errorCode;
   final String? errorString;
 
-  BmMtuSizeResponse({
+  BmMtuChangedResponse({
     required this.remoteId,
     required this.mtu,
     required this.success,
@@ -774,9 +774,9 @@ class BmMtuSizeResponse {
     required this.errorString,
   });
 
-  factory BmMtuSizeResponse.fromMap(Map<dynamic, dynamic> json) {
-    _printDbg("\nBmMtuSizeResponse $json");
-    return BmMtuSizeResponse(
+  factory BmMtuChangedResponse.fromMap(Map<dynamic, dynamic> json) {
+    _printDbg("\nBmMtuChangedResponse $json");
+    return BmMtuChangedResponse(
       remoteId: json['remote_id'],
       mtu: json['mtu'],
       success: json['success'] != 0,

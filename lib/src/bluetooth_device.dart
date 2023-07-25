@@ -5,18 +5,31 @@
 part of flutter_blue_plus;
 
 class BluetoothDevice {
+  ////////////////////////////////
+  // Internal
+  //
+
+  static Map<DeviceIdentifier, List<BluetoothService>> _knownServices = {};
+
+  // used for 'services' public api
+  final StreamController<List<BluetoothService>> _services = StreamController();
+
+  // used for 'isDiscoveringServices' public api
+  final _StreamController<bool> _isDiscoveringServices = _StreamController(initialValue: false);
+
+  ////////////////////////////////
+  // Public
+  //
+
   final DeviceIdentifier remoteId;
   final String localName;
   final BluetoothDeviceType type;
 
-  // used for 'services' public api
-  final _StreamController<List<BluetoothService>> _services = _StreamController(initialValue:[]);
-
-  // used for 'isDiscoveringServices' public api
-  final _StreamController<bool> _isDiscoveringServices = _StreamController(initialValue:false);
-
-  // stream return whether or not we are currently discovering services
-  Stream<bool> get isDiscoveringServices => _isDiscoveringServices.stream;
+  BluetoothDevice({
+    required this.remoteId,
+    required this.localName,
+    required this.type,
+  });
 
   BluetoothDevice.fromProto(BmBluetoothDevice p)
       : remoteId = DeviceIdentifier(p.remoteId),
@@ -26,8 +39,25 @@ class BluetoothDevice {
   /// allows connecting to a known device without scanning
   BluetoothDevice.fromId(String remoteId, {String? localName, BluetoothDeviceType? type})
       : remoteId = DeviceIdentifier(remoteId),
-        localName = localName ?? "Unknown localName",
+        localName = localName ?? "Unknown",
         type = type ?? BluetoothDeviceType.unknown;
+
+  // stream return whether or not we are currently discovering services
+  Stream<bool> get isDiscoveringServices => _isDiscoveringServices.stream;
+
+  // calls discoverServices if needed
+  Future<List<BluetoothService>> get servicesList async {
+    _knownServices[remoteId] ??= await discoverServices();
+    return _knownServices[remoteId]!;
+  }
+
+  /// Returns bluetooth services offered by the remote device
+  Stream<List<BluetoothService>> get servicesStream async* {
+    if (_knownServices[remoteId] != null) {
+      yield _knownServices[remoteId]!;
+    }
+    yield* _services.stream;
+  }
 
   /// Establishes a connection to the Bluetooth Device.
   Future<void> connect({
@@ -52,18 +82,6 @@ class BluetoothDevice {
 
     if (Platform.isAndroid && shouldClearGattCache) {
       clearGattCache();
-    }
-  }
-
-  /// Send a pairing request to the device (Android Only)
-  Future<void> pair() async {
-    return await FlutterBluePlus._invokeMethod('pair', remoteId.str);
-  }
-
-  /// Refresh ble services & characteristics (Android Only)
-  Future<void> clearGattCache() async {
-    if (Platform.isAndroid) {
-      return await FlutterBluePlus._invokeMethod('clearGattCache', remoteId.str);
     }
   }
 
@@ -101,26 +119,16 @@ class BluetoothDevice {
       throw FlutterBluePlusException("discoverServices", response.errorCode, response.errorString);
     }
 
-    List<BluetoothService> servicesList = response.services.map((p) => BluetoothService.fromProto(p)).toList();
+    List<BluetoothService> result = response.services.map((p) => BluetoothService.fromProto(p)).toList();
 
+    // remember known services
+    _knownServices[remoteId] = result;
+
+    // update streams
     _isDiscoveringServices.add(false);
-    _services.add(servicesList);
+    _services.add(result);
 
-    return servicesList;
-  }
-
-  /// Returns bluetooth services offered by the remote device
-  ///  - discoverServices must have already been called
-  Stream<List<BluetoothService>> get services async* {
-    List<BluetoothService> initialServices = await FlutterBluePlus._methods
-        .invokeMethod('services', remoteId.str)
-        .then((buffer) => BmDiscoverServicesResult.fromMap(buffer).services)
-        .then((i) => i.map((s) => BluetoothService.fromProto(s)).toList());
-
-    // initial value
-    yield initialServices;
-
-    yield* _services.stream;
+    return result;
   }
 
   /// The current connection state of the device
@@ -142,9 +150,9 @@ class BluetoothDevice {
 
   /// The current MTU size in bytes
   Stream<int> get mtu async* {
-    BmMtuSizeResponse response = await FlutterBluePlus._methods
-        .invokeMethod('mtu', remoteId.str)
-        .then((buffer) => BmMtuSizeResponse.fromMap(buffer));
+    BmMtuChangedResponse response = await FlutterBluePlus._methods
+        .invokeMethod('getMtu', remoteId.str)
+        .then((buffer) => BmMtuChangedResponse.fromMap(buffer));
 
     // failed?
     if (!response.success) {
@@ -155,9 +163,9 @@ class BluetoothDevice {
     yield response.mtu;
 
     yield* FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "MtuSize")
+        .where((m) => m.method == "OnMtuChanged")
         .map((m) => m.arguments)
-        .map((buffer) => BmMtuSizeResponse.fromMap(buffer))
+        .map((buffer) => BmMtuChangedResponse.fromMap(buffer))
         .where((p) => p.remoteId == remoteId.str)
         .map((p) => p.mtu);
   }
@@ -171,9 +179,9 @@ class BluetoothDevice {
     );
 
     var responseStream = FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "MtuSize")
+        .where((m) => m.method == "OnMtuChanged")
         .map((m) => m.arguments)
-        .map((buffer) => BmMtuSizeResponse.fromMap(buffer))
+        .map((buffer) => BmMtuChangedResponse.fromMap(buffer))
         .where((p) => p.remoteId == remoteId.str)
         .map((p) => p.mtu);
 
@@ -240,7 +248,7 @@ class BluetoothDevice {
     );
   }
 
-  /// Set the preferred connection
+  /// Set the preferred connection (Android Only)
   ///   - [txPhy] bitwise OR of all allowed phys for Tx, e.g. (Phy.le2m.mask | Phy.leCoded.mask)
   ///   - [txPhy] bitwise OR of all allowed phys for Rx, e.g. (Phy.le2m.mask | Phy.leCoded.mask)
   ///   - [option] preferred coding to use when transmitting on Phy.leCoded
@@ -263,12 +271,22 @@ class BluetoothDevice {
     );
   }
 
+  /// Send a pairing request to the device (Android Only)
+  Future<void> pair() async {
+    return await FlutterBluePlus._invokeMethod('pair', remoteId.str);
+  }
+
+  /// Refresh ble services & characteristics (Android Only)
+  Future<void> clearGattCache() async {
+    if (Platform.isAndroid) {
+      return await FlutterBluePlus._invokeMethod('clearGattCache', remoteId.str);
+    }
+  }
+
   /// Remove bond (Android Only)
   Future<bool> removeBond() async {
     if (Platform.isAndroid) {
-      return await FlutterBluePlus._methods
-          .invokeMethod('removeBond', remoteId.str)
-          .then<bool>((value) => value);
+      return await FlutterBluePlus._methods.invokeMethod('removeBond', remoteId.str).then<bool>((value) => value);
     } else {
       return false;
     }
@@ -289,7 +307,7 @@ class BluetoothDevice {
         'localName: $localName, '
         'type: $type, '
         'isDiscoveringServices: ${_isDiscoveringServices.value}, '
-        '_services: ${_services.value}'
+        'services: ${_knownServices[remoteId]}'
         '}';
   }
 
@@ -301,61 +319,7 @@ class BluetoothDevice {
 
   @Deprecated('Use connectionState instead')
   Stream<BluetoothConnectionState> get state => connectionState;
+
+  @Deprecated('Use servicesStream instead')
+  Stream<List<BluetoothService>> get services => servicesStream;
 }
-
-enum BluetoothDeviceType { unknown, classic, le, dual }
-
-BluetoothDeviceType bmToBluetoothDeviceType(BmBluetoothSpecEnum value) {
-  switch (value) {
-    case BmBluetoothSpecEnum.unknown:
-      return BluetoothDeviceType.unknown;
-    case BmBluetoothSpecEnum.classic:
-      return BluetoothDeviceType.classic;
-    case BmBluetoothSpecEnum.le:
-      return BluetoothDeviceType.le;
-    case BmBluetoothSpecEnum.dual:
-      return BluetoothDeviceType.dual;
-  }
-}
-
-enum BluetoothConnectionState { disconnected, connecting, connected, disconnecting }
-
-BluetoothConnectionState bmToBluetoothConnectionState(BmConnectionStateEnum value) {
-  switch (value) {
-    case BmConnectionStateEnum.disconnected:
-      return BluetoothConnectionState.disconnected;
-    case BmConnectionStateEnum.connecting:
-      return BluetoothConnectionState.connecting;
-    case BmConnectionStateEnum.connected:
-      return BluetoothConnectionState.connected;
-    case BmConnectionStateEnum.disconnecting:
-      return BluetoothConnectionState.disconnecting;
-  }
-}
-
-enum ConnectionPriority { balanced, high, lowPower }
-
-enum Phy { le1m, le2m, leCoded }
-
-enum PhyCoding { noPreferred, s2, s8 }
-
-extension PhyExt on Phy {
-  int get mask {
-    switch (this) {
-      case Phy.le1m:
-        return 1;
-      case Phy.le2m:
-        return 2;
-      case Phy.leCoded:
-        return 3;
-      default:
-        return 1;
-    }
-  }
-}
-
-@Deprecated('Use PhyCoding instead')
-enum PhyOption { noPreferred, s2, s8 }
-
-@Deprecated('Use Phy instead')
-enum PhyType { le1m, le2m, leCoded }

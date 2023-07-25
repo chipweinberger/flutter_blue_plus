@@ -602,29 +602,6 @@ public class FlutterBluePlusPlugin implements
                     break;
                 }
 
-                case "services":
-                {
-                    String remoteId = (String) call.arguments;
-
-                    BluetoothGatt gatt = locateGatt(remoteId);
-
-                    List<Object> services = new ArrayList<>();
-                    for(BluetoothGattService s : gatt.getServices()){
-                        services.add(bmBluetoothService(gatt.getDevice(), s, gatt));
-                    }
-
-                    // see: BmDiscoverServicesResult
-                    HashMap<String, Object> map = new HashMap<>();
-                    map.put("remote_id", remoteId);
-                    map.put("services", services);
-                    map.put("success", 1);
-                    map.put("error_code", 0);
-                    map.put("error_string", "");
-
-                    result.success(map);
-                    break;
-                }
-
                 case "readCharacteristic":
                 {
                     // see: BmReadCharacteristicRequest
@@ -925,13 +902,13 @@ public class FlutterBluePlusPlugin implements
                     break;
                 }
 
-                case "mtu":
+                case "getMtu":
                 {
                     String remoteId = (String) call.arguments;
 
                     BluetoothDeviceCache cache = mDevices.get(remoteId);
                     if(cache == null) {
-                        result.error("mtu", "no instance of BluetoothGatt, have you connected first?", null);
+                        result.error("getMtu", "no instance of BluetoothGatt, have you connected first?", null);
                         break;
                     }
 
@@ -1607,7 +1584,7 @@ public class FlutterBluePlusPlugin implements
                 cache.mtu = mtu;
             }
 
-            // see: BmMtuSizeResponse
+            // see: BmMtuChangedResponse
             HashMap<String, Object> response = new HashMap<>();
             response.put("remote_id", gatt.getDevice().getAddress());
             response.put("mtu", mtu);
@@ -1615,7 +1592,7 @@ public class FlutterBluePlusPlugin implements
             response.put("error_code", status);
             response.put("error_string", gattErrorString(status));
 
-            invokeMethodUIThread("MtuSize", response);
+            invokeMethodUIThread("onMtuChanged", response);
         }
     }; // BluetoothGattCallback
 

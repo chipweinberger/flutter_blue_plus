@@ -434,7 +434,7 @@ class DeviceScreen extends StatelessWidget {
                 ),
               ),
               StreamBuilder<List<BluetoothService>>(
-                stream: device.services,
+                stream: device.servicesStream,
                 initialData: const [],
                 builder: (c, snapshot) {
                   return Column(
