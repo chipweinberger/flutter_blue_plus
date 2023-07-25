@@ -61,14 +61,10 @@ class FlutterBluePlus {
 
   /// Turn on Bluetooth (Android only),
   static Future<void> turnOn({int timeout = 10}) async {
-    Stream<BmBluetoothAdapterState> responseStream = FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "adapterStateChanged")
-        .map((m) => m.arguments)
-        .map((buffer) => BmBluetoothAdapterState.fromMap(buffer))
-        .where((s) => s.adapterState == BmAdapterStateEnum.on);
+    Stream<BluetoothAdapterState> responseStream = adapterState.where((s) => s == BluetoothAdapterState.on);
 
     // Start listening now, before invokeMethod, to ensure we don't miss the response
-    Future<BmBluetoothAdapterState> futureResponse = responseStream.first;
+    Future<BluetoothAdapterState> futureResponse = responseStream.first;
 
     await _invokeMethod('turnOn');
 
@@ -77,14 +73,10 @@ class FlutterBluePlus {
 
   /// Turn off Bluetooth (Android only),
   static Future<void> turnOff({int timeout = 10}) async {
-    Stream<BmBluetoothAdapterState> responseStream = FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "adapterStateChanged")
-        .map((m) => m.arguments)
-        .map((buffer) => BmBluetoothAdapterState.fromMap(buffer))
-        .where((s) => s.adapterState == BmAdapterStateEnum.off);
+    Stream<BluetoothAdapterState> responseStream = adapterState.where((s) => s == BluetoothAdapterState.off);
 
     // Start listening now, before invokeMethod, to ensure we don't miss the response
-    Future<BmBluetoothAdapterState> futureResponse = responseStream.first;
+    Future<BluetoothAdapterState> futureResponse = responseStream.first;
 
     await _invokeMethod('turnOff');
 
