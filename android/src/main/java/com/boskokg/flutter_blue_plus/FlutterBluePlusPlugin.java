@@ -21,6 +21,7 @@ import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
+import android.bluetooth.le.ScanRecord;
 import android.bluetooth.le.ScanSettings;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -32,17 +33,21 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelUuid;
 import android.util.Log;
-
+import android.util.SparseArray;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.io.StringWriter;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 import java.lang.reflect.Method;
 
@@ -83,7 +88,7 @@ public class FlutterBluePlusPlugin implements
     private FlutterPluginBinding pluginBinding;
     private ActivityPluginBinding activityBinding;
 
-    static final private UUID CCCD_ID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
+    static final private UUID CCCD_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
     private final Map<String, BluetoothDeviceCache> mDevices = new HashMap<>();
     private LogLevel logLevel = LogLevel.DEBUG;
 
@@ -401,7 +406,7 @@ public class FlutterBluePlusPlugin implements
 
                         List<HashMap<String, Object>> devList = new ArrayList<HashMap<String, Object>>();
                         for (BluetoothDevice d : devices) {
-                            devList.add(MessageMaker.bmBluetoothDevice(d));
+                            devList.add(bmBluetoothDevice(d));
                         }
 
                         HashMap<String, Object> response = new HashMap<>();
@@ -418,7 +423,7 @@ public class FlutterBluePlusPlugin implements
 
                     List<HashMap<String,Object>> devList = new ArrayList<HashMap<String,Object>>();
                     for (BluetoothDevice d : bondedDevices) {
-                        devList.add(MessageMaker.bmBluetoothDevice(d));
+                        devList.add(bmBluetoothDevice(d));
                     }
 
                     HashMap<String, Object> response = new HashMap<String, Object>();
@@ -605,7 +610,7 @@ public class FlutterBluePlusPlugin implements
 
                     List<Object> services = new ArrayList<>();
                     for(BluetoothGattService s : gatt.getServices()){
-                        services.add(MessageMaker.bmBluetoothService(gatt.getDevice(), s, gatt));
+                        services.add(bmBluetoothService(gatt.getDevice(), s, gatt));
                     }
 
                     // see: BmDiscoverServicesResult
@@ -871,7 +876,7 @@ public class FlutterBluePlusPlugin implements
                         break;
                     }
 
-                    BluetoothGattDescriptor cccDescriptor = characteristic.getDescriptor(CCCD_ID);
+                    BluetoothGattDescriptor cccDescriptor = characteristic.getDescriptor(CCCD_UUID);
                     if(cccDescriptor == null) {
                         // Some ble devices do not actually need their CCCD updated.
                         // thus setCharacteristicNotification() is all that is required to enable notifications.
@@ -1363,7 +1368,7 @@ public class FlutterBluePlusPlugin implements
                         }
 
                         // see BmScanResult
-                        HashMap<String, Object> rr = MessageMaker.bmScanResult(result.getDevice(), result);
+                        HashMap<String, Object> rr = bmScanResult(result.getDevice(), result);
 
                         // see BmScanResponse
                         HashMap<String, Object> response = new HashMap<>();
@@ -1446,7 +1451,7 @@ public class FlutterBluePlusPlugin implements
 
             List<Object> services = new ArrayList<Object>();
             for(BluetoothGattService s : gatt.getServices()) {
-                services.add(MessageMaker.bmBluetoothService(gatt.getDevice(), s, gatt));
+                services.add(bmBluetoothService(gatt.getDevice(), s, gatt));
             }
 
             // see: BmDiscoverServicesResult
@@ -1466,7 +1471,7 @@ public class FlutterBluePlusPlugin implements
             // this callback is only for notifications & indications
             log(LogLevel.DEBUG, "[FBP-Android] onCharacteristicChanged: uuid: " + characteristic.getUuid().toString());
 
-            MessageMaker.ServicePair pair = MessageMaker.getServicePair(gatt, characteristic);
+            ServicePair pair = getServicePair(gatt, characteristic);
 
             // see: BmOnCharacteristicReceived
             HashMap<String, Object> response = new HashMap<>();
@@ -1488,7 +1493,7 @@ public class FlutterBluePlusPlugin implements
             // this callback is only for explicit characteristic reads
             log(LogLevel.DEBUG, "[FBP-Android] onCharacteristicRead: uuid: " + characteristic.getUuid().toString() + " status: " + status);
 
-            MessageMaker.ServicePair pair = MessageMaker.getServicePair(gatt, characteristic);
+            ServicePair pair = getServicePair(gatt, characteristic);
 
             // see: BmOnCharacteristicReceived
             HashMap<String, Object> response = new HashMap<>();
@@ -1509,7 +1514,7 @@ public class FlutterBluePlusPlugin implements
         {
             log(LogLevel.DEBUG, "[FBP-Android] onCharacteristicWrite: uuid: " + characteristic.getUuid().toString() + " status: " + status);
 
-            MessageMaker.ServicePair pair = MessageMaker.getServicePair(gatt, characteristic);
+            ServicePair pair = getServicePair(gatt, characteristic);
 
             // see: BmOnCharacteristicWritten
             HashMap<String, Object> response = new HashMap<>();
@@ -1529,7 +1534,7 @@ public class FlutterBluePlusPlugin implements
         {
             log(LogLevel.DEBUG, "[FBP-Android] onDescriptorRead: uuid: " + descriptor.getUuid().toString() + " status: " + status);
 
-            MessageMaker.ServicePair pair = MessageMaker.getServicePair(gatt, descriptor.getCharacteristic());
+            ServicePair pair = getServicePair(gatt, descriptor.getCharacteristic());
 
             // see: BmOnDescriptorResponse
             HashMap<String, Object> response = new HashMap<>();
@@ -1552,7 +1557,7 @@ public class FlutterBluePlusPlugin implements
         {
             log(LogLevel.DEBUG, "[FBP-Android] onDescriptorWrite: uuid: " + descriptor.getUuid().toString() + " status: " + status);
 
-            MessageMaker.ServicePair pair = MessageMaker.getServicePair(gatt, descriptor.getCharacteristic());
+            ServicePair pair = getServicePair(gatt, descriptor.getCharacteristic());
 
             // see: BmOnDescriptorResponse
             HashMap<String, Object> response = new HashMap<>();
@@ -1613,6 +1618,337 @@ public class FlutterBluePlusPlugin implements
             invokeMethodUIThread("MtuSize", response);
         }
     }; // BluetoothGattCallback
+
+    //////////////////////////////////////////////////////////////
+    // ██████    █████   ██████   ███████  ███████           
+    // ██   ██  ██   ██  ██   ██  ██       ██                
+    // ██████   ███████  ██████   ███████  █████             
+    // ██       ██   ██  ██   ██       ██  ██                
+    // ██       ██   ██  ██   ██  ███████  ███████           
+    //                                                     
+    //                                                     
+    //  █████   ██████   ██    ██  ███████  ██████   ████████ 
+    // ██   ██  ██   ██  ██    ██  ██       ██   ██     ██    
+    // ███████  ██   ██  ██    ██  █████    ██████      ██    
+    // ██   ██  ██   ██   ██  ██   ██       ██   ██     ██    
+    // ██   ██  ██████     ████    ███████  ██   ██     ██   
+
+    /**
+    * Parses packet data into {@link HashMap<String, Object>} structure.
+    *
+    * @param rawData The scan record data.
+    * @return An AdvertisementData proto object.
+    * @throws ArrayIndexOutOfBoundsException if the input is truncated.
+    */
+    static HashMap<String, Object> parseAdvertisementData(byte[] rawData) {
+        ByteBuffer data = ByteBuffer.wrap(rawData).asReadOnlyBuffer().order(ByteOrder.LITTLE_ENDIAN);
+        HashMap<String, Object> response = new HashMap<>();
+        boolean seenLongLocalName = false;
+        HashMap<String, Object> serviceData = new HashMap<>();
+        HashMap<String, Object> manufacturerData = new HashMap<>();
+        do {
+            int length = data.get() & 0xFF;
+            if (length == 0) {
+                break;
+            }
+            if (length > data.remaining()) {
+                Log.w(TAG, "parseAdvertisementData: Not enough data.");
+                return response;
+            }
+
+            int type = data.get() & 0xFF;
+            length--;
+
+            switch (type) {
+                case 0x08: // Short local name.
+                case 0x09: { // Long local name.
+                    if (seenLongLocalName) {
+                        // Prefer the long name over the short.
+                        data.position(data.position() + length);
+                        break;
+                    }
+                    byte[] localName = new byte[length];
+                    data.get(localName);
+                    try {
+                        response.put("local_name", new String(localName, "UTF-8"));
+                    } catch (UnsupportedEncodingException e) {}
+                    if (type == 0x09) {
+                        seenLongLocalName = true;
+                    }
+                    break;
+                }
+                case 0x0A: { // Power level.
+                    response.put("tx_power_level", data.get());
+                    break;
+                }
+                case 0x16: // Service Data with 16 bit UUID.
+                case 0x20: // Service Data with 32 bit UUID.
+                case 0x21: { // Service Data with 128 bit UUID.
+                    UUID svcUuid;
+                    int remainingDataLength = 0;
+                    if (type == 0x16 || type == 0x20) {
+                        long svcUuidInteger;
+                        if (type == 0x16) {
+                            svcUuidInteger = data.getShort() & 0xFFFF;
+                            remainingDataLength = length - 2;
+                        } else {
+                            svcUuidInteger = data.getInt() & 0xFFFFFFFF;
+                            remainingDataLength = length - 4;
+                        }
+                        svcUuid = UUID.fromString(String.format("%08x-0000-1000-8000-00805f9b34fb", svcUuidInteger));
+                    } else {
+                        long msb = data.getLong();
+                        long lsb = data.getLong();
+                        svcUuid = new UUID(msb, lsb);
+                        remainingDataLength = length - 16;
+                    }
+                    byte[] remainingData = new byte[remainingDataLength];
+                    data.get(remainingData);
+
+                    serviceData.put(svcUuid.toString(), remainingData);
+                    response.put("service_data", serviceData);
+                    break;
+                }
+                case 0xFF: {// Manufacturer specific data.
+                    if(length < 2) {
+                        Log.w(TAG, "parseAdvertisementData: Not enough data for Manufacturer specific data.");
+                        break;
+                    }
+                    int manufacturerId = data.getShort();
+                    if((length - 2) > 0) {
+                        byte[] msd = new byte[length - 2];
+                        data.get(msd);
+                        manufacturerData.put(Integer.toString(manufacturerId), msd);
+                        response.put("manufacturer_data", manufacturerId);
+                    }
+                    break;
+                }
+                default: {
+                    data.position(data.position() + length);
+                    break;
+                }
+            }
+        } while (true);
+        return response;
+    } 
+
+    //////////////////////////////////////////////////////////////////////
+    // ███    ███  ███████   ██████      
+    // ████  ████  ██       ██           
+    // ██ ████ ██  ███████  ██   ███     
+    // ██  ██  ██       ██  ██    ██     
+    // ██      ██  ███████   ██████ 
+    //     
+    // ██   ██  ███████  ██       ██████   ███████  ██████   ███████ 
+    // ██   ██  ██       ██       ██   ██  ██       ██   ██  ██      
+    // ███████  █████    ██       ██████   █████    ██████   ███████ 
+    // ██   ██  ██       ██       ██       ██       ██   ██       ██ 
+    // ██   ██  ███████  ███████  ██       ███████  ██   ██  ███████ 
+
+
+    static HashMap<String, Object> bmAdvertisementData(BluetoothDevice device, byte[] advertisementData, int rssi) {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("device", bmBluetoothDevice(device));
+        if(advertisementData != null && advertisementData.length > 0) {
+            map.put("advertisement_data", parseAdvertisementData(advertisementData));
+        }
+        map.put("rssi", rssi);
+        return map;
+    }
+
+    @TargetApi(21)
+    static HashMap<String, Object> bmScanResult(BluetoothDevice device, ScanResult result) {
+
+        ScanRecord scanRecord = result.getScanRecord();
+
+        HashMap<String, Object> advertisementData = new HashMap<>();
+        
+        // connectable
+        if(Build.VERSION.SDK_INT >= 26) {
+            advertisementData.put("connectable", result.isConnectable() ? 1 : 0);
+        } else if(scanRecord != null) {
+            int flags = scanRecord.getAdvertiseFlags();
+            advertisementData.put("connectable", (flags & 0x2) > 0 ? 1 : 0);
+        }
+
+        if(scanRecord != null) {
+
+            String localName = scanRecord.getDeviceName();
+
+            int txPower = scanRecord.getTxPowerLevel();
+
+            // Manufacturer Specific Data
+            SparseArray<byte[]> msd = scanRecord.getManufacturerSpecificData();
+            HashMap<Integer, String> msdMap = new HashMap<Integer, String>();
+            if(msd != null) {
+                for (int i = 0; i < msd.size(); i++) {
+                    int key = msd.keyAt(i);
+                    byte[] value = msd.valueAt(i);
+                    msdMap.put(key, bytesToHex(value));
+                }
+            }
+
+            // Service Data
+            Map<ParcelUuid, byte[]> serviceData = scanRecord.getServiceData();
+            HashMap<String, Object> serviceDataMap = new HashMap<>();
+            if(serviceData != null) {
+                for (Map.Entry<ParcelUuid, byte[]> entry : serviceData.entrySet()) {
+                    ParcelUuid key = entry.getKey();
+                    byte[] value = entry.getValue();
+                    serviceDataMap.put(key.getUuid().toString(), bytesToHex(value));
+                }
+            }
+
+            // Service UUIDs
+            List<ParcelUuid> serviceUuids = scanRecord.getServiceUuids();
+            List<String> serviceUuidList = new ArrayList<String>();
+            if(serviceUuids != null) {
+                for (ParcelUuid s : serviceUuids) {
+                    serviceUuidList.add(s.getUuid().toString());
+                }
+            }
+
+            // add to map
+            if(localName != null) {
+                advertisementData.put("local_name", localName);
+            }
+            if(txPower != Integer.MIN_VALUE) {
+                advertisementData.put("tx_power_level", txPower);
+            }
+            if(msd != null) {
+                advertisementData.put("manufacturer_data", msdMap);
+            }
+            if(serviceData != null) {
+                advertisementData.put("service_data", serviceDataMap);
+            }
+            if(serviceUuids != null) {
+                advertisementData.put("service_uuids", serviceUuidList);
+            }
+        }
+
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("device", bmBluetoothDevice(device));
+        map.put("rssi", result.getRssi());
+        map.put("advertisement_data", advertisementData);
+        return map;
+    }
+
+    static HashMap<String, Object> bmBluetoothDevice(BluetoothDevice device) {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("remote_id", device.getAddress());
+        if(device.getName() != null) {
+            map.put("local_name", device.getName());
+        }
+        map.put("type", device.getType());
+        return map;
+    }
+
+    static HashMap<String, Object> bmBluetoothService(BluetoothDevice device, BluetoothGattService service, BluetoothGatt gatt) {
+
+        List<Object> characteristics = new ArrayList<Object>();
+        for(BluetoothGattCharacteristic c : service.getCharacteristics()) {
+            characteristics.add(bmBluetoothCharacteristic(device, c, gatt));
+        }
+
+        List<Object> includedServices = new ArrayList<Object>();
+        for(BluetoothGattService s : service.getIncludedServices()) {
+            includedServices.add(bmBluetoothService(device, s, gatt));
+        }
+
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("remote_id", device.getAddress());
+        map.put("service_uuid", service.getUuid().toString());
+        map.put("is_primary", service.getType() == BluetoothGattService.SERVICE_TYPE_PRIMARY ? 1 : 0);
+        map.put("characteristics", characteristics);
+        map.put("included_services", includedServices);
+        return map;
+    }
+
+    static HashMap<String, Object> bmBluetoothCharacteristic(BluetoothDevice device, BluetoothGattCharacteristic characteristic, BluetoothGatt gatt) {
+
+        ServicePair pair = getServicePair(gatt, characteristic);
+
+        List<Object> descriptors = new ArrayList<Object>();
+        for(BluetoothGattDescriptor d : characteristic.getDescriptors()) {
+            descriptors.add(bmBluetoothDescriptor(device, d));
+        }
+
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("remote_id", device.getAddress());
+        map.put("service_uuid", pair.primary);
+        map.put("secondary_service_uuid", pair.secondary);
+        map.put("characteristic_uuid", characteristic.getUuid().toString());
+        map.put("descriptors", descriptors);
+        map.put("properties", bmCharacteristicProperties(characteristic.getProperties()));
+        map.put("value", bytesToHex(characteristic.getValue()));
+        return map;
+    }
+
+    static HashMap<String, Object> bmBluetoothDescriptor(BluetoothDevice device, BluetoothGattDescriptor descriptor) {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("remote_id", device.getAddress());
+        map.put("descriptor_uuid", descriptor.getUuid().toString());
+        map.put("characteristic_uuid", descriptor.getCharacteristic().getUuid().toString());
+        map.put("service_uuid", descriptor.getCharacteristic().getService().getUuid().toString());
+        map.put("value", bytesToHex(descriptor.getValue()));
+        return map;
+    }
+
+    static HashMap<String, Object> bmCharacteristicProperties(int properties) {
+        HashMap<String, Object> props = new HashMap<>();
+        props.put("broadcast",                      (properties & 1)   != 0 ? 1 : 0);
+        props.put("read",                           (properties & 2)   != 0 ? 1 : 0);
+        props.put("write_without_response",         (properties & 4)   != 0 ? 1 : 0);
+        props.put("write",                          (properties & 8)   != 0 ? 1 : 0);
+        props.put("notify",                         (properties & 16)  != 0 ? 1 : 0);
+        props.put("indicate",                       (properties & 32)  != 0 ? 1 : 0);
+        props.put("authenticated_signed_writes",    (properties & 64)  != 0 ? 1 : 0);
+        props.put("extended_properties",            (properties & 128) != 0 ? 1 : 0);
+        props.put("notify_encryption_required",     (properties & 256) != 0 ? 1 : 0);
+        props.put("indicate_encryption_required",   (properties & 512) != 0 ? 1 : 0);
+        return props;
+    }
+
+    static int bmConnectionStateEnum(int cs) {
+        switch (cs) {
+            case BluetoothProfile.STATE_DISCONNECTED:  return 0;
+            case BluetoothProfile.STATE_CONNECTING:    return 1;
+            case BluetoothProfile.STATE_CONNECTED:     return 2;
+            case BluetoothProfile.STATE_DISCONNECTING: return 3;
+            default: return 0;
+        }
+    }
+
+    public static class ServicePair {
+        public String primary;
+        public String secondary;
+    }
+
+    static ServicePair getServicePair(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
+
+        ServicePair result = new ServicePair();
+
+        BluetoothGattService service = characteristic.getService();
+
+        // is this a primary service?
+        if(service.getType() == BluetoothGattService.SERVICE_TYPE_PRIMARY) {
+            result.primary = service.getUuid().toString();
+            return result;
+        } 
+
+        // Otherwise, iterate all services until we find the primary service
+        for(BluetoothGattService primary : gatt.getServices()) {
+            for(BluetoothGattService secondary : primary.getIncludedServices()) {
+                if(secondary.getUuid().equals(service.getUuid())) {
+                    result.primary = primary.getUuid().toString();
+                    result.secondary = secondary.getUuid().toString();
+                    return result;
+                }
+            }
+        }
+
+        return result;
+    }
 
     //////////////////////////////////////////
     // ██    ██ ████████  ██  ██       ███████
@@ -1734,4 +2070,4 @@ public class FlutterBluePlusPlugin implements
             mtu = 23;
         }
     }
-} // FlutterBluePlusPlugin
+}
