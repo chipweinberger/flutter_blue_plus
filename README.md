@@ -231,9 +231,10 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 | localName                 | :white_check_mark: | :white_check_mark: |        | The cached localName of the device                         |
 | connect                   | :white_check_mark: | :white_check_mark: | :fire: | Establishes a connection to the device                     |
 | disconnect                | :white_check_mark: | :white_check_mark: | :fire: | Cancels an active or pending connection to the device      |
-| discoverServices          | :white_check_mark: | :white_check_mark: | :fire: | Discovers services, characteristics, and descriptors       |
+| discoverServices          | :white_check_mark: | :white_check_mark: | :fire: | Discover services                                          |
+| servicesList              | :white_check_mark: | :white_check_mark: | :fire: | Get services. Calls discoverServices for you, if needed    |
 | isDiscoveryingServices    | :white_check_mark: | :white_check_mark: |        | Stream of whether service discovery is in progress         |
-| services                  | :white_check_mark: | :white_check_mark: | :fire: | The cached result from discoverServices()                  |
+| servicesStream            | :white_check_mark: | :white_check_mark: |        | Stream of service changes                                  |
 | connectionState           | :white_check_mark: | :white_check_mark: |        | Stream of connection changes for the Bluetooth Device      |
 | mtu                       | :white_check_mark: | :white_check_mark: | :fire: | Stream of mtu size changes                                 |
 | readRssi                  | :white_check_mark: | :white_check_mark: | :fire: | Read RSSI from a connected device                          |
