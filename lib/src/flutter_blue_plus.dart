@@ -22,7 +22,7 @@ class FlutterBluePlus {
   static final _StreamController<bool> _isScanning = _StreamController(initialValue: false);
 
   // stream used for the scanResults public api
-  static final _StreamController<List<ScanResult>> _scanResults = _StreamController(initialValue: []);
+  static final _StreamController<List<ScanResult>> _scanResultsList = _StreamController(initialValue: []);
 
   // ScanResponses are received from the system one-by-one from the method broadcast stream.
   // This variable buffers all the results into a single-subscription stream.
@@ -92,7 +92,7 @@ class FlutterBluePlus {
   /// - The list contains all the results since the scan started.
   /// - When a scan is first started, an empty list is emitted.
   /// - The returned stream is never closed.
-  static Stream<List<ScanResult>> get scanResults => _scanResults.stream;
+  static Stream<List<ScanResult>> get scanResults => _scanResultsList.stream;
 
   /// Gets the current state of the Bluetooth module
   static Stream<BluetoothAdapterState> get adapterState async* {
@@ -142,6 +142,7 @@ class FlutterBluePlus {
     List<Guid> withDevices = const [],
     List<String> macAddresses = const [],
     Duration? timeout,
+    bool includeConnectedDevices = true,
     bool allowDuplicates = false,
     bool androidUsesFineLocation = false,
   }) async* {
@@ -157,7 +158,17 @@ class FlutterBluePlus {
     }
 
     // Clear scan results list
-    _scanResults.add(<ScanResult>[]);
+    _scanResultsList.add(<ScanResult>[]);
+
+    // include the connected devices?
+    if (includeConnectedDevices) {
+      List<BluetoothDevice> devs = await connectedDevices;
+      List<ScanResult> connected = [];
+      for (var d in devs) {
+        connected.add(await _bluetoothDeviceToScanResult(d));
+      }
+      _scanResultsList.add(connected);
+    }
 
     Stream<BmScanResponse> responseStream = FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "ScanResponse")
@@ -185,30 +196,25 @@ class FlutterBluePlus {
     _isScanning.add(true);
 
     await for (BmScanResponse response in _scanResponseBuffer!.stream) {
-      // check for failure
+      // failure?
       if (response.failed != null) {
         throw FlutterBluePlusException("scan", response.failed!.errorCode, response.failed!.errorString);
       }
 
-      if (response.result != null) {
-        ScanResult item = ScanResult.fromProto(response.result!);
-
-        // update list of devices
-        List<ScanResult> list = List<ScanResult>.from(_scanResults.value);
-        if (list.contains(item)) {
-          // the list will have duplicates if allowDuplicates is set.
-          // However, we only care to about the most recent advertisment
-          // so here we replace old advertisements. 1 per device.
-          int index = list.indexOf(item);
-          list[index] = item;
-        } else {
-          list.add(item);
-        }
-
-        _scanResults.add(list);
-
-        yield item;
+      // no result?
+      if (response.result == null) {
+        continue;
       }
+
+      ScanResult item = ScanResult.fromProto(response.result!);
+
+      // make new list while considering duplicates
+      List<ScanResult> list = _addOrUpdate(_scanResultsList.value, item);
+
+      // update list
+      _scanResultsList.add(list);
+
+      yield item;
     }
   }
 
@@ -223,6 +229,7 @@ class FlutterBluePlus {
     List<Guid> withDevices = const [],
     List<String> macAddresses = const [],
     Duration? timeout,
+    bool includeConnectedDevices = true,
     bool allowDuplicates = false,
     bool androidUsesFineLocation = false,
   }) async {
@@ -232,10 +239,11 @@ class FlutterBluePlus {
             withDevices: withDevices,
             macAddresses: macAddresses,
             timeout: timeout,
+            includeConnectedDevices: includeConnectedDevices,
             allowDuplicates: allowDuplicates,
             androidUsesFineLocation: androidUsesFineLocation)
         .drain();
-    return _scanResults.value;
+    return _scanResultsList.value;
   }
 
   /// Stops a scan for Bluetooth Low Energy devices
@@ -346,16 +354,23 @@ class DeviceIdentifier {
 }
 
 class ScanResult {
+  final BluetoothDevice device;
+  final AdvertisementData advertisementData;
+  final int rssi;
+  final DateTime timeStamp;
+
+  ScanResult({
+    required this.device,
+    required this.advertisementData,
+    required this.rssi,
+    required this.timeStamp,
+  });
+
   ScanResult.fromProto(BmScanResult p)
       : device = BluetoothDevice.fromProto(p.device),
         advertisementData = AdvertisementData.fromProto(p.advertisementData),
         rssi = p.rssi,
         timeStamp = DateTime.now();
-
-  final BluetoothDevice device;
-  final AdvertisementData advertisementData;
-  final int rssi;
-  final DateTime timeStamp;
 
   @override
   bool operator ==(Object other) =>
@@ -375,16 +390,61 @@ class ScanResult {
   }
 }
 
+List<ScanResult> _addOrUpdate(List<ScanResult> results, ScanResult item) {
+  // if allowDuplicates is set, the item may already be in the list.
+  // If so, update, otherwise add.
+  var list = List<ScanResult>.from(results);
+  if (list.contains(item)) {
+    int index = list.indexOf(item);
+    list[index] = item;
+  } else {
+    list.add(item);
+  }
+  return list;
+}
+
+Future<ScanResult> _bluetoothDeviceToScanResult(BluetoothDevice device) async {
+  // get services
+  List<String> serviceUuids = [];
+  try { // this would only throw if the remoteId is somehow forgotten by the system
+    List<BluetoothService> services = await device.services.first;
+    serviceUuids = services.map((e) => e.uuid.toString()).toList();
+  } catch (e) {
+    print("could not get services $e");
+  }
+  // adv data
+  var advertisementData = AdvertisementData(
+    localName: device.localName,
+    txPowerLevel: null,
+    connectable: true,
+    manufacturerData: {},
+    serviceData: {},
+    serviceUuids: serviceUuids,
+  );
+  // result
+  ScanResult scanResult =
+      ScanResult(device: device, advertisementData: advertisementData, rssi: 0, timeStamp: DateTime.now());
+  return scanResult;
+}
+
 class AdvertisementData {
   final String localName;
   final int? txPowerLevel;
   final bool connectable;
   final Map<int, List<int>> manufacturerData;
   final Map<String, List<int>> serviceData;
-
   // Note: we use strings and not Guids because advertisement UUIDs can
   // be 32-bit UUIDs, 64-bit, etc i.e. "FE56"
   final List<String> serviceUuids;
+
+  AdvertisementData({
+    required this.localName,
+    required this.txPowerLevel,
+    required this.connectable,
+    required this.manufacturerData,
+    required this.serviceData,
+    required this.serviceUuids,
+  });
 
   AdvertisementData.fromProto(BmAdvertisementData p)
       : localName = p.localName ?? "",

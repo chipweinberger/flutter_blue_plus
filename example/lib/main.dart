@@ -133,7 +133,7 @@ class FindDevicesScreen extends StatelessWidget {
         ),
         body: RefreshIndicator(
           onRefresh: () =>
-              FlutterBluePlus.startScan(timeout: const Duration(seconds: 15), androidUsesFineLocation: false),
+              FlutterBluePlus.startScan(timeout: const Duration(seconds: 15), includeConnectedDevices: false, androidUsesFineLocation: false),
           child: SingleChildScrollView(
             child: Column(
               children: <Widget>[
@@ -212,7 +212,7 @@ class FindDevicesScreen extends StatelessWidget {
                   onPressed: () async {
                     try {
                       FlutterBluePlus
-                          .startScan(timeout: const Duration(seconds: 15), androidUsesFineLocation: false);
+                          .startScan(timeout: const Duration(seconds: 15), includeConnectedDevices: false, androidUsesFineLocation: false);
                     } catch (e) {
                       final snackBar = SnackBar(content: Text(prettyException("Start Scan Error:", e)));
                       snackBarKeyB.currentState?.showSnackBar(snackBar);
