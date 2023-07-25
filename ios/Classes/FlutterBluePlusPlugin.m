@@ -678,24 +678,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 // ██    ██     ██     ██  ██            ██ 
 //  ██████      ██     ██  ███████  ███████ 
 
-- (NSData *)convertHexToData:(NSString *)hexString
-{
-    if (hexString.length % 2 != 0) {
-        return nil;
-    }
-
-    NSMutableData *data = [NSMutableData new];
-
-    for (NSInteger i = 0; i < hexString.length; i += 2) {
-        unsigned int byte = 0;
-        NSRange range = NSMakeRange(i, 2);
-        [[NSScanner scannerWithString:[hexString substringWithRange:range]] scanHexInt:&byte];
-        [data appendBytes:&byte length:1];
-    }
-
-    return [data copy];
-}
-
 - (CBPeripheral *)findPeripheral:(NSString *)remoteId
 {
     NSUUID *uuid = [[NSUUID alloc] initWithUUIDString:remoteId];
@@ -1262,23 +1244,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 // ██   ██  ██       ██       ██       ██       ██   ██       ██ 
 // ██   ██  ███████  ███████  ██       ███████  ██   ██  ███████ 
 
-
-- (NSString *)convertDataToHex:(NSData *)data 
-{
-    if (data == nil) {
-        return @"";
-    }
-
-    const unsigned char *bytes = (const unsigned char *)[data bytes];
-    NSMutableString *hexString = [NSMutableString new];
-
-    for (NSInteger i = 0; i < data.length; i++) {
-        [hexString appendFormat:@"%02x", bytes[i]];
-    }
-
-    return [hexString copy];
-}
-
 - (int)bmAdapterStateEnum:(CBManagerState)adapterState
 {
     switch (adapterState)
@@ -1472,6 +1437,40 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 // ██    ██    ██     ██  ██       ███████ 
 // ██    ██    ██     ██  ██            ██ 
 //  ██████     ██     ██  ███████  ███████ 
+
+- (NSString *)convertDataToHex:(NSData *)data 
+{
+    if (data == nil) {
+        return @"";
+    }
+
+    const unsigned char *bytes = (const unsigned char *)[data bytes];
+    NSMutableString *hexString = [NSMutableString new];
+
+    for (NSInteger i = 0; i < data.length; i++) {
+        [hexString appendFormat:@"%02x", bytes[i]];
+    }
+
+    return [hexString copy];
+}
+
+- (NSData *)convertHexToData:(NSString *)hexString
+{
+    if (hexString.length % 2 != 0) {
+        return nil;
+    }
+
+    NSMutableData *data = [NSMutableData new];
+
+    for (NSInteger i = 0; i < hexString.length; i += 2) {
+        unsigned int byte = 0;
+        NSRange range = NSMakeRange(i, 2);
+        [[NSScanner scannerWithString:[hexString substringWithRange:range]] scanHexInt:&byte];
+        [data appendBytes:&byte length:1];
+    }
+
+    return [data copy];
+}
 
 - (void)log:(LogLevel)level
      format:(NSString *)format, ...

@@ -1960,6 +1960,9 @@ public class FlutterBluePlusPlugin implements
     }
 
     private static byte[] hexToBytes(String s) {
+        if (s == null) {
+            return new byte[0]
+        }
         int len = s.length();
         byte[] data = new byte[len / 2];
 

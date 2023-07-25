@@ -1,7 +1,7 @@
 part of flutter_blue_plus;
 
 String _hexEncode(List<int> numbers) {
-  return numbers.map((n) => n.toRadixString(16).padLeft(2, '0')).join();
+  return numbers.map((n) => (n & 0xFF).toRadixString(16).padLeft(2, '0')).join();
 }
 
 List<int> _hexDecode(String hex) {
