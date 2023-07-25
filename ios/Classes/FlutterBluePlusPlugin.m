@@ -40,7 +40,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 @property(nonatomic, retain) NSObject<FlutterPluginRegistrar> *registrar;
 @property(nonatomic, retain) FlutterMethodChannel *methodChannel;
 @property(nonatomic, retain) CBCentralManager *centralManager;
-@property(nonatomic) NSMutableDictionary *scannedPeripherals;
+@property(nonatomic) NSMutableDictionary *knownPeripherals;
 @property(nonatomic) NSMutableArray *servicesThatNeedDiscovered;
 @property(nonatomic) NSMutableArray *characteristicsThatNeedDiscovered;
 @property(nonatomic) NSMutableDictionary *dataWaitingToWriteWithoutResponse;
@@ -54,7 +54,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                                                                 binaryMessenger:[registrar messenger]];
     FlutterBluePlusPlugin *instance = [[FlutterBluePlusPlugin alloc] init];
     instance.methodChannel = methodChannel;
-    instance.scannedPeripherals = [NSMutableDictionary new];
+    instance.knownPeripherals = [NSMutableDictionary new];
     instance.servicesThatNeedDiscovered = [NSMutableArray new];
     instance.characteristicsThatNeedDiscovered = [NSMutableArray new];
     instance.dataWaitingToWriteWithoutResponse = [NSMutableDictionary new];
@@ -222,32 +222,26 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             CBPeripheral *peripheral = nil; 
             if (peripheral == nil)
             {
+                // check the devices we know about
+                peripheral = [_knownPeripherals objectForKey:remoteId];
+            }
+            if (peripheral == nil)
+            {
+                // check the devices iOS knowns about
                 peripheral = [self findPeripheral:remoteId];
-            }
-            if (peripheral == nil)
-            {
-                peripheral = [_scannedPeripherals objectForKey:remoteId];
-            }
-            if (peripheral == nil)
-            {
-                // Generic Access service 0x1800
-                CBUUID* gasUuid = [CBUUID UUIDWithString:@"1800"];
-
-                NSArray *periphs = [self->_centralManager retrieveConnectedPeripheralsWithServices:@[gasUuid]];
-
-                for (CBPeripheral *p in periphs) {
-                    p.delegate = self;
-                    NSString *uuid = [[p identifier] UUIDString];
-                    [_scannedPeripherals setObject:p forKey:uuid];
-                }
-
-                peripheral = [_scannedPeripherals objectForKey:remoteId];
             }
             if (peripheral == nil)
             {
                 result([FlutterError errorWithCode:@"connect" message:@"Peripheral not found" details:remoteId]);
                 return;
             }
+
+            // we must keep a strong reference to any CBPeripheral before we connect to it.
+            // Why? CoreBluetooth does not keep strong references and will warn about API MISUSE and weak ptrs.
+            [_knownPeripherals setObject:peripheral forKey:remoteId];
+
+            // set ourself as delegate
+            peripheral.delegate = self;
 
             // options
             NSMutableDictionary *options = [[NSMutableDictionary alloc] init];
@@ -747,6 +741,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             break;
         }
     }
+
     return peripheral;
 }
 
@@ -882,7 +877,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         NSLog(@"[FBP-iOS] centralManager didDiscoverPeripheral");
     }
     
-    [self.scannedPeripherals setObject:peripheral forKey:[[peripheral identifier] UUIDString]];
+    [self.knownPeripherals setObject:peripheral forKey:[[peripheral identifier] UUIDString]];
 
     // See BmScanResult
     NSDictionary *result = [self toScanResultProto:peripheral advertisementData:advertisementData RSSI:RSSI];
