@@ -142,7 +142,6 @@ class FlutterBluePlus {
   static Stream<ScanResult> scan({
     ScanMode scanMode = ScanMode.lowLatency,
     List<Guid> withServices = const [],
-    List<Guid> withDevices = const [],
     List<String> macAddresses = const [],
     Duration? timeout,
     bool includeConnectedDevices = true,
@@ -168,7 +167,6 @@ class FlutterBluePlus {
       List<BluetoothDevice> devs = await connectedDevices;
       List<ScanResult> connected = [];
       for (var d in devs) {
-        
         connected.add(_bluetoothDeviceToScanResult(d, _lastAdvertisment[d.remoteId],  BluetoothConnectionState.connected));
       }
       _scanResultsList.add(connected);
@@ -233,7 +231,6 @@ class FlutterBluePlus {
   static Future startScan({
     ScanMode scanMode = ScanMode.lowLatency,
     List<Guid> withServices = const [],
-    List<Guid> withDevices = const [],
     List<String> macAddresses = const [],
     Duration? timeout,
     bool includeConnectedDevices = true,
@@ -243,7 +240,6 @@ class FlutterBluePlus {
     await scan(
             scanMode: scanMode,
             withServices: withServices,
-            withDevices: withDevices,
             macAddresses: macAddresses,
             timeout: timeout,
             includeConnectedDevices: includeConnectedDevices,
