@@ -32,6 +32,9 @@ class FlutterBluePlus {
   // timeout for scanning that can be cancelled by stopScan
   static Timer? _scanTimeout;
 
+  // Remember the last advertistment per device
+  static final Map<DeviceIdentifier, AdvertisementData> _lastAdvertisment = {};
+
   /// FlutterBluePlus log level
   static LogLevel _logLevel = LogLevel.debug;
 
@@ -165,7 +168,8 @@ class FlutterBluePlus {
       List<BluetoothDevice> devs = await connectedDevices;
       List<ScanResult> connected = [];
       for (var d in devs) {
-        connected.add(await _bluetoothDeviceToScanResult(d, BluetoothConnectionState.connected));
+        
+        connected.add(_bluetoothDeviceToScanResult(d, _lastAdvertisment[d.remoteId],  BluetoothConnectionState.connected));
       }
       _scanResultsList.add(connected);
     }
@@ -207,6 +211,9 @@ class FlutterBluePlus {
       }
 
       ScanResult item = ScanResult.fromProto(response.result!);
+
+      // remember the last advertisement
+      _lastAdvertisment[item.device.remoteId] = item.advertisementData;
 
       // make new list while considering duplicates
       List<ScanResult> list = _addOrUpdate(_scanResultsList.value, item);
@@ -407,10 +414,10 @@ List<ScanResult> _addOrUpdate(List<ScanResult> results, ScanResult item) {
   return list;
 }
 
-Future<ScanResult> _bluetoothDeviceToScanResult(
-    BluetoothDevice device, BluetoothConnectionState connectionState) async {
-  // adv data
-  var advertisementData = AdvertisementData(
+ScanResult _bluetoothDeviceToScanResult(
+    BluetoothDevice device, AdvertisementData? advertisementData, BluetoothConnectionState connectionState) {
+
+  advertisementData ??= AdvertisementData(
     localName: device.localName,
     txPowerLevel: null,
     connectable: true,
@@ -418,11 +425,12 @@ Future<ScanResult> _bluetoothDeviceToScanResult(
     serviceData: {},
     serviceUuids: [],
   );
+
   // result
   ScanResult scanResult = ScanResult(
       device: device,
       advertisementData: advertisementData,
-      rssi: 0,
+      rssi: -50,
       timeStamp: DateTime.now(),
       connectionState: connectionState);
   return scanResult;
