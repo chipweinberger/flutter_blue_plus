@@ -744,17 +744,17 @@ class BmConnectedDevicesResponse {
   }
 }
 
-class BmMtuSizeRequest {
+class BmMtuChangeRequest {
   final String remoteId;
   final int mtu;
 
-  BmMtuSizeRequest({required this.remoteId, required this.mtu});
+  BmMtuChangeRequest({required this.remoteId, required this.mtu});
 
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> data = {};
     data['remote_id'] = remoteId;
     data['mtu'] = mtu;
-    _printDbg("\nBmMtuSizeRequest $data");
+    _printDbg("\nBmMtuChangeRequest $data");
     return data;
   }
 }

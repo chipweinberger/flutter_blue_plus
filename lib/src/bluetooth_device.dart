@@ -179,10 +179,10 @@ class BluetoothDevice {
         .map((p) => p.mtu);
   }
 
-  /// Request to change MTU
+  /// Request to change MTU (Android Only)
   ///  - returns new MTU
   Future<int> requestMtu(int desiredMtu, {int timeout = 15}) async {
-    var request = BmMtuSizeRequest(
+    var request = BmMtuChangeRequest(
       remoteId: remoteId.str,
       mtu: desiredMtu,
     );

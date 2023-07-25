@@ -922,7 +922,7 @@ public class FlutterBluePlusPlugin implements
 
                 case "requestMtu":
                 {
-                    // see: BmMtuSizeRequest
+                    // see: BmMtuChangeRequest
                     HashMap<String, Object> data = call.arguments();
                     String remoteId = (String) data.get("remote_id");
                     int mtu =            (int) data.get("mtu");
@@ -1592,7 +1592,7 @@ public class FlutterBluePlusPlugin implements
             response.put("error_code", status);
             response.put("error_string", gattErrorString(status));
 
-            invokeMethodUIThread("onMtuChanged", response);
+            invokeMethodUIThread("OnMtuChanged", response);
         }
     }; // BluetoothGattCallback
 
