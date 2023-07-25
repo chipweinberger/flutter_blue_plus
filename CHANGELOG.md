@@ -1,3 +1,6 @@
+## 1.10.9
+* android: turnOn() and turnOff() could timeout if already on or already off
+
 ## 1.10.8
 * android: fix requestMtu (regression in 1.10.6)
 
