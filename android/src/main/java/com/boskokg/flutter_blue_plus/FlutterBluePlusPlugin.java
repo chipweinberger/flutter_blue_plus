@@ -89,7 +89,8 @@ public class FlutterBluePlusPlugin implements
     private ActivityPluginBinding activityBinding;
 
     static final private UUID CCCD_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
-    private final Map<String, BluetoothDeviceCache> mDevices = new HashMap<>();
+    private final Map<String, BluetoothGatt> mDevices = new HashMap<>();
+    private final Map<String, Integer> mMtuCache = new HashMap<>();
     private LogLevel logLevel = LogLevel.DEBUG;
 
     private interface OperationOnPermission {
@@ -180,11 +181,9 @@ public class FlutterBluePlusPlugin implements
         {
             Log.d(TAG, "teardown");
 
-            for (Map.Entry<String, BluetoothDeviceCache> entry : mDevices.entrySet()) {
-                String remoteId = entry.getKey();
-                BluetoothDeviceCache cache = entry.getValue();
-                BluetoothGatt gattServer = cache.gatt;
+            for (BluetoothGatt gattServer : mDevices.values()) {
                 if(gattServer != null) {
+                    String remoteId = gattServer.getDevice().getAddress();
                     Log.d(TAG, "calling disconnect() on device: " + remoteId);
                     Log.d(TAG, "calling gattServer.close() on device: " + remoteId);
                     gattServer.disconnect();
@@ -460,16 +459,16 @@ public class FlutterBluePlusPlugin implements
                         boolean isConnected = mBluetoothManager.getConnectedDevices(BluetoothProfile.GATT).contains(device);
 
                         // already connected?
-                        if(mDevices.containsKey(remoteId) && isConnected) {
+                        BluetoothGatt gattServer = mDevices.get(remoteId);
+                        if(gattServer != null && isConnected) {
                             result.success(null); // no work to do
                             return;
                         }
 
                         // If device was connected to previously but
                         // is now disconnected, attempt a reconnect
-                        BluetoothDeviceCache bluetoothDeviceCache = mDevices.get(remoteId);
-                        if(bluetoothDeviceCache != null && !isConnected) {
-                            if(bluetoothDeviceCache.gatt.connect() == false) {
+                        if(gattServer != null && !isConnected) {
+                            if(gattServer.connect() == false) {
                                 result.error("connect", "error when reconnecting to device", null);
                                 return;
                             }
@@ -477,15 +476,14 @@ public class FlutterBluePlusPlugin implements
                             return;
                         }
 
-                        // New request, connect and add gattServer to Map
-                        BluetoothGatt gattServer;
+                        // connect with new gattServer
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                             gattServer = device.connectGatt(context, autoConnect, mGattCallback, BluetoothDevice.TRANSPORT_LE);
                         } else {
                             gattServer = device.connectGatt(context, autoConnect, mGattCallback);
                         }
 
-                        mDevices.put(remoteId, new BluetoothDeviceCache(gattServer));
+                        mDevices.put(remoteId, gattServer);
 
                         result.success(null);
                     });
@@ -517,13 +515,12 @@ public class FlutterBluePlusPlugin implements
                 {
                     String remoteId = (String) call.arguments;
 
-                    BluetoothDeviceCache cache = mDevices.get(remoteId);
-                    if (cache == null) {
+                    BluetoothGatt gattServer = locateGatt(remoteId);
+                    if (gattServer == null) {
                         result.success(null); // no work to do
                         break;
                     }
 
-                    BluetoothGatt gattServer = cache.gatt;
                     final Method refreshMethod = gattServer.getClass().getMethod("refresh");
                     if (refreshMethod == null) {
                         result.error("clearGattCache", "unsupported on this android version", null);
@@ -539,21 +536,12 @@ public class FlutterBluePlusPlugin implements
                 case "disconnect":
                 {
                     String remoteId = (String) call.arguments;
-                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
-                    BluetoothDeviceCache cache = mDevices.remove(remoteId);
-
-                    if(cache != null) {
-
-                        BluetoothGatt gattServer = cache.gatt;
-
+                
+                    // if no server, then our app never called connect()
+                    // so there's no need for diconnect()
+                    BluetoothGatt gattServer = mDevices.get(remoteId);
+                    if (gattServer != null) {
                         gattServer.disconnect();
-
-                        int cs = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
-                        if(cs == BluetoothProfile.STATE_DISCONNECTED ||
-                           cs == BluetoothProfile.STATE_DISCONNECTING)
-                        {
-                            gattServer.close();
-                        }
                     }
 
                     result.success(null);
@@ -718,10 +706,10 @@ public class FlutterBluePlusPlugin implements
                     }
 
                     // check mtu
-                    BluetoothDeviceCache cache = mDevices.get(remoteId);
-                    if ((cache.mtu-3) < hexToBytes(value).length) {
+                    int mtu = mMtuCache.get(remoteId);
+                    if ((mtu-3) < hexToBytes(value).length) {
                         String s = "data longer than mtu allows. dataLength: " +
-                            hexToBytes(value).length + "> max: " + (cache.mtu-3);
+                            hexToBytes(value).length + "> max: " + (mtu-3);
                         result.error("write_characteristic_error", s, null);
                         break;
                     }
@@ -785,10 +773,10 @@ public class FlutterBluePlusPlugin implements
                     BluetoothGattDescriptor descriptor = locateDescriptor(characteristic, descriptorUuid);
 
                     // check mtu
-                    BluetoothDeviceCache cache = mDevices.get(remoteId);
-                    if ((cache.mtu-3) < hexToBytes(value).length) {
+                    int mtu = mMtuCache.get(remoteId);
+                    if ((mtu-3) < hexToBytes(value).length) {
                         String s = "data longer than mtu allows. dataLength: " +
-                            hexToBytes(value).length + "> max: " + (cache.mtu-3);
+                            hexToBytes(value).length + "> max: " + (mtu-3);
                         result.error("write_characteristic_error", s, null);
                         break;
                     }
@@ -906,15 +894,15 @@ public class FlutterBluePlusPlugin implements
                 {
                     String remoteId = (String) call.arguments;
 
-                    BluetoothDeviceCache cache = mDevices.get(remoteId);
-                    if(cache == null) {
+                    Integer mtu = mMtuCache.get(remoteId);
+                    if(mtu == null) {
                         result.error("getMtu", "no instance of BluetoothGatt, have you connected first?", null);
                         break;
                     }
 
                     HashMap<String, Object> response = new HashMap<String, Object>();
                     response.put("remote_id", remoteId);
-                    response.put("mtu", cache.mtu);
+                    response.put("mtu", mtu);
 
                     result.success(response);
                     break;
@@ -1147,15 +1135,11 @@ public class FlutterBluePlusPlugin implements
 
     private BluetoothGatt locateGatt(String remoteId) throws Exception
     {
-        BluetoothDeviceCache cache = mDevices.get(remoteId);
-
-        if(cache == null) {
-            throw new Exception("locateGatt: BluetoothDeviceCache is null, have you connected first?");
-        } else if(cache.gatt == null) {
-            throw new Exception("locateGatt: no instance of BluetoothGatt, have you connected first?");
-        } else {
-            return cache.gatt;
+        BluetoothGatt gattServer = mDevices.get(remoteId);
+        if(gattServer == null) {
+            throw new Exception("locateGatt failed. have you connected first?");
         }
+        return gattServer;
     }
 
     private BluetoothGattCharacteristic locateCharacteristic(BluetoothGatt gattServer,
@@ -1405,12 +1389,12 @@ public class FlutterBluePlusPlugin implements
         {
             log(LogLevel.DEBUG, "[FBP-Android] onConnectionStateChange: status: " + status + " newState: " + newState);
 
+            // disconnection?
             if(newState == BluetoothProfile.STATE_DISCONNECTED) {
-
-                if(!mDevices.containsKey(gatt.getDevice().getAddress())) {
-
-                    gatt.close();
-                }
+                // it is important to close, so that we don't run out
+                // of bluetooth resources which prevents new connections
+                mDevices.remove(gatt.getDevice().getAddress());
+                gatt.close();
             }
 
             // see: BmConnectionStateResponse
@@ -1579,10 +1563,8 @@ public class FlutterBluePlusPlugin implements
         {
             log(LogLevel.DEBUG, "[FBP-Android] onMtuChanged: mtu: " + mtu + " status: " + status);
 
-            BluetoothDeviceCache cache = mDevices.get(gatt.getDevice().getAddress());
-            if (cache != null) {
-                cache.mtu = mtu;
-            }
+            // remember mtu
+            mMtuCache.put(gatt.getDevice().getAddress(), mtu);
 
             // see: BmMtuChangedResponse
             HashMap<String, Object> response = new HashMap<>();
@@ -1961,7 +1943,7 @@ public class FlutterBluePlusPlugin implements
 
     private static byte[] hexToBytes(String s) {
         if (s == null) {
-            return new byte[0]
+            return new byte[0];
         }
         int len = s.length();
         byte[] data = new byte[len / 2];
