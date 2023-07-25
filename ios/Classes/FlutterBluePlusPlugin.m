@@ -117,7 +117,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // get state
             int adapterState = 0; // BmAdapterStateEnum.unknown
             if (self->_centralManager) {
-                adapterState = [self toAdapterStateInt:self->_centralManager.state];    
+                adapterState = [self bmAdapterStateEnum:self->_centralManager.state];    
             }
 
             // See BmBluetoothAdapterState
@@ -202,7 +202,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // Devices
             NSMutableArray *deviceProtos = [NSMutableArray new];
             for (CBPeripheral *p in periphs) {
-                [deviceProtos addObject:[self toDeviceProto:p]];
+                [deviceProtos addObject:[self bmBluetoothDevice:p]];
             }
 
             // See BmConnectedDevicesResponse
@@ -287,7 +287,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // See BmConnectionStateResponse
             NSDictionary* response = @{
                 @"remote_id":        remoteId,
-                @"connection_state": @([self connectionStateInt:connectionState]),
+                @"connection_state": @([self bmConnectionStateEnum:connectionState]),
             };
 
             result(response);
@@ -336,7 +336,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSMutableArray *services = [NSMutableArray new];
             for (CBService *s in [peripheral services])
             {
-                [services addObject:[self toServiceProto:peripheral service:s]];
+                [services addObject:[self bmBluetoothService:peripheral service:s]];
             }
 
             // See BmDiscoverServicesResult
@@ -858,7 +858,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         NSLog(@"[FBP-iOS] centralManagerDidUpdateState %li", self->_centralManager.state);
     }
 
-    int adapterState = [self toAdapterStateInt:self->_centralManager.state];
+    int adapterState = [self bmAdapterStateEnum:self->_centralManager.state];
 
     // See BmBluetoothAdapterState
     NSDictionary* response = @{
@@ -880,7 +880,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     [self.knownPeripherals setObject:peripheral forKey:[[peripheral identifier] UUIDString]];
 
     // See BmScanResult
-    NSDictionary *result = [self toScanResultProto:peripheral advertisementData:advertisementData RSSI:RSSI];
+    NSDictionary *result = [self bmScanResult:peripheral advertisementData:advertisementData RSSI:RSSI];
 
     // See BmScanResponse
     NSDictionary *response = @{
@@ -903,7 +903,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // See BmConnectionStateResponse
     NSDictionary *result = @{
         @"remote_id":        [[peripheral identifier] UUIDString],
-        @"connection_state": @([self connectionStateInt:peripheral.state]),
+        @"connection_state": @([self bmConnectionStateEnum:peripheral.state]),
     };
 
     // Send connection state
@@ -927,7 +927,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // See BmConnectionStateResponse
     NSDictionary *result = @{
         @"remote_id":        [[peripheral identifier] UUIDString],
-        @"connection_state": @([self connectionStateInt:peripheral.state]),
+        @"connection_state": @([self bmConnectionStateEnum:peripheral.state]),
     };
 
     // Send connection state
@@ -948,7 +948,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // See BmConnectionStateResponse
     NSDictionary *result = @{
         @"remote_id":        [[peripheral identifier] UUIDString],
-        @"connection_state": @([self connectionStateInt:peripheral.state]),
+        @"connection_state": @([self bmConnectionStateEnum:peripheral.state]),
     };
 
     // Send connection state
@@ -1034,7 +1034,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     NSMutableArray *services = [NSMutableArray new];
     for (CBService *s in [peripheral services])
     {
-        [services addObject:[self toServiceProto:peripheral service:s]];
+        [services addObject:[self bmBluetoothService:peripheral service:s]];
     }
 
     // See BmDiscoverServicesResult
@@ -1317,7 +1317,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     return [hexString copy];
 }
 
-- (int)toAdapterStateInt:(CBManagerState)adapterState
+- (int)bmAdapterStateEnum:(CBManagerState)adapterState
 {
     switch (adapterState)
     {
@@ -1332,9 +1332,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     return 0;
 }
 
-- (NSDictionary *)toScanResultProto:(CBPeripheral *)peripheral
-                  advertisementData:(NSDictionary<NSString *, id> *)advertisementData
-                               RSSI:(NSNumber *)RSSI
+- (NSDictionary *)bmScanResult:(CBPeripheral *)peripheral
+             advertisementData:(NSDictionary<NSString *, id> *)advertisementData
+                          RSSI:(NSNumber *)RSSI
 {
     NSString     *localName      = advertisementData[CBAdvertisementDataLocalNameKey];
     NSNumber     *connectable    = advertisementData[CBAdvertisementDataIsConnectable];
@@ -1394,15 +1394,14 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
   
     // See BmScanResult
     return @{
-        @"device":             [self toDeviceProto:peripheral],
+        @"device":             [self bmBluetoothDevice:peripheral],
         @"advertisement_data": ad,
         @"rssi":               RSSI ? RSSI : [NSNull null],
     };
 }
 
-- (NSDictionary *)toDeviceProto:(CBPeripheral *)peripheral
+- (NSDictionary *)bmBluetoothDevice:(CBPeripheral *)peripheral
 {
-    // See BmBluetoothDevice
     return @{
         @"remote_id":   [[peripheral identifier] UUIDString],
         @"local_name":  [peripheral name] ? [peripheral name] : [NSNull null],
@@ -1410,7 +1409,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     };
 }
 
-- (int)connectionStateInt:(CBPeripheralState)connectionState
+- (int)bmConnectionStateEnum:(CBPeripheralState)connectionState
 {
     switch (connectionState)
     {
@@ -1422,20 +1421,20 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     return 0;
 }
 
-- (NSDictionary *)toServiceProto:(CBPeripheral *)peripheral service:(CBService *)service
+- (NSDictionary *)bmBluetoothService:(CBPeripheral *)peripheral service:(CBService *)service
 {
     // Characteristics
     NSMutableArray *characteristicProtos = [NSMutableArray new];
     for (CBCharacteristic *c in [service characteristics])
     {
-        [characteristicProtos addObject:[self toCharacteristicProto:peripheral characteristic:c]];
+        [characteristicProtos addObject:[self bmBluetoothCharacteristic:peripheral characteristic:c]];
     }
 
     // Included Services
     NSMutableArray *includedServicesProtos = [NSMutableArray new];
     for (CBService *s in [service includedServices])
     {
-        [includedServicesProtos addObject:[self toServiceProto:peripheral service:s]];
+        [includedServicesProtos addObject:[self bmBluetoothService:peripheral service:s]];
     }
 
     // See BmBluetoothService
@@ -1448,8 +1447,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     };
 }
 
-- (NSDictionary*)toCharacteristicProto:(CBPeripheral *)peripheral
-                        characteristic:(CBCharacteristic *)characteristic
+- (NSDictionary*)bmBluetoothCharacteristic:(CBPeripheral *)peripheral
+                            characteristic:(CBCharacteristic *)characteristic
 {
     // descriptors
     NSMutableArray *descriptorProtos = [NSMutableArray new];
