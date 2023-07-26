@@ -61,7 +61,6 @@ class BluetoothDevice {
   Future<void> connect({
     Duration timeout = const Duration(seconds: 15),
     bool autoConnect = false,
-    bool shouldClearGattCache = true,
   }) async {
     var request = BmConnectRequest(
       remoteId: remoteId.str,
@@ -77,10 +76,6 @@ class BluetoothDevice {
 
     // wait for connection
     await futureState.timeout(timeout);
-
-    if (Platform.isAndroid && shouldClearGattCache) {
-      clearGattCache();
-    }
   }
 
   /// Cancels connection to the Bluetooth Device
