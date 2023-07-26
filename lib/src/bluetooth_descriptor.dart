@@ -44,18 +44,17 @@ class BluetoothDescriptor {
         characteristicUuid = p.characteristicUuid,
         descriptorUuid = p.descriptorUuid;
 
-  // only allows a single read or write to be underway at any time.
-  // otherwise, the calls can confuse each others platform response as theirs
-  final _Mutex _readMutex = _Mutex();
-  final _Mutex _writeMutex = _Mutex();
-
   /// Retrieves the value of a specified descriptor
   Future<List<int>> read({int timeout = 15}) async {
     List<int> readValue = [];
 
+    // Only allows a single read to be underway at any time, per-characteristic, per-device.
+    // Otherwise, there would be multiple in-flight requests and we wouldn't know which response is for us.
+    _Mutex readMutex = await _MutexFactory.getMutexForKey(remoteId.str + ":" + characteristicUuid.toString() + ":readDesc");
+
     // Only allow a single read operation
     // at a time, to prevent race conditions.
-    await _readMutex.synchronized(() async {
+    await readMutex.synchronized(() async {
       var request = BmReadDescriptorRequest(
         remoteId: remoteId.toString(),
         serviceUuid: serviceUuid,
@@ -94,9 +93,12 @@ class BluetoothDescriptor {
 
   /// Writes the value of a descriptor
   Future<void> write(List<int> value, {int timeout = 15}) async {
-    // Only allow a single write operation
-    // at a time, to prevent race conditions.
-    await _writeMutex.synchronized(() async {
+
+    // Only allows a single write to be underway at any time, per-characteristic, per-device.
+    // Otherwise, there would be multiple in-flight requests and we wouldn't know which response is for us.
+    _Mutex writeMutex = await _MutexFactory.getMutexForKey(remoteId.str + ":" + characteristicUuid.toString() + ":writeDesc");
+
+    await writeMutex.synchronized(() async {
       var request = BmWriteDescriptorRequest(
         remoteId: remoteId.toString(),
         serviceUuid: serviceUuid,

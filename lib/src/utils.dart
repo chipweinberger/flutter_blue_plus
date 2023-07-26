@@ -381,14 +381,14 @@ class _Mutex {
 // Create mutexes in a parrallel-safe way,
 class _MutexFactory {
   
-  static final _Mutex global = _Mutex();
-  static final Map<String, _Mutex> all = {};
+  static final _Mutex _global = _Mutex();
+  static final Map<String, _Mutex> _all = {};
 
   static Future<_Mutex> getMutexForKey(String key) async {
     _Mutex? value;
-    await global.synchronized(() async {
-      all[key] ??= _Mutex();
-      value = all[key];
+    await _global.synchronized(() async {
+      _all[key] ??= _Mutex();
+      value = _all[key];
     });
     return value!;
   }
