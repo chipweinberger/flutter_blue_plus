@@ -1,3 +1,5 @@
+## 1.12.1
+* android: simplify build.grade to not set specific gradle version. it is uneeded
 
 ## 1.12.0
 * android: remove permissions from plugin. It is easier for user to specify everything
