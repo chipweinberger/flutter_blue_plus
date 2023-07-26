@@ -94,6 +94,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         // initialize adapter
         if (self.centralManager == nil)
         {
+            NSLog(@"[FBP-iOS] initializing CBCentralManager");
+
             NSDictionary *options = @{
                 CBCentralManagerOptionShowPowerAlertKey: @(YES)
             };

@@ -76,8 +76,9 @@ public class FlutterBluePlusPlugin implements
     ActivityAware
 {
     private static final String TAG = "[FBP-Android]";
-    private final Object initializationLock = new Object();
-    private final Object tearDownLock = new Object();
+
+    private LogLevel logLevel = LogLevel.DEBUG;
+
     private Context context;
     private MethodChannel methodChannel;
     private static final String NAMESPACE = "flutter_blue_plus";
@@ -89,22 +90,19 @@ public class FlutterBluePlusPlugin implements
     private ActivityPluginBinding activityBinding;
 
     static final private UUID CCCD_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
+
     private final Map<String, BluetoothGatt> mConnectedDevices = new HashMap<>();
     private final Map<String, Integer> mConnectionState = new HashMap<>();
     private final Map<String, Integer> mMtu = new HashMap<>();
-    private LogLevel logLevel = LogLevel.DEBUG;
-
-    private interface OperationOnPermission {
-        void op(boolean granted, String permission);
-    }
 
     private int lastEventId = 1452;
     private final Map<Integer, OperationOnPermission> operationsOnPermission = new HashMap<>();
 
-    private final ArrayList<String> macDeviceScanned = new ArrayList<>();
-    private boolean allowDuplicates = false;
-
     private final int enableBluetoothRequestCode = 1879842617;
+
+    private interface OperationOnPermission {
+        void op(boolean granted, String permission);
+    }
 
     public FlutterBluePlusPlugin() {}
 
@@ -112,17 +110,46 @@ public class FlutterBluePlusPlugin implements
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding)
     {
         Log.d(TAG, "onAttachedToEngine");
+
         pluginBinding = flutterPluginBinding;
-        setup(pluginBinding.getBinaryMessenger(),
-                        (Application) pluginBinding.getApplicationContext());
+
+        this.context = (Application) pluginBinding.getApplicationContext();
+
+        methodChannel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), NAMESPACE + "/methods");
+        methodChannel.setMethodCallHandler(this);
+
+        IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+
+        this.context.registerReceiver(mBluetoothAdapterStateReceiver, filter);
     }
 
     @Override
     public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding)
     {
         Log.d(TAG, "onDetachedFromEngine");
+
         pluginBinding = null;
-        tearDown();
+
+        // close connections
+        for (BluetoothGatt gatt : mConnectedDevices.values()) {
+            if(gatt != null) {
+                String remoteId = gatt.getDevice().getAddress();
+                Log.d(TAG, "calling disconnect() on device: " + remoteId);
+                Log.d(TAG, "calling gatt.close() on device: " + remoteId);
+                gatt.disconnect();
+                gatt.close();
+            }
+        }
+        mConnectedDevices.clear();
+
+        context.unregisterReceiver(mBluetoothAdapterStateReceiver);
+        context = null;
+
+        methodChannel.setMethodCallHandler(null);
+        methodChannel = null;
+
+        mBluetoothAdapter = null;
+        mBluetoothManager = null;
     }
 
     @Override
@@ -155,55 +182,6 @@ public class FlutterBluePlusPlugin implements
         activityBinding = null;
     }
 
-    private void setup(final BinaryMessenger messenger,
-                           final Application application)
-    {
-        synchronized (initializationLock)
-        {
-            Log.d(TAG, "setup");
-
-            this.context = application;
-
-            methodChannel = new MethodChannel(messenger, NAMESPACE + "/methods");
-            methodChannel.setMethodCallHandler(this);
-
-            mBluetoothManager = (BluetoothManager) application.getSystemService(Context.BLUETOOTH_SERVICE);
-            mBluetoothAdapter = mBluetoothManager.getAdapter();
-
-            IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-
-            context.registerReceiver(mBluetoothAdapterStateReceiver, filter);
-        }
-    }
-
-    private void tearDown()
-    {
-        synchronized (tearDownLock)
-        {
-            Log.d(TAG, "teardown");
-
-            for (BluetoothGatt gatt : mConnectedDevices.values()) {
-                if(gatt != null) {
-                    String remoteId = gatt.getDevice().getAddress();
-                    Log.d(TAG, "calling disconnect() on device: " + remoteId);
-                    Log.d(TAG, "calling gatt.close() on device: " + remoteId);
-                    gatt.disconnect();
-                    gatt.close();
-                }
-            }
-            mConnectedDevices.clear();
-
-            context.unregisterReceiver(mBluetoothAdapterStateReceiver);
-            context = null;
-
-            methodChannel.setMethodCallHandler(null);
-            methodChannel = null;
-
-            mBluetoothAdapter = null;
-            mBluetoothManager = null;
-        }
-    }
-
     ////////////////////////////////////////////////////////////
     // ███    ███  ███████  ████████  ██   ██   ██████   ██████
     // ████  ████  ██          ██     ██   ██  ██    ██  ██   ██
@@ -223,6 +201,13 @@ public class FlutterBluePlusPlugin implements
     {
         try {
             log(LogLevel.DEBUG, "[FBP-Android] onMethodCall: " + call.method);
+
+            // initialize adapter
+            if (mBluetoothAdapter == null) {
+                log(LogLevel.DEBUG, "[FBP-Android] initializing BluetoothAdapter");
+                mBluetoothManager = (BluetoothManager) this.context.getSystemService(Context.BLUETOOTH_SERVICE);
+                mBluetoothAdapter = mBluetoothManager.getAdapter();
+            }
 
             // check that we have an adapter, except for 
             // the functions that do not need it
@@ -327,7 +312,7 @@ public class FlutterBluePlusPlugin implements
                     // see: BmScanSettings
                     HashMap<String, Object> data = call.arguments();
                     List<ScanFilter> filters = fetchFilters(data);
-                    allowDuplicates =          (boolean) data.get("allow_duplicates");
+                    boolean allowDuplicates =  (boolean) data.get("allow_duplicates");
                     int scanMode =                 (int) data.get("android_scan_mode");
                     boolean usesFineLocation = (boolean) data.get("android_uses_fine_location");
 
@@ -351,8 +336,6 @@ public class FlutterBluePlusPlugin implements
                             result.error("startScan", String.format("FlutterBluePlus requires %s permission", perm), null);
                             return;
                         }
-
-                        macDeviceScanned.clear();
 
                         BluetoothLeScanner scanner = mBluetoothAdapter.getBluetoothLeScanner();
                         if(scanner == null) {
@@ -1252,16 +1235,6 @@ public class FlutterBluePlusPlugin implements
 
                     BluetoothDevice device = result.getDevice();
 
-                    if (!allowDuplicates && device.getAddress() != null) {
-
-                        // duplicate?
-                        if (macDeviceScanned.contains(device.getAddress())) {
-                            return;
-                        }
-
-                        macDeviceScanned.add(device.getAddress());
-                    }
-
                     // see BmScanResult
                     HashMap<String, Object> rr = bmScanResult(device, result);
 
@@ -1879,13 +1852,11 @@ public class FlutterBluePlusPlugin implements
     private void invokeMethodUIThread(final String method, HashMap<String, Object> data)
     {
         new Handler(Looper.getMainLooper()).post(() -> {
-            synchronized (tearDownLock) {
-                //Could already be teared down at this moment
-                if (methodChannel != null) {
-                   methodChannel.invokeMethod(method, data);
-                } else {
-                    Log.w(TAG, "invokeMethodUIThread: tried to call method on closed channel: " + method);
-                }
+            //Could already be teared down at this moment
+            if (methodChannel != null) {
+                methodChannel.invokeMethod(method, data);
+            } else {
+                Log.w(TAG, "invokeMethodUIThread: tried to call method on closed channel: " + method);
             }
         });
     }
