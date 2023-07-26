@@ -1,3 +1,8 @@
+## 1.11.5
+* iOS: fix crash discoverServices() crash after bluetooth adapter is toggled on/off (regressed sometime after 1.4.0)
+* example: dismiss DeviceScreen when bluetooth adapter is turned off
+* android/iOS: log adapterState and connectionState as strings
+
 ## 1.11.4
 * android: fix null ptr exception getting Mtu
 
