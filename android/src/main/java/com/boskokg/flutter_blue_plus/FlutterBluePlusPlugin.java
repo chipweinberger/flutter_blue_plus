@@ -484,7 +484,7 @@ public class FlutterBluePlusPlugin implements
 
                     // check connected
                     int cs = connectionStateOfThisApp(remoteId);
-                    if(cs == BluetoothProfile.STATE_DISCONNECTED) {
+                    if(cs != BluetoothProfile.STATE_CONNECTED) {
                         result.error("pair", "you must call connect() first", null);
                         return;
                     }
