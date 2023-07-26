@@ -136,7 +136,7 @@ class FlutterBluePlus {
     List<Guid> withServices = const [],
     List<String> macAddresses = const [],
     Duration? timeout,
-    bool includeConnectedDevices = true,
+    bool includeConnectedSystemDevices = true,
     bool allowDuplicates = false,
     bool androidUsesFineLocation = false,
   }) async* {
@@ -155,7 +155,7 @@ class FlutterBluePlus {
     _scanResultsList.add(<ScanResult>[]);
 
     // include connected devices in the scan results?
-    if (includeConnectedDevices) {
+    if (includeConnectedSystemDevices) {
       _scanResultsList.add(await _getConnectedScanResults(withServices, macAddresses, _lastAdvertisments));
     }
 
@@ -220,7 +220,7 @@ class FlutterBluePlus {
     List<Guid> withServices = const [],
     List<String> macAddresses = const [],
     Duration? timeout,
-    bool includeConnectedDevices = true,
+    bool includeConnectedSystemDevices = true,
     bool allowDuplicates = false,
     bool androidUsesFineLocation = false,
   }) async {
@@ -229,7 +229,7 @@ class FlutterBluePlus {
             withServices: withServices,
             macAddresses: macAddresses,
             timeout: timeout,
-            includeConnectedDevices: includeConnectedDevices,
+            includeConnectedSystemDevices: includeConnectedSystemDevices,
             allowDuplicates: allowDuplicates,
             androidUsesFineLocation: androidUsesFineLocation)
         .drain();
