@@ -1,0 +1,50 @@
+name: Bug Report
+description: File a bug report
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: input
+    id: fbp-version
+    attributes:
+      label: FlutterBluePlus Version
+      description: run `flutter pub deps` in your project
+      placeholder: ex. 1.11.3
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: What OS?
+      description: please add this to your title
+      multiple: true
+      options:
+        - Android
+        - iOS
+        - macOS
+        - All
+    validations:
+      required: true
+  - type: input
+    id: os-version
+    attributes:
+      label: OS Version
+      description: What version of iOS/Android/MacOS are you on?
+      placeholder: ex. iOS 12.3.1
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: And, what did you expect to happen?
+      placeholder: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Copy and paste all log output.
+      render: shell
+    validations:
+      required: true
