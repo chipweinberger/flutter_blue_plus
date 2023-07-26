@@ -136,65 +136,73 @@ class FlutterBluePlus {
     bool allowDuplicates = false,
     bool androidUsesFineLocation = false,
   }) async* {
-    var settings = BmScanSettings(
-        serviceUuids: withServices,
-        macAddresses: macAddresses,
-        allowDuplicates: allowDuplicates,
-        androidScanMode: scanMode.value,
-        androidUsesFineLocation: androidUsesFineLocation);
+    try {
+      var settings = BmScanSettings(
+          serviceUuids: withServices,
+          macAddresses: macAddresses,
+          allowDuplicates: allowDuplicates,
+          androidScanMode: scanMode.value,
+          androidUsesFineLocation: androidUsesFineLocation);
 
-    if (_isScanning.value == true) {
-      throw FlutterBluePlusException('scan', -1, 'Another scan is already in progress.');
-    }
-
-    // Clear scan results list
-    _scanResultsList.add(<ScanResult>[]);
-
-    Stream<BmScanResponse> responseStream = FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "ScanResponse")
-        .map((m) => m.arguments)
-        .map((buffer) => BmScanResponse.fromMap(buffer))
-        .takeWhile((element) => _isScanning.value)
-        .doOnDone(stopScan);
-
-    // Start listening now, before invokeMethod, to ensure we don't miss any results
-    _scanResponseBuffer = _BufferStream.listen(responseStream);
-
-    // Start timer *after* stream is being listened to, to make sure the
-    // timeout does not fire before _scanResponseBuffer is set
-    if (timeout != null) {
-      _scanTimeout = Timer(timeout, () {
-        _scanResponseBuffer?.close();
-        _isScanning.add(false);
-        _invokeMethod('stopScan');
-      });
-    }
-
-    await _invokeMethod('startScan', settings.toMap());
-
-    // push to isScanning stream after invokeMethod('startScan') is called
-    _isScanning.add(true);
-
-    await for (BmScanResponse response in _scanResponseBuffer!.stream) {
-      // failure?
-      if (response.failed != null) {
-        throw FlutterBluePlusException("scan", response.failed!.errorCode, response.failed!.errorString);
+      if (_isScanning.value == true) {
+        throw FlutterBluePlusException('scan', -1, 'Another scan is already in progress.');
       }
 
-      // no result?
-      if (response.result == null) {
-        continue;
+      // push to isScanning stream
+      // we must do this early on to prevent duplicate scans
+      _isScanning.add(true);
+
+      // Clear scan results list
+      _scanResultsList.add(<ScanResult>[]);
+
+      Stream<BmScanResponse> responseStream = FlutterBluePlus._methodStream.stream
+          .where((m) => m.method == "ScanResponse")
+          .map((m) => m.arguments)
+          .map((buffer) => BmScanResponse.fromMap(buffer))
+          .takeWhile((element) => _isScanning.value)
+          .doOnDone(stopScan);
+
+      // Start listening now, before invokeMethod, to ensure we don't miss any results
+      _scanResponseBuffer = _BufferStream.listen(responseStream);
+
+      // Start timer *after* stream is being listened to, to make sure the
+      // timeout does not fire before _scanResponseBuffer is set
+      if (timeout != null) {
+        _scanTimeout = Timer(timeout, () {
+          _scanResponseBuffer?.close();
+          _isScanning.add(false);
+          _invokeMethod('stopScan');
+        });
       }
 
-      ScanResult item = ScanResult.fromProto(response.result!);
+      await _invokeMethod('startScan', settings.toMap());
 
-      // make new list while considering duplicates
-      List<ScanResult> list = _addOrUpdate(_scanResultsList.value, item);
+      await for (BmScanResponse response in _scanResponseBuffer!.stream) {
+        // failure?
+        if (response.failed != null) {
+          throw FlutterBluePlusException("scan", response.failed!.errorCode, response.failed!.errorString);
+        }
 
-      // update list
-      _scanResultsList.add(list);
+        // no result?
+        if (response.result == null) {
+          continue;
+        }
 
-      yield item;
+        ScanResult item = ScanResult.fromProto(response.result!);
+
+        // make new list while considering duplicates
+        List<ScanResult> list = _addOrUpdate(_scanResultsList.value, item);
+
+        // update list
+        _scanResultsList.add(list);
+
+        yield item;
+      }
+    } catch (e) {
+      // cleanup
+      _scanResponseBuffer?.close();
+      _isScanning.add(false);
+      rethrow;
     }
   }
 
