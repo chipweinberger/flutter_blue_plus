@@ -338,8 +338,8 @@ These devices may be found in System Settings, but they cannot be connected to b
 
 - you might need to reboot your device
 - you might need put your device in "discovery mode"
-- your phone may connect automatically
-- another app may have connected to your device
+- your phone may have already connected automatically
+- another app may have already connected to your device
 
 Try looking through already connected devices:
 
