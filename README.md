@@ -214,6 +214,7 @@ https://developer.android.com/about/versions/12/features/bluetooth-permissions -
 <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" android:maxSdkVersion="28" />
 ```
 
+And set androidUsesFineLocation when scanning:
 ```dart
 // Start scanning
 flutterBlue.startScan(timeout: Duration(seconds: 4), androidUsesFineLocation: true);
