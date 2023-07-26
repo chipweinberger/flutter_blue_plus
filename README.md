@@ -21,7 +21,9 @@
 
 FlutterBluePlus is a Bluetooth Low Energy plugin for [Flutter](https://flutter.dev).
 
-**Bluetooth Classic is not supported.** (i.e. speakers, headphones, mice, keyboards, gamepads, and more will not work).
+**Bluetooth Classic is not supported.** 
+
+(i.e. speakers, headphones, mice, keyboards, gamepads, and more are not supported).
 
 ## Cross-Platform Bluetooth Low Energy
 
