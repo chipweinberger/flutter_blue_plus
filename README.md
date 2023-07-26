@@ -8,6 +8,15 @@
 
 **Note: this plugin is continuous work from FlutterBlue since maintenance stopped.**
 
+## Contents
+
+- [Introduction](#introduction)
+- [Usage](#usage)
+- [Getting Started](#getting-started)
+- [Reference](#reference)
+- [Debugging](#debugging)
+- [Troubleshooting](#troubleshooting)
+
 ## Introduction
 
 FlutterBluePlus is a bluetooth plugin for [Flutter](https://flutter.dev), a new app SDK to help developers build modern multi-platform apps.
@@ -142,23 +151,6 @@ await device.requestMtu(512);
 
 Note that iOS will not allow requests of MTU size, and will always try to negotiate the highest possible MTU (iOS supports up to MTU size 185)
 
-### Get Already Connected System Devices
-
-Some devices stop advertising if they are already connected to by another app & will not show up in scans.
-
-If your device behaves like that, you can connect by searching devices already connected to your phone.
-
-```dart
-// search already connected devices
-List<BluetoothDevice> system = await FlutterBluePlus.connectedSystemDevices;
-for (var d in system) {
-    print('${r.device.localName} already connected to! ${r.device.remoteId}');
-    if (d.localName == "myBleDevice") {
-         await r.connect(); // must connect our own app
-    }
-}
-```
-
 ## Getting Started
 
 ### Change the minSdkVersion for Android
@@ -286,9 +278,9 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 | lastValueStream   | :white_check_mark: | :white_check_mark: |        | Stream of lastValue + onValueReceived          |
 
 
-## Troubleshooting
+## Debugging
 
-The easiest way to debug issues in FlutterBluePlus is to first make local copy.
+The easiest way to debug issues in FlutterBluePlus is to make your own local copy.
 
 ```
 cd /user/downloads
@@ -302,11 +294,74 @@ then in `pubspec.yaml` add the repo by path:
     path: /user/downloads/flutter_blue_plus
 ```
 
-Now you can edit FlutterBluePlus code and debug issues yourself. 
+Now you can edit the FlutterBluePlus code yourself.
 
-### When I scan using a service UUID filter, it doesn't find any devices.
+## Troubleshooting
 
-Make sure the device is advertising which service UUID's it supports. This is found in the advertisement
-packet as **UUID 16 bit complete list** or **UUID 128 bit complete list**.
+Many common problems are easily solved.
+
+### Scanning does not find my device
+
+**1. your device uses bluetooth classic, not BLE.**
+
+Headphones, speakers, keyboards, mice, gamepads, & printers all use Bluetooth Classic. FlutterBluePlus only supports Bluetooth Low Energy.
+
+**2. your device stopped advertising.**
+
+- you might need to reboot your device
+- you might need put your device in "discovery mode"
+- your phone may connect automatically
+- another app may have connected to your device
+
+Try looking through already connected devices:
+
+```dart
+// search already connected devices, including devices
+// connected to by other apps
+List<BluetoothDevice> system = await FlutterBluePlus.connectedSystemDevices;
+for (var d in system) {
+    print('${r.device.localName} already connected to! ${r.device.remoteId}');
+    if (d.localName == "myBleDevice") {
+         await r.connect(); // must connect our app
+    }
+}
+```
+
+**2. your scan filters are wrong.**
+
+- try removing all scan filters
+- for `withServices` to work, your device must actively advertise the serviceUUIDs it supports
+
+
+### onValueReceived is never called
+
+**1. you are not subscribed**
+
+Your device will only send values after you call `await characteristic.setNotifyValue(true)`
+
+**2. you are calling write**
+
+`onValueReceived` is only called for reads & notifies.
+
+You can do a single read with `await characteristic.read(...)`
+
+**3. your device has nothing to send**
+
+If you are using `setNotifyValue`, your device chooses when to send data.
+
+Try interacting with your device to get it to send new data.
+
+**4. your device has bugs**
+
+Try rebooting your ble device. 
+
+Some ble devices have buggy software and stop sending data.
+
+
+
+
+
+
+
 
 
