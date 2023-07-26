@@ -1,3 +1,6 @@
+## 1.11.6
+* dart: writeWithoutResponse should have its own mutex to prevent dropped packets
+
 ## 1.11.5
 * iOS: fix crash discoverServices() crash after bluetooth adapter is toggled on/off (regressed sometime after 1.4.0)
 * example: dismiss DeviceScreen when bluetooth adapter is turned off
