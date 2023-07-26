@@ -528,5 +528,5 @@ String prettyException(String prefix, dynamic e) {
   } else if (e is PlatformException) {
     return "$prefix ${e.message}";
   }
-  return e.toString();
+  return prefix + e.toString();
 }
