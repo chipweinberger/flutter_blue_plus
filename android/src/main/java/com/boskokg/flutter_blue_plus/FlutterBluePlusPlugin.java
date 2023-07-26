@@ -455,10 +455,9 @@ public class FlutterBluePlusPlugin implements
                         String remoteId =  (String)  args.get("remote_id");
                         boolean autoConnect = ((int) args.get("auto_connect")) != 0;
 
-                        // already connected by our app?
-                        int cs = connectionStateOfThisApp(remoteId);
-                        if(cs == BluetoothProfile.STATE_DISCONNECTED) {
-                            result.success(null); // no work to do
+                        // already connected?
+                        if (connectionStateOfThisApp(remoteId) == BluetoothProfile.STATE_CONNECTED) {
+                            result.success(null);// no work to do
                             return;
                         }
 
@@ -521,13 +520,15 @@ public class FlutterBluePlusPlugin implements
                 case "disconnect":
                 {
                     String remoteId = (String) call.arguments;
-                
-                    // call disconnect if needed
-                    int cs = connectionStateOfThisApp(remoteId);
-                    if(cs != BluetoothProfile.STATE_DISCONNECTED) {
-                        BluetoothGatt gattServer = mDevices.get(remoteId);
-                        gattServer.disconnect();
+
+                    // already disconnected?
+                    BluetoothGatt gattServer = mDevices.get(remoteId);
+                    if (gattServer == null) {
+                        result.success(null);// no work to do
+                        return;
                     }
+                
+                    gattServer.disconnect();
 
                     result.success(null);
                     break;

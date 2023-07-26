@@ -161,6 +161,9 @@ class BluetoothDevice {
 
   /// The current MTU size in bytes
   Stream<int> get mtu async* {
+    // wait for connection
+    await connectionState.where((v) => v == BluetoothConnectionState.connected).first;
+
     BmMtuChangedResponse response = await FlutterBluePlus._methods
         .invokeMethod('getMtu', remoteId.str)
         .then((buffer) => BmMtuChangedResponse.fromMap(buffer));

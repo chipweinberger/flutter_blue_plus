@@ -41,6 +41,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 @property(nonatomic, retain) FlutterMethodChannel *methodChannel;
 @property(nonatomic, retain) CBCentralManager *centralManager;
 @property(nonatomic) NSMutableDictionary *knownPeripherals;
+@property(nonatomic) NSMutableDictionary *connectedPeripherals;
 @property(nonatomic) NSMutableArray *servicesThatNeedDiscovered;
 @property(nonatomic) NSMutableArray *characteristicsThatNeedDiscovered;
 @property(nonatomic) NSMutableDictionary *dataWaitingToWriteWithoutResponse;
@@ -55,6 +56,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     FlutterBluePlusPlugin *instance = [[FlutterBluePlusPlugin alloc] init];
     instance.methodChannel = methodChannel;
     instance.knownPeripherals = [NSMutableDictionary new];
+    instance.connectedPeripherals = [NSMutableDictionary new];
     instance.servicesThatNeedDiscovered = [NSMutableArray new];
     instance.characteristicsThatNeedDiscovered = [NSMutableArray new];
     instance.dataWaitingToWriteWithoutResponse = [NSMutableDictionary new];
@@ -219,16 +221,24 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSString  *remoteId = args[@"remote_id"];
             bool autoConnect    = args[@"auto_connect"] != 0;
 
-            CBPeripheral *peripheral = nil; 
-            if (peripheral == nil)
-            {
-                // check the devices we know about
-                peripheral = [_knownPeripherals objectForKey:remoteId];
+            // already connected?
+            if ([self isConnectedToThisApp:remoteId]) {
+                result(@(true)); // no work to do
+                return;
             }
-            if (peripheral == nil)
+
+            CBPeripheral *peripheral = nil; 
+
+            // check the devices iOS knowns about
+            NSUUID *uuid = [[NSUUID alloc] initWithUUIDString:remoteId];
+            NSArray<CBPeripheral *> *peripherals = [_centralManager retrievePeripheralsWithIdentifiers:@[uuid]];
+            for (CBPeripheral *p in peripherals)
             {
-                // check the devices iOS knowns about
-                peripheral = [self findPeripheral:remoteId];
+                if ([[p.identifier UUIDString] isEqualToString:remoteId])
+                {
+                    peripheral = p;
+                    break;
+                }
             }
             if (peripheral == nil)
             {
@@ -238,7 +248,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             // we must keep a strong reference to any CBPeripheral before we connect to it.
             // Why? CoreBluetooth does not keep strong references and will warn about API MISUSE and weak ptrs.
-            [_knownPeripherals setObject:peripheral forKey:remoteId];
+            [self.knownPeripherals setObject:peripheral forKey:remoteId];
 
             // set ourself as delegate
             peripheral.delegate = self;
@@ -260,10 +270,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // remoteId is passed raw, not in a NSDictionary
             NSString *remoteId = [call arguments];
 
-            CBPeripheral *peripheral = [self findPeripheral:remoteId];
+            // already disconnected?
+            CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
             if (peripheral == nil) {
-                NSString* s = @"peripheral not found.";
-                result([FlutterError errorWithCode:@"disconnect" message:s details:remoteId]);
+                result(@(true)); // no work to do
                 return;
             }
 
@@ -275,14 +285,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         {
             // remoteId is passed raw, not in a NSDictionary
             NSString *remoteId = [call arguments];
- 
-            // get the connection state
-            // note: if the peripheral is not found it is considered disconnected
-            CBPeripheralState connectionState = CBPeripheralStateDisconnected;
-            CBPeripheral *peripheral = [self findPeripheral:remoteId];
-            if (peripheral) {
-                connectionState = peripheral.state;
-            }
+
+            // get state
+            CBPeripheralState connectionState = [self isConnectedToThisApp:remoteId] ?
+                CBPeripheralStateConnected :
+                CBPeripheralStateDisconnected;
 
             // See BmConnectionStateResponse
             NSDictionary* response = @{
@@ -297,16 +304,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // remoteId is passed raw, not in a NSDictionary
             NSString *remoteId = [call arguments];
 
-            CBPeripheral *peripheral = [self findPeripheral:remoteId];
+            CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
             if (peripheral == nil) {
-                NSString* s = @"peripheral not found. try reconnecting.";
-                result([FlutterError errorWithCode:@"discoverServices" message:s details:remoteId]);
-                return;
-            }
-
-            // check connected
-            if (peripheral.state != CBPeripheralStateConnected) {
-                NSString* s = @"device is not connected";
+                NSString* s = @"device is not connected. have you called connect()?";
                 result([FlutterError errorWithCode:@"discoverServices" message:s details:remoteId]);
                 return;
             }
@@ -330,16 +330,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSString  *secondaryServiceUuid = args[@"secondary_service_uuid"];
 
             // Find peripheral
-            CBPeripheral *peripheral = [self findPeripheral:remoteId];
+            CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
             if (peripheral == nil) {
-                NSString* s = @"peripheral not found. try reconnecting.";
-                result([FlutterError errorWithCode:@"readCharacteristic" message:s details:remoteId]);
-                return;
-            }
-
-            // check connected
-            if (peripheral.state != CBPeripheralStateConnected) {
-                NSString* s = @"device is not connected";
+                NSString* s = @"device is not connected. have you called connect()?";
                 result([FlutterError errorWithCode:@"readCharacteristic" message:s details:remoteId]);
                 return;
             }
@@ -372,16 +365,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSString  *characteristicUuid   = args[@"characteristic_uuid"];
 
             // Find peripheral
-            CBPeripheral *peripheral = [self findPeripheral:remoteId];
+            CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
             if (peripheral == nil) {
-                NSString* s = @"peripheral not found. try reconnecting.";
-                result([FlutterError errorWithCode:@"readDescriptor" message:s details:remoteId]);
-                return;
-            }
-
-            // check connected
-            if (peripheral.state != CBPeripheralStateConnected) {
-                NSString* s = @"device is not connected";
+                NSString* s = @"device is not connected. have you called connect()?";
                 result([FlutterError errorWithCode:@"readDescriptor" message:s details:remoteId]);
                 return;
             }
@@ -421,16 +407,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSString  *value                = args[@"value"];
             
             // Find peripheral
-            CBPeripheral *peripheral = [self findPeripheral:remoteId];
+            CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
             if (peripheral == nil) {
-                NSString* s = @"peripheral not found. try reconnecting.";
-                result([FlutterError errorWithCode:@"writeCharacteristic" message:s details:remoteId]);
-                return;
-            }
-
-            // check connected
-            if (peripheral.state != CBPeripheralStateConnected) {
-                NSString* s = @"device is not connected";
+                NSString* s = @"device is not connected. have you called connect()?";
                 result([FlutterError errorWithCode:@"writeCharacteristic" message:s details:remoteId]);
                 return;
             }
@@ -489,16 +468,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSString  *value                = args[@"value"];
 
             // Find peripheral
-            CBPeripheral *peripheral = [self findPeripheral:remoteId];
+            CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
             if (peripheral == nil) {
-                NSString* s = @"peripheral not found. try reconnecting.";
-                result([FlutterError errorWithCode:@"writeDescriptor" message:s details:remoteId]);
-                return;
-            }
-
-            // check connected
-            if (peripheral.state != CBPeripheralStateConnected) {
-                NSString* s = @"device is not connected";
+                NSString* s = @"device is not connected. have you called connect()?";
                 result([FlutterError errorWithCode:@"writeDescriptor" message:s details:remoteId]);
                 return;
             }
@@ -548,16 +520,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSNumber   *enable                = args[@"enable"];
 
             // Find peripheral
-            CBPeripheral *peripheral = [self findPeripheral:remoteId];
+            CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
             if (peripheral == nil) {
-                NSString* s = @"peripheral not found. try reconnecting.";
-                result([FlutterError errorWithCode:@"setNotification" message:s details:remoteId]);
-                return;
-            }
-
-            // check connected
-            if (peripheral.state != CBPeripheralStateConnected) {
-                NSString* s = @"device is not connected";
+                NSString* s = @"device is not connected. have you called connect()?";
                 result([FlutterError errorWithCode:@"setNotification" message:s details:remoteId]);
                 return;
             }
@@ -585,9 +550,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSString *remoteId = [call arguments];
 
             // get peripheral
-            CBPeripheral *peripheral = [self findPeripheral:remoteId];
+            CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
             if (peripheral == nil) {
-                NSString* s = @"peripheral not found. try reconnecting.";
+                NSString* s = @"device is not connected. have you called connect()?";
                 result([FlutterError errorWithCode:@"mtu" message:s details:remoteId]);
                 return;
             }
@@ -616,16 +581,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSString *remoteId = [call arguments];
 
             // get peripheral
-            CBPeripheral *peripheral = [self findPeripheral:remoteId];
+            CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
             if (peripheral == nil) {
-                NSString* s = @"peripheral not found. try reconnecting.";
-                result([FlutterError errorWithCode:@"readRssi" message:s details:remoteId]);
-                return;
-            }
-
-            // check connected
-            if (peripheral.state != CBPeripheralStateConnected) {
-                NSString* s = @"device is not connected";
+                NSString* s = @"device is not connected. have you called connect()?";
                 result([FlutterError errorWithCode:@"readRssi" message:s details:remoteId]);
                 return;
             }
@@ -678,23 +636,14 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 // ██    ██     ██     ██  ██            ██ 
 //  ██████      ██     ██  ███████  ███████ 
 
-- (CBPeripheral *)findPeripheral:(NSString *)remoteId
+- (bool)isConnectedToThisApp:(NSString *)remoteId
 {
-    NSUUID *uuid = [[NSUUID alloc] initWithUUIDString:remoteId];
+    return [self.connectedPeripherals objectForKey:remoteId] != nil;
+}
 
-    NSArray<CBPeripheral *> *peripherals = [_centralManager retrievePeripheralsWithIdentifiers:@[uuid]];
-
-    CBPeripheral *peripheral;
-    for (CBPeripheral *p in peripherals)
-    {
-        if ([[p.identifier UUIDString] isEqualToString:remoteId])
-        {
-            peripheral = p;
-            break;
-        }
-    }
-
-    return peripheral;
+- (CBPeripheral *)getConnectedPeripheral:(NSString *)remoteId
+{
+    return [self.connectedPeripherals objectForKey:remoteId];
 }
 
 - (CBCharacteristic *)locateCharacteristic:(NSString *)characteristicId
@@ -849,12 +798,17 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         NSLog(@"[FBP-iOS] didConnectPeripheral");
     }
 
+    NSString* remoteId = [[peripheral identifier] UUIDString];
+
+    // remember the connected peripherals of *this app*
+    [self.connectedPeripherals setObject:peripheral forKey:remoteId];
+
     // Register self as delegate for peripheral
     peripheral.delegate = self;
 
     // See BmConnectionStateResponse
     NSDictionary *result = @{
-        @"remote_id":        [[peripheral identifier] UUIDString],
+        @"remote_id":        remoteId,
         @"connection_state": @([self bmConnectionStateEnum:peripheral.state]),
     };
 
@@ -873,12 +827,17 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         NSLog(@"[FBP-iOS] didDisconnectPeripheral");
     }
 
+    NSString* remoteId = [[peripheral identifier] UUIDString];
+
+    // remember the connected peripherals of *this app*
+    [self.connectedPeripherals removeObjectForKey:remoteId];
+
     // Unregister self as delegate for peripheral, not working #42
     peripheral.delegate = nil;
 
     // See BmConnectionStateResponse
     NSDictionary *result = @{
-        @"remote_id":        [[peripheral identifier] UUIDString],
+        @"remote_id":        remoteId,
         @"connection_state": @([self bmConnectionStateEnum:peripheral.state]),
     };
 
