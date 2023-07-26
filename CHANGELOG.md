@@ -1,3 +1,8 @@
+## 1.11.0
+* Dart: rename connectedDevices -> connectedSystemDevices
+* Dart: remove servicesList (introduced in 1.10.6)
+* Dart: remove includeConnectedSystemDevices scan setting, it was too complicated 
+
 ## 1.10.10
 * android: fix platform exception when scanning with includeConnectedSystemDevices (Regression in 1.10.6)
 * dart: fix characteristic write crashed for negative values (Regression in 1.7.0)
