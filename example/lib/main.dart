@@ -42,7 +42,7 @@ class BluetoothAdapterStateObserver extends NavigatorObserver {
     super.didPush(route, previousRoute);
     if (route.settings.name == '/deviceScreen') {
       // Start listening to Bluetooth state changes when a new route is pushed
-      _btStateSubscription = FlutterBluePlus.adapterState.listen((state) {
+      _btStateSubscription ??= FlutterBluePlus.adapterState.listen((state) {
         if (state != BluetoothAdapterState.on) {
           // Pop the current route if Bluetooth is off
           navigator?.pop();
@@ -198,7 +198,7 @@ class FindDevicesScreen extends StatelessWidget {
                                         onPressed: () {
                                           Navigator.of(context).push(MaterialPageRoute(
                                               builder: (context) {
-                                                d.connect().catchError((e) {
+                                                d.connect(timeout: Duration(seconds: 4)).catchError((e) {
                                                   final snackBar =
                                                       SnackBar(content: Text(prettyException("Connect Error:", e)));
                                                   snackBarKeyB.currentState?.showSnackBar(snackBar);
@@ -225,7 +225,7 @@ class FindDevicesScreen extends StatelessWidget {
                             result: r,
                             onTap: () => Navigator.of(context).push(MaterialPageRoute(
                                 builder: (context) {
-                                  r.device.connect().catchError((e) {
+                                  r.device.connect(timeout: Duration(seconds: 4)).catchError((e) {
                                     final snackBar = SnackBar(content: Text(prettyException("Connect Error:", e)));
                                     snackBarKeyB.currentState?.showSnackBar(snackBar);
                                   });
@@ -309,7 +309,7 @@ class DeviceScreen extends StatelessWidget {
                     },
                     onWritePressed: () async {
                       try {
-                        await c.write(_getRandomBytes(), withoutResponse: true);
+                        await c.write(_getRandomBytes(), withoutResponse: c.properties.writeWithoutResponse);
                         if (c.properties.read) {
                           await c.read();
                         }
@@ -389,7 +389,7 @@ class DeviceScreen extends StatelessWidget {
                   case BluetoothConnectionState.disconnected:
                     onPressed = () async {
                       try {
-                        await device.connect();
+                        await device.connect(timeout: Duration(seconds: 4));
                       } catch (e) {
                         final snackBar = SnackBar(content: Text(prettyException("Connect Error:", e)));
                         snackBarKeyC.currentState?.showSnackBar(snackBar);
@@ -418,55 +418,62 @@ class DeviceScreen extends StatelessWidget {
               StreamBuilder<BluetoothConnectionState>(
                 stream: device.connectionState,
                 initialData: BluetoothConnectionState.connecting,
-                builder: (c, snapshot) => ListTile(
-                  leading: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      snapshot.data == BluetoothConnectionState.connected
-                          ? const Icon(Icons.bluetooth_connected)
-                          : const Icon(Icons.bluetooth_disabled),
-                      snapshot.data == BluetoothConnectionState.connected
-                          ? StreamBuilder<int>(
-                              stream: rssiStream(),
-                              builder: (context, snapshot) {
-                                return Text(snapshot.hasData ? '${snapshot.data}dBm' : '',
-                                    style: Theme.of(context).textTheme.bodySmall);
-                              })
-                          : Text('', style: Theme.of(context).textTheme.bodySmall),
-                    ],
-                  ),
-                  title: Text('Device is ${snapshot.data.toString().split('.')[1]}.'),
-                  subtitle: Text('${device.remoteId}'),
-                  trailing: StreamBuilder<bool>(
-                    stream: device.isDiscoveringServices,
-                    initialData: false,
-                    builder: (c, snapshot) => IndexedStack(
-                      index: (snapshot.data ?? false) ? 1 : 0,
-                      children: <Widget>[
-                        TextButton(
-                          child: const Text("Discover Services"),
-                          onPressed: () async {
-                            try {
-                              await device.discoverServices();
-                            } catch (e) {
-                              final snackBar = SnackBar(content: Text(prettyException("Discover Services Error:", e)));
-                              snackBarKeyC.currentState?.showSnackBar(snackBar);
-                            }
-                          },
-                        ),
-                        const IconButton(
-                          icon: SizedBox(
-                            child: CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation(Colors.grey),
-                            ),
-                            width: 18.0,
-                            height: 18.0,
-                          ),
-                          onPressed: null,
-                        )
-                      ],
+                builder: (c, snapshot) => Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text('${device.remoteId}'),
                     ),
-                  ),
+                    ListTile(
+                      leading: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          snapshot.data == BluetoothConnectionState.connected
+                              ? const Icon(Icons.bluetooth_connected)
+                              : const Icon(Icons.bluetooth_disabled),
+                          snapshot.data == BluetoothConnectionState.connected
+                              ? StreamBuilder<int>(
+                                  stream: rssiStream(),
+                                  builder: (context, snapshot) {
+                                    return Text(snapshot.hasData ? '${snapshot.data}dBm' : '',
+                                        style: Theme.of(context).textTheme.bodySmall);
+                                  })
+                              : Text('', style: Theme.of(context).textTheme.bodySmall),
+                        ],
+                      ),
+                      title: Text('Device is ${snapshot.data.toString().split('.')[1]}.'),
+                      trailing: StreamBuilder<bool>(
+                        stream: device.isDiscoveringServices,
+                        initialData: false,
+                        builder: (c, snapshot) => IndexedStack(
+                          index: (snapshot.data ?? false) ? 1 : 0,
+                          children: <Widget>[
+                            TextButton(
+                              child: const Text("Get Services"),
+                              onPressed: () async {
+                                try {
+                                  await device.discoverServices();
+                                } catch (e) {
+                                  final snackBar = SnackBar(content: Text(prettyException("Discover Services Error:", e)));
+                                  snackBarKeyC.currentState?.showSnackBar(snackBar);
+                                }
+                              },
+                            ),
+                            const IconButton(
+                              icon: SizedBox(
+                                child: CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation(Colors.grey),
+                                ),
+                                width: 18.0,
+                                height: 18.0,
+                              ),
+                              onPressed: null,
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               StreamBuilder<int>(
@@ -503,7 +510,7 @@ class DeviceScreen extends StatelessWidget {
     );
   }
 
-  Stream<int> rssiStream({Duration frequency = const Duration(seconds: 1)}) async* {
+  Stream<int> rssiStream({Duration frequency = const Duration(seconds: 5)}) async* {
     var isConnected = true;
     final subscription = device.connectionState.listen((v) {
       isConnected = v == BluetoothConnectionState.connected;

@@ -172,45 +172,42 @@ class _CharacteristicTileState extends State<CharacteristicTile> {
         final List<int>? value = snapshot.data;
         return ExpansionTile(
           title: ListTile(
-            title: Row(
-              children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    const Text('Characteristic'),
-                    Text('0x${widget.characteristic.characteristicUuid.toString().toUpperCase()}',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyLarge
-                            ?.copyWith(color: Theme.of(context).textTheme.bodySmall?.color))
-                  ],
+            title: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                const Text('Characteristic'),
+                Text('0x${widget.characteristic.characteristicUuid.toString().toUpperCase()}',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyLarge
+                        ?.copyWith(color: Theme.of(context).textTheme.bodySmall?.color),
                 ),
-                Spacer(),
-                if (widget.characteristic.properties.read)
-                  IconButton(
-                      icon: Icon(
-                        Icons.file_download,
-                        color: Theme.of(context).iconTheme.color?.withOpacity(0.5),
-                      ),
-                      onPressed: () {
-                        widget.onReadPressed!();
-                        setState(() {});
-                      }),
-                if (widget.characteristic.properties.write)
-                  IconButton(
-                    icon: Icon(Icons.file_upload, color: Theme.of(context).iconTheme.color?.withOpacity(0.5)),
-                    onPressed: () {
-                      widget.onWritePressed!();
-                      setState(() {});
-                    }),
-                if (widget.characteristic.properties.notify || widget.characteristic.properties.indicate)
-                  TextButton(
-                      child: Text(widget.characteristic.isNotifying ? "Unsubscribe" : "Subscribe"),
-                      onPressed: () {
-                        widget.onNotificationPressed!();
-                        setState(() {});
-                      })
+                Row(
+                  children: [
+                    if (widget.characteristic.properties.read)
+                      TextButton(
+                          child: Text("Read"),
+                          onPressed: () {
+                            widget.onReadPressed!();
+                            setState(() {});
+                          }),
+                    if (widget.characteristic.properties.write)
+                      TextButton(
+                          child: Text(widget.characteristic.properties.writeWithoutResponse ? "WriteNoResp" : "Write"),
+                          onPressed: () {
+                            widget.onWritePressed!();
+                            setState(() {});
+                          }),
+                    if (widget.characteristic.properties.notify || widget.characteristic.properties.indicate)
+                      TextButton(
+                          child: Text(widget.characteristic.isNotifying ? "Unsubscribe" : "Subscribe"),
+                          onPressed: () {
+                            widget.onNotificationPressed!();
+                            setState(() {});
+                          })
+                  ],
+                )
               ],
             ),
             subtitle: Text(value.toString()),
