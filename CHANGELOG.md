@@ -1,3 +1,9 @@
+
+## 1.12.0
+* android: remove permissions from plugin. It is easier for user to specify everything
+* dart: fix scan could be initiated twice causing bad state
+* dart: fix: read & write mutexs must always come from the MutexFactory to properly prevent race conditions
+
 ## 1.11.8
 * android/iOS: fix: setLogLevel, getAdapterState, getAdapterName returning error when adapter not available
 
