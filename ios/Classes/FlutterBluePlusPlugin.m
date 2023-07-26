@@ -100,10 +100,15 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             self.centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil options:options];
         }
-        // check that we have an adapter
-        if (self.centralManager == nil && [@"getAdapterState" isEqualToString:call.method] == false) {
+        // check that we have an adapter, except for the 
+        // functions that don't need it
+        if (self.centralManager == nil && 
+            [@"setLogLevel" isEqualToString:call.method] == false &&
+            [@"getAdapterState" isEqualToString:call.method] == false &&
+            [@"isAvailable" isEqualToString:call.method] == false &&
+            [@"getAdapterName" isEqualToString:call.method] == false) {
             NSString* s = @"the device does not have bluetooth";
-            result([FlutterError errorWithCode:@"bluetooth_unavailable" message:s details:NULL]);
+            result([FlutterError errorWithCode:@"bluetoothUnavailable" message:s details:NULL]);
             return;
         }
         

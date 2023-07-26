@@ -224,7 +224,13 @@ public class FlutterBluePlusPlugin implements
         try {
             log(LogLevel.DEBUG, "[FBP-Android] onMethodCall: " + call.method);
 
-            if(mBluetoothAdapter == null && !"isAvailable".equals(call.method)) {
+            // check that we have an adapter, except for 
+            // the functions that do not need it
+            if(mBluetoothAdapter == null && 
+                "setLogLevel".equals(call.method) == false &&
+                "getAdapterState".equals(call.method) == false &&
+                "isAvailable".equals(call.method) == false &&
+                "getAdapterName".equals(call.method) == false) {
                 result.error("bluetooth_unavailable", "the device does not have bluetooth", null);
                 return;
             }
