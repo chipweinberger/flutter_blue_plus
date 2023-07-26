@@ -761,7 +761,15 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 - (void)centralManagerDidUpdateState:(nonnull CBCentralManager *)central
 {
     if (_logLevel >= debug) {
-        NSLog(@"[FBP-iOS] centralManagerDidUpdateState %li", self->_centralManager.state);
+        NSLog(@"[FBP-iOS] centralManagerDidUpdateState %@", [self cbManagerStateString:self->_centralManager.state]);
+    }
+
+    // was the adapter turned off?
+    if (self->_centralManager.state != CBManagerStatePoweredOn) {
+        for (NSString *key in self.connectedPeripherals) {
+            NSLog(@"[FBP-iOS] disconnected from device %@", key);
+        }
+        [self.connectedPeripherals removeAllObjects];
     }
 
     int adapterState = [self bmAdapterStateEnum:self->_centralManager.state];
@@ -1447,6 +1455,21 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     }
 
     return [data copy];
+}
+
+- (NSString *)cbManagerStateString:(CBManagerState)adapterState
+{
+    switch (adapterState)
+    {
+        case CBManagerStateUnknown:      return @"CBManagerStateUnknown";
+        case CBManagerStateUnsupported:  return @"CBManagerStateUnsupported";
+        case CBManagerStateUnauthorized: return @"CBManagerStateUnauthorized";
+        case CBManagerStateResetting:    return @"CBManagerStateResetting";
+        case CBManagerStatePoweredOn:    return @"CBManagerStatePoweredOn";
+        case CBManagerStatePoweredOff:   return @"CBManagerStatePoweredOff";
+        default:                         return @"unhandled";
+    }
+    return @"";
 }
 
 - (void)log:(LogLevel)level
