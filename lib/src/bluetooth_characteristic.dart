@@ -65,6 +65,11 @@ class BluetoothCharacteristic {
   final _Mutex _readMutex = _Mutex();
   final _Mutex _writeMutex = _Mutex();
 
+  // After each writeWithoutResponse, we wait for the platform to tell us it is ready for more.
+  // Without this mutex, calling writeWithoutResponse on multiple characteristics at the same
+  // time would lead to dropped packets. Todo: would be better to have 1 of these mutex *per device*
+  static final _Mutex _writeWithoutResponseMutex = _Mutex();
+
   /// read a characteristic
   Future<List<int>> read({int timeout = 15}) async {
     List<int> responseValue = [];
@@ -113,9 +118,10 @@ class BluetoothCharacteristic {
   ///  - [withoutResponse]: the write is not guaranteed and always returns immediately with success.
   ///  - [withResponse]: the write returns error on failure
   Future<void> write(List<int> value, {bool withoutResponse = false, int timeout = 15}) async {
+    _Mutex mutex = withoutResponse ? _writeWithoutResponseMutex : _writeMutex;
     // Only allow a single write operation
     // at a time, to prevent race conditions.
-    await _writeMutex.synchronized(() async {
+    await mutex.synchronized(() async {
       final writeType = withoutResponse ? BmWriteType.withoutResponse : BmWriteType.withResponse;
 
       var request = BmWriteCharacteristicRequest(
