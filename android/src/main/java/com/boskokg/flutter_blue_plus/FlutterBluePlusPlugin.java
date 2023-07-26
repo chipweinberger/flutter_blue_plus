@@ -91,7 +91,7 @@ public class FlutterBluePlusPlugin implements
     static final private UUID CCCD_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
     private final Map<String, BluetoothGatt> mConnectedDevices = new HashMap<>();
     private final Map<String, Integer> mConnectionState = new HashMap<>();
-    private final Map<String, Integer> mMtuCache = new HashMap<>();
+    private final Map<String, Integer> mMtu = new HashMap<>();
     private LogLevel logLevel = LogLevel.DEBUG;
 
     private interface OperationOnPermission {
@@ -658,7 +658,7 @@ public class FlutterBluePlusPlugin implements
                     }
 
                     // check mtu
-                    int mtu = mMtuCache.get(remoteId);
+                    int mtu = mMtu.get(remoteId);
                     if ((mtu-3) < hexToBytes(value).length) {
                         String s = "data longer than mtu allows. dataLength: " +
                             hexToBytes(value).length + "> max: " + (mtu-3);
@@ -717,7 +717,7 @@ public class FlutterBluePlusPlugin implements
                     BluetoothGattDescriptor descriptor = locateDescriptor(characteristic, descriptorUuid);
 
                     // check mtu
-                    int mtu = mMtuCache.get(remoteId);
+                    int mtu = mMtu.get(remoteId);
                     if ((mtu-3) < hexToBytes(value).length) {
                         String s = "data longer than mtu allows. dataLength: " +
                             hexToBytes(value).length + "> max: " + (mtu-3);
@@ -830,7 +830,7 @@ public class FlutterBluePlusPlugin implements
                 {
                     String remoteId = (String) call.arguments;
 
-                    Integer mtu = mMtuCache.get(remoteId);
+                    Integer mtu = mMtu.get(remoteId);
                     if(mtu == null) {
                         result.error("getMtu", "no instance of BluetoothGatt, have you connected first?", null);
                         break;
@@ -1495,7 +1495,7 @@ public class FlutterBluePlusPlugin implements
             String remoteId = gatt.getDevice().getAddress();
 
             // remember mtu
-            mMtuCache.put(remoteId, mtu);
+            mMtu.put(remoteId, mtu);
 
             // see: BmMtuChangedResponse
             HashMap<String, Object> response = new HashMap<>();
