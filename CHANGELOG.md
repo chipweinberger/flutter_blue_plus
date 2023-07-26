@@ -1,3 +1,6 @@
+## 1.11.3
+* dart: writeWithoutResponse should wait for completion, to prevent dropped packets
+
 ## 1.11.2
 * Android: remove shouldClearGattCache connect option. It should be discouraged, and therefore called manually (added in ~1.6.0)
 
