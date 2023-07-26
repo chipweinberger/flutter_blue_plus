@@ -109,8 +109,8 @@ class FlutterBluePlus {
   /// Retrieve a list of connected devices
   /// - The list includes devices connected by other apps
   /// - You must call device.connect() before these devices can be used by FlutterBluePlus
-  static Future<List<BluetoothDevice>> get connectedDevices {
-    return _invokeMethod('getConnectedDevices')
+  static Future<List<BluetoothDevice>> get connectedSystemDevices {
+    return _invokeMethod('getConnectedSystemDevices')
         .then((buffer) => BmConnectedDevicesResponse.fromMap(buffer))
         .then((p) => p.devices)
         .then((p) => p.map((d) => BluetoothDevice.fromProto(d)).toList());
@@ -283,6 +283,9 @@ class FlutterBluePlus {
 
   @Deprecated('No longer needed, remove this from your code')
   static void get instance => null;
+
+  @Deprecated('Use connectedSystemDevices instead')
+  static Future<List<BluetoothDevice>> get connectedDevices => connectedSystemDevices;
 }
 
 /// Log levels for FlutterBlue
@@ -399,7 +402,7 @@ List<ScanResult> _addOrUpdate(List<ScanResult> results, ScanResult item) {
 
 Future<List<ScanResult>> _getConnectedScanResults(List<Guid> withServices, List<String> macAddresses,
     Map<DeviceIdentifier, AdvertisementData> lastAdvertisments) async {
-  List<BluetoothDevice> connectedDevices = await FlutterBluePlus.connectedDevices;
+  List<BluetoothDevice> connectedDevices = await FlutterBluePlus.connectedSystemDevices;
 
   List<ScanResult> scanResults = [];
 

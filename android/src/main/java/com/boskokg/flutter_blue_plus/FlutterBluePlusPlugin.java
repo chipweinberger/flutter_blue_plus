@@ -385,7 +385,7 @@ public class FlutterBluePlusPlugin implements
                     break;
                 }
 
-                case "getConnectedDevices":
+                case "getConnectedSystemDevices":
                 {
                     ArrayList<String> permissions = new ArrayList<>();
 
@@ -397,11 +397,12 @@ public class FlutterBluePlusPlugin implements
                     ensurePermissions(permissions, (granted, perm) -> {
 
                         if (!granted) {
-                            result.error("getConnectedDevices",
+                            result.error("getConnectedSystemDevices",
                                 String.format("FlutterBluePlus requires %s permission", perm), null);
                             return;
                         }
 
+                        // this includes devices connected by other apps
                         List<BluetoothDevice> devices = mBluetoothManager.getConnectedDevices(BluetoothProfile.GATT);
 
                         List<HashMap<String, Object>> devList = new ArrayList<HashMap<String, Object>>();
