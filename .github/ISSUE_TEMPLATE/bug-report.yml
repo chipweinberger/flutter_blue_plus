@@ -45,6 +45,7 @@ body:
     attributes:
       label: Logs
       description: Copy and paste all log output.
+      placeholder: include some of the logs leading up to your error as well. 
       render: shell
     validations:
       required: true
