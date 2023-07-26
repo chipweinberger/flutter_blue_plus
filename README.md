@@ -80,7 +80,7 @@ var subscription = FlutterBluePlus.scanResults.listen((results) {
 FlutterBluePlus.startScan(timeout: Duration(seconds: 4));
 
 // Stop scanning
-FlutterBluePlus.stopScan();
+await FlutterBluePlus.stopScan();
 ```
 
 ### Connect to a device
