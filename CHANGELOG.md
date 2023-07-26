@@ -1,3 +1,6 @@
+## 1.11.1
+* Dart: add back servicesList, but with simpler api
+
 ## 1.11.0
 * Dart: rename connectedDevices -> connectedSystemDevices
 * Dart: remove servicesList (introduced in 1.10.6)
