@@ -534,7 +534,7 @@ public class FlutterBluePlusPlugin implements
                     break;
                 }
 
-                case "getConnectionStateOfThisApp":
+                case "getConnectionState":
                 {
                     String remoteId = (String) call.arguments;
 

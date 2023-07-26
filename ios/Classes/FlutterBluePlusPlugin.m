@@ -281,12 +281,13 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             
             result(@(true));
         }
-        else if ([@"getConnectionStateOfThisApp" isEqualToString:call.method])
+        else if ([@"getConnectionState" isEqualToString:call.method])
         {
             // remoteId is passed raw, not in a NSDictionary
             NSString *remoteId = [call arguments];
 
-            // get state
+            // get the connection state of *our app*
+            // We don't care if other apps are connected
             CBPeripheralState connectionState = [self isConnectedToThisApp:remoteId] ?
                 CBPeripheralStateConnected :
                 CBPeripheralStateDisconnected;

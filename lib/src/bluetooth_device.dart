@@ -145,7 +145,7 @@ class BluetoothDevice {
   /// The current connection state of the device to this application
   Stream<BluetoothConnectionState> get connectionState async* {
     BluetoothConnectionState initialState = await FlutterBluePlus._methods
-        .invokeMethod('getConnectionStateOfThisApp', remoteId.str)
+        .invokeMethod('getConnectionState', remoteId.str)
         .then((buffer) => BmConnectionStateResponse.fromMap(buffer))
         .then((p) => bmToBluetoothConnectionState(p.connectionState));
 
