@@ -1153,6 +1153,8 @@ public class FlutterBluePlusPlugin implements
 
             final int adapterState = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
 
+            log(LogLevel.DEBUG, "[FBP-Android] adapterStateChanged: " + adapterStateString(adapterState));
+
             // convert to Protobuf enum
             int convertedState;
             switch (adapterState) {
@@ -1312,7 +1314,8 @@ public class FlutterBluePlusPlugin implements
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState)
         {
-            log(LogLevel.DEBUG, "[FBP-Android] onConnectionStateChange: status: " + status + " newState: " + newState);
+            log(LogLevel.DEBUG, "[FBP-Android] onConnectionStateChange: status: " + status +
+                " newState: " + connectionStateString(newState));
 
             String remoteId = gatt.getDevice().getAddress();
 
@@ -1905,6 +1908,26 @@ public class FlutterBluePlusPlugin implements
             sb.append(String.format("%02x", b));
         }
         return sb.toString();
+    }
+
+    private static String connectionStateString(int cs) {
+        switch (cs) {
+            case BluetoothProfile.STATE_DISCONNECTED:  return "disconnected";
+            case BluetoothProfile.STATE_CONNECTING:    return "connecting";
+            case BluetoothProfile.STATE_CONNECTED:     return "connected";
+            case BluetoothProfile.STATE_DISCONNECTING: return "disconnecting";
+            default:                                   return "UNKNOWN_CONNECTION_STATE (" + cs + ")";
+        }
+    }
+
+    private static String adapterStateString(int as) {
+        switch (as) {
+            case BluetoothAdapter.STATE_OFF:          return "off";
+            case BluetoothAdapter.STATE_ON:           return "on";
+            case BluetoothAdapter.STATE_TURNING_OFF:  return "turningOff";
+            case BluetoothAdapter.STATE_TURNING_ON:   return "turningOn";
+            default:                                  return "UNKNOWN_ADAPTER_STATE (" + as + ")";
+        }
     }
 
     private static String gattErrorString(int value) {
