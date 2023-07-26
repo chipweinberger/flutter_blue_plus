@@ -142,7 +142,7 @@ class FindDevicesScreen extends StatelessWidget {
                       .asyncMap((_) => FlutterBluePlus.connectedDevices),
                   initialData: const [],
                   builder: (c, snapshot) => Column(
-                    children: snapshot.data!
+                    children: (snapshot.data ?? [])
                         .map((d) => ListTile(
                               title: Text(d.localName),
                               subtitle: Text(d.remoteId.toString()),
@@ -168,7 +168,7 @@ class FindDevicesScreen extends StatelessWidget {
                   stream: FlutterBluePlus.scanResults,
                   initialData: const [],
                   builder: (c, snapshot) => Column(
-                    children: snapshot.data!
+                    children: (snapshot.data ?? [])
                         .map(
                           (r) => ScanResultTile(
                             result: r,
@@ -192,7 +192,7 @@ class FindDevicesScreen extends StatelessWidget {
           stream: FlutterBluePlus.isScanning,
           initialData: false,
           builder: (c, snapshot) {
-            if (snapshot.data!) {
+            if (snapshot.data ?? false) {
               return FloatingActionButton(
                 child: const Icon(Icons.stop),
                 onPressed: () async {
@@ -266,7 +266,7 @@ class DeviceScreen extends StatelessWidget {
                     },
                     onNotificationPressed: () async {
                       try {
-                        await c.setNotifyValue(!c.isNotifying);
+                        await c.setNotifyValue(c.isNotifying == false);
                         if (c.properties.read) {
                           await c.read();
                         }
@@ -387,7 +387,7 @@ class DeviceScreen extends StatelessWidget {
                     stream: device.isDiscoveringServices,
                     initialData: false,
                     builder: (c, snapshot) => IndexedStack(
-                      index: snapshot.data! ? 1 : 0,
+                      index: (snapshot.data ?? false) ? 1 : 0,
                       children: <Widget>[
                         TextButton(
                           child: const Text("Discover Services"),
@@ -438,7 +438,7 @@ class DeviceScreen extends StatelessWidget {
                 initialData: const [],
                 builder: (c, snapshot) {
                   return Column(
-                    children: _buildServiceTiles(context, snapshot.data!),
+                    children: _buildServiceTiles(context, snapshot.data ?? []),
                   );
                 },
               ),
