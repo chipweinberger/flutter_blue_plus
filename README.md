@@ -39,11 +39,9 @@ This makes FlutterBluePlus very stable.
 
 Flutter Blue Plus takes error handling very seriously. 
 
-Every error returned by the native platform is checked and thrown as an exception where appropriate.
+Every error returned by the native platform is checked and thrown as an exception where appropriate. See [Reference](#reference) for a list of throwable functions.
 
 **Streams:** At the time of writing, streams returned by Flutter Blue Plus never emit any errors and never close. There's no need to handle `onError` or `onDone` for  `stream.listen(...)`.
-
-**See the Reference section below for a complete list of throwing function.**
 
 ---
 
@@ -172,30 +170,39 @@ Android {
 
 We need to add the permission to use Bluetooth and access location:
 
-#### **Android**
+#### **Android (No Location)**
 
-In the **android/app/src/main/AndroidManifest.xml** let’s add:
+In the **android/app/src/main/AndroidManifest.xml** add:
 
 ```xml
 <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:usesPermissionFlags="neverForLocation" />
 <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" android:maxSdkVersion="30"/>
 ```
 
-As of Android 12, ACCESS_FINE_LOCATION is no longer required. However, if you need to determine the physical
-location of the device via Bluetooth, you must add this permission to your **android/app/src/main/AndroidManifest.xml**:
+#### **Android (With Fine Location)**
+
+If you want to use Bluetooth to determine location.
+
+In the **android/app/src/main/AndroidManifest.xml** add:
 
 ```xml
-<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-```
+<!-- remove the plugin permission which sets neverForLocation -->
+<uses-permission
+    android:name="android.permission.BLUETOOTH_SCAN"
+    tools:node="remove"
+    tools:selector="com.boskokg.flutter_blue_plus">
+</uses-permission>
 
-and set the androidUsesFineLocation flag to true when scanning:
+<!-- add back without neverForLocation -->
+<uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+<uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+```
 
 ```dart
 // Start scanning
 flutterBlue.startScan(timeout: Duration(seconds: 4), androidUsesFineLocation: true);
-
-// Stop scanning
-flutterBlue.stopScan();
 ```
 
 #### **IOS**
