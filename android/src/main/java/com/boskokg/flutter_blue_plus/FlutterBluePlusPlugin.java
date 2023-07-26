@@ -471,6 +471,7 @@ public class FlutterBluePlusPlugin implements
                             gatt = device.connectGatt(context, autoConnect, mGattCallback);
                         }
 
+                        mMtu.put(remoteId, 23); // default minimum mtu
                         mConnectedDevices.put(remoteId, gatt);
 
                         result.success(null);
