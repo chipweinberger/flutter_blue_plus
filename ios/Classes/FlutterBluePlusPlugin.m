@@ -44,7 +44,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 @property(nonatomic) NSMutableDictionary *connectedPeripherals;
 @property(nonatomic) NSMutableArray *servicesThatNeedDiscovered;
 @property(nonatomic) NSMutableArray *characteristicsThatNeedDiscovered;
-@property(nonatomic) NSMutableDictionary *dataWaitingToWriteWithoutResponse;
+@property(nonatomic) NSMutableDictionary *didWriteWithoutResponse;
 @property(nonatomic) LogLevel logLevel;
 @end
 
@@ -59,7 +59,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     instance.connectedPeripherals = [NSMutableDictionary new];
     instance.servicesThatNeedDiscovered = [NSMutableArray new];
     instance.characteristicsThatNeedDiscovered = [NSMutableArray new];
-    instance.dataWaitingToWriteWithoutResponse = [NSMutableDictionary new];
+    instance.didWriteWithoutResponse = [NSMutableDictionary new];
     instance.logLevel = debug;
 
     [registrar addMethodCallDelegate:instance channel:methodChannel];
@@ -433,10 +433,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             // device not ready?
             if (type == CBCharacteristicWriteWithoutResponse && !peripheral.canSendWriteWithoutResponse) {
-                // canSendWriteWithoutResponse is the current readiness of the peripheral to accept
-                // more write requests. If the peripheral isn't ready, we queue the request for later.
-                [_dataWaitingToWriteWithoutResponse setObject:args forKey:remoteId];
-                result(@(true));
+                // canSendWriteWithoutResponse is the current readiness of the peripheral to accept more write requests.
+                NSString* s = @"canSendWriteWithoutResponse is false. you must slow down";
+                result([FlutterError errorWithCode:@"writeCharacteristic" message:s details:NULL]);
                 return;
             } 
 
@@ -454,6 +453,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                   
             // Write to characteristic
             [peripheral writeValue:[self convertHexToData:value] forCharacteristic:characteristic type:type];
+
+            // remember the most recent write withoutResponse
+            if (type == CBCharacteristicWriteWithoutResponse) {
+                [self.didWriteWithoutResponse setObject:args forKey:remoteId];
+            }
 
             result(@(YES));
         }
@@ -1159,9 +1163,15 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     if (_logLevel >= debug) {
         NSLog(@"[FBP-iOS] peripheralIsReadyToSendWriteWithoutResponse");
     }
+
+    // peripheralIsReadyToSendWriteWithoutResponse is used to signal
+    // when a 'writeWithoutResponse' request has completed. 
+    // The dart code will wait for this signal, so that we don't
+    // queue writes too fast, which iOS would then drop the packets.
     
-    NSDictionary *request = [_dataWaitingToWriteWithoutResponse objectForKey:[[peripheral identifier] UUIDString]];
+    NSDictionary *request = [self.didWriteWithoutResponse objectForKey:[[peripheral identifier] UUIDString]];
     if (request == nil) {
+        NSLog(@"[FBP-iOS] didWriteWithoutResponse is null");
         return;
     }
     
@@ -1169,7 +1179,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     NSString  *characteristicUuid   = request[@"characteristic_uuid"];
     NSString  *serviceUuid          = request[@"service_uuid"];
     NSString  *secondaryServiceUuid = request[@"secondary_service_uuid"];
-    NSString  *value                = request[@"value"];
 
     // Find characteristic
     NSError *error = nil;
@@ -1183,12 +1192,20 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         return;
     }
 
-    // Write to characteristic
-    [peripheral writeValue:[self convertHexToData:value]
-            forCharacteristic:characteristic
-                        type:CBCharacteristicWriteWithoutResponse];
+    ServicePair *pair = [self getServicePair:peripheral characteristic:characteristic];
 
-    [_dataWaitingToWriteWithoutResponse removeObjectForKey:[[peripheral identifier] UUIDString]];
+    // See BmOnCharacteristicWritten
+    NSDictionary* result = @{
+        @"remote_id":               [peripheral.identifier UUIDString],
+        @"service_uuid":            [pair.primary.UUID fullUUIDString],
+        @"secondary_service_uuid":  pair.secondary ? [pair.secondary.UUID fullUUIDString] : [NSNull null],
+        @"characteristic_uuid":     [characteristic.UUID fullUUIDString],
+        @"success":                 @(error == nil),
+        @"error_string":            error ? [error localizedDescription] : [NSNull null],
+        @"error_code":              error ? @(error.code) : [NSNull null],
+    };
+
+    [_methodChannel invokeMethod:@"OnCharacteristicWritten" arguments:result];
 }
 
 //////////////////////////////////////////////////////////////////////

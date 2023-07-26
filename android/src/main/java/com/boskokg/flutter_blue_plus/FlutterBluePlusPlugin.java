@@ -1407,6 +1407,11 @@ public class FlutterBluePlusPlugin implements
         {
             log(LogLevel.DEBUG, "[FBP-Android] onCharacteristicWrite: uuid: " + characteristic.getUuid().toString() + " status: " + status);
 
+            // For "writeWithResponse", onCharacteristicWrite is called after the remote sends back a write response. 
+            // For "writeWithoutResponse", onCharacteristicWrite is called as long as there is still space left 
+            // in android's internal buffer. When the buffer is full, it delays calling onCharacteristicWrite 
+            // until there is at least ~50% free space again. 
+
             ServicePair pair = getServicePair(gatt, characteristic);
 
             // see: BmOnCharacteristicWritten

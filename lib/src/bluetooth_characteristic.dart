@@ -127,33 +127,30 @@ class BluetoothCharacteristic {
         value: value,
       );
 
-      if (writeType == BmWriteType.withResponse) {
-        var responseStream = FlutterBluePlus._methodStream.stream
-            .where((m) => m.method == "OnCharacteristicWritten")
-            .map((m) => m.arguments)
-            .map((buffer) => BmOnCharacteristicWritten.fromMap(buffer))
-            .where((p) => p.remoteId == request.remoteId)
-            .where((p) => p.serviceUuid == request.serviceUuid)
-            .where((p) => p.characteristicUuid == request.characteristicUuid);
+      var responseStream = FlutterBluePlus._methodStream.stream
+          .where((m) => m.method == "OnCharacteristicWritten")
+          .map((m) => m.arguments)
+          .map((buffer) => BmOnCharacteristicWritten.fromMap(buffer))
+          .where((p) => p.remoteId == request.remoteId)
+          .where((p) => p.serviceUuid == request.serviceUuid)
+          .where((p) => p.characteristicUuid == request.characteristicUuid);
 
-        // Start listening now, before invokeMethod, to ensure we don't miss the response
-        Future<BmOnCharacteristicWritten> futureResponse = responseStream.first;
+      // Start listening now, before invokeMethod, to ensure we don't miss the response
+      Future<BmOnCharacteristicWritten> futureResponse = responseStream.first;
 
-        await FlutterBluePlus._invokeMethod('writeCharacteristic', request.toMap());
+      await FlutterBluePlus._invokeMethod('writeCharacteristic', request.toMap());
 
-        // wait for response, so that we can check for success
-        BmOnCharacteristicWritten response = await futureResponse.timeout(Duration(seconds: timeout));
+      // wait for response so that we can:
+      //  1. check for success (writeWithResponse)
+      //  2. wait until the packet has been sent, to prevent iOS & Android dropping packets (writeWithoutResponse)
+      BmOnCharacteristicWritten response = await futureResponse.timeout(Duration(seconds: timeout));
 
-        // failed?
-        if (!response.success) {
-          throw FlutterBluePlusException("writeCharacteristic", response.errorCode, response.errorString);
-        }
-
-        return Future.value();
-      } else {
-        // invoke without waiting for reply
-        return FlutterBluePlus._invokeMethod('writeCharacteristic', request.toMap());
+      // failed?
+      if (!response.success) {
+        throw FlutterBluePlusException("writeCharacteristic", response.errorCode, response.errorString);
       }
+
+      return Future.value();
     });
   }
 
