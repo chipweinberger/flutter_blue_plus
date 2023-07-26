@@ -1,3 +1,7 @@
+## 1.12.2
+* example: android: add back INTERNET permission for debug and profile modes. needed for debugging
+* android: create BluetoothManager during onMethodCall, as opposed to app startup
+
 ## 1.12.1
 * android: simplify build.grade to not set specific gradle version. it is uneeded
 
