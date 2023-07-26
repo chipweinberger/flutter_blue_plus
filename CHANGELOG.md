@@ -1,3 +1,8 @@
+## 1.10.10
+* android: fix platform exception when scanning with includeConnectedDevices (Regression in 1.10.6)
+* dart: fix characteristic write crashed for negative values (Regression in 1.7.0)
+* dart: fix connectionState should only be concerned with *our apps* connectionState
+
 ## 1.10.9
 * android: turnOn() and turnOff() could timeout if already on or already off
 
