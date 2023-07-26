@@ -15,7 +15,7 @@
 - [Getting Started](#getting-started)
 - [Reference](#reference)
 - [Debugging](#debugging)
-- [Troubleshooting](#troubleshooting)
+- [Common Problems](#common-problems)
 
 ## Introduction
 
@@ -67,10 +67,12 @@ await FlutterBluePlus.adapterState.where((s) => s == BluetoothAdapterState.on).f
 
 ### Scan for devices
 
+If your device is not found, see [Common Problems](#common-problems).
+
 ```dart
 // Setup Listener for scan results
+// device not found? see "Common Problems" in the README
 var subscription = FlutterBluePlus.scanResults.listen((results) {
-    // do something with scan results
     for (ScanResult r in results) {
         print('${r.device.localName} found! rssi: ${r.rssi}');
     }
@@ -132,8 +134,11 @@ await d.write([0x12, 0x34])
 
 ### Set notifications and listen to changes
 
+If onValueReceived is never called, see [Common Problems](#common-problems) in the README.
+
 ```dart
 // Setup Listener for characteristic reads
+// If this is never called, see "Common Problems" in the README
 characteristic.onValueReceived.listen((value) {
     // do something with new value
 });
@@ -217,21 +222,21 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 
 ### FlutterBlue API
 
-|                        |      Android       |        iOS         | Throws | Description                                           |
-| :--------------------- | :----------------: | :----------------: | :----: | :-----------------------------------------------------|
-| adapterState           | :white_check_mark: | :white_check_mark: |        | Stream of state changes for the bluetooth adapter     |
-| isAvailable            | :white_check_mark: | :white_check_mark: |        | Checks whether the device supports Bluetooth          |
-| isOn                   | :white_check_mark: | :white_check_mark: |        | Checks if Bluetooth adapter is turned on              |
-| turnOn                 | :white_check_mark: |                    | :fire: | Turns on the bluetooth adapter                        |
-| turnOff                | :white_check_mark: |                    | :fire: | Turns off the bluetooth adapter                       |
-| scan                   | :white_check_mark: | :white_check_mark: | :fire: | Starts a scan for Ble devices and returns a stream    |
-| startScan              | :white_check_mark: | :white_check_mark: | :fire: | Starts a scan for Ble devices with no return value    |
-| stopScan               | :white_check_mark: | :white_check_mark: | :fire: | Stop an existing scan for Ble devices                 |
-| scanResults            | :white_check_mark: | :white_check_mark: |        | Stream of live scan results                           |
-| isScanning             | :white_check_mark: | :white_check_mark: |        | Stream of current scanning state                      |
-| isScanningNow          | :white_check_mark: | :white_check_mark: |        | Is a scan currently running?                          |
-| connectedSystemDevices | :white_check_mark: | :white_check_mark: |        | List of already connected devices, even by other apps |
-| setLogLevel            | :white_check_mark: | :white_check_mark: |        | Configure plugin log level                            |
+|                        |      Android       |        iOS         | Throws | Description                                                |
+| :--------------------- | :----------------: | :----------------: | :----: | :----------------------------------------------------------|
+| adapterState           | :white_check_mark: | :white_check_mark: |        | Stream of state changes for the bluetooth adapter          |
+| isAvailable            | :white_check_mark: | :white_check_mark: |        | Checks whether the device supports Bluetooth               |
+| isOn                   | :white_check_mark: | :white_check_mark: |        | Checks if Bluetooth adapter is turned on                   |
+| turnOn                 | :white_check_mark: |                    | :fire: | Turns on the bluetooth adapter                             |
+| turnOff                | :white_check_mark: |                    | :fire: | Turns off the bluetooth adapter                            |
+| scan                   | :white_check_mark: | :white_check_mark: | :fire: | Starts a scan for Ble devices and returns a stream         |
+| startScan              | :white_check_mark: | :white_check_mark: | :fire: | Starts a scan for Ble devices with no return value         |
+| stopScan               | :white_check_mark: | :white_check_mark: | :fire: | Stop an existing scan for Ble devices                      |
+| scanResults            | :white_check_mark: | :white_check_mark: |        | Stream of live scan results                                |
+| isScanning             | :white_check_mark: | :white_check_mark: |        | Stream of current scanning state                           |
+| isScanningNow          | :white_check_mark: | :white_check_mark: |        | Is a scan currently running?                               |
+| connectedSystemDevices | :white_check_mark: | :white_check_mark: |        | List of already connected devices, including by other apps |
+| setLogLevel            | :white_check_mark: | :white_check_mark: |        | Configure plugin log level                                 |
 
 ### BluetoothDevice API
 
@@ -297,15 +302,19 @@ then in `pubspec.yaml` add the repo by path:
 
 Now you can edit the FlutterBluePlus code yourself.
 
-## Troubleshooting
+## Common Problems
 
 Many common problems are easily solved.
+
+---
 
 ### Scanning does not find my device
 
 **1. your device uses bluetooth classic, not BLE.**
 
-Headphones, speakers, keyboards, mice, gamepads, & printers all use Bluetooth Classic. FlutterBluePlus only supports Bluetooth Low Energy.
+Headphones, speakers, keyboards, mice, gamepads, & printers all use Bluetooth Classic. 
+
+These devices may be found in System Settings, but they cannot be connected to by FlutterBluePlus. FlutterBluePlus only supports Bluetooth Low Energy.
 
 **2. your device stopped advertising.**
 
@@ -328,11 +337,19 @@ for (var d in system) {
 }
 ```
 
-**2. your scan filters are wrong.**
+**3. your scan filters are wrong.**
 
 - try removing all scan filters
 - for `withServices` to work, your device must actively advertise the serviceUUIDs it supports
 
+
+**4. try a ble scanner app**
+
+Search the App Store for a BLE scanner apps. 
+
+You should check if they can discover your device.
+
+---
 
 ### onValueReceived is never called
 
