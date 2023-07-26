@@ -1,3 +1,6 @@
+## 1.12.3
+* Android: fix mConnectionState & mMtu not cleared when onDetachedFromEngine (regression in 1.10.10)
+
 ## 1.12.2
 * example: android: add back INTERNET permission for debug and profile modes. needed for debugging
 * android: create BluetoothManager during onMethodCall, as opposed to app startup
