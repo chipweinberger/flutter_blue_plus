@@ -277,14 +277,7 @@ class BluetoothDevice {
 
   /// Send a pairing request to the device (Android Only)
   Future<void> pair() async {
-    return await FlutterBluePlus._invokeMethod('pair', remoteId.str);
-  }
-
-  /// Refresh ble services & characteristics (Android Only)
-  Future<void> clearGattCache() async {
-    if (Platform.isAndroid) {
-      return await FlutterBluePlus._invokeMethod('clearGattCache', remoteId.str);
-    }
+    return await FlutterBluePlus._invokeMethod('createBond', remoteId.str);
   }
 
   /// Remove bond (Android Only)
@@ -293,6 +286,13 @@ class BluetoothDevice {
       return await FlutterBluePlus._methods.invokeMethod('removeBond', remoteId.str).then<bool>((value) => value);
     } else {
       return false;
+    }
+  }
+
+  /// Refresh ble services & characteristics (Android Only)
+  Future<void> clearGattCache() async {
+    if (Platform.isAndroid) {
+      return await FlutterBluePlus._invokeMethod('clearGattCache', remoteId.str);
     }
   }
 

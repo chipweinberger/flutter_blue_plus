@@ -228,9 +228,9 @@ public class FlutterBluePlusPlugin implements
             // the functions that do not need it
             if(mBluetoothAdapter == null && 
                 "setLogLevel".equals(call.method) == false &&
-                "getAdapterState".equals(call.method) == false &&
                 "isAvailable".equals(call.method) == false &&
-                "getAdapterName".equals(call.method) == false) {
+                "getAdapterName".equals(call.method) == false &&
+                "getAdapterState".equals(call.method) == false) {
                 result.error("bluetooth_unavailable", "the device does not have bluetooth", null);
                 return;
             }
@@ -245,6 +245,19 @@ public class FlutterBluePlusPlugin implements
                     logLevel = LogLevel.values()[idx];
 
                     result.success(null);
+                    break;
+                }
+
+                case "isAvailable":
+                {
+                    result.success(mBluetoothAdapter != null);
+                    break;
+                }
+
+               case "getAdapterName":
+                {
+                    String adapterName = mBluetoothAdapter.getName();
+                    result.success(adapterName != null ? adapterName : "");
                     break;
                 }
 
@@ -273,22 +286,9 @@ public class FlutterBluePlusPlugin implements
                     break;
                 }
 
-                case "isAvailable":
-                {
-                    result.success(mBluetoothAdapter != null);
-                    break;
-                }
-
                 case "isOn":
                 {
                     result.success(mBluetoothAdapter.isEnabled());
-                    break;
-                }
-
-                case "getAdapterName":
-                {
-                    String adapterName = mBluetoothAdapter.getName();
-                    result.success(adapterName != null ? adapterName : "");
                     break;
                 }
 
@@ -424,22 +424,6 @@ public class FlutterBluePlusPlugin implements
                     break;
                 }
 
-                case "getBondedDevices":
-                {
-                    final Set<BluetoothDevice> bondedDevices = mBluetoothAdapter.getBondedDevices();
-
-                    List<HashMap<String,Object>> devList = new ArrayList<HashMap<String,Object>>();
-                    for (BluetoothDevice d : bondedDevices) {
-                        devList.add(bmBluetoothDevice(d));
-                    }
-
-                    HashMap<String, Object> response = new HashMap<String, Object>();
-                    response.put("devices", devList);
-
-                    result.success(response);
-                    break;
-                }
-
                 case "connect":
                 {
                     ArrayList<String> permissions = new ArrayList<>();
@@ -482,46 +466,6 @@ public class FlutterBluePlusPlugin implements
 
                         result.success(null);
                     });
-                    break;
-                }
-
-                case "pair":
-                {
-                    String remoteId = (String) call.arguments;
-
-                    // check connected
-                    int cs = connectionStateOfThisApp(remoteId);
-                    if(cs != BluetoothProfile.STATE_CONNECTED) {
-                        result.error("pair", "you must call connect() first", null);
-                        return;
-                    }
-
-                    // bond
-                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
-                    if(device.createBond() == false) {
-                        result.error("pair", "device.createBond() returned false", null);
-                        break;
-                    }
-
-                    result.success(null);
-                    break;
-                }
-
-                case "clearGattCache":
-                {
-                    String remoteId = (String) call.arguments;
-
-                    BluetoothGatt gatt = locateGatt(remoteId);
-
-                    final Method refreshMethod = gatt.getClass().getMethod("refresh");
-                    if (refreshMethod == null) {
-                        result.error("clearGattCache", "unsupported on this android version", null);
-                        break;
-                    }
-
-                    refreshMethod.invoke(gatt);
-
-                    result.success(null);
                     break;
                 }
 
@@ -604,32 +548,6 @@ public class FlutterBluePlusPlugin implements
                     break;
                 }
 
-                case "readDescriptor":
-                {
-                    // see: BmReadDescriptorRequest
-                    HashMap<String, Object> data = call.arguments();
-                    String remoteId =             (String) data.get("remote_id");
-                    String serviceUuid =          (String) data.get("service_uuid");
-                    String secondaryServiceUuid = (String) data.get("secondary_service_uuid");
-                    String characteristicUuid =   (String) data.get("characteristic_uuid");
-                    String descriptorUuid =       (String) data.get("descriptor_uuid");
-
-                    BluetoothGatt gatt = locateGatt(remoteId);
-
-                    BluetoothGattCharacteristic characteristic = locateCharacteristic(gatt,
-                        serviceUuid, secondaryServiceUuid, characteristicUuid);
-
-                    BluetoothGattDescriptor descriptor = locateDescriptor(characteristic, descriptorUuid);
-
-                    if(gatt.readDescriptor(descriptor) == false) {
-                        result.error("read_descriptor_error", "gatt.readDescriptor() returned false", null);
-                        break;
-                    }
-
-                    result.success(null);
-                    break;
-                }
-
                 case "writeCharacteristic":
                 {
                     // see: BmWriteCharacteristicRequest
@@ -700,6 +618,32 @@ public class FlutterBluePlusPlugin implements
                             result.error("write_characteristic_error", "gatt.writeCharacteristic() returned false", null);
                             break;
                         }
+                    }
+
+                    result.success(null);
+                    break;
+                }
+
+                case "readDescriptor":
+                {
+                    // see: BmReadDescriptorRequest
+                    HashMap<String, Object> data = call.arguments();
+                    String remoteId =             (String) data.get("remote_id");
+                    String serviceUuid =          (String) data.get("service_uuid");
+                    String secondaryServiceUuid = (String) data.get("secondary_service_uuid");
+                    String characteristicUuid =   (String) data.get("characteristic_uuid");
+                    String descriptorUuid =       (String) data.get("descriptor_uuid");
+
+                    BluetoothGatt gatt = locateGatt(remoteId);
+
+                    BluetoothGattCharacteristic characteristic = locateCharacteristic(gatt,
+                        serviceUuid, secondaryServiceUuid, characteristicUuid);
+
+                    BluetoothGattDescriptor descriptor = locateDescriptor(characteristic, descriptorUuid);
+
+                    if(gatt.readDescriptor(descriptor) == false) {
+                        result.error("read_descriptor_error", "gatt.readDescriptor() returned false", null);
+                        break;
                     }
 
                     result.success(null);
@@ -936,6 +880,44 @@ public class FlutterBluePlusPlugin implements
                     break;
                 }
 
+                case "getBondedDevices":
+                {
+                    final Set<BluetoothDevice> bondedDevices = mBluetoothAdapter.getBondedDevices();
+
+                    List<HashMap<String,Object>> devList = new ArrayList<HashMap<String,Object>>();
+                    for (BluetoothDevice d : bondedDevices) {
+                        devList.add(bmBluetoothDevice(d));
+                    }
+
+                    HashMap<String, Object> response = new HashMap<String, Object>();
+                    response.put("devices", devList);
+
+                    result.success(response);
+                    break;
+                }
+
+                case "createBond":
+                {
+                    String remoteId = (String) call.arguments;
+
+                    // check connected
+                    int cs = connectionStateOfThisApp(remoteId);
+                    if(cs != BluetoothProfile.STATE_CONNECTED) {
+                        result.error("createBond", "you must call connect() first", null);
+                        return;
+                    }
+
+                    // bond
+                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
+                    if(device.createBond() == false) {
+                        result.error("createBond", "device.createBond() returned false", null);
+                        break;
+                    }
+
+                    result.success(null);
+                    break;
+                }
+
                 case "removeBond":
                 {
                     String remoteId = (String) call.arguments;
@@ -951,6 +933,24 @@ public class FlutterBluePlusPlugin implements
                     removeBondMethod.invoke(device);
 
                     result.success(true);
+                    break;
+                }
+
+                case "clearGattCache":
+                {
+                    String remoteId = (String) call.arguments;
+
+                    BluetoothGatt gatt = locateGatt(remoteId);
+
+                    final Method refreshMethod = gatt.getClass().getMethod("refresh");
+                    if (refreshMethod == null) {
+                        result.error("clearGattCache", "unsupported on this android version", null);
+                        break;
+                    }
+
+                    refreshMethod.invoke(gatt);
+
+                    result.success(null);
                     break;
                 }
 

@@ -104,9 +104,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         // functions that don't need it
         if (self.centralManager == nil && 
             [@"setLogLevel" isEqualToString:call.method] == false &&
-            [@"getAdapterState" isEqualToString:call.method] == false &&
             [@"isAvailable" isEqualToString:call.method] == false &&
-            [@"getAdapterName" isEqualToString:call.method] == false) {
+            [@"getAdapterName" isEqualToString:call.method] == false &&
+            [@"getAdapterState" isEqualToString:call.method] == false) {
             NSString* s = @"the device does not have bluetooth";
             result([FlutterError errorWithCode:@"bluetoothUnavailable" message:s details:NULL]);
             return;
@@ -119,37 +119,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             result(@(true));
             return;
         }
-        if ([@"getAdapterState" isEqualToString:call.method])
-        {
-            // get state
-            int adapterState = 0; // BmAdapterStateEnum.unknown
-            if (self->_centralManager) {
-                adapterState = [self bmAdapterStateEnum:self->_centralManager.state];    
-            }
-
-            // See BmBluetoothAdapterState
-            NSDictionary* response = @{
-                @"adapter_state" : @(adapterState),
-            };
-
-            result(response);
-        }
         else if ([@"isAvailable" isEqualToString:call.method])
         {
             if (self.centralManager &&
                 self.centralManager.state != CBManagerStateUnsupported &&
                 self.centralManager.state != CBManagerStateUnknown)
-            {
-                result(@(YES));
-            }
-            else
-            {
-                result(@(NO));
-            }
-        }
-        else if ([@"isOn" isEqualToString:call.method])
-        {
-            if (self.centralManager.state == CBManagerStatePoweredOn)
             {
                 result(@(YES));
             }
@@ -166,6 +140,44 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // TODO: support this via hostname?
             result(@"Mac Bluetooth Adapter");
     #endif
+        }
+        if ([@"getAdapterState" isEqualToString:call.method])
+        {
+            // get state
+            int adapterState = 0; // BmAdapterStateEnum.unknown
+            if (self->_centralManager) {
+                adapterState = [self bmAdapterStateEnum:self->_centralManager.state];    
+            }
+
+            // See BmBluetoothAdapterState
+            NSDictionary* response = @{
+                @"adapter_state" : @(adapterState),
+            };
+
+            result(response);
+        }
+        else if ([@"isOn" isEqualToString:call.method])
+        {
+            if (self.centralManager.state == CBManagerStatePoweredOn)
+            {
+                result(@(YES));
+            }
+            else
+            {
+                result(@(NO));
+            }
+        }
+        else if([@"turnOn" isEqualToString:call.method])
+        {
+            result([FlutterError errorWithCode:@"turnOn" 
+                                    message:@"iOS does not support turning on bluetooth"
+                                    details:NULL]);
+        }
+        else if([@"turnOff" isEqualToString:call.method])
+        {
+            result([FlutterError errorWithCode:@"removeBond" 
+                                    message:@"iOS does not support turning off bluetooth"
+                                    details:NULL]);
         }
         else if ([@"startScan" isEqualToString:call.method])
         {
@@ -360,47 +372,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             result(@(true));
         }
-        else if ([@"readDescriptor" isEqualToString:call.method])
-        {
-            // See BmReadDescriptorRequest
-            NSDictionary *args = (NSDictionary*)call.arguments;
-            NSString  *remoteId             = args[@"remote_id"];
-            NSString  *descriptorUuid       = args[@"descriptor_uuid"];
-            NSString  *serviceUuid          = args[@"service_uuid"];
-            NSString  *secondaryServiceUuid = args[@"secondary_service_uuid"];
-            NSString  *characteristicUuid   = args[@"characteristic_uuid"];
-
-            // Find peripheral
-            CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
-            if (peripheral == nil) {
-                NSString* s = @"device is not connected. have you called connect()?";
-                result([FlutterError errorWithCode:@"readDescriptor" message:s details:remoteId]);
-                return;
-            }
-
-            // Find characteristic
-            NSError *error = nil;
-            CBCharacteristic *characteristic = [self locateCharacteristic:characteristicUuid
-                                                               peripheral:peripheral
-                                                                serviceId:serviceUuid
-                                                       secondaryServiceId:secondaryServiceUuid
-                                                                    error:&error];
-            if (characteristic == nil) {
-                result([FlutterError errorWithCode:@"readDescriptor" message:error.localizedDescription details:NULL]);
-                return;
-            }
-
-            // Find descriptor
-            CBDescriptor *descriptor = [self locateDescriptor:descriptorUuid characteristic:characteristic error:&error];
-            if (descriptor == nil) {
-                result([FlutterError errorWithCode:@"readDescriptor" message:error.localizedDescription details:NULL]);
-                return;
-            }
-
-            [peripheral readValueForDescriptor:descriptor];
-
-            result(@(true));
-        }
         else if ([@"writeCharacteristic" isEqualToString:call.method])
         {
             // See BmWriteCharacteristicRequest
@@ -465,6 +436,47 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             }
 
             result(@(YES));
+        }
+        else if ([@"readDescriptor" isEqualToString:call.method])
+        {
+            // See BmReadDescriptorRequest
+            NSDictionary *args = (NSDictionary*)call.arguments;
+            NSString  *remoteId             = args[@"remote_id"];
+            NSString  *descriptorUuid       = args[@"descriptor_uuid"];
+            NSString  *serviceUuid          = args[@"service_uuid"];
+            NSString  *secondaryServiceUuid = args[@"secondary_service_uuid"];
+            NSString  *characteristicUuid   = args[@"characteristic_uuid"];
+
+            // Find peripheral
+            CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
+            if (peripheral == nil) {
+                NSString* s = @"device is not connected. have you called connect()?";
+                result([FlutterError errorWithCode:@"readDescriptor" message:s details:remoteId]);
+                return;
+            }
+
+            // Find characteristic
+            NSError *error = nil;
+            CBCharacteristic *characteristic = [self locateCharacteristic:characteristicUuid
+                                                               peripheral:peripheral
+                                                                serviceId:serviceUuid
+                                                       secondaryServiceId:secondaryServiceUuid
+                                                                    error:&error];
+            if (characteristic == nil) {
+                result([FlutterError errorWithCode:@"readDescriptor" message:error.localizedDescription details:NULL]);
+                return;
+            }
+
+            // Find descriptor
+            CBDescriptor *descriptor = [self locateDescriptor:descriptorUuid characteristic:characteristic error:&error];
+            if (descriptor == nil) {
+                result([FlutterError errorWithCode:@"readDescriptor" message:error.localizedDescription details:NULL]);
+                return;
+            }
+
+            [peripheral readValueForDescriptor:descriptor];
+
+            result(@(true));
         }
         else if ([@"writeDescriptor" isEqualToString:call.method])
         {
@@ -614,10 +626,28 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                                     message:@"iOS does not support set preferred phy requests"
                                     details:NULL]);
         }
+        else if([@"getBondedDevices" isEqualToString:call.method])
+        {
+            result([FlutterError errorWithCode:@"getBondedDevices" 
+                                    message:@"iOS does not support getting bonded devices"
+                                    details:NULL]);
+        }
+        else if([@"createBond" isEqualToString:call.method])
+        {
+            result([FlutterError errorWithCode:@"setPreferredPhy" 
+                                    message:@"iOS does not support creating bonds"
+                                    details:NULL]);
+        }
         else if([@"removeBond" isEqualToString:call.method])
         {
             result([FlutterError errorWithCode:@"removeBond" 
                                     message:@"plugin does not support removeBond function on iOS"
+                                    details:NULL]);
+        }
+        else if([@"clearGattCache" isEqualToString:call.method])
+        {
+            result([FlutterError errorWithCode:@"clearGattCache" 
+                                    message:@"plugin does not support clearing gatt cache"
                                     details:NULL]);
         }
         else
