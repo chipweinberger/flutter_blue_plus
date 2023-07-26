@@ -141,6 +141,8 @@ public class FlutterBluePlusPlugin implements
             }
         }
         mConnectedDevices.clear();
+        mConnectionState.clear();
+        mMtu.clear;
 
         context.unregisterReceiver(mBluetoothAdapterStateReceiver);
         context = null;
