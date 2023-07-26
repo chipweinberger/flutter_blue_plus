@@ -49,7 +49,7 @@ Every error returned by the native platform is checked and thrown as an exceptio
 
 ```dart
 // check availability
-if (await FlutterBluePlus.isAvailable() == false) {
+if (await FlutterBluePlus.isAvailable == false) {
     print("Bluetooth not supported by this device");
     return;
 }
