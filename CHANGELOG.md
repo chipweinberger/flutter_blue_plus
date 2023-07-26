@@ -1,6 +1,6 @@
 ## 1.11.7
-* dart: fix: writeWithoutResponse - ensure only 1 mutex per characteristic to prevent race issues and dropped packets
-* dart: writeWithoutResponse should use a mutex per remoteId, to improve throughput
+* dart: fix: ensure only 1 mutex per characteristic to prevent race issues and dropped packets
+* dart: perf: writeWithoutResponse should use at least 1 mutex per remoteId, to improve throughput
 * example: improve word wrapping on smaller screens
 
 ## 1.11.6
