@@ -1,3 +1,6 @@
+## 1.11.8
+android/iOS: fix: setLogLevel, getAdapterState, getAdapterName returning error when adapter not available
+
 ## 1.11.7
 * dart: fix: ensure only 1 mutex per characteristic to prevent race issues and dropped packets
 * dart: perf: writeWithoutResponse should use at least 1 mutex per remoteId, to improve throughput
