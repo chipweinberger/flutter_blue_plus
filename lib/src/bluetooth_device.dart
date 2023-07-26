@@ -45,13 +45,6 @@ class BluetoothDevice {
   // stream return whether or not we are currently discovering services
   Stream<bool> get isDiscoveringServices => _isDiscoveringServices.stream;
 
-  // get services
-  //  - will call discoverServices if needed
-  Future<List<BluetoothService>> get servicesList async {
-    _knownServices[remoteId] ??= await discoverServices();
-    return _knownServices[remoteId]!;
-  }
-
   /// Stream of bluetooth services offered by the remote device
   Stream<List<BluetoothService>> get servicesStream async* {
     if (_knownServices[remoteId] != null) {
