@@ -32,9 +32,6 @@ class FlutterBluePlus {
   // timeout for scanning that can be cancelled by stopScan
   static Timer? _scanTimeout;
 
-  // Remember the last advertistment per device
-  static final Map<DeviceIdentifier, AdvertisementData> _lastAdvertisments = {};
-
   /// FlutterBluePlus log level
   static LogLevel _logLevel = LogLevel.debug;
 
@@ -136,7 +133,6 @@ class FlutterBluePlus {
     List<Guid> withServices = const [],
     List<String> macAddresses = const [],
     Duration? timeout,
-    bool includeConnectedSystemDevices = true,
     bool allowDuplicates = false,
     bool androidUsesFineLocation = false,
   }) async* {
@@ -153,11 +149,6 @@ class FlutterBluePlus {
 
     // Clear scan results list
     _scanResultsList.add(<ScanResult>[]);
-
-    // include connected devices in the scan results?
-    if (includeConnectedSystemDevices) {
-      _scanResultsList.add(await _getConnectedScanResults(withServices, macAddresses, _lastAdvertisments));
-    }
 
     Stream<BmScanResponse> responseStream = FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "ScanResponse")
@@ -197,9 +188,6 @@ class FlutterBluePlus {
 
       ScanResult item = ScanResult.fromProto(response.result!);
 
-      // remember the last advertisement
-      _lastAdvertisments[item.device.remoteId] = item.advertisementData;
-
       // make new list while considering duplicates
       List<ScanResult> list = _addOrUpdate(_scanResultsList.value, item);
 
@@ -220,7 +208,6 @@ class FlutterBluePlus {
     List<Guid> withServices = const [],
     List<String> macAddresses = const [],
     Duration? timeout,
-    bool includeConnectedSystemDevices = true,
     bool allowDuplicates = false,
     bool androidUsesFineLocation = false,
   }) async {
@@ -229,7 +216,6 @@ class FlutterBluePlus {
             withServices: withServices,
             macAddresses: macAddresses,
             timeout: timeout,
-            includeConnectedSystemDevices: includeConnectedSystemDevices,
             allowDuplicates: allowDuplicates,
             androidUsesFineLocation: androidUsesFineLocation)
         .drain();
@@ -398,59 +384,6 @@ List<ScanResult> _addOrUpdate(List<ScanResult> results, ScanResult item) {
     list.add(item);
   }
   return list;
-}
-
-Future<List<ScanResult>> _getConnectedScanResults(List<Guid> withServices, List<String> macAddresses,
-    Map<DeviceIdentifier, AdvertisementData> lastAdvertisments) async {
-  List<BluetoothDevice> connectedDevices = await FlutterBluePlus.connectedSystemDevices;
-
-  List<ScanResult> scanResults = [];
-
-  for (var device in connectedDevices) {
-    AdvertisementData? advertisementData = lastAdvertisments[device.remoteId];
-
-    // reconstruct the advertising data
-    if (advertisementData == null) {
-      List<Guid> servicesUuids = (await device.servicesList).map((e) => e.uuid).toList();
-      advertisementData = AdvertisementData(
-        localName: device.localName,
-        txPowerLevel: null,
-        connectable: true,
-        manufacturerData: {},
-        serviceData: {},
-        serviceUuids: servicesUuids.map((v) => v.toString()).toList(),
-      );
-    }
-
-    // check services
-    if (withServices.isNotEmpty) {
-      for (var uuid in withServices) {
-        if (advertisementData.serviceUuids.contains(uuid) == false) {
-          continue;
-        }
-      }
-    }
-
-    // check mac
-    if (macAddresses.isNotEmpty) {
-      List<Guid> uuids = macAddresses.map((e) => Guid(e)).toList();
-      if (uuids.contains(device.remoteId) == false) {
-        continue;
-      }
-    }
-
-    // result
-    ScanResult result = ScanResult(
-        device: device,
-        advertisementData: advertisementData,
-        rssi: -50,
-        timeStamp: DateTime.now(),
-        connectionState: BluetoothConnectionState.connected);
-
-    scanResults.add(result);
-  }
-
-  return scanResults;
 }
 
 class AdvertisementData {

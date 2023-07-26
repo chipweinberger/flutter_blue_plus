@@ -133,7 +133,8 @@ class FindDevicesScreen extends StatelessWidget {
         ),
         body: RefreshIndicator(
           onRefresh: () => FlutterBluePlus.startScan(
-              timeout: const Duration(seconds: 15), includeConnectedSystemDevices: true, androidUsesFineLocation: false),
+              timeout: const Duration(seconds: 15),
+              androidUsesFineLocation: false),
           child: SingleChildScrollView(
             child: Column(
               children: <Widget>[
@@ -160,14 +161,15 @@ class FindDevicesScreen extends StatelessWidget {
                                   if (snapshot.data == BluetoothConnectionState.disconnected) {
                                     return ElevatedButton(
                                         child: const Text('CONNECT'),
-                                        onPressed: () async {
-                                          try {
-                                            await d.connect();
-                                          } catch (e) {
-                                            final snackBar =
-                                                SnackBar(content: Text(prettyException("Connect Error:", e)));
-                                                snackBarKeyC.currentState?.showSnackBar(snackBar);
-                                          }
+                                        onPressed: () {
+                                          Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                                            d.connect().catchError((e) {
+                                              final snackBar =
+                                                  SnackBar(content: Text(prettyException("Connect Error:", e)));
+                                              snackBarKeyB.currentState?.showSnackBar(snackBar);
+                                            });
+                                            return DeviceScreen(device: d);
+                                          }));
                                         });
                                   }
                                   return Text(snapshot.data.toString().toUpperCase().split('.')[1]);
@@ -226,7 +228,6 @@ class FindDevicesScreen extends StatelessWidget {
                     try {
                       FlutterBluePlus.startScan(
                           timeout: const Duration(seconds: 15),
-                          includeConnectedSystemDevices: true,
                           androidUsesFineLocation: false);
                     } catch (e) {
                       final snackBar = SnackBar(content: Text(prettyException("Start Scan Error:", e)));
