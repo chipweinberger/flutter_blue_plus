@@ -1048,6 +1048,8 @@ public class FlutterBluePlusPlugin implements
 
     private int connectionStateOfThisApp(String remoteId)
     {
+        // other apps may be connected to the device.
+        // so we are careful to only check our connection state
         if(mConnectionState.get(remoteId) == null) {
             return BluetoothProfile.STATE_DISCONNECTED;
         } else {
