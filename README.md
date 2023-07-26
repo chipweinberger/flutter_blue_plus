@@ -242,7 +242,8 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 | disconnect                | :white_check_mark: | :white_check_mark: | :fire: | Cancels an active or pending connection to the device      |
 | discoverServices          | :white_check_mark: | :white_check_mark: | :fire: | Discover services                                          |
 | isDiscoveryingServices    | :white_check_mark: | :white_check_mark: |        | Stream of whether service discovery is in progress         |
-| servicesStream            | :white_check_mark: | :white_check_mark: |        | Stream of service changes                                  |
+| servicesList              | :white_check_mark: | :white_check_mark: |        | The list of services that were discovered                  |
+| servicesStream            | :white_check_mark: | :white_check_mark: |        | Stream of services changes                                 |
 | connectionState           | :white_check_mark: | :white_check_mark: |        | Stream of connection changes for the Bluetooth Device      |
 | mtu                       | :white_check_mark: | :white_check_mark: | :fire: | Stream of mtu size changes                                 |
 | readRssi                  | :white_check_mark: | :white_check_mark: | :fire: | Read RSSI from a connected device                          |
