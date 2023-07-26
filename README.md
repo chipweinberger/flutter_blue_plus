@@ -166,11 +166,7 @@ Android {
      minSdkVersion: 19
 ```
 
-### Add permissions for Bluetooth
-
-We need to add the permission to use Bluetooth and access location:
-
-#### **Android (No Location)**
+### Add permissions for Android (No Location)
 
 In the **android/app/src/main/AndroidManifest.xml** add:
 
@@ -180,7 +176,7 @@ In the **android/app/src/main/AndroidManifest.xml** add:
 <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" android:maxSdkVersion="30"/>
 ```
 
-#### **Android (With Fine Location)**
+### Add permissions for Android (With Fine Location)
 
 If you want to use Bluetooth to determine location.
 
@@ -205,7 +201,7 @@ In the **android/app/src/main/AndroidManifest.xml** add:
 flutterBlue.startScan(timeout: Duration(seconds: 4), androidUsesFineLocation: true);
 ```
 
-## Android Proguard
+### Android Proguard
 
 Add the following line in your `project/android/app/proguard-rules.pro` file:
 
@@ -214,11 +210,14 @@ Add the following line in your `project/android/app/proguard-rules.pro` file:
 ```
 
 to avoid seeing the following kind errors in your `release` builds:
+
 ```
-PlatformException(startScan, Field androidScanMode_ for m0.e0 not found. Known fields are [private int m0.e0.q, private b3.b0$i m0.e0.r, private boolean m0.e0.s, private static final m0.e0 m0.e0.t, private static volatile b3.a1 m0.e0.u], java.lang.RuntimeException: Field androidScanMode_ for m0.e0 not found
+PlatformException(startScan, Field androidScanMode_ for m0.e0 not found. Known fields are
+ [private int m0.e0.q, private b3.b0$i m0.e0.r, private boolean m0.e0.s, private static final m0.e0 m0.e0.t,
+ private static volatile b3.a1 m0.e0.u], java.lang.RuntimeException: Field androidScanMode_ for m0.e0 not found
 ```
 
-#### **IOS**
+### Add permissions for iOS
 
 In the **ios/Runner/Info.plist** let’s add:
 
