@@ -183,6 +183,9 @@ If you want to use Bluetooth to determine location.
 In the **android/app/src/main/AndroidManifest.xml** add:
 
 ```xml
+<!-- add tools -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+
 <!-- remove the plugin permission which sets neverForLocation -->
 <uses-permission
     android:name="android.permission.BLUETOOTH_SCAN"
@@ -190,7 +193,14 @@ In the **android/app/src/main/AndroidManifest.xml** add:
     tools:selector="com.boskokg.flutter_blue_plus">
 </uses-permission>
 
-<!-- add back without neverForLocation -->
+<!-- remove the plugin permission which sets maxSdkVersion 30 -->
+<uses-permission
+    android:name="android.permission.ACCESS_FINE_LOCATION"
+    tools:node="remove"
+    tools:selector="com.boskokg.flutter_blue_plus">
+</uses-permission>
+
+<!-- add back without neverForLocation, and without maxSdkVersion -->
 <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
 <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
 <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
