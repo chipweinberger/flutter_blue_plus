@@ -60,15 +60,9 @@ class BluetoothCharacteristic {
     }
   }
 
-  // only allows a single read or write to be underway at any time.
+  // only allows a single read to be underway at any time.
   // otherwise, the calls can confuse each others platform response as theirs
   final _Mutex _readMutex = _Mutex();
-  final _Mutex _writeMutex = _Mutex();
-
-  // After each writeWithoutResponse, we wait for the platform to tell us it is ready for more.
-  // Without this mutex, calling writeWithoutResponse on multiple characteristics at the same
-  // time would lead to dropped packets. Todo: would be better to have 1 of these mutex *per device*
-  static final _Mutex _writeWithoutResponseMutex = _Mutex();
 
   /// read a characteristic
   Future<List<int>> read({int timeout = 15}) async {
@@ -114,11 +108,22 @@ class BluetoothCharacteristic {
     return responseValue;
   }
 
+  // only allows a single write to be underway at any time.
+  // otherwise, the calls can confuse each others platform response as theirs
+  final _Mutex _writeMutex = _Mutex();
+
+  // After each writeWithoutResponse, we wait for the platform to tell us the device is ready for more.
+  // Once the device is ready, we grab this mutex, send a *single* writeWithoutResponse, then
+  // wait for the device to be ready again. 
+  Future<_Mutex> _writeWithoutResponseMutex(DeviceIdentifier remoteId) async {
+    return await _MutexFactory.getMutexForKey(remoteId.str);
+  }
+
   /// Writes a characteristic.
   ///  - [withoutResponse]: the write is not guaranteed and always returns immediately with success.
   ///  - [withResponse]: the write returns error on failure
   Future<void> write(List<int> value, {bool withoutResponse = false, int timeout = 15}) async {
-    _Mutex mutex = withoutResponse ? _writeWithoutResponseMutex : _writeMutex;
+    _Mutex mutex = withoutResponse ? await _writeWithoutResponseMutex(remoteId) : _writeMutex;
     // Only allow a single write operation
     // at a time, to prevent race conditions.
     await mutex.synchronized(() async {

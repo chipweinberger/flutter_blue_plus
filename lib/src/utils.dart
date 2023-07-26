@@ -377,3 +377,19 @@ class _Mutex {
     return currentOperation.future;
   }
 }
+
+// Create mutexes in a parrallel-safe way,
+class _MutexFactory {
+  
+  static final _Mutex global = _Mutex();
+  static final Map<String, _Mutex> all = {};
+
+  static Future<_Mutex> getMutexForKey(String key) async {
+    _Mutex? value;
+    await global.synchronized(() async {
+      all[key] ??= _Mutex();
+      value = all[key];
+    });
+    return value!;
+  }
+}
