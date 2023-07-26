@@ -1,3 +1,6 @@
+## 1.11.4
+* android: fix null ptr exception getting Mtu
+
 ## 1.11.3
 * dart: writeWithoutResponse should wait for completion, to prevent dropped packets
 
