@@ -60,16 +60,13 @@ class BluetoothCharacteristic {
     }
   }
 
-  // only allows a single read to be underway at any time.
-  // otherwise, the calls can confuse each others platform response as theirs
+  // Only allows a single read to be underway at any time, per characteristic.
+  // Otherwise, multiple in-flight requests wouldn't know which response is for them.
   final _Mutex _readMutex = _Mutex();
 
   /// read a characteristic
   Future<List<int>> read({int timeout = 15}) async {
     List<int> responseValue = [];
-
-    // Only allow a single read operation
-    // at a time, to prevent race conditions.
     await _readMutex.synchronized(() async {
       var request = BmReadCharacteristicRequest(
         remoteId: remoteId.toString(),
@@ -108,25 +105,36 @@ class BluetoothCharacteristic {
     return responseValue;
   }
 
-  // only allows a single write to be underway at any time.
-  // otherwise, the calls can confuse each others platform response as theirs
-  final _Mutex _writeMutex = _Mutex();
-
-  // After each writeWithoutResponse, we wait for the platform to tell us the device is ready for more.
-  // Once the device is ready, we grab this mutex, send a *single* writeWithoutResponse, then
-  // wait for the device to be ready again. 
-  Future<_Mutex> _writeWithoutResponseMutex(DeviceIdentifier remoteId) async {
-    return await _MutexFactory.getMutexForKey(remoteId.str);
-  }
-
   /// Writes a characteristic.
   ///  - [withoutResponse]: the write is not guaranteed and always returns immediately with success.
   ///  - [withResponse]: the write returns error on failure
   Future<void> write(List<int> value, {bool withoutResponse = false, int timeout = 15}) async {
-    _Mutex mutex = withoutResponse ? await _writeWithoutResponseMutex(remoteId) : _writeMutex;
-    // Only allow a single write operation
-    // at a time, to prevent race conditions.
-    await mutex.synchronized(() async {
+    print("withoutResponse $withoutResponse");
+
+    // The write mutex is more complicated, but the goal is the same.
+    // We need to limit the number of in-fight requests so that we know when a write has completed
+    //
+    // Normally, we can use a single mutex per-characteristic, and then we'll always know
+    // when our write is complete.
+    //
+    // However, There are 2 edge cases specific to writing that requires a coarser per-device mutex.
+    //
+    //   Edge Case 1: whenever we do a writeWithoutResponse, wait for the device to signal
+    //      that it is ready for more writeWithoutResponses before we return from this function.
+    //      This 'ready' signal is per-device, so we can only queue 1 writeWithoutResponse at a time.
+    //      If we did not wait for this signal, we would get packet loss.
+    //
+    //   Edge Case 2: if the characteristic supports both 'write' & 'writeWithoutResponse' we need to
+    //      use ensure there is only 1 mutex per characteristic. In this case, we must use the 
+    //      coarser per-device mutex always. If we allowed 2 mutexes, then there could be 2 in-flight 
+    //      request simultaneously (1 'write' and 1 'writeWithoutResponse' request) and we would not be able
+    //      to tell their responses apart from each other.
+    //
+    _Mutex writeMutex = (properties.write && properties.writeWithoutResponse) || withoutResponse
+        ? await _MutexFactory.getMutexForKey(remoteId.str)
+        : await _MutexFactory.getMutexForKey(remoteId.str + characteristicUuid.toString());
+
+    await writeMutex.synchronized(() async {
       final writeType = withoutResponse ? BmWriteType.withoutResponse : BmWriteType.withResponse;
 
       var request = BmWriteCharacteristicRequest(
