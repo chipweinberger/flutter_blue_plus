@@ -32,6 +32,25 @@ BluetoothConnectionState bmToBluetoothConnectionState(BmConnectionStateEnum valu
   }
 }
 
+BluetoothAdapterState bmToBluetoothAdapterState(BmAdapterStateEnum value) {
+  switch (value) {
+    case BmAdapterStateEnum.unknown:
+      return BluetoothAdapterState.unknown;
+    case BmAdapterStateEnum.unavailable:
+      return BluetoothAdapterState.unavailable;
+    case BmAdapterStateEnum.unauthorized:
+      return BluetoothAdapterState.unauthorized;
+    case BmAdapterStateEnum.turningOn:
+      return BluetoothAdapterState.turningOn;
+    case BmAdapterStateEnum.on:
+      return BluetoothAdapterState.on;
+    case BmAdapterStateEnum.turningOff:
+      return BluetoothAdapterState.turningOff;
+    case BmAdapterStateEnum.off:
+      return BluetoothAdapterState.off;
+  }
+}
+
 enum ConnectionPriority { balanced, high, lowPower }
 
 enum Phy { le1m, le2m, leCoded }

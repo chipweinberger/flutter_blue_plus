@@ -295,25 +295,6 @@ enum LogLevel {
 /// State of the bluetooth adapter.
 enum BluetoothAdapterState { unknown, unavailable, unauthorized, turningOn, on, turningOff, off }
 
-BluetoothAdapterState bmToBluetoothAdapterState(BmAdapterStateEnum value) {
-  switch (value) {
-    case BmAdapterStateEnum.unknown:
-      return BluetoothAdapterState.unknown;
-    case BmAdapterStateEnum.unavailable:
-      return BluetoothAdapterState.unavailable;
-    case BmAdapterStateEnum.unauthorized:
-      return BluetoothAdapterState.unauthorized;
-    case BmAdapterStateEnum.turningOn:
-      return BluetoothAdapterState.turningOn;
-    case BmAdapterStateEnum.on:
-      return BluetoothAdapterState.on;
-    case BmAdapterStateEnum.turningOff:
-      return BluetoothAdapterState.turningOff;
-    case BmAdapterStateEnum.off:
-      return BluetoothAdapterState.off;
-  }
-}
-
 class ScanMode {
   const ScanMode(this.value);
   static const lowPower = ScanMode(0);
