@@ -816,7 +816,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"adapter_state" : @(adapterState),
     };
 
-    [_methodChannel invokeMethod:@"adapterStateChanged" arguments:response];
+    [_methodChannel invokeMethod:@"OnAdapterStateChanged" arguments:response];
 }
 
 - (void)centralManager:(CBCentralManager *)central
@@ -838,7 +838,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"result": result,
     };
 
-    [_methodChannel invokeMethod:@"ScanResponse" arguments:response];
+    [_methodChannel invokeMethod:@"OnScanResponse" arguments:response];
 }
 
 - (void)centralManager:(CBCentralManager *)central
@@ -863,7 +863,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     };
 
     // Send connection state
-    [_methodChannel invokeMethod:@"connectionStateChanged" arguments:result];
+    [_methodChannel invokeMethod:@"OnConnectionStateChanged" arguments:result];
 }
 
 - (void)centralManager:(CBCentralManager *)central
@@ -892,7 +892,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     };
 
     // Send connection state
-    [_methodChannel invokeMethod:@"connectionStateChanged" arguments:result];
+    [_methodChannel invokeMethod:@"OnConnectionStateChanged" arguments:result];
 }
 
 - (void)centralManager:(CBCentralManager *)central
@@ -913,7 +913,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     };
 
     // Send connection state
-    [_methodChannel invokeMethod:@"connectionStateChanged" arguments:result];
+    [_methodChannel invokeMethod:@"OnConnectionStateChanged" arguments:result];
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1000,7 +1000,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     };
 
     // Send updated tree
-    [_methodChannel invokeMethod:@"DiscoverServicesResult" arguments:response];
+    [_methodChannel invokeMethod:@"OnDiscoverServicesResult" arguments:response];
 }
 
 - (void)peripheral:(CBPeripheral *)peripheral
@@ -1200,7 +1200,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"error_code":      error ? @(error.code) : [NSNull null],
     };
 
-    [_methodChannel invokeMethod:@"ReadRssiResult" arguments:result];
+    [_methodChannel invokeMethod:@"OnReadRssiResult" arguments:result];
 }
 
 - (void)peripheralIsReadyToSendWriteWithoutResponse:(CBPeripheral *)peripheral

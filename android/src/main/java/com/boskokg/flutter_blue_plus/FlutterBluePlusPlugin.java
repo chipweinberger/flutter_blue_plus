@@ -1144,7 +1144,7 @@ public class FlutterBluePlusPlugin implements
 
             final int adapterState = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
 
-            log(LogLevel.DEBUG, "[FBP-Android] adapterStateChanged: " + adapterStateString(adapterState));
+            log(LogLevel.DEBUG, "[FBP-Android] OnAdapterStateChanged: " + adapterStateString(adapterState));
 
             // convert to Protobuf enum
             int convertedState;
@@ -1160,7 +1160,7 @@ public class FlutterBluePlusPlugin implements
             HashMap<String, Object> map = new HashMap<>();
             map.put("adapter_state", convertedState);
 
-            invokeMethodUIThread("adapterStateChanged", map);
+            invokeMethodUIThread("OnAdapterStateChanged", map);
         }
     };
 
@@ -1244,7 +1244,7 @@ public class FlutterBluePlusPlugin implements
                     HashMap<String, Object> response = new HashMap<>();
                     response.put("result", rr);
 
-                    invokeMethodUIThread("ScanResponse", response);
+                    invokeMethodUIThread("OnScanResponse", response);
                 }
 
                 @Override
@@ -1270,7 +1270,7 @@ public class FlutterBluePlusPlugin implements
                     HashMap<String, Object> response = new HashMap<>();
                     response.put("failed", failed);
 
-                    invokeMethodUIThread("ScanResponse", response);
+                    invokeMethodUIThread("OnScanResponse", response);
                 }
             };
         }
@@ -1319,7 +1319,7 @@ public class FlutterBluePlusPlugin implements
             response.put("remote_id", remoteId);
             response.put("connection_state", bmConnectionStateEnum(newState));
 
-            invokeMethodUIThread("connectionStateChanged", response);
+            invokeMethodUIThread("OnConnectionStateChanged", response);
         }
 
         @Override
@@ -1340,7 +1340,7 @@ public class FlutterBluePlusPlugin implements
             response.put("error_code", status);
             response.put("error_string", gattErrorString(status));
 
-            invokeMethodUIThread("DiscoverServicesResult", response);
+            invokeMethodUIThread("OnDiscoverServicesResult", response);
         }
 
         @Override
@@ -1477,7 +1477,7 @@ public class FlutterBluePlusPlugin implements
             response.put("error_code", status);
             response.put("error_string", gattErrorString(status));
 
-            invokeMethodUIThread("ReadRssiResult", response);
+            invokeMethodUIThread("OnReadRssiResult", response);
         }
 
         @Override

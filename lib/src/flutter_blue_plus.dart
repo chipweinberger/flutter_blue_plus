@@ -95,7 +95,7 @@ class FlutterBluePlus {
     yield initialState;
 
     Stream<BluetoothAdapterState> responseStream = FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "adapterStateChanged")
+        .where((m) => m.method == "OnAdapterStateChanged")
         .map((m) => m.arguments)
         .map((buffer) => BmBluetoothAdapterState.fromMap(buffer))
         .map((s) => _bmToBluetoothAdapterState(s.adapterState));
@@ -156,7 +156,7 @@ class FlutterBluePlus {
       _scanResultsList.add(<ScanResult>[]);
 
       Stream<BmScanResponse> responseStream = FlutterBluePlus._methodStream.stream
-          .where((m) => m.method == "ScanResponse")
+          .where((m) => m.method == "OnScanResponse")
           .map((m) => m.arguments)
           .map((buffer) => BmScanResponse.fromMap(buffer))
           .takeWhile((element) => _isScanning.value)

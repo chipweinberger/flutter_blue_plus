@@ -102,7 +102,7 @@ class BluetoothDevice {
     _isDiscoveringServices.add(true);
 
     var responseStream = FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "DiscoverServicesResult")
+        .where((m) => m.method == "OnDiscoverServicesResult")
         .map((m) => m.arguments)
         .map((buffer) => BmDiscoverServicesResult.fromMap(buffer))
         .where((p) => p.remoteId == remoteId.str);
@@ -142,7 +142,7 @@ class BluetoothDevice {
     yield initialState;
 
     yield* FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "connectionStateChanged")
+        .where((m) => m.method == "OnConnectionStateChanged")
         .map((m) => m.arguments)
         .map((buffer) => BmConnectionStateResponse.fromMap(buffer))
         .where((p) => p.remoteId == remoteId.str)
@@ -202,7 +202,7 @@ class BluetoothDevice {
   /// Read the RSSI of connected remote device
   Future<int> readRssi({int timeout = 15}) async {
     var responseStream = FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "ReadRssiResult")
+        .where((m) => m.method == "OnReadRssiResult")
         .map((m) => m.arguments)
         .map((buffer) => BmReadRssiResult.fromMap(buffer))
         .where((p) => (p.remoteId == remoteId.str));
