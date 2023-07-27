@@ -1,3 +1,6 @@
+## 1.12.6
+* Dart: verbose logging: brown == data from platform
+
 ## 1.12.5
 * Dart: add more logging when in verbose mode, with color
 
