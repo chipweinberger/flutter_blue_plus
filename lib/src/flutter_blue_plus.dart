@@ -245,11 +245,13 @@ class FlutterBluePlus {
   }
 
   // invoke a platform method
-  static Future<dynamic> _invokeMethod(String method, [dynamic arguments]) {
+  static Future<dynamic> _invokeMethod(String method, [dynamic arguments]) async {
+    // initialize handler
     if (_initialized == false) {
+      // set handler
       _methods.setMethodCallHandler((MethodCall call) async {
         if (logLevel == LogLevel.verbose) {
-          print("[FBP] GOT: [[${call.method}]] ${call.arguments}");
+          print("[FBP] ${_black('[[ ${call.method} ]]')} result: ${_green(call.arguments.toString())}");
         }
         _methodStream.add(call);
       });
@@ -261,10 +263,18 @@ class FlutterBluePlus {
       setLogLevel(logLevel);
     }
 
+    // invoke
     if (logLevel == LogLevel.verbose) {
-      print("[FBP] CALL: <<$method>> $arguments");
+      print("[FBP] ${_black('<$method>')} args: ${_magenta(arguments.toString())}");
     }
-    return _methods.invokeMethod(method, arguments);
+
+    dynamic obj = await _methods.invokeMethod(method, arguments);
+
+    if (logLevel == LogLevel.verbose) {
+      print("[FBP] ${_black('<$method>')} result: ${_brown(obj.toString())}");
+    }
+
+    return obj;
   }
 
   @Deprecated('Use adapterName instead')
