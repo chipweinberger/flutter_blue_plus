@@ -243,7 +243,7 @@ public class FlutterBluePlusPlugin implements
 
                case "getAdapterName":
                 {
-                    String adapterName = mBluetoothAdapter.getName();
+                    String adapterName = mBluetoothAdapter != null ? mBluetoothAdapter.getName() : "N/A";
                     result.success(adapterName != null ? adapterName : "");
                     break;
                 }
