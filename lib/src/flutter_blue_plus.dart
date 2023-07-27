@@ -244,28 +244,26 @@ class FlutterBluePlus {
     _logLevel = level;
   }
 
-  static void _log(LogLevel level, String message) {
-    if (level.index <= _logLevel.index) {
-      if (kDebugMode) {
-        // ignore: avoid_print
-        print(message);
-      }
-    }
-  }
-
   // invoke a platform method
   static Future<dynamic> _invokeMethod(String method, [dynamic arguments]) {
     if (_initialized == false) {
       _methods.setMethodCallHandler((MethodCall call) async {
+        if (logLevel == LogLevel.verbose) {
+          print("[FBP] GOT: [[${call.method}]] ${call.arguments}");
+        }
         _methodStream.add(call);
       });
 
-      // avoid recursion: must set this before we call setLogLevel
+      // avoid recursion: must set this
+      // before we call setLogLevel
       _initialized = true;
 
       setLogLevel(logLevel);
     }
 
+    if (logLevel == LogLevel.verbose) {
+      print("[FBP] CALL: <<$method>> $arguments");
+    }
     return _methods.invokeMethod(method, arguments);
   }
 

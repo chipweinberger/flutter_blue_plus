@@ -255,7 +255,6 @@ class FindDevicesScreen extends StatelessWidget {
                     final snackBar = SnackBar(content: Text(prettyException("Stop Scan Error:", e)));
                     snackBarKeyB.currentState?.showSnackBar(snackBar);
                   }
-                  ;
                 },
                 backgroundColor: Colors.red,
               );
