@@ -34,7 +34,7 @@ class BluetoothDevice {
   BluetoothDevice.fromProto(BmBluetoothDevice p)
       : remoteId = DeviceIdentifier(p.remoteId),
         localName = p.localName ?? "",
-        type = bmToBluetoothDeviceType(p.type);
+        type = _bmToBluetoothDeviceType(p.type);
 
   /// allows connecting to a known device without scanning
   BluetoothDevice.fromId(String remoteId, {String? localName, BluetoothDeviceType? type})
@@ -137,7 +137,7 @@ class BluetoothDevice {
     BluetoothConnectionState initialState = await FlutterBluePlus._methods
         .invokeMethod('getConnectionState', remoteId.str)
         .then((buffer) => BmConnectionStateResponse.fromMap(buffer))
-        .then((p) => bmToBluetoothConnectionState(p.connectionState));
+        .then((p) => _bmToBluetoothConnectionState(p.connectionState));
 
     yield initialState;
 
@@ -146,7 +146,7 @@ class BluetoothDevice {
         .map((m) => m.arguments)
         .map((buffer) => BmConnectionStateResponse.fromMap(buffer))
         .where((p) => p.remoteId == remoteId.str)
-        .map((p) => bmToBluetoothConnectionState(p.connectionState));
+        .map((p) => _bmToBluetoothConnectionState(p.connectionState));
   }
 
   /// The current MTU size in bytes

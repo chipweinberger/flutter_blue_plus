@@ -4,7 +4,7 @@ part of flutter_blue_plus;
 
 enum BluetoothDeviceType { unknown, classic, le, dual }
 
-BluetoothDeviceType bmToBluetoothDeviceType(BmBluetoothSpecEnum value) {
+BluetoothDeviceType _bmToBluetoothDeviceType(BmBluetoothSpecEnum value) {
   switch (value) {
     case BmBluetoothSpecEnum.unknown:
       return BluetoothDeviceType.unknown;
@@ -19,7 +19,7 @@ BluetoothDeviceType bmToBluetoothDeviceType(BmBluetoothSpecEnum value) {
 
 enum BluetoothConnectionState { disconnected, connecting, connected, disconnecting }
 
-BluetoothConnectionState bmToBluetoothConnectionState(BmConnectionStateEnum value) {
+BluetoothConnectionState _bmToBluetoothConnectionState(BmConnectionStateEnum value) {
   switch (value) {
     case BmConnectionStateEnum.disconnected:
       return BluetoothConnectionState.disconnected;
@@ -32,7 +32,7 @@ BluetoothConnectionState bmToBluetoothConnectionState(BmConnectionStateEnum valu
   }
 }
 
-BluetoothAdapterState bmToBluetoothAdapterState(BmAdapterStateEnum value) {
+BluetoothAdapterState _bmToBluetoothAdapterState(BmAdapterStateEnum value) {
   switch (value) {
     case BmAdapterStateEnum.unknown:
       return BluetoothAdapterState.unknown;

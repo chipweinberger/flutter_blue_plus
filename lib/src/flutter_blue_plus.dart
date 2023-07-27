@@ -90,7 +90,7 @@ class FlutterBluePlus {
   static Stream<BluetoothAdapterState> get adapterState async* {
     BluetoothAdapterState initialState = await _invokeMethod('getAdapterState')
         .then((buffer) => BmBluetoothAdapterState.fromMap(buffer))
-        .then((s) => bmToBluetoothAdapterState(s.adapterState));
+        .then((s) => _bmToBluetoothAdapterState(s.adapterState));
 
     yield initialState;
 
@@ -98,7 +98,7 @@ class FlutterBluePlus {
         .where((m) => m.method == "adapterStateChanged")
         .map((m) => m.arguments)
         .map((buffer) => BmBluetoothAdapterState.fromMap(buffer))
-        .map((s) => bmToBluetoothAdapterState(s.adapterState));
+        .map((s) => _bmToBluetoothAdapterState(s.adapterState));
 
     yield* responseStream;
   }
@@ -341,7 +341,7 @@ class ScanResult {
         advertisementData = AdvertisementData.fromProto(p.advertisementData),
         rssi = p.rssi,
         timeStamp = DateTime.now(),
-        connectionState = bmToBluetoothConnectionState(p.connectionState);
+        connectionState = _bmToBluetoothConnectionState(p.connectionState);
 
   @override
   bool operator ==(Object other) =>
@@ -360,19 +360,6 @@ class ScanResult {
         'connectionState: $connectionState'
         '}';
   }
-}
-
-List<ScanResult> _addOrUpdate(List<ScanResult> results, ScanResult item) {
-  // if allowDuplicates is set, the item may already be in the list.
-  // If so, update, otherwise add.
-  var list = List<ScanResult>.from(results);
-  if (list.contains(item)) {
-    int index = list.indexOf(item);
-    list[index] = item;
-  } else {
-    list.add(item);
-  }
-  return list;
 }
 
 class AdvertisementData {
