@@ -49,6 +49,20 @@ Every error returned by the native platform is checked and thrown as an exceptio
 
 ---
 
+### Set Log Level
+
+Setting log level to verbose shows *all* data in and out.
+
+```dart
+FlutterBluePlus.setLogLevel(LogLevel.verbose)
+```
+
+⚫ = function name
+🟣 = args to platform
+🟡 = data from platform
+<img width="600" alt="Screenshot 2023-07-27 at 4 53 08 AM" src="https://github.com/boskokg/flutter_blue_plus/assets/1863934/ee37d702-2752-4402-bf26-fc661728c1c3">
+
+
 ### Enable Bluetooth
 
 ```dart
