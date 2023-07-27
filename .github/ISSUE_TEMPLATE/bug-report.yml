@@ -3,6 +3,10 @@ description: File a bug report
 title: "[Bug]: "
 labels: ["bug"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Having problems? Try setting 'FlutterBluePlus.setLogLevel(LogLevel.verbose)' to get more details
   - type: input
     id: fbp-version
     attributes:
