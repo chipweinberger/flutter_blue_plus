@@ -1,8 +1,5 @@
 part of flutter_blue_plus;
 
-void _printDbg(String s) {
-  FlutterBluePlus._log(LogLevel.verbose, s);
-}
 
 enum BmAdapterStateEnum {
   unknown,
@@ -22,12 +19,10 @@ class BmBluetoothAdapterState {
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> data = {};
     data['adapter_state'] = adapterState.index;
-    _printDbg("\nBmBluetoothAdapterState $data");
     return data;
   }
 
   factory BmBluetoothAdapterState.fromMap(Map<dynamic, dynamic> json) {
-    _printDbg("\nBmBluetoothAdapterState $json");
     return BmBluetoothAdapterState(
       adapterState: BmAdapterStateEnum.values[json['adapter_state']],
     );
@@ -55,7 +50,6 @@ class BmAdvertisementData {
   });
 
   factory BmAdvertisementData.fromMap(Map<dynamic, dynamic> json) {
-    _printDbg("\nBmAdvertisementData $json");
     // Get raw data
     var rawManufacturerData = json['manufacturer_data'] ?? {};
     var rawServiceData = json['service_data'] ?? {};
@@ -121,7 +115,6 @@ class BmScanSettings {
     data['allow_duplicates'] = allowDuplicates;
     data['android_scan_mode'] = androidScanMode;
     data['android_uses_fine_location'] = androidUsesFineLocation;
-    _printDbg("\nBmScanSettings $data");
     return data;
   }
 }
@@ -138,7 +131,6 @@ class BmScanFailed {
   });
 
   factory BmScanFailed.fromMap(Map<dynamic, dynamic> json) {
-    _printDbg("\BmScanFailed $json");
     return BmScanFailed(
       success: json['success'] != 0,
       errorCode: json['error_code'],
@@ -161,7 +153,6 @@ class BmScanResult {
   });
 
   factory BmScanResult.fromMap(Map<dynamic, dynamic> json) {
-    _printDbg("\nBmScanResult $json");
     return BmScanResult(
       device: BmBluetoothDevice.fromMap(json['device']),
       advertisementData: BmAdvertisementData.fromMap(json['advertisement_data']),
@@ -181,7 +172,6 @@ class BmScanResponse {
   });
 
   factory BmScanResponse.fromMap(Map<dynamic, dynamic> json) {
-    _printDbg("\BmScanResponse $json");
     return BmScanResponse(
       result: json['result'] != null ? BmScanResult.fromMap(json['result']) : null,
       failed: json['failed'] != null ? BmScanFailed.fromMap(json['failed']) : null,
@@ -202,7 +192,6 @@ class BmConnectRequest {
     final Map<dynamic, dynamic> data = {};
     data['remote_id'] = remoteId;
     data['auto_connect'] = autoConnect ? 1 : 0;
-    _printDbg("\nBmConnectRequest $data");
     return data;
   }
 }
@@ -230,12 +219,10 @@ class BmBluetoothDevice {
     data['remote_id'] = remoteId;
     data['local_name'] = localName;
     data['type'] = type.index;
-    _printDbg("\nBmBluetoothDevice $data");
     return data;
   }
 
   factory BmBluetoothDevice.fromMap(Map<dynamic, dynamic> json) {
-    _printDbg("\nBmBluetoothDevice $json");
     return BmBluetoothDevice(
       remoteId: json['remote_id'],
       localName: json['local_name'],
@@ -260,7 +247,6 @@ class BmBluetoothService {
   });
 
   factory BmBluetoothService.fromMap(Map<dynamic, dynamic> json) {
-    _printDbg("\nBmBluetoothService $json");
 
     // convert characteristics
     List<BmBluetoothCharacteristic> chrs = [];
@@ -304,7 +290,6 @@ class BmBluetoothCharacteristic {
   });
 
   factory BmBluetoothCharacteristic.fromMap(Map<dynamic, dynamic> json) {
-    _printDbg("\nBmBluetoothCharacteristic $json");
 
     // convert descriptors
     List<BmBluetoothDescriptor> descs = [];
@@ -340,7 +325,6 @@ class BmBluetoothDescriptor {
   });
 
   factory BmBluetoothDescriptor.fromMap(Map<dynamic, dynamic> json) {
-    _printDbg("\nBmBluetoothDescriptor $json");
     return BmBluetoothDescriptor(
       remoteId: json['remote_id'],
       serviceUuid: Guid(json['service_uuid']),
@@ -377,7 +361,6 @@ class BmCharacteristicProperties {
   });
 
   factory BmCharacteristicProperties.fromMap(Map<dynamic, dynamic> json) {
-    _printDbg("\nBmCharacteristicProperties $json");
     return BmCharacteristicProperties(
       broadcast: json['broadcast'] != 0,
       read: json['read'] != 0,
@@ -409,7 +392,6 @@ class BmDiscoverServicesResult {
   });
 
   factory BmDiscoverServicesResult.fromMap(Map<dynamic, dynamic> json) {
-    _printDbg("\nBmDiscoverServicesResult $json");
     return BmDiscoverServicesResult(
       remoteId: json['remote_id'],
       services: (json['services'] as List<dynamic>)
@@ -441,7 +423,6 @@ class BmReadCharacteristicRequest {
     data['service_uuid'] = serviceUuid.toString();
     data['secondary_service_uuid'] = secondaryServiceUuid?.toString();
     data['characteristic_uuid'] = characteristicUuid.toString();
-    _printDbg("\nBmReadCharacteristicRequest $data");
     return data;
   }
 }
@@ -468,8 +449,6 @@ class BmOnCharacteristicReceived {
   });
 
   factory BmOnCharacteristicReceived.fromMap(Map<dynamic, dynamic> json) {
-    _printDbg("\nBmOnCharacteristicReceived $json");
-
     return BmOnCharacteristicReceived(
       remoteId: json['remote_id'],
       serviceUuid: Guid(json['service_uuid']),
@@ -503,8 +482,6 @@ class BmOnCharacteristicWritten {
   });
 
   factory BmOnCharacteristicWritten.fromMap(Map<dynamic, dynamic> json) {
-    _printDbg("\BmOnCharacteristicWritten $json");
-
     return BmOnCharacteristicWritten(
       remoteId: json['remote_id'],
       serviceUuid: Guid(json['service_uuid']),
@@ -539,7 +516,6 @@ class BmReadDescriptorRequest {
     data['secondary_service_uuid'] = secondaryServiceUuid?.toString();
     data['characteristic_uuid'] = characteristicUuid.toString();
     data['descriptor_uuid'] = descriptorUuid.toString();
-    _printDbg("\nBmReadDescriptorRequest $data");
     return data;
   }
 }
@@ -574,7 +550,6 @@ class BmWriteCharacteristicRequest {
     data['characteristic_uuid'] = characteristicUuid.toString();
     data['write_type'] = writeType.index;
     data['value'] = _hexEncode(value);
-    _printDbg("\nBmWriteCharacteristicRequest $data");
     return data;
   }
 }
@@ -604,7 +579,6 @@ class BmWriteDescriptorRequest {
     data['characteristic_uuid'] = characteristicUuid.toString();
     data['descriptor_uuid'] = descriptorUuid.toString();
     data['value'] = _hexEncode(value);
-    _printDbg("\nBmWriteDescriptorRequest $data");
     return data;
   }
 }
@@ -650,7 +624,6 @@ class BmOnDescriptorResponse {
   });
 
   factory BmOnDescriptorResponse.fromMap(Map<dynamic, dynamic> json) {
-    _printDbg("\nBmOnDescriptorResponse $json");
     return BmOnDescriptorResponse(
       type: bmOnDescriptorResponseParse(json['type']),
       remoteId: json['remote_id'],
@@ -688,7 +661,6 @@ class BmSetNotificationRequest {
     data['secondary_service_uuid'] = secondaryServiceUuid?.toString();
     data['characteristic_uuid'] = characteristicUuid.toString();
     data['enable'] = enable;
-    _printDbg("BmSetNotificationRequest $data");
     return data;
   }
 }
@@ -713,12 +685,10 @@ class BmConnectionStateResponse {
     final Map<dynamic, dynamic> data = {};
     data['remote_id'] = remoteId;
     data['connection_state'] = connectionState.index;
-    _printDbg("\nBmConnectionStateResponse $data");
     return data;
   }
 
   factory BmConnectionStateResponse.fromMap(Map<dynamic, dynamic> json) {
-    _printDbg("\nBmConnectionStateResponse $json");
     return BmConnectionStateResponse(
       remoteId: json['remote_id'],
       connectionState: BmConnectionStateEnum.values[json['connection_state'] as int],
@@ -732,14 +702,11 @@ class BmConnectedDevicesResponse {
   BmConnectedDevicesResponse({required this.devices});
 
   factory BmConnectedDevicesResponse.fromMap(Map<dynamic, dynamic> json) {
-    _printDbg("\nBmConnectedDevicesResponse $json");
-
     // convert to BmBluetoothDevice
     List<BmBluetoothDevice> devices = [];
     for (var i = 0; i < json['devices'].length; i++) {
       devices.add(BmBluetoothDevice.fromMap(json['devices'][i]));
     }
-
     return BmConnectedDevicesResponse(devices: devices);
   }
 }
@@ -754,7 +721,6 @@ class BmMtuChangeRequest {
     final Map<dynamic, dynamic> data = {};
     data['remote_id'] = remoteId;
     data['mtu'] = mtu;
-    _printDbg("\nBmMtuChangeRequest $data");
     return data;
   }
 }
@@ -775,7 +741,6 @@ class BmMtuChangedResponse {
   });
 
   factory BmMtuChangedResponse.fromMap(Map<dynamic, dynamic> json) {
-    _printDbg("\nBmMtuChangedResponse $json");
     return BmMtuChangedResponse(
       remoteId: json['remote_id'],
       mtu: json['mtu'],
@@ -802,7 +767,6 @@ class BmReadRssiResult {
   });
 
   factory BmReadRssiResult.fromMap(Map<dynamic, dynamic> json) {
-    _printDbg("\nBmReadRssiResult $json");
     return BmReadRssiResult(
       remoteId: json['remote_id'],
       rssi: json['rssi'],
@@ -826,7 +790,6 @@ class BmConnectionPriorityRequest {
     final Map<dynamic, dynamic> data = {};
     data['remote_id'] = remoteId;
     data['connectionPriority'] = connectionPriority;
-    _printDbg("\nBmConnectionPriorityRequest $data");
     return data;
   }
 }
@@ -850,12 +813,10 @@ class BmPreferredPhy {
     data['txPhy'] = txPhy;
     data['rxPhy'] = rxPhy;
     data['phyOptions'] = phyOptions;
-    _printDbg("\nBmPreferredPhy $data");
     return data;
   }
 
   factory BmPreferredPhy.fromMap(Map<dynamic, dynamic> json) {
-    _printDbg("\nBmPreferredPhy $json");
     return BmPreferredPhy(
       remoteId: json['remote_id'],
       txPhy: json['txPhy'],
