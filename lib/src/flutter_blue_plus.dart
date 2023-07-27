@@ -251,7 +251,7 @@ class FlutterBluePlus {
       // set handler
       _methods.setMethodCallHandler((MethodCall call) async {
         if (logLevel == LogLevel.verbose) {
-          print("[FBP] ${_black('[[ ${call.method} ]]')} result: ${_green(call.arguments.toString())}");
+          print("[FBP] ${_black('[[ ${call.method} ]]')} result: ${_brown(call.arguments.toString())}");
         }
         _methodStream.add(call);
       });
