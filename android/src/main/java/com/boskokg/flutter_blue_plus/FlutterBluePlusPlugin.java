@@ -543,6 +543,7 @@ public class FlutterBluePlusPlugin implements
                     String characteristicUuid =   (String) data.get("characteristic_uuid");
                     String value =                (String) data.get("value");
                     int writeTypeInt =               (int) data.get("write_type");
+                    int ignoreMtuRestriction =       (int) data.get("ignore_mtu_restriction"); // 0 = false, 1 = true
 
                     int writeType = writeTypeInt == 0 ?
                         BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT :
@@ -568,13 +569,15 @@ public class FlutterBluePlusPlugin implements
                         }
                     }
 
-                    // check mtu
-                    int mtu = mMtu.get(remoteId);
-                    if ((mtu-3) < hexToBytes(value).length) {
-                        String s = "data longer than mtu allows. dataLength: " +
-                            hexToBytes(value).length + "> max: " + (mtu-3);
-                        result.error("write_characteristic_error", s, null);
-                        break;
+                    // check mtu if not ignored
+                    if (ignoreMtuRestriction == 0) {
+                        int mtu = mMtu.get(remoteId);
+                        if ((mtu-3) < hexToBytes(value).length) {
+                            String s = "data longer than mtu allows. dataLength: " +
+                                hexToBytes(value).length + "> max: " + (mtu-3);
+                            result.error("write_characteristic_error", s, null);
+                            break;
+                        }
                     }
 
                     // Version 33

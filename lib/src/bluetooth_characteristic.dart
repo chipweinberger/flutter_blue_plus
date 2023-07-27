@@ -23,15 +23,18 @@ class BluetoothCharacteristic {
   BluetoothCharacteristic.fromProto(BmBluetoothCharacteristic p)
       : remoteId = DeviceIdentifier(p.remoteId.toString()),
         serviceUuid = p.serviceUuid,
-        secondaryServiceUuid = p.secondaryServiceUuid != null ? p.secondaryServiceUuid! : null,
+        secondaryServiceUuid =
+            p.secondaryServiceUuid != null ? p.secondaryServiceUuid! : null,
         characteristicUuid = p.characteristicUuid,
-        descriptors = p.descriptors.map((d) => BluetoothDescriptor.fromProto(d)).toList(),
+        descriptors =
+            p.descriptors.map((d) => BluetoothDescriptor.fromProto(d)).toList(),
         properties = CharacteristicProperties.fromProto(p.properties),
         lastValue = p.value;
 
   // same as onValueReceived, but the stream immediately starts
   // with lastValue as its first value to not cause delay
-  Stream<List<int>> get lastValueStream => onValueReceived.newStreamWithInitialValue(lastValue);
+  Stream<List<int>> get lastValueStream =>
+      onValueReceived.newStreamWithInitialValue(lastValue);
 
   // this stream is updated:
   //   - after read() is called
@@ -51,9 +54,12 @@ class BluetoothCharacteristic {
 
   bool get isNotifying {
     try {
-      var cccd = descriptors.singleWhere((d) => d.descriptorUuid == BluetoothDescriptor.cccd);
-      var hasNotify = cccd.lastValue.isNotEmpty && (cccd.lastValue[0] & 0x01) > 0;
-      var hasIndicate = cccd.lastValue.isNotEmpty && (cccd.lastValue[0] & 0x02) > 0;
+      var cccd = descriptors
+          .singleWhere((d) => d.descriptorUuid == BluetoothDescriptor.cccd);
+      var hasNotify =
+          cccd.lastValue.isNotEmpty && (cccd.lastValue[0] & 0x01) > 0;
+      var hasIndicate =
+          cccd.lastValue.isNotEmpty && (cccd.lastValue[0] & 0x02) > 0;
       return hasNotify || hasIndicate;
     } catch (e) {
       return false;
@@ -66,7 +72,8 @@ class BluetoothCharacteristic {
 
     // Only allows a single read to be underway at any time, per-characteristic, per-device.
     // Otherwise, there would be multiple in-flight requests and we wouldn't know which response is for us.
-    _Mutex readMutex = await _MutexFactory.getMutexForKey(remoteId.str + ":" + characteristicUuid.toString() + ":readChr");
+    _Mutex readMutex = await _MutexFactory.getMutexForKey(
+        remoteId.str + ":" + characteristicUuid.toString() + ":readChr");
 
     await readMutex.synchronized(() async {
       var request = BmReadCharacteristicRequest(
@@ -87,13 +94,16 @@ class BluetoothCharacteristic {
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmOnCharacteristicReceived> futureResponse = responseStream.first;
 
-      await FlutterBluePlus._invokeMethod('readCharacteristic', request.toMap());
+      await FlutterBluePlus._invokeMethod(
+          'readCharacteristic', request.toMap());
 
-      BmOnCharacteristicReceived response = await futureResponse.timeout(Duration(seconds: timeout));
+      BmOnCharacteristicReceived response =
+          await futureResponse.timeout(Duration(seconds: timeout));
 
       // failed?
       if (!response.success) {
-        throw FlutterBluePlusException("readCharacteristic", response.errorCode, response.errorString);
+        throw FlutterBluePlusException(
+            "readCharacteristic", response.errorCode, response.errorString);
       }
 
       // cache latest value
@@ -109,7 +119,12 @@ class BluetoothCharacteristic {
   /// Writes a characteristic.
   ///  - [withoutResponse]: the write is not guaranteed and always returns immediately with success.
   ///  - [withResponse]: the write returns error on failure
-  Future<void> write(List<int> value, {bool withoutResponse = false, int timeout = 15}) async {
+  ///  - [ignoreMtuRestriction]: set to true to ignore the MTU size of the Bluetooth GATT. This might be helpful in case MTU negotitation with a specific devices is not possible
+  ///    but you know for sure that the device can handle the amount of data you want to send.
+  Future<void> write(List<int> value,
+      {bool withoutResponse = false,
+      int timeout = 15,
+      bool ignoreMtuRestriction = false}) async {
     print("withoutResponse $withoutResponse");
 
     // The write mutex is more complicated, but the goal is the same.
@@ -117,7 +132,9 @@ class BluetoothCharacteristic {
     _Mutex writeMutex = await _getwWriteMutex(withoutResponse);
 
     await writeMutex.synchronized(() async {
-      final writeType = withoutResponse ? BmWriteType.withoutResponse : BmWriteType.withResponse;
+      final writeType = withoutResponse
+          ? BmWriteType.withoutResponse
+          : BmWriteType.withResponse;
 
       var request = BmWriteCharacteristicRequest(
         remoteId: remoteId.toString(),
@@ -126,6 +143,9 @@ class BluetoothCharacteristic {
         secondaryServiceUuid: null,
         writeType: writeType,
         value: value,
+        ignoreMtuRestriction: ignoreMtuRestriction
+            ? BmWriteIgnoreMtuRestrictionType.yes
+            : BmWriteIgnoreMtuRestrictionType.no,
       );
 
       var responseStream = FlutterBluePlus._methodStream.stream
@@ -139,16 +159,19 @@ class BluetoothCharacteristic {
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmOnCharacteristicWritten> futureResponse = responseStream.first;
 
-      await FlutterBluePlus._invokeMethod('writeCharacteristic', request.toMap());
+      await FlutterBluePlus._invokeMethod(
+          'writeCharacteristic', request.toMap());
 
       // wait for response so that we can:
       //  1. check for success (writeWithResponse)
       //  2. wait until the packet has been sent, to prevent iOS & Android dropping packets (writeWithoutResponse)
-      BmOnCharacteristicWritten response = await futureResponse.timeout(Duration(seconds: timeout));
+      BmOnCharacteristicWritten response =
+          await futureResponse.timeout(Duration(seconds: timeout));
 
       // failed?
       if (!response.success) {
-        throw FlutterBluePlusException("writeCharacteristic", response.errorCode, response.errorString);
+        throw FlutterBluePlusException(
+            "writeCharacteristic", response.errorCode, response.errorString);
       }
 
       return Future.value();
@@ -169,7 +192,8 @@ class BluetoothCharacteristic {
 
     // Notifications & Indications are configured by writing to the
     // Client Characteristic Configuration Descriptor (CCCD)
-    Stream<BmOnDescriptorResponse> responseStream = FlutterBluePlus._methodStream.stream
+    Stream<BmOnDescriptorResponse> responseStream = FlutterBluePlus
+        ._methodStream.stream
         .where((m) => m.method == "OnDescriptorResponse")
         .map((m) => m.arguments)
         .map((buffer) => BmOnDescriptorResponse.fromMap(buffer))
@@ -185,11 +209,13 @@ class BluetoothCharacteristic {
     await FlutterBluePlus._invokeMethod('setNotification', request.toMap());
 
     // wait for response, so that we can check for success
-    BmOnDescriptorResponse response = await futureResponse.timeout(Duration(seconds: timeout));
+    BmOnDescriptorResponse response =
+        await futureResponse.timeout(Duration(seconds: timeout));
 
     // failed?
     if (!response.success) {
-      throw FlutterBluePlusException("setNotifyValue", response.errorCode, response.errorString);
+      throw FlutterBluePlusException(
+          "setNotifyValue", response.errorCode, response.errorString);
     }
 
     // verify notifications were actually set correctly
@@ -198,7 +224,8 @@ class BluetoothCharacteristic {
     var hasIndicate = cccd.isNotEmpty && (cccd[0] & 0x02) > 0;
     var isEnabled = hasNotify || hasIndicate;
     if (notify != isEnabled) {
-      throw FlutterBluePlusException("setNotifyValue", -1, "notifications were not updated");
+      throw FlutterBluePlusException(
+          "setNotifyValue", -1, "notifications were not updated");
     }
 
     // update descriptor
@@ -232,9 +259,11 @@ class BluetoothCharacteristic {
     //      then there could be 2 in-flight request simultaneously (1 write and 1 writeWithoutResponse request)
     //      and we would not be able to tell their responses apart from each other.
     //
-    return (properties.write && properties.writeWithoutResponse) || withoutResponse
+    return (properties.write && properties.writeWithoutResponse) ||
+            withoutResponse
         ? await _MutexFactory.getMutexForKey(remoteId.str)
-        : await _MutexFactory.getMutexForKey(remoteId.str + ":" + characteristicUuid.toString() + ":writeChr");
+        : await _MutexFactory.getMutexForKey(
+            remoteId.str + ":" + characteristicUuid.toString() + ":writeChr");
   }
 
   @override

@@ -384,6 +384,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSString  *secondaryServiceUuid = args[@"secondary_service_uuid"];
             NSNumber  *writeType            = args[@"write_type"];
             NSString  *value                = args[@"value"];
+            NSNumber  *ignoreMtuRestriction = args[@"ignore_mtu_restriction"];
             
             // Find peripheral
             CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
@@ -399,14 +400,16 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                     ? CBCharacteristicWriteWithResponse
                     : CBCharacteristicWriteWithoutResponse);
 
-            // check mtu
-            int mtu = (int) [peripheral maximumWriteValueLengthForType:type];
-            int dataLen = (int) [self convertHexToData:value].length;
-            if (mtu < dataLen) {
-                NSString* f = @"data is longer than MTU allows. dataLen: %d > maxDataLen: %d";
-                NSString* s = [NSString stringWithFormat:f, dataLen, mtu];
-                result([FlutterError errorWithCode:@"writeCharacteristic" message:s details:NULL]);
-                return;
+            // check mtu if not ignored
+            if (ignoreMtuRestriction == 0) {
+                int mtu = (int) [peripheral maximumWriteValueLengthForType:type];
+                int dataLen = (int) [self convertHexToData:value].length;
+                if (mtu < dataLen) {
+                    NSString* f = @"data is longer than MTU allows. dataLen: %d > maxDataLen: %d";
+                    NSString* s = [NSString stringWithFormat:f, dataLen, mtu];
+                    result([FlutterError errorWithCode:@"writeCharacteristic" message:s details:NULL]);
+                    return;
+                }
             }
 
             // device not ready?

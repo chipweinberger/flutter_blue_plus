@@ -21,7 +21,7 @@
 
 FlutterBluePlus is a Bluetooth Low Energy plugin for [Flutter](https://flutter.dev).
 
-**Bluetooth Classic is not supported.** 
+**Bluetooth Classic is not supported.**
 
 (i.e. speakers, headphones, mice, keyboards, gamepads, and more are not supported).
 
@@ -41,11 +41,11 @@ This makes FlutterBluePlus very stable.
 
 ### Error Handling :fire:
 
-Flutter Blue Plus takes error handling very seriously. 
+Flutter Blue Plus takes error handling very seriously.
 
 Every error returned by the native platform is checked and thrown as an exception where appropriate. See [Reference](#reference) for a list of throwable functions.
 
-**Streams:** At the time of writing, streams returned by Flutter Blue Plus never emit any errors and never close. There's no need to handle `onError` or `onDone` for  `stream.listen(...)`.
+**Streams:** At the time of writing, streams returned by Flutter Blue Plus never emit any errors and never close. There's no need to handle `onError` or `onDone` for `stream.listen(...)`.
 
 ---
 
@@ -236,6 +236,7 @@ https://developer.android.com/about/versions/12/features/bluetooth-permissions -
 ```
 
 And set androidUsesFineLocation when scanning:
+
 ```dart
 // Start scanning
 flutterBlue.startScan(timeout: Duration(seconds: 4), androidUsesFineLocation: true);
@@ -282,7 +283,7 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 ### FlutterBlue API
 
 |                        |      Android       |        iOS         | Throws | Description                                                |
-| :--------------------- | :----------------: | :----------------: | :----: | :----------------------------------------------------------|
+| :--------------------- | :----------------: | :----------------: | :----: | :--------------------------------------------------------- |
 | adapterState           | :white_check_mark: | :white_check_mark: |        | Stream of state changes for the bluetooth adapter          |
 | isAvailable            | :white_check_mark: | :white_check_mark: |        | Checks whether the device supports Bluetooth               |
 | isOn                   | :white_check_mark: | :white_check_mark: |        | Checks if Bluetooth adapter is turned on                   |
@@ -300,7 +301,7 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 ### BluetoothDevice API
 
 |                           |      Android       |        iOS         | Throws | Description                                                |
-| :------------------------ | :----------------: | :----------------: | :----: | :----------------------------------------------------------|
+| :------------------------ | :----------------: | :----------------: | :----: | :--------------------------------------------------------- |
 | localName                 | :white_check_mark: | :white_check_mark: |        | The cached localName of the device                         |
 | connect                   | :white_check_mark: | :white_check_mark: | :fire: | Establishes a connection to the device                     |
 | disconnect                | :white_check_mark: | :white_check_mark: | :fire: | Cancels an active or pending connection to the device      |
@@ -320,27 +321,27 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 
 ### BluetoothCharacteristic API
 
-|                 |      Android       |        iOS         | Throws | Description                                                    |
-| :-------------  | :----------------: | :----------------: | :----: | :--------------------------------------------------------------|
-| uuid            | :white_check_mark: | :white_check_mark: |        | The uuid of characeristic                                      |
-| read            | :white_check_mark: | :white_check_mark: | :fire: | Retrieves the value of the characteristic                      |
-| write           | :white_check_mark: | :white_check_mark: | :fire: | Writes the value of the characteristic                         |
-| setNotifyValue  | :white_check_mark: | :white_check_mark: | :fire: | Sets notifications or indications on the characteristic        |
-| isNotifying     | :white_check_mark: | :white_check_mark: |        | Are notifications or indications currently enabled             |
-| onValueReceived | :white_check_mark: | :white_check_mark: |        | Stream of characteristic value updates received from the device|
-| lastValue       | :white_check_mark: | :white_check_mark: |        | The most recent value of the characteristic                    |
-| lastValueStream | :white_check_mark: | :white_check_mark: |        | Stream of lastValue + onValueReceived                          |
+|                 |      Android       |        iOS         | Throws | Description                                                     |
+| :-------------- | :----------------: | :----------------: | :----: | :-------------------------------------------------------------- |
+| uuid            | :white_check_mark: | :white_check_mark: |        | The uuid of characeristic                                       |
+| read            | :white_check_mark: | :white_check_mark: | :fire: | Retrieves the value of the characteristic                       |
+| write           | :white_check_mark: | :white_check_mark: | :fire: | Writes the value of the characteristic                          |
+| setNotifyValue  | :white_check_mark: | :white_check_mark: | :fire: | Sets notifications or indications on the characteristic         |
+| isNotifying     | :white_check_mark: | :white_check_mark: |        | Are notifications or indications currently enabled              |
+| onValueReceived | :white_check_mark: | :white_check_mark: |        | Stream of characteristic value updates received from the device |
+| lastValue       | :white_check_mark: | :white_check_mark: |        | The most recent value of the characteristic                     |
+| lastValueStream | :white_check_mark: | :white_check_mark: |        | Stream of lastValue + onValueReceived                           |
 
 ### BluetoothDescriptor API
 
-|                   |      Android       |        iOS         | Throws | Description                                    |
-| :----             | :----------------: | :----------------: | :----: | :----------------------------------------------|
-| uuid              | :white_check_mark: | :white_check_mark: |        | The uuid of descriptor                         |
-| read              | :white_check_mark: | :white_check_mark: | :fire: | Retrieves the value of the descriptor          |
-| write             | :white_check_mark: | :white_check_mark: | :fire: | Writes the value of the descriptor             |
-| onValueReceived   | :white_check_mark: | :white_check_mark: |        | Stream of descriptor value reads & writes      |
-| lastValue         | :white_check_mark: | :white_check_mark: |        | The most recent value of the descriptor        |
-| lastValueStream   | :white_check_mark: | :white_check_mark: |        | Stream of lastValue + onValueReceived          |
+|                 |      Android       |        iOS         | Throws | Description                               |
+| :-------------- | :----------------: | :----------------: | :----: | :---------------------------------------- |
+| uuid            | :white_check_mark: | :white_check_mark: |        | The uuid of descriptor                    |
+| read            | :white_check_mark: | :white_check_mark: | :fire: | Retrieves the value of the descriptor     |
+| write           | :white_check_mark: | :white_check_mark: | :fire: | Writes the value of the descriptor        |
+| onValueReceived | :white_check_mark: | :white_check_mark: |        | Stream of descriptor value reads & writes |
+| lastValue       | :white_check_mark: | :white_check_mark: |        | The most recent value of the descriptor   |
+| lastValueStream | :white_check_mark: | :white_check_mark: |        | Stream of lastValue + onValueReceived     |
 
 ## Debugging
 
@@ -370,7 +371,7 @@ Many common problems are easily solved.
 
 **1. your device uses bluetooth classic, not BLE.**
 
-Headphones, speakers, keyboards, mice, gamepads, & printers all use Bluetooth Classic. 
+Headphones, speakers, keyboards, mice, gamepads, & printers all use Bluetooth Classic.
 
 These devices may be found in System Settings, but they cannot be connected to by FlutterBluePlus. FlutterBluePlus only supports Bluetooth Low Energy.
 
@@ -400,12 +401,29 @@ for (var d in system) {
 - try removing all scan filters
 - for `withServices` to work, your device must actively advertise the serviceUUIDs it supports
 
-
 **4. try a ble scanner app**
 
-Search the App Store for a BLE scanner apps. 
+Search the App Store for a BLE scanner apps.
 
 You should check if they can discover your device.
+
+**5. your write request (without response) does not work**
+
+Check out if the amount of bytes fits the defined MTU size. The MTU size is received on connection. Try to change the necessary MTU size by calling
+
+```
+await device.requestMtu(512);
+```
+
+or change the size of your byte array to fit the MTU size.
+
+In case you can not negotiate a different MTU size and you also do not want to shrink the size of your byte array, you can explicitely ignore the MTU size on writing data.
+
+Only do this, if you are **SURE** that the receiving device can handle it (e.g. because the hardware developer told you so).
+
+```
+c.write([0x12, 0x34], ignoreMtuRestriction: true);
+```
 
 ---
 
@@ -429,15 +447,6 @@ Try interacting with your device to get it to send new data.
 
 **4. your device has bugs**
 
-Try rebooting your ble device. 
+Try rebooting your ble device.
 
 Some ble devices have buggy software and stop sending data.
-
-
-
-
-
-
-
-
-
