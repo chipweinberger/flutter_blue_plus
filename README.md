@@ -55,7 +55,7 @@ Every error returned by the native platform is checked and thrown as an exceptio
 FlutterBluePlus.setLogLevel(LogLevel.verbose)
 ```
 
-Setting log level verbose shows *all* data in and out.
+Setting `LogLevel.verbose` shows *all* data in and out.
 
 ⚫ = function name
 
