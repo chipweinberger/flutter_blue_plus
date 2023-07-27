@@ -1,3 +1,6 @@
+## 1.12.5
+* Dart: add more logging when in verbose mode, with color
+
 ## 1.12.4
 * Android fix: build error typo (Regression in 1.12.3)
 
