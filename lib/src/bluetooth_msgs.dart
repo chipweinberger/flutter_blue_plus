@@ -786,7 +786,7 @@ class BmConnectionPriorityRequest {
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> data = {};
     data['remote_id'] = remoteId;
-    data['connectionPriority'] = connectionPriority;
+    data['connection_priority'] = connectionPriority;
     return data;
   }
 }
@@ -807,18 +807,18 @@ class BmPreferredPhy {
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> data = {};
     data['remote_id'] = remoteId;
-    data['txPhy'] = txPhy;
-    data['rxPhy'] = rxPhy;
-    data['phyOptions'] = phyOptions;
+    data['tx_phy'] = txPhy;
+    data['rx_phy'] = rxPhy;
+    data['phy_options'] = phyOptions;
     return data;
   }
 
   factory BmPreferredPhy.fromMap(Map<dynamic, dynamic> json) {
     return BmPreferredPhy(
       remoteId: json['remote_id'],
-      txPhy: json['txPhy'],
-      rxPhy: json['rxPhy'],
-      phyOptions: json['phyOptions'],
+      txPhy: json['tx_phy'],
+      rxPhy: json['rx_phy'],
+      phyOptions: json['phy_options'],
     );
   }
 }
