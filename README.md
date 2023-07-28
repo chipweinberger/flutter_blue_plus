@@ -23,7 +23,7 @@ FlutterBluePlus is a Bluetooth Low Energy plugin for [Flutter](https://flutter.d
 
 **Bluetooth Classic is not supported.** 
 
-(i.e. speakers, headphones, mice, keyboards, gamepads, and more are not supported).
+❗ (i.e. speakers, headphones, mice, keyboards, gamepads, and more are not supported). ❗
 
 ## Cross-Platform Bluetooth Low Energy
 
@@ -143,12 +143,13 @@ If you want write large messages regardless of mtu, define this function.
 import 'dart:math';
 
 // split large writes
+// Note: This can only be used for write (with response) to avoid data loss
 extension WriteLarge on BluetoothCharacteristic {
-  Future<void> writeLarge(List<int> value, int mtu, {bool withoutResponse = false, int timeout = 15}) async {
+  Future<void> writeLarge(List<int> value, int mtu, {int timeout = 15}) async {
     int chunk = mtu-3;
     for (int i = 0; i < value.length; i += chunk) {
       List<int> subvalue = value.sublist(i, max(i + chunk, value.length));
-      write(subvalue, withoutResponse: withoutResponse, timeout: timeout);
+      write(subvalue, withoutResponse:false, timeout: timeout);
     }
   }
 }
