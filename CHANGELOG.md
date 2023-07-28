@@ -1,3 +1,7 @@
+## 1.12.7
+* iOS: fix mtu returned on iOS was 3 too small
+* dart: clean: simplify mutexes. improves throughput for chrs that support write & writeWithoutResponse
+
 ## 1.12.6
 * Dart: verbose logging: brown == data from platform
 
