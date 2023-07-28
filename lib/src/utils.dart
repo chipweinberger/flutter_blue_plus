@@ -409,6 +409,7 @@ String _black(String s) {
   return '\x1B[1;30m$s\x1B[0m';
 }
 
+// ignore: unused_element
 String _green(String s) {
   // Use ANSI escape codes
   return '\x1B[1;32m$s\x1B[0m';
