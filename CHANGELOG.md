@@ -1,3 +1,6 @@
+## 1.12.8
+* android: fix: null ptr in setPreferredPhy & setConnectionPriority (regression in 1.7.0)
+
 ## 1.12.7
 * iOS: fix mtu returned on iOS was 3 too small
 * dart: clean: simplify mutexes. improves throughput for chrs that support write & writeWithoutResponse
