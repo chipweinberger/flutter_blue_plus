@@ -48,13 +48,13 @@ class BluetoothDescriptor {
   Future<List<int>> read({int timeout = 15}) async {
     List<int> readValue = [];
 
-    // Only allows a single read to be underway at any time, per-characteristic, per-device.
+    // Only allow a single read to be underway at any time, per-characteristic, per-device.
     // Otherwise, there would be multiple in-flight requests and we wouldn't know which response is for us.
-    _Mutex readMutex = await _MutexFactory.getMutexForKey(remoteId.str + ":" + characteristicUuid.toString() + ":readDesc");
+    String key = remoteId.str + ":" + characteristicUuid.toString() + ":writeDesc";
+    _Mutex readMutex = await _MutexFactory.getMutexForKey(key);
+    await readMutex.take();
 
-    // Only allow a single read operation
-    // at a time, to prevent race conditions.
-    await readMutex.synchronized(() async {
+    try {
       var request = BmReadDescriptorRequest(
         remoteId: remoteId.toString(),
         serviceUuid: serviceUuid,
@@ -86,19 +86,22 @@ class BluetoothDescriptor {
       }
 
       readValue = response.value;
-    });
+    } finally {
+      readMutex.give();
+    }
 
     return readValue;
   }
 
   /// Writes the value of a descriptor
   Future<void> write(List<int> value, {int timeout = 15}) async {
-
-    // Only allows a single write to be underway at any time, per-characteristic, per-device.
+    // Only allow a single write to be underway at any time, per-characteristic, per-device.
     // Otherwise, there would be multiple in-flight requests and we wouldn't know which response is for us.
-    _Mutex writeMutex = await _MutexFactory.getMutexForKey(remoteId.str + ":" + characteristicUuid.toString() + ":writeDesc");
+    String key = remoteId.str + ":" + characteristicUuid.toString() + ":writeDesc";
+    _Mutex writeMutex = await _MutexFactory.getMutexForKey(key);
+    await writeMutex.take();
 
-    await writeMutex.synchronized(() async {
+    try {
       var request = BmWriteDescriptorRequest(
         remoteId: remoteId.toString(),
         serviceUuid: serviceUuid,
@@ -129,7 +132,9 @@ class BluetoothDescriptor {
       if (!response.success) {
         throw FlutterBluePlusException("writeDescriptor", response.errorCode, response.errorString);
       }
-    });
+    } finally {
+      writeMutex.give();
+    }
 
     return Future.value();
   }

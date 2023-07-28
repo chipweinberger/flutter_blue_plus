@@ -198,11 +198,10 @@ class FlutterBluePlus {
 
         yield item;
       }
-    } catch (e) {
+    } finally {
       // cleanup
       _scanResponseBuffer?.close();
       _isScanning.add(false);
-      rethrow;
     }
   }
 

@@ -40,8 +40,7 @@ int _compareAsciiLowerCase(String a, String b) {
   return defaultResult.sign;
 }
 
-
-// add to list if item is new, 
+// add to list if item is new,
 // or update existing item
 List<T> _addOrUpdate<T>(List<T> results, T item) {
   var list = List<T>.from(results);
@@ -368,42 +367,39 @@ Stream<T> _mergeStreams<T>(List<Stream<T>> streams) {
   return controller.stream;
 }
 
+// dart is single threaded, but still has task switching.
+// this mutex lets a single task through at a time.
 class _Mutex {
-  Future<void> _lastOperation = Future.value();
+  final StreamController _controller = StreamController.broadcast();
+  bool took = false;
 
-  Future<void> synchronized(Function() operation) async {
-    final previousOperation = _lastOperation;
-    final currentOperation = Completer<void>();
-
-    _lastOperation = currentOperation.future;
-
-    // The `catchError` ensures that any error from the
-    // previous operation is not re-propagated
-    await previousOperation.catchError((_) {});
-
-    try {
-      await operation();
-      currentOperation.complete();
-    } catch (e, st) {
-      currentOperation.completeError(e, st);
+  Future<void> take() async {
+    while (took) {
+      await _controller.stream.first;
     }
+    took = true;
+  }
 
-    return currentOperation.future;
+  void give() {
+    took = false;
+    // release waiting tasks
+    _controller.add(null); 
   }
 }
 
 // Create mutexes in a parrallel-safe way,
 class _MutexFactory {
-  
   static final _Mutex _global = _Mutex();
   static final Map<String, _Mutex> _all = {};
 
   static Future<_Mutex> getMutexForKey(String key) async {
     _Mutex? value;
-    await _global.synchronized(() async {
+    await _global.take();
+    {
       _all[key] ??= _Mutex();
       value = _all[key];
-    });
+    }
+    _global.give();
     return value!;
   }
 }

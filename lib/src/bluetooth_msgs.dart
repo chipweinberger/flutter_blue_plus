@@ -1,6 +1,5 @@
 part of flutter_blue_plus;
 
-
 enum BmAdapterStateEnum {
   unknown,
   unavailable,
@@ -247,7 +246,6 @@ class BmBluetoothService {
   });
 
   factory BmBluetoothService.fromMap(Map<dynamic, dynamic> json) {
-
     // convert characteristics
     List<BmBluetoothCharacteristic> chrs = [];
     for (var v in json['characteristics']) {
@@ -290,7 +288,6 @@ class BmBluetoothCharacteristic {
   });
 
   factory BmBluetoothCharacteristic.fromMap(Map<dynamic, dynamic> json) {
-
     // convert descriptors
     List<BmBluetoothDescriptor> descs = [];
     for (var v in json['descriptors']) {
