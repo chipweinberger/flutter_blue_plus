@@ -6,7 +6,11 @@ body:
   - type: markdown
     attributes:
       value: |
-        Having problems? Try setting 'FlutterBluePlus.setLogLevel(LogLevel.verbose)' to get more details
+        I've considered if setting 'FlutterBluePlus.setLogLevel(LogLevel.verbose)' would help me solve my issue.
+  - type: markdown
+    attributes:
+      value: |
+        I've looked at the README "Common Problems" section
   - type: input
     id: fbp-version
     attributes:

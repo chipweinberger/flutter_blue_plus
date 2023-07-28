@@ -451,6 +451,60 @@ Try rebooting your ble device.
 
 Some ble devices have buggy software and stop sending data.
 
+### characteristic writes fails
+
+**1. the characeristic is not writeable**
+
+Not all characeristics support `write`.
+ 
+Your device must have configured this characteristic to support `write`.
+
+**2. the data length is too long**
+
+Characteristics only support writes up to a certain size. 
+
+`writeWithoutResponse`: you can only write up to (MTU-3) at a time. This is a BLE limitation.
+
+`write`: look in the usage section for a `writeLarge`` function you can use to solve this issue.
+
+**3. the characeristic does not support writeWithoutResponse**
+
+Not all characeristics support `writeWithoutResponse`. 
+ 
+Your device must have configured this characteristic to support `writeWithoutResponse`.
+
+**4. your bluetooth device turned off, or is out of range**
+
+If your device turns off mid-write, it will cause a failure.
+
+**5. your bluetooth device has bugs**
+
+Maybe your device crashed, or is not sending a response due to software bugs.
+
+**6. there is radio interference**
+
+Bluetooth is wireless and will not always work.
+
+
+### characteristic read fails
+
+**1. the characeristic is not readable**
+
+Not all characeristics support `read`.
+ 
+Your device must have configured this characteristic to support `read`.
+
+**2. your bluetooth device turned off, or is out of range**
+
+If your device turns off mid-read, it will cause a failure.
+
+**3. your bluetooth device has bugs**
+
+Maybe your device crashed, or is not sending a response due to software bugs.
+
+**4. there is radio interference**
+
+Bluetooth is wireless and will not always work.
 
 
 
