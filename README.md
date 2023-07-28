@@ -137,6 +137,23 @@ for(BluetoothCharacteristic c in characteristics) {
 await c.write([0x12, 0x34])
 ```
 
+If you want write large messages regardless of mtu, define this function.
+
+```dart
+import 'dart:math';
+
+// split large writes
+extension WriteLarge on BluetoothCharacteristic {
+  Future<void> writeLarge(List<int> value, int mtu, {bool withoutResponse = false, int timeout = 15}) async {
+    int chunk = mtu-3;
+    for (int i = 0; i < value.length; i += chunk) {
+      List<int> subvalue = value.sublist(i, max(i + chunk, value.length));
+      write(subvalue, withoutResponse: withoutResponse, timeout: timeout);
+    }
+  }
+}
+```
+
 ### Read and write descriptors
 
 ```dart
