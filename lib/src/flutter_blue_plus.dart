@@ -12,17 +12,21 @@ class FlutterBluePlus {
   static bool _initialized = false;
 
   // native platform channel
-  static final MethodChannel _methods = const MethodChannel('flutter_blue_plus/methods');
+  static final MethodChannel _methods =
+      const MethodChannel('flutter_blue_plus/methods');
 
   // a broadcast stream version of the MethodChannel
   // ignore: close_sinks
-  static final StreamController<MethodCall> _methodStream = StreamController.broadcast();
+  static final StreamController<MethodCall> _methodStream =
+      StreamController.broadcast();
 
   // stream used for the isScanning public api
-  static final _StreamController<bool> _isScanning = _StreamController(initialValue: false);
+  static final _StreamController<bool> _isScanning =
+      _StreamController(initialValue: false);
 
   // stream used for the scanResults public api
-  static final _StreamController<List<ScanResult>> _scanResultsList = _StreamController(initialValue: []);
+  static final _StreamController<List<ScanResult>> _scanResultsList =
+      _StreamController(initialValue: []);
 
   // ScanResponses are received from the system one-by-one from the method broadcast stream.
   // This variable buffers all the results into a single-subscription stream.
@@ -43,10 +47,12 @@ class FlutterBluePlus {
   static LogLevel get logLevel => _logLevel;
 
   /// Checks whether the device allows Bluetooth for your app
-  static Future<bool> get isAvailable async => await _invokeMethod('isAvailable');
+  static Future<bool> get isAvailable async =>
+      await _invokeMethod('isAvailable');
 
   /// Return the friendly Bluetooth name of the local Bluetooth adapter
-  static Future<String> get adapterName async => await _invokeMethod('getAdapterName');
+  static Future<String> get adapterName async =>
+      await _invokeMethod('getAdapterName');
 
   // returns whether we are scanning as a stream
   static Stream<bool> get isScanning => _isScanning.stream;
@@ -56,7 +62,8 @@ class FlutterBluePlus {
 
   /// Turn on Bluetooth (Android only),
   static Future<void> turnOn({int timeout = 10}) async {
-    Stream<BluetoothAdapterState> responseStream = adapterState.where((s) => s == BluetoothAdapterState.on);
+    Stream<BluetoothAdapterState> responseStream =
+        adapterState.where((s) => s == BluetoothAdapterState.on);
 
     // Start listening now, before invokeMethod, to ensure we don't miss the response
     Future<BluetoothAdapterState> futureResponse = responseStream.first;
@@ -68,7 +75,8 @@ class FlutterBluePlus {
 
   /// Turn off Bluetooth (Android only),
   static Future<void> turnOff({int timeout = 10}) async {
-    Stream<BluetoothAdapterState> responseStream = adapterState.where((s) => s == BluetoothAdapterState.off);
+    Stream<BluetoothAdapterState> responseStream =
+        adapterState.where((s) => s == BluetoothAdapterState.off);
 
     // Start listening now, before invokeMethod, to ensure we don't miss the response
     Future<BluetoothAdapterState> futureResponse = responseStream.first;
@@ -92,7 +100,8 @@ class FlutterBluePlus {
 
     yield initialState;
 
-    Stream<BluetoothAdapterState> responseStream = FlutterBluePlus._methodStream.stream
+    Stream<BluetoothAdapterState> responseStream = FlutterBluePlus
+        ._methodStream.stream
         .where((m) => m.method == "OnAdapterStateChanged")
         .map((m) => m.arguments)
         .map((buffer) => BmBluetoothAdapterState.fromMap(buffer))
@@ -143,7 +152,8 @@ class FlutterBluePlus {
           androidUsesFineLocation: androidUsesFineLocation);
 
       if (_isScanning.value == true) {
-        throw FlutterBluePlusException('scan', -1, 'Another scan is already in progress.');
+        throw FlutterBluePlusException(
+            'scan', -1, 'Another scan is already in progress.');
       }
 
       // push to isScanning stream
@@ -153,7 +163,8 @@ class FlutterBluePlus {
       // Clear scan results list
       _scanResultsList.add(<ScanResult>[]);
 
-      Stream<BmScanResponse> responseStream = FlutterBluePlus._methodStream.stream
+      Stream<BmScanResponse> responseStream = FlutterBluePlus
+          ._methodStream.stream
           .where((m) => m.method == "OnScanResponse")
           .map((m) => m.arguments)
           .map((buffer) => BmScanResponse.fromMap(buffer))
@@ -178,7 +189,8 @@ class FlutterBluePlus {
       await for (BmScanResponse response in _scanResponseBuffer!.stream) {
         // failure?
         if (response.failed != null) {
-          throw FlutterBluePlusException("scan", response.failed!.errorCode, response.failed!.errorString);
+          throw FlutterBluePlusException(
+              "scan", response.failed!.errorCode, response.failed!.errorString);
         }
 
         // no result?
@@ -243,7 +255,8 @@ class FlutterBluePlus {
   }
 
   // invoke a platform method
-  static Future<dynamic> _invokeMethod(String method, [dynamic arguments]) async {
+  static Future<dynamic> _invokeMethod(String method,
+      [dynamic arguments]) async {
     // initialize handler
     if (_initialized == false) {
       // set handler
@@ -254,7 +267,7 @@ class FlutterBluePlus {
           String result = call.arguments.toString();
           func = _logColor ? _black(func) : func;
           result = _logColor ? _brown(result) : result;
-          print("[FBP] $func result: $result");
+          debugPrint("[FBP] $func result: $result");
         }
         _methodStream.add(call);
       });
@@ -272,7 +285,7 @@ class FlutterBluePlus {
       String args = arguments.toString();
       func = _logColor ? _black(func) : func;
       args = _logColor ? _magenta(args) : args;
-      print("[FBP] $func args: $args");
+      debugPrint("[FBP] $func args: $args");
     }
 
     // invoke
@@ -284,7 +297,7 @@ class FlutterBluePlus {
       String result = obj.toString();
       func = _logColor ? _black(func) : func;
       result = _logColor ? _brown(result) : result;
-      print("[FBP] $func result: $result");
+      debugPrint("[FBP] $func result: $result");
     }
 
     return obj;
@@ -292,7 +305,8 @@ class FlutterBluePlus {
 
   /// Checks if Bluetooth functionality is turned on
   @Deprecated('Use adapterState.first == BluetoothAdapterState.on instead')
-  static Future<bool> get isOn async => await adapterState.first == BluetoothAdapterState.on;
+  static Future<bool> get isOn async =>
+      await adapterState.first == BluetoothAdapterState.on;
 
   @Deprecated('Use adapterName instead')
   static Future<String> get name => adapterName;
@@ -304,7 +318,8 @@ class FlutterBluePlus {
   static void get instance => null;
 
   @Deprecated('Use connectedSystemDevices instead')
-  static Future<List<BluetoothDevice>> get connectedDevices => connectedSystemDevices;
+  static Future<List<BluetoothDevice>> get connectedDevices =>
+      connectedSystemDevices;
 }
 
 /// Log levels for FlutterBlue
@@ -318,7 +333,15 @@ enum LogLevel {
 }
 
 /// State of the bluetooth adapter.
-enum BluetoothAdapterState { unknown, unavailable, unauthorized, turningOn, on, turningOff, off }
+enum BluetoothAdapterState {
+  unknown,
+  unavailable,
+  unauthorized,
+  turningOn,
+  on,
+  turningOff,
+  off
+}
 
 class ScanMode {
   const ScanMode(this.value);
@@ -343,7 +366,8 @@ class DeviceIdentifier {
   int get hashCode => str.hashCode;
 
   @override
-  bool operator ==(other) => other is DeviceIdentifier && _compareAsciiLowerCase(str, other.str) == 0;
+  bool operator ==(other) =>
+      other is DeviceIdentifier && _compareAsciiLowerCase(str, other.str) == 0;
 }
 
 class ScanResult {
@@ -370,7 +394,10 @@ class ScanResult {
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) || other is ScanResult && runtimeType == other.runtimeType && device == other.device;
+      identical(this, other) ||
+      other is ScanResult &&
+          runtimeType == other.runtimeType &&
+          device == other.device;
 
   @override
   int get hashCode => device.hashCode;

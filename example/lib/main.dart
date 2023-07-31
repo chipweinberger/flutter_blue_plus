@@ -518,7 +518,7 @@ class DeviceScreen extends StatelessWidget {
       try {
         yield await device.readRssi();
       } catch (e) {
-        print("Error reading RSSI: $e");
+        debugPrint("Error reading RSSI: $e");
         break;
       }
       await Future.delayed(frequency);
