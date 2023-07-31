@@ -34,6 +34,7 @@ class FlutterBluePlus {
 
   /// FlutterBluePlus log level
   static LogLevel _logLevel = LogLevel.debug;
+  static bool _logColor = true;
 
   ////////////////////
   //  Public
@@ -235,9 +236,10 @@ class FlutterBluePlus {
   }
 
   /// Sets the internal FlutterBlue log level
-  static void setLogLevel(LogLevel level) async {
+  static void setLogLevel(LogLevel level, {color = true}) async {
     await _invokeMethod('setLogLevel', level.index);
     _logLevel = level;
+    _logColor = color;
   }
 
   // invoke a platform method
@@ -246,8 +248,13 @@ class FlutterBluePlus {
     if (_initialized == false) {
       // set handler
       _methods.setMethodCallHandler((MethodCall call) async {
+        // log result
         if (logLevel == LogLevel.verbose) {
-          print("[FBP] ${_black('[[ ${call.method} ]]')} result: ${_brown(call.arguments.toString())}");
+          String func = '[[ ${call.method} ]]';
+          String result = call.arguments.toString();
+          func = _logColor ? _black(func) : func;
+          result = _logColor ? _brown(result) : result;
+          print("[FBP] $func result: $result");
         }
         _methodStream.add(call);
       });
@@ -259,21 +266,31 @@ class FlutterBluePlus {
       setLogLevel(logLevel);
     }
 
-    // invoke
+    // log args
     if (logLevel == LogLevel.verbose) {
-      print("[FBP] ${_black('<$method>')} args: ${_magenta(arguments.toString())}");
+      String func = '<$method>';
+      String args = arguments.toString();
+      func = _logColor ? _black(func) : func;
+      args = _logColor ? _magenta(args) : args;
+      print("[FBP] $func args: $args");
     }
 
+    // invoke
     dynamic obj = await _methods.invokeMethod(method, arguments);
 
+    // log result
     if (logLevel == LogLevel.verbose) {
-      print("[FBP] ${_black('<$method>')} result: ${_brown(obj.toString())}");
+      String func = '<$method>';
+      String result = obj.toString();
+      func = _logColor ? _black(func) : func;
+      result = _logColor ? _brown(result) : result;
+      print("[FBP] $func result: $result");
     }
 
     return obj;
   }
 
-  /// Checks if Bluetooth functionality is turned on 
+  /// Checks if Bluetooth functionality is turned on
   @Deprecated('Use adapterState.first == BluetoothAdapterState.on instead')
   static Future<bool> get isOn async => await adapterState.first == BluetoothAdapterState.on;
 
