@@ -114,23 +114,22 @@ class BluetoothCharacteristic {
   ///  - [withoutResponse]: the write is not guaranteed and always returns immediately with success.
   ///  - [withResponse]: the write returns error on failure
   Future<void> write(List<int> value, {bool withoutResponse = false, int timeout = 15}) async {
-    print("withoutResponse $withoutResponse");
-
     // Only allows a single read to be underway at any time, per-characteristic, per-device.
     // Otherwise, there would be multiple in-flight requests and we wouldn't know which response is for us.
     String key = remoteId.str + ":" + characteristicUuid.toString() + ":writeChr";
     _Mutex writeMutex = await _MutexFactory.getMutexForKey(key);
     await writeMutex.take();
 
-    // edge case: In order to avoid dropped packets, whenever we do a writeWithoutResponse,
-    //  we wait for the device to say it is ready for more before we return from this function.
-    //  This 'ready' signal is per-device, so we can only have 1 writeWithoutResponse request
-    //  in-flight at a time, per device.
+    // edge case: In order to avoid dropped packets, whenever we do a writeWithoutResponse, we
+    // wait for the device to say it is ready for more again before we return from this function,
+    // that way the next time we call write(writeWithoutResponse:true) we know the device is already
+    // ready and will not drop the packet. This 'ready' signal is per-device, so we can only have
+    // 1 writeWithoutResponse request in-flight at a time, per device.
     _Mutex deviceReady = await _MutexFactory.getMutexForKey(remoteId.str + ":withoutResp");
     if (withoutResponse) {
       await deviceReady.take();
     }
-    
+
     try {
       final writeType = withoutResponse ? BmWriteType.withoutResponse : BmWriteType.withResponse;
 
@@ -173,7 +172,6 @@ class BluetoothCharacteristic {
         deviceReady.give();
       }
     }
-
   }
 
   /// Sets notifications or indications for the characteristic.
@@ -231,7 +229,7 @@ class BluetoothCharacteristic {
 
     return notify == isEnabled;
   }
-  
+
   @override
   String toString() {
     return 'BluetoothCharacteristic{'
