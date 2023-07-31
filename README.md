@@ -400,6 +400,7 @@ These devices may be found in System Settings, but they cannot be connected to b
 - you might need put your device in "discovery mode"
 - your phone may have already connected automatically
 - another app may have already connected to your device
+- another phone may have already connected to your device
 
 Try looking through already connected devices:
 
@@ -431,9 +432,9 @@ You should check if they can discover your device.
 
 ### onValueReceived is never called
 
-**1. you are not subscribed**
+**1. you are not subscribed OR not calling read**
 
-Your device will only send values after you call `await characteristic.setNotifyValue(true)`
+Your device will only send values after you call `await characteristic.setNotifyValue(true)`, or `await characteristic.read()`
 
 **2. you are calling write**
 
@@ -453,6 +454,8 @@ Try rebooting your ble device.
 
 Some ble devices have buggy software and stop sending data.
 
+---
+
 ### characteristic writes fails
 
 **1. the characeristic is not writeable**
@@ -467,7 +470,7 @@ Characteristics only support writes up to a certain size.
 
 `writeWithoutResponse`: you can only write up to (MTU-3) at a time. This is a BLE limitation.
 
-`write`: look in the usage section for a `writeLarge`` function you can use to solve this issue.
+`write`: look in the [Usage](#usage) section for a `writeLarge` function you can use to solve this issue.
 
 **3. the characeristic does not support writeWithoutResponse**
 
@@ -487,6 +490,7 @@ Maybe your device crashed, or is not sending a response due to software bugs.
 
 Bluetooth is wireless and will not always work.
 
+---
 
 ### characteristic read fails
 
