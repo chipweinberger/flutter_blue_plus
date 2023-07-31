@@ -158,17 +158,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             result(response);
         }
-        else if ([@"isOn" isEqualToString:call.method])
-        {
-            if (self.centralManager.state == CBManagerStatePoweredOn)
-            {
-                result(@(YES));
-            }
-            else
-            {
-                result(@(NO));
-            }
-        }
         else if([@"turnOn" isEqualToString:call.method])
         {
             result([FlutterError errorWithCode:@"turnOn" 

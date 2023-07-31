@@ -69,7 +69,7 @@ Setting `LogLevel.verbose` shows *all* data in and out.
 ### Enable Bluetooth
 
 ```dart
-// check availability
+// check adapter availability  
 if (await FlutterBluePlus.isAvailable == false) {
     print("Bluetooth not supported by this device");
     return;

@@ -273,12 +273,6 @@ public class FlutterBluePlusPlugin implements
                     break;
                 }
 
-                case "isOn":
-                {
-                    result.success(mBluetoothAdapter.isEnabled());
-                    break;
-                }
-
                 case "turnOn":
                 {
                     if (mBluetoothAdapter.isEnabled()) {
