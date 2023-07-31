@@ -1371,9 +1371,13 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     // Included Services
     NSMutableArray *includedServicesProtos = [NSMutableArray new];
-    for (CBService *s in [service includedServices])
+    for (CBService *included in [service includedServices])
     {
-        [includedServicesProtos addObject:[self bmBluetoothService:peripheral service:s]];
+        // service includes itself?
+        if ([included.UUID isEqual:service.UUID]) {
+            continue; // skip, infinite recursion
+        }
+        [includedServicesProtos addObject:[self bmBluetoothService:peripheral service:included]];
     }
 
     // See BmBluetoothService

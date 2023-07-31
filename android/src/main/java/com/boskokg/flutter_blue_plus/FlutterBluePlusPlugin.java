@@ -1732,8 +1732,12 @@ public class FlutterBluePlusPlugin implements
         }
 
         List<Object> includedServices = new ArrayList<Object>();
-        for(BluetoothGattService s : service.getIncludedServices()) {
-            includedServices.add(bmBluetoothService(device, s, gatt));
+        for(BluetoothGattService included : service.getIncludedServices()) {
+            // service includes itself?
+            if (included.getUuid().equals(service.getUuid())) {
+                continue; // skip, infinite recursion
+            }
+            includedServices.add(bmBluetoothService(device, included, gatt));
         }
 
         HashMap<String, Object> map = new HashMap<>();
