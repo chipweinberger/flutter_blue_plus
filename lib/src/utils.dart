@@ -371,19 +371,21 @@ Stream<T> _mergeStreams<T>(List<Stream<T>> streams) {
 // this mutex lets a single task through at a time.
 class _Mutex {
   final StreamController _controller = StreamController.broadcast();
-  bool took = false;
+  int current = 0;
+  int issued = 0;
 
   Future<void> take() async {
-    while (took) {
-      await _controller.stream.first;
+    int mine = issued;
+    issued++; 
+    // tasks are executed in the same order they call take()
+    while (mine != current) {
+      await _controller.stream.first; // wait
     }
-    took = true;
   }
 
   void give() {
-    took = false;
-    // release waiting tasks
-    _controller.add(null); 
+    current++;
+    _controller.add(null); // release waiting tasks
   }
 }
 
