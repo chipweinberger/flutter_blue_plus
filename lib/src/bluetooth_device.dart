@@ -12,7 +12,7 @@ class BluetoothDevice {
   static Map<DeviceIdentifier, List<BluetoothService>> _knownServices = {};
 
   // used for 'services' public api
-  final StreamController<List<BluetoothService>> _services = StreamController();
+  final StreamController<List<BluetoothService>> _services = StreamController.broadcast();
 
   // used for 'isDiscoveringServices' public api
   final _StreamController<bool> _isDiscoveringServices = _StreamController(initialValue: false);
