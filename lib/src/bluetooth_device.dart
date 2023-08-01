@@ -36,7 +36,8 @@ class BluetoothDevice {
         localName = p.localName ?? "",
         type = _bmToBluetoothDeviceType(p.type);
 
-  /// allows connecting to a known device without scanning
+  /// allows connecting to a known device without re-scanning
+  /// Note: this device must have been discovered by your app in a previous scan
   BluetoothDevice.fromId(String remoteId, {String? localName, BluetoothDeviceType? type})
       : remoteId = DeviceIdentifier(remoteId),
         localName = localName ?? "Unknown",
