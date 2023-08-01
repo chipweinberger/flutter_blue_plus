@@ -1,3 +1,13 @@
+
+## 1.12.9
+* dart: fix: servicesStream: 'bad state: Stream has already been listened to'
+* dart: fix: remove unecessary print('withoutResponse ')
+* dart: mutex should make sure writes happen in the same order as called
+* dart: setLogLevel color now optional
+* android: fix: add blank AndroidManifest.xml to fix build errors in older flutter
+* android/iOS: fix: infinite recursion when included services includes itself
+* iOS: fix: FlutterBluePlus.isOn returns 'no' first time even though it is on
+
 ## 1.12.8
 * android: fix: null ptr in setPreferredPhy & setConnectionPriority (regression in 1.7.0)
 
