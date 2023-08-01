@@ -1,0 +1,6 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<!-- This file must be here to fix build errors in Flutter V2 -->
+<!-- But we intentionally leave this blank because android  bluetooth permissions are
+     complicated and always changing. By leaving this blank, users can set exactly the 
+     permissions they want, without having to 'undo' the permissions we set here -->
+</manifest>
