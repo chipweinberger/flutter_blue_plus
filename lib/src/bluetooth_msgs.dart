@@ -1,13 +1,13 @@
 part of flutter_blue_plus;
 
 enum BmAdapterStateEnum {
-  unknown,
-  unavailable,
-  unauthorized,
-  turningOn,
-  on,
-  turningOff,
-  off,
+  unknown, // 0
+  unavailable, // 1
+  unauthorized, // 2
+  turningOn, // 3
+  on, // 4
+  turningOff, // 5
+  off, // 6
 }
 
 class BmBluetoothAdapterState {
