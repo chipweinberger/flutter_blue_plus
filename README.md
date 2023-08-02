@@ -19,17 +19,19 @@
 
 ## Introduction
 
-FlutterBluePlus is a Bluetooth Low Energy plugin for [Flutter](https://flutter.dev). It supports BLE Central role only (most common).
+FlutterBluePlus is a Bluetooth Low Energy plugin for [Flutter](https://flutter.dev). 
 
-**Bluetooth Classic is not supported.** 
+It supports BLE Central Role only (most common). 
 
-❗ (i.e. speakers, headphones, mice, keyboards, gamepads, Arduino HC-05 & HC-06, and more are not supported). ❗
+If you need BLE Peripheral Role, you should check out [FlutterBlePeripheral](https://pub.dev/packages/flutter_ble_peripheral).
+
+## Bluetooth Classic is not supported ❗❗
+
+ i.e. speakers, headphones, mice, keyboards, gamepads, Arduino HC-05 & HC-06, and more are not supported 
 
 ## Cross-Platform Bluetooth Low Energy
 
 FlutterBluePlus aims to offer the most from all supported platforms: iOS, macOS, Android.
-
-Currently FlutterBluePlus only supports the phone as the BLE Central role (most common).
 
 The code is written to be simple, robust, and incredibly easy to understand.
 
