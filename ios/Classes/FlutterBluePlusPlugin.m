@@ -166,7 +166,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         }
         else if([@"turnOff" isEqualToString:call.method])
         {
-            result([FlutterError errorWithCode:@"removeBond" 
+            result([FlutterError errorWithCode:@"turnOff" 
                                     message:@"iOS does not support turning off bluetooth"
                                     details:NULL]);
         }

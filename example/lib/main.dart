@@ -140,26 +140,6 @@ class FindDevicesScreen extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Find Devices'),
-          actions: [
-            if (Platform.isAndroid)
-              ElevatedButton(
-                child: const Text('TURN OFF'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  foregroundColor: Colors.white,
-                ),
-                onPressed: () async {
-                  try {
-                    if (Platform.isAndroid) {
-                      await FlutterBluePlus.turnOff();
-                    }
-                  } catch (e) {
-                    final snackBar = SnackBar(content: Text(prettyException("Error Turning On:", e)));
-                    snackBarKeyB.currentState?.showSnackBar(snackBar);
-                  }
-                },
-              ),
-          ],
         ),
         body: RefreshIndicator(
           onRefresh: () {

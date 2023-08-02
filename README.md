@@ -311,7 +311,6 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 | isAvailable            | :white_check_mark: | :white_check_mark: |        | Checks whether the device supports Bluetooth               |
 | isOn                   | :white_check_mark: | :white_check_mark: |        | Checks if Bluetooth adapter is turned on                   |
 | turnOn                 | :white_check_mark: |                    | :fire: | Turns on the bluetooth adapter                             |
-| turnOff                | :white_check_mark: |                    | :fire: | Turns off the bluetooth adapter                            |
 | scan                   | :white_check_mark: | :white_check_mark: | :fire: | Starts a scan for Ble devices and returns a stream         |
 | startScan              | :white_check_mark: | :white_check_mark: | :fire: | Starts a scan for Ble devices with no return value         |
 | stopScan               | :white_check_mark: | :white_check_mark: | :fire: | Stop an existing scan for Ble devices                      |

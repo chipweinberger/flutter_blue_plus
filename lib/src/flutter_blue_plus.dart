@@ -66,18 +66,6 @@ class FlutterBluePlus {
     await futureResponse.timeout(Duration(seconds: timeout));
   }
 
-  /// Turn off Bluetooth (Android only),
-  static Future<void> turnOff({int timeout = 10}) async {
-    Stream<BluetoothAdapterState> responseStream = adapterState.where((s) => s == BluetoothAdapterState.off);
-
-    // Start listening now, before invokeMethod, to ensure we don't miss the response
-    Future<BluetoothAdapterState> futureResponse = responseStream.first;
-
-    await _invokeMethod('turnOff');
-
-    await futureResponse.timeout(Duration(seconds: timeout));
-  }
-
   /// Returns a stream of List<ScanResult> results while a scan is in progress.
   /// - The list contains all the results since the scan started.
   /// - When a scan is first started, an empty list is emitted.
@@ -288,6 +276,19 @@ class FlutterBluePlus {
     }
 
     return obj;
+  }
+
+  /// Turn off Bluetooth (Android only),
+  @Deprecated('Deprecated in Android SDK 33 with no replacement')
+  static Future<void> turnOff({int timeout = 10}) async {
+    Stream<BluetoothAdapterState> responseStream = adapterState.where((s) => s == BluetoothAdapterState.off);
+
+    // Start listening now, before invokeMethod, to ensure we don't miss the response
+    Future<BluetoothAdapterState> futureResponse = responseStream.first;
+
+    await _invokeMethod('turnOff');
+
+    await futureResponse.timeout(Duration(seconds: timeout));
   }
 
   /// Checks if Bluetooth functionality is turned on
