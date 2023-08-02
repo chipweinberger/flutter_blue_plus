@@ -25,7 +25,7 @@ It supports BLE Central Role only (most common).
 
 If you need BLE Peripheral Role, you should check out [FlutterBlePeripheral](https://pub.dev/packages/flutter_ble_peripheral).
 
-## Bluetooth Classic is not supported ❗❗
+## ❗ Bluetooth Classic is not supported ❗
 
  i.e. speakers, headphones, mice, keyboards, gamepads, Arduino HC-05 & HC-06, and more are not supported 
 
