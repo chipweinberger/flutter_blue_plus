@@ -1120,8 +1120,12 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     NSData* data = nil;
     if (descriptor.value) {
-        int value = [descriptor.value intValue];
-        data = [NSData dataWithBytes:&value length:sizeof(value)];
+        if ([descriptor.value isKindOfClass:[NSString class]]) {
+            data = [descriptor.value dataUsingEncoding:NSUTF8StringEncoding];
+        } else {
+            int value = [descriptor.value intValue];
+            data = [NSData dataWithBytes:&value length:sizeof(value)];
+        }
     }
     
     // See BmOnDescriptorResponse
@@ -1153,7 +1157,15 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     ServicePair *pair = [self getServicePair:peripheral characteristic:descriptor.characteristic];
 
-    int value = [descriptor.value intValue];
+    NSData* data = nil;
+    if (descriptor.value) {
+        if ([descriptor.value isKindOfClass:[NSString class]]) {
+            data = [descriptor.value dataUsingEncoding:NSUTF8StringEncoding];
+        } else {
+            int value = [descriptor.value intValue];
+            data = [NSData dataWithBytes:&value length:sizeof(value)];
+        }
+    }
     
     // See BmOnDescriptorResponse
     NSDictionary* result = @{
@@ -1163,7 +1175,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"secondary_service_uuid": pair.secondary ? [pair.secondary.UUID fullUUIDString] : [NSNull null],
         @"characteristic_uuid":    [descriptor.characteristic.UUID fullUUIDString],
         @"descriptor_uuid":        [descriptor.UUID fullUUIDString],
-        @"value":                  [self convertDataToHex:[NSData dataWithBytes:&value length:sizeof(value)]],
+        @"value":                  [self convertDataToHex:data],
         @"success":                @(error == nil),
         @"error_string":           error ? [error localizedDescription] : [NSNull null],
         @"error_code":             error ? @(error.code) : [NSNull null],
