@@ -1118,15 +1118,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     ServicePair *pair = [self getServicePair:peripheral characteristic:descriptor.characteristic];
 
-    NSData* data = nil;
-    if (descriptor.value) {
-        if ([descriptor.value isKindOfClass:[NSString class]]) {
-            data = [descriptor.value dataUsingEncoding:NSUTF8StringEncoding];
-        } else {
-            int value = [descriptor.value intValue];
-            data = [NSData dataWithBytes:&value length:sizeof(value)];
-        }
-    }
+    NSData* data = [self descriptorToData:descriptor];
     
     // See BmOnDescriptorResponse
     NSDictionary* result = @{
@@ -1157,15 +1149,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     ServicePair *pair = [self getServicePair:peripheral characteristic:descriptor.characteristic];
 
-    NSData* data = nil;
-    if (descriptor.value) {
-        if ([descriptor.value isKindOfClass:[NSString class]]) {
-            data = [descriptor.value dataUsingEncoding:NSUTF8StringEncoding];
-        } else {
-            int value = [descriptor.value intValue];
-            data = [NSData dataWithBytes:&value length:sizeof(value)];
-        }
-    }
+    NSData* data = [self descriptorToData:descriptor];
     
     // See BmOnDescriptorResponse
     NSDictionary* result = @{
@@ -1562,5 +1546,30 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     }
 
     return result;
+}
+
+- (NSData *)descriptorToData:(CBDescriptor *)descriptor
+{
+    NSData* data = nil;
+    if (descriptor.value)
+    {
+        if ([descriptor.value isKindOfClass:[NSString class]])
+        {
+            // NSString
+            data = [descriptor.value dataUsingEncoding:NSUTF8StringEncoding];
+        }
+        else if ([descriptor.value isKindOfClass:[NSNumber class]])
+        {
+            // NSNumber
+            int value = [descriptor.value intValue];
+            data = [NSData dataWithBytes:&value length:sizeof(value)];
+        } 
+        else if ([descriptor.value isKindOfClass:[NSData class]])
+        {
+            // NSData
+            data = descriptor.value;
+        }
+    }
+    return data;
 }
 @end
