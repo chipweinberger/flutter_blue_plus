@@ -194,6 +194,18 @@ characteristic.onValueReceived.listen((value) {
 await characteristic.setNotifyValue(true);
 ```
 
+### Get Connected System Devices
+
+These devices are already connected to the system, but must be reconnected by *your app* before you can communicate with them.
+
+```dart
+List<BluetoothDevice> connectedSystemDevices = await FlutterBluePlus.connectedSystemDevices;
+for (var d in connectedSystemDevices) {
+    await d.connect(); // Must connect *our* app to the device
+    await d.discoverServices();
+}
+```
+
 ### Read the MTU and request larger size
 
 ```dart
