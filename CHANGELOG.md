@@ -1,3 +1,7 @@
+## 1.12.11
+* Android: fix: potential null dereference if the platform does not have bluetooth
+* Android: fix: close all connections when bluetooth is turned off (DeadObjectException)
+
 ## 1.12.10
 * iOS: isAvailable returns false the first time, incorrectly
 * iOS: fix: descriptors, must handle NSData, NSString, & NSNumber correctly
