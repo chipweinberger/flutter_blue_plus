@@ -1,3 +1,7 @@
+## 1.12.10
+* iOS: isAvailable returns false the first time, incorrectly
+* iOS: fix: descriptors, must handle NSData, NSString, & NSNumber correctly
+* Android: turnOff is deprecated in Android
 
 ## 1.12.9
 * dart: fix: servicesStream: 'bad state: Stream has already been listened to'
