@@ -196,7 +196,7 @@ public class FlutterBluePlusPlugin implements
             if (mBluetoothAdapter == null) {
                 log(LogLevel.DEBUG, "[FBP-Android] initializing BluetoothAdapter");
                 mBluetoothManager = (BluetoothManager) this.context.getSystemService(Context.BLUETOOTH_SERVICE);
-                mBluetoothAdapter = mBluetoothManager.getAdapter();
+                mBluetoothAdapter = mBluetoothManager != null ? mBluetoothManager.getAdapter() : null;
             }
 
             // check that we have an adapter, except for 
