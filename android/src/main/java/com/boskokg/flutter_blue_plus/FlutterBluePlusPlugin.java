@@ -130,19 +130,7 @@ public class FlutterBluePlusPlugin implements
 
         pluginBinding = null;
 
-        // close connections
-        for (BluetoothGatt gatt : mConnectedDevices.values()) {
-            if(gatt != null) {
-                String remoteId = gatt.getDevice().getAddress();
-                Log.d(TAG, "calling disconnect() on device: " + remoteId);
-                Log.d(TAG, "calling gatt.close() on device: " + remoteId);
-                gatt.disconnect();
-                gatt.close();
-            }
-        }
-        mConnectedDevices.clear();
-        mConnectionState.clear();
-        mMtu.clear();
+        closeAllConnections();
 
         context.unregisterReceiver(mBluetoothAdapterStateReceiver);
         context = null;
@@ -1111,6 +1099,22 @@ public class FlutterBluePlusPlugin implements
         return descriptor;
     }
 
+    private void closeAllConnections()
+    {
+        for (BluetoothGatt gatt : mConnectedDevices.values()) {
+            if(gatt != null) {
+                String remoteId = gatt.getDevice().getAddress();
+                Log.d(TAG, "calling disconnect() on device: " + remoteId);
+                Log.d(TAG, "calling gatt.close() on device: " + remoteId);
+                gatt.disconnect();
+                gatt.close();
+            }
+        }
+        mConnectedDevices.clear();
+        mConnectionState.clear();
+        mMtu.clear();
+    }
+
     /////////////////////////////////////////////////////////////////////////////////////
     // ██████   ██████    ██████    █████   ██████    ██████   █████   ███████  ████████
     // ██   ██  ██   ██  ██    ██  ██   ██  ██   ██  ██       ██   ██  ██          ██
@@ -1140,6 +1144,12 @@ public class FlutterBluePlusPlugin implements
 
             log(LogLevel.DEBUG, "[FBP-Android] OnAdapterStateChanged: " + adapterStateString(adapterState));
 
+            // close all connections
+            if (adapterState == BluetoothAdapter.STATE_TURNING_OFF || 
+                adapterState == BluetoothAdapter.STATE_OFF) {
+                closeAllConnections();
+            }
+
             // convert to Protobuf enum
             int convertedState;
             switch (adapterState) {
@@ -1149,7 +1159,7 @@ public class FlutterBluePlusPlugin implements
                 case BluetoothAdapter.STATE_TURNING_ON:   convertedState = 3;           break;
                 default:                                  convertedState = 0;           break;
             }
-
+            
             // see: BmBluetoothAdapterState
             HashMap<String, Object> map = new HashMap<>();
             map.put("adapter_state", convertedState);
