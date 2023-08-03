@@ -123,16 +123,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         }
         else if ([@"isAvailable" isEqualToString:call.method])
         {
-            if (self.centralManager &&
-                self.centralManager.state != CBManagerStateUnsupported &&
-                self.centralManager.state != CBManagerStateUnknown)
-            {
-                result(@(YES));
-            }
-            else
-            {
-                result(@(NO));
-            }
+            result(@(self.centralManager != nil));
         }
         else if ([@"getAdapterName" isEqualToString:call.method])
         {
