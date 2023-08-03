@@ -65,7 +65,7 @@ class BluetoothCharacteristic {
     List<int> responseValue = [];
 
     // Only allows a single read to be underway at any time, per-characteristic, per-device.
-    // Otherwise, there would be multiple in-flight requests and we wouldn't know which response is for us.
+    // Otherwise, there would be multiple in-flight reads and we wouldn't know which response is which.
     String key = remoteId.str + ":" + characteristicUuid.toString() + ":readChr";
     _Mutex readMutex = await _MutexFactory.getMutexForKey(key);
     await readMutex.take();
@@ -114,8 +114,8 @@ class BluetoothCharacteristic {
   ///  - [withoutResponse]: the write is not guaranteed and always returns immediately with success.
   ///  - [withResponse]: the write returns error on failure
   Future<void> write(List<int> value, {bool withoutResponse = false, int timeout = 15}) async {
-    // Only allows a single read to be underway at any time, per-characteristic, per-device.
-    // Otherwise, there would be multiple in-flight requests and we wouldn't know which response is for us.
+    // Only allows a single write to be underway at any time, per-characteristic, per-device.
+    // Otherwise, there would be multiple in-flight writes and we wouldn't know which response is which.
     String key = remoteId.str + ":" + characteristicUuid.toString() + ":writeChr";
     _Mutex writeMutex = await _MutexFactory.getMutexForKey(key);
     await writeMutex.take();
