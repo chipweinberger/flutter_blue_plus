@@ -1,3 +1,7 @@
+## 1.12.12
+* Android: fix: null ptr deref during ScanResult connectionState (regressed in 1.10.6)
+^ connectionState was added to scanResults last week. It was not a good idea, and is now fully removed.
+
 ## 1.12.11
 * Android: fix: potential null dereference if the platform does not have bluetooth
 * Android: fix: close all connections when bluetooth is turned off (DeadObjectException)
