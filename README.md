@@ -91,6 +91,7 @@ if (Platform.isAndroid) {
 
 // wait bluetooth to be on
 // note: for iOS the initial state is typically BluetoothAdapterState.unknown
+// note: if you have permissions issues you will get stuck at BluetoothAdapterState.unauthorized
 await FlutterBluePlus.adapterState.where((s) => s == BluetoothAdapterState.on).first;
 ```
 
