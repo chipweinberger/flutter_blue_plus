@@ -27,7 +27,7 @@ If you need BLE Peripheral Role, you should check out [FlutterBlePeripheral](htt
 
 ## ❗ Bluetooth Classic is not supported ❗
 
- i.e. speakers, headphones, mice, keyboards, gamepads, Arduino HC-05 & HC-06, and more are not supported 
+ i.e. speakers, headphones, mice, keyboards, gamepads, Arduino HC-05 & HC-06, and more are not supported. These all use Bluetooth Classic.
 
 ## Cross-Platform Bluetooth Low Energy
 
