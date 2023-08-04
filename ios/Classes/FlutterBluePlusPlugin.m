@@ -1322,7 +1322,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"device":             [self bmBluetoothDevice:peripheral],
         @"advertisement_data": ad,
         @"rssi":               RSSI ? RSSI : [NSNull null],
-        @"connection_state":   @([self bmConnectionStateEnum:peripheral.state]),
     };
 }
 

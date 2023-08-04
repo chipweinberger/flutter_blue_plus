@@ -1713,14 +1713,10 @@ public class FlutterBluePlusPlugin implements
             }
         }
 
-        // connection state
-        int cs = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
-
         HashMap<String, Object> map = new HashMap<>();
         map.put("device", bmBluetoothDevice(device));
         map.put("rssi", result.getRssi());
         map.put("advertisement_data", advertisementData);
-        map.put("connection_state", bmConnectionStateEnum(cs));
         return map;
     }
 
