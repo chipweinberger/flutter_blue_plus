@@ -123,7 +123,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         }
         else if ([@"isAvailable" isEqualToString:call.method])
         {
-            result(@(self.centralManager != nil));
+            result(self.centralManager != nil ? @(YES) : @(NO));
         }
         else if ([@"getAdapterName" isEqualToString:call.method])
         {
