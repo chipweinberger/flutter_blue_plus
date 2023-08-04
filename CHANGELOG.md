@@ -1,3 +1,6 @@
+## 1.12.13
+* iOS: fix: FlutterBluePlus.isAvailable 'int' is not a subtype of type 'FutureOr<bool>' (regressed in 1.12.10)
+
 ## 1.12.12
 * Android: fix: null ptr deref during ScanResult connectionState (regressed in 1.10.6)
 ^ connectionState was added to scanResults last week. It was not a good idea, and is now fully removed.
