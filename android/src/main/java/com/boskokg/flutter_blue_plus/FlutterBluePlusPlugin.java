@@ -1186,14 +1186,18 @@ public class FlutterBluePlusPlugin implements
         List<ScanFilter> filters;
 
         List<String> servicesUuids = (List<String>)scanSettings.get("service_uuids");
-        int macCount = (int)scanSettings.getOrDefault("mac_count", 0);
+        int macCount = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) ?
+                (int)scanSettings.getOrDefault("mac_count", 0) :
+                ((scanSettings.get("mac_count") != null) ? (int)scanSettings.get("mac_count") : 0);
         int serviceCount = servicesUuids.size();
         int count = macCount + serviceCount;
 
         filters = new ArrayList<>(count);
 
         List<String> noMacAddresses = new ArrayList<String>();
-        List<String> macAddresses = (List<String>)scanSettings.getOrDefault("mac_addresses", noMacAddresses);
+        List<String> macAddresses = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) ?
+                (List<String>)scanSettings.getOrDefault("mac_addresses", noMacAddresses) :
+                ((scanSettings.get("mac_addresses") != null) ? (List<String>)scanSettings.get("mac_addresses") : noMacAddresses);
 
         for (int i = 0; i < macCount; i++) {
             String macAddress = macAddresses.get(i);
