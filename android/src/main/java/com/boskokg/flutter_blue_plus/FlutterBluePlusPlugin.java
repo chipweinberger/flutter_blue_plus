@@ -301,8 +301,7 @@ public class FlutterBluePlusPlugin implements
                     int scanMode =                        (int) data.get("android_scan_mode");
                     boolean usesFineLocation =        (boolean) data.get("android_uses_fine_location");
 
-                    // Android 12+
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    if (Build.VERSION.SDK_INT >= 31) { // Android 12 (October 2021)
                         permissions.add(Manifest.permission.BLUETOOTH_SCAN);
                         permissions.add(Manifest.permission.BLUETOOTH_CONNECT);
                         if (usesFineLocation) {
@@ -310,8 +309,7 @@ public class FlutterBluePlusPlugin implements
                         }
                     }
 
-                    // Android 11 or lower
-                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                    if (Build.VERSION.SDK_INT <= 30) { // Android 11 (September 2020)
                         permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
                     }
 
@@ -329,8 +327,7 @@ public class FlutterBluePlusPlugin implements
                         }
 
                         ScanSettings settings;
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            // Api Level 26
+                        if (Build.VERSION.SDK_INT >= 26) { // Android 8.0 (August 2017)
                             settings = new ScanSettings.Builder()
                                 .setPhy(ScanSettings.PHY_LE_ALL_SUPPORTED)
                                 .setLegacy(false)
@@ -378,8 +375,7 @@ public class FlutterBluePlusPlugin implements
                 {
                     ArrayList<String> permissions = new ArrayList<>();
 
-                    // Android 12+
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    if (Build.VERSION.SDK_INT >= 31) { // Android 12 (October 2021)
                         permissions.add(Manifest.permission.BLUETOOTH_CONNECT);
                     }
 
@@ -411,8 +407,7 @@ public class FlutterBluePlusPlugin implements
                 {
                     ArrayList<String> permissions = new ArrayList<>();
 
-                    // Android 12+
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    if (Build.VERSION.SDK_INT >= 31) { // Android 12 (October 2021)
                         permissions.add(Manifest.permission.BLUETOOTH_CONNECT);
                     }
 
@@ -438,7 +433,7 @@ public class FlutterBluePlusPlugin implements
                         // connect with new gatt
                         BluetoothGatt gatt;
                         BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        if (Build.VERSION.SDK_INT >= 23) { // Android 6.0 (October 2015)
                             gatt = device.connectGatt(context, autoConnect, mGattCallback, BluetoothDevice.TRANSPORT_LE);
                         } else {
                             gatt = device.connectGatt(context, autoConnect, mGattCallback);
@@ -575,8 +570,7 @@ public class FlutterBluePlusPlugin implements
                         break;
                     }
 
-                    // Version 33
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    if (Build.VERSION.SDK_INT >= 33) { // Android 13 (August 2022)
 
                         int rv = gatt.writeCharacteristic(characteristic, hexToBytes(value), writeType);
 
@@ -660,8 +654,7 @@ public class FlutterBluePlusPlugin implements
                         break;
                     }
 
-                    // Version 33
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    if (Build.VERSION.SDK_INT >= 33) { // Android 13 (August 2022)
 
                         int rv = gatt.writeDescriptor(descriptor, hexToBytes(value));
 
@@ -832,8 +825,7 @@ public class FlutterBluePlusPlugin implements
 
                 case "setPreferredPhy":
                 {
-                    // check version
-                    if(Build.VERSION.SDK_INT < 26) {
+                    if(Build.VERSION.SDK_INT < 26) { // Android 8.0 (August 2017)
                         result.error("setPreferredPhy",
                             "Only supported on devices >= API 26. This device == " +
                             Build.VERSION.SDK_INT, null);
@@ -1625,7 +1617,7 @@ public class FlutterBluePlusPlugin implements
         HashMap<String, Object> advertisementData = new HashMap<>();
         
         // connectable
-        if(Build.VERSION.SDK_INT >= 26) {
+        if(Build.VERSION.SDK_INT >= 26) { // Android 8.0 (August 2017)
             advertisementData.put("connectable", result.isConnectable() ? 1 : 0);
         } else if(scanRecord != null) {
             int flags = scanRecord.getAdvertiseFlags();
