@@ -449,6 +449,30 @@ You should check if they can discover your device.
 
 ---
 
+### Connection fails
+
+**1. Your ble device may be low battery**
+
+Bluetooth can become erratic when your peripheral device is low battery.
+
+**2. Your ble device may have refused the connection or have a bug**
+
+Connection is a two-way process. Your ble device may be misconfigured.
+
+**3. You may be on the edge of the Bluetooth range.**
+
+The signal is too weak, or there are a lot of devices causing radio interference.
+
+**4. Some phones have an issue connecting while scanning.**
+
+The Huawei P8 Lite is one of the reported phones to have this issue. Try stopping your scanner before connecting.
+
+**5. Try restarting your phone**
+
+Bluetooth is a complicated system service, and can enter a bad state.
+
+---
+
 ### onValueReceived is never called
 
 **1. you are not subscribed OR not calling read**
