@@ -295,10 +295,11 @@ public class FlutterBluePlusPlugin implements
 
                     // see: BmScanSettings
                     HashMap<String, Object> data = call.arguments();
-                    List<ScanFilter> filters = fetchFilters(data);
-                    boolean allowDuplicates =  (boolean) data.get("allow_duplicates");
-                    int scanMode =                 (int) data.get("android_scan_mode");
-                    boolean usesFineLocation = (boolean) data.get("android_uses_fine_location");
+                    List<String> serviceUuids = (List<String>) data.get("service_uuids");
+                    List<String> macAddresses =  (List<String>) data.get("mac_addresses");
+                    boolean allowDuplicates =         (boolean) data.get("allow_duplicates");
+                    int scanMode =                        (int) data.get("android_scan_mode");
+                    boolean usesFineLocation =        (boolean) data.get("android_uses_fine_location");
 
                     // Android 12+
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -337,6 +338,24 @@ public class FlutterBluePlusPlugin implements
                         } else {
                             settings = new ScanSettings.Builder()
                                 .setScanMode(scanMode).build();
+                        }
+
+                        List<ScanFilter> filters = new ArrayList<>();
+                        
+                        if (macAddresses != null) {
+                            for (int i = 0; i < macAddresses.size(); i++) {
+                                String macAddress = macAddresses.get(i);
+                                ScanFilter f = new ScanFilter.Builder().setDeviceAddress(macAddress).build();
+                                filters.add(f);
+                            }
+                        }
+
+                        if (serviceUuids != null) {
+                            for (int i = 0; i < serviceUuids.size(); i++) {
+                                String uuid = serviceUuids.get(i);
+                                ScanFilter f = new ScanFilter.Builder().setServiceUuid(ParcelUuid.fromString(uuid)).build();
+                                filters.add(f);
+                            }
                         }
 
                         scanner.startScan(filters, settings, getScanCallback());
@@ -1167,48 +1186,6 @@ public class FlutterBluePlusPlugin implements
             invokeMethodUIThread("OnAdapterStateChanged", map);
         }
     };
-
-     ////////////////////////////////////////////////////////////////
-    // ███████  ███████  ████████   ██████  ██   ██
-    // ██       ██          ██     ██       ██   ██
-    // █████    █████       ██     ██       ███████
-    // ██       ██          ██     ██       ██   ██
-    // ██       ███████     ██      ██████  ██   ██
-    //
-    // ███████  ██  ██       ████████  ███████  ██████   ███████
-    // ██       ██  ██          ██     ██       ██   ██  ██
-    // █████    ██  ██          ██     █████    ██████   ███████
-    // ██       ██  ██          ██     ██       ██   ██       ██
-    // ██       ██  ███████     ██     ███████  ██   ██  ███████
-
-    private List<ScanFilter> fetchFilters(HashMap<String, Object> scanSettings)
-    {
-        List<ScanFilter> filters;
-
-        List<String> servicesUuids = (List<String>)scanSettings.get("service_uuids");
-        int macCount = (int)scanSettings.getOrDefault("mac_count", 0);
-        int serviceCount = servicesUuids.size();
-        int count = macCount + serviceCount;
-
-        filters = new ArrayList<>(count);
-
-        List<String> noMacAddresses = new ArrayList<String>();
-        List<String> macAddresses = (List<String>)scanSettings.getOrDefault("mac_addresses", noMacAddresses);
-
-        for (int i = 0; i < macCount; i++) {
-            String macAddress = macAddresses.get(i);
-            ScanFilter f = new ScanFilter.Builder().setDeviceAddress(macAddress).build();
-            filters.add(f);
-        }
-
-        for (int i = 0; i < serviceCount; i++) {
-            String uuid = servicesUuids.get(i);
-            ScanFilter f = new ScanFilter.Builder().setServiceUuid(ParcelUuid.fromString(uuid)).build();
-            filters.add(f);
-        }
-
-        return filters;
-    }
 
     /////////////////////////////////////////////////////////////////////////////
     // ███████   ██████   █████   ███    ██
