@@ -59,6 +59,9 @@ class BluetoothDevice {
   }
 
   /// Establishes a connection to the Bluetooth Device.
+  ///   [autoConnect] Android only. reconnect whenever the device is found. This only
+  ///   works if the device is in the Bluetooth scan cache or it is has been bonded before.
+  ///   The scan cache is cleared whenever bluetooth is turned off.
   Future<void> connect({
     Duration timeout = const Duration(seconds: 15),
     bool autoConnect = false,
