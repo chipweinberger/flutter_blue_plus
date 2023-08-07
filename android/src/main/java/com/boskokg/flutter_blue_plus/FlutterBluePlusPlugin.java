@@ -330,6 +330,7 @@ public class FlutterBluePlusPlugin implements
 
                         ScanSettings settings;
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            // Api Level 26
                             settings = new ScanSettings.Builder()
                                 .setPhy(ScanSettings.PHY_LE_ALL_SUPPORTED)
                                 .setLegacy(false)
@@ -342,20 +343,16 @@ public class FlutterBluePlusPlugin implements
 
                         List<ScanFilter> filters = new ArrayList<>();
                         
-                        if (macAddresses != null) {
-                            for (int i = 0; i < macAddresses.size(); i++) {
-                                String macAddress = macAddresses.get(i);
-                                ScanFilter f = new ScanFilter.Builder().setDeviceAddress(macAddress).build();
-                                filters.add(f);
-                            }
+                        for (int i = 0; i < macAddresses.size(); i++) {
+                            String macAddress = macAddresses.get(i);
+                            ScanFilter f = new ScanFilter.Builder().setDeviceAddress(macAddress).build();
+                            filters.add(f);
                         }
 
-                        if (serviceUuids != null) {
-                            for (int i = 0; i < serviceUuids.size(); i++) {
-                                String uuid = serviceUuids.get(i);
-                                ScanFilter f = new ScanFilter.Builder().setServiceUuid(ParcelUuid.fromString(uuid)).build();
-                                filters.add(f);
-                            }
+                        for (int i = 0; i < serviceUuids.size(); i++) {
+                            String uuid = serviceUuids.get(i);
+                            ScanFilter f = new ScanFilter.Builder().setServiceUuid(ParcelUuid.fromString(uuid)).build();
+                            filters.add(f);
                         }
 
                         scanner.startScan(filters, settings, getScanCallback());
