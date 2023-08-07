@@ -280,7 +280,7 @@ class BluetoothDevice {
   }
 
   /// Send a pairing request to the device (Android Only)
-  Future<void> pair() async {
+  Future<void> createBond() async {
     return await FlutterBluePlus._invokeMethod('createBond', remoteId.str);
   }
 
@@ -318,6 +318,9 @@ class BluetoothDevice {
         'services: ${_knownServices[remoteId]}'
         '}';
   }
+
+  @Deprecated('Use createBond() instead')
+  Future<void> pair() async => await createBond();
 
   @Deprecated('Use remoteId instead')
   DeviceIdentifier get id => remoteId;
