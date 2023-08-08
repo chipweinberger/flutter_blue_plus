@@ -118,9 +118,11 @@ public class FlutterBluePlusPlugin implements
         methodChannel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), NAMESPACE + "/methods");
         methodChannel.setMethodCallHandler(this);
 
-        IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+        IntentFilter filterAdapter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+        this.context.registerReceiver(mBluetoothAdapterStateReceiver, filterAdapter);
 
-        this.context.registerReceiver(mBluetoothAdapterStateReceiver, filter);
+        IntentFilter filterBond = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
+        this.context.registerReceiver(mBluetoothBondStateReceiver, filterBond);
     }
 
     @Override
@@ -132,6 +134,7 @@ public class FlutterBluePlusPlugin implements
 
         closeAllConnections();
 
+        context.unregisterReceiver(mBluetoothBondStateReceiver);
         context.unregisterReceiver(mBluetoothAdapterStateReceiver);
         context = null;
 
@@ -244,18 +247,9 @@ public class FlutterBluePlusPlugin implements
                         adapterState = mBluetoothAdapter.getState();
                     } catch (Exception e) {}
 
-                    int convertedState;
-                    switch (adapterState) {
-                        case BluetoothAdapter.STATE_OFF:          convertedState = 6;           break;
-                        case BluetoothAdapter.STATE_ON:           convertedState = 4;           break;
-                        case BluetoothAdapter.STATE_TURNING_OFF:  convertedState = 5;           break;
-                        case BluetoothAdapter.STATE_TURNING_ON:   convertedState = 3;           break;
-                        default:                                  convertedState = 0;           break;
-                    }
-
                     // see: BmBluetoothAdapterState
                     HashMap<String, Object> map = new HashMap<>();
-                    map.put("adapter_state", convertedState);
+                    map.put("adapter_state", bmAdapterStateEnum(adapterState));
 
                     result.success(map);
                     break;
@@ -1124,11 +1118,11 @@ public class FlutterBluePlusPlugin implements
     }
 
     /////////////////////////////////////////////////////////////////////////////////////
-    // ██████   ██████    ██████    █████   ██████    ██████   █████   ███████  ████████
-    // ██   ██  ██   ██  ██    ██  ██   ██  ██   ██  ██       ██   ██  ██          ██
-    // ██████   ██████   ██    ██  ███████  ██   ██  ██       ███████  ███████     ██
-    // ██   ██  ██   ██  ██    ██  ██   ██  ██   ██  ██       ██   ██       ██     ██
-    // ██████   ██   ██   ██████   ██   ██  ██████    ██████  ██   ██  ███████     ██
+    //  █████   ██████    █████   ██████   ████████  ███████  ██████
+    // ██   ██  ██   ██  ██   ██  ██   ██     ██     ██       ██   ██
+    // ███████  ██   ██  ███████  ██████      ██     █████    ██████
+    // ██   ██  ██   ██  ██   ██  ██          ██     ██       ██   ██
+    // ██   ██  ██████   ██   ██  ██          ██     ███████  ██   ██
     //
     // ██████   ███████   ██████  ███████  ██  ██    ██  ███████  ██████
     // ██   ██  ██       ██       ██       ██  ██    ██  ██       ██   ██
@@ -1139,12 +1133,12 @@ public class FlutterBluePlusPlugin implements
     private final BroadcastReceiver mBluetoothAdapterStateReceiver = new BroadcastReceiver()
     {
         @Override
-        public void onReceive(Context context, Intent intent) {
-
+        public void onReceive(Context context, Intent intent)
+        {
             final String action = intent.getAction();
 
             // no change?
-            if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action) == false) {
+            if (action == null || BluetoothAdapter.ACTION_STATE_CHANGED.equals(action) == false) {
                 return;
             }
 
@@ -1157,22 +1151,47 @@ public class FlutterBluePlusPlugin implements
                 adapterState == BluetoothAdapter.STATE_OFF) {
                 closeAllConnections();
             }
-
-            // convert to Protobuf enum
-            int convertedState;
-            switch (adapterState) {
-                case BluetoothAdapter.STATE_OFF:          convertedState = 6;           break;
-                case BluetoothAdapter.STATE_ON:           convertedState = 4;           break;
-                case BluetoothAdapter.STATE_TURNING_OFF:  convertedState = 5;           break;
-                case BluetoothAdapter.STATE_TURNING_ON:   convertedState = 3;           break;
-                default:                                  convertedState = 0;           break;
-            }
             
             // see: BmBluetoothAdapterState
             HashMap<String, Object> map = new HashMap<>();
-            map.put("adapter_state", convertedState);
+            map.put("adapter_state", bmAdapterStateEnum(adapterState));
 
             invokeMethodUIThread("OnAdapterStateChanged", map);
+        }
+    };
+
+    /////////////////////////////////////////////////////////////////////////////////////
+    // ██████    ██████   ███    ██  ██████
+    // ██   ██  ██    ██  ████   ██  ██   ██
+    // ██████   ██    ██  ██ ██  ██  ██   ██
+    // ██   ██  ██    ██  ██  ██ ██  ██   ██
+    // ██████    ██████   ██   ████  ██████
+    //
+    // ██████   ███████   ██████  ███████  ██  ██    ██  ███████  ██████
+    // ██   ██  ██       ██       ██       ██  ██    ██  ██       ██   ██
+    // ██████   █████    ██       █████    ██  ██    ██  █████    ██████
+    // ██   ██  ██       ██       ██       ██   ██  ██   ██       ██   ██
+    // ██   ██  ███████   ██████  ███████  ██    ████    ███████  ██   ██
+
+    private final BroadcastReceiver mBluetoothBondStateReceiver = new BroadcastReceiver()
+    {
+        @Override
+        public void onReceive(Context context, Intent intent)
+        {
+            final String action = intent.getAction();
+
+            // no change?
+            if (action == null || action.equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED) == false) {
+                return;
+            }
+
+            final BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+
+            final int curBondState = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.ERROR);
+            final int prevBondState = intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, -1);
+
+            log(LogLevel.DEBUG, "[FBP-Android] OnBondStateChanged: " + bondStateString(curBondState) +
+                " prev: " + bondStateString(prevBondState));
         }
     };
 
@@ -1776,6 +1795,16 @@ public class FlutterBluePlusPlugin implements
         }
     }
 
+    static int bmAdapterStateEnum(int as) {
+        switch (as) {
+            case BluetoothAdapter.STATE_OFF:          return 6;
+            case BluetoothAdapter.STATE_ON:           return 4;
+            case BluetoothAdapter.STATE_TURNING_OFF:  return 5;
+            case BluetoothAdapter.STATE_TURNING_ON:   return 3;
+            default:                                  return 0; 
+        }
+    }
+
     public static class ServicePair {
         public String primary;
         public String secondary;
@@ -1876,6 +1905,15 @@ public class FlutterBluePlusPlugin implements
             case BluetoothAdapter.STATE_TURNING_OFF:  return "turningOff";
             case BluetoothAdapter.STATE_TURNING_ON:   return "turningOn";
             default:                                  return "UNKNOWN_ADAPTER_STATE (" + as + ")";
+        }
+    }
+
+    private static String bondStateString(int bs) {
+        switch (bs) {
+            case BluetoothDevice.BOND_BONDING: return "bonding";
+            case BluetoothDevice.BOND_BONDED:  return "bonded";
+            case BluetoothDevice.BOND_NONE:    return "bond-none";
+            default:                           return "UNKNOWN_BOND_STATE (" + bs + ")";
         }
     }
 
