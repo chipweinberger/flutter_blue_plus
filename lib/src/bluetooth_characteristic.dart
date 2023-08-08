@@ -64,6 +64,9 @@ class BluetoothCharacteristic {
   Future<List<int>> read({int timeout = 15}) async {
     List<int> responseValue = [];
 
+    // check & wait if bonding
+    await BluetoothDevice._waitIfBonding(remoteId);
+
     // Only allows a single read to be underway at any time, per-characteristic, per-device.
     // Otherwise, there would be multiple in-flight reads and we wouldn't know which response is which.
     String key = remoteId.str + ":" + characteristicUuid.toString() + ":readChr";
@@ -114,6 +117,9 @@ class BluetoothCharacteristic {
   ///  - [withoutResponse]: the write is not guaranteed and always returns immediately with success.
   ///  - [withResponse]: the write returns error on failure
   Future<void> write(List<int> value, {bool withoutResponse = false, int timeout = 15}) async {
+    // check & wait if bonding
+    await BluetoothDevice._waitIfBonding(remoteId);
+
     // Only allows a single write to be underway at any time, per-characteristic, per-device.
     // Otherwise, there would be multiple in-flight writes and we wouldn't know which response is which.
     String key = remoteId.str + ":" + characteristicUuid.toString() + ":writeChr";
@@ -178,6 +184,9 @@ class BluetoothCharacteristic {
   ///   - If a characteristic supports both notifications and indications,
   ///     we'll use notifications. This is a limitation of CoreBluetooth on iOS.
   Future<bool> setNotifyValue(bool notify, {int timeout = 15}) async {
+    // check & wait if bonding
+    await BluetoothDevice._waitIfBonding(remoteId);
+    
     var request = BmSetNotificationRequest(
       remoteId: remoteId.toString(),
       serviceUuid: serviceUuid,

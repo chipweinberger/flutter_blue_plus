@@ -77,9 +77,9 @@ class BluetoothDevice {
         autoConnect: autoConnect,
       );
 
-      BluetoothConnectionState initialState = await connectionState.where((s) => 
-        s == BluetoothConnectionState.connected ||
-        s == BluetoothConnectionState.disconnected).first;
+      BluetoothConnectionState initialState = await connectionState
+          .where((s) => s == BluetoothConnectionState.connected || s == BluetoothConnectionState.disconnected)
+          .first;
 
       if (initialState == BluetoothConnectionState.connected) {
         return; // no work to do
@@ -119,9 +119,9 @@ class BluetoothDevice {
     await opMutex.take();
 
     try {
-      BluetoothConnectionState initialState = await connectionState.where((s) => 
-        s == BluetoothConnectionState.connected ||
-        s == BluetoothConnectionState.disconnected).first;
+      BluetoothConnectionState initialState = await connectionState
+          .where((s) => s == BluetoothConnectionState.connected || s == BluetoothConnectionState.disconnected)
+          .first;
 
       if (initialState == BluetoothConnectionState.disconnected) {
         return; // no work to do
@@ -148,6 +148,8 @@ class BluetoothDevice {
 
   /// Discover services, characteristics, and descriptors of the remote device
   Future<List<BluetoothService>> discoverServices({int timeout = 15}) async {
+    // check & wait if bonding
+    await _waitIfBonding(remoteId);
     // Only allow a single 'discoverServices' operation to be underway per device.
     String key = remoteId.str + ":discoverServices";
     _Mutex opMutex = await _MutexFactory.getMutexForKey(key);
@@ -240,6 +242,9 @@ class BluetoothDevice {
   /// Request to change MTU (Android Only)
   ///  - returns new MTU
   Future<int> requestMtu(int desiredMtu, {int timeout = 15}) async {
+    // check & wait if bonding
+    await _waitIfBonding(remoteId);
+
     // Only allow a single 'requestMtu' operation to be underway per device.
     String key = remoteId.str + ":requestMtu";
     _Mutex opMutex = await _MutexFactory.getMutexForKey(key);
@@ -275,6 +280,9 @@ class BluetoothDevice {
 
   /// Read the RSSI of connected remote device
   Future<int> readRssi({int timeout = 15}) async {
+    // check & wait if bonding
+    await _waitIfBonding(remoteId);
+    
     // Only allow a single 'readRssi' operation to be underway per device.
     String key = remoteId.str + ":readRssi";
     _Mutex opMutex = await _MutexFactory.getMutexForKey(key);
@@ -368,7 +376,6 @@ class BluetoothDevice {
     await opMutex.take();
 
     try {
-
       BmBondStateEnum initialState = await FlutterBluePlus._methods
           .invokeMethod('getBondState', remoteId.str)
           .then((buffer) => BmBondStateResponse.fromMap(buffer))
@@ -421,6 +428,47 @@ class BluetoothDevice {
       throw FlutterBluePlusException("clearGattCache", -1, "android-only");
     }
     await FlutterBluePlus._invokeMethod('clearGattCache', remoteId.str);
+  }
+
+  // for internal use
+  // it is unadvisable to do anything else with the device while bonding, otherwise many functions will fail
+  // see: https://github.com/weliem/blessed-android
+  // see: https://medium.com/@martijn.van.welie/making-android-ble-work-part-2-47a3cdaade07
+  static _waitIfBonding(DeviceIdentifier remoteId, {int timeout = 60}) async {
+    if (Platform.isAndroid == false) {
+      return; // only needed on android
+    }
+    if (await _bondState(remoteId.str).first != BmBondStateEnum.bonding) {
+      return; // not currently bonding
+    }
+    if (FlutterBluePlus.logLevel.index >= LogLevel.debug.index) {
+      print("[FBP] waiting for bonding to complete...");
+    }
+    BmBondStateEnum bs = await _bondState(remoteId.str)
+        .where((bs) => bs != BmBondStateEnum.bonding)
+        .first
+        .timeout(Duration(seconds: timeout));
+    if (bs != BmBondStateEnum.bonded) {
+      throw FlutterBluePlusException("bonding", -1, "failed to bond to device: $bs");
+    }
+  }
+
+  // for internal use
+  static Stream<BmBondStateEnum> _bondState(String remoteId) async* {
+    BmBondStateEnum initialState = await FlutterBluePlus._methods
+        .invokeMethod('getBondState', remoteId)
+        .then((buffer) => BmBondStateResponse.fromMap(buffer))
+        .then((p) => p.bondState);
+
+    yield initialState;
+
+    // Start listening now, before invokeMethod, to ensure we don't miss the response
+    yield* FlutterBluePlus._methodStream.stream
+        .where((m) => m.method == "OnBondStateChanged")
+        .map((m) => m.arguments)
+        .map((buffer) => BmBondStateResponse.fromMap(buffer))
+        .where((p) => p.remoteId == remoteId)
+        .map((e) => e.bondState);
   }
 
   @override

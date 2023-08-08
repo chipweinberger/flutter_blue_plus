@@ -217,51 +217,6 @@ public class FlutterBluePlusPlugin implements
                 return;
             }
 
-            // must finish bonding otherwise these functions can fail.
-            // see: https://github.com/weliem/blessed-android
-            // see: https://medium.com/@martijn.van.welie/making-android-ble-work-part-2-47a3cdaade07
-            if("discoverServices".equals(call.method) ||
-               "readCharacteristic".equals(call.method) ||
-               "writeCharacteristic".equals(call.method) ||
-               "readDescriptor".equals(call.method) ||
-               "writeDescriptor".equals(call.method) ||
-               "setNotification".equals(call.method) ||
-               "requestMtu".equals(call.method) ||
-               "readRssi".equals(call.method)) {
-
-                // get remoteId
-                String remoteId = "";
-                if ("discoverServices".equals(call.method) ||
-                    "readRssi".equals(call.method)) {
-                    remoteId = (String) call.arguments;
-                } else {
-                    HashMap<String, Object> data = call.arguments();
-                    remoteId = (String) data.get("remote_id");
-                }
-
-                // still bonding?
-                if (mBondState.get(remoteId) != null && mBondState.get(remoteId) == BondState.BONDING) {
-                    log(LogLevel.DEBUG, "[FBP-Android] Waiting for bonding to complete...");
-                    int iter = 0;
-                    BondState bs;
-                    do {
-                        bs = mBondState.get(remoteId);
-                        Thread.sleep(250); // sleep 250 ms
-                        iter++;
-                    } while (bs == BondState.BONDING && iter < 120);
-                    if (iter >= 120) {
-                        result.error("bonding", "timed out waiting for bonding to finish", null);
-                        return;
-                    }
-                    if (bs == BondState.FAILED) {
-                        result.error("bonding", "failed to bond to peripheral", null);
-                        return;
-                    }
-                    log(LogLevel.DEBUG, "[FBP-Android] successfully bonded");
-                }
-            }
-
-
             switch (call.method) {
 
                 case "setLogLevel":
@@ -559,16 +514,7 @@ public class FlutterBluePlusPlugin implements
                 {
                     String remoteId = (String) call.arguments;
 
-                    if (Build.VERSION.SDK_INT <= 25) { // Android 7.1 (October 2016)
-                        // on Android 7.1 and below, discoverServices will fail if called
-                        // too quickly after bonding completes. For simplicity, we always delay when bonded.
-                        // see: https://github.com/weliem/blessed-android
-                        // see: https://medium.com/@martijn.van.welie/making-android-ble-work-part-2-47a3cdaade07
-                        if (mBondState.get(remoteId) != null && mBondState.get(remoteId) == BondState.BONDED) {
-                            log(LogLevel.WARNING, "[FBP-Android] waiting 1.5s before calling discoverServices");
-                            Thread.sleep(1500); // sleep 1500ms
-                        }
-                    }
+                    checkAndroid7discoverServicesWorkaround(remoteId);
 
                     BluetoothGatt gatt = locateGatt(remoteId);
 
@@ -1254,6 +1200,20 @@ public class FlutterBluePlusPlugin implements
         mConnectionState.clear();
         mBondState.clear();
         mMtu.clear();
+    }
+
+    private void checkAndroid7discoverServicesWorkaround(String remoteId) throws InterruptedException
+    {
+        // on Android 7.1 and below, discoverServices will fail if called
+        // too quickly after bonding completes. For simplicity, we always delay when bonded.
+        // see: https://github.com/weliem/blessed-android
+        // see: https://medium.com/@martijn.van.welie/making-android-ble-work-part-2-47a3cdaade07
+        if (Build.VERSION.SDK_INT <= 25) { // Android 7.1 (October 2016)
+            if (mBondState.get(remoteId) != null && mBondState.get(remoteId) == BondState.BONDED) {
+                log(LogLevel.WARNING, "[FBP-Android] waiting 1.5s before calling discoverServices to workaround android 7 bug");
+                Thread.sleep(1500); // sleep 1500ms
+            }
+        }
     }
 
     /////////////////////////////////////////////////////////////////////////////////////
