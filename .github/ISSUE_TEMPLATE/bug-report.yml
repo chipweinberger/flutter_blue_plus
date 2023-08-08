@@ -61,7 +61,7 @@ body:
     attributes:
       label: Logs
       description: Copy and paste all log output.
-      placeholder: include some of the logs leading up to your error as well. 
+      placeholder: Ideally include all logs from the very begining
       render: shell
     validations:
       required: true
