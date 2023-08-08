@@ -119,10 +119,15 @@ class BluetoothDevice {
         return; // no work to do
       }
 
-      var responseStream = connectionState.where((s) => s == BluetoothConnectionState.disconnected);
+      var responseStream = FlutterBluePlus._methodStream.stream
+          .where((m) => m.method == "OnConnectionStateChanged")
+          .map((m) => m.arguments)
+          .map((buffer) => BmConnectionStateResponse.fromMap(buffer))
+          .where((p) => p.remoteId == remoteId.str)
+          .where((p) => p.connectionState == BmConnectionStateEnum.disconnected);
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
-      Future<BluetoothConnectionState> futureState = responseStream.first;
+      Future<BmConnectionStateResponse> futureState = responseStream.first;
 
       await FlutterBluePlus._invokeMethod('disconnect', remoteId.str);
 
