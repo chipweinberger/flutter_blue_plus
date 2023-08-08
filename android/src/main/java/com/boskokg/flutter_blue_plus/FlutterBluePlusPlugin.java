@@ -808,7 +808,9 @@ public class FlutterBluePlusPlugin implements
 
                     BluetoothGatt gatt = locateGatt(remoteId);
 
-                    if(gatt.requestConnectionPriority(connectionPriority) == false) {
+                    int cpInteger = bmConnectionPriorityParse(connectionPriority);
+
+                    if(gatt.requestConnectionPriority(cpInteger) == false) {
                         result.error("request_connection_priority", "gatt.requestConnectionPriority() returned false", null);
                         break;
                     }
@@ -894,12 +896,16 @@ public class FlutterBluePlusPlugin implements
 
                     // not bonded?
                     if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
-                        result.success(true);
+                        result.success(true); // no work to do
                         break;
                     }
 
                     Method removeBondMethod = device.getClass().getMethod("removeBond");
-                    removeBondMethod.invoke(device);
+                    boolean rv = (boolean) removeBondMethod.invoke(device);
+                    if(rv == false) {
+                        result.error("removeBond", "device.removeBond() returned false", null);
+                        break;
+                    }
 
                     result.success(true);
                     break;
@@ -1791,7 +1797,7 @@ public class FlutterBluePlusPlugin implements
             case BluetoothProfile.STATE_CONNECTING:    return 1;
             case BluetoothProfile.STATE_CONNECTED:     return 2;
             case BluetoothProfile.STATE_DISCONNECTING: return 3;
-            default: return 0;
+            default:                                   return 0;
         }
     }
 
@@ -1802,6 +1808,15 @@ public class FlutterBluePlusPlugin implements
             case BluetoothAdapter.STATE_TURNING_OFF:  return 5;
             case BluetoothAdapter.STATE_TURNING_ON:   return 3;
             default:                                  return 0; 
+        }
+    }
+
+    static int bmConnectionPriorityParse(int value) {
+        switch(value) {
+            case 0: return BluetoothGatt.CONNECTION_PRIORITY_BALANCED;
+            case 1: return BluetoothGatt.CONNECTION_PRIORITY_HIGH;
+            case 2: return BluetoothGatt.CONNECTION_PRIORITY_LOW_POWER;
+            default: return BluetoothGatt.CONNECTION_PRIORITY_LOW_POWER;
         }
     }
 

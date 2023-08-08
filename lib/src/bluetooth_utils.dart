@@ -1,6 +1,4 @@
-
 part of flutter_blue_plus;
-
 
 enum BluetoothDeviceType { unknown, classic, le, dual }
 
@@ -48,6 +46,17 @@ BluetoothAdapterState _bmToBluetoothAdapterState(BmAdapterStateEnum value) {
       return BluetoothAdapterState.turningOff;
     case BmAdapterStateEnum.off:
       return BluetoothAdapterState.off;
+  }
+}
+
+BmConnectionPriorityEnum _bmConnectionPriorityEnum(ConnectionPriority value) {
+  switch (value) {
+    case ConnectionPriority.balanced:
+      return BmConnectionPriorityEnum.balanced;
+    case ConnectionPriority.high:
+      return BmConnectionPriorityEnum.high;
+    case ConnectionPriority.lowPower:
+      return BmConnectionPriorityEnum.lowPower;
   }
 }
 

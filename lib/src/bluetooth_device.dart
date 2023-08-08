@@ -229,25 +229,13 @@ class BluetoothDevice {
 
   /// Request connection priority update (Android only)
   Future<void> requestConnectionPriority({required ConnectionPriority connectionPriorityRequest}) async {
-    int connectionPriority = 0;
-
-    switch (connectionPriorityRequest) {
-      case ConnectionPriority.balanced:
-        connectionPriority = 0;
-        break;
-      case ConnectionPriority.high:
-        connectionPriority = 1;
-        break;
-      case ConnectionPriority.lowPower:
-        connectionPriority = 2;
-        break;
-      default:
-        break;
+    if (Platform.isAndroid == false) {
+      throw FlutterBluePlusException("setPreferredPhy", -1, "android-only");
     }
 
     var request = BmConnectionPriorityRequest(
       remoteId: remoteId.str,
-      connectionPriority: connectionPriority,
+      connectionPriority: _bmConnectionPriorityEnum(connectionPriorityRequest),
     );
 
     await FlutterBluePlus._invokeMethod(
@@ -266,6 +254,10 @@ class BluetoothDevice {
     required int rxPhy,
     required PhyCoding option,
   }) async {
+    if (Platform.isAndroid == false) {
+      throw FlutterBluePlusException("setPreferredPhy", -1, "android-only");
+    }
+
     var request = BmPreferredPhy(
       remoteId: remoteId.str,
       txPhy: txPhy,
@@ -281,23 +273,26 @@ class BluetoothDevice {
 
   /// Send a pairing request to the device (Android Only)
   Future<void> createBond() async {
+    if (Platform.isAndroid == false) {
+      throw FlutterBluePlusException("createBond", -1, "android-only");
+    }
     return await FlutterBluePlus._invokeMethod('createBond', remoteId.str);
   }
 
   /// Remove bond (Android Only)
-  Future<bool> removeBond() async {
-    if (Platform.isAndroid) {
-      return await FlutterBluePlus._methods.invokeMethod('removeBond', remoteId.str).then<bool>((value) => value);
-    } else {
-      return false;
+  Future<void> removeBond() async {
+    if (Platform.isAndroid == false) {
+      throw FlutterBluePlusException("removeBond", -1, "android-only");
     }
+    await FlutterBluePlus._methods.invokeMethod('removeBond', remoteId.str);
   }
 
   /// Refresh ble services & characteristics (Android Only)
   Future<void> clearGattCache() async {
-    if (Platform.isAndroid) {
-      return await FlutterBluePlus._invokeMethod('clearGattCache', remoteId.str);
+    if (Platform.isAndroid == false) {
+      throw FlutterBluePlusException("clearGattCache", -1, "android-only");
     }
+    await FlutterBluePlus._invokeMethod('clearGattCache', remoteId.str);
   }
 
   @override

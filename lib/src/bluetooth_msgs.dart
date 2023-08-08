@@ -771,9 +771,15 @@ class BmReadRssiResult {
   }
 }
 
+enum BmConnectionPriorityEnum{
+  balanced, // 0 
+  high, // 1
+  lowPower, // 2
+}
+
 class BmConnectionPriorityRequest {
   final String remoteId;
-  final int connectionPriority;
+  final BmConnectionPriorityEnum connectionPriority;
 
   BmConnectionPriorityRequest({
     required this.remoteId,
@@ -783,7 +789,7 @@ class BmConnectionPriorityRequest {
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> data = {};
     data['remote_id'] = remoteId;
-    data['connection_priority'] = connectionPriority;
+    data['connection_priority'] = connectionPriority.index;
     return data;
   }
 }
