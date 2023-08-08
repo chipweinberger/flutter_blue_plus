@@ -1,4 +1,4 @@
-// Copyright 2017, Paul DeMarco.
+// Copyright 2023, Charles Weinberger & Paul DeMarco.
 // All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
@@ -282,7 +282,7 @@ class BluetoothDevice {
   Future<int> readRssi({int timeout = 15}) async {
     // check & wait if bonding
     await _waitIfBonding(remoteId);
-    
+
     // Only allow a single 'readRssi' operation to be underway per device.
     String key = remoteId.str + ":readRssi";
     _Mutex opMutex = await _MutexFactory.getMutexForKey(key);

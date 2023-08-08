@@ -1,4 +1,4 @@
-// Copyright 2017, Paul DeMarco.
+// Copyright 2023, Charles Weinberger & Paul DeMarco.
 // All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
@@ -186,7 +186,7 @@ class BluetoothCharacteristic {
   Future<bool> setNotifyValue(bool notify, {int timeout = 15}) async {
     // check & wait if bonding
     await BluetoothDevice._waitIfBonding(remoteId);
-    
+
     var request = BmSetNotificationRequest(
       remoteId: remoteId.toString(),
       serviceUuid: serviceUuid,

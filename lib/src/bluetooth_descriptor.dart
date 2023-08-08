@@ -1,4 +1,4 @@
-// Copyright 2017, Paul DeMarco.
+// Copyright 2023, Charles Weinberger & Paul DeMarco.
 // All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
@@ -100,7 +100,7 @@ class BluetoothDescriptor {
   Future<void> write(List<int> value, {int timeout = 15}) async {
     // check & wait if bonding
     await BluetoothDevice._waitIfBonding(remoteId);
-    
+
     // Only allow a single write to be underway at any time, per-characteristic, per-device.
     // Otherwise, there would be multiple in-flight requests and we wouldn't know which response is for us.
     String key = remoteId.str + ":" + characteristicUuid.toString() + ":writeDesc";
