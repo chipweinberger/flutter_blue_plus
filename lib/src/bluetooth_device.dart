@@ -271,7 +271,10 @@ class BluetoothDevice {
     );
   }
 
-  /// Send a pairing request to the device (Android Only)
+  /// Force pairing dialogue to show. (Android Only) 
+  /// Typically, the only way to create a pairing request and show the pairing
+  /// dialog in Android is to connect and try to use an encrypted characteristic which 
+  /// is a bit awkward of an API. Calling this function circumvents that step.
   Future<void> createBond() async {
     if (Platform.isAndroid == false) {
       throw FlutterBluePlusException("createBond", -1, "android-only");
