@@ -1,3 +1,6 @@
+## 1.13.3
+* Dart: be extra careful to only call connect & disconnect when necessary
+
 ## 1.13.2
 * Dart: fix: connect should be no-op if already connected (Regression in 1.13.1)
 * Dart: BluetoothDevice: use mutexes to prevent multiple in flight requests
