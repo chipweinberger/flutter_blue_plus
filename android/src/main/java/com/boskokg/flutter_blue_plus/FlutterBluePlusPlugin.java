@@ -307,29 +307,58 @@ public class FlutterBluePlusPlugin implements
 
                 case "turnOn":
                 {
-                    if (mBluetoothAdapter.isEnabled()) {
-                        result.success(true); // no work to do
-                        break;
+                    ArrayList<String> permissions = new ArrayList<>();
+
+                    if (Build.VERSION.SDK_INT >= 31) { // Android 12 (October 2021)
+                        permissions.add(Manifest.permission.BLUETOOTH_CONNECT);
                     }
 
-                    Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                    if (Build.VERSION.SDK_INT <= 30) { // Android 11 (September 2020)
+                        permissions.add(Manifest.permission.BLUETOOTH);
+                    }
 
-                    activityBinding.getActivity().startActivityForResult(enableBtIntent, enableBluetoothRequestCode);
+                    ensurePermissions(permissions, (granted, perm) -> {
 
-                    result.success(true);
+                        if (mBluetoothAdapter.isEnabled()) {
+                            result.success(true); // no work to do
+                            return;
+                        }
+
+                        Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+
+                        activityBinding.getActivity().startActivityForResult(enableBtIntent, enableBluetoothRequestCode);
+
+                        result.success(true);
+                        return;
+                    });
                     break;
                 }
 
                 case "turnOff":
                 {
-                    if (mBluetoothAdapter.isEnabled() == false) {
-                        result.success(true); // no work to do
-                        break;
+                    ArrayList<String> permissions = new ArrayList<>();
+
+                    if (Build.VERSION.SDK_INT >= 31) { // Android 12 (October 2021)
+                        permissions.add(Manifest.permission.BLUETOOTH_CONNECT);
                     }
 
-                    boolean disabled = mBluetoothAdapter.disable();
+                    if (Build.VERSION.SDK_INT <= 30) { // Android 11 (September 2020)
+                        permissions.add(Manifest.permission.BLUETOOTH);
+                    }
 
-                    result.success(disabled);
+                    ensurePermissions(permissions, (granted, perm) -> {
+
+                        if (mBluetoothAdapter.isEnabled() == false) {
+                            result.success(true); // no work to do
+                            return;
+                        }
+
+                        // this is deprecated in API level 33.
+                        boolean disabled = mBluetoothAdapter.disable();
+
+                        result.success(disabled);
+                        return;
+                    });
                     break;
                 }
 
