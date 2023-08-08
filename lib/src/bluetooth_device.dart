@@ -104,7 +104,7 @@ class BluetoothDevice {
 
       // failure?
       if (response.connectionState == BmConnectionStateEnum.disconnected) {
-        throw FlutterBluePlusException('connect', response.errorCode, response.errorString);
+        throw FlutterBluePlusException('connect', response.disconnectReasonCode, response.disconnectReasonString);
       }
     } finally {
       opMutex.give();

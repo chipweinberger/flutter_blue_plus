@@ -669,32 +669,22 @@ enum BmConnectionStateEnum {
 class BmConnectionStateResponse {
   final String remoteId;
   final BmConnectionStateEnum connectionState;
-  final bool success;
-  final int? errorCode;
-  final String? errorString;
+  final int? disconnectReasonCode;
+  final String? disconnectReasonString;
 
   BmConnectionStateResponse({
     required this.remoteId,
     required this.connectionState,
-    required this.success,
-    required this.errorCode,
-    required this.errorString,
+    required this.disconnectReasonCode,
+    required this.disconnectReasonString,
   });
-
-  Map<dynamic, dynamic> toMap() {
-    final Map<dynamic, dynamic> data = {};
-    data['remote_id'] = remoteId;
-    data['connection_state'] = connectionState.index;
-    return data;
-  }
 
   factory BmConnectionStateResponse.fromMap(Map<dynamic, dynamic> json) {
     return BmConnectionStateResponse(
       remoteId: json['remote_id'],
       connectionState: BmConnectionStateEnum.values[json['connection_state'] as int],
-      success: json['success'] != 0,
-      errorCode: json['error_code'],
-      errorString: json['error_string'],
+      disconnectReasonCode: json['disconnect_reason_code'],
+      disconnectReasonString: json['disconnect_reason_string'],
     );
   }
 }
