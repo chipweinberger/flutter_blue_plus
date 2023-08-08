@@ -376,7 +376,6 @@ public class FlutterBluePlusPlugin implements
 
                     if (Build.VERSION.SDK_INT >= 31) { // Android 12 (October 2021)
                         permissions.add(Manifest.permission.BLUETOOTH_SCAN);
-                        permissions.add(Manifest.permission.BLUETOOTH_CONNECT);
                         if (usesFineLocation) {
                             permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
                         }
