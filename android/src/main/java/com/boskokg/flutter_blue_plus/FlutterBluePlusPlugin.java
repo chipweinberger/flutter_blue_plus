@@ -520,6 +520,9 @@ public class FlutterBluePlusPlugin implements
                     HashMap<String, Object> response = new HashMap<>();
                     response.put("connection_state", bmConnectionStateEnum(cs));
                     response.put("remote_id", remoteId);
+                    response.put("success", 1);
+                    response.put("error_code", 0);
+                    response.put("error_string", "");
 
                     result.success(response);
                     break;
@@ -1460,6 +1463,9 @@ public class FlutterBluePlusPlugin implements
             HashMap<String, Object> response = new HashMap<>();
             response.put("remote_id", remoteId);
             response.put("connection_state", bmConnectionStateEnum(newState));
+            response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
+            response.put("error_code", status);
+            response.put("error_string", hciStatusString(status));
 
             invokeMethodUIThread("OnConnectionStateChanged", response);
         }

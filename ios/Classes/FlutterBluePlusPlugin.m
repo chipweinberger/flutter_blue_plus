@@ -295,6 +295,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSDictionary* response = @{
                 @"remote_id":        remoteId,
                 @"connection_state": @([self bmConnectionStateEnum:connectionState]),
+                @"success":          @(1),
+                @"error_string":     [NSNull null],
+                @"error_code":       [NSNull null],
             };
 
             result(response);
@@ -840,6 +843,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     NSDictionary *result = @{
         @"remote_id":        remoteId,
         @"connection_state": @([self bmConnectionStateEnum:peripheral.state]),
+        @"success":          @(1),
+        @"error_string":     [NSNull null],
+        @"error_code":       [NSNull null],
     };
 
     // Send connection state
@@ -869,6 +875,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     NSDictionary *result = @{
         @"remote_id":        remoteId,
         @"connection_state": @([self bmConnectionStateEnum:peripheral.state]),
+        @"success":          error == nil ? @(1) : @(0),
+        @"error_string":     error ? [error localizedDescription] : [NSNull null],
+        @"error_code":       error ? @(error.code) : [NSNull null],
     };
 
     // Send connection state
@@ -890,6 +899,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     NSDictionary *result = @{
         @"remote_id":        [[peripheral identifier] UUIDString],
         @"connection_state": @([self bmConnectionStateEnum:peripheral.state]),
+        @"success":          error == nil ? @(1) : @(0),
+        @"error_string":     error ? [error localizedDescription] : [NSNull null],
+        @"error_code":       error ? @(error.code) : [NSNull null],
     };
 
     // Send connection state

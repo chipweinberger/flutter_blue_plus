@@ -669,10 +669,16 @@ enum BmConnectionStateEnum {
 class BmConnectionStateResponse {
   final String remoteId;
   final BmConnectionStateEnum connectionState;
+  final bool success;
+  final int? errorCode;
+  final String? errorString;
 
   BmConnectionStateResponse({
     required this.remoteId,
     required this.connectionState,
+    required this.success,
+    required this.errorCode,
+    required this.errorString,
   });
 
   Map<dynamic, dynamic> toMap() {
@@ -686,6 +692,9 @@ class BmConnectionStateResponse {
     return BmConnectionStateResponse(
       remoteId: json['remote_id'],
       connectionState: BmConnectionStateEnum.values[json['connection_state'] as int],
+      success: json['success'] != 0,
+      errorCode: json['error_code'],
+      errorString: json['error_string'],
     );
   }
 }

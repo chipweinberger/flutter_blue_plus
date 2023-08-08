@@ -71,15 +71,27 @@ class BluetoothDevice {
       autoConnect: autoConnect,
     );
 
-    var responseStream = connectionState.where((s) => s == BluetoothConnectionState.connected);
+    var responseStream = FlutterBluePlus._methodStream.stream
+        .where((m) => m.method == "OnConnectionStateChanged")
+        .map((m) => m.arguments)
+        .map((buffer) => BmConnectionStateResponse.fromMap(buffer))
+        .where((p) => p.remoteId == remoteId.str)
+        .where((p) =>
+            p.connectionState == BmConnectionStateEnum.disconnected ||
+            p.connectionState == BmConnectionStateEnum.connected);
 
     // Start listening now, before invokeMethod, to ensure we don't miss the response
-    Future<BluetoothConnectionState> futureState = responseStream.first;
+    Future<BmConnectionStateResponse> futureState = responseStream.first;
 
     await FlutterBluePlus._invokeMethod('connect', request.toMap());
 
-    // wait for connection
-    await futureState.timeout(timeout);
+    // wait for result
+    BmConnectionStateResponse response = await futureState.timeout(timeout);
+
+    // failure?
+    if (response.connectionState == BmConnectionStateEnum.disconnected) {
+      throw FlutterBluePlusException('connect', response.errorCode, response.errorString);
+    }
   }
 
   /// Cancels connection to the Bluetooth Device
@@ -317,6 +329,7 @@ class BluetoothDevice {
     if (Platform.isAndroid == false) {
       throw FlutterBluePlusException("removeBond", -1, "android-only");
     }
+
     /// This is a hidden function in android. So I am not sure
     /// if OnBondStateChanged will actually change.
     await FlutterBluePlus._methods.invokeMethod('removeBond', remoteId.str);
