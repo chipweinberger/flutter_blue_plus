@@ -452,9 +452,20 @@ public class FlutterBluePlusPlugin implements
 
                         // already connected?
                         if (connectionStateOfThisApp(remoteId) == BluetoothProfile.STATE_CONNECTED) {
-                            result.success(null);// no work to do
+
+                            // see: BmConnectionStateResponse
+                            HashMap<String, Object> response = new HashMap<>();
+                            response.put("remote_id", remoteId);
+                            response.put("connection_state", bmConnectionStateEnum(BluetoothProfile.STATE_CONNECTED));
+                            response.put("disconnect_reason_code", null);
+                            response.put("disconnect_reason_string", null);
+
+                            // the dart code always waits for this callback
+                            invokeMethodUIThread("OnConnectionStateChanged", response);
+
+                            result.success(null);
                             return;
-                        }
+                        } 
 
                         // connect with new gatt
                         BluetoothGatt gatt;
@@ -480,7 +491,15 @@ public class FlutterBluePlusPlugin implements
                     // already disconnected?
                     BluetoothGatt gatt = mConnectedDevices.get(remoteId);
                     if (gatt == null) {
-                        result.success(null);// no work to do
+                        // see: BmConnectionStateResponse
+                        HashMap<String, Object> response = new HashMap<>();
+                        response.put("remote_id", remoteId);
+                        response.put("connection_state", bmConnectionStateEnum(BluetoothProfile.STATE_DISCONNECTED));
+                        response.put("disconnect_reason_code", 0x00);
+                        response.put("disconnect_reason_string", "ALREADY_DISCONNECTED");
+
+                        // the dart code always waits for this callback
+                        invokeMethodUIThread("OnConnectionStateChanged", response);
                         return;
                     }
                 

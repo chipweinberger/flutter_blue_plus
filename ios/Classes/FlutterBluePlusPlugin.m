@@ -222,6 +222,18 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             // already connected?
             if ([self isConnectedToThisApp:remoteId]) {
+
+                // See BmConnectionStateResponse
+                NSDictionary *response = @{
+                    @"remote_id":                remoteId,
+                    @"connection_state":         @([self bmConnectionStateEnum:CBPeripheralStateConnected]),
+                    @"disconnect_reason_code":   [NSNull null],
+                    @"disconnect_reason_string": [NSNull null],
+                };
+
+                // the dart code always waits for this callback
+                [_methodChannel invokeMethod:@"OnConnectionStateChanged" arguments:response];
+
                 result(@(true)); // no work to do
                 return;
             }
@@ -272,6 +284,18 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // already disconnected?
             CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
             if (peripheral == nil) {
+
+                // See BmConnectionStateResponse
+                NSDictionary *response = @{
+                    @"remote_id":                remoteId,
+                    @"connection_state":         @([self bmConnectionStateEnum:CBPeripheralStateConnected]),
+                    @"disconnect_reason_code":   @(0),
+                    @"disconnect_reason_string": @"Already Disconnected",
+                };
+
+                // the dart code always waits for this callback
+                [_methodChannel invokeMethod:@"OnConnectionStateChanged" arguments:response];
+                
                 result(@(true)); // no work to do
                 return;
             }

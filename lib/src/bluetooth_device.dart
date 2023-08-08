@@ -77,14 +77,6 @@ class BluetoothDevice {
         autoConnect: autoConnect,
       );
 
-      BluetoothConnectionState initialState = await connectionState
-          .where((s) => s == BluetoothConnectionState.connected || s == BluetoothConnectionState.disconnected)
-          .first;
-
-      if (initialState == BluetoothConnectionState.connected) {
-        return; // no work to do
-      }
-
       var responseStream = FlutterBluePlus._methodStream.stream
           .where((m) => m.method == "OnConnectionStateChanged")
           .map((m) => m.arguments)
@@ -119,14 +111,6 @@ class BluetoothDevice {
     await opMutex.take();
 
     try {
-      BluetoothConnectionState initialState = await connectionState
-          .where((s) => s == BluetoothConnectionState.connected || s == BluetoothConnectionState.disconnected)
-          .first;
-
-      if (initialState == BluetoothConnectionState.disconnected) {
-        return; // no work to do
-      }
-
       var responseStream = FlutterBluePlus._methodStream.stream
           .where((m) => m.method == "OnConnectionStateChanged")
           .map((m) => m.arguments)
