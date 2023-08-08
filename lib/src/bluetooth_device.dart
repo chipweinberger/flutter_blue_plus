@@ -77,7 +77,11 @@ class BluetoothDevice {
         autoConnect: autoConnect,
       );
 
-      if (await connectionState.first == BluetoothConnectionState.connected) {
+      BluetoothConnectionState initialState = await connectionState.where((s) => 
+        s == BluetoothConnectionState.connected ||
+        s == BluetoothConnectionState.disconnected).first;
+
+      if (initialState == BluetoothConnectionState.connected) {
         return; // no work to do
       }
 
@@ -115,7 +119,11 @@ class BluetoothDevice {
     await opMutex.take();
 
     try {
-      if (await connectionState.first == BluetoothConnectionState.disconnected) {
+      BluetoothConnectionState initialState = await connectionState.where((s) => 
+        s == BluetoothConnectionState.connected ||
+        s == BluetoothConnectionState.disconnected).first;
+
+      if (initialState == BluetoothConnectionState.disconnected) {
         return; // no work to do
       }
 
@@ -148,8 +156,7 @@ class BluetoothDevice {
     List<BluetoothService> result = [];
 
     try {
-      final s = await connectionState.first;
-      if (s != BluetoothConnectionState.connected) {
+      if (await connectionState.first != BluetoothConnectionState.connected) {
         throw FlutterBluePlusException('discoverServices', -1, 'device is not connected');
       }
 
