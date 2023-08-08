@@ -352,7 +352,7 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 | readRssi                  | :white_check_mark: | :white_check_mark: | :fire: | Read RSSI from a connected device                          |
 | requestMtu                | :white_check_mark: |                    | :fire: | Request to change the MTU for the device                   |
 | requestConnectionPriority | :white_check_mark: |                    | :fire: | Request to update a high priority, low latency connection  |
-| createBond                | :white_check_mark: |                    | :fire: | Typically bonding is automatic. Use only if you know why.  |
+| createBond                | :white_check_mark: |                    | :fire: | Force a system pairing dialogue to show, if needed         |
 | removeBond                | :white_check_mark: |                    | :fire: | Remove Bluetooth Bond of device                            |
 | setPreferredPhy           | :white_check_mark: |                    |        | Set preferred RX and TX phy for connection and phy options |
 | clearGattCache            | :white_check_mark: |                    | :fire: | Clear android cache of service discovery results           |
