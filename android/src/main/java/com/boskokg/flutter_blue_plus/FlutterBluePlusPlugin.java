@@ -259,7 +259,6 @@ public class FlutterBluePlusPlugin implements
                     }
                     log(LogLevel.DEBUG, "[FBP-Android] successfully bonded");
                 }
-                return;
             }
 
 
