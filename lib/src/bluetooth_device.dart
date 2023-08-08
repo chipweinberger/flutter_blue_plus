@@ -71,6 +71,10 @@ class BluetoothDevice {
       autoConnect: autoConnect,
     );
 
+    if (await connectionState.first == BluetoothConnectionState.connected) {
+      return; // no work to do
+    }
+
     var responseStream = FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnConnectionStateChanged")
         .map((m) => m.arguments)
@@ -96,6 +100,10 @@ class BluetoothDevice {
 
   /// Cancels connection to the Bluetooth Device
   Future<void> disconnect({int timeout = 15}) async {
+    if (await connectionState.first == BluetoothConnectionState.disconnected) {
+      return; // no work to do
+    }
+
     var responseStream = connectionState.where((s) => s == BluetoothConnectionState.disconnected);
 
     // Start listening now, before invokeMethod, to ensure we don't miss the response
