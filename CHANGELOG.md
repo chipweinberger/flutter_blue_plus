@@ -1,3 +1,7 @@
+## 1.13.1
+* Android/iOS: fix: on connection failure, return right away
+* Android/iOS: improve: on connection failure, return error code and error string
+
 ## 1.13.0
 This release focuses on improving bonding support.
 * Android: fix: discoverServices & others can fail if currently in the process of bonding
