@@ -1,3 +1,6 @@
+## 1.13.4
+* Android: fix: discoverServices never returns (regression in 1.13.0)
+
 ## 1.13.3
 * Dart: be extra careful to only call connect & disconnect when necessary
 
