@@ -825,3 +825,29 @@ class BmPreferredPhy {
     );
   }
 }
+
+
+enum BmBondStateEnum {
+  none, // 0
+  bonding, // 1
+  bonded, // 2
+  failed, // 3
+  lost, // 4
+}
+
+class BmBondStateResponse {
+  final String remoteId;
+  final BmBondStateEnum bondState;
+
+  BmBondStateResponse({
+    required this.remoteId,
+    required this.bondState,
+  });
+
+  factory BmBondStateResponse.fromMap(Map<dynamic, dynamic> json) {
+    return BmBondStateResponse(
+      remoteId: json['remote_id'],
+      bondState: BmBondStateEnum.values[json['bond_state']],
+    );
+  }
+}

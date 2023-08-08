@@ -271,15 +271,45 @@ class BluetoothDevice {
     );
   }
 
-  /// Force pairing dialogue to show. (Android Only) 
+  /// Force pairing dialogue to show. (Android Only)
   /// Typically, the only way to create a pairing request and show the pairing
-  /// dialog in Android is to connect and try to use an encrypted characteristic which 
+  /// dialog in Android is to connect and try to use an encrypted characteristic which
   /// is a bit awkward of an API. Calling this function circumvents that step.
-  Future<void> createBond() async {
+  Future<void> createBond({int timeout = 90}) async {
     if (Platform.isAndroid == false) {
       throw FlutterBluePlusException("createBond", -1, "android-only");
     }
-    return await FlutterBluePlus._invokeMethod('createBond', remoteId.str);
+
+    BmBondStateEnum initialState = await FlutterBluePlus._methods
+        .invokeMethod('getBondState', remoteId.str)
+        .then((buffer) => BmBondStateResponse.fromMap(buffer))
+        .then((p) => p.bondState);
+
+    if (initialState == BmBondStateEnum.bonded) {
+      return; // no work to do
+    }
+
+    // Start listening now, before invokeMethod, to ensure we don't miss the response
+    var responseStream = FlutterBluePlus._methodStream.stream
+        .where((m) => m.method == "OnBondStateChanged")
+        .map((m) => m.arguments)
+        .map((buffer) => BmBondStateResponse.fromMap(buffer))
+        .where((p) => p.remoteId == remoteId.str)
+        .where((p) => p.bondState != BmBondStateEnum.bonding);
+
+    // Start listening now, before invokeMethod, to ensure we don't miss the response
+    Future<BmBondStateResponse> futureResponse = responseStream.first;
+
+    // invoke
+    await FlutterBluePlus._invokeMethod('createBond', remoteId.str);
+
+    // wait for response
+    BmBondStateResponse bs = await futureResponse.timeout(Duration(seconds: timeout));
+
+    // success?
+    if (bs.bondState != BmBondStateEnum.bonded) {
+      throw FlutterBluePlusException("createBond", -1, "Could not establish bond");
+    }
   }
 
   /// Remove bond (Android Only)
@@ -287,6 +317,8 @@ class BluetoothDevice {
     if (Platform.isAndroid == false) {
       throw FlutterBluePlusException("removeBond", -1, "android-only");
     }
+    /// This is a hidden function in android. So I am not sure
+    /// if OnBondStateChanged will actually change.
     await FlutterBluePlus._methods.invokeMethod('removeBond', remoteId.str);
   }
 

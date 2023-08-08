@@ -45,6 +45,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 import java.io.StringWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -93,10 +94,10 @@ public class FlutterBluePlusPlugin implements
 
     static final private UUID CCCD_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
 
-    private final Map<String, BluetoothGatt> mConnectedDevices = new HashMap<>();
-    private final Map<String, Integer> mConnectionState = new HashMap<>();
-    private final Map<String, BondState> mBondState = new HashMap<>();
-    private final Map<String, Integer> mMtu = new HashMap<>();
+    private final Map<String, BluetoothGatt> mConnectedDevices = new ConcurrentHashMap<>();
+    private final Map<String, Integer> mConnectionState = new ConcurrentHashMap<>();
+    private final Map<String, BondState> mBondState = new ConcurrentHashMap<>();
+    private final Map<String, Integer> mMtu = new ConcurrentHashMap<>();
 
     private int lastEventId = 1452;
     private final Map<Integer, OperationOnPermission> operationsOnPermission = new HashMap<>();
@@ -927,6 +928,23 @@ public class FlutterBluePlusPlugin implements
                     break;
                 }
 
+                case "getBondState":
+                {
+                    String remoteId = (String) call.arguments;
+
+                    // get bond state
+                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
+                    BondState bs = bondState(device.getBondState(), BluetoothDevice.BOND_NONE);
+
+                    // see: BmBondStateResponse
+                    HashMap<String, Object> response = new HashMap<>();
+                    response.put("remote_id", remoteId);
+                    response.put("bond_state", bmBondStateEnum(bs));
+
+                    result.success(response);
+                    break;
+                }
+
                 case "createBond":
                 {
                     String remoteId = (String) call.arguments;
@@ -938,8 +956,15 @@ public class FlutterBluePlusPlugin implements
                         return;
                     }
 
-                    // bond
                     BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
+
+                    // already bonded or bonding?
+                    if (device.getBondState() != BluetoothDevice.BOND_NONE) {
+                        result.success(true); // no work to do
+                        break;
+                    }
+
+                    // bond
                     if(device.createBond() == false) {
                         result.error("createBond", "device.createBond() returned false", null);
                         break;
@@ -1167,6 +1192,23 @@ public class FlutterBluePlusPlugin implements
         return descriptor;
     }
 
+    private BondState bondState(int cur, int prev) {
+        BondState bs = BondState.NONE;
+        switch(cur) {
+            case BluetoothDevice.BOND_NONE:
+                if (prev == BluetoothDevice.BOND_BONDING) {
+                    return BondState.FAILED;
+                }
+                if (prev == BluetoothDevice.BOND_BONDED) {
+                    return BondState.LOST;
+                }
+                return BondState.NONE;
+            case BluetoothDevice.BOND_BONDING: bs = BondState.BONDING;
+            case BluetoothDevice.BOND_BONDED: bs = BondState.BONDED;
+            default: return BondState.NONE;
+        }
+    }           
+
     private void closeAllConnections()
     {
         for (BluetoothGatt gatt : mConnectedDevices.values()) {
@@ -1262,29 +1304,24 @@ public class FlutterBluePlusPlugin implements
 
             final BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
-            final int curBondState = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.ERROR);
-            final int prevBondState = intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, -1);
+            final int cur = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.ERROR);
+            final int prev = intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, -1);
 
-            log(LogLevel.DEBUG, "[FBP-Android] OnBondStateChanged: " + bondStateString(curBondState) +
-                " prev: " + bondStateString(prevBondState));
+            log(LogLevel.DEBUG, "[FBP-Android] OnBondStateChanged: " + bondStateString(cur) + " prev: " + bondStateString(prev));
 
             String remoteId = device.getAddress();
 
-            // convert to BondState enum
-            BondState bs = BondState.NONE;
-            switch(curBondState) {
-                case BluetoothDevice.BOND_NONE:
-                    switch(prevBondState) {
-                        case BluetoothDevice.BOND_NONE: bs = BondState.NONE;
-                        case BluetoothDevice.BOND_BONDING: bs = BondState.FAILED;
-                        case BluetoothDevice.BOND_BONDED: bs = BondState.LOST;
-                    }
-                case BluetoothDevice.BOND_BONDING: bs = BondState.BONDING;
-                case BluetoothDevice.BOND_BONDED: bs = BondState.BONDED;
-            }
+            BondState bs = bondState(cur, prev);
 
             // remember state
             mBondState.put(remoteId, bs);
+
+            // see: BmBondStateResponse
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("remote_id", remoteId);
+            map.put("bond_state", bmBondStateEnum(bs));
+
+            invokeMethodUIThread("OnBondStateChanged", map);
 
             // lost bond. Peripherals can typically store keys for only 1 bond and will delete
             // keys to previously bonded phones on new connections. Android does not handle
@@ -1917,6 +1954,17 @@ public class FlutterBluePlusPlugin implements
             case BluetoothAdapter.STATE_TURNING_OFF:  return 5;
             case BluetoothAdapter.STATE_TURNING_ON:   return 3;
             default:                                  return 0; 
+        }
+    }
+
+    static int bmBondStateEnum(BondState bs) {
+        switch (bs) {
+            case NONE:    return 0;
+            case BONDING: return 1;
+            case BONDED:  return 2;
+            case FAILED:  return 3;
+            case LOST:    return 4;
+            default:                return 0; 
         }
     }
 
