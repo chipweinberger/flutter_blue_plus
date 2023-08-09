@@ -96,7 +96,6 @@ public class FlutterBluePlusPlugin implements
 
     private final Map<String, BluetoothGatt> mConnectedDevices = new ConcurrentHashMap<>();
     private final Map<String, Integer> mConnectionState = new ConcurrentHashMap<>();
-    private final Map<String, Integer> mBondState = new ConcurrentHashMap<>();
     private final Map<String, Integer> mMtu = new ConcurrentHashMap<>();
 
     private int lastEventId = 1452;
@@ -513,8 +512,6 @@ public class FlutterBluePlusPlugin implements
                 {
                     String remoteId = (String) call.arguments;
 
-                    checkAndroid7discoverServicesWorkaround(remoteId);
-
                     BluetoothGatt gatt = locateGatt(remoteId);
 
                     if(gatt.discoverServices() == false) {
@@ -896,9 +893,10 @@ public class FlutterBluePlusPlugin implements
                         return;
                     }
 
+                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
+
                     // already bonded?
-                    if (mBondState.get(remoteId) != null && 
-                        mBondState.get(remoteId) == BluetoothDevice.BOND_BONDED) {
+                    if (device.getBondState() == BluetoothDevice.BOND_BONDED) {
 
                         // see: BmBondStateResponse
                         HashMap<String, Object> response = new HashMap<>();
@@ -914,8 +912,6 @@ public class FlutterBluePlusPlugin implements
                         break;
                     }
 
-                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
-
                     // bond
                     if(device.createBond() == false) {
                         result.error("createBond", "device.createBond() returned false", null);
@@ -929,11 +925,11 @@ public class FlutterBluePlusPlugin implements
                 case "removeBond":
                 {
                     String remoteId = (String) call.arguments;
+
                     BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
 
                     // already removed?
-                    if (mBondState.get(remoteId) == null || 
-                        mBondState.get(remoteId) == BluetoothDevice.BOND_NONE) {
+                    if (device.getBondState() == BluetoothDevice.BOND_NONE) {
 
                         // see: BmBondStateResponse
                         HashMap<String, Object> response = new HashMap<>();
@@ -1169,22 +1165,7 @@ public class FlutterBluePlusPlugin implements
         }
         mConnectedDevices.clear();
         mConnectionState.clear();
-        mBondState.clear();
         mMtu.clear();
-    }
-
-    private void checkAndroid7discoverServicesWorkaround(String remoteId) throws InterruptedException
-    {
-        // on Android 7.1 and below, discoverServices will fail if called
-        // too quickly after bonding completes. For simplicity, we always delay when bonded.
-        // see: https://github.com/weliem/blessed-android
-        // see: https://medium.com/@martijn.van.welie/making-android-ble-work-part-2-47a3cdaade07
-        if (Build.VERSION.SDK_INT <= 25) { // Android 7.1 (October 2016)
-            if (mBondState.get(remoteId) != null && mBondState.get(remoteId) == BluetoothDevice.BOND_BONDED) {
-                log(LogLevel.WARNING, "[FBP-Android] waiting 1.5s before calling discoverServices to workaround android 7 bug");
-                Thread.sleep(1500); // sleep 1500ms
-            }
-        }
     }
 
     /////////////////////////////////////////////////////////////////////////////////////
@@ -1264,9 +1245,6 @@ public class FlutterBluePlusPlugin implements
             log(LogLevel.DEBUG, "[FBP-Android] OnBondStateChanged: " + bondStateString(cur) + " prev: " + bondStateString(prev));
 
             String remoteId = device.getAddress();
-
-            // remember current state
-            mBondState.put(remoteId, cur);
 
             boolean lost = cur == BluetoothDevice.BOND_NONE && prev == BluetoothDevice.BOND_BONDED;
             boolean fail = cur == BluetoothDevice.BOND_NONE && prev == BluetoothDevice.BOND_BONDING;
