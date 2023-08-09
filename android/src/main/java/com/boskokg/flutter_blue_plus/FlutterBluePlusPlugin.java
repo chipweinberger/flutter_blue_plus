@@ -927,15 +927,17 @@ public class FlutterBluePlusPlugin implements
                     String remoteId = (String) call.arguments;
 
                     // get bond state
-                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
-                    BondState bs = bondState(device.getBondState(), BluetoothDevice.BOND_NONE);
+                    BondState bs = mBondState.get(remoteId) != null ? mBondState.get(remoteId) : BondState.NONE;
 
                     // see: BmBondStateResponse
                     HashMap<String, Object> response = new HashMap<>();
                     response.put("remote_id", remoteId);
                     response.put("bond_state", bmBondStateEnum(bs));
 
-                    result.success(response);
+                    // the dart code always waits on this
+                    invokeMethodUIThread("OnBondStateChanged", response);
+
+                    result.success(true);
                     break;
                 }
 
@@ -950,13 +952,25 @@ public class FlutterBluePlusPlugin implements
                         return;
                     }
 
-                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
+                    // get bond state
+                    BondState bs = mBondState.get(remoteId) != null ? mBondState.get(remoteId) : BondState.NONE;
 
-                    // already bonded or bonding?
-                    if (device.getBondState() != BluetoothDevice.BOND_NONE) {
+                    // already bonded?
+                    if (bs == BondState.BONDED) {
+
+                        // see: BmBondStateResponse
+                        HashMap<String, Object> response = new HashMap<>();
+                        response.put("remote_id", remoteId);
+                        response.put("bond_state", bmBondStateEnum(bs));
+
+                        // the dart code always waits on this
+                        invokeMethodUIThread("OnBondStateChanged", response);
+
                         result.success(true); // no work to do
                         break;
                     }
+
+                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
 
                     // bond
                     if(device.createBond() == false) {
@@ -973,8 +987,20 @@ public class FlutterBluePlusPlugin implements
                     String remoteId = (String) call.arguments;
                     BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
 
-                    // not bonded?
-                    if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
+                    // get bond state
+                    BondState bs = mBondState.get(remoteId) != null ? mBondState.get(remoteId) : BondState.NONE;
+
+                    // already unbonded?
+                    if (bs == BondState.NONE || bs == BondState.LOST) {
+
+                        // see: BmBondStateResponse
+                        HashMap<String, Object> response = new HashMap<>();
+                        response.put("remote_id", remoteId);
+                        response.put("bond_state", bmBondStateEnum(bs));
+
+                        // the dart code always waits on this
+                        invokeMethodUIThread("OnBondStateChanged", response);
+
                         result.success(true); // no work to do
                         break;
                     }

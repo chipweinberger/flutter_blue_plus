@@ -134,6 +134,7 @@ class BluetoothDevice {
   Future<List<BluetoothService>> discoverServices({int timeout = 15}) async {
     // check & wait if bonding
     await _waitIfBonding(remoteId);
+
     // Only allow a single 'discoverServices' operation to be underway per device.
     String key = remoteId.str + ":discoverServices";
     _Mutex opMutex = await _MutexFactory.getMutexForKey(key);
@@ -172,9 +173,11 @@ class BluetoothDevice {
 
       // remember known services
       _knownServices[remoteId] = result;
+
+      // add to stream
+      _services.add(result);
     } finally {
       _isDiscoveringServices.add(false);
-      _services.add(result);
       opMutex.give();
     }
 
@@ -354,22 +357,12 @@ class BluetoothDevice {
       throw FlutterBluePlusException("createBond", -1, "android-only");
     }
 
-    // Only allow a single 'createBond' operation to be underway per device.
-    String key = remoteId.str + ":createBond";
+    // Only allow a single 'createRemoveBond' operation to be underway per device.
+    String key = remoteId.str + ":createRemoveBond";
     _Mutex opMutex = await _MutexFactory.getMutexForKey(key);
     await opMutex.take();
 
     try {
-      BmBondStateEnum initialState = await FlutterBluePlus._methods
-          .invokeMethod('getBondState', remoteId.str)
-          .then((buffer) => BmBondStateResponse.fromMap(buffer))
-          .then((p) => p.bondState);
-
-      if (initialState == BmBondStateEnum.bonded) {
-        return; // no work to do
-      }
-
-      // Start listening now, before invokeMethod, to ensure we don't miss the response
       var responseStream = FlutterBluePlus._methodStream.stream
           .where((m) => m.method == "OnBondStateChanged")
           .map((m) => m.arguments)
@@ -388,7 +381,7 @@ class BluetoothDevice {
 
       // success?
       if (bs.bondState != BmBondStateEnum.bonded) {
-        throw FlutterBluePlusException("createBond", -1, "Could not establish bond");
+        throw FlutterBluePlusException("createBond", -1, "Failed to establish bond. ${bs.bondState}");
       }
     } finally {
       opMutex.give();
@@ -396,14 +389,40 @@ class BluetoothDevice {
   }
 
   /// Remove bond (Android Only)
-  Future<void> removeBond() async {
+  Future<void> removeBond({int timeout = 30}) async {
     if (Platform.isAndroid == false) {
       throw FlutterBluePlusException("removeBond", -1, "android-only");
     }
 
-    /// This is a hidden function in android. So I am not sure
-    /// if OnBondStateChanged will actually change.
-    await FlutterBluePlus._methods.invokeMethod('removeBond', remoteId.str);
+    // Only allow a single 'createRemoveBond' operation to be underway per device.
+    String key = remoteId.str + ":createRemoveBond";
+    _Mutex opMutex = await _MutexFactory.getMutexForKey(key);
+    await opMutex.take();
+
+    try {
+      var responseStream = FlutterBluePlus._methodStream.stream
+          .where((m) => m.method == "OnBondStateChanged")
+          .map((m) => m.arguments)
+          .map((buffer) => BmBondStateResponse.fromMap(buffer))
+          .where((p) => p.remoteId == remoteId.str)
+          .where((p) => p.bondState != BmBondStateEnum.bonding);
+
+      // Start listening now, before invokeMethod, to ensure we don't miss the response
+      Future<BmBondStateResponse> futureResponse = responseStream.first;
+
+      // invoke
+      await FlutterBluePlus._invokeMethod('removeBond', remoteId.str);
+
+      // wait for response
+      BmBondStateResponse bs = await futureResponse.timeout(Duration(seconds: timeout));
+
+      // success?
+      if (bs.bondState != BmBondStateEnum.none && bs.bondState != BmBondStateEnum.lost) {
+        throw FlutterBluePlusException("removeBond", -1, "Failed to remove bond. ${bs.bondState}");
+      }
+    } finally {
+      opMutex.give();
+    }
   }
 
   /// Refresh ble services & characteristics (Android Only)
@@ -422,37 +441,32 @@ class BluetoothDevice {
     if (Platform.isAndroid == false) {
       return; // only needed on android
     }
-    if (await _bondState(remoteId.str).first != BmBondStateEnum.bonding) {
-      return; // not currently bonding
-    }
-    if (FlutterBluePlus.logLevel.index >= LogLevel.debug.index) {
-      print("[FBP] waiting for bonding to complete...");
-    }
-    BmBondStateEnum bs = await _bondState(remoteId.str)
-        .where((bs) => bs != BmBondStateEnum.bonding)
-        .first
-        .timeout(Duration(seconds: timeout));
-    if (bs != BmBondStateEnum.bonded) {
-      throw FlutterBluePlusException("bonding", -1, "failed to bond to device: $bs");
-    }
-  }
-
-  // for internal use
-  static Stream<BmBondStateEnum> _bondState(String remoteId) async* {
-    BmBondStateEnum initialState = await FlutterBluePlus._methods
-        .invokeMethod('getBondState', remoteId)
-        .then((buffer) => BmBondStateResponse.fromMap(buffer))
-        .then((p) => p.bondState);
-
-    yield initialState;
-
-    // Start listening now, before invokeMethod, to ensure we don't miss the response
-    yield* FlutterBluePlus._methodStream.stream
+    var responseStream = FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnBondStateChanged")
         .map((m) => m.arguments)
         .map((buffer) => BmBondStateResponse.fromMap(buffer))
-        .where((p) => p.remoteId == remoteId)
+        .where((p) => p.remoteId == remoteId.str)
         .map((e) => e.bondState);
+
+    // Start listening now, before invokeMethod, to ensure we don't miss the response
+    _BufferStream bufferStream = _BufferStream.listen(responseStream);
+
+    await FlutterBluePlus._methods.invokeMethod('getBondState', remoteId);
+
+    await for (BmBondStateEnum bs in bufferStream.stream) {
+      switch (bs) {
+        case BmBondStateEnum.none:
+          break;
+        case BmBondStateEnum.bonding:
+          continue;
+        case BmBondStateEnum.bonded:
+          break;
+        case BmBondStateEnum.failed:
+          throw FlutterBluePlusException("bonding", -1, "failed to bond to device.");
+        case BmBondStateEnum.lost:
+          throw FlutterBluePlusException("bonding", -2, "bond lost. must reconnect");
+      }
+    }
   }
 
   @override
