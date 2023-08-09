@@ -66,25 +66,12 @@ class BluetoothDevice {
     Duration timeout = const Duration(seconds: 15),
     bool autoConnect = false,
   }) async {
-    // already connected?
-    if (FlutterBluePlus._connectionStates[remoteId] != null &&
-        FlutterBluePlus._connectionStates[remoteId]!.connectionState == BmConnectionStateEnum.connected) {
-      return;
-    }
-
     // Only allow a single 'connectDisconnect' operation at the same time per device.
     String key = remoteId.str + ":connectDisconnect";
     _Mutex opMutex = await _MutexFactory.getMutexForKey(key);
     await opMutex.take();
 
     try {
-      // already connected? it's worth checking this again because
-      // it could have changed after awaiting for the mutex
-      if (FlutterBluePlus._connectionStates[remoteId] != null &&
-          FlutterBluePlus._connectionStates[remoteId]!.connectionState == BmConnectionStateEnum.connected) {
-        return;
-      }
-
       var request = BmConnectRequest(
         remoteId: remoteId.str,
         autoConnect: autoConnect,
@@ -118,25 +105,12 @@ class BluetoothDevice {
 
   /// Cancels connection to the Bluetooth Device
   Future<void> disconnect({int timeout = 15}) async {
-    // already disconnected?
-    if (FlutterBluePlus._connectionStates[remoteId] == null ||
-        FlutterBluePlus._connectionStates[remoteId]!.connectionState == BmConnectionStateEnum.disconnected) {
-      return;
-    }
-
     // Only allow a single 'connectDisconnect' operation at the same time per device.
     String key = remoteId.str + ":connectDisconnect";
     _Mutex opMutex = await _MutexFactory.getMutexForKey(key);
     await opMutex.take();
 
     try {
-      // already disconnected? it's worth checking this again because
-      // it could have changed after awaiting for the mutex
-      if (FlutterBluePlus._connectionStates[remoteId] == null ||
-          FlutterBluePlus._connectionStates[remoteId]!.connectionState == BmConnectionStateEnum.disconnected) {
-        return;
-      }
-
       var responseStream = FlutterBluePlus._methodStream.stream
           .where((m) => m.method == "OnConnectionStateChanged")
           .map((m) => m.arguments)
@@ -166,12 +140,6 @@ class BluetoothDevice {
     List<BluetoothService> result = [];
 
     try {
-      // not connected?
-      if (FlutterBluePlus._connectionStates[remoteId] == null ||
-          FlutterBluePlus._connectionStates[remoteId]!.connectionState == BmConnectionStateEnum.disconnected) {
-        throw FlutterBluePlusException('discoverServices', -1, 'device is not connected');
-      }
-
       // signal that we have started
       _isDiscoveringServices.add(true);
 
