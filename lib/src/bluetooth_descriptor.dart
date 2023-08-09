@@ -15,6 +15,9 @@ class BluetoothDescriptor {
   // convenience accessor
   Guid get uuid => descriptorUuid;
 
+  /// this variable is updated:
+  ///   - *live* if you call onValueReceived.listen() or lastValueStream.listen()
+  ///   - *once* if you call read()
   List<int> lastValue = [];
 
   // same as onValueReceived, but the stream immediately starts

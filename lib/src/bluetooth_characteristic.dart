@@ -16,7 +16,7 @@ class BluetoothCharacteristic {
   Guid get uuid => characteristicUuid;
 
   /// this variable is updated:
-  ///   - *live* if you call onValueReceived.listen() or lastValueStream.listen()
+  ///   - *live* if you call onValueReceived.listen() or lastValueStream.listen() & setNotifyValue(true)
   ///   - *once* if you call read()
   List<int> lastValue;
 
