@@ -18,6 +18,11 @@ class FlutterBluePlus {
   // ignore: close_sinks
   static final StreamController<MethodCall> _methodStream = StreamController.broadcast();
 
+  // we always keep track of these device variables
+  static final Map<DeviceIdentifier, BmConnectionStateResponse> _connectionStates = {};
+  static final Map<DeviceIdentifier, BmBondStateResponse> _bondStates = {};
+  static final Map<DeviceIdentifier, BmMtuChangedResponse> _mtuValues = {};
+
   // stream used for the isScanning public api
   static final _StreamController<bool> _isScanning = _StreamController(initialValue: false);
 
@@ -230,27 +235,43 @@ class FlutterBluePlus {
     _logColor = color;
   }
 
+  static Future<dynamic> _methodCallHandler(MethodCall call) async {
+    // log result
+    if (logLevel == LogLevel.verbose) {
+      String func = '[[ ${call.method} ]]';
+      String result = call.arguments.toString();
+      func = _logColor ? _black(func) : func;
+      result = _logColor ? _brown(result) : result;
+      print("[FBP] $func result: $result");
+    }
+
+    // keep track of bond state
+    if (call.method == "OnBondStateChanged") {
+      BmBondStateResponse response = BmBondStateResponse.fromMap(call.arguments);
+      _bondStates[DeviceIdentifier(response.remoteId)] = response;
+    }
+
+    // keep track of connection states
+    if (call.method == "OnConnectionStateChanged") {
+      BmConnectionStateResponse response = BmConnectionStateResponse.fromMap(call.arguments);
+      _connectionStates[DeviceIdentifier(response.remoteId)] = response;
+    }
+
+    // keep track of mtu values
+    if (call.method == "OnMtuChanged") {
+      BmMtuChangedResponse response = BmMtuChangedResponse.fromMap(call.arguments);
+      _mtuValues[DeviceIdentifier(response.remoteId)] = response;
+    }
+
+    _methodStream.add(call);
+  }
+
   // invoke a platform method
   static Future<dynamic> _invokeMethod(String method, [dynamic arguments]) async {
-    // initialize handler
+    // initialize response handler
     if (_initialized == false) {
-      // set handler
-      _methods.setMethodCallHandler((MethodCall call) async {
-        // log result
-        if (logLevel == LogLevel.verbose) {
-          String func = '[[ ${call.method} ]]';
-          String result = call.arguments.toString();
-          func = _logColor ? _black(func) : func;
-          result = _logColor ? _brown(result) : result;
-          print("[FBP] $func result: $result");
-        }
-        _methodStream.add(call);
-      });
-
-      // avoid recursion: must set this
-      // before we call setLogLevel
-      _initialized = true;
-
+      _initialized = true; // avoid recursion: must set before setLogLevel
+      _methods.setMethodCallHandler(_methodCallHandler);
       setLogLevel(logLevel);
     }
 

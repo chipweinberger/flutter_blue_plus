@@ -304,27 +304,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             
             result(@(true));
         }
-        else if ([@"getConnectionState" isEqualToString:call.method])
-        {
-            // remoteId is passed raw, not in a NSDictionary
-            NSString *remoteId = [call arguments];
-
-            // get the connection state of *our app*
-            // We don't care if other apps are connected
-            CBPeripheralState connectionState = [self isConnectedToThisApp:remoteId] ?
-                CBPeripheralStateConnected :
-                CBPeripheralStateDisconnected;
-
-            // See BmConnectionStateResponse
-            NSDictionary* response = @{
-                @"remote_id":                remoteId,
-                @"connection_state":         @([self bmConnectionStateEnum:connectionState]),
-                @"disconnect_reason_code":   [NSNull null],
-                @"disconnect_reason_string": [NSNull null],
-            };
-
-            result(response);
-        }
         else if ([@"discoverServices" isEqualToString:call.method])
         {
             // remoteId is passed raw, not in a NSDictionary
@@ -573,31 +552,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             [peripheral setNotifyValue:[enable boolValue] forCharacteristic:characteristic];
             
             result(@(true));
-        }
-        else if ([@"getMtu" isEqualToString:call.method])
-        {
-            // remoteId is passed raw, not in a NSDictionary
-            NSString *remoteId = [call arguments];
-
-            // get peripheral
-            CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
-            if (peripheral == nil) {
-                NSString* s = @"device is not connected. have you called connect()?";
-                result([FlutterError errorWithCode:@"mtu" message:s details:remoteId]);
-                return;
-            }
-
-            // get mtu
-            uint32_t mtu = [self getMtu:peripheral];
-
-            // See: BmMtuChangedResponse
-            NSDictionary* response = @{
-                @"remote_id" : [[peripheral identifier] UUIDString],
-                @"mtu" : @(mtu),
-                @"success" : @(1),
-            };
-            
-            result(response);
         }
         else if ([@"requestMtu" isEqualToString:call.method])
         {

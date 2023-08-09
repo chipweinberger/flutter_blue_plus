@@ -509,25 +509,6 @@ public class FlutterBluePlusPlugin implements
                     break;
                 }
 
-                case "getConnectionState":
-                {
-                    String remoteId = (String) call.arguments;
-
-                    // get the connection state of *our app*
-                    // We don't care if other apps are connected
-                    int cs = connectionStateOfThisApp(remoteId);
-
-                    // see: BmConnectionStateResponse
-                    HashMap<String, Object> response = new HashMap<>();
-                    response.put("connection_state", bmConnectionStateEnum(cs));
-                    response.put("remote_id", remoteId);
-                    response.put("disconnect_reason_code", null);
-                    response.put("disconnect_reason_string", null);
-
-                    result.success(response);
-                    break;
-                }
-
                 case "discoverServices":
                 {
                     String remoteId = (String) call.arguments;
@@ -803,24 +784,6 @@ public class FlutterBluePlusPlugin implements
                     break;
                 }
 
-                case "getMtu":
-                {
-                    String remoteId = (String) call.arguments;
-
-                    Integer mtu = mMtu.get(remoteId);
-                    if(mtu == null) {
-                        result.error("getMtu", "no instance of BluetoothGatt, have you connected first?", null);
-                        break;
-                    }
-
-                    HashMap<String, Object> response = new HashMap<String, Object>();
-                    response.put("remote_id", remoteId);
-                    response.put("mtu", mtu);
-
-                    result.success(response);
-                    break;
-                }
-
                 case "requestMtu":
                 {
                     // see: BmMtuChangeRequest
@@ -919,25 +882,6 @@ public class FlutterBluePlusPlugin implements
                     response.put("devices", devList);
 
                     result.success(response);
-                    break;
-                }
-
-                case "getBondState":
-                {
-                    String remoteId = (String) call.arguments;
-
-                    // get bond state
-                    BondState bs = mBondState.get(remoteId) != null ? mBondState.get(remoteId) : BondState.NONE;
-
-                    // see: BmBondStateResponse
-                    HashMap<String, Object> response = new HashMap<>();
-                    response.put("remote_id", remoteId);
-                    response.put("bond_state", bmBondStateEnum(bs));
-
-                    // the dart code always waits on this
-                    invokeMethodUIThread("OnBondStateChanged", response);
-
-                    result.success(true);
                     break;
                 }
 

@@ -186,13 +186,10 @@ class BluetoothDevice {
 
   /// The current connection state of the device to this application
   Stream<BluetoothConnectionState> get connectionState async* {
-    BluetoothConnectionState initialState = await FlutterBluePlus._methods
-        .invokeMethod('getConnectionState', remoteId.str)
-        .then((buffer) => BmConnectionStateResponse.fromMap(buffer))
-        .then((p) => _bmToBluetoothConnectionState(p.connectionState));
-
-    yield initialState;
-
+    // initial value
+    yield _bmToBluetoothConnectionState(
+        FlutterBluePlus._connectionStates[remoteId]?.connectionState ?? BmConnectionStateEnum.disconnected);
+    // stream
     yield* FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnConnectionStateChanged")
         .map((m) => m.arguments)
@@ -203,21 +200,9 @@ class BluetoothDevice {
 
   /// The current MTU size in bytes
   Stream<int> get mtu async* {
-    // wait for connection
-    await connectionState.where((v) => v == BluetoothConnectionState.connected).first;
-
-    BmMtuChangedResponse response = await FlutterBluePlus._methods
-        .invokeMethod('getMtu', remoteId.str)
-        .then((buffer) => BmMtuChangedResponse.fromMap(buffer));
-
-    // failed?
-    if (!response.success) {
-      throw FlutterBluePlusException("mtu", response.errorCode, response.errorString);
-    }
-
     // initial value
-    yield response.mtu;
-
+    yield FlutterBluePlus._mtuValues[remoteId]?.mtu ?? 23;
+    // stream
     yield* FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnMtuChanged")
         .map((m) => m.arguments)
@@ -441,6 +426,13 @@ class BluetoothDevice {
     if (Platform.isAndroid == false) {
       return; // only needed on android
     }
+    if (FlutterBluePlus._bondStates[remoteId] == null) {
+      return; // bonding not yet started
+    }
+    if (FlutterBluePlus._bondStates[remoteId]!.bondState != BmBondStateEnum.bonding) {
+      return; // already bonded / not yet bonding
+    }
+
     var responseStream = FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnBondStateChanged")
         .map((m) => m.arguments)
@@ -448,12 +440,7 @@ class BluetoothDevice {
         .where((p) => p.remoteId == remoteId.str)
         .map((e) => e.bondState);
 
-    // Start listening now, before invokeMethod, to ensure we don't miss the response
-    _BufferStream bufferStream = _BufferStream.listen(responseStream);
-
-    await FlutterBluePlus._methods.invokeMethod('getBondState', remoteId);
-
-    await for (BmBondStateEnum bs in bufferStream.stream) {
+    await for (BmBondStateEnum bs in responseStream) {
       switch (bs) {
         case BmBondStateEnum.none:
           break;
