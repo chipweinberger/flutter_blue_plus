@@ -95,7 +95,7 @@ class BluetoothCharacteristic {
 
       // failed?
       if (!response.success) {
-        throw FlutterBluePlusException("readCharacteristic", response.errorCode, response.errorString);
+        throw FlutterBluePlusException(_nativeError, "readCharacteristic", response.errorCode, response.errorString);
       }
 
       // cache latest value
@@ -163,7 +163,7 @@ class BluetoothCharacteristic {
 
       // failed?
       if (!response.success) {
-        throw FlutterBluePlusException("writeCharacteristic", response.errorCode, response.errorString);
+        throw FlutterBluePlusException(_nativeError, "writeCharacteristic", response.errorCode, response.errorString);
       }
 
       return Future.value();
@@ -209,7 +209,7 @@ class BluetoothCharacteristic {
 
     // failed?
     if (!response.success) {
-      throw FlutterBluePlusException("setNotifyValue", response.errorCode, response.errorString);
+      throw FlutterBluePlusException(_nativeError, "setNotifyValue", response.errorCode, response.errorString);
     }
 
     // verify notifications were actually set correctly
@@ -218,7 +218,8 @@ class BluetoothCharacteristic {
     var hasIndicate = cccd.isNotEmpty && (cccd[0] & 0x02) > 0;
     var isEnabled = hasNotify || hasIndicate;
     if (notify != isEnabled) {
-      throw FlutterBluePlusException("setNotifyValue", -1, "notifications were not updated");
+      throw FlutterBluePlusException(ErrorPlatform.dart, "setNotifyValue",
+        FbpErrorCode.setNotifyFailed.index, "notifications were not updated");
     }
 
     // update descriptor

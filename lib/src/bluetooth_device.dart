@@ -96,7 +96,7 @@ class BluetoothDevice {
 
       // failure?
       if (response.connectionState == BmConnectionStateEnum.disconnected) {
-        throw FlutterBluePlusException('connect', response.disconnectReasonCode, response.disconnectReasonString);
+        throw FlutterBluePlusException(_nativeError, "connect", response.disconnectReasonCode, response.disconnectReasonString);
       }
     } finally {
       opMutex.give();
@@ -159,7 +159,7 @@ class BluetoothDevice {
 
       // failed?
       if (!response.success) {
-        throw FlutterBluePlusException("discoverServices", response.errorCode, response.errorString);
+        throw FlutterBluePlusException(_nativeError, "discoverServices", response.errorCode, response.errorString);
       }
 
       result = response.services.map((p) => BluetoothService.fromProto(p)).toList();
@@ -230,7 +230,7 @@ class BluetoothDevice {
 
       // failed?
       if (!response.success) {
-        throw FlutterBluePlusException("readRssi", response.errorCode, response.errorString);
+        throw FlutterBluePlusException(_nativeError, "readRssi", response.errorCode, response.errorString);
       }
       rssi = response.rssi;
     } finally {
@@ -244,7 +244,8 @@ class BluetoothDevice {
   ///  - returns new MTU
   Future<int> requestMtu(int desiredMtu, {int timeout = 15}) async {
     if (Platform.isAndroid == false) {
-      throw FlutterBluePlusException("requestMtu", -1, "android-only");
+      throw FlutterBluePlusException(ErrorPlatform.dart, "requestMtu",
+        FbpErrorCode.androidOnly.index, "android-only");
     }
 
     // Only allow a single 'requestMtu' operation at the same time per device.
@@ -283,7 +284,8 @@ class BluetoothDevice {
   /// Request connection priority update (Android only)
   Future<void> requestConnectionPriority({required ConnectionPriority connectionPriorityRequest}) async {
     if (Platform.isAndroid == false) {
-      throw FlutterBluePlusException("setPreferredPhy", -1, "android-only");
+      throw FlutterBluePlusException(ErrorPlatform.dart, "setPreferredPhy",
+        FbpErrorCode.androidOnly.index, "android-only");
     }
 
     var request = BmConnectionPriorityRequest(
@@ -308,7 +310,8 @@ class BluetoothDevice {
     required PhyCoding option,
   }) async {
     if (Platform.isAndroid == false) {
-      throw FlutterBluePlusException("setPreferredPhy", -1, "android-only");
+      throw FlutterBluePlusException(ErrorPlatform.dart, "setPreferredPhy",
+        FbpErrorCode.androidOnly.index, "android-only");
     }
 
     var request = BmPreferredPhy(
@@ -330,7 +333,8 @@ class BluetoothDevice {
   /// is a bit awkward of an API. Calling this function circumvents that step.
   Future<void> createBond({int timeout = 90}) async {
     if (Platform.isAndroid == false) {
-      throw FlutterBluePlusException("createBond", -1, "android-only");
+      throw FlutterBluePlusException(ErrorPlatform.dart, "createBond",
+        FbpErrorCode.androidOnly.index, "android-only");
     }
 
     // Only allow a single 'createRemoveBond' operation at the same time per device.
@@ -357,7 +361,8 @@ class BluetoothDevice {
 
       // success?
       if (bs.bondState != BmBondStateEnum.bonded) {
-        throw FlutterBluePlusException("createBond", -1, "Failed to establish bond. ${bs.bondState}");
+        throw FlutterBluePlusException(ErrorPlatform.dart, "createBond",
+          FbpErrorCode.createBondFailed.hashCode, "Failed to create bond. ${bs.bondState}");
       }
     } finally {
       opMutex.give();
@@ -367,7 +372,8 @@ class BluetoothDevice {
   /// Remove bond (Android Only)
   Future<void> removeBond({int timeout = 30}) async {
     if (Platform.isAndroid == false) {
-      throw FlutterBluePlusException("removeBond", -1, "android-only");
+      throw FlutterBluePlusException(ErrorPlatform.dart, "removeBond",
+        FbpErrorCode.androidOnly.index, "android-only");
     }
 
     // Only allow a single 'createRemoveBond' operation at the same time per device.
@@ -394,7 +400,8 @@ class BluetoothDevice {
 
       // success?
       if (bs.bondState != BmBondStateEnum.none) {
-        throw FlutterBluePlusException("removeBond", -1, "Failed to remove bond. ${bs.bondState}");
+        throw FlutterBluePlusException(ErrorPlatform.dart, "createBond",
+          FbpErrorCode.removeBondFailed.hashCode, "Failed to remove bond. ${bs.bondState}");
       }
     } finally {
       opMutex.give();
@@ -404,7 +411,8 @@ class BluetoothDevice {
   /// Refresh ble services & characteristics (Android Only)
   Future<void> clearGattCache() async {
     if (Platform.isAndroid == false) {
-      throw FlutterBluePlusException("clearGattCache", -1, "android-only");
+      throw FlutterBluePlusException(ErrorPlatform.dart, "clearGattCache",
+        FbpErrorCode.androidOnly.index, "android-only");
     }
     await FlutterBluePlus._invokeMethod('clearGattCache', remoteId.str);
   }
@@ -412,7 +420,8 @@ class BluetoothDevice {
   // Get the current bondState of the device (Android Only)
   Stream<BluetoothBondState> bondState() async* {
     if (Platform.isAndroid == false) {
-      throw FlutterBluePlusException("bondState", -1, "android-only");
+      throw FlutterBluePlusException(ErrorPlatform.dart, "bondState",
+        FbpErrorCode.androidOnly.index, "android-only");
     }
     // initial
     if (FlutterBluePlus._bondStates[remoteId] != null) {

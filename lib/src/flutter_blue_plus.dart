@@ -137,7 +137,8 @@ class FlutterBluePlus {
           androidUsesFineLocation: androidUsesFineLocation);
 
       if (_isScanning.value == true) {
-        throw FlutterBluePlusException('scan', -1, 'Another scan is already in progress.');
+        throw FlutterBluePlusException(ErrorPlatform.dart, "scan",
+          FbpErrorCode.scanInProgress.index, 'another scan already in progress');
       }
 
       // push to isScanning stream
@@ -172,7 +173,8 @@ class FlutterBluePlus {
       await for (BmScanResponse response in _scanResponseBuffer!.stream) {
         // failure?
         if (response.failed != null) {
-          throw FlutterBluePlusException("scan", response.failed!.errorCode, response.failed!.errorString);
+          throw FlutterBluePlusException(_nativeError, "scan",
+            response.failed!.errorCode, response.failed!.errorString);
         }
 
         // no result?
@@ -450,12 +452,37 @@ class AdvertisementData {
   }
 }
 
+enum ErrorPlatform {
+  dart,
+  android,
+  apple,
+}
+
+final ErrorPlatform _nativeError = (() {
+  if (Platform.isAndroid) {
+    return ErrorPlatform.android;
+  } else {
+    return ErrorPlatform.apple;
+  }
+})();
+
+
+enum FbpErrorCode {
+  success, // 0
+  androidOnly, // 1
+  scanInProgress, // 2
+  createBondFailed, // 3
+  removeBondFailed, // 4
+  setNotifyFailed, // 5
+}
+
 class FlutterBluePlusException implements Exception {
+  final ErrorPlatform errorPlatform;
   final String errorName;
   final int? errorCode;
   final String? errorString;
 
-  FlutterBluePlusException(this.errorName, this.errorCode, this.errorString);
+  FlutterBluePlusException(this.errorPlatform, this.errorName, this.errorCode, this.errorString);
 
   @override
   String toString() {

@@ -85,7 +85,7 @@ class BluetoothDescriptor {
 
       // failed?
       if (!response.success) {
-        throw FlutterBluePlusException("readDescriptor", response.errorCode, response.errorString);
+        throw FlutterBluePlusException(_nativeError, "readDescriptor", response.errorCode, response.errorString);
       }
 
       readValue = response.value;
@@ -133,7 +133,7 @@ class BluetoothDescriptor {
 
       // failed?
       if (!response.success) {
-        throw FlutterBluePlusException("writeDescriptor", response.errorCode, response.errorString);
+        throw FlutterBluePlusException(_nativeError, "writeDescriptor", response.errorCode, response.errorString);
       }
     } finally {
       writeMutex.give();
