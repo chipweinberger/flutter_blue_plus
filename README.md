@@ -348,6 +348,7 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 | servicesList              | :white_check_mark: | :white_check_mark: |        | The list of services that were discovered                  |
 | servicesStream            | :white_check_mark: | :white_check_mark: |        | Stream of services changes                                 |
 | connectionState           | :white_check_mark: | :white_check_mark: |        | Stream of connection changes for the Bluetooth Device      |
+| bondState                 | :white_check_mark: |                    |        | Stream of device bond state. Can be useful on Android      |
 | mtu                       | :white_check_mark: | :white_check_mark: | :fire: | Stream of mtu size changes                                 |
 | readRssi                  | :white_check_mark: | :white_check_mark: | :fire: | Read RSSI from a connected device                          |
 | requestMtu                | :white_check_mark: |                    | :fire: | Request to change the MTU for the device                   |
