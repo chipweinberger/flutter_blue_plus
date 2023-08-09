@@ -770,8 +770,8 @@ class BmReadRssiResult {
   }
 }
 
-enum BmConnectionPriorityEnum{
-  balanced, // 0 
+enum BmConnectionPriorityEnum {
+  balanced, // 0
   high, // 1
   lowPower, // 2
 }
@@ -825,28 +825,31 @@ class BmPreferredPhy {
   }
 }
 
-
 enum BmBondStateEnum {
   none, // 0
   bonding, // 1
   bonded, // 2
-  failed, // 3
-  lost, // 4
 }
 
 class BmBondStateResponse {
   final String remoteId;
   final BmBondStateEnum bondState;
+  final bool bondFailed; // only possible when bondState.none
+  final bool bondLost;   // only possible when bondState.none
 
   BmBondStateResponse({
     required this.remoteId,
     required this.bondState,
+    required this.bondFailed,
+    required this.bondLost,
   });
 
   factory BmBondStateResponse.fromMap(Map<dynamic, dynamic> json) {
     return BmBondStateResponse(
       remoteId: json['remote_id'],
       bondState: BmBondStateEnum.values[json['bond_state']],
+      bondFailed: json['bond_failed'],
+      bondLost: json['bond_lost'],
     );
   }
 }

@@ -96,7 +96,7 @@ public class FlutterBluePlusPlugin implements
 
     private final Map<String, BluetoothGatt> mConnectedDevices = new ConcurrentHashMap<>();
     private final Map<String, Integer> mConnectionState = new ConcurrentHashMap<>();
-    private final Map<String, BondState> mBondState = new ConcurrentHashMap<>();
+    private final Map<String, Integer> mBondState = new ConcurrentHashMap<>();
     private final Map<String, Integer> mMtu = new ConcurrentHashMap<>();
 
     private int lastEventId = 1452;
@@ -896,16 +896,16 @@ public class FlutterBluePlusPlugin implements
                         return;
                     }
 
-                    // get bond state
-                    BondState bs = mBondState.get(remoteId) != null ? mBondState.get(remoteId) : BondState.NONE;
-
                     // already bonded?
-                    if (bs == BondState.BONDED) {
+                    if (mBondState.get(remoteId) != null && 
+                        mBondState.get(remoteId) == BluetoothDevice.BOND_BONDED) {
 
                         // see: BmBondStateResponse
                         HashMap<String, Object> response = new HashMap<>();
                         response.put("remote_id", remoteId);
-                        response.put("bond_state", bmBondStateEnum(bs));
+                        response.put("bond_state", bmBondStateEnum(BluetoothDevice.BOND_BONDED));
+                        response.put("bond_failed", false);
+                        response.put("bond_lost", false);
 
                         // the dart code always waits on this
                         invokeMethodUIThread("OnBondStateChanged", response);
@@ -931,16 +931,16 @@ public class FlutterBluePlusPlugin implements
                     String remoteId = (String) call.arguments;
                     BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
 
-                    // get bond state
-                    BondState bs = mBondState.get(remoteId) != null ? mBondState.get(remoteId) : BondState.NONE;
-
-                    // already unbonded?
-                    if (bs == BondState.NONE || bs == BondState.LOST) {
+                    // already removed?
+                    if (mBondState.get(remoteId) == null || 
+                        mBondState.get(remoteId) == BluetoothDevice.BOND_NONE) {
 
                         // see: BmBondStateResponse
                         HashMap<String, Object> response = new HashMap<>();
                         response.put("remote_id", remoteId);
-                        response.put("bond_state", bmBondStateEnum(bs));
+                        response.put("bond_state", bmBondStateEnum(BluetoothDevice.BOND_NONE));
+                        response.put("bond_failed", false);
+                        response.put("bond_lost", false);
 
                         // the dart code always waits on this
                         invokeMethodUIThread("OnBondStateChanged", response);
@@ -1154,24 +1154,7 @@ public class FlutterBluePlusPlugin implements
         }
 
         return descriptor;
-    }
-
-    private BondState bondState(int cur, int prev) {
-        BondState bs = BondState.NONE;
-        switch(cur) {
-            case BluetoothDevice.BOND_NONE:
-                if (prev == BluetoothDevice.BOND_BONDING) {
-                    return BondState.FAILED;
-                }
-                if (prev == BluetoothDevice.BOND_BONDED) {
-                    return BondState.LOST;
-                }
-                return BondState.NONE;
-            case BluetoothDevice.BOND_BONDING: bs = BondState.BONDING;
-            case BluetoothDevice.BOND_BONDED: bs = BondState.BONDED;
-            default: return BondState.NONE;
-        }
-    }           
+    }       
 
     private void closeAllConnections()
     {
@@ -1197,7 +1180,7 @@ public class FlutterBluePlusPlugin implements
         // see: https://github.com/weliem/blessed-android
         // see: https://medium.com/@martijn.van.welie/making-android-ble-work-part-2-47a3cdaade07
         if (Build.VERSION.SDK_INT <= 25) { // Android 7.1 (October 2016)
-            if (mBondState.get(remoteId) != null && mBondState.get(remoteId) == BondState.BONDED) {
+            if (mBondState.get(remoteId) != null && mBondState.get(remoteId) == BluetoothDevice.BOND_BONDED) {
                 log(LogLevel.WARNING, "[FBP-Android] waiting 1.5s before calling discoverServices to workaround android 7 bug");
                 Thread.sleep(1500); // sleep 1500ms
             }
@@ -1260,13 +1243,6 @@ public class FlutterBluePlusPlugin implements
     // ██   ██  ██       ██       ██       ██   ██  ██   ██       ██   ██
     // ██   ██  ███████   ██████  ███████  ██    ████    ███████  ██   ██
 
-    private enum BondState {
-        NONE,
-        BONDING,
-        BONDED,
-        FAILED,
-        LOST,
-    }
 
     private final BroadcastReceiver mBluetoothBondStateReceiver = new BroadcastReceiver()
     {
@@ -1289,39 +1265,20 @@ public class FlutterBluePlusPlugin implements
 
             String remoteId = device.getAddress();
 
-            BondState bs = bondState(cur, prev);
+            // remember current state
+            mBondState.put(remoteId, cur);
 
-            // remember state
-            mBondState.put(remoteId, bs);
+            boolean lost = cur == BluetoothDevice.BOND_NONE && prev == BluetoothDevice.BOND_BONDED;
+            boolean fail = cur == BluetoothDevice.BOND_NONE && prev == BluetoothDevice.BOND_BONDING;
 
             // see: BmBondStateResponse
             HashMap<String, Object> map = new HashMap<>();
             map.put("remote_id", remoteId);
-            map.put("bond_state", bmBondStateEnum(bs));
+            map.put("bond_state", bmBondStateEnum(cur));
+            map.put("bond_failed", cur == BluetoothDevice.BOND_NONE && prev == BluetoothDevice.BOND_BONDING);
+            map.put("bond_lost", cur == BluetoothDevice.BOND_NONE && prev == BluetoothDevice.BOND_BONDED);
 
             invokeMethodUIThread("OnBondStateChanged", map);
-
-            // lost bond. Peripherals can typically store keys for only 1 bond and will delete
-            // keys to previously bonded phones on new connections. Android does not handle
-            // this case very well, and we must disconnect in order to force re-bonding.
-            // see: https://github.com/weliem/blessed-android
-            // see: https://medium.com/@martijn.van.welie/making-android-ble-work-part-4-72a0b85cb442
-            if (bs == BondState.LOST) {
-                BluetoothGatt gatt = mConnectedDevices.get(remoteId);
-                if(gatt != null) {
-                    log(LogLevel.WARNING, "[FBP-Android] bond lost. we must reconnect");
-                    // It seems to take 1 second for the Bluetooth stack to fully update its internal administration. 
-                    // So if you lose a bond, disconnect + reconnect immediately, Android will tell you the
-                    // device is still bonded but it it won’t fully work, So wait 1 second before disconnecting and reconnecting.
-                    Timer timer = new Timer();
-                    timer.schedule(new TimerTask() {
-                        @Override
-                        public void run() {
-                            gatt.disconnect();
-                        }
-                    }, 1000);
-                }
-            }
         }
     };
 
@@ -1938,14 +1895,12 @@ public class FlutterBluePlusPlugin implements
         }
     }
 
-    static int bmBondStateEnum(BondState bs) {
+    static int bmBondStateEnum(int bs) {
         switch (bs) {
-            case NONE:    return 0;
-            case BONDING: return 1;
-            case BONDED:  return 2;
-            case FAILED:  return 3;
-            case LOST:    return 4;
-            default:                return 0; 
+            case BluetoothDevice.BOND_NONE:    return 0;
+            case BluetoothDevice.BOND_BONDING: return 1;
+            case BluetoothDevice.BOND_BONDED:  return 2;
+            default:                           return 0; 
         }
     }
 

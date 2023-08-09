@@ -48,9 +48,6 @@ class BluetoothDescriptor {
   Future<List<int>> read({int timeout = 15}) async {
     List<int> readValue = [];
 
-    // check & wait if bonding
-    await BluetoothDevice._waitIfBonding(remoteId);
-
     // Only allow a single read to be underway at any time, per-characteristic, per-device.
     // Otherwise, there would be multiple in-flight requests and we wouldn't know which response is for us.
     String key = remoteId.str + ":" + characteristicUuid.toString() + ":writeDesc";
@@ -98,9 +95,6 @@ class BluetoothDescriptor {
 
   /// Writes the value of a descriptor
   Future<void> write(List<int> value, {int timeout = 15}) async {
-    // check & wait if bonding
-    await BluetoothDevice._waitIfBonding(remoteId);
-
     // Only allow a single write to be underway at any time, per-characteristic, per-device.
     // Otherwise, there would be multiple in-flight requests and we wouldn't know which response is for us.
     String key = remoteId.str + ":" + characteristicUuid.toString() + ":writeDesc";

@@ -60,6 +60,25 @@ BmConnectionPriorityEnum _bmConnectionPriorityEnum(ConnectionPriority value) {
   }
 }
 
+BluetoothBondState _bmToBluetoothBondState(BmBondStateResponse value) {
+  switch (value.bondState) {
+    case BmBondStateEnum.none:
+      if (value.bondFailed) {
+        return BluetoothBondState.failed;
+      }
+      if (value.bondLost) {
+        return BluetoothBondState.lost;
+      }
+      return BluetoothBondState.none;
+    case BmBondStateEnum.bonding:
+      return BluetoothBondState.bonding;
+    case BmBondStateEnum.bonded:
+      return BluetoothBondState.bonded;
+  }
+}
+
+enum BluetoothBondState { none, bonding, bonded, failed, lost}
+
 enum ConnectionPriority { balanced, high, lowPower }
 
 enum Phy { le1m, le2m, leCoded }
