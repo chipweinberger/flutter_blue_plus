@@ -1196,7 +1196,7 @@ public class FlutterBluePlusPlugin implements
             service.getCharacteristic(UUID.fromString(characteristicId));
 
         if(characteristic == null) {
-            return new CharacteristicResult(null, "characteristic not found in service."  + characteristicId);
+            return new CharacteristicResult(null, "characteristic not found in service "  + characteristicId);
         }
 
         return new CharacteristicResult(characteristic, null);
