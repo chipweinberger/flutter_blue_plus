@@ -1,3 +1,16 @@
+## 1.14.0
+1.14.0 is a sizeable refactor of BluetoothDevice & Android bond handling to improve reliablility & error handling.
+It also removes some changes regarding bond state made in 1.13.0, and instead exposes BluetoothDevice.bondState.
+It is been well tested, but 1.12.14 is currently the most known-stable. 
+
+* Android: expose BluetoothDevice.bondState & remove implicit waitIfBonding changes added in 1.13.0
+* Android: prefer result.error over exceptions
+* Dart: fix: BluetoothDevice: connect & disconnect and others could incorrectly timeout (unlikely race conditions) 
+* Dart: fix: BluetoothDevice: getBondState, getMtu, getConnectionState could skip values (unlikely race conditions) 
+* Dart: fix: clear servicesList after disconnection. Android requires you call discoverServices again
+* Example: fix: Subscribe button was not updating
+* Example: show snackbars on success as well
+
 ## 1.13.4
 * Android: fix: discoverServices never returns (regression in 1.13.0)
 * Android: fix: turnOn & turnOff must check for permissions

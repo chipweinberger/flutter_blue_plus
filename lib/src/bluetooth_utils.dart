@@ -77,6 +77,11 @@ BluetoothBondState _bmToBluetoothBondState(BmBondStateResponse value) {
   }
 }
 
+// [none] no bond
+// [bonding] bonding is underway
+// [bonded] bond success
+// [failed] a bonding attempt failed
+// [lost] a previous bond was deleted (you should reconnect to force a rebond)
 enum BluetoothBondState { none, bonding, bonded, failed, lost}
 
 enum ConnectionPriority { balanced, high, lowPower }
