@@ -145,9 +145,9 @@ class ServiceTile extends StatelessWidget {
 class CharacteristicTile extends StatefulWidget {
   final BluetoothCharacteristic characteristic;
   final List<DescriptorTile> descriptorTiles;
-  final VoidCallback? onReadPressed;
-  final VoidCallback? onWritePressed;
-  final VoidCallback? onNotificationPressed;
+  final Future<void> Function()? onReadPressed;
+  final Future<void> Function()? onWritePressed;
+  final Future<void> Function()? onNotificationPressed;
 
   const CharacteristicTile(
       {Key? key,
@@ -188,22 +188,22 @@ class _CharacteristicTileState extends State<CharacteristicTile> {
                     if (widget.characteristic.properties.read)
                       TextButton(
                           child: Text("Read"),
-                          onPressed: () {
-                            widget.onReadPressed!();
+                          onPressed: () async {
+                            await widget.onReadPressed!();
                             setState(() {});
                           }),
                     if (widget.characteristic.properties.write)
                       TextButton(
                           child: Text(widget.characteristic.properties.writeWithoutResponse ? "WriteNoResp" : "Write"),
-                          onPressed: () {
-                            widget.onWritePressed!();
+                          onPressed: () async {
+                            await widget.onWritePressed!();
                             setState(() {});
                           }),
                     if (widget.characteristic.properties.notify || widget.characteristic.properties.indicate)
                       TextButton(
                           child: Text(widget.characteristic.isNotifying ? "Unsubscribe" : "Subscribe"),
-                          onPressed: () {
-                            widget.onNotificationPressed!();
+                          onPressed: () async {
+                            await widget.onNotificationPressed!();
                             setState(() {});
                           })
                   ],
