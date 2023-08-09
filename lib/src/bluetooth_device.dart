@@ -9,8 +9,6 @@ class BluetoothDevice {
   // Internal
   //
 
-  static Map<DeviceIdentifier, List<BluetoothService>> _knownServices = {};
-
   // used for 'services' public api
   final StreamController<List<BluetoothService>> _services = StreamController.broadcast();
 
@@ -48,12 +46,13 @@ class BluetoothDevice {
 
   // Get services
   //  - returns null if discoverServices() has not been called
-  List<BluetoothService>? get servicesList => _knownServices[remoteId];
+  List<BluetoothService>? get servicesList => FlutterBluePlus._knownServices[remoteId];
 
   /// Stream of bluetooth services offered by the remote device
+  /// Note: this is *only* updated when you call discoverServices()
   Stream<List<BluetoothService>> get servicesStream async* {
-    if (_knownServices[remoteId] != null) {
-      yield _knownServices[remoteId]!;
+    if (FlutterBluePlus._knownServices[remoteId] != null) {
+      yield FlutterBluePlus._knownServices[remoteId]!;
     }
     yield* _services.stream;
   }
@@ -165,7 +164,7 @@ class BluetoothDevice {
       result = response.services.map((p) => BluetoothService.fromProto(p)).toList();
 
       // remember known services
-      _knownServices[remoteId] = result;
+      FlutterBluePlus._knownServices[remoteId] = result;
 
       // add to stream
       _services.add(result);
@@ -444,7 +443,7 @@ class BluetoothDevice {
         'localName: $localName, '
         'type: $type, '
         'isDiscoveringServices: ${_isDiscoveringServices.value}, '
-        'services: ${_knownServices[remoteId]}'
+        'services: ${FlutterBluePlus._knownServices[remoteId]}'
         '}';
   }
 

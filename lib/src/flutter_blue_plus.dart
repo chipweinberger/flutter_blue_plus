@@ -19,6 +19,7 @@ class FlutterBluePlus {
   static final StreamController<MethodCall> _methodStream = StreamController.broadcast();
 
   // we always keep track of these device variables
+  static final Map<DeviceIdentifier, List<BluetoothService>> _knownServices = {};
   static final Map<DeviceIdentifier, BmConnectionStateResponse> _connectionStates = {};
   static final Map<DeviceIdentifier, BmBondStateResponse> _bondStates = {};
   static final Map<DeviceIdentifier, BmMtuChangedResponse> _mtuValues = {};
@@ -255,6 +256,10 @@ class FlutterBluePlus {
     if (call.method == "OnConnectionStateChanged") {
       BmConnectionStateResponse response = BmConnectionStateResponse.fromMap(call.arguments);
       _connectionStates[DeviceIdentifier(response.remoteId)] = response;
+      if (response.connectionState == BmConnectionStateEnum.disconnected) {
+        // clear known services, must call discoverServices again
+        _knownServices[DeviceIdentifier(response.remoteId)] = [];
+      }
     }
 
     // keep track of mtu values
