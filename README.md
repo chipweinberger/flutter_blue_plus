@@ -128,6 +128,7 @@ device.disconnect();
 ### Discover services
 
 ```dart
+// Note: You must call this again if disconnected!
 List<BluetoothService> services = await device.discoverServices();
 services.forEach((service) {
     // do something with service
