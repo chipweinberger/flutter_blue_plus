@@ -1,3 +1,6 @@
+## 1.14.1
+* Dart: improve: each FlutterBluePlusException should have unique code for handling
+
 ## 1.14.0
 1.14.0 is a sizeable refactor of BluetoothDevice & Android bond handling to improve reliablility & error handling.
 It also removes some changes regarding bond state made in 1.13.0, and instead exposes BluetoothDevice.bondState.
