@@ -118,6 +118,7 @@ class BluetoothOffScreen extends StatelessWidget {
                       }
                     } catch (e) {
                       final snackBar = SnackBar(content: Text(prettyException("Error Turning On:", e)));
+                      snackBarKeyA.currentState?.removeCurrentSnackBar();
                       snackBarKeyA.currentState?.showSnackBar(snackBar);
                     }
                   },
@@ -181,6 +182,7 @@ class FindDevicesScreen extends StatelessWidget {
                                                 d.connect(timeout: Duration(seconds: 4)).catchError((e) {
                                                   final snackBar =
                                                       SnackBar(content: Text(prettyException("Connect Error:", e)));
+                                                  snackBarKeyB.currentState?.removeCurrentSnackBar();
                                                   snackBarKeyB.currentState?.showSnackBar(snackBar);
                                                 });
                                                 return DeviceScreen(device: d);
@@ -207,6 +209,7 @@ class FindDevicesScreen extends StatelessWidget {
                                 builder: (context) {
                                   r.device.connect(timeout: Duration(seconds: 4)).catchError((e) {
                                     final snackBar = SnackBar(content: Text(prettyException("Connect Error:", e)));
+                                    snackBarKeyB.currentState?.removeCurrentSnackBar();
                                     snackBarKeyB.currentState?.showSnackBar(snackBar);
                                   });
                                   return DeviceScreen(device: r.device);
@@ -233,6 +236,7 @@ class FindDevicesScreen extends StatelessWidget {
                     FlutterBluePlus.stopScan();
                   } catch (e) {
                     final snackBar = SnackBar(content: Text(prettyException("Stop Scan Error:", e)));
+                    snackBarKeyB.currentState?.removeCurrentSnackBar();
                     snackBarKeyB.currentState?.showSnackBar(snackBar);
                   }
                 },
@@ -248,6 +252,7 @@ class FindDevicesScreen extends StatelessWidget {
                       }
                     } catch (e) {
                       final snackBar = SnackBar(content: Text(prettyException("Start Scan Error:", e)));
+                      snackBarKeyB.currentState?.removeCurrentSnackBar();
                       snackBarKeyB.currentState?.showSnackBar(snackBar);
                     }
                   });
@@ -281,30 +286,42 @@ class DeviceScreen extends StatelessWidget {
                     onReadPressed: () async {
                       try {
                         await c.read();
+                        final snackBar = SnackBar(content: Text("Read: Success"));
+                        snackBarKeyC.currentState?.removeCurrentSnackBar();
+                        snackBarKeyC.currentState?.showSnackBar(snackBar);
                       } catch (e) {
                         final snackBar = SnackBar(content: Text(prettyException("Read Error:", e)));
+                        snackBarKeyC.currentState?.removeCurrentSnackBar();
                         snackBarKeyC.currentState?.showSnackBar(snackBar);
                       }
                     },
                     onWritePressed: () async {
                       try {
                         await c.write(_getRandomBytes(), withoutResponse: c.properties.writeWithoutResponse);
+                        final snackBar = SnackBar(content: Text("Write: Success"));
+                        snackBarKeyC.currentState?.removeCurrentSnackBar();
+                        snackBarKeyC.currentState?.showSnackBar(snackBar);
                         if (c.properties.read) {
                           await c.read();
                         }
                       } catch (e) {
                         final snackBar = SnackBar(content: Text(prettyException("Write Error:", e)));
+                        snackBarKeyC.currentState?.removeCurrentSnackBar();
                         snackBarKeyC.currentState?.showSnackBar(snackBar);
                       }
                     },
                     onNotificationPressed: () async {
                       try {
                         await c.setNotifyValue(c.isNotifying == false);
+                        final snackBar = SnackBar(content: Text("Subscribe: Success"));
+                        snackBarKeyC.currentState?.removeCurrentSnackBar();
+                        snackBarKeyC.currentState?.showSnackBar(snackBar);
                         if (c.properties.read) {
                           await c.read();
                         }
                       } catch (e) {
                         final snackBar = SnackBar(content: Text(prettyException("Subscribe Error:", e)));
+                        snackBarKeyC.currentState?.removeCurrentSnackBar();
                         snackBarKeyC.currentState?.showSnackBar(snackBar);
                       }
                     },
@@ -315,16 +332,24 @@ class DeviceScreen extends StatelessWidget {
                             onReadPressed: () async {
                               try {
                                 await d.read();
+                                final snackBar = SnackBar(content: Text("Read: Success"));
+                                snackBarKeyC.currentState?.removeCurrentSnackBar();
+                                snackBarKeyC.currentState?.showSnackBar(snackBar);
                               } catch (e) {
                                 final snackBar = SnackBar(content: Text(prettyException("Read Error:", e)));
+                                snackBarKeyC.currentState?.removeCurrentSnackBar();
                                 snackBarKeyC.currentState?.showSnackBar(snackBar);
                               }
                             },
                             onWritePressed: () async {
                               try {
                                 await d.write(_getRandomBytes());
+                                final snackBar = SnackBar(content: Text("Write: Success"));
+                                snackBarKeyC.currentState?.removeCurrentSnackBar();
+                                snackBarKeyC.currentState?.showSnackBar(snackBar);
                               } catch (e) {
                                 final snackBar = SnackBar(content: Text(prettyException("Write Error:", e)));
+                                snackBarKeyC.currentState?.removeCurrentSnackBar();
                                 snackBarKeyC.currentState?.showSnackBar(snackBar);
                               }
                             },
@@ -358,8 +383,12 @@ class DeviceScreen extends StatelessWidget {
                     onPressed = () async {
                       try {
                         await device.disconnect();
+                        final snackBar = SnackBar(content: Text("Disconnect: Success"));
+                        snackBarKeyC.currentState?.removeCurrentSnackBar();
+                        snackBarKeyC.currentState?.showSnackBar(snackBar);
                       } catch (e) {
                         final snackBar = SnackBar(content: Text(prettyException("Disconnect Error:", e)));
+                        snackBarKeyC.currentState?.removeCurrentSnackBar();
                         snackBarKeyC.currentState?.showSnackBar(snackBar);
                       }
                     };
@@ -369,8 +398,12 @@ class DeviceScreen extends StatelessWidget {
                     onPressed = () async {
                       try {
                         await device.connect(timeout: Duration(seconds: 4));
+                        final snackBar = SnackBar(content: Text("Connect: Success"));
+                        snackBarKeyC.currentState?.removeCurrentSnackBar();
+                        snackBarKeyC.currentState?.showSnackBar(snackBar);
                       } catch (e) {
                         final snackBar = SnackBar(content: Text(prettyException("Connect Error:", e)));
+                        snackBarKeyC.currentState?.removeCurrentSnackBar();
                         snackBarKeyC.currentState?.showSnackBar(snackBar);
                       }
                     };
@@ -432,8 +465,13 @@ class DeviceScreen extends StatelessWidget {
                               onPressed: () async {
                                 try {
                                   await device.discoverServices();
+                                  final snackBar = SnackBar(content: Text("Discover Services: Success"));
+                                  snackBarKeyC.currentState?.removeCurrentSnackBar();
+                                  snackBarKeyC.currentState?.showSnackBar(snackBar);
                                 } catch (e) {
-                                  final snackBar = SnackBar(content: Text(prettyException("Discover Services Error:", e)));
+                                  final snackBar =
+                                      SnackBar(content: Text(prettyException("Discover Services Error:", e)));
+                                  snackBarKeyC.currentState?.removeCurrentSnackBar();
                                   snackBarKeyC.currentState?.showSnackBar(snackBar);
                                 }
                               },
@@ -466,8 +504,12 @@ class DeviceScreen extends StatelessWidget {
                       onPressed: () async {
                         try {
                           await device.requestMtu(223);
+                          final snackBar = SnackBar(content: Text("Request Mtu: Success"));
+                          snackBarKeyC.currentState?.removeCurrentSnackBar();
+                          snackBarKeyC.currentState?.showSnackBar(snackBar);
                         } catch (e) {
                           final snackBar = SnackBar(content: Text(prettyException("Change Mtu Error:", e)));
+                          snackBarKeyC.currentState?.removeCurrentSnackBar();
                           snackBarKeyC.currentState?.showSnackBar(snackBar);
                         }
                       }),
