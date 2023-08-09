@@ -46,10 +46,11 @@ class BluetoothDevice {
 
   // Get services
   //  - returns null if discoverServices() has not been called
+  //  - this is cleared on disconnection. You must call discoverServices() again
   List<BluetoothService>? get servicesList => FlutterBluePlus._knownServices[remoteId];
 
   /// Stream of bluetooth services offered by the remote device
-  /// Note: this is *only* updated when you call discoverServices()
+  ///   - this stream is only updated when you call discoverServices()
   Stream<List<BluetoothService>> get servicesStream async* {
     if (FlutterBluePlus._knownServices[remoteId] != null) {
       yield FlutterBluePlus._knownServices[remoteId]!;
