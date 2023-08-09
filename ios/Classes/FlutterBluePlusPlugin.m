@@ -221,7 +221,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             bool autoConnect    = args[@"auto_connect"] != 0;
 
             // already connected?
-            if ([self isConnectedToThisApp:remoteId]) {
+            CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
+            if (peripheral != nil) {
 
                 // See BmConnectionStateResponse
                 NSDictionary *response = @{
@@ -237,8 +238,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 result(@(true)); // no work to do
                 return;
             }
-
-            CBPeripheral *peripheral = nil; 
 
             // check the devices iOS knowns about
             NSUUID *uuid = [[NSUUID alloc] initWithUUIDString:remoteId];
@@ -311,7 +310,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
             if (peripheral == nil) {
-                NSString* s = @"device is not connected. have you called connect()?";
+                NSString* s = @"device is disconnected";
                 result([FlutterError errorWithCode:@"discoverServices" message:s details:remoteId]);
                 return;
             }
@@ -337,7 +336,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // Find peripheral
             CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
             if (peripheral == nil) {
-                NSString* s = @"device is not connected. have you called connect()?";
+                NSString* s = @"device is disconnected";
                 result([FlutterError errorWithCode:@"readCharacteristic" message:s details:remoteId]);
                 return;
             }
@@ -373,7 +372,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // Find peripheral
             CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
             if (peripheral == nil) {
-                NSString* s = @"device is not connected. have you called connect()?";
+                NSString* s = @"device is disconnected";
                 result([FlutterError errorWithCode:@"writeCharacteristic" message:s details:remoteId]);
                 return;
             }
@@ -437,7 +436,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // Find peripheral
             CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
             if (peripheral == nil) {
-                NSString* s = @"device is not connected. have you called connect()?";
+                NSString* s = @"device is disconnected";
                 result([FlutterError errorWithCode:@"readDescriptor" message:s details:remoteId]);
                 return;
             }
@@ -479,7 +478,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // Find peripheral
             CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
             if (peripheral == nil) {
-                NSString* s = @"device is not connected. have you called connect()?";
+                NSString* s = @"device is disconnected";
                 result([FlutterError errorWithCode:@"writeDescriptor" message:s details:remoteId]);
                 return;
             }
@@ -531,7 +530,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // Find peripheral
             CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
             if (peripheral == nil) {
-                NSString* s = @"device is not connected. have you called connect()?";
+                NSString* s = @"device is disconnected";
                 result([FlutterError errorWithCode:@"setNotification" message:s details:remoteId]);
                 return;
             }
@@ -567,7 +566,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // get peripheral
             CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
             if (peripheral == nil) {
-                NSString* s = @"device is not connected. have you called connect()?";
+                NSString* s = @"device is disconnected";
                 result([FlutterError errorWithCode:@"readRssi" message:s details:remoteId]);
                 return;
             }
@@ -637,11 +636,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 // ██    ██     ██     ██  ██       ███████ 
 // ██    ██     ██     ██  ██            ██ 
 //  ██████      ██     ██  ███████  ███████ 
-
-- (bool)isConnectedToThisApp:(NSString *)remoteId
-{
-    return [self.connectedPeripherals objectForKey:remoteId] != nil;
-}
 
 - (CBPeripheral *)getConnectedPeripheral:(NSString *)remoteId
 {
