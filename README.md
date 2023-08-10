@@ -39,7 +39,7 @@ The code is written to be simple, robust, and incredibly easy to understand.
 
 FlutterBluePlus has zero dependencies besides Flutter, Android, and iOS themselves.
 
-This makes FlutterBluePlus very stable.
+This makes FlutterBluePlus very stable, and easy to maintain.
 
 ## Usage
 
