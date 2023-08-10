@@ -137,8 +137,8 @@ class FlutterBluePlus {
           androidUsesFineLocation: androidUsesFineLocation);
 
       if (_isScanning.value == true) {
-        throw FlutterBluePlusException(ErrorPlatform.dart, "scan",
-          FbpErrorCode.scanInProgress.index, 'another scan already in progress');
+        throw FlutterBluePlusException(
+            ErrorPlatform.dart, "scan", FbpErrorCode.scanInProgress.index, 'another scan already in progress');
       }
 
       // push to isScanning stream
@@ -173,8 +173,8 @@ class FlutterBluePlus {
       await for (BmScanResponse response in _scanResponseBuffer!.stream) {
         // failure?
         if (response.failed != null) {
-          throw FlutterBluePlusException(_nativeError, "scan",
-            response.failed!.errorCode, response.failed!.errorString);
+          throw FlutterBluePlusException(
+              _nativeError, "scan", response.failed!.errorCode, response.failed!.errorString);
         }
 
         // no result?
@@ -260,7 +260,7 @@ class FlutterBluePlus {
       _connectionStates[DeviceIdentifier(response.remoteId)] = response;
       if (response.connectionState == BmConnectionStateEnum.disconnected) {
         // clear known services, must call discoverServices again
-        _knownServices[DeviceIdentifier(response.remoteId)] = [];
+        _knownServices.remove(DeviceIdentifier(response.remoteId));
       }
     }
 
@@ -465,7 +465,6 @@ final ErrorPlatform _nativeError = (() {
     return ErrorPlatform.apple;
   }
 })();
-
 
 enum FbpErrorCode {
   success, // 0
