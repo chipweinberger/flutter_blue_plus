@@ -3,6 +3,43 @@ description: File a feature request
 title: "[Feature]: "
 labels: ["feature"]
 body:
+  - type: input
+    id: fbp-version
+    attributes:
+      label: FlutterBluePlus Version
+      description: run `flutter pub deps` in your project
+      placeholder: ex. 1.12.7
+    validations:
+      required: true
+  - type: input
+    id: flutter-version
+    attributes:
+      label: Flutter Version
+      description: run `flutter --version` in your project
+      placeholder: ex. 3.10.6
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: What OS?
+      description: please add this to your title
+      multiple: true
+      options:
+        - Android
+        - iOS
+        - macOS
+        - All
+    validations:
+      required: true
+  - type: input
+    id: os-version
+    attributes:
+      label: OS Version
+      description: What version of iOS/Android/MacOS are you on?
+      placeholder: ex. iOS 12.3.1
+    validations:
+      required: true
   - type: textarea
     id: feature-request
     attributes:
@@ -10,3 +47,11 @@ body:
       placeholder: Please describe what you need in detail, and why.
     validations:
       required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Copy and paste any relevant log output.
+      placeholder: Ideally include all logs from the very begining
+      render: shell
+
