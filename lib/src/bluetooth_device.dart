@@ -180,30 +180,38 @@ class BluetoothDevice {
 
   /// The current connection state of the device to this application
   Stream<BluetoothConnectionState> get connectionState async* {
-    // initial value - Note: we only care about the connection state of *our* app, which
-    // is why we can get away with not invoking any native platform methods
-    yield _bmToBluetoothConnectionState(
-        FlutterBluePlus._connectionStates[remoteId]?.connectionState ?? BmConnectionStateEnum.disconnected);
-    // stream
-    yield* FlutterBluePlus._methodStream.stream
+    // start listening now so we do not miss any changes
+    var buffer = _BufferStream.listen(FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnConnectionStateChanged")
         .map((m) => m.arguments)
         .map((buffer) => BmConnectionStateResponse.fromMap(buffer))
         .where((p) => p.remoteId == remoteId.str)
-        .map((p) => _bmToBluetoothConnectionState(p.connectionState));
+        .map((p) => _bmToBluetoothConnectionState(p.connectionState)));
+
+    // initial value - Note: we only care about the current connection state of *our* app,
+    // which is why we do not have to invoking any native platform methods to get this.
+    yield _bmToBluetoothConnectionState(
+        FlutterBluePlus._connectionStates[remoteId]?.connectionState ?? BmConnectionStateEnum.disconnected);
+
+    // stream
+    yield* buffer.stream;
   }
 
   /// The current MTU size in bytes
   Stream<int> get mtu async* {
-    // initial value
-    yield FlutterBluePlus._mtuValues[remoteId]?.mtu ?? 23;
-    // stream
-    yield* FlutterBluePlus._methodStream.stream
+    // start listening now so we do not miss any changes
+    var buffer = _BufferStream.listen(FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnMtuChanged")
         .map((m) => m.arguments)
         .map((buffer) => BmMtuChangedResponse.fromMap(buffer))
         .where((p) => p.remoteId == remoteId.str)
-        .map((p) => p.mtu);
+        .map((p) => p.mtu));
+
+    // initial value from our cache
+    yield FlutterBluePlus._mtuValues[remoteId]?.mtu ?? 23;
+
+    // stream
+    yield* buffer.stream;
   }
 
   /// Read the RSSI of connected remote device
@@ -432,15 +440,15 @@ class BluetoothDevice {
 
     // initial state
     if (FlutterBluePlus._bondStates[remoteId] != null) {
-      // we prefer to use the bond state that we've already cached.
-      // it's faster & simpler to understand race-condition wise.
+      // we must get the cached bond state if available because
+      // getInitialBondState is not able to detect bondLost & bondFailed
       yield _bmToBluetoothBondState(FlutterBluePlus._bondStates[remoteId]!);
     } else {
-      // must get the initial state from the system. 
-      // the value is pushed to the stream.
-      await FlutterBluePlus._methods
+      // must get the initial state from the system.
+      yield await FlutterBluePlus._methods
           .invokeMethod('getInitialBondState', remoteId.str)
-          .then((buffer) => BmBondStateResponse.fromMap(buffer));
+          .then((buffer) => BmBondStateResponse.fromMap(buffer))
+          .then((p) => _bmToBluetoothBondState(p));
     }
 
     // stream

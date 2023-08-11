@@ -80,19 +80,20 @@ class FlutterBluePlus {
 
   /// Gets the current state of the Bluetooth module
   static Stream<BluetoothAdapterState> get adapterState async* {
-    BluetoothAdapterState initialState = await _invokeMethod('getAdapterState')
-        .then((buffer) => BmBluetoothAdapterState.fromMap(buffer))
-        .then((s) => _bmToBluetoothAdapterState(s.adapterState));
-
-    yield initialState;
-
-    Stream<BluetoothAdapterState> responseStream = FlutterBluePlus._methodStream.stream
+    // start listening now so we do not miss any changes
+    var buffer = _BufferStream.listen(FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnAdapterStateChanged")
         .map((m) => m.arguments)
         .map((buffer) => BmBluetoothAdapterState.fromMap(buffer))
-        .map((s) => _bmToBluetoothAdapterState(s.adapterState));
+        .map((s) => _bmToBluetoothAdapterState(s.adapterState)));
 
-    yield* responseStream;
+    // initial state
+    yield await _invokeMethod('getAdapterState')
+        .then((buffer) => BmBluetoothAdapterState.fromMap(buffer))
+        .then((s) => _bmToBluetoothAdapterState(s.adapterState));
+
+    // stream
+    yield* buffer.stream;
   }
 
   /// Retrieve a list of connected devices
