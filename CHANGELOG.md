@@ -1,3 +1,6 @@
+## 1.14.3
+* **[Fix]** Example: was using deprecated variable name
+
 ## 1.14.2
 * **[improve]** Dart: knownServices should be fully cleared on disconnection
 * **[improve]** Dart: error handling: return more descriptive timeout exceptions
