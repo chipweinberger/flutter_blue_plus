@@ -127,7 +127,7 @@ await device.disconnect();
 // Handle Disconnection
 device.connectionState.listen((BluetoothConnectionState state) async {
     if (state == BluetoothConnectionState.disconnected) {
-        // start a periodic timer that tries to periodically reconnect.
+        // typically, start a periodic timer that tries to periodically reconnect.
         // Note: you must always re-discover services after disconnection!
     }
 });
