@@ -62,8 +62,7 @@ Every error returned by the native platform is checked and thrown as an exceptio
 ### Set Log Level
 
 ```dart
-// your terminal may not support color 
-// (i.e. you'll see logs of '\x1B[1;35m' characters)
+// if your terminal doesn't support color you'll see annoying logs like `\x1B[1;35m`
 FlutterBluePlus.setLogLevel(LogLevel.verbose, color:false)
 ```
 
