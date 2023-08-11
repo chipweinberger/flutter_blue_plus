@@ -45,7 +45,7 @@ This makes FlutterBluePlus very stable, and easy to maintain.
 
 ## ⭐ Stars ⭐
 
-Please star this repo & [pub.dev](https://pub.dev/packages/flutter_blue_plus). We all benefit with a larger community.
+Please star this repo & on [pub.dev](https://pub.dev/packages/flutter_blue_plus). We all benefit from having a larger community.
 
 ## Usage
 
