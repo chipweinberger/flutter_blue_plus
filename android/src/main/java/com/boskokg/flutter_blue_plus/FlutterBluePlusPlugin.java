@@ -972,7 +972,10 @@ public class FlutterBluePlusPlugin implements
                     response.put("bond_failed", false);
                     response.put("bond_lost", false);
 
-                    result.success(response);
+                    // push to stream
+                    invokeMethodUIThread("OnBondStateChanged", response);
+
+                    result.success(true);
                     break;
                 }
 
