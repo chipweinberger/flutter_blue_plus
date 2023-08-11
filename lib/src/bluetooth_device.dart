@@ -63,7 +63,7 @@ class BluetoothDevice {
   ///   works if the device is in the Bluetooth scan cache or it is has been bonded before.
   ///   The scan cache is cleared whenever bluetooth is turned off.
   Future<void> connect({
-    Duration timeout = const Duration(seconds: 15),
+    Duration timeout = const Duration(seconds: 35),
     bool autoConnect = false,
   }) async {
     // Only allow a single 'connectDisconnect' operation at the same time per device.
@@ -104,7 +104,7 @@ class BluetoothDevice {
   }
 
   /// Cancels connection to the Bluetooth Device
-  Future<void> disconnect({int timeout = 15}) async {
+  Future<void> disconnect({int timeout = 35}) async {
     // Only allow a single 'connectDisconnect' operation at the same time per device.
     String key = remoteId.str + ":connectDisconnect";
     _Mutex opMutex = await _MutexFactory.getMutexForKey(key);
