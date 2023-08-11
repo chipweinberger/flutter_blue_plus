@@ -16,6 +16,7 @@ import 'widgets.dart';
 final snackBarKeyA = GlobalKey<ScaffoldMessengerState>();
 final snackBarKeyB = GlobalKey<ScaffoldMessengerState>();
 final snackBarKeyC = GlobalKey<ScaffoldMessengerState>();
+final Map<DeviceIdentifier, ValueNotifier<bool>> isConnectingOrDisconnecting = {};
 
 void main() {
   if (Platform.isAndroid) {
@@ -184,10 +185,15 @@ class _FindDevicesScreenState extends State<FindDevicesScreen> {
                                         onPressed: () {
                                           Navigator.of(context).push(MaterialPageRoute(
                                               builder: (context) {
-                                                d.connect(timeout: Duration(seconds: 4)).catchError((e) {
+                                                isConnectingOrDisconnecting[d.remoteId] ??= ValueNotifier(true);
+                                                isConnectingOrDisconnecting[d.remoteId]!.value = true;
+                                                d.connect(timeout: Duration(seconds: 35)).catchError((e) {
                                                   final snackBar = snackBarFail(prettyException("Connect Error:", e));
-                                                  snackBarKeyB.currentState?.removeCurrentSnackBar();
-                                                  snackBarKeyB.currentState?.showSnackBar(snackBar);
+                                                  snackBarKeyC.currentState?.removeCurrentSnackBar();
+                                                  snackBarKeyC.currentState?.showSnackBar(snackBar);
+                                                }).then((v) {
+                                                  isConnectingOrDisconnecting[d.remoteId] ??= ValueNotifier(false);
+                                                  isConnectingOrDisconnecting[d.remoteId]!.value = false;
                                                 });
                                                 return DeviceScreen(device: d);
                                               },
@@ -211,10 +217,15 @@ class _FindDevicesScreenState extends State<FindDevicesScreen> {
                             result: r,
                             onTap: () => Navigator.of(context).push(MaterialPageRoute(
                                 builder: (context) {
-                                  r.device.connect(timeout: Duration(seconds: 4)).catchError((e) {
+                                  isConnectingOrDisconnecting[r.device.remoteId] ??= ValueNotifier(true);
+                                  isConnectingOrDisconnecting[r.device.remoteId]!.value = true;
+                                  r.device.connect(timeout: Duration(seconds: 35)).catchError((e) {
                                     final snackBar = snackBarFail(prettyException("Connect Error:", e));
-                                    snackBarKeyB.currentState?.removeCurrentSnackBar();
-                                    snackBarKeyB.currentState?.showSnackBar(snackBar);
+                                    snackBarKeyC.currentState?.removeCurrentSnackBar();
+                                    snackBarKeyC.currentState?.showSnackBar(snackBar);
+                                  }).then((v) {
+                                    isConnectingOrDisconnecting[r.device.remoteId] ??= ValueNotifier(false);
+                                    isConnectingOrDisconnecting[r.device.remoteId]!.value = false;
                                   });
                                   return DeviceScreen(device: r.device);
                                 },
@@ -270,9 +281,9 @@ class _FindDevicesScreenState extends State<FindDevicesScreen> {
 }
 
 class DeviceScreen extends StatelessWidget {
-  const DeviceScreen({Key? key, required this.device}) : super(key: key);
-
   final BluetoothDevice device;
+
+  const DeviceScreen({Key? key, required this.device}) : super(key: key);
 
   List<int> _getRandomBytes() {
     final math = Random();
@@ -387,6 +398,8 @@ class DeviceScreen extends StatelessWidget {
                 switch (snapshot.data) {
                   case BluetoothConnectionState.connected:
                     onPressed = () async {
+                      isConnectingOrDisconnecting[device.remoteId] ??= ValueNotifier(true);
+                      isConnectingOrDisconnecting[device.remoteId]!.value = true;
                       try {
                         await device.disconnect();
                         final snackBar = snackBarGood("Disconnect: Success");
@@ -397,13 +410,17 @@ class DeviceScreen extends StatelessWidget {
                         snackBarKeyC.currentState?.removeCurrentSnackBar();
                         snackBarKeyC.currentState?.showSnackBar(snackBar);
                       }
+                      isConnectingOrDisconnecting[device.remoteId] ??= ValueNotifier(false);
+                      isConnectingOrDisconnecting[device.remoteId]!.value = false;
                     };
                     text = 'DISCONNECT';
                     break;
                   case BluetoothConnectionState.disconnected:
                     onPressed = () async {
+                      isConnectingOrDisconnecting[device.remoteId] ??= ValueNotifier(true);
+                      isConnectingOrDisconnecting[device.remoteId]!.value = true;
                       try {
-                        await device.connect(timeout: Duration(seconds: 4));
+                        await device.connect(timeout: Duration(seconds: 35));
                         final snackBar = snackBarGood("Connect: Success");
                         snackBarKeyC.currentState?.removeCurrentSnackBar();
                         snackBarKeyC.currentState?.showSnackBar(snackBar);
@@ -412,6 +429,8 @@ class DeviceScreen extends StatelessWidget {
                         snackBarKeyC.currentState?.removeCurrentSnackBar();
                         snackBarKeyC.currentState?.showSnackBar(snackBar);
                       }
+                      isConnectingOrDisconnecting[device.remoteId] ??= ValueNotifier(false);
+                      isConnectingOrDisconnecting[device.remoteId]!.value = false;
                     };
                     text = 'CONNECT';
                     break;
@@ -420,14 +439,33 @@ class DeviceScreen extends StatelessWidget {
                     text = snapshot.data.toString().split(".").last.toUpperCase();
                     break;
                 }
-                return TextButton(
-                    onPressed: onPressed,
-                    child: Text(
-                      text,
-                      style: Theme.of(context).primaryTextTheme.labelLarge?.copyWith(color: Colors.white),
-                    ));
+                return ValueListenableBuilder<bool>(
+                    valueListenable: isConnectingOrDisconnecting[device.remoteId]!,
+                    builder: (context, value, child) {
+                      isConnectingOrDisconnecting[device.remoteId] ??= ValueNotifier(false);
+                      if (isConnectingOrDisconnecting[device.remoteId]!.value == true) {
+                        // Show spinner when connecting or disconnecting
+                        return Padding(
+                          padding: const EdgeInsets.all(14.0),
+                          child: AspectRatio(
+                            aspectRatio: 1.0,
+                            child: CircularProgressIndicator(
+                              backgroundColor: Colors.black12,
+                              color: Colors.black26,
+                            ),
+                          ),
+                        );
+                      } else {
+                        return TextButton(
+                            onPressed: onPressed,
+                            child: Text(
+                              text,
+                              style: Theme.of(context).primaryTextTheme.labelLarge?.copyWith(color: Colors.white),
+                            ));
+                      }
+                    });
               },
-            )
+            ),
           ],
         ),
         body: SingleChildScrollView(
