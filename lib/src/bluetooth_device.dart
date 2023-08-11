@@ -179,7 +179,8 @@ class BluetoothDevice {
 
   /// The current connection state of the device to this application
   Stream<BluetoothConnectionState> get connectionState async* {
-    // initial value
+    // initial value - Note: we only care about the connection state of *our* app, which 
+    // is why we can get away with not invoking any native platform methods
     yield _bmToBluetoothConnectionState(
         FlutterBluePlus._connectionStates[remoteId]?.connectionState ?? BmConnectionStateEnum.disconnected);
     // stream

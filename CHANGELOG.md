@@ -1,3 +1,12 @@
+
+## 1.14.4
+* **[improve]** Dart: deprecate `disconnecting` & `connecting` states, they're not actually streamed by Android or iOS
+* **[improve]** Dart: increase default connection timeout 15 -> 35 seconds to slightly exceed android & iOS defaults
+* **[improve]** Example: unsubscribe snackbar showed 'Subscribe: Success' incorrectly
+* **[improve]** Example: improve: snackbar color blue & red for good & fail
+* **[improve]** Example: add spinner while connecting or disconnecting
+* **[improve]** Example: improve: do not continually call connectedSystemDevice & RSSI
+
 ## 1.14.3
 * **[Fix]** Example: was using deprecated variable name
 
