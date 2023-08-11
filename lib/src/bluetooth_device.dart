@@ -430,7 +430,7 @@ class BluetoothDevice {
       throw FlutterBluePlusException(ErrorPlatform.dart, "bondState", FbpErrorCode.androidOnly.index, "android-only");
     }
 
-    // start listening now so we do not miss any values
+    // start listening now so we do not miss any changes
     var buffer = _BufferStream.listen(FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnBondStateChanged")
         .map((m) => m.arguments)
@@ -440,7 +440,7 @@ class BluetoothDevice {
 
     // initial state
     if (FlutterBluePlus._bondStates[remoteId] != null) {
-      // we must get the cached bond state if available because
+      // we must use the cached bond state (if available) because
       // getInitialBondState is not able to detect bondLost & bondFailed
       yield _bmToBluetoothBondState(FlutterBluePlus._bondStates[remoteId]!);
     } else {

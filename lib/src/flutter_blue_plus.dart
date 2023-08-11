@@ -156,7 +156,7 @@ class FlutterBluePlus {
           .takeWhile((element) => _isScanning.value)
           .doOnDone(stopScan);
 
-      // Start listening now, before invokeMethod, to ensure we don't miss any results
+      // Start listening now, before invokeMethod, so we do not miss any results
       _scanResponseBuffer = _BufferStream.listen(responseStream);
 
       // Start timer *after* stream is being listened to, to make sure the
