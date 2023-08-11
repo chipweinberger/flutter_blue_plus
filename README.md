@@ -79,7 +79,7 @@ Setting `LogLevel.verbose` shows *all* data in and out.
 
 ### Enable Bluetooth
 
-**Note:** On iOS, a "*This app would like to use Bluetooth*" system dialogue appears the first time you call any FlutterBluePlus method because the underlying `CBCentralManager` on iOS, and `BluetoothManager` on Android classes are initialized.
+**Note:** On iOS, a "*This app would like to use Bluetooth*" system dialogue appears on first call to a FlutterBluePlus method. This is when the `CBCentralManager` (iOS) & `BluetoothManager` (Android) are initialized.
  
 ```dart
 // check adapter availability
