@@ -131,9 +131,14 @@ class BluetoothOffScreen extends StatelessWidget {
   }
 }
 
-class FindDevicesScreen extends StatelessWidget {
+class FindDevicesScreen extends StatefulWidget {
   const FindDevicesScreen({Key? key}) : super(key: key);
 
+  @override
+  State<FindDevicesScreen> createState() => _FindDevicesScreenState();
+}
+
+class _FindDevicesScreenState extends State<FindDevicesScreen> {
   @override
   Widget build(BuildContext context) {
     return ScaffoldMessenger(
@@ -144,17 +149,17 @@ class FindDevicesScreen extends StatelessWidget {
         ),
         body: RefreshIndicator(
           onRefresh: () {
+            setState(() {}); // force refresh of connectedSystemDevices
             if (FlutterBluePlus.isScanningNow == false) {
-              return FlutterBluePlus.startScan(timeout: const Duration(seconds: 15), androidUsesFineLocation: false);
+              FlutterBluePlus.startScan(timeout: const Duration(seconds: 15), androidUsesFineLocation: false);
             }
-            return Future.value();
+            return Future.delayed(Duration(milliseconds: 500)); // show refresh icon breifly
           },
           child: SingleChildScrollView(
             child: Column(
               children: <Widget>[
                 StreamBuilder<List<BluetoothDevice>>(
-                  stream: Stream.periodic(const Duration(seconds: 5))
-                      .asyncMap((_) => FlutterBluePlus.connectedSystemDevices),
+                  stream: Stream.fromFuture(FlutterBluePlus.connectedSystemDevices),
                   initialData: const [],
                   builder: (c, snapshot) => Column(
                     children: (snapshot.data ?? [])
@@ -244,7 +249,7 @@ class FindDevicesScreen extends StatelessWidget {
               );
             } else {
               return FloatingActionButton(
-                  child: const Icon(Icons.search),
+                  child: const Text("SCAN"),
                   onPressed: () async {
                     try {
                       if (FlutterBluePlus.isScanningNow == false) {
@@ -255,6 +260,7 @@ class FindDevicesScreen extends StatelessWidget {
                       snackBarKeyB.currentState?.removeCurrentSnackBar();
                       snackBarKeyB.currentState?.showSnackBar(snackBar);
                     }
+                    setState(() {}); // force refresh of connectedSystemDevices
                   });
             }
           },
@@ -446,7 +452,7 @@ class DeviceScreen extends StatelessWidget {
                               : const Icon(Icons.bluetooth_disabled),
                           snapshot.data == BluetoothConnectionState.connected
                               ? StreamBuilder<int>(
-                                  stream: rssiStream(),
+                                  stream: rssiStream(maxItems: 1),
                                   builder: (context, snapshot) {
                                     return Text(snapshot.hasData ? '${snapshot.data}dBm' : '',
                                         style: Theme.of(context).textTheme.bodySmall);
@@ -532,12 +538,13 @@ class DeviceScreen extends StatelessWidget {
     );
   }
 
-  Stream<int> rssiStream({Duration frequency = const Duration(seconds: 5)}) async* {
+  Stream<int> rssiStream({Duration frequency = const Duration(seconds: 5), int? maxItems = null}) async* {
     var isConnected = true;
     final subscription = device.connectionState.listen((v) {
       isConnected = v == BluetoothConnectionState.connected;
     });
-    while (isConnected) {
+    int i = 0;
+    while (isConnected && (maxItems == null || i < maxItems)) {
       try {
         yield await device.readRssi();
       } catch (e) {
@@ -545,6 +552,7 @@ class DeviceScreen extends StatelessWidget {
         break;
       }
       await Future.delayed(frequency);
+      i++;
     }
     // Device disconnected, stopping RSSI stream
     subscription.cancel();
