@@ -43,6 +43,10 @@ FlutterBluePlus has zero dependencies besides Flutter, Android, and iOS themselv
 
 This makes FlutterBluePlus very stable, and easy to maintain.
 
+## ⭐ Stars ⭐
+
+Please star this repo & [pub.dev](https://pub.dev/packages/flutter_blue_plus). We all benefit with a larger community.
+
 ## Usage
 
 ### Error Handling :fire:
