@@ -1,3 +1,5 @@
+## 1.14.5
+* **[improve]** Dart: adapterState, bondState, mtu, connectiontate could miss changes due to race conditions
 
 ## 1.14.4
 * **[improve]** Dart: deprecate `disconnecting` & `connecting` states, they're not actually streamed by Android or iOS
