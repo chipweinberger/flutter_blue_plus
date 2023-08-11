@@ -118,19 +118,19 @@ await FlutterBluePlus.stopScan();
 ### Connect to a device
 
 ```dart
-// Connect to the device
-await device.connect();
-
-// Disconnect from device
-await device.disconnect();
-
-// Handle Disconnection
+// listen for disconnection
 device.connectionState.listen((BluetoothConnectionState state) async {
     if (state == BluetoothConnectionState.disconnected) {
         // typically, start a periodic timer that tries to periodically reconnect.
         // Note: you must always re-discover services after disconnection!
     }
 });
+
+// Connect to the device
+await device.connect();
+
+// Disconnect from device
+await device.disconnect();
 ```
 
 ### Discover services
