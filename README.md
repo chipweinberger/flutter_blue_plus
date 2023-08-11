@@ -29,6 +29,8 @@ If you need BLE Peripheral Role, you should check out [FlutterBlePeripheral](htt
 
  i.e. speakers, headphones, mice, keyboards, gamepads, Arduino HC-05 & HC-06, and more are not supported. These all use Bluetooth Classic.
 
+ Also, iBeacons are **_not_** supported on iOS. Apple requires you to use CoreLocation.
+
 ## Cross-Platform Bluetooth Low Energy
 
 FlutterBluePlus aims to offer the most from all supported platforms: iOS, macOS, Android.
