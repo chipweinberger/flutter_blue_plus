@@ -69,7 +69,7 @@ class FlutterBluePlus {
 
     await _invokeMethod('turnOn');
 
-    await futureResponse.timeout(Duration(seconds: timeout));
+    await futureResponse.fbpTimeout(timeout, "turnOn");
   }
 
   /// Returns a stream of List<ScanResult> results while a scan is in progress.
@@ -316,7 +316,7 @@ class FlutterBluePlus {
 
     await _invokeMethod('turnOff');
 
-    await futureResponse.timeout(Duration(seconds: timeout));
+    await futureResponse.fbpTimeout(timeout, "turnOff");
   }
 
   /// Checks if Bluetooth functionality is turned on
@@ -473,18 +473,19 @@ enum FbpErrorCode {
   createBondFailed, // 3
   removeBondFailed, // 4
   setNotifyFailed, // 5
+  timeout, // 6
 }
 
 class FlutterBluePlusException implements Exception {
-  final ErrorPlatform errorPlatform;
-  final String errorName;
-  final int? errorCode;
-  final String? errorString;
+  final ErrorPlatform platform;
+  final String function;
+  final int? code;
+  final String? description;
 
-  FlutterBluePlusException(this.errorPlatform, this.errorName, this.errorCode, this.errorString);
+  FlutterBluePlusException(this.platform, this.function, this.code, this.description);
 
   @override
   String toString() {
-    return 'FlutterBluePlusException: name:$errorName errorCode:$errorCode, errorString:$errorString';
+    return 'FlutterBluePlusException: $function: (code: $code) $description';
   }
 }

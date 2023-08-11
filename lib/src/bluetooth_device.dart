@@ -92,7 +92,7 @@ class BluetoothDevice {
       await FlutterBluePlus._invokeMethod('connect', request.toMap());
 
       // wait for result
-      BmConnectionStateResponse response = await futureState.timeout(timeout);
+      BmConnectionStateResponse response = await futureState.fbpTimeout(timeout.inSeconds, "connect");
 
       // failure?
       if (response.connectionState == BmConnectionStateEnum.disconnected) {
@@ -124,7 +124,7 @@ class BluetoothDevice {
       await FlutterBluePlus._invokeMethod('disconnect', remoteId.str);
 
       // wait for disconnection
-      await futureState.timeout(Duration(seconds: timeout));
+      await futureState.fbpTimeout(timeout, "disconnect");
     } finally {
       opMutex.give();
     }
@@ -155,7 +155,7 @@ class BluetoothDevice {
       await FlutterBluePlus._invokeMethod('discoverServices', remoteId.str);
 
       // wait for response
-      BmDiscoverServicesResult response = await futureResponse.timeout(Duration(seconds: timeout));
+      BmDiscoverServicesResult response = await futureResponse.fbpTimeout(timeout, "discoverServices");
 
       // failed?
       if (!response.success) {
@@ -226,7 +226,7 @@ class BluetoothDevice {
       await FlutterBluePlus._invokeMethod('readRssi', remoteId.str);
 
       // wait for response
-      BmReadRssiResult response = await futureResponse.timeout(Duration(seconds: timeout));
+      BmReadRssiResult response = await futureResponse.fbpTimeout(timeout, "readRssi");
 
       // failed?
       if (!response.success) {
@@ -273,7 +273,7 @@ class BluetoothDevice {
 
       await FlutterBluePlus._invokeMethod('requestMtu', request.toMap());
 
-      mtu = await futureResponse.timeout(Duration(seconds: timeout));
+      mtu = await futureResponse.fbpTimeout(timeout, "requestMtu");
     } finally {
       opMutex.give();
     }
@@ -357,7 +357,7 @@ class BluetoothDevice {
       await FlutterBluePlus._invokeMethod('createBond', remoteId.str);
 
       // wait for response
-      BmBondStateResponse bs = await futureResponse.timeout(Duration(seconds: timeout));
+      BmBondStateResponse bs = await futureResponse.fbpTimeout(timeout, "createBond");
 
       // success?
       if (bs.bondState != BmBondStateEnum.bonded) {
@@ -396,7 +396,7 @@ class BluetoothDevice {
       await FlutterBluePlus._invokeMethod('removeBond', remoteId.str);
 
       // wait for response
-      BmBondStateResponse bs = await futureResponse.timeout(Duration(seconds: timeout));
+      BmBondStateResponse bs = await futureResponse.fbpTimeout(timeout, "removeBond");
 
       // success?
       if (bs.bondState != BmBondStateEnum.none) {

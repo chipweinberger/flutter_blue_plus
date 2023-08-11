@@ -91,7 +91,7 @@ class BluetoothCharacteristic {
 
       await FlutterBluePlus._invokeMethod('readCharacteristic', request.toMap());
 
-      BmOnCharacteristicReceived response = await futureResponse.timeout(Duration(seconds: timeout));
+      BmOnCharacteristicReceived response = await futureResponse.fbpTimeout(timeout, "readCharacteristic");
 
       // failed?
       if (!response.success) {
@@ -159,7 +159,7 @@ class BluetoothCharacteristic {
       // wait for response so that we can:
       //  1. check for success (writeWithResponse)
       //  2. wait until the packet has been sent, to prevent iOS & Android dropping packets (writeWithoutResponse)
-      BmOnCharacteristicWritten response = await futureResponse.timeout(Duration(seconds: timeout));
+      BmOnCharacteristicWritten response = await futureResponse.fbpTimeout(timeout, "writeCharacteristic");
 
       // failed?
       if (!response.success) {
@@ -205,7 +205,7 @@ class BluetoothCharacteristic {
     await FlutterBluePlus._invokeMethod('setNotification', request.toMap());
 
     // wait for response, so that we can check for success
-    BmOnDescriptorResponse response = await futureResponse.timeout(Duration(seconds: timeout));
+    BmOnDescriptorResponse response = await futureResponse.fbpTimeout(timeout, "setNotifyValue");
 
     // failed?
     if (!response.success) {
