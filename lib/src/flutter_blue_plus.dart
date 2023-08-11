@@ -488,4 +488,13 @@ class FlutterBluePlusException implements Exception {
   String toString() {
     return 'FlutterBluePlusException: $function: (code: $code) $description';
   }
+
+  @Deprecated('Use function instead')
+  String get errorName => function;
+
+  @Deprecated('Use code instead')
+  int? get errorCode => code;
+
+  @Deprecated('Use description instead')
+  String? get errorString => description;
 }

@@ -552,7 +552,7 @@ class DeviceScreen extends StatelessWidget {
 
 String prettyException(String prefix, dynamic e) {
   if (e is FlutterBluePlusException) {
-    return "$prefix ${e.errorString}";
+    return "$prefix ${e.description}";
   } else if (e is PlatformException) {
     return "$prefix ${e.message}";
   }
