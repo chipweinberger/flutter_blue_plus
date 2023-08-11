@@ -958,6 +958,24 @@ public class FlutterBluePlusPlugin implements
                     break;
                 }
 
+                case "getInitialBondState":
+                {
+                    String remoteId = (String) call.arguments;
+
+                    // get bond state
+                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
+
+                    // see: BmBondStateResponse
+                    HashMap<String, Object> response = new HashMap<>();
+                    response.put("remote_id", remoteId);
+                    response.put("bond_state", bmBondStateEnum(device.getBondState()));
+                    response.put("bond_failed", false);
+                    response.put("bond_lost", false);
+
+                    result.success(response);
+                    break;
+                }
+
                 case "createBond":
                 {
                     String remoteId = (String) call.arguments;
