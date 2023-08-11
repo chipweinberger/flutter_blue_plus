@@ -177,11 +177,12 @@ class _CharacteristicTileState extends State<CharacteristicTile> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 const Text('Characteristic'),
-                Text('0x${widget.characteristic.characteristicUuid.toString().toUpperCase()}',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyLarge
-                        ?.copyWith(color: Theme.of(context).textTheme.bodySmall?.color),
+                Text(
+                  '0x${widget.characteristic.characteristicUuid.toString().toUpperCase()}',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyLarge
+                      ?.copyWith(color: Theme.of(context).textTheme.bodySmall?.color),
                 ),
                 Row(
                   children: [
@@ -290,3 +291,13 @@ class AdapterStateTile extends StatelessWidget {
     );
   }
 }
+
+SnackBar snackBarGood(String message) {
+  return SnackBar(content: Text(message), backgroundColor: Colors.blue);
+}
+
+SnackBar snackBarFail(String message) {
+  return SnackBar(content: Text(message), backgroundColor: Colors.red);
+}
+
+

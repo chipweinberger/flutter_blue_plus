@@ -117,7 +117,7 @@ class BluetoothOffScreen extends StatelessWidget {
                         await FlutterBluePlus.turnOn();
                       }
                     } catch (e) {
-                      final snackBar = SnackBar(content: Text(prettyException("Error Turning On:", e)));
+                      final snackBar = snackBarFail(prettyException("Error Turning On:", e));
                       snackBarKeyA.currentState?.removeCurrentSnackBar();
                       snackBarKeyA.currentState?.showSnackBar(snackBar);
                     }
@@ -185,8 +185,7 @@ class _FindDevicesScreenState extends State<FindDevicesScreen> {
                                           Navigator.of(context).push(MaterialPageRoute(
                                               builder: (context) {
                                                 d.connect(timeout: Duration(seconds: 4)).catchError((e) {
-                                                  final snackBar =
-                                                      SnackBar(content: Text(prettyException("Connect Error:", e)));
+                                                  final snackBar = snackBarFail(prettyException("Connect Error:", e));
                                                   snackBarKeyB.currentState?.removeCurrentSnackBar();
                                                   snackBarKeyB.currentState?.showSnackBar(snackBar);
                                                 });
@@ -213,7 +212,7 @@ class _FindDevicesScreenState extends State<FindDevicesScreen> {
                             onTap: () => Navigator.of(context).push(MaterialPageRoute(
                                 builder: (context) {
                                   r.device.connect(timeout: Duration(seconds: 4)).catchError((e) {
-                                    final snackBar = SnackBar(content: Text(prettyException("Connect Error:", e)));
+                                    final snackBar = snackBarFail(prettyException("Connect Error:", e));
                                     snackBarKeyB.currentState?.removeCurrentSnackBar();
                                     snackBarKeyB.currentState?.showSnackBar(snackBar);
                                   });
@@ -240,7 +239,7 @@ class _FindDevicesScreenState extends State<FindDevicesScreen> {
                   try {
                     FlutterBluePlus.stopScan();
                   } catch (e) {
-                    final snackBar = SnackBar(content: Text(prettyException("Stop Scan Error:", e)));
+                    final snackBar = snackBarFail(prettyException("Stop Scan Error:", e));
                     snackBarKeyB.currentState?.removeCurrentSnackBar();
                     snackBarKeyB.currentState?.showSnackBar(snackBar);
                   }
@@ -256,7 +255,7 @@ class _FindDevicesScreenState extends State<FindDevicesScreen> {
                         FlutterBluePlus.startScan(timeout: const Duration(seconds: 15), androidUsesFineLocation: false);
                       }
                     } catch (e) {
-                      final snackBar = SnackBar(content: Text(prettyException("Start Scan Error:", e)));
+                      final snackBar = snackBarFail(prettyException("Start Scan Error:", e));
                       snackBarKeyB.currentState?.removeCurrentSnackBar();
                       snackBarKeyB.currentState?.showSnackBar(snackBar);
                     }
@@ -292,11 +291,11 @@ class DeviceScreen extends StatelessWidget {
                     onReadPressed: () async {
                       try {
                         await c.read();
-                        final snackBar = SnackBar(content: Text("Read: Success"));
+                        final snackBar = snackBarGood("Read: Success");
                         snackBarKeyC.currentState?.removeCurrentSnackBar();
                         snackBarKeyC.currentState?.showSnackBar(snackBar);
                       } catch (e) {
-                        final snackBar = SnackBar(content: Text(prettyException("Read Error:", e)));
+                        final snackBar = snackBarFail(prettyException("Read Error:", e));
                         snackBarKeyC.currentState?.removeCurrentSnackBar();
                         snackBarKeyC.currentState?.showSnackBar(snackBar);
                       }
@@ -304,14 +303,14 @@ class DeviceScreen extends StatelessWidget {
                     onWritePressed: () async {
                       try {
                         await c.write(_getRandomBytes(), withoutResponse: c.properties.writeWithoutResponse);
-                        final snackBar = SnackBar(content: Text("Write: Success"));
+                        final snackBar = snackBarGood("Write: Success");
                         snackBarKeyC.currentState?.removeCurrentSnackBar();
                         snackBarKeyC.currentState?.showSnackBar(snackBar);
                         if (c.properties.read) {
                           await c.read();
                         }
                       } catch (e) {
-                        final snackBar = SnackBar(content: Text(prettyException("Write Error:", e)));
+                        final snackBar = snackBarFail(prettyException("Write Error:", e));
                         snackBarKeyC.currentState?.removeCurrentSnackBar();
                         snackBarKeyC.currentState?.showSnackBar(snackBar);
                       }
@@ -320,14 +319,14 @@ class DeviceScreen extends StatelessWidget {
                       try {
                         String op = c.isNotifying == false ? "Subscribe" : "Unubscribe";
                         await c.setNotifyValue(c.isNotifying == false);
-                        final snackBar = SnackBar(content: Text("$op : Success"));
+                        final snackBar = snackBarGood("$op : Success");
                         snackBarKeyC.currentState?.removeCurrentSnackBar();
                         snackBarKeyC.currentState?.showSnackBar(snackBar);
                         if (c.properties.read) {
                           await c.read();
                         }
                       } catch (e) {
-                        final snackBar = SnackBar(content: Text(prettyException("Subscribe Error:", e)));
+                        final snackBar = snackBarFail(prettyException("Subscribe Error:", e));
                         snackBarKeyC.currentState?.removeCurrentSnackBar();
                         snackBarKeyC.currentState?.showSnackBar(snackBar);
                       }
@@ -339,11 +338,11 @@ class DeviceScreen extends StatelessWidget {
                             onReadPressed: () async {
                               try {
                                 await d.read();
-                                final snackBar = SnackBar(content: Text("Read: Success"));
+                                final snackBar = snackBarGood("Read: Success");
                                 snackBarKeyC.currentState?.removeCurrentSnackBar();
                                 snackBarKeyC.currentState?.showSnackBar(snackBar);
                               } catch (e) {
-                                final snackBar = SnackBar(content: Text(prettyException("Read Error:", e)));
+                                final snackBar = snackBarFail(prettyException("Read Error:", e));
                                 snackBarKeyC.currentState?.removeCurrentSnackBar();
                                 snackBarKeyC.currentState?.showSnackBar(snackBar);
                               }
@@ -351,11 +350,11 @@ class DeviceScreen extends StatelessWidget {
                             onWritePressed: () async {
                               try {
                                 await d.write(_getRandomBytes());
-                                final snackBar = SnackBar(content: Text("Write: Success"));
+                                final snackBar = snackBarGood("Write: Success");
                                 snackBarKeyC.currentState?.removeCurrentSnackBar();
                                 snackBarKeyC.currentState?.showSnackBar(snackBar);
                               } catch (e) {
-                                final snackBar = SnackBar(content: Text(prettyException("Write Error:", e)));
+                                final snackBar = snackBarFail(prettyException("Write Error:", e));
                                 snackBarKeyC.currentState?.removeCurrentSnackBar();
                                 snackBarKeyC.currentState?.showSnackBar(snackBar);
                               }
@@ -390,11 +389,11 @@ class DeviceScreen extends StatelessWidget {
                     onPressed = () async {
                       try {
                         await device.disconnect();
-                        final snackBar = SnackBar(content: Text("Disconnect: Success"));
+                        final snackBar = snackBarGood("Disconnect: Success");
                         snackBarKeyC.currentState?.removeCurrentSnackBar();
                         snackBarKeyC.currentState?.showSnackBar(snackBar);
                       } catch (e) {
-                        final snackBar = SnackBar(content: Text(prettyException("Disconnect Error:", e)));
+                        final snackBar = snackBarFail(prettyException("Disconnect Error:", e));
                         snackBarKeyC.currentState?.removeCurrentSnackBar();
                         snackBarKeyC.currentState?.showSnackBar(snackBar);
                       }
@@ -405,11 +404,11 @@ class DeviceScreen extends StatelessWidget {
                     onPressed = () async {
                       try {
                         await device.connect(timeout: Duration(seconds: 4));
-                        final snackBar = SnackBar(content: Text("Connect: Success"));
+                        final snackBar = snackBarGood("Connect: Success");
                         snackBarKeyC.currentState?.removeCurrentSnackBar();
                         snackBarKeyC.currentState?.showSnackBar(snackBar);
                       } catch (e) {
-                        final snackBar = SnackBar(content: Text(prettyException("Connect Error:", e)));
+                        final snackBar = snackBarFail(prettyException("Connect Error:", e));
                         snackBarKeyC.currentState?.removeCurrentSnackBar();
                         snackBarKeyC.currentState?.showSnackBar(snackBar);
                       }
@@ -472,12 +471,11 @@ class DeviceScreen extends StatelessWidget {
                               onPressed: () async {
                                 try {
                                   await device.discoverServices();
-                                  final snackBar = SnackBar(content: Text("Discover Services: Success"));
+                                  final snackBar = snackBarGood("Discover Services: Success");
                                   snackBarKeyC.currentState?.removeCurrentSnackBar();
                                   snackBarKeyC.currentState?.showSnackBar(snackBar);
                                 } catch (e) {
-                                  final snackBar =
-                                      SnackBar(content: Text(prettyException("Discover Services Error:", e)));
+                                  final snackBar = snackBarFail(prettyException("Discover Services Error:", e));
                                   snackBarKeyC.currentState?.removeCurrentSnackBar();
                                   snackBarKeyC.currentState?.showSnackBar(snackBar);
                                 }
@@ -511,11 +509,11 @@ class DeviceScreen extends StatelessWidget {
                       onPressed: () async {
                         try {
                           await device.requestMtu(223);
-                          final snackBar = SnackBar(content: Text("Request Mtu: Success"));
+                          final snackBar = snackBarGood("Request Mtu: Success");
                           snackBarKeyC.currentState?.removeCurrentSnackBar();
                           snackBarKeyC.currentState?.showSnackBar(snackBar);
                         } catch (e) {
-                          final snackBar = SnackBar(content: Text(prettyException("Change Mtu Error:", e)));
+                          final snackBar = snackBarFail(prettyException("Change Mtu Error:", e));
                           snackBarKeyC.currentState?.removeCurrentSnackBar();
                           snackBarKeyC.currentState?.showSnackBar(snackBar);
                         }
