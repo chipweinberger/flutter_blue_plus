@@ -15,18 +15,25 @@ BluetoothDeviceType _bmToBluetoothDeviceType(BmBluetoothSpecEnum value) {
   }
 }
 
-enum BluetoothConnectionState { disconnected, connecting, connected, disconnecting }
+enum BluetoothConnectionState { 
+  disconnected,
+  connected, 
+  // Deprecated: To be more precise, 'connecting' is only returned by getConnectionState (android)
+  // or CBPeripheral.state (iOS), which FlutterBluePlus does not need.
+  @Deprecated('Android & iOS dont stream this state. You can delete')
+  connecting,
+  // Deprecated: To be more precise, 'disconnecting' is only returned by getConnectionState (android)
+  // or CBPeripheral.state (iOS), which FlutterBluePlus does not need.
+  @Deprecated('Android & iOS dont stream this state. You can delete')
+  disconnecting
+}
 
 BluetoothConnectionState _bmToBluetoothConnectionState(BmConnectionStateEnum value) {
   switch (value) {
     case BmConnectionStateEnum.disconnected:
       return BluetoothConnectionState.disconnected;
-    case BmConnectionStateEnum.connecting:
-      return BluetoothConnectionState.connecting;
     case BmConnectionStateEnum.connected:
       return BluetoothConnectionState.connected;
-    case BmConnectionStateEnum.disconnecting:
-      return BluetoothConnectionState.disconnecting;
   }
 }
 

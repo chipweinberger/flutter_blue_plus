@@ -661,9 +661,7 @@ class BmSetNotificationRequest {
 
 enum BmConnectionStateEnum {
   disconnected, // 0
-  connecting, // 1
-  connected, // 2
-  disconnecting, // 3
+  connected, // 1
 }
 
 class BmConnectionStateResponse {

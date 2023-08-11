@@ -1319,11 +1319,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     switch (connectionState)
     {
         case CBPeripheralStateDisconnected:  return 0; // BmConnectionStateEnum.disconnected
-        case CBPeripheralStateConnecting:    return 1; // BmConnectionStateEnum.connecting
-        case CBPeripheralStateConnected:     return 2; // BmConnectionStateEnum.connected
-        case CBPeripheralStateDisconnecting: return 3; // BmConnectionStateEnum.disconnecting
+        case CBPeripheralStateConnected:     return 1; // BmConnectionStateEnum.connected
+        default:                             return 0;
     }
-    return 0;
 }
 
 - (NSDictionary *)bmBluetoothService:(CBPeripheral *)peripheral service:(CBService *)service

@@ -1402,6 +1402,14 @@ public class FlutterBluePlusPlugin implements
                 " (" + hciStatusString(status) + ")" +
                 " newState: " + connectionStateString(newState));
 
+            // android never calls this callback with connecting or disconnecting,
+            // (theyre only used for gatt.getConnectionState()), but just to be
+            // future proof, explicitly ignore anything else. CoreBluetooth is the same.
+            if(newState != BluetoothProfile.STATE_CONNECTED ||
+               newState != BluetoothProfile.STATE_DISCONNECTED) {
+                return;
+            }
+
             String remoteId = gatt.getDevice().getAddress();
 
             // connected?
@@ -1905,9 +1913,7 @@ public class FlutterBluePlusPlugin implements
     static int bmConnectionStateEnum(int cs) {
         switch (cs) {
             case BluetoothProfile.STATE_DISCONNECTED:  return 0;
-            case BluetoothProfile.STATE_CONNECTING:    return 1;
-            case BluetoothProfile.STATE_CONNECTED:     return 2;
-            case BluetoothProfile.STATE_DISCONNECTING: return 3;
+            case BluetoothProfile.STATE_CONNECTED:     return 1;
             default:                                   return 0;
         }
     }
