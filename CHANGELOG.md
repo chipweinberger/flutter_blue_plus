@@ -6,10 +6,9 @@
 * **[improve]** Dart: each FlutterBluePlusException should have unique code for handling
 
 ## 1.14.0
-1.14.0 is a refactor of BluetoothDevice & Android bond handling to improve reliablility & error handling.
-It also removes some changes regarding bond state made in 1.13.0, and instead exposes BluetoothDevice.bondState.
-
-* **[feature]** Android:  expose BluetoothDevice.bondState & remove implicit waitIfBonding changes added in 1.13.0
+* **[feature]** Android:  expose BluetoothDevice.bondState
+* **[remove]** changes regarding bond state made in 1.13.0 in favor of exposing bondState
+* **[refactor]** BluetoothDevice & Android bond handling to improve reliablility & error handling.
 * **[fix]** Dart: BluetoothDevice: connect & disconnect and others could incorrectly timeout (unlikely race conditions) 
 * **[fix]** Dart: BluetoothDevice: getBondState, getMtu, getConnectionState could skip values (unlikely race conditions) 
 * **[fix]** Dart: clear servicesList after disconnection. Android requires you call discoverServices again
