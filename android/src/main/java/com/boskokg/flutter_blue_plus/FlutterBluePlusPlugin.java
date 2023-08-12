@@ -1423,7 +1423,7 @@ public class FlutterBluePlusPlugin implements
             // android never calls this callback with connecting or disconnecting,
             // (theyre only used for gatt.getConnectionState()), but just to be
             // future proof, explicitly ignore anything else. CoreBluetooth is the same.
-            if(newState != BluetoothProfile.STATE_CONNECTED ||
+            if(newState != BluetoothProfile.STATE_CONNECTED &&
                newState != BluetoothProfile.STATE_DISCONNECTED) {
                 return;
             }
