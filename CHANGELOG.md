@@ -1,3 +1,6 @@
+## 1.14.6
+ **[Fix]** iOS: disconnect would timeout if already disconnected (regression 1.14.0)
+
 ## 1.14.5
 * **[improve]** Dart: adapterState, bondState, mtu, connectiontate could miss changes due to race conditions
 
