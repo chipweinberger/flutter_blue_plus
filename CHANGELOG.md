@@ -1,3 +1,6 @@
+## 1.14.7
+ **[Fix]** Android: connected & disconnected states not received (regression in 1.14.4)
+
 ## 1.14.6
  **[Fix]** iOS: disconnect would timeout if already disconnected (regression 1.14.0)
 
