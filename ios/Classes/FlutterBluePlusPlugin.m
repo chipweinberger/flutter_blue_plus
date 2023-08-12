@@ -287,7 +287,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 // See BmConnectionStateResponse
                 NSDictionary *response = @{
                     @"remote_id":                remoteId,
-                    @"connection_state":         @([self bmConnectionStateEnum:CBPeripheralStateConnected]),
+                    @"connection_state":         @([self bmConnectionStateEnum:CBPeripheralStateDisconnected]),
                     @"disconnect_reason_code":   @(0),
                     @"disconnect_reason_string": @"Already Disconnected",
                 };
