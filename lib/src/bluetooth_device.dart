@@ -190,8 +190,10 @@ class BluetoothDevice {
 
     // initial value - Note: we only care about the current connection state of *our* app,
     // which is why we do not have to invoking any native platform methods to get this.
-    yield _bmToBluetoothConnectionState(
-        FlutterBluePlus._connectionStates[remoteId]?.connectionState ?? BmConnectionStateEnum.disconnected);
+    if (buffer.hasReceivedValue == false) {
+      yield _bmToBluetoothConnectionState(
+          FlutterBluePlus._connectionStates[remoteId]?.connectionState ?? BmConnectionStateEnum.disconnected);
+    }
 
     // stream
     yield* buffer.stream;
@@ -208,7 +210,9 @@ class BluetoothDevice {
         .map((p) => p.mtu));
 
     // initial value from our cache
-    yield FlutterBluePlus._mtuValues[remoteId]?.mtu ?? 23;
+    if (buffer.hasReceivedValue == false) {
+      yield FlutterBluePlus._mtuValues[remoteId]?.mtu ?? 23;
+    }
 
     // stream
     yield* buffer.stream;
@@ -445,10 +449,14 @@ class BluetoothDevice {
       yield _bmToBluetoothBondState(FlutterBluePlus._bondStates[remoteId]!);
     } else {
       // must get the initial state from the system.
-      yield await FlutterBluePlus._methods
+      BluetoothBondState initialValue = await FlutterBluePlus._methods
           .invokeMethod('getInitialBondState', remoteId.str)
           .then((buffer) => BmBondStateResponse.fromMap(buffer))
           .then((p) => _bmToBluetoothBondState(p));
+      // make sure the initial value has not become out of date
+      if (buffer.hasReceivedValue == false) {
+        yield initialValue;
+      }
     }
 
     // stream

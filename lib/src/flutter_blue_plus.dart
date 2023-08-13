@@ -88,9 +88,14 @@ class FlutterBluePlus {
         .map((s) => _bmToBluetoothAdapterState(s.adapterState)));
 
     // initial state
-    yield await _invokeMethod('getAdapterState')
+    BluetoothAdapterState initialValue = await _invokeMethod('getAdapterState')
         .then((buffer) => BmBluetoothAdapterState.fromMap(buffer))
         .then((s) => _bmToBluetoothAdapterState(s.adapterState));
+
+    // make sure the initial value has not become out of date
+    if (buffer.hasReceivedValue == false) {
+      yield initialValue;
+    }
 
     // stream
     yield* buffer.stream;

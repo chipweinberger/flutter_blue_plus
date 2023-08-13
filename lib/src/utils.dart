@@ -56,7 +56,8 @@ List<T> _addOrUpdate<T>(List<T> results, T item) {
 extension FutureTimeout<T> on Future<T> {
   Future<T> fbpTimeout(int seconds, String errorName) {
     return this.timeout(Duration(seconds: seconds), onTimeout: () {
-      throw FlutterBluePlusException(ErrorPlatform.dart, errorName, FbpErrorCode.timeout.index, "Timed out after ${seconds}s");
+      throw FlutterBluePlusException(
+          ErrorPlatform.dart, errorName, FbpErrorCode.timeout.index, "Timed out after ${seconds}s");
     });
   }
 }
@@ -97,6 +98,7 @@ class _BufferStream<T> {
   final Stream<T> _inputStream;
   late final StreamSubscription? _subscription;
   late final StreamController<T> _controller;
+  late bool hasReceivedValue = false;
 
   _BufferStream.listen(this._inputStream) {
     _controller = StreamController<T>(
@@ -115,6 +117,7 @@ class _BufferStream<T> {
     // immediately start listening to the inputStream
     _subscription = _inputStream.listen(
       (data) {
+        hasReceivedValue = true;
         _controller.add(data);
       },
       onError: (e) {
