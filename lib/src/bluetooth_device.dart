@@ -420,7 +420,7 @@ class BluetoothDevice {
   }
 
   // Get the current bondState of the device (Android Only)
-  Stream<BluetoothBondState> bondState() async* {
+  Stream<BluetoothBondState> get bondState async* {
     if (Platform.isAndroid == false) {
       throw FlutterBluePlusException(ErrorPlatform.dart, "bondState", FbpErrorCode.androidOnly.index, "android-only");
     }
