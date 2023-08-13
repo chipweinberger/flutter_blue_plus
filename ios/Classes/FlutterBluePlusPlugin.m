@@ -223,19 +223,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // already connected?
             CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
             if (peripheral != nil) {
-
-                // See BmConnectionStateResponse
-                NSDictionary *response = @{
-                    @"remote_id":                remoteId,
-                    @"connection_state":         @([self bmConnectionStateEnum:CBPeripheralStateConnected]),
-                    @"disconnect_reason_code":   [NSNull null],
-                    @"disconnect_reason_string": [NSNull null],
-                };
-
-                // the dart code always waits for this callback
-                [_methodChannel invokeMethod:@"OnConnectionStateChanged" arguments:response];
-
-                result(@(true)); // no work to do
+                if (_logLevel >= debug) {
+                    NSLog(@"[FBP-iOS] already connected");
+                }
+                result(@(1)); // no work to do
                 return;
             }
 
@@ -273,7 +264,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             [_centralManager connectPeripheral:peripheral options:options];
             
-            result(@(true));
+            result(@(0));
         }
         else if ([@"disconnect" isEqualToString:call.method])
         {
@@ -283,25 +274,16 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // already disconnected?
             CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
             if (peripheral == nil) {
-
-                // See BmConnectionStateResponse
-                NSDictionary *response = @{
-                    @"remote_id":                remoteId,
-                    @"connection_state":         @([self bmConnectionStateEnum:CBPeripheralStateDisconnected]),
-                    @"disconnect_reason_code":   @(0),
-                    @"disconnect_reason_string": @"Already Disconnected",
-                };
-
-                // the dart code always waits for this callback
-                [_methodChannel invokeMethod:@"OnConnectionStateChanged" arguments:response];
-                
-                result(@(true)); // no work to do
+                if (_logLevel >= debug) {
+                    NSLog(@"[FBP-iOS] already disconnected");
+                }
+                result(@(1)); // no work to do
                 return;
             }
 
             [_centralManager cancelPeripheralConnection:peripheral];
             
-            result(@(true));
+            result(@(0));
         }
         else if ([@"discoverServices" isEqualToString:call.method])
         {

@@ -90,15 +90,17 @@ class BluetoothDevice {
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmConnectionStateResponse> futureState = responseStream.first;
 
-      await FlutterBluePlus._invokeMethod('connect', request.toMap());
+      int alreadyConnected = await FlutterBluePlus._invokeMethod('connect', request.toMap());
 
-      // wait for result
-      BmConnectionStateResponse response = await futureState.fbpTimeout(timeout.inSeconds, "connect");
+      if (alreadyConnected == 0) {
+        // wait for result
+        BmConnectionStateResponse response = await futureState.fbpTimeout(timeout.inSeconds, "connect");
 
-      // failure?
-      if (response.connectionState == BmConnectionStateEnum.disconnected) {
-        throw FlutterBluePlusException(
-            _nativeError, "connect", response.disconnectReasonCode, response.disconnectReasonString);
+        // failure?
+        if (response.connectionState == BmConnectionStateEnum.disconnected) {
+          throw FlutterBluePlusException(
+              _nativeError, "connect", response.disconnectReasonCode, response.disconnectReasonString);
+        }
       }
     } finally {
       opMutex.give();
@@ -123,10 +125,12 @@ class BluetoothDevice {
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmConnectionStateResponse> futureState = responseStream.first;
 
-      await FlutterBluePlus._invokeMethod('disconnect', remoteId.str);
+      int alreadyDisconnected = await FlutterBluePlus._invokeMethod('disconnect', remoteId.str);
 
-      // wait for disconnection
-      await futureState.fbpTimeout(timeout, "disconnect");
+      if (alreadyDisconnected == 0) {
+        // wait for disconnection
+        await futureState.fbpTimeout(timeout, "disconnect");
+      }
     } finally {
       opMutex.give();
     }
@@ -425,7 +429,8 @@ class BluetoothDevice {
       throw FlutterBluePlusException(ErrorPlatform.dart, "bondState", FbpErrorCode.androidOnly.index, "android-only");
     }
 
-    // start listening now so we do not miss any changes
+    // start listening now so we do not miss any changes.
+    // in particular, missed chamges that happen due to await getInitialBondState
     var buffer = _BufferStream.listen(FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnBondStateChanged")
         .map((m) => m.arguments)
@@ -437,7 +442,12 @@ class BluetoothDevice {
     if (FlutterBluePlus._bondStates[remoteId] != null) {
       // we must use the cached bond state (if available) because
       // getInitialBondState is not able to detect bondLost & bondFailed
-      yield _bmToBluetoothBondState(FlutterBluePlus._bondStates[remoteId]!);
+      BluetoothBondState initialValue = _bmToBluetoothBondState(FlutterBluePlus._bondStates[remoteId]!);
+      // make sure this data is not out of date (just a precaution).
+      // this should only happen if we 'awaited' on something after listening to the buffer stream
+      if (buffer.hasReceivedValue == false) {
+        yield initialValue;
+      }
     } else {
       // must get the initial state from the system.
       BluetoothBondState initialValue = await FlutterBluePlus._methods
@@ -445,6 +455,7 @@ class BluetoothDevice {
           .then((args) => BmBondStateResponse.fromMap(args))
           .then((p) => _bmToBluetoothBondState(p));
       // make sure the initial value has not become out of date
+      // while we were awaiting for the initial value
       if (buffer.hasReceivedValue == false) {
         yield initialValue;
       }

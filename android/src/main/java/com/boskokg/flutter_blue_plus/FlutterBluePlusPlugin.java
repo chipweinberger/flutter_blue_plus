@@ -451,18 +451,8 @@ public class FlutterBluePlusPlugin implements
                         // already connected?
                         BluetoothGatt gatt = mConnectedDevices.get(remoteId);
                         if (gatt != null) {
-
-                            // see: BmConnectionStateResponse
-                            HashMap<String, Object> response = new HashMap<>();
-                            response.put("remote_id", remoteId);
-                            response.put("connection_state", bmConnectionStateEnum(BluetoothProfile.STATE_CONNECTED));
-                            response.put("disconnect_reason_code", null);
-                            response.put("disconnect_reason_string", null);
-
-                            // the dart code always waits for this callback
-                            invokeMethodUIThread("OnConnectionStateChanged", response);
-
-                            result.success(null);
+                            log(LogLevel.DEBUG, "[FBP-Android] already connected");
+                            result.success(1);  // no work to do
                             return;
                         } 
 
@@ -474,7 +464,13 @@ public class FlutterBluePlusPlugin implements
                             gatt = device.connectGatt(context, autoConnect, mGattCallback);
                         }
 
-                        result.success(null);
+                        // error check
+                        if (gatt == null) {
+                            result.error("connect", String.format("device.connectGatt returned null"), null);
+                            return;
+                        }
+
+                        result.success(0);
                     });
                     break;
                 }
@@ -486,21 +482,14 @@ public class FlutterBluePlusPlugin implements
                     // already disconnected?
                     BluetoothGatt gatt = mConnectedDevices.get(remoteId);
                     if (gatt == null) {
-                        // see: BmConnectionStateResponse
-                        HashMap<String, Object> response = new HashMap<>();
-                        response.put("remote_id", remoteId);
-                        response.put("connection_state", bmConnectionStateEnum(BluetoothProfile.STATE_DISCONNECTED));
-                        response.put("disconnect_reason_code", 0x00);
-                        response.put("disconnect_reason_string", "ALREADY_DISCONNECTED");
-
-                        // the dart code always waits for this callback
-                        invokeMethodUIThread("OnConnectionStateChanged", response);
+                        log(LogLevel.DEBUG, "[FBP-Android] already disconnected");
+                        result.success(1);  // no work to do
                         return;
                     }
                 
                     gatt.disconnect();
 
-                    result.success(null);
+                    result.success(0);
                     break;
                 }
 

@@ -93,6 +93,7 @@ class FlutterBluePlus {
         .then((s) => _bmToBluetoothAdapterState(s.adapterState));
 
     // make sure the initial value has not become out of date
+    // while we were awaiting for the initial state
     if (buffer.hasReceivedValue == false) {
       yield initialValue;
     }
