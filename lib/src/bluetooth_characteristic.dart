@@ -39,7 +39,7 @@ class BluetoothCharacteristic {
   Stream<List<int>> get onValueReceived => FlutterBluePlus._methodStream.stream
           .where((m) => m.method == "OnCharacteristicReceived")
           .map((m) => m.arguments)
-          .map((buffer) => BmOnCharacteristicReceived.fromMap(buffer))
+          .map((args) => BmOnCharacteristicReceived.fromMap(args))
           .where((p) => p.remoteId == remoteId.toString())
           .where((p) => p.serviceUuid == serviceUuid)
           .where((p) => p.characteristicUuid == characteristicUuid)
@@ -81,7 +81,7 @@ class BluetoothCharacteristic {
       var responseStream = FlutterBluePlus._methodStream.stream
           .where((m) => m.method == "OnCharacteristicReceived")
           .map((m) => m.arguments)
-          .map((buffer) => BmOnCharacteristicReceived.fromMap(buffer))
+          .map((args) => BmOnCharacteristicReceived.fromMap(args))
           .where((p) => p.remoteId == request.remoteId)
           .where((p) => p.serviceUuid == request.serviceUuid)
           .where((p) => p.characteristicUuid == request.characteristicUuid);
@@ -146,7 +146,7 @@ class BluetoothCharacteristic {
       var responseStream = FlutterBluePlus._methodStream.stream
           .where((m) => m.method == "OnCharacteristicWritten")
           .map((m) => m.arguments)
-          .map((buffer) => BmOnCharacteristicWritten.fromMap(buffer))
+          .map((args) => BmOnCharacteristicWritten.fromMap(args))
           .where((p) => p.remoteId == request.remoteId)
           .where((p) => p.serviceUuid == request.serviceUuid)
           .where((p) => p.characteristicUuid == request.characteristicUuid);
@@ -192,7 +192,7 @@ class BluetoothCharacteristic {
     Stream<BmOnDescriptorResponse> responseStream = FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnDescriptorResponse")
         .map((m) => m.arguments)
-        .map((buffer) => BmOnDescriptorResponse.fromMap(buffer))
+        .map((args) => BmOnDescriptorResponse.fromMap(args))
         .where((p) => p.type == BmOnDescriptorResponseType.write)
         .where((p) => p.remoteId == request.remoteId)
         .where((p) => p.serviceUuid == request.serviceUuid)

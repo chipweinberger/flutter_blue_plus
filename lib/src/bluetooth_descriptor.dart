@@ -30,7 +30,7 @@ class BluetoothDescriptor {
   Stream<List<int>> get onValueReceived => FlutterBluePlus._methodStream.stream
           .where((m) => m.method == "OnDescriptorResponse")
           .map((m) => m.arguments)
-          .map((buffer) => BmOnDescriptorResponse.fromMap(buffer))
+          .map((args) => BmOnDescriptorResponse.fromMap(args))
           .where((p) => (p.remoteId == remoteId.toString()))
           .where((p) => (p.descriptorUuid == descriptorUuid))
           .where((p) => (p.characteristicUuid == characteristicUuid))
@@ -69,7 +69,7 @@ class BluetoothDescriptor {
       Stream<BmOnDescriptorResponse> responseStream = FlutterBluePlus._methodStream.stream
           .where((m) => m.method == "OnDescriptorResponse")
           .map((m) => m.arguments)
-          .map((buffer) => BmOnDescriptorResponse.fromMap(buffer))
+          .map((args) => BmOnDescriptorResponse.fromMap(args))
           .where((p) => (p.type == BmOnDescriptorResponseType.read))
           .where((p) => (p.remoteId == request.remoteId))
           .where((p) => (p.serviceUuid == request.serviceUuid))
@@ -117,7 +117,7 @@ class BluetoothDescriptor {
       Stream<BmOnDescriptorResponse> responseStream = FlutterBluePlus._methodStream.stream
           .where((m) => m.method == "OnDescriptorResponse")
           .map((m) => m.arguments)
-          .map((buffer) => BmOnDescriptorResponse.fromMap(buffer))
+          .map((args) => BmOnDescriptorResponse.fromMap(args))
           .where((p) => (p.type == BmOnDescriptorResponseType.write))
           .where((p) => (p.remoteId == request.remoteId))
           .where((p) => (p.serviceUuid == request.serviceUuid))

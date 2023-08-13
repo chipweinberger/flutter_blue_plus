@@ -84,12 +84,12 @@ class FlutterBluePlus {
     var buffer = _BufferStream.listen(FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnAdapterStateChanged")
         .map((m) => m.arguments)
-        .map((buffer) => BmBluetoothAdapterState.fromMap(buffer))
+        .map((args) => BmBluetoothAdapterState.fromMap(args))
         .map((s) => _bmToBluetoothAdapterState(s.adapterState)));
 
     // initial state
     BluetoothAdapterState initialValue = await _invokeMethod('getAdapterState')
-        .then((buffer) => BmBluetoothAdapterState.fromMap(buffer))
+        .then((args) => BmBluetoothAdapterState.fromMap(args))
         .then((s) => _bmToBluetoothAdapterState(s.adapterState));
 
     // make sure the initial value has not become out of date
@@ -106,7 +106,7 @@ class FlutterBluePlus {
   /// - You must call device.connect() before these devices can be used by FlutterBluePlus
   static Future<List<BluetoothDevice>> get connectedSystemDevices {
     return _invokeMethod('getConnectedSystemDevices')
-        .then((buffer) => BmConnectedDevicesResponse.fromMap(buffer))
+        .then((args) => BmConnectedDevicesResponse.fromMap(args))
         .then((p) => p.devices)
         .then((p) => p.map((d) => BluetoothDevice.fromProto(d)).toList());
   }
@@ -114,7 +114,7 @@ class FlutterBluePlus {
   /// Retrieve a list of bonded devices (Android only)
   static Future<List<BluetoothDevice>> get bondedDevices {
     return _invokeMethod('getBondedDevices')
-        .then((buffer) => BmConnectedDevicesResponse.fromMap(buffer))
+        .then((args) => BmConnectedDevicesResponse.fromMap(args))
         .then((p) => p.devices)
         .then((p) => p.map((d) => BluetoothDevice.fromProto(d)).toList());
   }
@@ -157,7 +157,7 @@ class FlutterBluePlus {
       Stream<BmScanResponse> responseStream = FlutterBluePlus._methodStream.stream
           .where((m) => m.method == "OnScanResponse")
           .map((m) => m.arguments)
-          .map((buffer) => BmScanResponse.fromMap(buffer))
+          .map((args) => BmScanResponse.fromMap(args))
           .takeWhile((element) => _isScanning.value)
           .doOnDone(stopScan);
 
