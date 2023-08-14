@@ -15,9 +15,16 @@ BluetoothDeviceType _bmToBluetoothDeviceType(BmBluetoothSpecEnum value) {
   }
 }
 
-enum BluetoothConnectionState { 
+class DisconnectReason {
+  final ErrorPlatform platform;
+  final int? code; // specific to platform
+  final String? description;
+  DisconnectReason(this.platform, this.code, this.description);
+}
+
+enum BluetoothConnectionState {
   disconnected,
-  connected, 
+  connected,
   // Deprecated: To be more precise, 'connecting' is only returned by getConnectionState (android)
   // or CBPeripheral.state (iOS), which FlutterBluePlus does not need.
   @Deprecated('Android & iOS dont stream this state. You can delete')
@@ -89,7 +96,7 @@ BluetoothBondState _bmToBluetoothBondState(BmBondStateResponse value) {
 // [bonded] bond success
 // [failed] a bonding attempt failed
 // [lost] a previous bond was deleted (you should reconnect to force a rebond)
-enum BluetoothBondState { none, bonding, bonded, failed, lost}
+enum BluetoothBondState { none, bonding, bonded, failed, lost }
 
 enum ConnectionPriority { balanced, high, lowPower }
 

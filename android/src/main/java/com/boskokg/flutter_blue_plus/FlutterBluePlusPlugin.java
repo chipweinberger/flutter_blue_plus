@@ -1760,7 +1760,6 @@ public class FlutterBluePlusPlugin implements
         return map;
     }
 
-    @TargetApi(21)
     HashMap<String, Object> bmScanResult(BluetoothDevice device, ScanResult result) {
 
         ScanRecord scanRecord = result.getScanRecord();

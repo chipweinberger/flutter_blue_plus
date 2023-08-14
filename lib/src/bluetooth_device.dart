@@ -183,6 +183,16 @@ class BluetoothDevice {
     return result;
   }
 
+  // return the most recent disconnection reason
+  DisconnectReason? get disconnectReason {
+    if (FlutterBluePlus._connectionStates[remoteId] == null) {
+      return null;
+    }
+    int? code = FlutterBluePlus._connectionStates[remoteId]!.disconnectReasonCode;
+    String? description = FlutterBluePlus._connectionStates[remoteId]!.disconnectReasonString;
+    return DisconnectReason(_nativeError, code, description);
+  }
+
   /// The current connection state of the device to this application
   Stream<BluetoothConnectionState> get connectionState {
     // initial value - Note: we only care about the current connection state of
