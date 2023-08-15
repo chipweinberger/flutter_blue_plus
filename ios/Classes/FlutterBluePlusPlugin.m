@@ -1232,7 +1232,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     // Manufacturer Data
     NSDictionary* manufDataB = nil;
-    if (manufData != nil && manufData.length > 2) {
+    if (manufData != nil && manufData.length >= 2) {
         
         // first 2 bytes are manufacturerId
         unsigned short manufId = 0;
