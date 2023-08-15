@@ -321,16 +321,19 @@ public class FlutterBluePlusPlugin implements
                     // see: BmScanSettings
                     HashMap<String, Object> data = call.arguments();
                     List<String> serviceUuids = (List<String>) data.get("service_uuids");
-                    List<String> macAddresses =  (List<String>) data.get("mac_addresses");
-                    boolean allowDuplicates =         (boolean) data.get("allow_duplicates");
-                    int scanMode =                        (int) data.get("android_scan_mode");
-                    boolean usesFineLocation =        (boolean) data.get("android_uses_fine_location");
+                    List<String> macAddresses = (List<String>) data.get("mac_addresses");
+                    boolean allowDuplicates =        (boolean) data.get("allow_duplicates");
+                    int scanMode =                       (int) data.get("android_scan_mode");
+                    boolean usesFineLocation =       (boolean) data.get("android_uses_fine_location");
 
                     if (Build.VERSION.SDK_INT >= 31) { // Android 12 (October 2021)
                         permissions.add(Manifest.permission.BLUETOOTH_SCAN);
                         if (usesFineLocation) {
                             permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
                         }
+                        // it is unclear why this is needed, but some phones throw a
+                        // SecurityException AdapterService getRemoteName, without it
+                        permissions.add(Manifest.permission.BLUETOOTH_CONNECT);
                     }
 
                     if (Build.VERSION.SDK_INT <= 30) { // Android 11 (September 2020)
