@@ -1,3 +1,11 @@
+## 1.14.8
+* **[Feature]** Dart: add device.disconnectReason
+* **[Improve]** Dart: breaking change: rename bondState() -> bondState
+* **[Fix]** Dart: calling connect or disconnect multiple times should not re-push to connectionState stream (regression in 1.14.0)
+* **[Fix]** Android: calling connect or disconnect multiple times could fail(regression in 1.14.7)
+* **[Fix]** Android: security exception on startScan for some phones (regression in 1.13.4)
+* **[Fix]** Dart: various streams could push values out of order 
+
 ## 1.14.7
  **[Fix]** Android: connected & disconnected states not received (regression in 1.14.4)
 
