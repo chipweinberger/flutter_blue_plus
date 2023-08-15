@@ -1,3 +1,6 @@
+## 1.14.9
+* **[Fix]** iOS: disconnect reason code & string are mixed up
+
 ## 1.14.8
 * **[Feature]** Dart: add device.disconnectReason
 * **[Improve]** Dart: breaking change: rename bondState() -> bondState
