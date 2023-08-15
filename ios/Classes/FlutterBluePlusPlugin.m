@@ -827,8 +827,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     NSDictionary *result = @{
         @"remote_id":                remoteId,
         @"connection_state":         @([self bmConnectionStateEnum:peripheral.state]),
-        @"disconnect_reason_code":   error ? [error localizedDescription] : [NSNull null],
-        @"disconnect_reason_string": error ? @(error.code) : [NSNull null],
+        @"disconnect_reason_code":   error ? @(error.code) : [NSNull null],
+        @"disconnect_reason_string": error ? [error localizedDescription] : [NSNull null],
     };
 
     // Send connection state
@@ -850,8 +850,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     NSDictionary *result = @{
         @"remote_id":                [[peripheral identifier] UUIDString],
         @"connection_state":         @([self bmConnectionStateEnum:peripheral.state]),
-        @"disconnect_reason_code":   error ? [error localizedDescription] : [NSNull null],
-        @"disconnect_reason_string": error ? @(error.code) : [NSNull null],
+        @"disconnect_reason_code":   error ? @(error.code) : [NSNull null], 
+        @"disconnect_reason_string": error ? [error localizedDescription] : [NSNull null],
     };
 
     // Send connection state
