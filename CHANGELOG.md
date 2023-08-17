@@ -1,3 +1,6 @@
+## 1.14.11
+* **[Deprecate]** dart: isDiscoveringServices & servicesStream. They can be easily implemented yourself
+
 ## 1.14.10
 * **[Fix]** iOS: scan results with empty manufacturer data was not parsed
 
