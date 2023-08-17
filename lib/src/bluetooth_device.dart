@@ -9,7 +9,7 @@ class BluetoothDevice {
   // Internal
   //
 
-  // used for 'services' public api
+  // used for 'servicesStream' public api
   final StreamController<List<BluetoothService>> _services = StreamController.broadcast();
 
   // used for 'isDiscoveringServices' public api
@@ -42,6 +42,7 @@ class BluetoothDevice {
         type = type ?? BluetoothDeviceType.unknown;
 
   // stream return whether or not we are currently discovering services
+  @Deprecated("planed for removal (Jan 2024). It can be easily implemented yourself") // deprecated on Aug 2023 
   Stream<bool> get isDiscoveringServices => _isDiscoveringServices.stream;
 
   // Get services
@@ -51,6 +52,7 @@ class BluetoothDevice {
 
   /// Stream of bluetooth services offered by the remote device
   ///   - this stream is only updated when you call discoverServices()
+  @Deprecated("planed for removal (Jan 2024). It can be easily implemented yourself") // deprecated on Aug 2023 
   Stream<List<BluetoothService>> get servicesStream {
     if (FlutterBluePlus._knownServices[remoteId] != null) {
       return _services.stream.newStreamWithInitialValue(FlutterBluePlus._knownServices[remoteId]!);

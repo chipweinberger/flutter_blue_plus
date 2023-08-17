@@ -114,7 +114,6 @@ class BluetoothCharacteristic {
   ///  - [withoutResponse]: the write is not guaranteed and always returns immediately with success.
   ///  - [withResponse]: the write returns error on failure
   Future<void> write(List<int> value, {bool withoutResponse = false, int timeout = 15}) async {
-
     // Only allows a single write to be underway at any time, per-characteristic, per-device.
     // Otherwise, there would be multiple in-flight writes and we wouldn't know which response is which.
     String key = remoteId.str + ":" + characteristicUuid.toString() + ":writeChr";
@@ -218,8 +217,8 @@ class BluetoothCharacteristic {
     var hasIndicate = cccd.isNotEmpty && (cccd[0] & 0x02) > 0;
     var isEnabled = hasNotify || hasIndicate;
     if (notify != isEnabled) {
-      throw FlutterBluePlusException(ErrorPlatform.dart, "setNotifyValue",
-        FbpErrorCode.setNotifyFailed.index, "notifications were not updated");
+      throw FlutterBluePlusException(
+          ErrorPlatform.dart, "setNotifyValue", FbpErrorCode.setNotifyFailed.index, "notifications were not updated");
     }
 
     // update descriptor
