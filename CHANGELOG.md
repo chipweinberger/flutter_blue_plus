@@ -1,3 +1,6 @@
+## 1.14.10
+* **[Fix]** iOS: scan results with empty manufacturer data was not parsed
+
 ## 1.14.9
 * **[Fix]** iOS: disconnect reason code & string are mixed up
 
