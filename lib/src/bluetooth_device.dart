@@ -67,8 +67,8 @@ class BluetoothDevice {
     Duration timeout = const Duration(seconds: 35),
     bool autoConnect = false,
   }) async {
-    // Only allow a single 'connectDisconnect' operation at the same time per device.
-    String key = remoteId.str + ":connectDisconnect";
+    // Only allow a single 'connectOrDisconnect' operation at the same time per device.
+    String key = remoteId.str + ":connectOrDisconnect";
     _Mutex opMutex = await _MutexFactory.getMutexForKey(key);
     await opMutex.take();
 
@@ -109,8 +109,8 @@ class BluetoothDevice {
 
   /// Cancels connection to the Bluetooth Device
   Future<void> disconnect({int timeout = 35}) async {
-    // Only allow a single 'connectDisconnect' operation at the same time per device.
-    String key = remoteId.str + ":connectDisconnect";
+    // Only allow a single 'connectOrDisconnect' operation at the same time per device.
+    String key = remoteId.str + ":connectOrDisconnect";
     _Mutex opMutex = await _MutexFactory.getMutexForKey(key);
     await opMutex.take();
 
