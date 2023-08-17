@@ -176,8 +176,8 @@ extension WriteLarge on BluetoothCharacteristic {
   Future<void> writeLarge(List<int> value, int mtu, {int timeout = 15}) async {
     int chunk = mtu-3;
     for (int i = 0; i < value.length; i += chunk) {
-      List<int> subvalue = value.sublist(i, max(i + chunk, value.length));
-      write(subvalue, withoutResponse:false, timeout: timeout);
+      List<int> subvalue = value.sublist(i, min(i + chunk, value.length));
+      await write(subvalue, withoutResponse:false, timeout: timeout);
     }
   }
 }
