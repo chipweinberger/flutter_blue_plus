@@ -49,7 +49,7 @@ Please star this repo & on [pub.dev](https://pub.dev/packages/flutter_blue_plus)
 
 ## Usage
 
-### Error Handling :fire:
+### :fire: Error Handling :fire:
 
 Flutter Blue Plus takes error handling very seriously. 
 
