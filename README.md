@@ -6,7 +6,7 @@
 </p>
 <br><br>
 
-**Note: this plugin is continuous work from FlutterBlue since maintenance stopped.**
+**Note: this plugin is continuous work from [FlutterBlue](https://github.com/pauldemarco/flutter_blue) since maintenance stopped.**
 
 ## Contents
 
