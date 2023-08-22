@@ -366,14 +366,14 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                     : CBCharacteristicWriteWithoutResponse);
 
             // check mtu
-            int mtu = [self getMtu:peripheral];
-            int dataLen = (int) [self convertHexToData:value].length;
-            if ((mtu-3) < dataLen) {
-                NSString* f = @"data is longer than MTU allows. dataLen: %d > maxDataLen: %d";
-                NSString* s = [NSString stringWithFormat:f, dataLen, (mtu-3)];
-                result([FlutterError errorWithCode:@"writeCharacteristic" message:s details:NULL]);
-                return;
-            }
+            // int mtu = [self getMtu:peripheral];
+            // int dataLen = (int) [self convertHexToData:value].length;
+            // if ((mtu-3) < dataLen) {
+            //     NSString* f = @"data is longer than MTU allows. dataLen: %d > maxDataLen: %d";
+            //     NSString* s = [NSString stringWithFormat:f, dataLen, (mtu-3)];
+            //     result([FlutterError errorWithCode:@"writeCharacteristic" message:s details:NULL]);
+            //     return;
+            // }
 
             // device not ready?
             if (type == CBCharacteristicWriteWithoutResponse && !peripheral.canSendWriteWithoutResponse) {
