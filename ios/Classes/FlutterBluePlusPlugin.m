@@ -792,6 +792,20 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // Register self as delegate for peripheral
     peripheral.delegate = self;
 
+    // in iOS, mtu is negotatiated once automatically 
+    // as part of the connection process
+    // See BmMtuChangedResponse
+    NSDictionary* mtuChanged = @{
+        @"remote_id" :      remoteId,
+        @"mtu":             @([self getMtu:peripheral]),
+        @"success":         @(1),
+        @"error_string":    [NSNull null],
+        @"error_code":      [NSNull null],
+    };
+
+    // send mtu value
+    [_methodChannel invokeMethod:@"OnMtuChanged" arguments:mtuChanged];
+
     // See BmConnectionStateResponse
     NSDictionary *result = @{
         @"remote_id":                remoteId,
@@ -871,7 +885,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 // ██   ██  ██       ██       ██       ██    ██  ██   ██     ██     ██               
 // ██████   ███████  ███████  ███████   ██████   ██   ██     ██     ███████ 
 
-- (void)peripheral:(CBPeripheral *)peripheral didDiscoverServices:(NSError *)error
+- (void)peripheral:(CBPeripheral *)peripheral
+    didDiscoverServices:(NSError *)error
 {
     if (error) {
         NSLog(@"[FBP-iOS] didDiscoverServices: [Error] %@", [error localizedDescription]);
@@ -1121,7 +1136,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     [_methodChannel invokeMethod:@"OnDescriptorResponse" arguments:result];
 }
 
-- (void)peripheral:(CBPeripheral *)peripheral didReadRSSI:(NSNumber *)rssi error:(NSError *)error
+- (void)peripheral:(CBPeripheral *)peripheral
+    didReadRSSI:(NSNumber *)rssi error:(NSError *)error
 {
     if (error) {
         NSLog(@"[FBP-iOS] didReadRSSI: [Error] %@", [error localizedDescription]);
