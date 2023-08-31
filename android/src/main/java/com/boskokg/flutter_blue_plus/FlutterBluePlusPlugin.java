@@ -1647,66 +1647,52 @@ public class FlutterBluePlusPlugin implements
 
     HashMap<String, Object> bmAdvertisementData(ScanResult result) {
 
+        int min = Integer.MIN_VALUE;
+
         ScanRecord adv = result.getScanRecord();
 
+        String                  localName    = adv != null ?  adv.getDeviceName()                : null;
+        boolean                 connectable  = adv != null ? (adv.getAdvertiseFlags() & 0x2) > 0 : false;
+        SparseArray<byte[]>     manufData    = adv != null ?  adv.getManufacturerSpecificData()  : null;
+        int                     txPower      = adv != null ?  adv.getTxPowerLevel()              : min;
+        List<ParcelUuid>        serviceUuids = adv != null ?  adv.getServiceUuids()              : null;
+        Map<ParcelUuid, byte[]> serviceData  = adv != null ?  adv.getServiceData()               : null;
+
+        // Manufacturer Specific Data
+        HashMap<Integer, String> manufDataB = new HashMap<Integer, String>();
+        if(manufData != null) {
+            for (int i = 0; i < manufData.size(); i++) {
+                int key = manufData.keyAt(i);
+                byte[] value = manufData.valueAt(i);
+                manufDataB.put(key, bytesToHex(value));
+            }
+        }
+
+        // Service Data
+        HashMap<String, Object> serviceDataB = new HashMap<>();
+        if(serviceData != null) {
+            for (Map.Entry<ParcelUuid, byte[]> entry : serviceData.entrySet()) {
+                ParcelUuid key = entry.getKey();
+                byte[] value = entry.getValue();
+                serviceDataB.put(key.getUuid().toString(), bytesToHex(value));
+            }
+        }
+
+        // Service UUIDs
+        List<String> serviceUuidsB = new ArrayList<String>();
+        if(serviceUuids != null) {
+            for (ParcelUuid s : serviceUuids) {
+                serviceUuidsB.add(s.getUuid().toString());
+            }
+        }
+
         HashMap<String, Object> map = new HashMap<>();
-        
-        // connectable
-        if(Build.VERSION.SDK_INT >= 26) { // Android 8.0 (August 2017)
-            map.put("connectable", result.isConnectable() ? 1 : 0);
-        } else if(adv != null) {
-            int flags = adv.getAdvertiseFlags();
-            map.put("connectable", (flags & 0x2) > 0 ? 1 : 0);
-        }
-
-        if(adv != null) {
-
-            // Local Name
-            String localName = adv.getDeviceName();
-
-            // Tx Power Level
-            int min = Integer.MIN_VALUE;
-            int txPower = adv.getTxPowerLevel();
-
-            // Manufacturer Specific Data
-            SparseArray<byte[]> msd = adv.getManufacturerSpecificData();
-            HashMap<Integer, String> msdMap = new HashMap<Integer, String>();
-            if(msd != null) {
-                for (int i = 0; i < msd.size(); i++) {
-                    int key = msd.keyAt(i);
-                    byte[] value = msd.valueAt(i);
-                    msdMap.put(key, bytesToHex(value));
-                }
-            }
-
-            // Service Data
-            Map<ParcelUuid, byte[]> serviceData = adv.getServiceData();
-            HashMap<String, Object> serviceDataMap = new HashMap<>();
-            if(serviceData != null) {
-                for (Map.Entry<ParcelUuid, byte[]> entry : serviceData.entrySet()) {
-                    ParcelUuid key = entry.getKey();
-                    byte[] value = entry.getValue();
-                    serviceDataMap.put(key.getUuid().toString(), bytesToHex(value));
-                }
-            }
-
-            // Service UUIDs
-            List<ParcelUuid> serviceUuids = adv.getServiceUuids();
-            List<String> serviceUuidList = new ArrayList<String>();
-            if(serviceUuids != null) {
-                for (ParcelUuid s : serviceUuids) {
-                    serviceUuidList.add(s.getUuid().toString());
-                }
-            }
-
-            // add to map
-            if(localName != null)    { map.put("local_name", localName);}
-            if(txPower != min)       { map.put("tx_power_level", txPower);}
-            if(msd != null)          { map.put("manufacturer_data", msdMap);}
-            if(serviceData != null)  { map.put("service_data", serviceDataMap);}
-            if(serviceUuids != null) { map.put("service_uuids", serviceUuidList);}
-        }
-
+        map.put("local_name",        localName);
+        map.put("tx_power_level",    txPower      != min  ? txPower       : null);
+        map.put("connectable",       connectable);
+        map.put("manufacturer_data", manufData    != null ? manufDataB    : null);
+        map.put("service_data",      serviceData  != null ? serviceDataB  : null);
+        map.put("service_uuids",     serviceUuids != null ? serviceUuidsB : null);
         return map;
     }
 
