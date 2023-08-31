@@ -42,7 +42,7 @@ class BluetoothDevice {
         type = type ?? BluetoothDeviceType.unknown;
 
   // stream return whether or not we are currently discovering services
-  @Deprecated("planed for removal (Jan 2024). It can be easily implemented yourself") // deprecated on Aug 2023 
+  @Deprecated("planed for removal (Jan 2024). It can be easily implemented yourself") // deprecated on Aug 2023
   Stream<bool> get isDiscoveringServices => _isDiscoveringServices.stream;
 
   // Get services
@@ -52,7 +52,7 @@ class BluetoothDevice {
 
   /// Stream of bluetooth services offered by the remote device
   ///   - this stream is only updated when you call discoverServices()
-  @Deprecated("planed for removal (Jan 2024). It can be easily implemented yourself") // deprecated on Aug 2023 
+  @Deprecated("planed for removal (Jan 2024). It can be easily implemented yourself") // deprecated on Aug 2023
   Stream<List<BluetoothService>> get servicesStream {
     if (FlutterBluePlus._knownServices[remoteId] != null) {
       return _services.stream.newStreamWithInitialValue(FlutterBluePlus._knownServices[remoteId]!);
@@ -450,27 +450,25 @@ class BluetoothDevice {
         .where((p) => p.remoteId == remoteId.str)
         .map((p) => _bmToBluetoothBondState(p)));
 
+    BluetoothBondState initialValue;
+
     // initial state
     if (FlutterBluePlus._bondStates[remoteId] != null) {
       // we must use the cached bond state (if available) because
       // getInitialBondState is not able to detect bondLost & bondFailed
-      BluetoothBondState initialValue = _bmToBluetoothBondState(FlutterBluePlus._bondStates[remoteId]!);
-      // make sure this data is not out of date (just a precaution).
-      // this should only happen if we 'awaited' on something after listening to the buffer stream
-      if (buffer.hasReceivedValue == false) {
-        yield initialValue;
-      }
+      initialValue = _bmToBluetoothBondState(FlutterBluePlus._bondStates[remoteId]!);
     } else {
       // must get the initial state from the system.
-      BluetoothBondState initialValue = await FlutterBluePlus._methods
+      initialValue = await FlutterBluePlus._methods
           .invokeMethod('getInitialBondState', remoteId.str)
           .then((args) => BmBondStateResponse.fromMap(args))
           .then((p) => _bmToBluetoothBondState(p));
-      // make sure the initial value has not become out of date
-      // while we were awaiting for the initial value
-      if (buffer.hasReceivedValue == false) {
-        yield initialValue;
-      }
+    }
+
+    // make sure the initial value has not become out of date
+    // while we were awaiting for the initial value
+    if (buffer.hasReceivedValue == false) {
+      yield initialValue;
     }
 
     // stream
