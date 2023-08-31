@@ -1632,113 +1632,6 @@ public class FlutterBluePlusPlugin implements
         }
     }; // BluetoothGattCallback
 
-    //////////////////////////////////////////////////////////////
-    // ██████    █████   ██████   ███████  ███████           
-    // ██   ██  ██   ██  ██   ██  ██       ██                
-    // ██████   ███████  ██████   ███████  █████             
-    // ██       ██   ██  ██   ██       ██  ██                
-    // ██       ██   ██  ██   ██  ███████  ███████           
-    //                                                     
-    //                                                     
-    //  █████   ██████   ██    ██  ███████  ██████   ████████ 
-    // ██   ██  ██   ██  ██    ██  ██       ██   ██     ██    
-    // ███████  ██   ██  ██    ██  █████    ██████      ██    
-    // ██   ██  ██   ██   ██  ██   ██       ██   ██     ██    
-    // ██   ██  ██████     ████    ███████  ██   ██     ██   
-
-    // Parses packet data into HashMap<String, Object>
-    HashMap<String, Object> parseAdvertisementData(byte[] rawData) {
-        ByteBuffer data = ByteBuffer.wrap(rawData).asReadOnlyBuffer().order(ByteOrder.LITTLE_ENDIAN);
-        HashMap<String, Object> response = new HashMap<>();
-        boolean seenLongLocalName = false;
-        HashMap<String, Object> serviceData = new HashMap<>();
-        HashMap<String, Object> manufacturerData = new HashMap<>();
-        do {
-            int length = data.get() & 0xFF;
-            if (length == 0) {
-                break;
-            }
-            if (length > data.remaining()) {
-                Log.w(TAG, "parseAdvertisementData: Not enough data.");
-                return response;
-            }
-
-            int type = data.get() & 0xFF;
-            length--;
-
-            switch (type) {
-                case 0x08: // Short local name.
-                case 0x09: { // Long local name.
-                    if (seenLongLocalName) {
-                        // Prefer the long name over the short.
-                        data.position(data.position() + length);
-                        break;
-                    }
-                    byte[] localName = new byte[length];
-                    data.get(localName);
-                    try {
-                        response.put("local_name", new String(localName, "UTF-8"));
-                    } catch (UnsupportedEncodingException e) {}
-                    if (type == 0x09) {
-                        seenLongLocalName = true;
-                    }
-                    break;
-                }
-                case 0x0A: { // Power level.
-                    response.put("tx_power_level", data.get());
-                    break;
-                }
-                case 0x16: // Service Data with 16 bit UUID.
-                case 0x20: // Service Data with 32 bit UUID.
-                case 0x21: { // Service Data with 128 bit UUID.
-                    UUID svcUuid;
-                    int remainingDataLength = 0;
-                    if (type == 0x16 || type == 0x20) {
-                        long svcUuidInteger;
-                        if (type == 0x16) {
-                            svcUuidInteger = data.getShort() & 0xFFFF;
-                            remainingDataLength = length - 2;
-                        } else {
-                            svcUuidInteger = data.getInt() & 0xFFFFFFFF;
-                            remainingDataLength = length - 4;
-                        }
-                        svcUuid = UUID.fromString(String.format("%08x-0000-1000-8000-00805f9b34fb", svcUuidInteger));
-                    } else {
-                        long msb = data.getLong();
-                        long lsb = data.getLong();
-                        svcUuid = new UUID(msb, lsb);
-                        remainingDataLength = length - 16;
-                    }
-                    byte[] remainingData = new byte[remainingDataLength];
-                    data.get(remainingData);
-
-                    serviceData.put(svcUuid.toString(), remainingData);
-                    response.put("service_data", serviceData);
-                    break;
-                }
-                case 0xFF: {// Manufacturer specific data.
-                    if(length < 2) {
-                        Log.w(TAG, "parseAdvertisementData: Not enough data for Manufacturer specific data.");
-                        break;
-                    }
-                    int manufacturerId = data.getShort();
-                    if((length - 2) > 0) {
-                        byte[] msd = new byte[length - 2];
-                        data.get(msd);
-                        manufacturerData.put(Integer.toString(manufacturerId), msd);
-                        response.put("manufacturer_data", manufacturerId);
-                    }
-                    break;
-                }
-                default: {
-                    data.position(data.position() + length);
-                    break;
-                }
-            }
-        } while (true);
-        return response;
-    } 
-
     //////////////////////////////////////////////////////////////////////
     // ███    ███  ███████   ██████      
     // ████  ████  ██       ██           
@@ -1751,17 +1644,6 @@ public class FlutterBluePlusPlugin implements
     // ███████  █████    ██       ██████   █████    ██████   ███████ 
     // ██   ██  ██       ██       ██       ██       ██   ██       ██ 
     // ██   ██  ███████  ███████  ██       ███████  ██   ██  ███████ 
-
-
-    HashMap<String, Object> bmAdvertisementData(BluetoothDevice device, byte[] advertisementData, int rssi) {
-        HashMap<String, Object> map = new HashMap<>();
-        map.put("device", bmBluetoothDevice(device));
-        if(advertisementData != null && advertisementData.length > 0) {
-            map.put("advertisement_data", parseAdvertisementData(advertisementData));
-        }
-        map.put("rssi", rssi);
-        return map;
-    }
 
     HashMap<String, Object> bmScanResult(BluetoothDevice device, ScanResult result) {
 
