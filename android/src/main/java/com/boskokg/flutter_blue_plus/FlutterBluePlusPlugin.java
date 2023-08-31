@@ -1645,28 +1645,31 @@ public class FlutterBluePlusPlugin implements
     // ██   ██  ██       ██       ██       ██       ██   ██       ██ 
     // ██   ██  ███████  ███████  ██       ███████  ██   ██  ███████ 
 
-    HashMap<String, Object> bmScanResult(BluetoothDevice device, ScanResult result) {
+    HashMap<String, Object> bmAdvertisementData(ScanResult result) {
 
-        ScanRecord scanRecord = result.getScanRecord();
+        ScanRecord adv = result.getScanRecord();
 
-        HashMap<String, Object> advertisementData = new HashMap<>();
+        HashMap<String, Object> map = new HashMap<>();
         
         // connectable
         if(Build.VERSION.SDK_INT >= 26) { // Android 8.0 (August 2017)
-            advertisementData.put("connectable", result.isConnectable() ? 1 : 0);
-        } else if(scanRecord != null) {
-            int flags = scanRecord.getAdvertiseFlags();
-            advertisementData.put("connectable", (flags & 0x2) > 0 ? 1 : 0);
+            map.put("connectable", result.isConnectable() ? 1 : 0);
+        } else if(adv != null) {
+            int flags = adv.getAdvertiseFlags();
+            map.put("connectable", (flags & 0x2) > 0 ? 1 : 0);
         }
 
-        if(scanRecord != null) {
+        if(adv != null) {
 
-            String localName = scanRecord.getDeviceName();
+            // Local Name
+            String localName = adv.getDeviceName();
 
-            int txPower = scanRecord.getTxPowerLevel();
+            // Tx Power Level
+            int min = Integer.MIN_VALUE;
+            int txPower = adv.getTxPowerLevel();
 
             // Manufacturer Specific Data
-            SparseArray<byte[]> msd = scanRecord.getManufacturerSpecificData();
+            SparseArray<byte[]> msd = adv.getManufacturerSpecificData();
             HashMap<Integer, String> msdMap = new HashMap<Integer, String>();
             if(msd != null) {
                 for (int i = 0; i < msd.size(); i++) {
@@ -1677,7 +1680,7 @@ public class FlutterBluePlusPlugin implements
             }
 
             // Service Data
-            Map<ParcelUuid, byte[]> serviceData = scanRecord.getServiceData();
+            Map<ParcelUuid, byte[]> serviceData = adv.getServiceData();
             HashMap<String, Object> serviceDataMap = new HashMap<>();
             if(serviceData != null) {
                 for (Map.Entry<ParcelUuid, byte[]> entry : serviceData.entrySet()) {
@@ -1688,7 +1691,7 @@ public class FlutterBluePlusPlugin implements
             }
 
             // Service UUIDs
-            List<ParcelUuid> serviceUuids = scanRecord.getServiceUuids();
+            List<ParcelUuid> serviceUuids = adv.getServiceUuids();
             List<String> serviceUuidList = new ArrayList<String>();
             if(serviceUuids != null) {
                 for (ParcelUuid s : serviceUuids) {
@@ -1697,27 +1700,21 @@ public class FlutterBluePlusPlugin implements
             }
 
             // add to map
-            if(localName != null) {
-                advertisementData.put("local_name", localName);
-            }
-            if(txPower != Integer.MIN_VALUE) {
-                advertisementData.put("tx_power_level", txPower);
-            }
-            if(msd != null) {
-                advertisementData.put("manufacturer_data", msdMap);
-            }
-            if(serviceData != null) {
-                advertisementData.put("service_data", serviceDataMap);
-            }
-            if(serviceUuids != null) {
-                advertisementData.put("service_uuids", serviceUuidList);
-            }
+            if(localName != null)    { map.put("local_name", localName);}
+            if(txPower != min)       { map.put("tx_power_level", txPower);}
+            if(msd != null)          { map.put("manufacturer_data", msdMap);}
+            if(serviceData != null)  { map.put("service_data", serviceDataMap);}
+            if(serviceUuids != null) { map.put("service_uuids", serviceUuidList);}
         }
 
+        return map;
+    }
+
+    HashMap<String, Object> bmScanResult(BluetoothDevice device, ScanResult result) {
         HashMap<String, Object> map = new HashMap<>();
         map.put("device", bmBluetoothDevice(device));
         map.put("rssi", result.getRssi());
-        map.put("advertisement_data", advertisementData);
+        map.put("advertisement_data", bmAdvertisementData(result));
         return map;
     }
 
