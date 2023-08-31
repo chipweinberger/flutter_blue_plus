@@ -30,8 +30,8 @@ class BmBluetoothAdapterState {
 
 class BmAdvertisementData {
   final String? localName;
-  final int? txPowerLevel;
   final bool connectable;
+  final int? txPowerLevel;
   final Map<int, List<int>> manufacturerData;
   final Map<String, List<int>> serviceData;
 
@@ -41,8 +41,8 @@ class BmAdvertisementData {
 
   BmAdvertisementData({
     required this.localName,
-    required this.txPowerLevel,
     required this.connectable,
+    required this.txPowerLevel,
     required this.manufacturerData,
     required this.serviceData,
     required this.serviceUuids,
@@ -77,8 +77,8 @@ class BmAdvertisementData {
     // Construct the BmAdvertisementData
     return BmAdvertisementData(
       localName: json['local_name'],
-      txPowerLevel: json['tx_power_level'],
       connectable: json['connectable'] != 0,
+      txPowerLevel: json['tx_power_level'],
       manufacturerData: manufacturerData,
       serviceData: serviceData,
       serviceUuids: serviceUuids,

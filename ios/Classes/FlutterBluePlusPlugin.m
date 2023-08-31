@@ -1225,8 +1225,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 {
     NSString     *localName      = advertisementData[CBAdvertisementDataLocalNameKey];
     NSNumber     *connectable    = advertisementData[CBAdvertisementDataIsConnectable];
-    NSData       *manufData      = advertisementData[CBAdvertisementDataManufacturerDataKey];
     NSNumber     *txPower        = advertisementData[CBAdvertisementDataTxPowerLevelKey];
+    NSData       *manufData      = advertisementData[CBAdvertisementDataManufacturerDataKey];
     NSArray      *serviceUuids   = advertisementData[CBAdvertisementDataServiceUUIDsKey];
     NSDictionary *serviceData    = advertisementData[CBAdvertisementDataServiceDataKey];
 
@@ -1270,10 +1270,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     }
 
     // See BmAdvertisementData
-    NSDictionary* ad = @{
+    NSDictionary* advData = @{
         @"local_name":         localName     ? localName     : [NSNull null],
-        @"tx_power_level":     txPower       ? txPower       : [NSNull null],
         @"connectable":        connectable   ? connectable   : @(0),
+        @"tx_power_level":     txPower       ? txPower       : [NSNull null],
         @"manufacturer_data":  manufDataB    ? manufDataB    : [NSNull null],
         @"service_uuids":      serviceUuidsB ? serviceUuidsB : [NSNull null],
         @"service_data":       serviceDataB  ? serviceDataB  : [NSNull null],
@@ -1282,7 +1282,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // See BmScanResult
     return @{
         @"device":             [self bmBluetoothDevice:peripheral],
-        @"advertisement_data": ad,
+        @"advertisement_data": advData,
         @"rssi":               RSSI ? RSSI : [NSNull null],
     };
 }

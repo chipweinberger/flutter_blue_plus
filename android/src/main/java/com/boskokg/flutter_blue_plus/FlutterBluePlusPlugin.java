@@ -1653,8 +1653,8 @@ public class FlutterBluePlusPlugin implements
 
         String                  localName    = adv != null ?  adv.getDeviceName()                : null;
         boolean                 connectable  = adv != null ? (adv.getAdvertiseFlags() & 0x2) > 0 : false;
-        SparseArray<byte[]>     manufData    = adv != null ?  adv.getManufacturerSpecificData()  : null;
         int                     txPower      = adv != null ?  adv.getTxPowerLevel()              : min;
+        SparseArray<byte[]>     manufData    = adv != null ?  adv.getManufacturerSpecificData()  : null;
         List<ParcelUuid>        serviceUuids = adv != null ?  adv.getServiceUuids()              : null;
         Map<ParcelUuid, byte[]> serviceData  = adv != null ?  adv.getServiceData()               : null;
 
@@ -1688,8 +1688,8 @@ public class FlutterBluePlusPlugin implements
 
         HashMap<String, Object> map = new HashMap<>();
         map.put("local_name",        localName);
-        map.put("tx_power_level",    txPower      != min  ? txPower       : null);
         map.put("connectable",       connectable);
+        map.put("tx_power_level",    txPower      != min  ? txPower       : null);
         map.put("manufacturer_data", manufData    != null ? manufDataB    : null);
         map.put("service_data",      serviceData  != null ? serviceDataB  : null);
         map.put("service_uuids",     serviceUuids != null ? serviceUuidsB : null);
