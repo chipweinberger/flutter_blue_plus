@@ -335,6 +335,13 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 return;
             }
 
+            // check readable
+            if ((characteristic.properties & CBCharacteristicPropertyRead) == 0) {
+                NSString* s = @"The READ property is not supported by this BLE characteristic";
+                result([FlutterError errorWithCode:@"writeCharacteristic" message:s details:NULL]);
+                return;
+            }
+
             // Trigger a read
             [peripheral readValueForCharacteristic:characteristic];
 
@@ -348,7 +355,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSString  *characteristicUuid   = args[@"characteristic_uuid"];
             NSString  *serviceUuid          = args[@"service_uuid"];
             NSString  *secondaryServiceUuid = args[@"secondary_service_uuid"];
-            NSNumber  *writeType            = args[@"write_type"];
+            NSNumber  *writeTypeNumber      = args[@"write_type"];
             NSString  *value                = args[@"value"];
             
             // Find peripheral
@@ -360,8 +367,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             }
 
             // Get correct write type
-            CBCharacteristicWriteType type =
-                ([writeType intValue] == 0
+            CBCharacteristicWriteType writeType =
+                ([writeTypeNumber intValue] == 0
                     ? CBCharacteristicWriteWithResponse
                     : CBCharacteristicWriteWithoutResponse);
 
@@ -376,7 +383,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             }
 
             // device not ready?
-            if (type == CBCharacteristicWriteWithoutResponse && !peripheral.canSendWriteWithoutResponse) {
+            if (writeType == CBCharacteristicWriteWithoutResponse && !peripheral.canSendWriteWithoutResponse) {
                 // canSendWriteWithoutResponse is the current readiness of the peripheral to accept more write requests.
                 NSString* s = @"canSendWriteWithoutResponse is false. you must slow down";
                 result([FlutterError errorWithCode:@"writeCharacteristic" message:s details:NULL]);
@@ -394,12 +401,27 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 result([FlutterError errorWithCode:@"writeCharacteristic" message:error.localizedDescription details:NULL]);
                 return;
             }
+
+            // check writeable
+            if(writeType == CBCharacteristicWriteWithoutResponse) {
+                if ((characteristic.properties & CBCharacteristicPropertyWriteWithoutResponse) == 0) {
+                    NSString* s = @"The WRITE_NO_RESPONSE property is not supported by this BLE characteristic";
+                    result([FlutterError errorWithCode:@"writeCharacteristic" message:s details:NULL]);
+                    return;
+                }
+            } else {
+                if ((characteristic.properties & CBCharacteristicPropertyWrite) == 0) {
+                    NSString* s = @"The WRITE property is not supported by this BLE characteristic";
+                    result([FlutterError errorWithCode:@"writeCharacteristic" message:s details:NULL]);
+                    return;
+                }
+            }
                   
             // Write to characteristic
-            [peripheral writeValue:[self convertHexToData:value] forCharacteristic:characteristic type:type];
+            [peripheral writeValue:[self convertHexToData:value] forCharacteristic:characteristic type:writeType];
 
             // remember the most recent write withoutResponse
-            if (type == CBCharacteristicWriteWithoutResponse) {
+            if (writeType == CBCharacteristicWriteWithoutResponse) {
                 [self.didWriteWithoutResponse setObject:args forKey:remoteId];
             }
 
@@ -526,6 +548,15 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                                                                     error:&error];
             if (characteristic == nil) {
                 result([FlutterError errorWithCode:@"setNotification" message:error.localizedDescription details:NULL]);
+                return;
+            }
+
+            // check notify-able
+            bool canNotify = (characteristic.properties & CBCharacteristicPropertyNotify) != 0;
+            bool canIndicate = (characteristic.properties & CBCharacteristicPropertyIndicate) != 0;
+            if(!canIndicate && !canNotify) {
+                NSString* s = @"neither NOTIFY nor INDICATE properties are supported by this BLE characteristic";
+                result([FlutterError errorWithCode:@"setNotification" message:s details:NULL]);
                 return;
             }
 
