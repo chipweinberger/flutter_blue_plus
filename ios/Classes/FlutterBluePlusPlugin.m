@@ -45,6 +45,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 @property(nonatomic) NSMutableArray *servicesThatNeedDiscovered;
 @property(nonatomic) NSMutableArray *characteristicsThatNeedDiscovered;
 @property(nonatomic) NSMutableDictionary *didWriteWithoutResponse;
+@property(nonatomic) NSMutableDictionary *peripheralMtu;
+@property(nonatomic) NSTimer *checkForMtuChangesTimer;
 @property(nonatomic) LogLevel logLevel;
 @end
 
@@ -60,6 +62,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     instance.servicesThatNeedDiscovered = [NSMutableArray new];
     instance.characteristicsThatNeedDiscovered = [NSMutableArray new];
     instance.didWriteWithoutResponse = [NSMutableDictionary new];
+    instance.peripheralMtu = [NSMutableDictionary new];
     instance.logLevel = debug;
 
     [registrar addMethodCallDelegate:instance channel:methodChannel];
@@ -101,6 +104,17 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             };
 
             self.centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil options:options];
+        }
+        // initialize timer
+        if (self.checkForMtuChangesTimer == nil)
+        {
+            NSLog(@"[FBP-iOS] initializing checkForMtuChangesTimer");
+
+            self.checkForMtuChangesTimer = [NSTimer scheduledTimerWithTimeInterval:0.025
+                target:self
+                selector:@selector(checkForMtuChangesCallback) 
+                userInfo:@{}
+                repeats:YES];
         }
         // check that we have an adapter, except for the 
         // functions that don't need it
@@ -742,6 +756,47 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     return nil;
 }
 
+////////////////////////////////////
+// ███    ███ ████████ ██    ██ 
+// ████  ████    ██    ██    ██ 
+// ██ ████ ██    ██    ██    ██ 
+// ██  ██  ██    ██    ██    ██ 
+// ██      ██    ██     ██████  
+
+// in iOS, mtu is negotatiated once automatically sometime after the
+// the connection process, but there is no platform callback for it.
+- (void)checkForMtuChangesCallback
+{
+    for (NSString *key in self.connectedPeripherals) {
+
+        CBPeripheral *peripheral = [self.connectedPeripherals objectForKey:key];
+
+        int curMtu = (int) [self getMtu:peripheral];
+
+        NSNumber* prevMtu = (NSNumber*) [self.peripheralMtu objectForKey:peripheral];
+
+        // mtu changed?
+        if (prevMtu == nil || [prevMtu intValue] != curMtu) {
+
+            // remember new mtu value
+            [self.peripheralMtu setObject:@(curMtu) forKey:peripheral];
+
+            NSString* remoteId = [[peripheral identifier] UUIDString];
+
+            // See BmMtuChangedResponse
+            NSDictionary* mtuChanged = @{
+                @"remote_id" :      remoteId,
+                @"mtu":             @(curMtu),
+                @"success":         @(1),
+                @"error_string":    [NSNull null],
+                @"error_code":      [NSNull null],
+            };
+
+            // send mtu value
+            [_methodChannel invokeMethod:@"OnMtuChanged" arguments:mtuChanged];
+        }
+    }
+}
 
 /////////////////////////////////////////////////////////////////////////////////////
 //  ██████  ██████    ██████  ███████  ███    ██  ████████  ██████    █████  ██      
@@ -823,20 +878,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // Register self as delegate for peripheral
     peripheral.delegate = self;
 
-    // in iOS, mtu is negotatiated once automatically 
-    // as part of the connection process
-    // See BmMtuChangedResponse
-    NSDictionary* mtuChanged = @{
-        @"remote_id" :      remoteId,
-        @"mtu":             @([self getMtu:peripheral]),
-        @"success":         @(1),
-        @"error_string":    [NSNull null],
-        @"error_code":      [NSNull null],
-    };
-
-    // send mtu value
-    [_methodChannel invokeMethod:@"OnMtuChanged" arguments:mtuChanged];
-
     // See BmConnectionStateResponse
     NSDictionary *result = @{
         @"remote_id":                remoteId,
@@ -864,6 +905,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     // remember the connected peripherals of *this app*
     [self.connectedPeripherals removeObjectForKey:remoteId];
+
+    // clear negotiated mtu
+    [self.peripheralMtu removeObjectForKey:peripheral];
 
     // Unregister self as delegate for peripheral, not working #42
     peripheral.delegate = nil;
