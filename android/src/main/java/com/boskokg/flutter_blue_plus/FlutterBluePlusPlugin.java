@@ -96,6 +96,7 @@ public class FlutterBluePlusPlugin implements
 
     private final Map<String, BluetoothGatt> mConnectedDevices = new ConcurrentHashMap<>();
     private final Map<String, Integer> mMtu = new ConcurrentHashMap<>();
+    private final Map<String, Boolean> mAutoConnect = new ConcurrentHashMap<>();
 
     private int lastEventId = 1452;
     private final Map<Integer, OperationOnPermission> operationsOnPermission = new HashMap<>();
@@ -471,6 +472,10 @@ public class FlutterBluePlusPlugin implements
                         if (gatt == null) {
                             result.error("connect", String.format("device.connectGatt returned null"), null);
                             return;
+                        } else {
+                            // Save flag "autoConnect"; 
+                            // if connect was not succesful entry will be deleted in Gatt-callback.
+                            mAutoConnect.put(remoteId, autoConnect);
                         }
 
                         result.success(0);
@@ -481,6 +486,9 @@ public class FlutterBluePlusPlugin implements
                 case "disconnect":
                 {
                     String remoteId = (String) call.arguments;
+
+                    mAutoConnect.remove(remoteId);
+                    // Entry in mConnectedDevices and mMtu will be removed in the corresponding "Gatt callback".
 
                     // already disconnected?
                     BluetoothGatt gatt = mConnectedDevices.get(remoteId);
@@ -1227,6 +1235,7 @@ public class FlutterBluePlusPlugin implements
         }
         mConnectedDevices.clear();
         mMtu.clear();
+        mAutoConnect.clear();
     }
 
     /////////////////////////////////////////////////////////////////////////////////////
@@ -1424,24 +1433,42 @@ public class FlutterBluePlusPlugin implements
 
             String remoteId = gatt.getDevice().getAddress();
 
+            if (status != BluetoothGatt.GATT_SUCCESS) {
+                Boolean autoConnect = mAutoConnect.get(remoteId);
+                if ((autoConnect != null) && (autoConnect == false)) {
+                    // Connect failed and no autoConnect set, delete entry in mAutoConnect again which was just set
+                    // in "Method call" "call".
+                    mAutoConnect.remove(remoteId);
+                }
+            }
+
             // connected?
-            if(newState == BluetoothProfile.STATE_CONNECTED) {
+            if (newState == BluetoothProfile.STATE_CONNECTED) {
                 // add to connected devices
                 mConnectedDevices.put(remoteId, gatt);
-
                 // default minimum mtu
                 mMtu.put(remoteId, 23); 
+                // mAutoConnect was already updated in "Method call" "connect".
             }
 
             // disconnected?
             if(newState == BluetoothProfile.STATE_DISCONNECTED) {
+                // Check "autoConnect"
+                Boolean autoConnect = mAutoConnect.get(remoteId);
+                if ((autoConnect == null) || (autoConnect == false)) {
+                    log(LogLevel.DEBUG, "[FBP-Android] onConnectionStateChange-" + connectionStateString(newState) +
+                        ": autoConnect not defined or false, delete all correspondig data and close gatt.");
+                    mAutoConnect.remove(remoteId);
+                    mConnectedDevices.remove(remoteId);
+                    mMtu.remove(remoteId);
+                    // it is important to close, otherwise we could run out
+                    // of bluetooth resources preventing new connections
+                    gatt.close();
+                } else {
+                    log(LogLevel.DEBUG, "[FBP-Android] onConnectionStateChange-" + connectionStateString(newState) +
+                        ": autoConnect = true, do not close gatt and keep all corresponding data for a later re-connect.");
 
-                // remove from connected devices
-                mConnectedDevices.remove(remoteId);
-
-                // it is important to close, otherwise we could run out
-                // of bluetooth resources preventing new connections
-                gatt.close();
+                }
             }
 
             // see: BmConnectionStateResponse
