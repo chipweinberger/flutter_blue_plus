@@ -96,6 +96,7 @@ public class FlutterBluePlusPlugin implements
 
     private final Map<String, BluetoothGatt> mConnectedDevices = new ConcurrentHashMap<>();
     private final Map<String, Integer> mMtu = new ConcurrentHashMap<>();
+    private final Map<String, Boolean> mAutoConnect = new ConcurrentHashMap<>();
 
     private int lastEventId = 1452;
     private final Map<Integer, OperationOnPermission> operationsOnPermission = new HashMap<>();
@@ -451,6 +452,9 @@ public class FlutterBluePlusPlugin implements
                         String remoteId =  (String)  args.get("remote_id");
                         boolean autoConnect = ((int) args.get("auto_connect")) != 0;
 
+                        // remember autoconnect 
+                        mAutoConnect.put(remoteId, autoConnect);
+
                         // already connected?
                         BluetoothGatt gatt = mConnectedDevices.get(remoteId);
                         if (gatt != null) {
@@ -489,6 +493,10 @@ public class FlutterBluePlusPlugin implements
                         result.success(1);  // no work to do
                         return;
                     }
+
+                    // calling disconnect explicitly turns off autoconnect.
+                    // this allows gatt resources to be reclaimed
+                    mAutoConnect.put(remoteId, false);
                 
                     gatt.disconnect();
 
@@ -1439,9 +1447,15 @@ public class FlutterBluePlusPlugin implements
                 // remove from connected devices
                 mConnectedDevices.remove(remoteId);
 
-                // it is important to close, otherwise we could run out
-                // of bluetooth resources preventing new connections
-                gatt.close();
+                // we cannot call 'close' for autoconnect
+                // because it prevents autoconnect from working
+                if (mAutoConnect.get(remoteId) == null || mAutoConnect.get(remoteId) == false) {
+                    // it is important to close after disconnection, otherwise we will 
+                    // quickly run out of bluetooth resources, preventing new connections
+                    gatt.close();
+                } else {
+                    log(LogLevel.DEBUG, "[FBP-Android] autoconnect is true. skipping gatt.close()");
+                }
             }
 
             // see: BmConnectionStateResponse
