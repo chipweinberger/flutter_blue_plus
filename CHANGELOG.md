@@ -1,3 +1,8 @@
+## 1.14.12
+* **[Fix]** Android: autoconnect was not working. regressed sometimes after 1.4.0
+* **[Cleanup]** Android: cleanup bmAdvertisementData
+* **[Improve]** iOS: check that characteristic supports READ, WRITE, WRITE_NO_RESP properties and throw error otherwise
+
 ## 1.14.11
 * **[Deprecate]** dart: isDiscoveringServices & servicesStream. They can be easily implemented yourself
 
