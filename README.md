@@ -172,7 +172,7 @@ await c.write([0x12, 0x34]);
 ///   1. it can only be used *with* response to avoid data loss
 ///   2. the peripheral device must support the 'long write' ble protocol.
 ///   3. Interrupted transfers can leave the characteristic in a partially written state
-///   4. It is very slow.
+///   4. If the mtu is small, it is very very slow.
 await c.write(data, allowLongWrite:true);
 ```
 
