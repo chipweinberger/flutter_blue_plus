@@ -165,9 +165,7 @@ for(BluetoothCharacteristic c in characteristics) {
 await c.write([0x12, 0x34]);
 ```
 
-To write large characteristics (up to 512 bytes) regardless of mtu, use allowLongWrite:
-
-**Note:** `characteristic.read()` will return the entire data. 
+**allowLongWrite**: To write large characteristics (up to 512 bytes) regardless of mtu, use allowLongWrite:
 
 ```dart
 /// allowLongWrite should be used with caution. 
@@ -178,15 +176,14 @@ To write large characteristics (up to 512 bytes) regardless of mtu, use allowLon
 await c.write(data, allowLongWrite:true);
 ```
 
-To write lots of data (unlimited), you can define the `splitWrite` function. 
-
-**Note:** due to splitting, `characteristic.read()` will return partial data.
+**splitWrite**: To write lots of data (unlimited), you can define the `splitWrite` function. 
 
 ```dart
 import 'dart:math';
-// writeSplit should be used with caution. 
-//    1. it can only be used *with* response to avoid data loss
-//    2. The characteristic must support split data
+// writeSplit should be used with caution.
+//    1. due to splitting, `characteristic.read()` will return partial data.
+//    2. it can only be used *with* response to avoid data loss
+//    3. The characteristic must support split data
 extension splitWrite on BluetoothCharacteristic {
   Future<void> splitWrite(List<int> value, int mtu, {int timeout = 15}) async {
     int chunk = mtu-3;
