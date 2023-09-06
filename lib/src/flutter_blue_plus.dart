@@ -287,6 +287,7 @@ class FlutterBluePlus {
       _initialized = true; // avoid recursion: must set before setLogLevel
       _methods.setMethodCallHandler(_methodCallHandler);
       setLogLevel(logLevel);
+      await _invokeMethod('flutterHotRestart'); // closes all existing connections
     }
 
     // log args

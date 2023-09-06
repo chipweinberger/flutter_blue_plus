@@ -136,8 +136,14 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             result([FlutterError errorWithCode:@"bluetoothUnavailable" message:s details:NULL]);
             return;
         }
-        
-        if ([@"setLogLevel" isEqualToString:call.method])
+
+        if ([@"flutterHotRestart" isEqualToString:call.method])
+        {
+            [self closeAllConnections:true];
+            result(@(0));
+            return;
+        }
+        else if ([@"setLogLevel" isEqualToString:call.method])
         {
             NSNumber *logLevelIndex = [call arguments];
             _logLevel = (LogLevel)[logLevelIndex integerValue];
@@ -778,6 +784,37 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     return nil;
 }
 
+- (void)closeAllConnections:(BOOL)wait
+{
+    NSLog(@"[FBP-iOS] closeAllConnections");
+
+    // request disconnections
+    for (NSString *key in self.connectedPeripherals)
+    {
+        NSLog(@"[FBP-iOS] calling disconnect: %@", key);
+        CBPeripheral *peripheral = [self.connectedPeripherals objectForKey:key];
+        [_centralManager cancelPeripheralConnection:peripheral];
+    }
+
+    // wait for disconnections?
+    if (wait)
+    {
+        while (self.connectedPeripherals.count > 0)
+        {
+            NSLog(@"[FBP-iOS] waiting for disconnections: %lu", self.connectedPeripherals.count);
+            [NSThread sleepForTimeInterval:0.050];  // Wait for 50ms
+        }
+        NSLog(@"[FBP-iOS] everything disconnected");
+    }
+
+    [self.connectedPeripherals removeAllObjects];
+    [self.knownPeripherals removeAllObjects];
+    [self.servicesThatNeedDiscovered removeAllObjects];
+    [self.characteristicsThatNeedDiscovered removeAllObjects];
+    [self.didWriteWithoutResponse removeAllObjects];
+    [self.peripheralMtu removeAllObjects];
+}
+
 ////////////////////////////////////
 // ███    ███ ████████ ██    ██ 
 // ████  ████    ██    ██    ██ 
@@ -850,7 +887,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         for (NSString *key in self.connectedPeripherals) {
             NSLog(@"[FBP-iOS] disconnected from device %@", key);
         }
-        [self.connectedPeripherals removeAllObjects];
+        [self closeAllConnections:false];
     }
 
     int adapterState = [self bmAdapterStateEnum:self->_centralManager.state];
