@@ -139,10 +139,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
         if ([@"flutterHotRestart" isEqualToString:call.method])
         {
-            [self closeAllConnections];
+            [self disconnectAllDevices];
             NSLog(@"[FBP-iOS] connectedPeripherals: %lu", self.connectedPeripherals.count);
             if (self.connectedPeripherals.count == 0) {
-                NSLog(@"[FBP-iOS] hot restart complete");
+                NSLog(@"[FBP-iOS] HotRestart: complete");
             }
             result(@(self.connectedPeripherals.count));
             return;
@@ -788,9 +788,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     return nil;
 }
 
-- (void)closeAllConnections
+- (void)disconnectAllDevices
 {
-    NSLog(@"[FBP-iOS] closeAllConnections");
+    NSLog(@"[FBP-iOS] disconnectAllDevices");
 
     // request disconnections
     for (NSString *key in self.connectedPeripherals)
@@ -884,7 +884,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         for (NSString *key in self.connectedPeripherals) {
             NSLog(@"[FBP-iOS] disconnected from device %@", key);
         }
-        [self closeAllConnections];
+        [self disconnectAllDevices];
     }
 
     int adapterState = [self bmAdapterStateEnum:self->_centralManager.state];
