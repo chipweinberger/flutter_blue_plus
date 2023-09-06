@@ -616,10 +616,9 @@ public class FlutterBluePlusPlugin implements
                     int dataLen = hexToBytes(value).length;
                     if (maxLen > dataLen) {
                         String t = writeTypeInt == 0 ? "withResponse" : "withoutResponse";
-                        String a = allowSplits ? "Allow Splits" : "No Splits";
+                        String a = allowSplits ? ", Allow Splits" : ", No Splits";
                         String b = writeTypeInt == 0 ? a : "";
-                        String s = "data longer allowed. dataLen: " + dataLen + " > max: " + maxLen +
-                            " (" + t + ", " + b +")";
+                        String s = "data longer than allowed. dataLen: " + dataLen + " > max: " + maxLen + " (" + t + b +")";
                         result.error("writeCharacteristic", s, null);
                         break;
                     }
