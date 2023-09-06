@@ -231,8 +231,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         {
             // See BmConnectRequest
             NSDictionary* args = (NSDictionary*)call.arguments;
-            NSString  *remoteId = args[@"remote_id"];
-            bool autoConnect    = args[@"auto_connect"] != 0;
+            NSString  *remoteId       = args[@"remote_id"];
+            NSNumber  *autoConnect    = args[@"auto_connect"];
 
             // already connected?
             CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
@@ -273,7 +273,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             if (@available(iOS 17, *)) {
                 // note: use CBConnectPeripheralOptionEnableAutoReconnect constant
                 // when iOS 17 is more widely available
-                [options setObject:@(autoConnect) forKey:@"kCBConnectOptionEnableAutoReconnect"];
+                [options setObject:autoConnect forKey:@"kCBConnectOptionEnableAutoReconnect"];
             } 
 
             [_centralManager connectPeripheral:peripheral options:options];
@@ -370,6 +370,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSString  *serviceUuid          = args[@"service_uuid"];
             NSString  *secondaryServiceUuid = args[@"secondary_service_uuid"];
             NSNumber  *writeTypeNumber      = args[@"write_type"];
+            NSNumber  *allowSplits          = args[@"allow_splits"];
             NSString  *value                = args[@"value"];
             
             // Find peripheral
@@ -386,13 +387,15 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                     ? CBCharacteristicWriteWithResponse
                     : CBCharacteristicWriteWithoutResponse);
 
-            // check maximum write len
-            int maxLen = [self getMaxPayload:peripheral forType:writeType];
+            // check maximum payload
+            int maxLen = [self getMaxPayload:peripheral forType:writeType allowSplits:[allowSplits boolValue]];
             int dataLen = (int) [self convertHexToData:value].length;
             if (dataLen > maxLen) {
-                NSString* t = [writeTypeNumber intValue] == 0 ? @"With Response" : @"Without Response";
-                NSString* f = @"data longer than allowed. dataLen: %d > maxDataLen: %d (%@)";
-                NSString* s = [NSString stringWithFormat:f, dataLen, maxLen, t];
+                NSString* t = [writeTypeNumber intValue] == 0 ? @"withResponse" : @"withoutResponse";
+                NSString* a = [allowSplits boolValue] ? @"Allow Splits" : @"No Splits";
+                NSString* b = [writeTypeNumber intValue] == 0 ? a : @"";
+                NSString* f = @"data longer than allowed. dataLen: %d > max: %d (%@, %@)";
+                NSString* s = [NSString stringWithFormat:f, dataLen, maxLen, t, b];
                 result([FlutterError errorWithCode:@"writeCharacteristic" message:s details:NULL]);
                 return;
             }
@@ -1553,13 +1556,18 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     }
 }
 
-- (int)getMaxPayload:(CBPeripheral *)peripheral forType:(CBCharacteristicWriteType)writeType
+- (int)getMaxPayload:(CBPeripheral *)peripheral forType:(CBCharacteristicWriteType)writeType allowSplits:(bool)allowSplits
 {
     // 512 this comes from the BLE spec. Characteritics should not 
     // be longer than 512. Android also enforces this as the maximum.
     int maxAttrLen = 512; 
 
-    // For withoutResponse
+    // if splitting is disabled, we can only write up to MTU-3
+    if (allowSplits == false) {
+        writeType = CBCharacteristicWriteWithoutResponse;
+    }
+
+    // For withoutResponse, or allowSplits == false
     //   iOS returns MTU-3. In theory, MTU can be as high as 65535 (16-bit).
     //   I've seen iOS return 524 for this value. But typically it is lower.
     //   The MTU is negotiated by the OS, and depends on iOS version.
@@ -1577,8 +1585,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
 - (int)getMtu:(CBPeripheral *)peripheral
 {
-    // +3 is for the ATT overhead
-    return [self getMaxPayload:peripheral forType:CBCharacteristicWriteWithoutResponse]+3;
+    int maxPayload = [self getMaxPayload:peripheral forType:CBCharacteristicWriteWithoutResponse allowSplits:false];
+    return maxPayload + 3; // ATT overhead
 }
 
 - (ServicePair *)getServicePair:(CBPeripheral *)peripheral

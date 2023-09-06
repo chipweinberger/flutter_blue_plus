@@ -575,6 +575,7 @@ public class FlutterBluePlusPlugin implements
                     String characteristicUuid =   (String) data.get("characteristic_uuid");
                     String value =                (String) data.get("value");
                     int writeTypeInt =               (int) data.get("write_type");
+                    boolean allowSplits =           ((int) data.get("allow_splits")) == 1;
 
                     int writeType = writeTypeInt == 0 ?
                         BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT :
@@ -596,7 +597,7 @@ public class FlutterBluePlusPlugin implements
                     BluetoothGattCharacteristic characteristic = chr.characteristic;
 
                     // check writeable
-                    if(writeType == 1) {
+                    if(writeType == BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE) {
                         if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE) == 0) {
                             result.error("writeCharacteristic",
                                 "The WRITE_NO_RESPONSE property is not supported by this BLE characteristic", null);
@@ -610,11 +611,15 @@ public class FlutterBluePlusPlugin implements
                         }
                     }
 
-                    // check mtu
-                    int mtu = mMtu.get(remoteId);
-                    if ((mtu-3) < hexToBytes(value).length) {
-                        String s = "data longer than mtu allows. dataLength: " +
-                            hexToBytes(value).length + "> max: " + (mtu-3);
+                    // check maximum payload
+                    int maxLen = getMaxPayload(remoteId, writeType, allowSplits);
+                    int dataLen = hexToBytes(value).length;
+                    if (maxLen > dataLen) {
+                        String t = writeTypeInt == 0 ? "withResponse" : "withoutResponse";
+                        String a = allowSplits ? "Allow Splits" : "No Splits";
+                        String b = writeTypeInt == 0 ? a : "";
+                        String s = "data longer allowed. dataLen: " + dataLen + " > max: " + maxLen +
+                            " (" + t + ", " + b +")";
                         result.error("writeCharacteristic", s, null);
                         break;
                     }
@@ -1220,6 +1225,30 @@ public class FlutterBluePlusPlugin implements
         }
 
         return new CharacteristicResult(characteristic, null);
+    }
+
+    private int getMaxPayload(String remoteId, int writeType, boolean allowSplits)
+    {
+        // 512 this comes from the BLE spec. Characteritics should not 
+        // be longer than 512. Android also enforces this as the maximum in internal code.
+        int maxAttrLen = 512; 
+
+        // if no response, we can only write up to MTU-3. 
+        // This is the same limitation as iOS, and ensures transfer reliability.
+        if (writeType == BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE || allowSplits == false) {
+
+            // get mtu
+            Integer mtu = mMtu.get(remoteId);
+            if (mtu == null) {
+                mtu = 23; // 23 is the minumum MTU, as per the BLE spec
+            }
+
+            return Math.min(mtu - 3, maxAttrLen);
+
+        } else {
+            // if using withResponse, android will auto split up to the maxAttrLen.
+            return maxAttrLen;
+        }
     }
 
     private void closeAllConnections()

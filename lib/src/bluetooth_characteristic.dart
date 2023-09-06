@@ -113,7 +113,17 @@ class BluetoothCharacteristic {
   /// Writes a characteristic.
   ///  - [withoutResponse]: the write is not guaranteed and always returns immediately with success.
   ///  - [withResponse]: the write returns error on failure
-  Future<void> write(List<int> value, {bool withoutResponse = false, int timeout = 15}) async {
+  ///  - [allowSplits]: if set, writes 'withResponse' larger than MTU are allowed (up to 512 bytes).
+  ///        This should be used with caution. 
+  ///        1. the peripheral device must support the ble protocol for long writes.
+  ///        2. It is much slower.
+  Future<void> write(List<int> value,
+      {bool withoutResponse = false, bool allowSplits = false, int timeout = 15}) async {
+    //  must have responses in order to reliably transfer a split write.
+    if (withoutResponse && allowSplits) {
+      throw ArgumentError("cannot split a write withoutResponse - not allowed on iOS or Android");
+    }
+
     // Only allows a single write to be underway at any time, per-characteristic, per-device.
     // Otherwise, there would be multiple in-flight writes and we wouldn't know which response is which.
     String key = remoteId.str + ":" + characteristicUuid.toString() + ":writeChr";
@@ -139,6 +149,7 @@ class BluetoothCharacteristic {
         serviceUuid: serviceUuid,
         secondaryServiceUuid: null,
         writeType: writeType,
+        allowSplits: allowSplits,
         value: value,
       );
 
