@@ -1,8 +1,11 @@
+## 1.14.22
+* **[Fix]** Android: Hot Restart: could get stuck in infinite loop (regression in 1.14.19)
+
 ## 1.14.21
 * **[Refactor]** dart: store lastValue at global level so Desc & Chr classes are fully immutable
 
 ## 1.14.20
-* **[Fix]** Hot Restart: could get stuck in infinite loop (regression in 1.14.19)
+* **[Fix]** iOS: Hot Restart: could get stuck in infinite loop (regression in 1.14.19)
 
 ## 1.14.19
 * **[Fix]** Hot Restart: close all connections when dart vm is restarted
