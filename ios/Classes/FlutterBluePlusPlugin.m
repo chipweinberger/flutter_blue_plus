@@ -720,18 +720,20 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     CBDescriptor *descriptor = [self getDescriptorFromArray:descriptorId array:[characteristic descriptors]];
     if (descriptor == nil)
     {
-        NSDictionary* d = @{NSLocalizedDescriptionKey : @"descriptor could not be located on the device"};
+        NSString* format = @"descriptor not found in characteristic (desc: '%@', chr: '%@')";
+        NSString* s = [NSString stringWithFormat:format, descriptorId, [characteristic.UUID fullUUIDString]];
+        NSDictionary* d = @{NSLocalizedDescriptionKey : s};
         *error = [NSError errorWithDomain:@"flutterBluePlus" code:1002 userInfo:d];
         return nil;
     }
     return descriptor;
 }
 
-- (CBService *)getServiceFromArray:(NSString *)uuidString array:(NSArray<CBService *> *)array
+- (CBService *)getServiceFromArray:(NSString *)uuid array:(NSArray<CBService *> *)array
 {
     for (CBService *s in array)
     {
-        if ([[s UUID] isEqual:[CBUUID UUIDWithString:uuidString]])
+        if ([[s.UUID fullUUIDString] isEqualToString:uuid])
         {
             return s;
         }
@@ -739,11 +741,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     return nil;
 }
 
-- (CBCharacteristic *)getCharacteristicFromArray:(NSString *)uuidString array:(NSArray<CBCharacteristic *> *)array
+- (CBCharacteristic *)getCharacteristicFromArray:(NSString *)uuid array:(NSArray<CBCharacteristic *> *)array
 {
     for (CBCharacteristic *c in array)
     {
-        if ([[c UUID] isEqual:[CBUUID UUIDWithString:uuidString]])
+        if ([[c.UUID fullUUIDString] isEqualToString:uuid])
         {
             return c;
         }
@@ -751,11 +753,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     return nil;
 }
 
-- (CBDescriptor *)getDescriptorFromArray:(NSString *)uuidString array:(NSArray<CBDescriptor *> *)array
+- (CBDescriptor *)getDescriptorFromArray:(NSString *)uuid array:(NSArray<CBDescriptor *> *)array
 {
     for (CBDescriptor *d in array)
     {
-        if ([[d UUID] isEqual:[CBUUID UUIDWithString:uuidString]])
+        if ([[d.UUID fullUUIDString] isEqualToString:uuid])
         {
             return d;
         }

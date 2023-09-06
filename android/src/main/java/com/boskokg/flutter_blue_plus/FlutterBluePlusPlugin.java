@@ -538,7 +538,7 @@ public class FlutterBluePlusPlugin implements
                         break;
                     }
 
-                    CharacteristicResult chr = locateCharacteristic(gatt,
+                    FoundCharacteristic chr = locateCharacteristic(gatt,
                         serviceUuid, secondaryServiceUuid, characteristicUuid);
                     if (chr.error != null) {
                         result.error("readCharacteristic", chr.error, null);
@@ -587,7 +587,7 @@ public class FlutterBluePlusPlugin implements
                         break;
                     }
 
-                    CharacteristicResult chr = locateCharacteristic(gatt,
+                    FoundCharacteristic chr = locateCharacteristic(gatt,
                         serviceUuid, secondaryServiceUuid, characteristicUuid);
                     if (chr.error != null) {
                         result.error("writeCharacteristic", chr.error, null);
@@ -670,7 +670,7 @@ public class FlutterBluePlusPlugin implements
                         break;
                     }
 
-                    CharacteristicResult chr = locateCharacteristic(gatt,
+                    FoundCharacteristic chr = locateCharacteristic(gatt,
                         serviceUuid, secondaryServiceUuid, characteristicUuid);
                     if (chr.error != null) {
                         result.error("readDescriptor", chr.error, null);
@@ -712,7 +712,7 @@ public class FlutterBluePlusPlugin implements
                         break;
                     }
 
-                    CharacteristicResult chr = locateCharacteristic(gatt,
+                    FoundCharacteristic chr = locateCharacteristic(gatt,
                         serviceUuid, secondaryServiceUuid, characteristicUuid);
                     if (chr.error != null) {
                         result.error("writeDescriptor", chr.error, null);
@@ -782,7 +782,7 @@ public class FlutterBluePlusPlugin implements
                         break;
                     }
 
-                    CharacteristicResult chr = locateCharacteristic(gatt,
+                    FoundCharacteristic chr = locateCharacteristic(gatt,
                         serviceUuid, secondaryServiceUuid, characteristicUuid);
                     if (chr.error != null) {
                         result.error("setNotification", chr.error, null);
@@ -1176,25 +1176,25 @@ public class FlutterBluePlusPlugin implements
     // ██    ██     ██     ██  ██            ██
     //  ██████      ██     ██  ███████  ███████
 
-    class CharacteristicResult {
+    class FoundCharacteristic {
         public BluetoothGattCharacteristic characteristic;
         public String error;
 
-        public CharacteristicResult(BluetoothGattCharacteristic characteristic, String error) {
+        public FoundCharacteristic(BluetoothGattCharacteristic characteristic, String error) {
             this.characteristic = characteristic;
             this.error = error;
         }
     }
 
-    private CharacteristicResult locateCharacteristic(BluetoothGatt gatt,
-                                                             String serviceId,
-                                                             String secondaryServiceId,
-                                                             String characteristicId)
+    private FoundCharacteristic locateCharacteristic(BluetoothGatt gatt,
+                                                            String serviceId,
+                                                            String secondaryServiceId,
+                                                            String characteristicId)
     {
         BluetoothGattService primaryService = gatt.getService(UUID.fromString(serviceId));
 
         if(primaryService == null) {
-            return new CharacteristicResult(null, "service not found '" + serviceId + "'");
+            return new FoundCharacteristic(null, "service not found '" + serviceId + "'");
         }
 
         BluetoothGattService secondaryService = null;
@@ -1208,7 +1208,7 @@ public class FlutterBluePlusPlugin implements
             }
 
             if(secondaryService == null) {
-                return new CharacteristicResult(null, "secondaryService not found '" + secondaryServiceId + "'");
+                return new FoundCharacteristic(null, "secondaryService not found '" + secondaryServiceId + "'");
             }
         }
 
@@ -1220,11 +1220,11 @@ public class FlutterBluePlusPlugin implements
             service.getCharacteristic(UUID.fromString(characteristicId));
 
         if(characteristic == null) {
-            return new CharacteristicResult(null, "characteristic not found in service " + 
+            return new FoundCharacteristic(null, "characteristic not found in service " + 
                 "(chr: '" + characteristicId + "' svc: '" + serviceId + "')");
         }
 
-        return new CharacteristicResult(characteristic, null);
+        return new FoundCharacteristic(characteristic, null);
     }
 
     private int getMaxPayload(String remoteId, int writeType, boolean allowLongWrite)
