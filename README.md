@@ -477,9 +477,9 @@ for (var d in system) {
 
 Search the App Store for a BLE scanner apps and install it on your phone, and another phone.
 
-Question 1: Is *your phone* (the phone with your flutter app) able to scan it using the 3rd party scanner?
+**Question 1:** When the issue is happening, is *your phone* (the phone with your flutter app) able to scan it using the 3rd party scanner?
 
-Question 2: Is *another phone* able to scan it using the 3rd party scanner?
+**Question 2:** When the issue is happening, is *another phone* able to scan it using the 3rd party scanner?
 
 ---
 
