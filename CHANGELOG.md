@@ -1,3 +1,6 @@
+## 1.14.19
+* **[Fix]** Hot Restart: close all connections when dart vm is restarted
+
 ## 1.14.18
 * **[Fix]** Android: crash uuid128 null deref (regression in 1.14.17)
 
