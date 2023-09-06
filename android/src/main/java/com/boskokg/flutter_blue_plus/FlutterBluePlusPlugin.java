@@ -769,7 +769,6 @@ public class FlutterBluePlusPlugin implements
                     if (Build.VERSION.SDK_INT >= 33) { // Android 13 (August 2022)
 
                         int rv = gatt.writeDescriptor(descriptor, hexToBytes(value));
-
                         if (rv != BluetoothStatusCodes.SUCCESS) {
                             String s = "gatt.writeDescriptor() returned " + rv + " : " + bluetoothStatusString(rv);
                             result.error("writeDescriptor", s, null);
@@ -860,15 +859,27 @@ public class FlutterBluePlusPlugin implements
                         descriptorValue  = BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE;
                     }
 
-                    if (!cccd.setValue(descriptorValue)) {
-                        result.error("setNotification", "cccd.setValue() returned false", null);
-                        break;
-                    }
+                    if (Build.VERSION.SDK_INT >= 33) { // Android 13 (August 2022)
 
-                    // update notifications on remote BLE device
-                    if (!gatt.writeDescriptor(cccd)) {
-                        result.error("setNotification", "gatt.writeDescriptor() returned false", null);
-                        break;
+                        int rv = gatt.writeDescriptor(cccd, descriptorValue);
+                        if (rv != BluetoothStatusCodes.SUCCESS) {
+                            String s = "gatt.writeDescriptor() returned " + rv + " : " + bluetoothStatusString(rv);
+                            result.error("setNotification", s, null);
+                            break;
+                        }
+
+                    } else {
+
+                        if (!cccd.setValue(descriptorValue)) {
+                            result.error("setNotification", "cccd.setValue() returned false", null);
+                            break;
+                        }
+
+                        // update notifications on remote BLE device
+                        if (!gatt.writeDescriptor(cccd)) {
+                            result.error("setNotification", "gatt.writeDescriptor() returned false", null);
+                            break;
+                        }
                     }
 
                     result.success(null);
