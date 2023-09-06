@@ -1,3 +1,6 @@
+## 1.14.14
+* **[Fix]** Android: dataLen longer than allowed (regression in 1.14.13)
+
 ## 1.14.13
 * **[Fix]** iOS: onMtuChanged was not called
 * **[Feature]** iOS & Android: writeCharacteristic: add 'allowSplits' option to do longer writes
