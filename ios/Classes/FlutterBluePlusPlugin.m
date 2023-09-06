@@ -386,12 +386,13 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                     ? CBCharacteristicWriteWithResponse
                     : CBCharacteristicWriteWithoutResponse);
 
-            // check mtu
-            int mtu = [self getMtu:peripheral];
+            // check maximum write len
+            int maxLen = [self getMaxPayload:peripheral forType:writeType];
             int dataLen = (int) [self convertHexToData:value].length;
-            if ((mtu-3) < dataLen) {
-                NSString* f = @"data is longer than MTU allows. dataLen: %d > maxDataLen: %d";
-                NSString* s = [NSString stringWithFormat:f, dataLen, (mtu-3)];
+            if (dataLen > maxLen) {
+                NSString* t = [writeTypeNumber intValue] == 0 ? @"With Response" : @"Without Response";
+                NSString* f = @"data longer than allowed. dataLen: %d > maxDataLen: %d (%@)";
+                NSString* s = [NSString stringWithFormat:f, dataLen, maxLen, t];
                 result([FlutterError errorWithCode:@"writeCharacteristic" message:s details:NULL]);
                 return;
             }
@@ -1552,10 +1553,32 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     }
 }
 
+- (int)getMaxPayload:(CBPeripheral *)peripheral forType:(CBCharacteristicWriteType)writeType
+{
+    // 512 this comes from the BLE spec. Characteritics should not 
+    // be longer than 512. Android also enforces this as the maximum.
+    int maxAttrLen = 512; 
+
+    // For withoutResponse
+    //   iOS returns MTU-3. In theory, MTU can be as high as 65535 (16-bit).
+    //   I've seen iOS return 524 for this value. But typically it is lower.
+    //   The MTU is negotiated by the OS, and depends on iOS version.
+    //
+    // For withResponse, 
+    //   iOS typically returns a constant value of 512, regardless of MTU. 
+    //   This is because iOS will autosplit large writes
+    int maxForType = (int) [peripheral maximumWriteValueLengthForType:writeType];
+
+    // In order to operate the same on both iOS & Android, we enforce a 
+    // maximum of 512, which is the same as android. This is also the
+    // maxAttrLen of the BLE specification.
+    return MIN(maxForType, maxAttrLen);
+}
+
 - (int)getMtu:(CBPeripheral *)peripheral
 {
-    int maxPayload = (int) [peripheral maximumWriteValueLengthForType:CBCharacteristicWriteWithoutResponse];
-    return maxPayload+3; // +3 is part of the BLE spec
+    // +3 is for the ATT overhead
+    return [self getMaxPayload:peripheral forType:CBCharacteristicWriteWithoutResponse]+3;
 }
 
 - (ServicePair *)getServicePair:(CBPeripheral *)peripheral
