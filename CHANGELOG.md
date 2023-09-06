@@ -1,3 +1,6 @@
+## 1.14.17
+* **[Fix]** Android: shortUUID: characteristic not found
+
 ## 1.14.16
 * **[Fix]** macOS: lower required version to 10.11 (equivalent to  iOS 9.0)
 
