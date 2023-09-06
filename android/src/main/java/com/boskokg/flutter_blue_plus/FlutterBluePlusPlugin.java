@@ -1568,7 +1568,7 @@ public class FlutterBluePlusPlugin implements
             HashMap<String, Object> response = new HashMap<>();
             response.put("remote_id", gatt.getDevice().getAddress());
             response.put("service_uuid", uuid128(pair.primary));
-            response.put("secondary_service_uuid", uuid128(pair.secondary));
+            response.put("secondary_service_uuid", pair.secondary != null ? uuid128(pair.secondary) : null);
             response.put("characteristic_uuid", uuid128(characteristic.getUuid()));
             response.put("value", bytesToHex(characteristic.getValue()));
             response.put("success", 1);
@@ -1590,7 +1590,7 @@ public class FlutterBluePlusPlugin implements
             HashMap<String, Object> response = new HashMap<>();
             response.put("remote_id", gatt.getDevice().getAddress());
             response.put("service_uuid", uuid128(pair.primary));
-            response.put("secondary_service_uuid", uuid128(pair.secondary));
+            response.put("secondary_service_uuid", pair.secondary != null ? uuid128(pair.secondary) : null);
             response.put("characteristic_uuid", uuid128(characteristic.getUuid()));
             response.put("value", bytesToHex(characteristic.getValue()));
             response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
@@ -1616,7 +1616,7 @@ public class FlutterBluePlusPlugin implements
             HashMap<String, Object> response = new HashMap<>();
             response.put("remote_id", gatt.getDevice().getAddress());
             response.put("service_uuid", uuid128(pair.primary));
-            response.put("secondary_service_uuid", uuid128(pair.secondary));
+            response.put("secondary_service_uuid", pair.secondary != null ? uuid128(pair.secondary) : null);
             response.put("characteristic_uuid", uuid128(characteristic.getUuid()));
             response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
             response.put("error_code", status);
@@ -1637,7 +1637,7 @@ public class FlutterBluePlusPlugin implements
             response.put("type", 0); // type: read
             response.put("remote_id", gatt.getDevice().getAddress());
             response.put("service_uuid", uuid128(pair.primary));
-            response.put("secondary_service_uuid", uuid128(pair.secondary));
+            response.put("secondary_service_uuid", pair.secondary != null ? uuid128(pair.secondary) : null);
             response.put("characteristic_uuid", uuid128(descriptor.getCharacteristic().getUuid()));
             response.put("descriptor_uuid", uuid128(descriptor.getUuid()));
             response.put("value", bytesToHex(descriptor.getValue()));
@@ -1660,7 +1660,7 @@ public class FlutterBluePlusPlugin implements
             response.put("type", 1); // type: write
             response.put("remote_id", gatt.getDevice().getAddress());
             response.put("service_uuid", uuid128(pair.primary));
-            response.put("secondary_service_uuid", uuid128(pair.secondary));
+            response.put("secondary_service_uuid", pair.secondary != null ? uuid128(pair.secondary) : null);
             response.put("characteristic_uuid", uuid128(descriptor.getCharacteristic().getUuid()));
             response.put("descriptor_uuid", uuid128(descriptor.getUuid()));
             response.put("value", bytesToHex(descriptor.getValue()));
@@ -1834,7 +1834,7 @@ public class FlutterBluePlusPlugin implements
         HashMap<String, Object> map = new HashMap<>();
         map.put("remote_id", device.getAddress());
         map.put("service_uuid", uuid128(pair.primary));
-        map.put("secondary_service_uuid", uuid128(pair.secondary));
+        map.put("secondary_service_uuid", pair.secondary != null ? uuid128(pair.secondary) : null);
         map.put("characteristic_uuid", uuid128(characteristic.getUuid()));
         map.put("descriptors", descriptors);
         map.put("properties", bmCharacteristicProperties(characteristic.getProperties()));
