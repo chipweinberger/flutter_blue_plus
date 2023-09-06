@@ -1,3 +1,6 @@
+## 1.14.21
+* **[Refactor]** dart: store lastValue at global level so Desc & Chr classes are fully immutable
+
 ## 1.14.20
 * **[Fix]** Hot Restart: could get stuck in infinite loop (regression in 1.14.19)
 
