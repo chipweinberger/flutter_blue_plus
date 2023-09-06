@@ -170,9 +170,9 @@ To write large messages (up to 512 bytes) regardless of mtu use allowSplits:
 ```dart
 /// allowSplits should be used with caution. 
 ///   1. it can only be used *with* response
-///   2. the peripheral device must support the long write ble protocol.
-///   3. Interrupted transfers can leave the peripheral characteristic in a partially written state
-///   4. It is much slower.
+///   2. the peripheral device must support the 'long write' ble protocol.
+///   3. Interrupted transfers can leave the characteristic in a partially written state
+///   4. It is very slow.
 await c.write(data, allowSplits:true);
 ```
 
