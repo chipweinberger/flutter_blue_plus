@@ -156,7 +156,7 @@ public class FlutterBluePlusPlugin implements
 
         pluginBinding = null;
 
-        closeAllConnections(false);
+        closeAllConnections();
 
         context.unregisterReceiver(mBluetoothBondStateReceiver);
         context.unregisterReceiver(mBluetoothAdapterStateReceiver);
@@ -241,8 +241,12 @@ public class FlutterBluePlusPlugin implements
 
                 case "flutterHotRestart":
                 {
-                    closeAllConnections(true);
-                    result.success(0);
+                    closeAllConnections();
+                    log(LogLevel.DEBUG, "[FBP-Android] connectedPeripherals: " + mConnectedDevices.size());
+                    if (mConnectedDevices.size() == 0) {
+                        log(LogLevel.DEBUG, "[FBP-Android] hot restart complete");
+                    }
+                    result.success(mConnectedDevices.size());
                     break;
                 }
 
@@ -1296,7 +1300,7 @@ public class FlutterBluePlusPlugin implements
         }
     }
 
-    private void closeAllConnections(boolean wait)
+    private void closeAllConnections()
     {
         Log.d(TAG, "[FBP-Android] closeAllConnections");
 
@@ -1311,18 +1315,6 @@ public class FlutterBluePlusPlugin implements
             }
         }
 
-        // wait for disconnections?
-        if (wait) {
-            while (mConnectedDevices.isEmpty() == false) {
-                log(LogLevel.DEBUG, "[FBP-Android] waiting for disconnections: " + mConnectedDevices.size());
-                try {
-                    Thread.sleep(50);  // Wait for 50ms
-                } catch (InterruptedException e) {}
-            }
-            log(LogLevel.DEBUG, "[FBP-Android] everything disconnected");
-        }
-
-        mConnectedDevices.clear();
         mMtu.clear();
         mAutoConnect.clear();
     }
@@ -1359,7 +1351,7 @@ public class FlutterBluePlusPlugin implements
             // close all connections
             if (adapterState == BluetoothAdapter.STATE_TURNING_OFF || 
                 adapterState == BluetoothAdapter.STATE_OFF) {
-                closeAllConnections(false);
+                closeAllConnections();
             }
             
             // see: BmBluetoothAdapterState

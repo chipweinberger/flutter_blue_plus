@@ -282,12 +282,17 @@ class FlutterBluePlus {
 
   // invoke a platform method
   static Future<dynamic> _invokeMethod(String method, [dynamic arguments]) async {
+    _Mutex mtx = await _MutexFactory.getMutexForKey("invokeMethod");
+    await mtx.take();
+
     // initialize response handler
     if (_initialized == false) {
       _initialized = true; // avoid recursion: must set before setLogLevel
       _methods.setMethodCallHandler(_methodCallHandler);
       setLogLevel(logLevel);
-      await _invokeMethod('flutterHotRestart'); // closes all existing connections
+      while ((await _methods.invokeMethod('flutterHotRestart')) != 0) {
+        await Future.delayed(Duration(milliseconds: 50));
+      }
     }
 
     // log args
@@ -310,6 +315,8 @@ class FlutterBluePlus {
       result = _logColor ? _brown(result) : result;
       print("[FBP] $func result: $result");
     }
+
+    mtx.give();
 
     return obj;
   }

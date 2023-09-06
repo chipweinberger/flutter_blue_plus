@@ -139,8 +139,12 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
         if ([@"flutterHotRestart" isEqualToString:call.method])
         {
-            [self closeAllConnections:true];
-            result(@(0));
+            [self closeAllConnections];
+            NSLog(@"[FBP-iOS] connectedPeripherals: %lu", self.connectedPeripherals.count);
+            if (self.connectedPeripherals.count == 0) {
+                NSLog(@"[FBP-iOS] hot restart complete");
+            }
+            result(@(self.connectedPeripherals.count));
             return;
         }
         else if ([@"setLogLevel" isEqualToString:call.method])
@@ -784,30 +788,23 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     return nil;
 }
 
-- (void)closeAllConnections:(BOOL)wait
+- (void)closeAllConnections
 {
     NSLog(@"[FBP-iOS] closeAllConnections");
 
     // request disconnections
     for (NSString *key in self.connectedPeripherals)
     {
-        NSLog(@"[FBP-iOS] calling disconnect: %@", key);
         CBPeripheral *peripheral = [self.connectedPeripherals objectForKey:key];
-        [_centralManager cancelPeripheralConnection:peripheral];
+        NSLog(@"[FBP-iOS] calling disconnect: %@", key);
+        [self.centralManager cancelPeripheralConnection:peripheral];
     }
 
-    // wait for disconnections?
-    if (wait)
-    {
-        while (self.connectedPeripherals.count > 0)
-        {
-            NSLog(@"[FBP-iOS] waiting for disconnections: %lu", self.connectedPeripherals.count);
-            [NSThread sleepForTimeInterval:0.050];  // Wait for 50ms
-        }
-        NSLog(@"[FBP-iOS] everything disconnected");
-    }
+    // note: we do *not* clear self.connectedPeripherals
+    // Otherwise the peripheral would not have any strong references 
+    // and would be garbage collected, making the didDisconnectPeripheral
+    // callback not called
 
-    [self.connectedPeripherals removeAllObjects];
     [self.knownPeripherals removeAllObjects];
     [self.servicesThatNeedDiscovered removeAllObjects];
     [self.characteristicsThatNeedDiscovered removeAllObjects];
@@ -887,7 +884,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         for (NSString *key in self.connectedPeripherals) {
             NSLog(@"[FBP-iOS] disconnected from device %@", key);
         }
-        [self closeAllConnections:false];
+        [self closeAllConnections];
     }
 
     int adapterState = [self bmAdapterStateEnum:self->_centralManager.state];
