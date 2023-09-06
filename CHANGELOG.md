@@ -1,3 +1,6 @@
+## 1.14.15
+* **[Rename]** allowSplits -> allowLongWrite
+
 ## 1.14.14
 * **[Fix]** Android: dataLen longer than allowed (regression in 1.14.13)
 
