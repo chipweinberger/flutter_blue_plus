@@ -682,7 +682,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     CBService *primaryService = [self getServiceFromArray:serviceId array:[peripheral services]];
     if (primaryService == nil || [primaryService isPrimary] == false)
     {
-        NSDictionary* d = @{NSLocalizedDescriptionKey : @"service could not be located on the device"};
+        NSString* s = [NSString stringWithFormat:@"service not found '%@'", serviceId];
+        NSDictionary* d = @{NSLocalizedDescriptionKey : s};
         *error = [NSError errorWithDomain:@"flutterBluePlus" code:1000 userInfo:d];
         return nil;
     }
@@ -692,7 +693,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     {
         secondaryService = [self getServiceFromArray:secondaryServiceId array:[primaryService includedServices]];
         if (error && !secondaryService) {
-            NSString* s = [NSString stringWithFormat:@"secondary service '%@' could not be located on the device", secondaryServiceId];
+            NSString* s = [NSString stringWithFormat:@"secondaryService not found '%@'", secondaryServiceId];
             NSDictionary* d = @{NSLocalizedDescriptionKey : s};
             *error = [NSError errorWithDomain:@"flutterBluePlus" code:1001 userInfo:d];
             return nil;
@@ -704,7 +705,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     CBCharacteristic *characteristic = [self getCharacteristicFromArray:characteristicId array:[service characteristics]];
     if (characteristic == nil)
     {
-        NSDictionary* d = @{NSLocalizedDescriptionKey : @"characteristic could not be located on the device"};
+        NSString* format = @"characteristic not found in service (chr: '%@', svc: '%@')";
+        NSString* s = [NSString stringWithFormat:format, characteristicId, serviceId];
+        NSDictionary* d = @{NSLocalizedDescriptionKey : s};
         *error = [NSError errorWithDomain:@"flutterBluePlus" code:1002 userInfo:d];
         return nil;
     }

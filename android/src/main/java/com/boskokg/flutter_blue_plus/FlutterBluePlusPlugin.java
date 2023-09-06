@@ -1194,7 +1194,7 @@ public class FlutterBluePlusPlugin implements
         BluetoothGattService primaryService = gatt.getService(UUID.fromString(serviceId));
 
         if(primaryService == null) {
-            return new CharacteristicResult(null, "service not found " + serviceId);
+            return new CharacteristicResult(null, "service not found '" + serviceId + "'");
         }
 
         BluetoothGattService secondaryService = null;
@@ -1208,7 +1208,7 @@ public class FlutterBluePlusPlugin implements
             }
 
             if(secondaryService == null) {
-                return new CharacteristicResult(null, "secondaryService not found " + secondaryServiceId);
+                return new CharacteristicResult(null, "secondaryService not found '" + secondaryServiceId + "'");
             }
         }
 
@@ -1220,7 +1220,8 @@ public class FlutterBluePlusPlugin implements
             service.getCharacteristic(UUID.fromString(characteristicId));
 
         if(characteristic == null) {
-            return new CharacteristicResult(null, "characteristic not found in service "  + characteristicId);
+            return new CharacteristicResult(null, "characteristic not found in service " + 
+                "(chr: '" + characteristicId + "' svc: '" + serviceId + "')");
         }
 
         return new CharacteristicResult(characteristic, null);
