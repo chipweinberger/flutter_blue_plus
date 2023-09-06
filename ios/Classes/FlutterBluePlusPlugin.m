@@ -13,17 +13,26 @@
 @end
 
 @interface CBUUID (CBUUIDAdditionsFlutterBluePlus)
-- (NSString *)fullUUIDString;
+- (NSString *)uuid128;
 @end
 
 @implementation CBUUID (CBUUIDAdditionsFlutterBluePlus)
-- (NSString *)fullUUIDString
+- (NSString *)uuid128
 {
     if (self.UUIDString.length == 4)
     {
+        // 16-bit uuid
         return [[NSString stringWithFormat:@"0000%@-0000-1000-8000-00805F9B34FB", self.UUIDString] lowercaseString];
+    } 
+    else if (self.UUIDString.length == 8)
+    {
+        // 32-bit uuid
+        return [[NSString stringWithFormat:@"%@-0000-1000-8000-00805F9B34FB", self.UUIDString] lowercaseString];
     }
-    return [self.UUIDString lowercaseString];
+    else {
+        // 128-bit uuid
+        return [self.UUIDString lowercaseString];
+    }
 }
 @end
 
@@ -679,6 +688,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                         secondaryServiceId:(NSString *)secondaryServiceId
                                      error:(NSError **)error
 {
+    // primary
     CBService *primaryService = [self getServiceFromArray:serviceId array:[peripheral services]];
     if (primaryService == nil || [primaryService isPrimary] == false)
     {
@@ -688,6 +698,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         return nil;
     }
 
+    // secondary
     CBService *secondaryService;
     if (secondaryServiceId && (NSNull*) secondaryServiceId != [NSNull null] && secondaryServiceId.length)
     {
@@ -700,8 +711,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         }
     }
 
+    // which service?
     CBService *service = (secondaryService != nil) ? secondaryService : primaryService;
 
+    // characteristic
     CBCharacteristic *characteristic = [self getCharacteristicFromArray:characteristicId array:[service characteristics]];
     if (characteristic == nil)
     {
@@ -721,7 +734,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     if (descriptor == nil)
     {
         NSString* format = @"descriptor not found in characteristic (desc: '%@', chr: '%@')";
-        NSString* s = [NSString stringWithFormat:format, descriptorId, [characteristic.UUID fullUUIDString]];
+        NSString* s = [NSString stringWithFormat:format, descriptorId, [characteristic.UUID uuid128]];
         NSDictionary* d = @{NSLocalizedDescriptionKey : s};
         *error = [NSError errorWithDomain:@"flutterBluePlus" code:1002 userInfo:d];
         return nil;
@@ -733,7 +746,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 {
     for (CBService *s in array)
     {
-        if ([[s.UUID fullUUIDString] isEqualToString:uuid])
+        if ([[s.UUID uuid128] isEqualToString:uuid])
         {
             return s;
         }
@@ -745,7 +758,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 {
     for (CBCharacteristic *c in array)
     {
-        if ([[c.UUID fullUUIDString] isEqualToString:uuid])
+        if ([[c.UUID uuid128] isEqualToString:uuid])
         {
             return c;
         }
@@ -757,7 +770,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 {
     for (CBDescriptor *d in array)
     {
-        if ([[d.UUID fullUUIDString] isEqualToString:uuid])
+        if ([[d.UUID uuid128] isEqualToString:uuid])
         {
             return d;
         }
@@ -1077,9 +1090,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // See BmOnCharacteristicReceived
     NSDictionary* result = @{
         @"remote_id":               [peripheral.identifier UUIDString],
-        @"service_uuid":            [pair.primary.UUID fullUUIDString],
-        @"secondary_service_uuid":  pair.secondary ? [pair.secondary.UUID fullUUIDString] : [NSNull null],
-        @"characteristic_uuid":     [characteristic.UUID fullUUIDString],
+        @"service_uuid":            [pair.primary.UUID uuid128],
+        @"secondary_service_uuid":  pair.secondary ? [pair.secondary.UUID uuid128] : [NSNull null],
+        @"characteristic_uuid":     [characteristic.UUID uuid128],
         @"value":                   [self convertDataToHex:characteristic.value],
         @"success":                 error == nil ? @(1) : @(0),
         @"error_string":            error ? [error localizedDescription] : [NSNull null],
@@ -1105,9 +1118,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // See BmOnCharacteristicWritten
     NSDictionary* result = @{
         @"remote_id":               [peripheral.identifier UUIDString],
-        @"service_uuid":            [pair.primary.UUID fullUUIDString],
-        @"secondary_service_uuid":  pair.secondary ? [pair.secondary.UUID fullUUIDString] : [NSNull null],
-        @"characteristic_uuid":     [characteristic.UUID fullUUIDString],
+        @"service_uuid":            [pair.primary.UUID uuid128],
+        @"secondary_service_uuid":  pair.secondary ? [pair.secondary.UUID uuid128] : [NSNull null],
+        @"characteristic_uuid":     [characteristic.UUID uuid128],
         @"success":                 @(error == nil),
         @"error_string":            error ? [error localizedDescription] : [NSNull null],
         @"error_code":              error ? @(error.code) : [NSNull null],
@@ -1145,9 +1158,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     NSDictionary* result = @{
         @"type":                   @(1), // type: write
         @"remote_id":              [peripheral.identifier UUIDString],
-        @"service_uuid":           [pair.primary.UUID fullUUIDString],
-        @"secondary_service_uuid": pair.secondary ? [pair.secondary.UUID fullUUIDString] : [NSNull null],
-        @"characteristic_uuid":    [characteristic.UUID fullUUIDString],
+        @"service_uuid":           [pair.primary.UUID uuid128],
+        @"secondary_service_uuid": pair.secondary ? [pair.secondary.UUID uuid128] : [NSNull null],
+        @"characteristic_uuid":    [characteristic.UUID uuid128],
         @"descriptor_uuid":        @"00002902-0000-1000-8000-00805f9b34fb", // uuid of CCCD
         @"value":                  [self convertDataToHex:[NSData dataWithBytes:&value length:sizeof(value)]],
         @"success":                @(error == nil),
@@ -1176,10 +1189,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     NSDictionary* result = @{
         @"type":                   @(0), // type: read
         @"remote_id":              [peripheral.identifier UUIDString],
-        @"service_uuid":           [pair.primary.UUID fullUUIDString],
-        @"secondary_service_uuid": pair.secondary ? [pair.secondary.UUID fullUUIDString] : [NSNull null],
-        @"characteristic_uuid":    [descriptor.characteristic.UUID fullUUIDString],
-        @"descriptor_uuid":        [descriptor.UUID fullUUIDString],
+        @"service_uuid":           [pair.primary.UUID uuid128],
+        @"secondary_service_uuid": pair.secondary ? [pair.secondary.UUID uuid128] : [NSNull null],
+        @"characteristic_uuid":    [descriptor.characteristic.UUID uuid128],
+        @"descriptor_uuid":        [descriptor.UUID uuid128],
         @"value":                  [self convertDataToHex:data],
         @"success":                @(error == nil),
         @"error_string":           error ? [error localizedDescription] : [NSNull null],
@@ -1207,10 +1220,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     NSDictionary* result = @{
         @"type":                   @(1), // type: write
         @"remote_id":              [peripheral.identifier UUIDString],
-        @"service_uuid":           [pair.primary.UUID fullUUIDString],
-        @"secondary_service_uuid": pair.secondary ? [pair.secondary.UUID fullUUIDString] : [NSNull null],
-        @"characteristic_uuid":    [descriptor.characteristic.UUID fullUUIDString],
-        @"descriptor_uuid":        [descriptor.UUID fullUUIDString],
+        @"service_uuid":           [pair.primary.UUID uuid128],
+        @"secondary_service_uuid": pair.secondary ? [pair.secondary.UUID uuid128] : [NSNull null],
+        @"characteristic_uuid":    [descriptor.characteristic.UUID uuid128],
+        @"descriptor_uuid":        [descriptor.UUID uuid128],
         @"value":                  [self convertDataToHex:data],
         @"success":                @(error == nil),
         @"error_string":           error ? [error localizedDescription] : [NSNull null],
@@ -1280,9 +1293,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // See BmOnCharacteristicWritten
     NSDictionary* result = @{
         @"remote_id":               [peripheral.identifier UUIDString],
-        @"service_uuid":            [pair.primary.UUID fullUUIDString],
-        @"secondary_service_uuid":  pair.secondary ? [pair.secondary.UUID fullUUIDString] : [NSNull null],
-        @"characteristic_uuid":     [characteristic.UUID fullUUIDString],
+        @"service_uuid":            [pair.primary.UUID uuid128],
+        @"secondary_service_uuid":  pair.secondary ? [pair.secondary.UUID uuid128] : [NSNull null],
+        @"characteristic_uuid":     [characteristic.UUID uuid128],
         @"success":                 @(error == nil),
         @"error_string":            error ? [error localizedDescription] : [NSNull null],
         @"error_code":              error ? @(error.code) : [NSNull null],
@@ -1429,7 +1442,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // See BmBluetoothService
     return @{
         @"remote_id":           [peripheral.identifier UUIDString],
-        @"service_uuid":        [service.UUID fullUUIDString],
+        @"service_uuid":        [service.UUID uuid128],
         @"characteristics":     characteristicProtos,
         @"is_primary":          @([service isPrimary]),
         @"included_services":   includedServicesProtos,
@@ -1452,10 +1465,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         // See: BmBluetoothDescriptor
         NSDictionary* desc = @{
             @"remote_id":              [peripheral.identifier UUIDString],
-            @"service_uuid":           [d.characteristic.service.UUID fullUUIDString],
+            @"service_uuid":           [d.characteristic.service.UUID uuid128],
             @"secondary_service_uuid": [NSNull null],
-            @"characteristic_uuid":    [d.characteristic.UUID fullUUIDString],
-            @"descriptor_uuid":        [d.UUID fullUUIDString],
+            @"characteristic_uuid":    [d.characteristic.UUID uuid128],
+            @"descriptor_uuid":        [d.UUID uuid128],
             @"value":                  [self convertDataToHex:data],
         };
 
@@ -1483,9 +1496,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // See BmBluetoothCharacteristic
     return @{
         @"remote_id":              [peripheral.identifier UUIDString],
-        @"service_uuid":           [pair.primary.UUID fullUUIDString],
-        @"secondary_service_uuid": pair.secondary ? [pair.secondary.UUID fullUUIDString] : [NSNull null],
-        @"characteristic_uuid":    [characteristic.UUID fullUUIDString],
+        @"service_uuid":           [pair.primary.UUID uuid128],
+        @"secondary_service_uuid": pair.secondary ? [pair.secondary.UUID uuid128] : [NSNull null],
+        @"characteristic_uuid":    [characteristic.UUID uuid128],
         @"descriptors":            descriptorProtos,
         @"properties":             propsMap,
         @"value":                  [self convertDataToHex:characteristic.value],
