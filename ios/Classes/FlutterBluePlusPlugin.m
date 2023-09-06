@@ -392,7 +392,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             int dataLen = (int) [self convertHexToData:value].length;
             if (dataLen > maxLen) {
                 NSString* t = [writeTypeNumber intValue] == 0 ? @"withResponse" : @"withoutResponse";
-                NSString* a = [allowSplits boolValue] ? @", Allow Splits" : @", No Splits";
+                NSString* a = [allowSplits boolValue] ? @", allowSplits" : @", noSplits";
                 NSString* b = [writeTypeNumber intValue] == 0 ? a : @"";
                 NSString* f = @"data longer than allowed. dataLen: %d > max: %d (%@%@)";
                 NSString* s = [NSString stringWithFormat:f, dataLen, maxLen, t, b];
