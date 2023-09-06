@@ -196,6 +196,7 @@ extension splitWrite on BluetoothCharacteristic {
     }
   }
 }
+```
 
 ### Read and write descriptors
 
