@@ -165,7 +165,7 @@ for(BluetoothCharacteristic c in characteristics) {
 await c.write([0x12, 0x34]);
 ```
 
-**allowLongWrite**: To write large characteristics (up to 512 bytes) regardless of mtu, use allowLongWrite:
+**allowLongWrite**: To write large characteristics (up to 512 bytes) regardless of mtu, use `allowLongWrite`:
 
 ```dart
 /// allowLongWrite should be used with caution. 
