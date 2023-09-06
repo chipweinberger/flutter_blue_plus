@@ -525,7 +525,7 @@ class BmWriteCharacteristicRequest {
   final Guid? secondaryServiceUuid;
   final Guid characteristicUuid;
   final BmWriteType writeType;
-  final bool allowSplits;
+  final bool allowLongWrite;
   final List<int> value;
 
   BmWriteCharacteristicRequest({
@@ -534,7 +534,7 @@ class BmWriteCharacteristicRequest {
     required this.secondaryServiceUuid,
     required this.characteristicUuid,
     required this.writeType,
-    required this.allowSplits,
+    required this.allowLongWrite,
     required this.value,
   });
 
@@ -545,7 +545,7 @@ class BmWriteCharacteristicRequest {
     data['secondary_service_uuid'] = secondaryServiceUuid?.toString();
     data['characteristic_uuid'] = characteristicUuid.toString();
     data['write_type'] = writeType.index;
-    data['allow_splits'] = allowSplits ? 1 : 0;
+    data['allow_long_write'] = allowLongWrite ? 1 : 0;
     data['value'] = _hexEncode(value);
     return data;
   }

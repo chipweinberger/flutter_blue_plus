@@ -113,14 +113,16 @@ class BluetoothCharacteristic {
   /// Writes a characteristic.
   ///  - [withoutResponse]: the write is not guaranteed and always returns immediately with success.
   ///  - [withResponse]: the write returns error on failure
-  ///  - [allowSplits]: if set, writes 'withResponse' larger than MTU are allowed (up to 512 bytes).
-  ///        This should be used with caution. 
-  ///        1. the peripheral device must support the ble protocol for long writes.
-  ///        2. It is much slower.
+  ///  - [allowLongWrite]: if set, writes 'withResponse' larger than MTU are allowed (up to 512 bytes).
+  ///       This should be used with caution. 
+  ///         1. it can only be used *with* response
+  ///         2. the peripheral device must support the 'long write' ble protocol.
+  ///         3. Interrupted transfers can leave the characteristic in a partially written state
+  ///         4. If the mtu is small, it is very very slow.
   Future<void> write(List<int> value,
-      {bool withoutResponse = false, bool allowSplits = false, int timeout = 15}) async {
+      {bool withoutResponse = false, bool allowLongWrite = false, int timeout = 15}) async {
     //  must have responses in order to reliably transfer a split write.
-    if (withoutResponse && allowSplits) {
+    if (withoutResponse && allowLongWrite) {
       throw ArgumentError("cannot split a write withoutResponse - not allowed on iOS or Android");
     }
 
@@ -149,7 +151,7 @@ class BluetoothCharacteristic {
         serviceUuid: serviceUuid,
         secondaryServiceUuid: null,
         writeType: writeType,
-        allowSplits: allowSplits,
+        allowLongWrite: allowLongWrite,
         value: value,
       );
 

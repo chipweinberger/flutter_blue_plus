@@ -370,7 +370,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSString  *serviceUuid          = args[@"service_uuid"];
             NSString  *secondaryServiceUuid = args[@"secondary_service_uuid"];
             NSNumber  *writeTypeNumber      = args[@"write_type"];
-            NSNumber  *allowSplits          = args[@"allow_splits"];
+            NSNumber  *allowLongWrite          = args[@"allow_long_write"];
             NSString  *value                = args[@"value"];
             
             // Find peripheral
@@ -388,11 +388,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                     : CBCharacteristicWriteWithoutResponse);
 
             // check maximum payload
-            int maxLen = [self getMaxPayload:peripheral forType:writeType allowSplits:[allowSplits boolValue]];
+            int maxLen = [self getMaxPayload:peripheral forType:writeType allowLongWrite:[allowLongWrite boolValue]];
             int dataLen = (int) [self convertHexToData:value].length;
             if (dataLen > maxLen) {
                 NSString* t = [writeTypeNumber intValue] == 0 ? @"withResponse" : @"withoutResponse";
-                NSString* a = [allowSplits boolValue] ? @", allowSplits" : @", noSplits";
+                NSString* a = [allowLongWrite boolValue] ? @", allowLongWrite" : @", noLongWrite";
                 NSString* b = [writeTypeNumber intValue] == 0 ? a : @"";
                 NSString* f = @"data longer than allowed. dataLen: %d > max: %d (%@%@)";
                 NSString* s = [NSString stringWithFormat:f, dataLen, maxLen, t, b];
@@ -1556,18 +1556,18 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     }
 }
 
-- (int)getMaxPayload:(CBPeripheral *)peripheral forType:(CBCharacteristicWriteType)writeType allowSplits:(bool)allowSplits
+- (int)getMaxPayload:(CBPeripheral *)peripheral forType:(CBCharacteristicWriteType)writeType allowLongWrite:(bool)allowLongWrite
 {
     // 512 this comes from the BLE spec. Characteritics should not 
     // be longer than 512. Android also enforces this as the maximum.
     int maxAttrLen = 512; 
 
     // if splitting is disabled, we can only write up to MTU-3
-    if (allowSplits == false) {
+    if (allowLongWrite == false) {
         writeType = CBCharacteristicWriteWithoutResponse;
     }
 
-    // For withoutResponse, or allowSplits == false
+    // For withoutResponse, or allowLongWrite == false
     //   iOS returns MTU-3. In theory, MTU can be as high as 65535 (16-bit).
     //   I've seen iOS return 524 for this value. But typically it is lower.
     //   The MTU is negotiated by the OS, and depends on iOS version.
@@ -1585,7 +1585,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
 - (int)getMtu:(CBPeripheral *)peripheral
 {
-    int maxPayload = [self getMaxPayload:peripheral forType:CBCharacteristicWriteWithoutResponse allowSplits:false];
+    int maxPayload = [self getMaxPayload:peripheral forType:CBCharacteristicWriteWithoutResponse allowLongWrite:false];
     return maxPayload + 3; // ATT overhead
 }
 

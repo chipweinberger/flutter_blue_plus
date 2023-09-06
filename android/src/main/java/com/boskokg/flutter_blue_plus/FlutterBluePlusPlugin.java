@@ -575,7 +575,7 @@ public class FlutterBluePlusPlugin implements
                     String characteristicUuid =   (String) data.get("characteristic_uuid");
                     String value =                (String) data.get("value");
                     int writeTypeInt =               (int) data.get("write_type");
-                    boolean allowSplits =           ((int) data.get("allow_splits")) == 1;
+                    boolean allowLongWrite =        ((int) data.get("allow_long_write")) != 0;
 
                     int writeType = writeTypeInt == 0 ?
                         BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT :
@@ -612,11 +612,11 @@ public class FlutterBluePlusPlugin implements
                     }
 
                     // check maximum payload
-                    int maxLen = getMaxPayload(remoteId, writeType, allowSplits);
+                    int maxLen = getMaxPayload(remoteId, writeType, allowLongWrite);
                     int dataLen = hexToBytes(value).length;
                     if (dataLen > maxLen) {
                         String t = writeTypeInt == 0 ? "withResponse" : "withoutResponse";
-                        String a = allowSplits ? ", allowSplits" : ", noSplits";
+                        String a = allowLongWrite ? ", allowLongWrite" : ", noLongWrite";
                         String b = writeTypeInt == 0 ? a : "";
                         String s = "data longer than allowed. dataLen: " + dataLen + " > max: " + maxLen + " (" + t + b +")";
                         result.error("writeCharacteristic", s, null);
@@ -1226,7 +1226,7 @@ public class FlutterBluePlusPlugin implements
         return new CharacteristicResult(characteristic, null);
     }
 
-    private int getMaxPayload(String remoteId, int writeType, boolean allowSplits)
+    private int getMaxPayload(String remoteId, int writeType, boolean allowLongWrite)
     {
         // 512 this comes from the BLE spec. Characteritics should not 
         // be longer than 512. Android also enforces this as the maximum in internal code.
@@ -1234,7 +1234,7 @@ public class FlutterBluePlusPlugin implements
 
         // if no response, we can only write up to MTU-3. 
         // This is the same limitation as iOS, and ensures transfer reliability.
-        if (writeType == BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE || allowSplits == false) {
+        if (writeType == BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE || allowLongWrite == false) {
 
             // get mtu
             Integer mtu = mMtu.get(remoteId);

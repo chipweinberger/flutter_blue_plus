@@ -3,7 +3,7 @@
 
 ## 1.14.13
 * **[Fix]** iOS: onMtuChanged was not called
-* **[Feature]** iOS & Android: writeCharacteristic: add 'allowSplits' option to do longer writes
+* **[Feature]** iOS & Android: writeCharacteristic: add 'allowLongWrite' option to do longer writes
 
 ## 1.14.12
 * **[Fix]** Android: autoconnect was not working. regressed sometimes after 1.4.0
