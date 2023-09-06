@@ -1,5 +1,5 @@
 ## 1.14.18
-* **[Fix]** Android: crash uuid128 null deref (regression in 1.14.16)
+* **[Fix]** Android: crash uuid128 null deref (regression in 1.14.17)
 
 ## 1.14.17
 * **[Fix]** Android: shortUUID: characteristic not found
