@@ -23,6 +23,8 @@ class FlutterBluePlus {
   static final Map<DeviceIdentifier, BmConnectionStateResponse> _connectionStates = {};
   static final Map<DeviceIdentifier, BmBondStateResponse> _bondStates = {};
   static final Map<DeviceIdentifier, BmMtuChangedResponse> _mtuValues = {};
+  static final Map<String, BmOnCharacteristicReceived> _lastChrs = {};
+  static final Map<String, BmOnDescriptorResponse> _lastDescs = {};
 
   // stream used for the isScanning public api
   static final _StreamController<bool> _isScanning = _StreamController(initialValue: false);
@@ -257,24 +259,42 @@ class FlutterBluePlus {
 
     // keep track of bond state
     if (call.method == "OnBondStateChanged") {
-      BmBondStateResponse response = BmBondStateResponse.fromMap(call.arguments);
-      _bondStates[DeviceIdentifier(response.remoteId)] = response;
+      BmBondStateResponse r = BmBondStateResponse.fromMap(call.arguments);
+      _bondStates[DeviceIdentifier(r.remoteId)] = r;
     }
 
     // keep track of connection states
     if (call.method == "OnConnectionStateChanged") {
-      BmConnectionStateResponse response = BmConnectionStateResponse.fromMap(call.arguments);
-      _connectionStates[DeviceIdentifier(response.remoteId)] = response;
-      if (response.connectionState == BmConnectionStateEnum.disconnected) {
+      BmConnectionStateResponse r = BmConnectionStateResponse.fromMap(call.arguments);
+      _connectionStates[DeviceIdentifier(r.remoteId)] = r;
+      if (r.connectionState == BmConnectionStateEnum.disconnected) {
         // clear known services, must call discoverServices again
-        _knownServices.remove(DeviceIdentifier(response.remoteId));
+        _knownServices.remove(DeviceIdentifier(r.remoteId));
       }
     }
 
     // keep track of mtu values
     if (call.method == "OnMtuChanged") {
-      BmMtuChangedResponse response = BmMtuChangedResponse.fromMap(call.arguments);
-      _mtuValues[DeviceIdentifier(response.remoteId)] = response;
+      BmMtuChangedResponse r = BmMtuChangedResponse.fromMap(call.arguments);
+      if (r.success == true) {
+        _mtuValues[DeviceIdentifier(r.remoteId)] = r;
+      }
+    }
+
+    // keep track of characteristic values
+    if (call.method == "OnCharacteristicReceived") {
+      BmOnCharacteristicReceived r = BmOnCharacteristicReceived.fromMap(call.arguments);
+      if (r.success == true) {
+        _lastChrs["${r.remoteId}:${r.serviceUuid}:${r.characteristicUuid}"] = r;
+      }
+    }
+
+    // keep track of descriptor values
+    if (call.method == "OnDescriptorResponse") {
+      BmOnDescriptorResponse r = BmOnDescriptorResponse.fromMap(call.arguments);
+      if (r.success == true) {
+        _lastDescs["${r.remoteId}:${r.serviceUuid}:${r.characteristicUuid}:${r.descriptorUuid}"] = r;
+      }
     }
 
     _methodStream.add(call);

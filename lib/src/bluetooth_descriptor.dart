@@ -5,8 +5,6 @@
 part of flutter_blue_plus;
 
 class BluetoothDescriptor {
-  static final Guid cccd = Guid("00002902-0000-1000-8000-00805f9b34fb");
-
   final DeviceIdentifier remoteId;
   final Guid serviceUuid;
   final Guid characteristicUuid;
@@ -18,7 +16,10 @@ class BluetoothDescriptor {
   /// this variable is updated:
   ///   - *live* if you call onValueReceived.listen() or lastValueStream.listen()
   ///   - *once* if you call read()
-  List<int> lastValue = [];
+  List<int> get lastValue {
+    String key = "$remoteId:$serviceUuid:$characteristicUuid:$descriptorUuid";
+    return FlutterBluePlus._lastDescs[key]?.value ?? [];
+  }
 
   // same as onValueReceived, but the stream immediately starts
   // with lastValue as its first value to not cause delay
@@ -28,18 +29,15 @@ class BluetoothDescriptor {
   //  - descriptor.read() succeeds
   //  - descriptor.write() succeeds
   Stream<List<int>> get onValueReceived => FlutterBluePlus._methodStream.stream
-          .where((m) => m.method == "OnDescriptorResponse")
-          .map((m) => m.arguments)
-          .map((args) => BmOnDescriptorResponse.fromMap(args))
-          .where((p) => (p.remoteId == remoteId.toString()))
-          .where((p) => (p.descriptorUuid == descriptorUuid))
-          .where((p) => (p.characteristicUuid == characteristicUuid))
-          .where((p) => (p.serviceUuid == serviceUuid))
-          .where((p) => (p.success == true))
-          .map((p) {
-        lastValue = p.value; // cache latest value
-        return p.value;
-      });
+      .where((m) => m.method == "OnDescriptorResponse")
+      .map((m) => m.arguments)
+      .map((args) => BmOnDescriptorResponse.fromMap(args))
+      .where((p) => (p.remoteId == remoteId.toString()))
+      .where((p) => (p.descriptorUuid == descriptorUuid))
+      .where((p) => (p.characteristicUuid == characteristicUuid))
+      .where((p) => (p.serviceUuid == serviceUuid))
+      .where((p) => (p.success == true))
+      .map((p) => p.value);
 
   BluetoothDescriptor.fromProto(BmBluetoothDescriptor p)
       : remoteId = DeviceIdentifier(p.remoteId),

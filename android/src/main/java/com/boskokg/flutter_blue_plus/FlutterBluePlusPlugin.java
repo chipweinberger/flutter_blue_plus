@@ -1853,7 +1853,6 @@ public class FlutterBluePlusPlugin implements
         map.put("characteristic_uuid", uuid128(characteristic.getUuid()));
         map.put("descriptors", descriptors);
         map.put("properties", bmCharacteristicProperties(characteristic.getProperties()));
-        map.put("value", bytesToHex(characteristic.getValue()));
         return map;
     }
 
@@ -1863,7 +1862,6 @@ public class FlutterBluePlusPlugin implements
         map.put("descriptor_uuid", uuid128(descriptor.getUuid()));
         map.put("characteristic_uuid", uuid128(descriptor.getCharacteristic().getUuid()));
         map.put("service_uuid", uuid128(descriptor.getCharacteristic().getService().getUuid()));
-        map.put("value", bytesToHex(descriptor.getValue()));
         return map;
     }
 

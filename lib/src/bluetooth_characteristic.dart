@@ -4,6 +4,8 @@
 
 part of flutter_blue_plus;
 
+final Guid cccdUuid = Guid("00002902-0000-1000-8000-00805f9b34fb");
+
 class BluetoothCharacteristic {
   final DeviceIdentifier remoteId;
   final Guid serviceUuid;
@@ -18,7 +20,10 @@ class BluetoothCharacteristic {
   /// this variable is updated:
   ///   - *live* if you call onValueReceived.listen() or lastValueStream.listen() & setNotifyValue(true)
   ///   - *once* if you call read()
-  List<int> lastValue;
+  List<int> get lastValue {
+    String key = "$remoteId:$serviceUuid:$characteristicUuid";
+    return FlutterBluePlus._lastChrs[key]?.value ?? [];
+  }
 
   BluetoothCharacteristic.fromProto(BmBluetoothCharacteristic p)
       : remoteId = DeviceIdentifier(p.remoteId.toString()),
@@ -26,8 +31,7 @@ class BluetoothCharacteristic {
         secondaryServiceUuid = p.secondaryServiceUuid != null ? p.secondaryServiceUuid! : null,
         characteristicUuid = p.characteristicUuid,
         descriptors = p.descriptors.map((d) => BluetoothDescriptor.fromProto(d)).toList(),
-        properties = CharacteristicProperties.fromProto(p.properties),
-        lastValue = p.value;
+        properties = CharacteristicProperties.fromProto(p.properties);
 
   // same as onValueReceived, but the stream immediately starts
   // with lastValue as its first value to not cause delay
@@ -44,14 +48,11 @@ class BluetoothCharacteristic {
           .where((p) => p.serviceUuid == serviceUuid)
           .where((p) => p.characteristicUuid == characteristicUuid)
           .where((p) => p.success == true)
-          .map((c) {
-        lastValue = c.value; // Update cache of lastValue
-        return c.value;
-      });
+          .map((c) => c.value);
 
   bool get isNotifying {
     try {
-      var cccd = descriptors.singleWhere((d) => d.descriptorUuid == BluetoothDescriptor.cccd);
+      var cccd = descriptors.singleWhere((d) => d.descriptorUuid == cccdUuid);
       var hasNotify = cccd.lastValue.isNotEmpty && (cccd.lastValue[0] & 0x01) > 0;
       var hasIndicate = cccd.lastValue.isNotEmpty && (cccd.lastValue[0] & 0x02) > 0;
       return hasNotify || hasIndicate;
@@ -98,9 +99,6 @@ class BluetoothCharacteristic {
         throw FlutterBluePlusException(_nativeError, "readCharacteristic", response.errorCode, response.errorString);
       }
 
-      // cache latest value
-      lastValue = response.value;
-
       // set return value
       responseValue = response.value;
     } finally {
@@ -114,7 +112,7 @@ class BluetoothCharacteristic {
   ///  - [withoutResponse]: the write is not guaranteed and always returns immediately with success.
   ///  - [withResponse]: the write returns error on failure
   ///  - [allowLongWrite]: if set, writes 'withResponse' larger than MTU are allowed (up to 512 bytes).
-  ///       This should be used with caution. 
+  ///       This should be used with caution.
   ///         1. it can only be used *with* response
   ///         2. the peripheral device must support the 'long write' ble protocol.
   ///         3. Interrupted transfers can leave the characteristic in a partially written state
@@ -209,7 +207,7 @@ class BluetoothCharacteristic {
         .where((p) => p.remoteId == request.remoteId)
         .where((p) => p.serviceUuid == request.serviceUuid)
         .where((p) => p.characteristicUuid == request.characteristicUuid)
-        .where((p) => p.descriptorUuid == BluetoothDescriptor.cccd);
+        .where((p) => p.descriptorUuid == cccdUuid);
 
     // Start listening now, before invokeMethod, to ensure we don't miss the response
     Future<BmOnDescriptorResponse> futureResponse = responseStream.first;
@@ -232,13 +230,6 @@ class BluetoothCharacteristic {
     if (notify != isEnabled) {
       throw FlutterBluePlusException(
           ErrorPlatform.dart, "setNotifyValue", FbpErrorCode.setNotifyFailed.index, "notifications were not updated");
-    }
-
-    // update descriptor
-    for (var d in descriptors) {
-      if (d.uuid == BluetoothDescriptor.cccd) {
-        d.lastValue = response.value;
-      }
     }
 
     return notify == isEnabled;

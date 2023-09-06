@@ -1503,7 +1503,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             @"secondary_service_uuid": [NSNull null],
             @"characteristic_uuid":    [d.characteristic.UUID uuid128],
             @"descriptor_uuid":        [d.UUID uuid128],
-            @"value":                  [self convertDataToHex:data],
         };
 
         [descriptorProtos addObject:desc];
@@ -1535,7 +1534,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"characteristic_uuid":    [characteristic.UUID uuid128],
         @"descriptors":            descriptorProtos,
         @"properties":             propsMap,
-        @"value":                  [self convertDataToHex:characteristic.value],
     };
 }
 

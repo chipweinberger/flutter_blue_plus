@@ -272,7 +272,6 @@ class BmBluetoothCharacteristic {
   final Guid characteristicUuid;
   List<BmBluetoothDescriptor> descriptors;
   BmCharacteristicProperties properties;
-  List<int> value;
 
   BmBluetoothCharacteristic({
     required this.remoteId,
@@ -281,7 +280,6 @@ class BmBluetoothCharacteristic {
     required this.characteristicUuid,
     required this.descriptors,
     required this.properties,
-    required this.value,
   });
 
   factory BmBluetoothCharacteristic.fromMap(Map<dynamic, dynamic> json) {
@@ -298,7 +296,6 @@ class BmBluetoothCharacteristic {
       characteristicUuid: Guid(json['characteristic_uuid']),
       descriptors: descs,
       properties: BmCharacteristicProperties.fromMap(json['properties']),
-      value: _hexDecode(json['value']),
     );
   }
 }
@@ -308,14 +305,12 @@ class BmBluetoothDescriptor {
   final Guid serviceUuid;
   final Guid characteristicUuid;
   final Guid descriptorUuid;
-  final List<int> value;
 
   BmBluetoothDescriptor({
     required this.remoteId,
     required this.serviceUuid,
     required this.characteristicUuid,
     required this.descriptorUuid,
-    required this.value,
   });
 
   factory BmBluetoothDescriptor.fromMap(Map<dynamic, dynamic> json) {
@@ -324,7 +319,6 @@ class BmBluetoothDescriptor {
       serviceUuid: Guid(json['service_uuid']),
       characteristicUuid: Guid(json['characteristic_uuid']),
       descriptorUuid: Guid(json['descriptor_uuid']),
-      value: _hexDecode(json['value']),
     );
   }
 }
