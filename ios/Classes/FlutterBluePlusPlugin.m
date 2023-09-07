@@ -139,11 +139,16 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
         if ([@"flutterHotRestart" isEqualToString:call.method])
         {
+            [self->_centralManager stopScan];
+
             [self disconnectAllDevices];
+
             NSLog(@"[FBP-iOS] connectedPeripherals: %lu", self.connectedPeripherals.count);
+
             if (self.connectedPeripherals.count == 0) {
                 NSLog(@"[FBP-iOS] HotRestart: complete");
             }
+            
             result(@(self.connectedPeripherals.count));
             return;
         }

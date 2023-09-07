@@ -242,11 +242,19 @@ public class FlutterBluePlusPlugin implements
 
                 case "flutterHotRestart":
                 {
+                    BluetoothLeScanner scanner = mBluetoothAdapter.getBluetoothLeScanner();
+                    if(scanner != null) {
+                        scanner.stopScan(getScanCallback());
+                    }
+
                     disconnectAllDevices();
+
                     log(LogLevel.DEBUG, "[FBP-Android] connectedPeripherals: " + mConnectedDevices.size());
+                    
                     if (mConnectedDevices.size() == 0) {
                         log(LogLevel.DEBUG, "[FBP-Android] HotRestart: complete");
                     }
+
                     result.success(mConnectedDevices.size());
                     break;
                 }
