@@ -19,12 +19,12 @@ class FlutterBluePlus {
   static final StreamController<MethodCall> _methodStream = StreamController.broadcast();
 
   // we always keep track of these device variables
-  static final Map<DeviceIdentifier, List<BluetoothService>> _knownServices = {};
   static final Map<DeviceIdentifier, BmConnectionStateResponse> _connectionStates = {};
+  static final Map<DeviceIdentifier, List<BluetoothService>> _knownServices = {};
   static final Map<DeviceIdentifier, BmBondStateResponse> _bondStates = {};
   static final Map<DeviceIdentifier, BmMtuChangedResponse> _mtuValues = {};
-  static final Map<String, BmOnCharacteristicReceived> _lastChrs = {};
-  static final Map<String, BmOnDescriptorResponse> _lastDescs = {};
+  static final Map<DeviceIdentifier, Map<String, BmOnCharacteristicReceived>> _lastChrs = {};
+  static final Map<DeviceIdentifier, Map<String, BmOnDescriptorResponse>> _lastDescs = {};
 
   // stream used for the isScanning public api
   static final _StreamController<bool> _isScanning = _StreamController(initialValue: false);
@@ -268,8 +268,11 @@ class FlutterBluePlus {
       BmConnectionStateResponse r = BmConnectionStateResponse.fromMap(call.arguments);
       _connectionStates[DeviceIdentifier(r.remoteId)] = r;
       if (r.connectionState == BmConnectionStateEnum.disconnected) {
-        // clear known services, must call discoverServices again
         _knownServices.remove(DeviceIdentifier(r.remoteId));
+        _bondStates.remove(DeviceIdentifier(r.remoteId));
+        _mtuValues.remove(DeviceIdentifier(r.remoteId));
+        _lastChrs.remove(DeviceIdentifier(r.remoteId));
+        _lastDescs.remove(DeviceIdentifier(r.remoteId));
       }
     }
 
@@ -285,7 +288,11 @@ class FlutterBluePlus {
     if (call.method == "OnCharacteristicReceived") {
       BmOnCharacteristicReceived r = BmOnCharacteristicReceived.fromMap(call.arguments);
       if (r.success == true) {
-        _lastChrs["${r.remoteId}:${r.serviceUuid}:${r.characteristicUuid}"] = r;
+        DeviceIdentifier d = DeviceIdentifier(r.remoteId);
+        if (_lastChrs[d] == null) {
+          _lastChrs[d] = {};
+        }
+        _lastChrs[DeviceIdentifier(r.remoteId)]!["${r.serviceUuid}:${r.characteristicUuid}"] = r;
       }
     }
 
@@ -293,7 +300,11 @@ class FlutterBluePlus {
     if (call.method == "OnDescriptorResponse") {
       BmOnDescriptorResponse r = BmOnDescriptorResponse.fromMap(call.arguments);
       if (r.success == true) {
-        _lastDescs["${r.remoteId}:${r.serviceUuid}:${r.characteristicUuid}:${r.descriptorUuid}"] = r;
+        DeviceIdentifier d = DeviceIdentifier(r.remoteId);
+        if (_lastDescs[d] == null) {
+          _lastDescs[d] = {};
+        }
+        _lastDescs[d]!["${r.serviceUuid}:${r.characteristicUuid}:${r.descriptorUuid}"] = r;
       }
     }
 

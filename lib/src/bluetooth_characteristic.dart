@@ -21,8 +21,8 @@ class BluetoothCharacteristic {
   ///   - *live* if you call onValueReceived.listen() or lastValueStream.listen() & setNotifyValue(true)
   ///   - *once* if you call read()
   List<int> get lastValue {
-    String key = "$remoteId:$serviceUuid:$characteristicUuid";
-    return FlutterBluePlus._lastChrs[key]?.value ?? [];
+    String key = "$serviceUuid:$characteristicUuid";
+    return FlutterBluePlus._lastChrs[remoteId]?[key]?.value ?? [];
   }
 
   BluetoothCharacteristic.fromProto(BmBluetoothCharacteristic p)

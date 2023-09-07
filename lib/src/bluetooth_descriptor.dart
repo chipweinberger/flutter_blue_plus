@@ -17,8 +17,8 @@ class BluetoothDescriptor {
   ///   - *live* if you call onValueReceived.listen() or lastValueStream.listen()
   ///   - *once* if you call read()
   List<int> get lastValue {
-    String key = "$remoteId:$serviceUuid:$characteristicUuid:$descriptorUuid";
-    return FlutterBluePlus._lastDescs[key]?.value ?? [];
+    String key = "$serviceUuid:$characteristicUuid:$descriptorUuid";
+    return FlutterBluePlus._lastDescs[remoteId]?[key]?.value ?? [];
   }
 
   // same as onValueReceived, but the stream immediately starts
