@@ -213,7 +213,7 @@ class FlutterBluePlus {
   ///  - To observe the results live, listen to the [scanResults] stream.
   ///  - call [stopScan] to complete the returned future, or set [timeout]
   ///  - see [scan] documentation for more details
-  static Future startScan({
+  static Future<List<ScanResult>> startScan({
     ScanMode scanMode = ScanMode.lowLatency,
     List<Guid> withServices = const [],
     List<String> macAddresses = const [],
