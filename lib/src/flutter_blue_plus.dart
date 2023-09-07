@@ -20,7 +20,7 @@ class FlutterBluePlus {
 
   // we always keep track of these device variables
   static final Map<DeviceIdentifier, BmConnectionStateResponse> _connectionStates = {};
-  static final Map<DeviceIdentifier, List<BluetoothService>> _knownServices = {};
+  static final Map<DeviceIdentifier, BmDiscoverServicesResult> _knownServices = {};
   static final Map<DeviceIdentifier, BmBondStateResponse> _bondStates = {};
   static final Map<DeviceIdentifier, BmMtuChangedResponse> _mtuValues = {};
   static final Map<DeviceIdentifier, Map<String, BmOnCharacteristicReceived>> _lastChrs = {};
@@ -257,12 +257,6 @@ class FlutterBluePlus {
       print("[FBP] $func result: $result");
     }
 
-    // keep track of bond state
-    if (call.method == "OnBondStateChanged") {
-      BmBondStateResponse r = BmBondStateResponse.fromMap(call.arguments);
-      _bondStates[DeviceIdentifier(r.remoteId)] = r;
-    }
-
     // keep track of connection states
     if (call.method == "OnConnectionStateChanged") {
       BmConnectionStateResponse r = BmConnectionStateResponse.fromMap(call.arguments);
@@ -273,6 +267,21 @@ class FlutterBluePlus {
         _mtuValues.remove(DeviceIdentifier(r.remoteId));
         _lastChrs.remove(DeviceIdentifier(r.remoteId));
         _lastDescs.remove(DeviceIdentifier(r.remoteId));
+      }
+    }
+
+    // keep track of bond state
+    if (call.method == "OnBondStateChanged") {
+      BmBondStateResponse r = BmBondStateResponse.fromMap(call.arguments);
+      _bondStates[DeviceIdentifier(r.remoteId)] = r;
+    }
+
+
+    // keep track of services
+    if (call.method == "OnDiscoverServicesResult") {
+      BmDiscoverServicesResult r = BmDiscoverServicesResult.fromMap(call.arguments);
+      if (r.success == true) {
+        _knownServices[DeviceIdentifier(r.remoteId)] = r;
       }
     }
 
