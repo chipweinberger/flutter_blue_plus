@@ -1,3 +1,6 @@
+## 1.14.23
+* **[Fix]** setNotifyValue & others must be cleared after disconnection
+
 ## 1.14.22
 * **[Fix]** Android: Hot Restart: could get stuck in infinite loop (regression in 1.14.19)
 
