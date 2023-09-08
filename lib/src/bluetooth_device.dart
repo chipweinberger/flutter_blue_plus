@@ -346,10 +346,8 @@ class BluetoothDevice {
     );
   }
 
-  /// Force pairing dialogue to show. (Android Only)
-  /// Typically, the only way to create a pairing request and show the pairing
-  /// dialog in Android is to connect and try to use an encrypted characteristic which
-  /// is a bit awkward of an API. Calling this function circumvents that step.
+  /// Force the bonding popup to show now (Android Only) 
+  /// Note! calling this is usually not necessary!! The platform does it automatically.
   Future<void> createBond({int timeout = 90}) async {
     if (Platform.isAndroid == false) {
       throw FlutterBluePlusException(ErrorPlatform.dart, "createBond", FbpErrorCode.androidOnly.index, "android-only");

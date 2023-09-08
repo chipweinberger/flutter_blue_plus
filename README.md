@@ -246,6 +246,17 @@ await device.requestMtu(512);
 
 Note that iOS will not allow requests of MTU size, and will always try to negotiate the highest possible MTU (iOS supports up to MTU size 185)
 
+### Create Bond (Android Only)
+
+**Note:** calling this is usually not necessary!! The platform will do it automatically. 
+
+However, you can force the popup to show sooner.
+
+```dart
+  /// Force the bonding popup to show now (Android Only) 
+  await device.createBond();
+```
+
 ## Getting Started
 
 ### Change the minSdkVersion for Android
