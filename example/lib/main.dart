@@ -262,9 +262,7 @@ class _FindDevicesScreenState extends State<FindDevicesScreen> {
                   child: const Text("SCAN"),
                   onPressed: () async {
                     try {
-                      if (FlutterBluePlus.isScanningNow == false) {
-                        FlutterBluePlus.startScan(timeout: const Duration(seconds: 15), androidUsesFineLocation: false);
-                      }
+                      await FlutterBluePlus.startScan(timeout: const Duration(seconds: 15), androidUsesFineLocation: false);
                     } catch (e) {
                       final snackBar = snackBarFail(prettyException("Start Scan Error:", e));
                       snackBarKeyB.currentState?.removeCurrentSnackBar();

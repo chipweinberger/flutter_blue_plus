@@ -40,17 +40,15 @@ int _compareAsciiLowerCase(String a, String b) {
   return defaultResult.sign;
 }
 
-// add to list if item is new,
-// or update existing item
-List<T> _addOrUpdate<T>(List<T> results, T item) {
-  var list = List<T>.from(results);
-  if (list.contains(item)) {
-    int index = list.indexOf(item);
-    list[index] = item;
-  } else {
-    list.add(item);
+extension AddOrUpdate<T> on List<T> {
+  void addOrUpdate(T item) {
+    final index = indexOf(item);
+    if (index != -1) {
+      this[index] = item;
+    } else {
+      add(item);
+    }
   }
-  return list;
 }
 
 extension FutureTimeout<T> on Future<T> {

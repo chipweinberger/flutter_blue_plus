@@ -1,3 +1,15 @@
+## 1.15.0
+* **[Refactor]** simplify scanning api
+* **[Feature]** add `removeIfGone` option to `startScan`
+
+**Breaking Changes & Improvements:**
+- removed `FlutterBluePlus.scan`. Use `FlutterBluePlus.scartScan(oneByOne: true)` instead.
+- removed `allowDuplicates` option for `scartScan`. It is not supported on android. We always filter duplicates anyway.
+- `startScan` now returns Future<void> instead of Future<List<ScanResult>>. It was redundant and confusing.
+- if you `await startScan` it will not complete once the scan starts, instead of when it ends
+- if you call `startScan` twice, it will now cancel the previous scan instead of throwing an exception
+
+
 ## 1.14.24
 * **[Fix]** Android: setNotifyValue: (code: 5) notifications were not updated
 * **[Fix]** Hot Restart: stop scanning when hot restarting

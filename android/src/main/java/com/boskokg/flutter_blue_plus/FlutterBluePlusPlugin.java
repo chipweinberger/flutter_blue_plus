@@ -286,7 +286,7 @@ public class FlutterBluePlusPlugin implements
                 case "getAdapterState":
                 {
                     // get adapterState, if we can
-                    int adapterState = -1;
+                    int adapterState = -1; // unknown
                     try {
                         adapterState = mBluetoothAdapter.getState();
                     } catch (Exception e) {}
