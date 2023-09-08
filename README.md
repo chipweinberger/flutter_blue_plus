@@ -52,7 +52,6 @@ Please star this repo & on [pub.dev](https://pub.dev/packages/flutter_blue_plus)
 FlutterBluePlus has a beautiful example app, useful to debug issues.
 
 ```
-// run example
 cd ./example
 flutter run
 ```
