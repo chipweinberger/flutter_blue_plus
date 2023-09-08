@@ -63,7 +63,7 @@ Flutter Blue Plus takes error handling very seriously.
 
 Every error returned by the native platform is checked and thrown as an exception where appropriate. See [Reference](#reference) for a list of throwable functions.
 
-**Streams:** At the time of writing, streams returned by Flutter Blue Plus never emit any errors and never close. There's no need to handle `onError` or `onDone` for  `stream.listen(...)`.
+**Streams:** At the time of writing, streams returned by Flutter Blue Plus never emit any errors and never close. There's no need to handle `onError` or `onDone` for  `stream.listen(...)`. The one exception is FlutterBluePlus.scanResults, which you should handle `onError`.
 
 ---
 
@@ -121,13 +121,15 @@ If your device is not found, see [Common Problems](#common-problems).
 // device not found? see "Common Problems" in the README
 Set<DeviceIdentifier> seen = {};
 var subscription = FlutterBluePlus.scanResults.listen((results) {
-    for (ScanResult r in results) {
-        if (seen.contains(r.device.remoteId) == false) {
-            print('${r.device.remoteId}: "${r.device.localName}" found! rssi: ${r.rssi}');
-            seen.add(r.device.remoteId);
+        for (ScanResult r in results) {
+            if (seen.contains(r.device.remoteId) == false) {
+                print('${r.device.remoteId}: "${r.device.localName}" found! rssi: ${r.rssi}');
+                seen.add(r.device.remoteId);
+            }
         }
-    }
-});
+    },
+    onError(e) => print(e);
+);
 
 // Start scanning
 // Note: You should always call `scanResults.listen` before you call startScan!
