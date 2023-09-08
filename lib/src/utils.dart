@@ -321,6 +321,7 @@ class _NewStreamWithInitialValueTransformer<T> extends StreamTransformerBase<T, 
 }
 
 extension _StreamDoOnDone<T> on Stream<T> {
+  // ignore: unused_element
   Stream<T> doOnDone(void Function() onDone) {
     return transform(_OnDoneTransformer(onDone: onDone));
   }
