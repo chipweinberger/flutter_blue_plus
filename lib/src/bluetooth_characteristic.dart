@@ -22,7 +22,7 @@ class BluetoothCharacteristic {
   ///   - *once* if you call read()
   List<int> get lastValue {
     String key = "$serviceUuid:$characteristicUuid";
-    return FlutterBluePlus._lastChrs[remoteId]?[key]?.value ?? [];
+    return FlutterBluePlus._lastChrs[remoteId]?[key] ?? [];
   }
 
   BluetoothCharacteristic.fromProto(BmBluetoothCharacteristic p)
@@ -41,14 +41,14 @@ class BluetoothCharacteristic {
   //   - after read() is called
   //   - when a notification arrives
   Stream<List<int>> get onValueReceived => FlutterBluePlus._methodStream.stream
-          .where((m) => m.method == "OnCharacteristicReceived")
-          .map((m) => m.arguments)
-          .map((args) => BmOnCharacteristicReceived.fromMap(args))
-          .where((p) => p.remoteId == remoteId.toString())
-          .where((p) => p.serviceUuid == serviceUuid)
-          .where((p) => p.characteristicUuid == characteristicUuid)
-          .where((p) => p.success == true)
-          .map((c) => c.value);
+      .where((m) => m.method == "OnCharacteristicReceived")
+      .map((m) => m.arguments)
+      .map((args) => BmOnCharacteristicReceived.fromMap(args))
+      .where((p) => p.remoteId == remoteId.toString())
+      .where((p) => p.serviceUuid == serviceUuid)
+      .where((p) => p.characteristicUuid == characteristicUuid)
+      .where((p) => p.success == true)
+      .map((c) => c.value);
 
   bool get isNotifying {
     try {
@@ -199,40 +199,37 @@ class BluetoothCharacteristic {
 
     // Notifications & Indications are configured by writing to the
     // Client Characteristic Configuration Descriptor (CCCD)
-    Stream<BmOnDescriptorResponse> responseStream = FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "OnDescriptorResponse")
+    Stream<BmOnDescriptorWrite> responseStream = FlutterBluePlus._methodStream.stream
+        .where((m) => m.method == "OnDescriptorWrite")
         .map((m) => m.arguments)
-        .map((args) => BmOnDescriptorResponse.fromMap(args))
-        .where((p) => p.type == BmOnDescriptorResponseType.write)
+        .map((args) => BmOnDescriptorWrite.fromMap(args))
         .where((p) => p.remoteId == request.remoteId)
         .where((p) => p.serviceUuid == request.serviceUuid)
         .where((p) => p.characteristicUuid == request.characteristicUuid)
         .where((p) => p.descriptorUuid == cccdUuid);
 
     // Start listening now, before invokeMethod, to ensure we don't miss the response
-    Future<BmOnDescriptorResponse> futureResponse = responseStream.first;
+    Future<BmOnDescriptorWrite> futureResponse = responseStream.first;
 
     await FlutterBluePlus._invokeMethod('setNotification', request.toMap());
 
     // wait for response, so that we can check for success
-    BmOnDescriptorResponse response = await futureResponse.fbpTimeout(timeout, "setNotifyValue");
+    BmOnDescriptorWrite response = await futureResponse.fbpTimeout(timeout, "setNotifyValue");
 
     // failed?
     if (!response.success) {
       throw FlutterBluePlusException(_nativeError, "setNotifyValue", response.errorCode, response.errorString);
     }
 
-    // verify notifications were actually set correctly
-    var cccd = response.value;
-    var hasNotify = cccd.isNotEmpty && (cccd[0] & 0x01) > 0;
-    var hasIndicate = cccd.isNotEmpty && (cccd[0] & 0x02) > 0;
-    var isEnabled = hasNotify || hasIndicate;
-    if (notify != isEnabled) {
-      throw FlutterBluePlusException(
-          ErrorPlatform.dart, "setNotifyValue", FbpErrorCode.setNotifyFailed.index, "notifications were not updated");
-    }
+    // update CCCD descriptor
+    // On iOS, if a characteristic supports both notify and indicate, it uses notifications.
+    // We match this behavior on Android.
+    String key = "$serviceUuid:$characteristicUuid:${cccdUuid.toString()}";
+    List<int> value = properties.notify ? [1] : (properties.indicate ? [2] : [0]);
+    FlutterBluePlus._lastDescs[remoteId] ??= {};
+    FlutterBluePlus._lastDescs[remoteId]![key] = value;
 
-    return notify == isEnabled;
+    return true;
   }
 
   @override

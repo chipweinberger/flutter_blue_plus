@@ -23,8 +23,8 @@ class FlutterBluePlus {
   static final Map<DeviceIdentifier, BmDiscoverServicesResult> _knownServices = {};
   static final Map<DeviceIdentifier, BmBondStateResponse> _bondStates = {};
   static final Map<DeviceIdentifier, BmMtuChangedResponse> _mtuValues = {};
-  static final Map<DeviceIdentifier, Map<String, BmOnCharacteristicReceived>> _lastChrs = {};
-  static final Map<DeviceIdentifier, Map<String, BmOnDescriptorResponse>> _lastDescs = {};
+  static final Map<DeviceIdentifier, Map<String, List<int>>> _lastChrs = {};
+  static final Map<DeviceIdentifier, Map<String, List<int>>> _lastDescs = {};
 
   // stream used for the isScanning public api
   static final _StreamController<bool> _isScanning = _StreamController(initialValue: false);
@@ -298,22 +298,18 @@ class FlutterBluePlus {
       BmOnCharacteristicReceived r = BmOnCharacteristicReceived.fromMap(call.arguments);
       if (r.success == true) {
         DeviceIdentifier d = DeviceIdentifier(r.remoteId);
-        if (_lastChrs[d] == null) {
-          _lastChrs[d] = {};
-        }
-        _lastChrs[DeviceIdentifier(r.remoteId)]!["${r.serviceUuid}:${r.characteristicUuid}"] = r;
+        _lastChrs[d] ??= {};
+        _lastChrs[DeviceIdentifier(r.remoteId)]!["${r.serviceUuid}:${r.characteristicUuid}"] = r.value;
       }
     }
 
     // keep track of descriptor values
-    if (call.method == "OnDescriptorResponse") {
-      BmOnDescriptorResponse r = BmOnDescriptorResponse.fromMap(call.arguments);
+    if (call.method == "OnDescriptorRead") {
+      BmOnDescriptorRead r = BmOnDescriptorRead.fromMap(call.arguments);
       if (r.success == true) {
         DeviceIdentifier d = DeviceIdentifier(r.remoteId);
-        if (_lastDescs[d] == null) {
-          _lastDescs[d] = {};
-        }
-        _lastDescs[d]!["${r.serviceUuid}:${r.characteristicUuid}:${r.descriptorUuid}"] = r;
+        _lastDescs[d] ??= {};
+        _lastDescs[d]!["${r.serviceUuid}:${r.characteristicUuid}:${r.descriptorUuid}"] = r.value;
       }
     }
 
@@ -523,12 +519,11 @@ final ErrorPlatform _nativeError = (() {
 
 enum FbpErrorCode {
   success, // 0
-  androidOnly, // 1
-  scanInProgress, // 2
-  createBondFailed, // 3
-  removeBondFailed, // 4
-  setNotifyFailed, // 5
-  timeout, // 6
+  timeout, // 1
+  androidOnly, // 2
+  scanInProgress, // 3
+  createBondFailed, // 4
+  removeBondFailed, // 5
 }
 
 class FlutterBluePlusException implements Exception {

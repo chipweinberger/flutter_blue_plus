@@ -1456,7 +1456,6 @@ public class FlutterBluePlusPlugin implements
 
     private ScanCallback scanCallback;
 
-    @TargetApi(21)
     private ScanCallback getScanCallback()
     {
         if(scanCallback == null) {
@@ -1671,26 +1670,53 @@ public class FlutterBluePlusPlugin implements
         }
 
         @Override
+        @TargetApi(33)
+        public void onDescriptorRead(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status, byte[] value)
+        {
+            log(LogLevel.DEBUG, "[FBP-Android] onDescriptorRead: uuid: " + uuid128(descriptor.getUuid()) + " status: " + status);
+
+            ServicePair pair = getServicePair(gatt, descriptor.getCharacteristic());
+
+            // see: BmOnDescriptorRead
+            HashMap<String, Object> response = new HashMap<>();
+            response.put("remote_id", gatt.getDevice().getAddress());
+            response.put("service_uuid", uuid128(pair.primary));
+            response.put("secondary_service_uuid", pair.secondary != null ? uuid128(pair.secondary) : null);
+            response.put("characteristic_uuid", uuid128(descriptor.getCharacteristic().getUuid()));
+            response.put("descriptor_uuid", uuid128(descriptor.getUuid()));
+            response.put("value", bytesToHex(value));
+            response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
+            response.put("error_code", status);
+            response.put("error_string", gattErrorString(status));
+
+            invokeMethodUIThread("OnDescriptorRead", response);
+        }
+
+        @Override
         public void onDescriptorRead(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status)
         {
             log(LogLevel.DEBUG, "[FBP-Android] onDescriptorRead: uuid: " + uuid128(descriptor.getUuid()) + " status: " + status);
 
             ServicePair pair = getServicePair(gatt, descriptor.getCharacteristic());
 
-            // see: BmOnDescriptorResponse
+            // this was deprecated in API level 33 because the api makes it look like
+            // you could always call getValue on a descriptor. But in reality, this
+            // only works after a *read* has been made, not a *write*.
+            byte[] value = descriptor.getValue();
+
+            // see: BmOnDescriptorRead
             HashMap<String, Object> response = new HashMap<>();
-            response.put("type", 0); // type: read
             response.put("remote_id", gatt.getDevice().getAddress());
             response.put("service_uuid", uuid128(pair.primary));
             response.put("secondary_service_uuid", pair.secondary != null ? uuid128(pair.secondary) : null);
             response.put("characteristic_uuid", uuid128(descriptor.getCharacteristic().getUuid()));
             response.put("descriptor_uuid", uuid128(descriptor.getUuid()));
-            response.put("value", bytesToHex(descriptor.getValue()));
+            response.put("value", bytesToHex(value));
             response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
             response.put("error_code", status);
             response.put("error_string", gattErrorString(status));
 
-            invokeMethodUIThread("OnDescriptorResponse", response);
+            invokeMethodUIThread("OnDescriptorRead", response);
         }
 
         @Override
@@ -1700,20 +1726,18 @@ public class FlutterBluePlusPlugin implements
 
             ServicePair pair = getServicePair(gatt, descriptor.getCharacteristic());
 
-            // see: BmOnDescriptorResponse
+            // see: BmOnDescriptorWrite
             HashMap<String, Object> response = new HashMap<>();
-            response.put("type", 1); // type: write
             response.put("remote_id", gatt.getDevice().getAddress());
             response.put("service_uuid", uuid128(pair.primary));
             response.put("secondary_service_uuid", pair.secondary != null ? uuid128(pair.secondary) : null);
             response.put("characteristic_uuid", uuid128(descriptor.getCharacteristic().getUuid()));
             response.put("descriptor_uuid", uuid128(descriptor.getUuid()));
-            response.put("value", bytesToHex(descriptor.getValue()));
             response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
             response.put("error_code", status);
             response.put("error_string", gattErrorString(status));
 
-            invokeMethodUIThread("OnDescriptorResponse", response);
+            invokeMethodUIThread("OnDescriptorWrite", response);
         }
 
         @Override
