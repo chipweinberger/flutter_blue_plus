@@ -118,7 +118,7 @@ var subscription = FlutterBluePlus.scanResults.listen((results) {
 
 // Start scanning
 // Note: You should always call `scanResults.listen` before you call startScan!
-await FlutterBluePlus.startScan(timeout: Duration(seconds: 4));
+await FlutterBluePlus.startScan();
 
 // Stop scanning
 await FlutterBluePlus.stopScan();
