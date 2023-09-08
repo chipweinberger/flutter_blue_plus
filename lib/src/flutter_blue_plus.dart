@@ -122,10 +122,9 @@ class FlutterBluePlus {
   /// Start a scan, and return a stream of results
   ///   - [timeout] calls stopScan after a specified duration
   ///   - [removeIfGone] if true, remove devices after they've stopped advertising for X duration
-  ///   - [oneByOne] if true, the output list will only contain the most recent advertisement
-  ///   - [androidUsesFineLocation] requests ACCESS_FINE_LOCATION permission at runtime regardless
-  ///    of Android version. On Android 11 and below (Sdk < 31), this permission is required
-  ///    and therefore we will always request it. Your AndroidManifest.xml must match.
+  ///   - [oneByOne] if true, we will stream every advertistment one by one, including duplicates.
+  ///    If false, we deduplicate the advertisements, and return a list of devices.
+  ///   - [androidUsesFineLocation] request ACCESS_FINE_LOCATION permission at runtime
   static Future<void> startScan({
     List<Guid> withServices = const [],
     Duration? timeout,
