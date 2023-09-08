@@ -137,7 +137,7 @@ class FlutterBluePlus {
       await stopScan();
     }
 
-    // mark scanning
+    // push to stream
     _isScanning.add(true);
 
     var settings = BmScanSettings(
@@ -164,7 +164,7 @@ class FlutterBluePlus {
     // invoke platform method
     await _invokeMethod('startScan', settings.toMap());
 
-    // remove devices after they are gone?
+    // check every 250ms for gone devices?
     late Stream<BmScanResponse?> outputStream;
     if (removeIfGone != null) {
       outputStream = _mergeStreams([_scanBuffer.stream, Stream.periodic(Duration(milliseconds: 250))]);
@@ -208,11 +208,11 @@ class FlutterBluePlus {
   }
 
   /// Stops a scan for Bluetooth Low Energy devices
-  static Future stopScan() async {
+  static Future<void> stopScan() async {
     _scanSubscription?.cancel();
     _scanTimeout?.cancel();
     _isScanning.add(false);
-    _invokeMethod('stopScan');
+    await _invokeMethod('stopScan');
   }
 
   /// Sets the internal FlutterBlue log level
