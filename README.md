@@ -47,6 +47,16 @@ This makes FlutterBluePlus very stable, and easy to maintain.
 
 Please star this repo & on [pub.dev](https://pub.dev/packages/flutter_blue_plus). We all benefit from having a larger community.
 
+## Example
+
+FlutterBluePlus has a beautiful example app, useful to debug issues.
+
+<br>
+<p align="center">
+<img alt="FlutterBlue" src="https://github.com/boskokg/flutter_blue_plus/blob/master/site/example.png?raw=true" />
+</p>
+<br><br>
+
 ## Usage
 
 ### :fire: Error Handling :fire:
@@ -111,12 +121,12 @@ If your device is not found, see [Common Problems](#common-problems).
 ```dart
 // Setup Listener for scan results.
 // device not found? see "Common Problems" in the README
-Set<DeviceIdentifier> printed = {};
+Set<DeviceIdentifier> seen = {};
 var subscription = FlutterBluePlus.scanResults.listen((results) {
     for (ScanResult r in results) {
-        if (printed.contains(r.device.remoteId) == false) {
+        if (seen.contains(r.device.remoteId) == false) {
             print('${r.device.remoteId}: "${r.device.localName}" found! rssi: ${r.rssi}');
-            printed.add(r.device.remoteId);
+            seen.add(r.device.remoteId);
         }
     }
 });
