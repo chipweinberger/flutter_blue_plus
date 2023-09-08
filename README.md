@@ -79,10 +79,11 @@ Setting `LogLevel.verbose` shows *all* data in and out.
 
 ### Enable Bluetooth
 
-**Note:** On iOS, a "*This app would like to use Bluetooth*" system dialogue appears on first call to a FlutterBluePlus method. This is when the `CBCentralManager` (iOS) & `BluetoothManager` (Android) are initialized.
+**Note:** On iOS, a "*This app would like to use Bluetooth*" system dialogue appears on first call to any FlutterBluePlus method. 
  
 ```dart
 // check adapter availability
+// Note: The platform is initialized on the first call to any FlutterBluePlus method.
 if (await FlutterBluePlus.isAvailable == false) {
     print("Bluetooth not supported by this device");
     return;
@@ -136,6 +137,7 @@ device.connectionState.listen((BluetoothConnectionState state) async {
 });
 
 // Connect to the device
+// Note: You should always call `connectionState.listen` before you call connect!
 await device.connect();
 
 // Disconnect from device
@@ -145,7 +147,7 @@ await device.disconnect();
 ### Discover services
 
 ```dart
-// Note: You must call this again if disconnected!
+// Note: You must call discoverServices after every connection!
 List<BluetoothService> services = await device.discoverServices();
 services.forEach((service) {
     // do something with service
