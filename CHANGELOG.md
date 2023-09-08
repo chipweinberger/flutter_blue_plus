@@ -1,3 +1,7 @@
+## 1.14.24
+* **[Fix]** Android: setNotifyValue: (code: 5) notifications were not updated
+* **[Fix]** Hot Restart: stop scanning when hot restarting
+
 ## 1.14.23
 * **[Fix]** setNotifyValue & others must be cleared after disconnection (regression in 1.14.21)
 
