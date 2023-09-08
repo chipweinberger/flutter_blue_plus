@@ -51,6 +51,12 @@ Please star this repo & on [pub.dev](https://pub.dev/packages/flutter_blue_plus)
 
 FlutterBluePlus has a beautiful example app, useful to debug issues.
 
+**To run:**
+```
+cd ./example
+flutter run
+```
+
 <p align="center">
 <img alt="FlutterBlue" src="https://github.com/boskokg/flutter_blue_plus/blob/master/site/example.png?raw=true" />
 </p>
