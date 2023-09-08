@@ -41,26 +41,11 @@ class BluetoothDevice {
         localName = localName ?? "Unknown",
         type = type ?? BluetoothDeviceType.unknown;
 
-  // stream return whether or not we are currently discovering services
-  @Deprecated("planed for removal (Jan 2024). It can be easily implemented yourself") // deprecated on Aug 2023
-  Stream<bool> get isDiscoveringServices => _isDiscoveringServices.stream;
-
   // Get services
   //  - returns null if discoverServices() has not been called
   //  - this is cleared on disconnection. You must call discoverServices() again
   List<BluetoothService>? get servicesList {
     return FlutterBluePlus._knownServices[remoteId]?.services.map((p) => BluetoothService.fromProto(p)).toList();
-  }
-
-  /// Stream of bluetooth services offered by the remote device
-  ///   - this stream is only updated when you call discoverServices()
-  @Deprecated("planed for removal (Jan 2024). It can be easily implemented yourself") // deprecated on Aug 2023
-  Stream<List<BluetoothService>> get servicesStream {
-    if (FlutterBluePlus._knownServices[remoteId] != null) {
-      return _services.stream.newStreamWithInitialValue(servicesList!);
-    } else {
-      return _services.stream;
-    }
   }
 
   /// Establishes a connection to the Bluetooth Device.
@@ -489,6 +474,21 @@ class BluetoothDevice {
         'isDiscoveringServices: ${_isDiscoveringServices.value}, '
         'services: ${FlutterBluePlus._knownServices[remoteId]}'
         '}';
+  }
+
+  // stream return whether or not we are currently discovering services
+  @Deprecated("planed for removal (Jan 2024). It can be easily implemented yourself") // deprecated on Aug 2023
+  Stream<bool> get isDiscoveringServices => _isDiscoveringServices.stream;
+  
+  /// Stream of bluetooth services offered by the remote device
+  ///   - this stream is only updated when you call discoverServices()
+  @Deprecated("planed for removal (Jan 2024). It can be easily implemented yourself") // deprecated on Aug 2023
+  Stream<List<BluetoothService>> get servicesStream {
+    if (FlutterBluePlus._knownServices[remoteId] != null) {
+      return _services.stream.newStreamWithInitialValue(servicesList!);
+    } else {
+      return _services.stream;
+    }
   }
 
   @Deprecated('Use createBond() instead')
