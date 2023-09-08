@@ -1,3 +1,6 @@
+## 1.15.1
+* **[Fix]** FlutterBluePlus.scanResults should always return list copy to avoid iteration exceptions
+
 ## 1.15.0
 * **[Refactor]** simplify scanning api
 * **[Feature]** add `removeIfGone` option to `startScan`
