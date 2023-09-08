@@ -123,14 +123,16 @@ class FlutterBluePlus {
   }
 
   /// Starts a scan for Bluetooth Low Energy devices and returns a stream
-  /// of the [ScanResult] results as they are received.
-  ///    - throws an exception if scanning is already in progress
-  ///    - [timeout] calls stopScan after a specified duration
-  ///    - [androidUsesFineLocation] requests ACCESS_FINE_LOCATION permission at runtime regardless
+  /// of the [ScanResult] results as they are received in real-time.
+  ///   - throws an exception if scanning is already in progress
+  ///   - [timeout] calls stopScan after a specified duration
+  ///   - [allowDuplicates] if true, repeated advertisements will update `ScanResult.timeStamp`.
+  ///    Useful for detecting when a device is no longer available. (i.e. now - timestamp > threshold)
+  ///   - [androidUsesFineLocation] requests ACCESS_FINE_LOCATION permission at runtime regardless
   ///    of Android version. On Android 11 and below (Sdk < 31), this permission is required
   ///    and therefore we will always request it. Your AndroidManifest.xml must match.
   static Stream<ScanResult> scan({
-    ScanMode scanMode = ScanMode.lowLatency,
+    ScanMode scanMode = ScanMode.lowLatency, // only applicable on android
     List<Guid> withServices = const [],
     List<String> macAddresses = const [],
     Duration? timeout,
@@ -193,11 +195,26 @@ class FlutterBluePlus {
 
         ScanResult item = ScanResult.fromProto(response.result!);
 
-        // make new list while considering duplicates
-        List<ScanResult> list = _addOrUpdate(_scanResultsList.value, item);
+        List<ScanResult> existingList = _scanResultsList.value;
 
-        // update list
-        _scanResultsList.add(list);
+        // is duplicate?
+        bool isDuplicate = existingList.contains(item);
+
+        // make new list while considering duplicates
+        List<ScanResult> updatedList = _addOrUpdate(existingList, item);
+
+        // update stream
+        _scanResultsList.add(updatedList);
+
+        // skip duplicates?
+        if (allowDuplicates == false && isDuplicate) {
+          continue;
+        }
+
+        // mac address filter
+        if (macAddresses.isNotEmpty && macAddresses.contains(item.device.remoteId.toString()) == false) {
+          continue;
+        }
 
         yield item;
       }
@@ -208,13 +225,18 @@ class FlutterBluePlus {
     }
   }
 
-  /// Start a scan
-  ///  - future completes when the scan is done.
-  ///  - To observe the results live, listen to the [scanResults] stream.
-  ///  - call [stopScan] to complete the returned future, or set [timeout]
-  ///  - see [scan] documentation for more details
+  /// Start a scan. To observe the results live, listen to the [scanResults] stream.
+  ///   - future completes when the scan is done.
+  ///   - throws an exception if scanning is already in progress
+  ///   - call stopScan to complete the returned future, or set [timeout]
+  ///   - [timeout] calls stopScan after a specified duration
+  ///   - [allowDuplicates] if true, repeated advertisements will update `ScanResult.timeStamp`.
+  ///    Useful for detecting when a device is no longer available. (i.e. now - timestamp > threshold)
+  ///   - [androidUsesFineLocation] requests ACCESS_FINE_LOCATION permission at runtime regardless
+  ///    of Android version. On Android 11 and below (Sdk < 31), this permission is required
+  ///    and therefore we will always request it. Your AndroidManifest.xml must match.
   static Future<List<ScanResult>> startScan({
-    ScanMode scanMode = ScanMode.lowLatency,
+    ScanMode scanMode = ScanMode.lowLatency, // only applicable on android
     List<Guid> withServices = const [],
     List<String> macAddresses = const [],
     Duration? timeout,
@@ -275,7 +297,6 @@ class FlutterBluePlus {
       BmBondStateResponse r = BmBondStateResponse.fromMap(call.arguments);
       _bondStates[DeviceIdentifier(r.remoteId)] = r;
     }
-
 
     // keep track of services
     if (call.method == "OnDiscoverServicesResult") {
