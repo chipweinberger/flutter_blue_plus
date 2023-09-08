@@ -1,3 +1,6 @@
+## 1.15.2
+* **[Fix]** stopScan was not awaiting for invokeMethod
+
 ## 1.15.1
 * **[Fix]** FlutterBluePlus.scanResults should always return list copy to avoid iteration exceptions
 
