@@ -437,3 +437,14 @@ String _brown(String s) {
   // Use ANSI escape codes
   return '\x1B[1;33m$s\x1B[0m';
 }
+
+extension FirstWhereOrNullExtension<T> on Iterable<T> {
+  T? firstWhereOrNull(bool Function(T) test) {
+    for (var element in this) {
+      if (test(element)) {
+        return element;
+      }
+    }
+    return null;
+  }
+}

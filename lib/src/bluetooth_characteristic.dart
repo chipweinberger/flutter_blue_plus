@@ -51,14 +51,13 @@ class BluetoothCharacteristic {
       .map((c) => c.value);
 
   bool get isNotifying {
-    try {
-      var cccd = descriptors.singleWhere((d) => d.descriptorUuid == cccdUuid);
-      var hasNotify = cccd.lastValue.isNotEmpty && (cccd.lastValue[0] & 0x01) > 0;
-      var hasIndicate = cccd.lastValue.isNotEmpty && (cccd.lastValue[0] & 0x02) > 0;
-      return hasNotify || hasIndicate;
-    } catch (e) {
+    var cccd = descriptors.firstWhereOrNull((d) => d.descriptorUuid == cccdUuid);
+    if (cccd == null) {
       return false;
     }
+    var hasNotify = cccd.lastValue.isNotEmpty && (cccd.lastValue[0] & 0x01) > 0;
+    var hasIndicate = cccd.lastValue.isNotEmpty && (cccd.lastValue[0] & 0x02) > 0;
+    return hasNotify || hasIndicate;
   }
 
   /// read a characteristic
