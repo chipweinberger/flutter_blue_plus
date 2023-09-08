@@ -120,7 +120,8 @@ If your device is not found, see [Common Problems](#common-problems).
 // Setup Listener for scan results.
 // device not found? see "Common Problems" in the README
 Set<DeviceIdentifier> seen = {};
-var subscription = FlutterBluePlus.scanResults.listen((results) {
+var subscription = FlutterBluePlus.scanResults.listen(
+    (results) {
         for (ScanResult r in results) {
             if (seen.contains(r.device.remoteId) == false) {
                 print('${r.device.remoteId}: "${r.device.localName}" found! rssi: ${r.rssi}');
