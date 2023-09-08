@@ -108,7 +108,7 @@ await FlutterBluePlus.adapterState
 If your device is not found, see [Common Problems](#common-problems).
 
 ```dart
-// Setup Listener for scan results
+// Setup Listener for scan results.
 // device not found? see "Common Problems" in the README
 var subscription = FlutterBluePlus.scanResults.listen((results) {
     for (ScanResult r in results) {
@@ -117,7 +117,8 @@ var subscription = FlutterBluePlus.scanResults.listen((results) {
 });
 
 // Start scanning
-FlutterBluePlus.startScan(timeout: Duration(seconds: 4));
+// Note: You should always call `scanResults.listen` before you call startScan!
+await FlutterBluePlus.startScan(timeout: Duration(seconds: 4));
 
 // Stop scanning
 await FlutterBluePlus.stopScan();
