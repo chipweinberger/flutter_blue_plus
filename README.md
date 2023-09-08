@@ -243,11 +243,10 @@ for (var d in connectedSystemDevices) {
 
 ```dart
 final mtu = await device.mtu.first;
+
+// (Android Only) On iOS, MTU is negotiated automatically
 await device.requestMtu(512);
 ```
-
-Note that iOS will not allow requests of MTU size, and will always try to negotiate the highest possible MTU (iOS supports up to MTU size 185)
-
 ### Create Bond (Android Only)
 
 **Note:** calling this is usually not necessary!! The platform will do it automatically. 
@@ -372,8 +371,7 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 | isAvailable            | :white_check_mark: | :white_check_mark: |        | Checks whether the device supports Bluetooth               |
 | turnOn                 | :white_check_mark: |                    | :fire: | Turns on the bluetooth adapter                             |
 | adapterState        🌀 | :white_check_mark: | :white_check_mark: |        | Stream of on & off states of the bluetooth adapter         |
-| scan                   | :white_check_mark: | :white_check_mark: | :fire: | Starts a scan for Ble devices and returns a stream         |
-| startScan              | :white_check_mark: | :white_check_mark: | :fire: | Starts a scan for Ble devices with no return value         |
+| startScan              | :white_check_mark: | :white_check_mark: | :fire: | Starts a scan for Ble devices                              |
 | stopScan               | :white_check_mark: | :white_check_mark: | :fire: | Stop an existing scan for Ble devices                      |
 | scanResults         🌀 | :white_check_mark: | :white_check_mark: |        | Stream of live scan results                                |
 | isScanning          🌀 | :white_check_mark: | :white_check_mark: |        | Stream of current scanning state                           |
@@ -389,9 +387,7 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 | connect                   | :white_check_mark: | :white_check_mark: | :fire: | Establishes a connection to the device                     |
 | disconnect                | :white_check_mark: | :white_check_mark: | :fire: | Cancels an active or pending connection to the device      |
 | discoverServices          | :white_check_mark: | :white_check_mark: | :fire: | Discover services                                          |
-| isDiscoveryingServices 🌀 | :white_check_mark: | :white_check_mark: |        | Stream of whether service discovery is in progress         |
 | servicesList              | :white_check_mark: | :white_check_mark: |        | The list of services that were discovered                  |
-| servicesStream         🌀 | :white_check_mark: | :white_check_mark: |        | Stream of services changes                                 |
 | connectionState        🌀 | :white_check_mark: | :white_check_mark: |        | Stream of connection changes for the Bluetooth Device      |
 | bondState              🌀 | :white_check_mark: |                    |        | Stream of device bond state. Can be useful on Android      |
 | mtu                    🌀 | :white_check_mark: | :white_check_mark: | :fire: | Stream of mtu size changes                                 |
