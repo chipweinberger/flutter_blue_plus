@@ -183,7 +183,7 @@ class FlutterBluePlus {
         output.removeWhere((elm) => DateTime.now().difference(elm.timeStamp) > removeIfGone!);
 
         // push to stream
-        _scanResultsList.add(output);
+        _scanResultsList.add(List.from(output));
       } else {
         // failure?
         if (response.failed != null) {
@@ -203,7 +203,7 @@ class FlutterBluePlus {
         }
 
         // push to stream
-        _scanResultsList.add(output);
+        _scanResultsList.add(List.from(output));
       }
     });
   }
