@@ -328,6 +328,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // remoteId is passed raw, not in a NSDictionary
             NSString *remoteId = [call arguments];
 
+            // Find peripheral
             CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
             if (peripheral == nil) {
                 NSString* s = @"device is disconnected";

@@ -1,5 +1,5 @@
 ## 1.15.4
-* **[Fix]** some typos in disconnect exceptions (from 1.15.3)"
+* **[Fix]** some typos in disconnect exceptions (from 1.15.3)
 
 ## 1.15.3
 * **[Improve]** prefer dart exceptions over platform exceptions when device is disconnected
