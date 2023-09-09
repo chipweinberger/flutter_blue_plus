@@ -222,6 +222,13 @@ class FlutterBluePlus {
     _logColor = color;
   }
 
+  static bool _isDeviceConnected(DeviceIdentifier remoteId) {
+    if (_connectionStates[remoteId] == null) {
+      return false;
+    }
+    return _connectionStates[remoteId]!.connectionState == BmConnectionStateEnum.connected;
+  }
+
   static Future<dynamic> _methodCallHandler(MethodCall call) async {
     // log result
     if (logLevel == LogLevel.verbose) {
@@ -502,11 +509,12 @@ final ErrorPlatform _nativeError = (() {
 })();
 
 enum FbpErrorCode {
-  success, // 0
-  timeout, // 1
-  androidOnly, // 2
-  createBondFailed, // 3
-  removeBondFailed, // 4
+  success,
+  timeout,
+  androidOnly,
+  createBondFailed,
+  removeBondFailed,
+  deviceIsDisconnected,
 }
 
 class FlutterBluePlusException implements Exception {

@@ -62,13 +62,20 @@ class BluetoothCharacteristic {
 
   /// read a characteristic
   Future<List<int>> read({int timeout = 15}) async {
-    List<int> responseValue = [];
+    // check connected
+    if (FlutterBluePlus._isDeviceConnected(remoteId) == false) {
+      throw FlutterBluePlusException(ErrorPlatform.dart, "readCharacteristic",
+        FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
+    }
 
     // Only allows a single read to be underway at any time, per-characteristic, per-device.
     // Otherwise, there would be multiple in-flight reads and we wouldn't know which response is which.
     String key = remoteId.str + ":" + characteristicUuid.toString() + ":readChr";
     _Mutex readMutex = await _MutexFactory.getMutexForKey(key);
     await readMutex.take();
+
+    // return value
+    List<int> responseValue = [];
 
     try {
       var request = BmReadCharacteristicRequest(
@@ -118,9 +125,15 @@ class BluetoothCharacteristic {
   ///         4. If the mtu is small, it is very very slow.
   Future<void> write(List<int> value,
       {bool withoutResponse = false, bool allowLongWrite = false, int timeout = 15}) async {
-    //  must have responses in order to reliably transfer a split write.
+    //  check args
     if (withoutResponse && allowLongWrite) {
-      throw ArgumentError("cannot split a write withoutResponse - not allowed on iOS or Android");
+      throw ArgumentError("cannot longWrite withoutResponse, not allowed on iOS or Android");
+    }
+
+    // check connected
+    if (FlutterBluePlus._isDeviceConnected(remoteId) == false) {
+      throw FlutterBluePlusException(ErrorPlatform.dart, "writeCharacteristic",
+        FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
     // Only allows a single write to be underway at any time, per-characteristic, per-device.
@@ -188,6 +201,12 @@ class BluetoothCharacteristic {
   ///   - If a characteristic supports both notifications and indications,
   ///     we'll use notifications. This is a limitation of CoreBluetooth on iOS.
   Future<bool> setNotifyValue(bool notify, {int timeout = 15}) async {
+    // check connected
+    if (FlutterBluePlus._isDeviceConnected(remoteId) == false) {
+      throw FlutterBluePlusException(ErrorPlatform.dart, "setNotification",
+        FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
+    }
+
     var request = BmSetNotificationRequest(
       remoteId: remoteId.toString(),
       serviceUuid: serviceUuid,

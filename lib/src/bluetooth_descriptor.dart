@@ -47,13 +47,20 @@ class BluetoothDescriptor {
 
   /// Retrieves the value of a specified descriptor
   Future<List<int>> read({int timeout = 15}) async {
-    List<int> readValue = [];
+    // check connected
+    if (FlutterBluePlus._isDeviceConnected(remoteId) == false) {
+      throw FlutterBluePlusException(ErrorPlatform.dart, "readDescriptor",
+        FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
+    }
 
     // Only allow a single read to be underway at any time, per-characteristic, per-device.
     // Otherwise, there would be multiple in-flight requests and we wouldn't know which response is for us.
     String key = remoteId.str + ":" + characteristicUuid.toString() + ":readDesc";
     _Mutex readMutex = await _MutexFactory.getMutexForKey(key);
     await readMutex.take();
+
+    // return value
+    List<int> readValue = [];
 
     try {
       var request = BmReadDescriptorRequest(
@@ -95,6 +102,12 @@ class BluetoothDescriptor {
 
   /// Writes the value of a descriptor
   Future<void> write(List<int> value, {int timeout = 15}) async {
+    // check connected
+    if (FlutterBluePlus._isDeviceConnected(remoteId) == false) {
+      throw FlutterBluePlusException(ErrorPlatform.dart, "writeDescriptor",
+        FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
+    }
+
     // Only allow a single write to be underway at any time, per-characteristic, per-device.
     // Otherwise, there would be multiple in-flight requests and we wouldn't know which response is for us.
     String key = remoteId.str + ":" + characteristicUuid.toString() + ":writeDesc";
