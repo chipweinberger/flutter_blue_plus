@@ -1,3 +1,6 @@
+## 1.15.3
+* **[Improve]** prefer dart exceptions over platform exceptions when device is disconnected
+
 ## 1.15.2
 * **[Fix]** stopScan was not awaiting for invokeMethod
 
