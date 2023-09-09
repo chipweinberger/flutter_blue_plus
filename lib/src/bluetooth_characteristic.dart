@@ -203,7 +203,7 @@ class BluetoothCharacteristic {
   Future<bool> setNotifyValue(bool notify, {int timeout = 15}) async {
     // check connected
     if (FlutterBluePlus._isDeviceConnected(remoteId) == false) {
-      throw FlutterBluePlusException(ErrorPlatform.dart, "setNotification",
+      throw FlutterBluePlusException(ErrorPlatform.dart, "setNotifyValue",
         FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 

@@ -314,7 +314,7 @@ class BluetoothDevice {
 
     // check connected
     if (FlutterBluePlus._isDeviceConnected(remoteId) == false) {
-      throw FlutterBluePlusException(ErrorPlatform.dart, "createBond",
+      throw FlutterBluePlusException(ErrorPlatform.dart, "requestConnectionPriority",
         FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
@@ -344,7 +344,7 @@ class BluetoothDevice {
 
     // check connected
     if (FlutterBluePlus._isDeviceConnected(remoteId) == false) {
-      throw FlutterBluePlusException(ErrorPlatform.dart, "createBond",
+      throw FlutterBluePlusException(ErrorPlatform.dart, "setPreferredPhy",
         FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
@@ -453,7 +453,7 @@ class BluetoothDevice {
 
     // check connected
     if (FlutterBluePlus._isDeviceConnected(remoteId) == false) {
-      throw FlutterBluePlusException(ErrorPlatform.dart, "createBond",
+      throw FlutterBluePlusException(ErrorPlatform.dart, "clearGattCache",
         FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
