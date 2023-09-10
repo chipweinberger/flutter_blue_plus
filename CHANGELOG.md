@@ -1,3 +1,6 @@
+## 1.15.5
+* **[Fix]** firstWhereOrNull conflict
+
 ## 1.15.4
 * **[Fix]** some typos in disconnect exceptions (from 1.15.3)
 
