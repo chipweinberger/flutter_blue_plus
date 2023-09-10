@@ -51,7 +51,7 @@ class BluetoothCharacteristic {
       .map((c) => c.value);
 
   bool get isNotifying {
-    var cccd = descriptors.firstWhereOrNull((d) => d.descriptorUuid == cccdUuid);
+    var cccd = descriptors._firstWhereOrNull((d) => d.descriptorUuid == cccdUuid);
     if (cccd == null) {
       return false;
     }
