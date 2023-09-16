@@ -367,7 +367,7 @@ class FlutterBluePlus {
   @Deprecated('Use connectedSystemDevices instead')
   static Future<List<BluetoothDevice>> get connectedDevices => connectedSystemDevices;
 
-  @Deprecated('removed. use startScan with the oneByOne option instead')
+  @Deprecated('removed. read MIGRATION.md for simple alternatives')
   static Stream<ScanResult> scan(
           {ScanMode scanMode = ScanMode.lowLatency,
           List<Guid> withServices = const [],
