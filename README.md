@@ -153,8 +153,10 @@ await FlutterBluePlus.stopScan();
 // listen for disconnection
 device.connectionState.listen((BluetoothConnectionState state) async {
     if (state == BluetoothConnectionState.disconnected) {
-        // typically, start a periodic timer that tries to periodically reconnect.
-        // Note: you must always re-discover services after disconnection!
+        // 1. typically, start a periodic timer that tries to 
+        //    periodically reconnect, or just call connect() again right now
+        // 2. you must always re-discover services after disconnection!
+        // 3. you should cancel subscriptions to all characteristics you listened to
     }
 });
 
@@ -241,8 +243,16 @@ If onValueReceived is never called, see [Common Problems](#common-problems) in t
 ```dart
 // Setup Listener for characteristic reads
 // If this is never called, see "Common Problems" in the README
-characteristic.onValueReceived.listen((value) {
+final subscription = characteristic.onValueReceived.listen((value) {
     // do something with new value
+});
+
+// listen for disconnection
+device.connectionState.listen((BluetoothConnectionState state) async {
+    if (state == BluetoothConnectionState.disconnected) {
+        // stop listening to characteristic
+        subscription.cancel();
+    }
 });
 
 // enable notifications
