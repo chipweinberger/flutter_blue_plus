@@ -586,7 +586,29 @@ Try interacting with your device to get it to send new data.
 
 Try rebooting your ble device. 
 
-Some ble devices have buggy software and stop sending data.
+Some ble devices have buggy software and stop sending data
+
+---
+
+### onValueReceived is called with duplicate data
+
+You are probably forgetting to cancel the original `stream.listen` resulting in multiple listens.
+
+The easiest solution is to cancel all device subscriptions during disconnection.
+
+```dart
+final subscription = characteristic.onValueReceived.listen((value) {
+    // ...
+});
+
+device.connectionState.listen((BluetoothConnectionState state) {
+    if (state == BluetoothConnectionState.disconnected) {
+        subscription.cancel(); // must cancel!
+    }
+});
+
+await characteristic.setNotifyValue(true);
+```
 
 ---
 
@@ -604,7 +626,7 @@ Characteristics only support writes up to a certain size.
 
 `writeWithoutResponse`: you can only write up to (MTU-3) at a time. This is a BLE limitation.
 
-`write`: look in the [Usage](#usage) section for a `writeLarge` function you can use to solve this issue.
+`write (with response)`: look in the [Usage](#usage) section for functions you can use to solve this issue.
 
 **3. the characeristic does not support writeWithoutResponse**
 
