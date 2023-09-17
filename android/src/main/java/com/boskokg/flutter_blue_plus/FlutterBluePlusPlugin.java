@@ -248,6 +248,7 @@ public class FlutterBluePlusPlugin implements
                     }
 
                     disconnectAllDevices();
+                    closeAllDevices();
 
                     log(LogLevel.DEBUG, "[FBP-Android] connectedPeripherals: " + mConnectedDevices.size());
                     

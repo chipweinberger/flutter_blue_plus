@@ -146,6 +146,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSLog(@"[FBP-iOS] connectedPeripherals: %lu", self.connectedPeripherals.count);
 
             if (self.connectedPeripherals.count == 0) {
+                [self.knownPeripherals removeAllObjects];
                 NSLog(@"[FBP-iOS] HotRestart: complete");
             }
             
@@ -806,12 +807,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         [self.centralManager cancelPeripheralConnection:peripheral];
     }
 
-    // note: we do *not* clear self.connectedPeripherals
+    // note: we do *not* clear self.knownPeripherals
     // Otherwise the peripheral would not have any strong references 
     // and would be garbage collected, making the didDisconnectPeripheral
     // callback not called
 
-    [self.knownPeripherals removeAllObjects];
     [self.servicesThatNeedDiscovered removeAllObjects];
     [self.characteristicsThatNeedDiscovered removeAllObjects];
     [self.didWriteWithoutResponse removeAllObjects];
@@ -887,10 +887,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     // was the adapter turned off?
     if (self->_centralManager.state != CBManagerStatePoweredOn) {
-        for (NSString *key in self.connectedPeripherals) {
-            NSLog(@"[FBP-iOS] disconnected from device %@", key);
-        }
         [self disconnectAllDevices];
+        [self.connectedPeripherals removeAllObjects];
     }
 
     int adapterState = [self bmAdapterStateEnum:self->_centralManager.state];
