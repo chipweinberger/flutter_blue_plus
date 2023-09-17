@@ -248,7 +248,7 @@ final subscription = characteristic.onValueReceived.listen((value) {
 });
 
 // listen for disconnection
-device.connectionState.listen((BluetoothConnectionState state) async {
+device.connectionState.listen((BluetoothConnectionState state) {
     if (state == BluetoothConnectionState.disconnected) {
         // stop listening to characteristic
         subscription.cancel();
@@ -274,10 +274,25 @@ for (var d in connectedSystemDevices) {
 ### Read the MTU and request larger size
 
 ```dart
-final mtu = await device.mtu.first;
+final subscription = device.mtu.listen((int mtu) {
+    // iOS: initial value is always 23, but iOS will quickly negotiate a higher value
+    // android: you must request higher mtu yourself
+    print("mtu $mtu");
+});
 
-// (Android Only) On iOS, MTU is negotiated automatically
-await device.requestMtu(512);
+// listen for disconnection
+device.connectionState.listen((BluetoothConnectionState state) {
+    if (state == BluetoothConnectionState.disconnected) {
+        // stop listening to mtu stream
+        subscription.cancel();
+    }
+});
+
+
+// (Android Only)
+if (Platform.isAndroid) {
+    await device.requestMtu(512);
+}
 ```
 ### Create Bond (Android Only)
 
