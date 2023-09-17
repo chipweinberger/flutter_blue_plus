@@ -1,3 +1,6 @@
+## 1.15.7
+* **[Fix]** android: turning bluetooth off would not fully disconnect devices (regression 1.14.19)"
+
 ## 1.15.6
 * **[Fix]** iOS: turning bluetooth off would not fully disconnect devices (regression 1.14.19)
 * **[Readme]** add v1.15.0 migration guides
