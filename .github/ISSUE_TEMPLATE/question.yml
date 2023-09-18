@@ -48,6 +48,14 @@ body:
       placeholder: ex. iOS 12.3.1
     validations:
       required: true
+  - type: input
+    id: ble-module
+    attributes:
+      label: Bluetooth Module
+      description: What ble module is your device using?
+      placeholder: ex. Arduino HC-08, Espressif esp32-s2, TI CC2541, Nordic nRF52840, NXP QN908x
+    validations:
+      required: true
   - type: textarea
     id: question
     attributes:
