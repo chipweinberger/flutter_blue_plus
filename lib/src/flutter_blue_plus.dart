@@ -155,12 +155,6 @@ class FlutterBluePlus {
     // Start listening now, before invokeMethod, so we do not miss any results
     _BufferStream<BmScanResponse> _scanBuffer = _BufferStream.listen(responseStream);
 
-    // Start timer *after* stream is being listened to, to make sure the
-    // timeout does not fire before _buffer is set
-    if (timeout != null) {
-      _scanTimeout = Timer(timeout, stopScan);
-    }
-
     // invoke platform method
     await _invokeMethod('startScan', settings.toMap());
 
@@ -205,6 +199,12 @@ class FlutterBluePlus {
         _scanResultsList.add(List.from(output));
       }
     });
+
+    // Start timer *after* stream is being listened to, to make sure the
+    // timeout does not fire before _scanSubscription is set
+    if (timeout != null) {
+      _scanTimeout = Timer(timeout, stopScan);
+    }
   }
 
   /// Stops a scan for Bluetooth Low Energy devices
