@@ -159,12 +159,9 @@ class FlutterBluePlus {
     await _invokeMethod('startScan', settings.toMap());
 
     // check every 250ms for gone devices?
-    late Stream<BmScanResponse?> outputStream;
-    if (removeIfGone != null) {
-      outputStream = _mergeStreams([_scanBuffer.stream, Stream.periodic(Duration(milliseconds: 250))]);
-    } else {
-      outputStream = _scanBuffer.stream;
-    }
+    late Stream<BmScanResponse?> outputStream = removeIfGone != null
+        ? _mergeStreams([_scanBuffer.stream, Stream.periodic(Duration(milliseconds: 250))])
+        : _scanBuffer.stream;
 
     List<ScanResult> output = [];
 
@@ -189,8 +186,7 @@ class FlutterBluePlus {
 
         // add result to output
         if (oneByOne) {
-          output.clear();
-          output.add(sr);
+          output = [sr];
         } else {
           output.addOrUpdate(sr);
         }
