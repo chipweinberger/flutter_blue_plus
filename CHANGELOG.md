@@ -1,5 +1,8 @@
+## 1.15.8
+* **[Fix]** if any platform exception happens, fbp will deadlock (regression 1.14.20)
+
 ## 1.15.7
-* **[Fix]** android: turning bluetooth off would not fully disconnect devices (regression 1.14.19)"
+* **[Fix]** android: turning bluetooth off would not fully disconnect devices (regression 1.14.19)
 
 ## 1.15.6
 * **[Fix]** iOS: turning bluetooth off would not fully disconnect devices (regression 1.14.19)
