@@ -295,43 +295,48 @@ class FlutterBluePlus {
 
   // invoke a platform method
   static Future<dynamic> _invokeMethod(String method, [dynamic arguments]) async {
+    // only allow 1 invocation at a time (guarentees that hot restart finishes)
     _Mutex mtx = await _MutexFactory.getMutexForKey("invokeMethod");
     await mtx.take();
 
-    // initialize response handler
-    if (_initialized == false) {
-      _initialized = true; // avoid recursion: must set before setLogLevel
-      _methods.setMethodCallHandler(_methodCallHandler);
-      setLogLevel(logLevel);
-      while ((await _methods.invokeMethod('flutterHotRestart')) != 0) {
-        await Future.delayed(Duration(milliseconds: 50));
+    dynamic out;
+
+    try {
+      // initialize response handler
+      if (_initialized == false) {
+        _initialized = true; // avoid recursion: must set before setLogLevel
+        _methods.setMethodCallHandler(_methodCallHandler);
+        setLogLevel(logLevel);
+        while ((await _methods.invokeMethod('flutterHotRestart')) != 0) {
+          await Future.delayed(Duration(milliseconds: 50));
+        }
       }
+
+      // log args
+      if (logLevel == LogLevel.verbose) {
+        String func = '<$method>';
+        String args = arguments.toString();
+        func = _logColor ? _black(func) : func;
+        args = _logColor ? _magenta(args) : args;
+        print("[FBP] $func args: $args");
+      }
+
+      // invoke
+      out = await _methods.invokeMethod(method, arguments);
+
+      // log result
+      if (logLevel == LogLevel.verbose) {
+        String func = '<$method>';
+        String result = out.toString();
+        func = _logColor ? _black(func) : func;
+        result = _logColor ? _brown(result) : result;
+        print("[FBP] $func result: $result");
+      }
+    } finally {
+      mtx.give();
     }
 
-    // log args
-    if (logLevel == LogLevel.verbose) {
-      String func = '<$method>';
-      String args = arguments.toString();
-      func = _logColor ? _black(func) : func;
-      args = _logColor ? _magenta(args) : args;
-      print("[FBP] $func args: $args");
-    }
-
-    // invoke
-    dynamic obj = await _methods.invokeMethod(method, arguments);
-
-    // log result
-    if (logLevel == LogLevel.verbose) {
-      String func = '<$method>';
-      String result = obj.toString();
-      func = _logColor ? _black(func) : func;
-      result = _logColor ? _brown(result) : result;
-      print("[FBP] $func result: $result");
-    }
-
-    mtx.give();
-
-    return obj;
+    return out;
   }
 
   /// Turn off Bluetooth (Android only),
