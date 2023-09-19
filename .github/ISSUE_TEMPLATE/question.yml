@@ -67,8 +67,8 @@ body:
     id: logs
     attributes:
       label: Logs
-      description: Copy and paste all log output.
-      placeholder: Ideally include all logs from the very begining
+      description: Paste *ALL* logs!
+      placeholder: Include logs from the very begining!
       render: shell
     validations:
       required: true
