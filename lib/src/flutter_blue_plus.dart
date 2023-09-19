@@ -64,6 +64,7 @@ class FlutterBluePlus {
   /// - The list contains all the results since the scan started.
   /// - The returned stream is never closed.
   static Stream<List<ScanResult>> get scanResults => _scanResultsList.stream;
+  static List<ScanResult> get latestScanResults => _scanResultsList.latestValue;
 
   /// Turn on Bluetooth (Android only),
   static Future<void> turnOn({int timeout = 10}) async {
