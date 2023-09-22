@@ -249,11 +249,17 @@ public class FlutterBluePlusPlugin implements
                     disconnectAllDevices(true  /* alsoClose? */);
 
                     log(LogLevel.DEBUG, "[FBP-Android] connectedPeripherals: " + mConnectedDevices.size());
-                    
-                    if (mConnectedDevices.size() == 0) {
-                        log(LogLevel.DEBUG, "[FBP-Android] HotRestart: complete");
-                    }
 
+                    result.success(mConnectedDevices.size());
+                    break;
+                }
+
+                case "connectedCount":
+                {
+                    log(LogLevel.DEBUG, "[FBP-Android] connectedPeripherals: " + mConnectedDevices.size());
+                    if (mConnectedDevices.size() == 0) {
+                        log(LogLevel.DEBUG, "[FBP-Android] Hot Restart: complete");
+                    }
                     result.success(mConnectedDevices.size());
                     break;
                 }

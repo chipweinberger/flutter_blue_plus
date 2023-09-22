@@ -147,9 +147,18 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             if (self.connectedPeripherals.count == 0) {
                 [self.knownPeripherals removeAllObjects];
-                NSLog(@"[FBP-iOS] HotRestart: complete");
             }
             
+            result(@(self.connectedPeripherals.count));
+            return;
+        }
+        else if ([@"connectedCount" isEqualToString:call.method])
+        {
+            NSLog(@"[FBP-iOS] connectedPeripherals: %lu", self.connectedPeripherals.count);
+            if (self.connectedPeripherals.count == 0) {
+                NSLog(@"[FBP-iOS] Hot Restart: complete");
+                [self.knownPeripherals removeAllObjects];
+            }
             result(@(self.connectedPeripherals.count));
             return;
         }

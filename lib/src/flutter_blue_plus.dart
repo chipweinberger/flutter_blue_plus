@@ -307,8 +307,11 @@ class FlutterBluePlus {
         _initialized = true; // avoid recursion: must set before setLogLevel
         _methods.setMethodCallHandler(_methodCallHandler);
         setLogLevel(logLevel);
-        while ((await _methods.invokeMethod('flutterHotRestart')) != 0) {
+        if ((await _methods.invokeMethod('flutterHotRestart')) != 0) {
           await Future.delayed(Duration(milliseconds: 50));
+          while ((await _methods.invokeMethod('connectedCount')) != 0) {
+            await Future.delayed(Duration(milliseconds: 50));
+          }
         }
       }
 
