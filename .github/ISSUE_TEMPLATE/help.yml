@@ -1,7 +1,7 @@
-name: Question
-description: Ask a question
-title: "[Question]: "
-labels: ["question"]
+name: Help / Question
+description: Need help?
+title: "[Help]: "
+labels: ["help"]
 body:
   - type: markdown
     attributes:
