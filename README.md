@@ -570,9 +570,9 @@ Bluetooth is a complicated system service, and can enter a bad state.
 
 Your device will only send values after you call `await characteristic.setNotifyValue(true)`, or `await characteristic.read()`
 
-**2. you are calling write**
+**2. you are calling write instead of read**
 
-`onValueReceived` is only called for reads & notifies.
+`onValueReceived` is only called for reads & notifies, not writes.
 
 You can do a single read with `await characteristic.read(...)`
 
