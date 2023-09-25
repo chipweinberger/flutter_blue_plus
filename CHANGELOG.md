@@ -24,10 +24,11 @@
 * **[Fix]** FlutterBluePlus.scanResults should always return list copy to avoid iteration exceptions
 
 ## 1.15.0
+## Scanning API Changes
+
+**Overview**:
 * **[Refactor]** simplify scanning api
 * **[Feature]** add `removeIfGone` option to `startScan`
-
-**Note:** You can safely delete the `allowDuplicates` option if you are using it. It does not affect behavior.
 
 **Breaking Changes & Improvements:**
 - **(simplify)** removed `FlutterBluePlus.scan`. Use `FlutterBluePlus.scartScan(oneByOne: true)` instead.
