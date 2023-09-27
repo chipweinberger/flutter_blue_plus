@@ -205,10 +205,17 @@ class FlutterBluePlus {
 
   /// Stops a scan for Bluetooth Low Energy devices
   static Future<void> stopScan() async {
+    await _stopScan();
+  }
+
+  // for internal use
+  static Future<void> _stopScan({bool invokePlatform = true}) async {
     _scanSubscription?.cancel();
     _scanTimeout?.cancel();
     _isScanning.add(false);
-    await _invokeMethod('stopScan');
+    if (invokePlatform) {
+      await _invokeMethod('stopScan');
+    }
   }
 
   /// Sets the internal FlutterBlue log level
@@ -233,6 +240,14 @@ class FlutterBluePlus {
       func = _logColor ? _black(func) : func;
       result = _logColor ? _brown(result) : result;
       print("[FBP] $func result: $result");
+    }
+
+    // keep track of adapter states
+    if (call.method == "OnAdapterStateChanged") {
+      BmBluetoothAdapterState r = BmBluetoothAdapterState.fromMap(call.arguments);
+      if (isScanningNow && r.adapterState != BmAdapterStateEnum.on) {
+        _stopScan(invokePlatform: false);
+      }
     }
 
     // keep track of connection states
