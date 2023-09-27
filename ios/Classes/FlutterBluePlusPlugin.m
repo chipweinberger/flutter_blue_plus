@@ -128,6 +128,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         // check that we have an adapter, except for the 
         // functions that don't need it
         if (self.centralManager == nil && 
+            [@"flutterHotRestart" isEqualToString:call.method] == false &&
+            [@"connectedCount" isEqualToString:call.method] == false &&
             [@"setLogLevel" isEqualToString:call.method] == false &&
             [@"isAvailable" isEqualToString:call.method] == false &&
             [@"getAdapterName" isEqualToString:call.method] == false &&
@@ -139,7 +141,13 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
         if ([@"flutterHotRestart" isEqualToString:call.method])
         {
-            [self->_centralManager stopScan];
+            // no adapter?
+            if (self.centralManager == null) {
+                result(@(0)); // no work to do
+                return;
+            }
+
+            [self.centralManager stopScan];
 
             [self disconnectAllDevices:false];
 

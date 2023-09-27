@@ -229,6 +229,8 @@ public class FlutterBluePlusPlugin implements
             // check that we have an adapter, except for 
             // the functions that do not need it
             if(mBluetoothAdapter == null && 
+                "flutterHotRestart".equals(call.method) == false &&
+                "connectedCount".equals(call.method) == false &&
                 "setLogLevel".equals(call.method) == false &&
                 "isAvailable".equals(call.method) == false &&
                 "getAdapterName".equals(call.method) == false &&
@@ -241,6 +243,12 @@ public class FlutterBluePlusPlugin implements
 
                 case "flutterHotRestart":
                 {
+                    // no adapter?
+                    if (mBluetoothAdapter == null) {
+                        result.success(0); // no work to do
+                        break;
+                    }
+
                     BluetoothLeScanner scanner = mBluetoothAdapter.getBluetoothLeScanner();
                     if(scanner != null) {
                         scanner.stopScan(getScanCallback());
