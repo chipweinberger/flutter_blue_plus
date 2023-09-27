@@ -126,6 +126,7 @@
 * **[improve]** Dart: each FlutterBluePlusException should have unique code for handling
 
 ## 1.14.0
+This release improves bonding support.
 * **[feature]** Android:  expose BluetoothDevice.bondState
 * **[remove]** changes regarding bond state made in 1.13.0 in favor of exposing bondState
 * **[refactor]** BluetoothDevice & Android bond handling to improve reliablility & error handling.
@@ -153,7 +154,7 @@
 * **[improve]** Android/iOS: on connection failure, return error code and error string
 
 ## 1.13.0
-This release focuses on improving bonding support.
+This release improves bonding support.
 * **[fix]** Android: discoverServices & others can fail if currently in the process of bonding
 * **[improve]** Android: createBond: check for success and throw exception on failure
 * **[improve]** Android: removeBond: return Future(void) instead of Future(Bool), and throw exception on failure
@@ -216,6 +217,7 @@ This release focuses on improving bonding support.
 * **[improve]** Android: simplify build.grade to not set specific gradle version. it is uneeded
 
 ## 1.12.0
+This release simplifies permissions.
 * **[improve]** Android: remove permissions from plugin. It is easier for user to specify everything
 * **[fix]** Dart: scan could be initiated twice causing bad state
 * **[fix]** Dart: read & write mutexs must always come from the MutexFactory to properly prevent race conditions
@@ -249,9 +251,10 @@ This release focuses on improving bonding support.
 * **[improve]** Dart: add back servicesList, but with simpler api
 
 ## 1.11.0
-* **[rename]** Dart:  connectedDevices -> connectedSystemDevices
-* **[remove]** Dart:  servicesList (introduced in 1.10.6)
+This release removes recent changes to the API causing issues.
 * **[remove]** Dart:  includeConnectedSystemDevices scan setting, it was too complicated 
+* **[remove]** Dart:  servicesList (introduced in 1.10.6)
+* **[rename]** Dart:  connectedDevices -> connectedSystemDevices
 
 ## 1.10.10
 * **[fix]** Android: platform exception when scanning with includeConnectedSystemDevices (Regression in 1.10.6)
@@ -292,7 +295,7 @@ This release focuses on improving bonding support.
 * **[improve]** Example: add error handling to descriptor read & write
 
 ## 1.10.0
-This release is focused on improving error handling and reliability.
+This release improves error handling and reliability.
 There are 2 small breaking changes. See below.
 * **BREAKING CHANGE:** Dart: turnOn() & turnOff() now wait for completion, return void instead of bool, and can throw
 * **BREAKING CHANGE:** Dart: use static functions for FlutterBluePlus instead of FlutterBluePlus.instance. Multiple instances is not supported by any platform.
@@ -388,6 +391,7 @@ simplicity of the FlutterBluePlus codebase. Please submit bug reports.
 * **[fix]** Android: characteristic properties check was incorrect (regression in 1.7.8)
 
 ## 1.8.0
+This release improves error handling.
 * **[improve]** android/ios: handle errors for charactersticRead
 * **[improve]** android/ios: handle errors for readDescriptor
 * **[improve]** android/ios: handle errors for discoverServices
@@ -431,6 +435,7 @@ simplicity of the FlutterBluePlus codebase. Please submit bug reports.
 * **[fix]** iOS: when connecting, exception is thrown (regression in 1.7.0)
 
 ## 1.7.0
+This release removes Protobuf.
 * **[refactor]** removed protobuf dependency 
 * **[fix]** Android: turnOn and turnOff not working (regression in 1.6.1)
 * **[fix]** Dart: guid exception with serviceUUID is empty
@@ -444,6 +449,7 @@ simplicity of the FlutterBluePlus codebase. Please submit bug reports.
 * **[improve]** Android: significantly clean up all code
 
 ## 1.6.0
+This release reformats a bunch of Android code.
 * **[fix]** Dart: close BufferStream listen on stopScan
 * **[improve]** Dart: don't repropogate Mutex error
 * **[improve]** Dart: better stacktrace on error for Characteristic Read/Write
@@ -463,6 +469,7 @@ simplicity of the FlutterBluePlus codebase. Please submit bug reports.
 * **[improve]** iOS: logs now adhere to logLevel
 
 ## 1.5.0
+This release closes many open issues on Github.
 * **[fix]** Dart: writeCharacteristic (and other similar functions) exception could be missed
 * **[fix]** Dart: setNotifyValue should check for success and throw error on failure
 * **[fix]** Dart: race conditions in connect(), disconnect(), readRssi(), writeCharacteristic(), readCharacteristic()
