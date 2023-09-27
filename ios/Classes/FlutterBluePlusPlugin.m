@@ -804,7 +804,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     return nil;
 }
 
-- (void)disconnectAllDevices:(bool)isAdapterTurnedOff
+- (void)disconnectAllDevices:(bool)isAdapterOff
 {
     NSLog(@"[FBP-iOS] disconnectAllDevices");
 
@@ -814,14 +814,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         CBPeripheral *peripheral = [self.connectedPeripherals objectForKey:key];
         NSLog(@"[FBP-iOS] calling disconnect: %@", key);
 
-        // when the adapter is turned off, it is an 'api misuse' to call
-        // cancelPeripheralConnection as it is implicit
-        if (isAdapterTurnedOff == false) {
-            [self.centralManager cancelPeripheralConnection:peripheral];
-        } else {
-            // inexplicably, iOS does not call 'didDisconnectPeripheral'
-            // when the adapter is turned off, so we must send it ourself.
-
+        // inexplicably, iOS does not call 'didDisconnectPeripheral' when
+        // the adapter is turned off, so we must send these responses manually
+        if (isAdapterOff) {
             // See BmConnectionStateResponse
             NSDictionary *result = @{
                 @"remote_id":                [[peripheral identifier] UUIDString],
@@ -832,7 +827,18 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             // Send connection state
             [_methodChannel invokeMethod:@"OnConnectionStateChanged" arguments:result];
+        } else {
+            // request disconnection
+            // Note: when the adapter is turned off, it is an 'api misuse'
+            // to call cancelPeripheralConnection as it is implicit
+            [self.centralManager cancelPeripheralConnection:peripheral];
         }
+    }
+
+    // iOS does not call 'didDisconnectPeripheral' after the
+    //  adapter is turned off, so we must clear this ourself
+    if (isAdapterOff) {
+        [self.connectedPeripherals removeAllObjects];
     }
 
     // note: we do *not* clear self.knownPeripherals
@@ -916,7 +922,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // was the adapter turned off?
     if (self->_centralManager.state != CBManagerStatePoweredOn) {
         [self disconnectAllDevices:true];
-        [self.connectedPeripherals removeAllObjects];
     }
 
     int adapterState = [self bmAdapterStateEnum:self->_centralManager.state];
