@@ -104,12 +104,6 @@ if (await FlutterBluePlus.isAvailable == false) {
     return;
 }
 
-// turn on bluetooth ourself if we can
-// for iOS, the user controls bluetooth enable/disable
-if (Platform.isAndroid) {
-    await FlutterBluePlus.turnOn();
-}
-
 // handle bluetooth on & off
 // note: for iOS the initial state is typically BluetoothAdapterState.unknown
 // note: if you have permissions issues you will get stuck at BluetoothAdapterState.unauthorized
@@ -121,6 +115,12 @@ FlutterBluePlus.adapterState.listen((BluetoothAdapterState state) {
         // show an error to the user, etc
     }
 });
+
+// turn on bluetooth ourself if we can
+// for iOS, the user controls bluetooth enable/disable
+if (Platform.isAndroid) {
+    await FlutterBluePlus.turnOn();
+}
 ```
 
 ### Scan for devices
