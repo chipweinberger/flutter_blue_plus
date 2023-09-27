@@ -156,7 +156,7 @@ public class FlutterBluePlusPlugin implements
 
         pluginBinding = null;
 
-        disconnectAllDevices(true /* alsoClose? */);
+        disconnectAllDevices(true /* closeAll? */);
 
         context.unregisterReceiver(mBluetoothBondStateReceiver);
         context.unregisterReceiver(mBluetoothAdapterStateReceiver);
@@ -246,7 +246,7 @@ public class FlutterBluePlusPlugin implements
                         scanner.stopScan(getScanCallback());
                     }
 
-                    disconnectAllDevices(true  /* alsoClose? */);
+                    disconnectAllDevices(true  /* closeAll? */);
 
                     log(LogLevel.DEBUG, "[FBP-Android] connectedPeripherals: " + mConnectedDevices.size());
 
@@ -1347,7 +1347,7 @@ public class FlutterBluePlusPlugin implements
         }
     }
 
-    private void disconnectAllDevices(boolean alsoClose)
+    private void disconnectAllDevices(boolean closeAll)
     {
         Log.d(TAG, "[FBP-Android] disconnectAllDevices");
 
@@ -1355,23 +1355,27 @@ public class FlutterBluePlusPlugin implements
         for (BluetoothGatt gatt : mConnectedDevices.values()) {
             if(gatt != null) {
                 String remoteId = gatt.getDevice().getAddress();
+
+                // disconnect
                 Log.d(TAG, "[FBP-Android] calling disconnect: " + remoteId);
                 gatt.disconnect();
-            }
-        }
 
-        // close all devices?
-        if (alsoClose) {
-            Log.d(TAG, "[FBP-Android] closeAllDevices");
-            for (BluetoothGatt gatt : mConnectedDevices.values()) {
-                if(gatt != null) {
-                    String remoteId = gatt.getDevice().getAddress();
+                // not autoconnected?
+                bool notAutoConnected = mAutoConnect.get(remoteId) == null || mAutoConnect.get(remoteId) == false;
+
+                // close
+                if (closeAll || notAutoConnected) {
+                    // it is important to close after disconnection, otherwise we will 
+                    // quickly run out of bluetooth resources, preventing new connections
                     Log.d(TAG, "[FBP-Android] calling close: " + remoteId);
                     gatt.close();
+                } else {
+                    // we cannot close autoConnected devices
+                    // because this stops autoConnect from working
+                    Log.d(TAG, "[FBP-Android] skipping close (autoConnect): " + remoteId);
                 }
             }
         }
-
 
         mConnectedDevices.clear();
         mMtu.clear();
@@ -1409,7 +1413,7 @@ public class FlutterBluePlusPlugin implements
             // disconnect all devices
             if (adapterState == BluetoothAdapter.STATE_TURNING_OFF || 
                 adapterState == BluetoothAdapter.STATE_OFF) {
-                disconnectAllDevices(false  /* alsoClose? */);
+                disconnectAllDevices(false  /* closeAll? */);
             }
             
             // see: BmBluetoothAdapterState
