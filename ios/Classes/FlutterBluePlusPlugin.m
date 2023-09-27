@@ -814,10 +814,24 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         CBPeripheral *peripheral = [self.connectedPeripherals objectForKey:key];
         NSLog(@"[FBP-iOS] calling disconnect: %@", key);
 
-        // when the adapter is turned off, we are not supposed to call
+        // when the adapter is turned off, it is an 'api misuse' to call
         // cancelPeripheralConnection as it is implicit
         if (isAdapterTurnedOff == false) {
             [self.centralManager cancelPeripheralConnection:peripheral];
+        } else {
+            // inexplicably, iOS does not call 'didDisconnectPeripheral'
+            // when the adapter is turned off, so we must send it ourself.
+
+            // See BmConnectionStateResponse
+            NSDictionary *result = @{
+                @"remote_id":                [[peripheral identifier] UUIDString],
+                @"connection_state":         @([self bmConnectionStateEnum:peripheral.state]),
+                @"disconnect_reason_code":   error ? @(57),
+                @"disconnect_reason_string": error ? @"Bluetooth turned off",
+            };
+
+            // Send connection state
+            [_methodChannel invokeMethod:@"OnConnectionStateChanged" arguments:result];
         }
     }
 
