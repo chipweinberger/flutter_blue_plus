@@ -1,3 +1,9 @@
+## 1.15.9
+* **[Fix]** iOS: adapter turnOff: edge case when adapter is turned off while scanning
+* **[Fix]** iOS: adapter turnOff: disconnect handlers not firing when adapter turned off
+* **[Fix]** iOS: adapter turnOff: API MISUSE when adapter is turned off
+* **[Cleanup]** Hot Restart: use separate conenctedCount method for clarity
+
 ## 1.15.8
 * **[Fix]** if any platform exception happens, fbp will deadlock (regression 1.14.20)
 
