@@ -141,7 +141,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         {
             [self->_centralManager stopScan];
 
-            [self disconnectAllDevices];
+            [self disconnectAllDevices:false];
 
             NSLog(@"[FBP-iOS] connectedPeripherals: %lu", self.connectedPeripherals.count);
 
@@ -804,7 +804,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     return nil;
 }
 
-- (void)disconnectAllDevices
+- (void)disconnectAllDevices:(bool)isAdapterTurnedOff
 {
     NSLog(@"[FBP-iOS] disconnectAllDevices");
 
@@ -813,7 +813,12 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     {
         CBPeripheral *peripheral = [self.connectedPeripherals objectForKey:key];
         NSLog(@"[FBP-iOS] calling disconnect: %@", key);
-        [self.centralManager cancelPeripheralConnection:peripheral];
+
+        // when the adapter is turned off, we are not supposed to call
+        // cancelPeripheralConnection as it is implicit
+        if (isAdapterTurnedOff == false) {
+            [self.centralManager cancelPeripheralConnection:peripheral];
+        }
     }
 
     // note: we do *not* clear self.knownPeripherals
@@ -896,7 +901,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     // was the adapter turned off?
     if (self->_centralManager.state != CBManagerStatePoweredOn) {
-        [self disconnectAllDevices];
+        [self disconnectAllDevices:true];
         [self.connectedPeripherals removeAllObjects];
     }
 
