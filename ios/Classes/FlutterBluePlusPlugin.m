@@ -825,9 +825,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // See BmConnectionStateResponse
             NSDictionary *result = @{
                 @"remote_id":                [[peripheral identifier] UUIDString],
-                @"connection_state":         @([self bmConnectionStateEnum:peripheral.state]),
-                @"disconnect_reason_code":   error ? @(57),
-                @"disconnect_reason_string": error ? @"Bluetooth turned off",
+                @"connection_state":         @([self bmConnectionStateEnum:CBPeripheralStateDisconnected]),
+                @"disconnect_reason_code":   @(57), // just a random value, could be anything.
+                @"disconnect_reason_string": @"Bluetooth turned off",
             };
 
             // Send connection state
