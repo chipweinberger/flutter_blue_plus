@@ -177,12 +177,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             result(@(true));
             return;
         }
-        else if([@"getSupportedPHY" isEqualToString:call.method])
-        {
-            result([FlutterError errorWithCode:@"getSupportedPHY" 
-                                    message:@"plugin does not support get phy support"
-                                    details:NULL]);
-        }
         else if ([@"isAvailable" isEqualToString:call.method])
         {
             result(self.centralManager != nil ? @(YES) : @(NO));
@@ -658,37 +652,43 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         else if([@"requestConnectionPriority" isEqualToString:call.method])
         {
             result([FlutterError errorWithCode:@"requestConnectionPriority" 
-                                    message:@"iOS does not support connection priority requests"
+                                    message:@"android only"
+                                    details:NULL]);
+        }
+        else if([@"getPhySupport" isEqualToString:call.method])
+        {
+            result([FlutterError errorWithCode:@"getPhySupport" 
+                                    message:@"android only"
                                     details:NULL]);
         }
         else if([@"setPreferredPhy" isEqualToString:call.method])
         {
             result([FlutterError errorWithCode:@"setPreferredPhy" 
-                                    message:@"iOS does not support set preferred phy requests"
+                                    message:@"android only"
                                     details:NULL]);
         }
         else if([@"getBondedDevices" isEqualToString:call.method])
         {
             result([FlutterError errorWithCode:@"getBondedDevices" 
-                                    message:@"iOS does not support getting bonded devices"
+                                    message:@"android only"
                                     details:NULL]);
         }
         else if([@"createBond" isEqualToString:call.method])
         {
             result([FlutterError errorWithCode:@"setPreferredPhy" 
-                                    message:@"iOS does not support creating bonds"
+                                    message:@"android only"
                                     details:NULL]);
         }
         else if([@"removeBond" isEqualToString:call.method])
         {
             result([FlutterError errorWithCode:@"removeBond" 
-                                    message:@"plugin does not support removeBond function on iOS"
+                                    message:@"android only"
                                     details:NULL]);
         }
         else if([@"clearGattCache" isEqualToString:call.method])
         {
             result([FlutterError errorWithCode:@"clearGattCache" 
-                                    message:@"plugin does not support clearing gatt cache"
+                                    message:@"android only"
                                     details:NULL]);
         }
         else

@@ -429,7 +429,7 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 | isScanningNow          | :white_check_mark: | :white_check_mark: |        | Is a scan currently running?                               |
 | connectedSystemDevices | :white_check_mark: | :white_check_mark: |        | List of already connected devices, including by other apps |
 | setLogLevel            | :white_check_mark: | :white_check_mark: |        | Configure plugin log level                                 |
-| getSupportedPHY        | :white_check_mark: |                    | :fire: | Get supported bluetooth codes                              |
+| getPhySupport          | :white_check_mark: |                    | :fire: | Get supported bluetooth phy codings                        |
 
 ### BluetoothDevice API
 
@@ -441,11 +441,11 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 | discoverServices          | :white_check_mark: | :white_check_mark: | :fire: | Discover services                                          |
 | servicesList              | :white_check_mark: | :white_check_mark: |        | The list of services that were discovered                  |
 | connectionState        🌀 | :white_check_mark: | :white_check_mark: |        | Stream of connection changes for the Bluetooth Device      |
-| bondState              🌀 | :white_check_mark: |                    |        | Stream of device bond state. Can be useful on Android      |
 | mtu                    🌀 | :white_check_mark: | :white_check_mark: | :fire: | Stream of mtu size changes                                 |
 | readRssi                  | :white_check_mark: | :white_check_mark: | :fire: | Read RSSI from a connected device                          |
 | requestMtu                | :white_check_mark: |                    | :fire: | Request to change the MTU for the device                   |
 | requestConnectionPriority | :white_check_mark: |                    | :fire: | Request to update a high priority, low latency connection  |
+| bondState              🌀 | :white_check_mark: |                    |        | Stream of device bond state. Can be useful on Android      |
 | createBond                | :white_check_mark: |                    | :fire: | Force a system pairing dialogue to show, if needed         |
 | removeBond                | :white_check_mark: |                    | :fire: | Remove Bluetooth Bond of device                            |
 | setPreferredPhy           | :white_check_mark: |                    |        | Set preferred RX and TX phy for connection and phy options |

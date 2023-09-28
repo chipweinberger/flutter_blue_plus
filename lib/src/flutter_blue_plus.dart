@@ -230,14 +230,14 @@ class FlutterBluePlus {
   }
 
   /// Request Bluetooth PHY support
-  static Future<PHYSupportResult> getSupportedPHY() async {
+  static Future<PhySupport> getPhySupport() async {
     // check android
     if (Platform.isAndroid == false) {
       throw FlutterBluePlusException(
-          ErrorPlatform.dart, "getSupportedPHY", FbpErrorCode.androidOnly.index, "android-only");
+          ErrorPlatform.dart, "getPhySupport", FbpErrorCode.androidOnly.index, "android-only");
     }
 
-    return await _invokeMethod('getSupportedPHY').then((args) => PHYSupportResult.fromMap(args));
+    return await _invokeMethod('getPhySupport').then((args) => PhySupport.fromMap(args));
   }
 
   static bool _isDeviceConnected(DeviceIdentifier remoteId) {
@@ -528,15 +528,16 @@ class AdvertisementData {
   }
 }
 
-class PHYSupportResult {
-  PHYSupportResult({required this.le2MPhySupported, required this.leCodedPhySupported});
+class PhySupport {
+  final bool le2M;
+  final bool leCoded;
 
-  final bool le2MPhySupported, leCodedPhySupported;
+  PhySupport({required this.le2M, required this.leCoded});
 
-  factory PHYSupportResult.fromMap(Map<dynamic, dynamic> json) {
-    return PHYSupportResult(
-      le2MPhySupported: json['le_2M_phy_supported'],
-      leCodedPhySupported: json['le_coded_phy_supported'],
+  factory PhySupport.fromMap(Map<dynamic, dynamic> json) {
+    return PhySupport(
+      le2M: json['le_2M'],
+      leCoded: json['le_coded'],
     );
   }
 }
