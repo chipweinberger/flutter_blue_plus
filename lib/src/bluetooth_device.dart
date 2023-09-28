@@ -6,16 +6,6 @@ part of flutter_blue_plus;
 
 class BluetoothDevice {
   ////////////////////////////////
-  // Internal
-  //
-
-  // used for 'servicesStream' public api
-  final StreamController<List<BluetoothService>> _services = StreamController.broadcast();
-
-  // used for 'isDiscoveringServices' public api
-  final _StreamController<bool> _isDiscoveringServices = _StreamController(initialValue: false);
-
-  ////////////////////////////////
   // Public
   //
 
@@ -135,9 +125,6 @@ class BluetoothDevice {
     List<BluetoothService> result = [];
 
     try {
-      // signal that we have started
-      _isDiscoveringServices.add(true);
-
       var responseStream = FlutterBluePlus._methodStream.stream
           .where((m) => m.method == "OnDiscoverServicesResult")
           .map((m) => m.arguments)
@@ -159,10 +146,7 @@ class BluetoothDevice {
 
       result = response.services.map((p) => BluetoothService.fromProto(p)).toList();
 
-      // add to stream
-      _services.add(result);
     } finally {
-      _isDiscoveringServices.add(false);
       opMutex.give();
     }
 
@@ -508,25 +492,15 @@ class BluetoothDevice {
     return 'BluetoothDevice{'
         'remoteId: $remoteId, '
         'localName: $localName, '
-        'isDiscoveringServices: ${_isDiscoveringServices.value}, '
         'services: ${FlutterBluePlus._knownServices[remoteId]}'
         '}';
   }
 
-  // stream return whether or not we are currently discovering services
-  @Deprecated("planed for removal (Jan 2024). It can be easily implemented yourself") // deprecated on Aug 2023
-  Stream<bool> get isDiscoveringServices => _isDiscoveringServices.stream;
+  @Deprecated("removed. no replacement")
+  Stream<bool> get isDiscoveringServices async* {yield false;}
 
-  /// Stream of bluetooth services offered by the remote device
-  ///   - this stream is only updated when you call discoverServices()
-  @Deprecated("planed for removal (Jan 2024). It can be easily implemented yourself") // deprecated on Aug 2023
-  Stream<List<BluetoothService>> get servicesStream {
-    if (FlutterBluePlus._knownServices[remoteId] != null) {
-      return _services.stream.newStreamWithInitialValue(servicesList!);
-    } else {
-      return _services.stream;
-    }
-  }
+  @Deprecated("removed. no replacement")
+  Stream<List<BluetoothService>> get servicesStream  async* {yield [];}
 
   @Deprecated('Use createBond() instead')
   Future<void> pair() async => await createBond();
