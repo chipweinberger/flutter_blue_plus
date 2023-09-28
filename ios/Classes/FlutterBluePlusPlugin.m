@@ -142,7 +142,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         if ([@"flutterHotRestart" isEqualToString:call.method])
         {
             // no adapter?
-            if (self.centralManager == null) {
+            if (self.centralManager == nil) {
                 result(@(0)); // no work to do
                 return;
             }

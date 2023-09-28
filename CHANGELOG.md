@@ -1,3 +1,7 @@
+## 1.15.10
+* **[Fix]** iOS: localName does not match Android
+* **[Fix]** flutterHotRestart: error was thrown if device did not have bluetooth adapter
+
 ## 1.15.9
 * **[Fix]** iOS: adapter turnOff: edge case when adapter is turned off while scanning
 * **[Fix]** iOS: adapter turnOff: disconnect handlers not firing when adapter turned off
