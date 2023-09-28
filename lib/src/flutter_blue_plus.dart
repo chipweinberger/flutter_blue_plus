@@ -225,6 +225,17 @@ class FlutterBluePlus {
     _logColor = color;
   }
 
+  /// Request Bluetooth PHY support
+  static Future<PHYSupportResult> getSupportedPHY() async {
+    // check android
+    if (Platform.isAndroid == false) {
+      throw FlutterBluePlusException(
+          ErrorPlatform.dart, "getSupportedPHY", FbpErrorCode.androidOnly.index, "android-only");
+    }
+
+    return await _invokeMethod('getSupportedPHY').then((args) => PHYSupportResult.fromMap(args));
+  }
+
   static bool _isDeviceConnected(DeviceIdentifier remoteId) {
     if (_connectionStates[remoteId] == null) {
       return false;
@@ -510,6 +521,19 @@ class AdvertisementData {
         'serviceData: $serviceData, '
         'serviceUuids: $serviceUuids'
         '}';
+  }
+}
+
+class PHYSupportResult {
+  PHYSupportResult({required this.le2MPhySupported, required this.leCodedPhySupported});
+
+  final bool le2MPhySupported, leCodedPhySupported;
+
+  factory PHYSupportResult.fromMap(Map<dynamic, dynamic> json) {
+    return PHYSupportResult(
+      le2MPhySupported: json['le_2M_phy_supported'],
+      leCodedPhySupported: json['le_coded_phy_supported'],
+    );
   }
 }
 

@@ -429,6 +429,7 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 | isScanningNow          | :white_check_mark: | :white_check_mark: |        | Is a scan currently running?                               |
 | connectedSystemDevices | :white_check_mark: | :white_check_mark: |        | List of already connected devices, including by other apps |
 | setLogLevel            | :white_check_mark: | :white_check_mark: |        | Configure plugin log level                                 |
+| getSupportedPHY        | :white_check_mark: |                    | :fire: | Get supported bluetooth codes                              |
 
 ### BluetoothDevice API
 
