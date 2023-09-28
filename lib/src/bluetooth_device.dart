@@ -20,24 +20,19 @@ class BluetoothDevice {
   //
 
   final DeviceIdentifier remoteId;
-  final BluetoothDeviceType type;
 
   BluetoothDevice({
     required this.remoteId,
-    required this.type,
   });
 
-  BluetoothDevice.fromProto(BmBluetoothDevice p)
-      : remoteId = DeviceIdentifier(p.remoteId),
-        type = _bmToBluetoothDeviceType(p.type);
+  BluetoothDevice.fromProto(BmBluetoothDevice p) : remoteId = DeviceIdentifier(p.remoteId);
 
   /// allows connecting to a known device without re-scanning
   /// Note: this device must have been discovered by your app in a previous scan
-  BluetoothDevice.fromId(String remoteId, {String? localName, BluetoothDeviceType? type})
-      : remoteId = DeviceIdentifier(remoteId),
-        type = type ?? BluetoothDeviceType.unknown;
+  BluetoothDevice.fromId(String remoteId) : remoteId = DeviceIdentifier(remoteId);
 
   // localName is from advertisementData
+  // Note: You must scan first!
   String get localName => FlutterBluePlus._localNames[remoteId] ?? "";
 
   // Get services
@@ -513,7 +508,6 @@ class BluetoothDevice {
     return 'BluetoothDevice{'
         'remoteId: $remoteId, '
         'localName: $localName, '
-        'type: $type, '
         'isDiscoveringServices: ${_isDiscoveringServices.value}, '
         'services: ${FlutterBluePlus._knownServices[remoteId]}'
         '}';

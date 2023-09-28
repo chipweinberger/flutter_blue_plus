@@ -192,33 +192,22 @@ class BmConnectRequest {
   }
 }
 
-enum BmBluetoothSpecEnum {
-  unknown,
-  classic,
-  le,
-  dual,
-}
-
 class BmBluetoothDevice {
   String remoteId;
-  BmBluetoothSpecEnum type;
 
   BmBluetoothDevice({
     required this.remoteId,
-    required this.type,
   });
 
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> data = {};
     data['remote_id'] = remoteId;
-    data['type'] = type.index;
     return data;
   }
 
   factory BmBluetoothDevice.fromMap(Map<dynamic, dynamic> json) {
     return BmBluetoothDevice(
       remoteId: json['remote_id'],
-      type: BmBluetoothSpecEnum.values[json['type']],
     );
   }
 }

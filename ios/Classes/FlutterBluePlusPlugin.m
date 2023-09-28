@@ -1463,7 +1463,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 {
     return @{
         @"remote_id":   [[peripheral identifier] UUIDString],
-        @"type":        @(2), // hardcode to BLE. Does iOS differentiate?
     };
 }
 

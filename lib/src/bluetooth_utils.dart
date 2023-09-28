@@ -1,20 +1,5 @@
 part of flutter_blue_plus;
 
-enum BluetoothDeviceType { unknown, classic, le, dual }
-
-BluetoothDeviceType _bmToBluetoothDeviceType(BmBluetoothSpecEnum value) {
-  switch (value) {
-    case BmBluetoothSpecEnum.unknown:
-      return BluetoothDeviceType.unknown;
-    case BmBluetoothSpecEnum.classic:
-      return BluetoothDeviceType.classic;
-    case BmBluetoothSpecEnum.le:
-      return BluetoothDeviceType.le;
-    case BmBluetoothSpecEnum.dual:
-      return BluetoothDeviceType.dual;
-  }
-}
-
 class DisconnectReason {
   final ErrorPlatform platform;
   final int? code; // specific to platform
