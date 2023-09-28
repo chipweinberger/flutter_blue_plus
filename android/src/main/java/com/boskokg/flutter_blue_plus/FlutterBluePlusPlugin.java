@@ -1369,7 +1369,7 @@ public class FlutterBluePlusPlugin implements
                 gatt.disconnect();
 
                 // not autoconnected?
-                bool notAutoConnected = mAutoConnect.get(remoteId) == null || mAutoConnect.get(remoteId) == false;
+                boolean notAutoConnected = mAutoConnect.get(remoteId) == null || mAutoConnect.get(remoteId) == false;
 
                 // close
                 if (closeAll || notAutoConnected) {
