@@ -177,6 +177,12 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             result(@(true));
             return;
         }
+        else if([@"getSupportedPHY" isEqualToString:call.method])
+        {
+            result([FlutterError errorWithCode:@"getSupportedPHY" 
+                                    message:@"plugin does not support get phy support"
+                                    details:NULL]);
+        }
         else if ([@"isAvailable" isEqualToString:call.method])
         {
             result(self.centralManager != nil ? @(YES) : @(NO));
