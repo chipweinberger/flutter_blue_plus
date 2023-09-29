@@ -33,8 +33,8 @@ class BluetoothCharacteristic {
         descriptors = p.descriptors.map((d) => BluetoothDescriptor.fromProto(d)).toList(),
         properties = CharacteristicProperties.fromProto(p.properties);
 
-  // same as onValueReceived, but the stream immediately starts
-  // with lastValue as its first value to not cause delay
+  /// same as onValueReceived, but the stream immediately starts
+  /// with lastValue as its first value to not cause delay
   Stream<List<int>> get lastValueStream => onValueReceived.newStreamWithInitialValue(lastValue);
 
   // this stream is updated:

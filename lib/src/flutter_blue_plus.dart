@@ -11,14 +11,14 @@ class FlutterBluePlus {
 
   static bool _initialized = false;
 
-  // native platform channel
+  /// native platform channel
   static final MethodChannel _methods = const MethodChannel('flutter_blue_plus/methods');
 
-  // a broadcast stream version of the MethodChannel
+  /// a broadcast stream version of the MethodChannel
   // ignore: close_sinks
   static final StreamController<MethodCall> _methodStream = StreamController.broadcast();
 
-  // we always keep track of these device variables
+  // always keep track of these device variables
   static final Map<DeviceIdentifier, BmConnectionStateResponse> _connectionStates = {};
   static final Map<DeviceIdentifier, BmDiscoverServicesResult> _knownServices = {};
   static final Map<DeviceIdentifier, BmBondStateResponse> _bondStates = {};
@@ -26,16 +26,16 @@ class FlutterBluePlus {
   static final Map<DeviceIdentifier, Map<String, List<int>>> _lastChrs = {};
   static final Map<DeviceIdentifier, Map<String, List<int>>> _lastDescs = {};
 
-  // stream used for the isScanning public api
+  /// stream used for the isScanning public api
   static final _isScanning = _StreamController<bool>(initialValue: false);
 
-  // stream used for the scanResults public api
+  /// stream used for the scanResults public api
   static final _scanResultsList = _StreamController<List<ScanResult>>(initialValue: []);
 
-  // the subscription to the scan results stream
+  /// the subscription to the scan results stream
   static StreamSubscription<BmScanResponse?>? _scanSubscription;
 
-  // timeout for scanning that can be cancelled by stopScan
+  /// timeout for scanning that can be cancelled by stopScan
   static Timer? _scanTimeout;
 
   /// FlutterBluePlus log level
@@ -54,10 +54,10 @@ class FlutterBluePlus {
   /// Return the friendly Bluetooth name of the local Bluetooth adapter
   static Future<String> get adapterName async => await _invokeMethod('getAdapterName');
 
-  // returns whether we are scanning as a stream
+  /// returns whether we are scanning as a stream
   static Stream<bool> get isScanning => _isScanning.stream;
 
-  // are we scanning right now?
+  /// are we scanning right now?
   static bool get isScanningNow => _isScanning.latestValue;
 
   /// Returns a stream of List<ScanResult> results while a scan is in progress.
@@ -319,7 +319,7 @@ class FlutterBluePlus {
     _methodStream.add(call);
   }
 
-  // invoke a platform method
+  /// invoke a platform method
   static Future<dynamic> _invokeMethod(String method, [dynamic arguments]) async {
     // only allow 1 invocation at a time (guarentees that hot restart finishes)
     _Mutex mtx = await _MutexFactory.getMutexForKey("invokeMethod");
@@ -490,6 +490,7 @@ class AdvertisementData {
   final bool connectable;
   final Map<int, List<int>> manufacturerData;
   final Map<String, List<int>> serviceData;
+  
   // Note: we use strings and not Guids because advertisement UUIDs can
   // be 32-bit UUIDs, 64-bit, etc i.e. "FE56"
   final List<String> serviceUuids;

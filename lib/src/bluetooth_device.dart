@@ -23,9 +23,9 @@ class BluetoothDevice {
       : remoteId = DeviceIdentifier(remoteId),
         localName = localName ?? "";
 
-  // Get services
-  //  - returns null if discoverServices() has not been called
-  //  - this is cleared on disconnection. You must call discoverServices() again
+  /// Get services
+  ///  - returns null if discoverServices() has not been called
+  ///  - this is cleared on disconnection. You must call discoverServices() again
   List<BluetoothService>? get servicesList {
     return FlutterBluePlus._knownServices[remoteId]?.services.map((p) => BluetoothService.fromProto(p)).toList();
   }
@@ -435,7 +435,7 @@ class BluetoothDevice {
     await FlutterBluePlus._invokeMethod('clearGattCache', remoteId.str);
   }
 
-  // Get the current bondState of the device (Android Only)
+  /// Get the current bondState of the device (Android Only)
   Stream<BluetoothBondState> get bondState async* {
     // check android
     if (Platform.isAndroid == false) {

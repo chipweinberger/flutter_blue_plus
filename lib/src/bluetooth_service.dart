@@ -11,7 +11,7 @@ class BluetoothService {
   final List<BluetoothCharacteristic> characteristics;
   final List<BluetoothService> includedServices;
 
-  // convenience accessor
+  /// convenience accessor
   Guid get uuid => serviceUuid;
 
   BluetoothService.fromProto(BmBluetoothService p)
