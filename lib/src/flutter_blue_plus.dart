@@ -25,7 +25,6 @@ class FlutterBluePlus {
   static final Map<DeviceIdentifier, BmMtuChangedResponse> _mtuValues = {};
   static final Map<DeviceIdentifier, Map<String, List<int>>> _lastChrs = {};
   static final Map<DeviceIdentifier, Map<String, List<int>>> _lastDescs = {};
-  static final Map<DeviceIdentifier, String> _localNames = {};
 
   // stream used for the isScanning public api
   static final _isScanning = _StreamController<bool>(initialValue: false);
@@ -184,9 +183,6 @@ class FlutterBluePlus {
 
         // convert
         ScanResult sr = ScanResult.fromProto(response.result!);
-
-        // cache localName
-        _localNames[sr.device.remoteId] = sr.advertisementData.localName;
 
         // add result to output
         if (oneByOne) {
