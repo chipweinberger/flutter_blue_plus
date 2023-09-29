@@ -529,7 +529,10 @@ class AdvertisementData {
 }
 
 class PhySupport {
+  /// High speed (PHY 2M)
   final bool le2M;
+
+  /// Long range (PHY codec)
   final bool leCoded;
 
   PhySupport({required this.le2M, required this.leCoded});
