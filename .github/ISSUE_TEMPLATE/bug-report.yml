@@ -3,14 +3,13 @@ description: File a bug report
 title: "[Bug]: "
 labels: ["bug"]
 body:
-  - type: markdown
+  - type: checkboxes
     attributes:
-      value: |
-        I've considered if setting 'FlutterBluePlus.setLogLevel(LogLevel.verbose)' would help me solve my issue.
-  - type: markdown
-    attributes:
-      value: |
-        I've looked at the README "Common Problems" section
+      label: Requirements
+      description: 
+      options:
+        - label: "I've looked at the README 'Common Problems' section"
+          required: true
   - type: input
     id: fbp-version
     attributes:
