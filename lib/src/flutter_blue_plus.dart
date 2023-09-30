@@ -566,7 +566,10 @@ class AdvertisementData {
 }
 
 class PhySupport {
+  /// High speed (PHY 2M)
   final bool le2M;
+
+  /// Long range (PHY codec)
   final bool leCoded;
 
   PhySupport({required this.le2M, required this.leCoded});
@@ -604,9 +607,16 @@ enum FbpErrorCode {
 }
 
 class FlutterBluePlusException implements Exception {
+  /// Which platform did the error occur on?
   final ErrorPlatform platform;
+
+  /// Which function failed?
   final String function;
+
+   /// note: depends on platform
   final int? code;
+
+  /// note: depends on platform
   final String? description;
 
   FlutterBluePlusException(this.platform, this.function, this.code, this.description);

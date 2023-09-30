@@ -189,7 +189,7 @@ class BluetoothDevice {
         .newStreamWithInitialValue(initialValue);
   }
 
-  /// Name Changed Stream (iOS Only)
+  /// Name Changed Stream (iOS & macOS only)
   ///  - uses the GAP Device Name characteristic (0x2A00)
   Stream<String> get onNameChanged {
     // check iOS or macOS
@@ -204,8 +204,9 @@ class BluetoothDevice {
         .map((m) => m.platformName ?? "");
   }
 
-  /// Services Changed Stream (iOS Only)
+  /// Services Changed Stream (iOS & macOS only)
   ///  - uses the GAP Services Changed characteristic (0x2A05)
+  ///  - you must re-call discoverServices() 
   Stream<void> get onServicesChanged {
     // check iOS or macOS
     if (Platform.isIOS == false && Platform.isMacOS == false ) {

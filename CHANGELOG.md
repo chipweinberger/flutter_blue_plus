@@ -1,5 +1,8 @@
+## 1.16.2
+**[Fix]** platform check in `onNameChanged` & `onServicesChanged` was incorrect
+
 ## 1.16.1
-**[Add]** iOS: add support for onServicesChanged & onNameChanged
+**[Add]** iOS: add support for `onServicesChanged` & `onNameChanged`
 
 ## 1.16.0
 This release simplifies BluetoothDevice construction.
@@ -31,7 +34,7 @@ This release simplifies BluetoothDevice construction.
 * **[Readme]** add v1.15.0 migration guides
 
 ## 1.15.5
-* **[Fix]** firstWhereOrNull conflict
+* **[Fix]** `firstWhereOrNull` conflict (regression in 1.15.0)
 
 ## 1.15.4
 * **[Fix]** some typos in disconnect exceptions (from 1.15.3)
