@@ -1,3 +1,11 @@
+## 1.16.0
+This release improves BluetoothDevice.
+**[Breaking Change]** remove BluetoothDevice.type & BluetoothDevice.localName from constructor for simplicity
+**[Breaking Change]** remove servicesStream & isDiscoveringServices deprecated functions
+**[Rename]** `localName` -> `platformName` to reflect platform specific behavior
+**[Fix]** `setNotifyValue` must take `descWrite` mutex
+**[Add]** Android: getPhySupport
+
 ## 1.15.10
 * **[Fix]** iOS: localName does not match Android
 * **[Fix]** flutterHotRestart: error was thrown if device did not have bluetooth adapter
@@ -306,9 +314,8 @@ This release removes recent changes to the API causing issues.
 
 ## 1.10.0
 This release improves error handling and reliability.
-There are 2 small breaking changes. See below.
-* **BREAKING CHANGE:** Dart: turnOn() & turnOff() now wait for completion, return void instead of bool, and can throw
-* **BREAKING CHANGE:** Dart: use static functions for FlutterBluePlus instead of FlutterBluePlus.instance. Multiple instances is not supported by any platform.
+* **[BREAKING CHANGE]** Dart: turnOn() & turnOff() now wait for completion, return void instead of bool, and can throw
+* **[BREAKING CHANGE]** Dart: use static functions for FlutterBluePlus instead of FlutterBluePlus.instance. Multiple instances is not supported by any platform.
 * **[improve]** readme: add error handling section
 * **[improve]** iOS: handle missing bluetooth adapter gracefully
 * **[improve]** iOS: getAdapterState && getConnectionState are more robust
@@ -346,8 +353,7 @@ There are 2 small breaking changes. See below.
 This release marks the end of major work to improve reliability and
 simplicity of the FlutterBluePlus codebase. Please submit bug reports.
 
-* **ANDROID ONLY BREAKING CHANGE:** When `read()` is called `onValueChangedStream` is pushed to as well. This change was made to make both platforms behave the same way. It is an unavoidable limitation of iOS. See: https://github.com/boskokg/flutter_blue_plus/issues/419
-
+* **[BREAKING CHANGE]** Android: When `read()` is called `onValueChangedStream` is pushed to as well. This change was made to make both platforms behave the same way. It is an unavoidable limitation of iOS. See: https://github.com/boskokg/flutter_blue_plus/issues/419
 * **[fix]** Android/iOS: mtu check minus 3 issue (reggression in 1.8.3)
 * **[fix]** Dart: BluetoothCharacteristic.state variable not working (bug introduced 1.8.6)
 * **[fix]** Dart: FlutterBluePlus.state variable not working (bug introduced 1.8.6)
