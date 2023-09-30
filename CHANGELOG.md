@@ -1,3 +1,6 @@
+## 1.16.1
+**[Add]** iOS: add support for onServicesChanged & onNameChanged
+
 ## 1.16.0
 This release simplifies BluetoothDevice construction.
 **[Breaking Change]** remove `BluetoothDevice.type` & `BluetoothDevice.localName` from constructor for simplicity
