@@ -104,7 +104,7 @@ class FlutterBluePlus {
 
   /// Retrieve a list of connected devices
   /// - The list includes devices connected by other apps
-  /// - You must call device.connect() before these devices can be used by FlutterBluePlus
+  /// - You must still call device.connect() to connect them to *your app*
   static Future<List<BluetoothDevice>> get connectedSystemDevices async {
     BmConnectedDevicesResponse response =
         await _invokeMethod('getConnectedSystemDevices').then((args) => BmConnectedDevicesResponse.fromMap(args));

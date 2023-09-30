@@ -10,7 +10,7 @@ class BluetoothDescriptor {
   final Guid characteristicUuid;
   final Guid descriptorUuid;
 
-  // convenience accessor
+  /// convenience accessor
   Guid get uuid => descriptorUuid;
 
   /// this variable is updated:
@@ -21,13 +21,13 @@ class BluetoothDescriptor {
     return FlutterBluePlus._lastDescs[remoteId]?[key] ?? [];
   }
 
-  // same as onValueReceived, but the stream immediately starts
-  // with lastValue as its first value to not cause delay
+  /// same as onValueReceived, but the stream immediately starts
+  /// with lastValue as its first value to not cause delay
   Stream<List<int>> get lastValueStream => onValueReceived.newStreamWithInitialValue(lastValue);
 
-  // this stream is pushed to whenever:
-  //  - descriptor.read() succeeds
-  //  - descriptor.write() succeeds
+  /// this stream is pushed to whenever:
+  ///  - descriptor.read() succeeds
+  ///  - descriptor.write() succeeds
   Stream<List<int>> get onValueReceived => FlutterBluePlus._methodStream.stream
       .where((m) => m.method == "OnDescriptorRead")
       .map((m) => m.arguments)

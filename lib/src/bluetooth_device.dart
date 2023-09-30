@@ -18,7 +18,7 @@ class BluetoothDevice {
   BluetoothDevice.fromId(String remoteId) : remoteId = DeviceIdentifier(remoteId);
 
   /// platform name
-  /// - iOS: uses GAP name if set at characteristic 0x2A00, otherwise advertised name
+  /// - iOS: uses GAP name characteristic 0x2A00, otherwise advertised name
   /// - Android: uses advertised name
   String get platformName => FlutterBluePlus._platformNames[remoteId] ?? "";
 
