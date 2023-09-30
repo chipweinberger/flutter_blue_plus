@@ -597,7 +597,7 @@ enum FbpErrorCode {
   success,
   timeout,
   androidOnly,
-  iosOnly,
+  applePlatformOnly,
   createBondFailed,
   removeBondFailed,
   deviceIsDisconnected,

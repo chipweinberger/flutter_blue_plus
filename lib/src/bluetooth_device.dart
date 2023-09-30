@@ -192,9 +192,9 @@ class BluetoothDevice {
   /// Name Changed Stream (iOS Only)
   ///  - uses the GAP Device Name characteristic (0x2A00)
   Stream<String> get onNameChanged {
-    // check iOS
-    if (Platform.isAndroid == false) {
-      throw FlutterBluePlusException(ErrorPlatform.dart, "onNameChanged", FbpErrorCode.iosOnly.index, "iOS-only");
+    // check iOS or macOS
+    if (Platform.isIOS == false && Platform.isMacOS == false ) {
+      throw FlutterBluePlusException(ErrorPlatform.dart, "onNameChanged", FbpErrorCode.applePlatformOnly.index, "iOS-macOS-only");
     }
     return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnNameChanged")
@@ -207,9 +207,9 @@ class BluetoothDevice {
   /// Services Changed Stream (iOS Only)
   ///  - uses the GAP Services Changed characteristic (0x2A05)
   Stream<void> get onServicesChanged {
-    // check iOS
-    if (Platform.isAndroid == false) {
-      throw FlutterBluePlusException(ErrorPlatform.dart, "onServicesChanged", FbpErrorCode.iosOnly.index, "iOS-only");
+    // check iOS or macOS
+    if (Platform.isIOS == false && Platform.isMacOS == false ) {
+      throw FlutterBluePlusException(ErrorPlatform.dart, "onServicesChanged", FbpErrorCode.applePlatformOnly.index, "iOS-macOS-only");
     }
     return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnServicesChanged")
