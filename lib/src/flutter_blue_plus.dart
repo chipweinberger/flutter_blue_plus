@@ -254,6 +254,30 @@ class FlutterBluePlus {
     return _connectionStates[remoteId]!.connectionState == BmConnectionStateEnum.connected;
   }
 
+  static Future<dynamic> _initFlutterBluePlus() async {
+    if (_initialized) {
+      return;
+    }
+
+    // avoid infinite recursion: must set this
+    // to true before we call setLogLevel!
+    _initialized = true;
+
+    // set platform method handler
+    _methods.setMethodCallHandler(_methodCallHandler);
+
+    // set default log level
+    setLogLevel(logLevel);
+
+    // hot restart
+    if ((await _methods.invokeMethod('flutterHotRestart')) != 0) {
+      await Future.delayed(Duration(milliseconds: 50));
+      while ((await _methods.invokeMethod('connectedCount')) != 0) {
+        await Future.delayed(Duration(milliseconds: 50));
+      }
+    }
+  }
+
   static Future<dynamic> _methodCallHandler(MethodCall call) async {
     // log result
     if (logLevel == LogLevel.verbose) {
@@ -332,25 +356,16 @@ class FlutterBluePlus {
 
   /// invoke a platform method
   static Future<dynamic> _invokeMethod(String method, [dynamic arguments]) async {
+    // return value
+    dynamic out;
+
     // only allow 1 invocation at a time (guarentees that hot restart finishes)
     _Mutex mtx = await _MutexFactory.getMutexForKey("invokeMethod");
     await mtx.take();
 
-    dynamic out;
-
     try {
-      // initialize response handler
-      if (_initialized == false) {
-        _initialized = true; // avoid recursion: must set before setLogLevel
-        _methods.setMethodCallHandler(_methodCallHandler);
-        setLogLevel(logLevel);
-        if ((await _methods.invokeMethod('flutterHotRestart')) != 0) {
-          await Future.delayed(Duration(milliseconds: 50));
-          while ((await _methods.invokeMethod('connectedCount')) != 0) {
-            await Future.delayed(Duration(milliseconds: 50));
-          }
-        }
-      }
+      // initialize
+      _initFlutterBluePlus();
 
       // log args
       if (logLevel == LogLevel.verbose) {
@@ -501,7 +516,7 @@ class AdvertisementData {
   final bool connectable;
   final Map<int, List<int>> manufacturerData;
   final Map<String, List<int>> serviceData;
-  
+
   // Note: we use strings and not Guids because advertisement UUIDs can
   // be 32-bit UUIDs, 64-bit, etc i.e. "FE56"
   final List<String> serviceUuids;
