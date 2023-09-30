@@ -1,3 +1,6 @@
+## 1.16.2
+**[Fix]** platform check in onNameChanged & onServicesChanged was incorrect
+
 ## 1.16.1
 **[Add]** iOS: add support for onServicesChanged & onNameChanged
 
