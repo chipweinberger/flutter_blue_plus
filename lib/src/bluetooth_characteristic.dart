@@ -50,6 +50,8 @@ class BluetoothCharacteristic {
       .where((p) => p.success == true)
       .map((c) => c.value);
 
+  /// return true if we're subscribed to this characteristic
+  ///   -  you can subscribe using setNotifyValue(true)
   bool get isNotifying {
     var cccd = descriptors._firstWhereOrNull((d) => d.descriptorUuid == cccdUuid);
     if (cccd == null) {

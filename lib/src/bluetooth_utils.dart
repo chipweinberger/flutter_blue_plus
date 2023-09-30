@@ -77,7 +77,7 @@ BluetoothBondState _bmToBluetoothBondState(BmBondStateResponse value) {
 }
 
 // [none] no bond
-// [bonding] bonding is underway
+// [bonding] bonding is in progress
 // [bonded] bond success
 // [failed] a bonding attempt failed
 // [lost] a previous bond was deleted (you should reconnect to force a rebond)

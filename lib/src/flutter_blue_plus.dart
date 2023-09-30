@@ -173,12 +173,10 @@ class FlutterBluePlus {
     // listen & push to `scanResults` stream
     _scanSubscription = outputStream.listen((BmScanResponse? response) {
       if (response == null) {
-        // if null, this is just a periodic update
-        // for removing old results
-        output.removeWhere((elm) => DateTime.now().difference(elm.timeStamp) > removeIfGone!);
-
-        // push to stream
-        _scanResultsList.add(List.from(output));
+        // if null, this is just a periodic update to remove old results
+        if (output._removeWhere((elm) => DateTime.now().difference(elm.timeStamp) > removeIfGone!)) {
+          _scanResultsList.add(List.from(output)); // push to stream
+        }
       } else {
         // failure?
         if (response.failed != null) {
@@ -613,7 +611,7 @@ class FlutterBluePlusException implements Exception {
   /// Which function failed?
   final String function;
 
-   /// note: depends on platform
+  /// note: depends on platform
   final int? code;
 
   /// note: depends on platform

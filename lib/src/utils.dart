@@ -41,6 +41,7 @@ int _compareAsciiLowerCase(String a, String b) {
 }
 
 extension AddOrUpdate<T> on List<T> {
+  /// add an item to a list, or update item if it already exists
   void addOrUpdate(T item) {
     final index = indexOf(item);
     if (index != -1) {
@@ -438,6 +439,7 @@ String _brown(String s) {
 }
 
 extension FirstWhereOrNullExtension<T> on Iterable<T> {
+  /// returns first item to satisfy `test`, else null
   T? _firstWhereOrNull(bool Function(T) test) {
     for (var element in this) {
       if (test(element)) {
@@ -445,6 +447,15 @@ extension FirstWhereOrNullExtension<T> on Iterable<T> {
       }
     }
     return null;
+  }
+}
+
+extension RemoveWhere<T> on List<T> {
+  /// returns true if some items where removed
+  bool _removeWhere(bool Function(T) test) {
+    int initialLength = this.length;
+    this.removeWhere(test);
+    return this.length != initialLength;
   }
 }
 
