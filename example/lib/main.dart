@@ -167,7 +167,7 @@ class _FindDevicesScreenState extends State<FindDevicesScreen> {
                   builder: (c, snapshot) => Column(
                     children: (snapshot.data ?? [])
                         .map((d) => ListTile(
-                              title: Text(d.localName),
+                              title: Text(d.platformName),
                               subtitle: Text(d.remoteId.toString()),
                               trailing: StreamBuilder<BluetoothConnectionState>(
                                 stream: d.connectionState,
@@ -389,7 +389,7 @@ class DeviceScreen extends StatelessWidget {
       key: snackBarKeyC,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(device.localName),
+          title: Text(device.platformName),
           actions: <Widget>[
             StreamBuilder<BluetoothConnectionState>(
               stream: device.connectionState,

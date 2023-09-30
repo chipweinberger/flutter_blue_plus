@@ -135,7 +135,7 @@ var subscription = FlutterBluePlus.scanResults.listen(
     (results) {
         for (ScanResult r in results) {
             if (seen.contains(r.device.remoteId) == false) {
-                print('${r.device.remoteId}: "${r.device.localName}" found! rssi: ${r.rssi}');
+                print('${r.device.remoteId}: "${r.advertisementData.localName}" found! rssi: ${r.rssi}');
                 seen.add(r.device.remoteId);
             }
         }
@@ -435,7 +435,7 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 
 |                           |      Android       |        iOS         | Throws | Description                                                |
 | :------------------------ | :----------------: | :----------------: | :----: | :----------------------------------------------------------|
-| localName                 | :white_check_mark: | :white_check_mark: |        | The cached localName of the device                         |
+| platformName              | :white_check_mark: | :white_check_mark: |        | The platform cached name of the device                     |
 | connect                   | :white_check_mark: | :white_check_mark: | :fire: | Establishes a connection to the device                     |
 | disconnect                | :white_check_mark: | :white_check_mark: | :fire: | Cancels an active or pending connection to the device      |
 | discoverServices          | :white_check_mark: | :white_check_mark: | :fire: | Discover services                                          |
@@ -522,8 +522,8 @@ Try looking through already connected devices:
 // connected to by other apps
 List<BluetoothDevice> system = await FlutterBluePlus.connectedSystemDevices;
 for (var d in system) {
-    print('${r.device.localName} already connected to! ${r.device.remoteId}');
-    if (d.localName == "myBleDevice") {
+    print('${r.device.platformName} already connected to! ${r.device.remoteId}');
+    if (d.platformName == "myBleDevice") {
          await r.connect(); // must connect our app
     }
 }

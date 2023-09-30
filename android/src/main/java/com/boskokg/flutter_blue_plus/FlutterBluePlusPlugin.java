@@ -97,7 +97,6 @@ public class FlutterBluePlusPlugin implements
     private final Map<String, BluetoothGatt> mConnectedDevices = new ConcurrentHashMap<>();
     private final Map<String, Integer> mMtu = new ConcurrentHashMap<>();
     private final Map<String, Boolean> mAutoConnect = new ConcurrentHashMap<>();
-
     private int lastEventId = 1452;
     private final Map<Integer, OperationOnPermission> operationsOnPermission = new HashMap<>();
 
@@ -1528,13 +1527,14 @@ public class FlutterBluePlusPlugin implements
                     super.onScanResult(callbackType, result);
 
                     BluetoothDevice device = result.getDevice();
+                    String remoteId = device.getAddress();
 
                     // see BmScanResult
-                    HashMap<String, Object> rr = bmScanResult(device, result);
+                    HashMap<String, Object> sr = bmScanResult(device, result);
 
                     // see BmScanResponse
                     HashMap<String, Object> response = new HashMap<>();
-                    response.put("result", rr);
+                    response.put("result", sr);
 
                     invokeMethodUIThread("OnScanResponse", response);
                 }
@@ -1917,9 +1917,7 @@ public class FlutterBluePlusPlugin implements
     HashMap<String, Object> bmBluetoothDevice(BluetoothDevice device) {
         HashMap<String, Object> map = new HashMap<>();
         map.put("remote_id", device.getAddress());
-        if(device.getName() != null) {
-            map.put("local_name", device.getName());
-        }
+        map.put("platform_name", device.getName()); 
         return map;
     }
 

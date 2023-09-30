@@ -25,6 +25,7 @@ class FlutterBluePlus {
   static final Map<DeviceIdentifier, BmMtuChangedResponse> _mtuValues = {};
   static final Map<DeviceIdentifier, Map<String, List<int>>> _lastChrs = {};
   static final Map<DeviceIdentifier, Map<String, List<int>>> _lastDescs = {};
+  static final Map<DeviceIdentifier, String> _platformNames = {};
 
   /// stream used for the isScanning public api
   static final _isScanning = _StreamController<bool>(initialValue: false);
@@ -104,11 +105,15 @@ class FlutterBluePlus {
   /// Retrieve a list of connected devices
   /// - The list includes devices connected by other apps
   /// - You must call device.connect() before these devices can be used by FlutterBluePlus
-  static Future<List<BluetoothDevice>> get connectedSystemDevices {
-    return _invokeMethod('getConnectedSystemDevices')
-        .then((args) => BmConnectedDevicesResponse.fromMap(args))
-        .then((p) => p.devices)
-        .then((p) => p.map((d) => BluetoothDevice.fromProto(d)).toList());
+  static Future<List<BluetoothDevice>> get connectedSystemDevices async {
+    BmConnectedDevicesResponse response =
+        await _invokeMethod('getConnectedSystemDevices').then((args) => BmConnectedDevicesResponse.fromMap(args));
+    for (BmBluetoothDevice device in response.devices) {
+      if (device.platformName != null) {
+        _platformNames[DeviceIdentifier(device.remoteId)] = device.platformName!;
+      }
+    }
+    return response.devices.map((d) => BluetoothDevice.fromProto(d)).toList();
   }
 
   /// Retrieve a list of bonded devices (Android only)
@@ -179,6 +184,12 @@ class FlutterBluePlus {
         if (response.failed != null) {
           throw FlutterBluePlusException(
               _nativeError, "scan", response.failed!.errorCode, response.failed!.errorString);
+        }
+
+        // cache platformName
+        BmBluetoothDevice device = response.result!.device;
+        if (device.platformName != null) {
+          _platformNames[DeviceIdentifier(device.remoteId)] = device.platformName!;
         }
 
         // convert

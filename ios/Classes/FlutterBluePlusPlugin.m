@@ -956,8 +956,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     if (_logLevel >= verbose) {
         NSLog(@"[FBP-iOS] centralManager didDiscoverPeripheral");
     }
+
+    NSString* remoteId = [[peripheral identifier] UUIDString];
     
-    [self.knownPeripherals setObject:peripheral forKey:[[peripheral identifier] UUIDString]];
+    [self.knownPeripherals setObject:peripheral forKey:remoteId];
 
     // See BmScanResult
     NSDictionary *result = [self bmScanResult:peripheral advertisementData:advertisementData RSSI:RSSI];
@@ -1468,8 +1470,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 - (NSDictionary *)bmBluetoothDevice:(CBPeripheral *)peripheral
 {
     return @{
-        @"remote_id":   [[peripheral identifier] UUIDString],
-        @"local_name":  [peripheral name] ? [peripheral name] : [NSNull null],
+        @"remote_id":       [[peripheral identifier] UUIDString],
+        @"platform_name":   [peripheral name] ? [peripheral name] : [NSNull null],
     };
 }
 

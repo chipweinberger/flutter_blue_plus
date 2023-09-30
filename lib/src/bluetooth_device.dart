@@ -6,22 +6,21 @@ part of flutter_blue_plus;
 
 class BluetoothDevice {
   final DeviceIdentifier remoteId;
-  final String localName;
 
   BluetoothDevice({
     required this.remoteId,
-    required this.localName,
   });
 
-  BluetoothDevice.fromProto(BmBluetoothDevice p)
-      : remoteId = DeviceIdentifier(p.remoteId),
-        localName = p.localName ?? "";
+  BluetoothDevice.fromProto(BmBluetoothDevice p) : remoteId = DeviceIdentifier(p.remoteId);
 
   /// allows connecting to a known device without re-scanning
   /// Note: this device must have been discovered by your app in a previous scan
-  BluetoothDevice.fromId(String remoteId, {String? localName})
-      : remoteId = DeviceIdentifier(remoteId),
-        localName = localName ?? "";
+  BluetoothDevice.fromId(String remoteId) : remoteId = DeviceIdentifier(remoteId);
+
+  /// platform name
+  /// - iOS: uses GAP name if set at characteristic 0x2A00, otherwise advertised name
+  /// - Android: uses advertised name
+  String get platformName => FlutterBluePlus._platformNames[remoteId] ?? "";
 
   /// Get services
   ///  - returns null if discoverServices() has not been called
@@ -150,7 +149,7 @@ class BluetoothDevice {
     return result;
   }
 
-  // return the most recent disconnection reason
+  /// The most recent disconnection reason
   DisconnectReason? get disconnectReason {
     if (FlutterBluePlus._connectionStates[remoteId] == null) {
       return null;
@@ -488,16 +487,20 @@ class BluetoothDevice {
   String toString() {
     return 'BluetoothDevice{'
         'remoteId: $remoteId, '
-        'localName: $localName, '
+        'platformName: $platformName, '
         'services: ${FlutterBluePlus._knownServices[remoteId]}'
         '}';
   }
 
   @Deprecated("removed. no replacement")
-  Stream<bool> get isDiscoveringServices async* {yield false;}
+  Stream<bool> get isDiscoveringServices async* {
+    yield false;
+  }
 
   @Deprecated("removed. no replacement")
-  Stream<List<BluetoothService>> get servicesStream  async* {yield [];}
+  Stream<List<BluetoothService>> get servicesStream async* {
+    yield [];
+  }
 
   @Deprecated('Use createBond() instead')
   Future<void> pair() async => await createBond();
@@ -505,8 +508,11 @@ class BluetoothDevice {
   @Deprecated('Use remoteId instead')
   DeviceIdentifier get id => remoteId;
 
-  @Deprecated('Use localName instead')
-  String get name => localName;
+  @Deprecated('Use platformName instead')
+  String get localName => platformName;
+
+  @Deprecated('Use platformName instead')
+  String get name => platformName;
 
   @Deprecated('Use connectionState instead')
   Stream<BluetoothConnectionState> get state => connectionState;

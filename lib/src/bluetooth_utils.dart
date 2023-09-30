@@ -1,6 +1,5 @@
 part of flutter_blue_plus;
 
-
 class DisconnectReason {
   final ErrorPlatform platform;
   final int? code; // specific to platform

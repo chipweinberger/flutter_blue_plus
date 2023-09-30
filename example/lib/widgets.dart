@@ -12,13 +12,13 @@ class ScanResultTile extends StatelessWidget {
   final VoidCallback? onTap;
 
   Widget _buildTitle(BuildContext context) {
-    if (result.device.localName.isNotEmpty) {
+    if (result.device.platformName.isNotEmpty) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            result.device.localName,
+            result.device.platformName,
             overflow: TextOverflow.ellipsis,
           ),
           Text(
