@@ -309,6 +309,20 @@ class FlutterBluePlus {
       }
     }
 
+    // keep track of device name
+    if (call.method == "OnNameChanged") {
+      BmBluetoothDevice device = BmBluetoothDevice.fromMap(call.arguments);
+      if (device.platformName != null) {
+        _platformNames[DeviceIdentifier(device.remoteId)] = device.platformName!;
+      }
+    }
+
+    // keep track of service changes
+    if (call.method == "OnServicesChanged") {
+      BmBluetoothDevice device = BmBluetoothDevice.fromMap(call.arguments);
+      _knownServices.remove(DeviceIdentifier(device.remoteId));
+    }
+
     // keep track of bond state
     if (call.method == "OnBondStateChanged") {
       BmBondStateResponse r = BmBondStateResponse.fromMap(call.arguments);
@@ -583,6 +597,7 @@ enum FbpErrorCode {
   success,
   timeout,
   androidOnly,
+  iosOnly,
   createBondFailed,
   removeBondFailed,
   deviceIsDisconnected,

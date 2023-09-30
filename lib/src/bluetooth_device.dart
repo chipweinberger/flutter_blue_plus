@@ -189,6 +189,36 @@ class BluetoothDevice {
         .newStreamWithInitialValue(initialValue);
   }
 
+  /// Name Changed Stream (iOS Only)
+  ///  - uses the GAP Device Name characteristic (0x2A00)
+  Stream<String> get onNameChanged {
+    // check iOS
+    if (Platform.isAndroid == false) {
+      throw FlutterBluePlusException(ErrorPlatform.dart, "onNameChanged", FbpErrorCode.iosOnly.index, "iOS-only");
+    }
+    return FlutterBluePlus._methodStream.stream
+        .where((m) => m.method == "OnNameChanged")
+        .map((m) => m.arguments)
+        .map((args) => BmBluetoothDevice.fromMap(args))
+        .where((p) => p.remoteId == remoteId.str)
+        .map((m) => m.platformName ?? "");
+  }
+
+  /// Services Changed Stream (iOS Only)
+  ///  - uses the GAP Services Changed characteristic (0x2A05)
+  Stream<void> get onServicesChanged {
+    // check iOS
+    if (Platform.isAndroid == false) {
+      throw FlutterBluePlusException(ErrorPlatform.dart, "onServicesChanged", FbpErrorCode.iosOnly.index, "iOS-only");
+    }
+    return FlutterBluePlus._methodStream.stream
+        .where((m) => m.method == "OnServicesChanged")
+        .map((m) => m.arguments)
+        .map((args) => BmBluetoothDevice.fromMap(args))
+        .where((p) => p.remoteId == remoteId.str)
+        .map((m) => null);
+  }
+
   /// Read the RSSI of connected remote device
   Future<int> readRssi({int timeout = 15}) async {
     // check connected

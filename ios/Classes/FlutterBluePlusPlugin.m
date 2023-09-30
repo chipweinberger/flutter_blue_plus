@@ -1300,6 +1300,29 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     [_methodChannel invokeMethod:@"BmOnDescriptorWrite" arguments:result];
 }
 
+- (void)peripheralDidUpdateName:(CBPeripheral *)peripheral
+{
+    if (_logLevel >= debug) {
+        NSLog(@"[FBP-iOS] didUpdateName");
+    }
+
+    NSDictionary* result = [self bmBluetoothDevice:peripheral];
+
+    [_methodChannel invokeMethod:@"OnNameChanged" arguments:result];
+}
+
+- (void)peripheral:(CBPeripheral *)peripheral 
+    didModifyServices:(NSArray<CBService *> *)invalidatedServices
+{
+    if (_logLevel >= debug) {
+        NSLog(@"[FBP-iOS] didModifyServices");
+    }
+
+    NSDictionary* result = [self bmBluetoothDevice:peripheral];
+
+    [_methodChannel invokeMethod:@"OnServicesChanged" arguments:result];
+}
+
 - (void)peripheral:(CBPeripheral *)peripheral
     didReadRSSI:(NSNumber *)rssi error:(NSError *)error
 {
