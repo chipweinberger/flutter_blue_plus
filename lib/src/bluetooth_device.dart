@@ -21,25 +21,21 @@ class BluetoothDevice {
 
   final DeviceIdentifier remoteId;
   final String localName;
-  final BluetoothDeviceType type;
 
   BluetoothDevice({
     required this.remoteId,
     required this.localName,
-    required this.type,
   });
 
   BluetoothDevice.fromProto(BmBluetoothDevice p)
       : remoteId = DeviceIdentifier(p.remoteId),
-        localName = p.localName ?? "",
-        type = _bmToBluetoothDeviceType(p.type);
+        localName = p.localName ?? "";
 
   /// allows connecting to a known device without re-scanning
   /// Note: this device must have been discovered by your app in a previous scan
-  BluetoothDevice.fromId(String remoteId, {String? localName, BluetoothDeviceType? type})
+  BluetoothDevice.fromId(String remoteId, {String? localName})
       : remoteId = DeviceIdentifier(remoteId),
-        localName = localName ?? "Unknown",
-        type = type ?? BluetoothDeviceType.unknown;
+        localName = localName ?? "";
 
   // Get services
   //  - returns null if discoverServices() has not been called
@@ -129,8 +125,8 @@ class BluetoothDevice {
   Future<List<BluetoothService>> discoverServices({int timeout = 15}) async {
     // check connected
     if (FlutterBluePlus._isDeviceConnected(remoteId) == false) {
-      throw FlutterBluePlusException(ErrorPlatform.dart, "discoverServices",
-        FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
+      throw FlutterBluePlusException(
+          ErrorPlatform.dart, "discoverServices", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
     // Only allow a single 'discoverServices' operation at the same time per device.
@@ -219,8 +215,8 @@ class BluetoothDevice {
   Future<int> readRssi({int timeout = 15}) async {
     // check connected
     if (FlutterBluePlus._isDeviceConnected(remoteId) == false) {
-      throw FlutterBluePlusException(ErrorPlatform.dart, "readRssi",
-        FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
+      throw FlutterBluePlusException(
+          ErrorPlatform.dart, "readRssi", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
     // Only allow a single 'readRssi' operation at the same time per device.
@@ -267,8 +263,8 @@ class BluetoothDevice {
 
     // check connected
     if (FlutterBluePlus._isDeviceConnected(remoteId) == false) {
-      throw FlutterBluePlusException(ErrorPlatform.dart, "requestMtu",
-        FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
+      throw FlutterBluePlusException(
+          ErrorPlatform.dart, "requestMtu", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
     // Only allow a single 'requestMtu' operation at the same time per device.
@@ -315,7 +311,7 @@ class BluetoothDevice {
     // check connected
     if (FlutterBluePlus._isDeviceConnected(remoteId) == false) {
       throw FlutterBluePlusException(ErrorPlatform.dart, "requestConnectionPriority",
-        FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
+          FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
     var request = BmConnectionPriorityRequest(
@@ -344,8 +340,8 @@ class BluetoothDevice {
 
     // check connected
     if (FlutterBluePlus._isDeviceConnected(remoteId) == false) {
-      throw FlutterBluePlusException(ErrorPlatform.dart, "setPreferredPhy",
-        FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
+      throw FlutterBluePlusException(
+          ErrorPlatform.dart, "setPreferredPhy", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
     var request = BmPreferredPhy(
@@ -358,7 +354,7 @@ class BluetoothDevice {
     await FlutterBluePlus._invokeMethod('setPreferredPhy', request.toMap());
   }
 
-  /// Force the bonding popup to show now (Android Only) 
+  /// Force the bonding popup to show now (Android Only)
   /// Note! calling this is usually not necessary!! The platform does it automatically.
   Future<void> createBond({int timeout = 90}) async {
     // check android
@@ -368,8 +364,8 @@ class BluetoothDevice {
 
     // check connected
     if (FlutterBluePlus._isDeviceConnected(remoteId) == false) {
-      throw FlutterBluePlusException(ErrorPlatform.dart, "createBond",
-        FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
+      throw FlutterBluePlusException(
+          ErrorPlatform.dart, "createBond", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
     // Only allow a single 'createRemoveBond' operation at the same time per device.
@@ -453,8 +449,8 @@ class BluetoothDevice {
 
     // check connected
     if (FlutterBluePlus._isDeviceConnected(remoteId) == false) {
-      throw FlutterBluePlusException(ErrorPlatform.dart, "clearGattCache",
-        FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
+      throw FlutterBluePlusException(
+          ErrorPlatform.dart, "clearGattCache", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
     await FlutterBluePlus._invokeMethod('clearGattCache', remoteId.str);
@@ -523,7 +519,7 @@ class BluetoothDevice {
   // stream return whether or not we are currently discovering services
   @Deprecated("planed for removal (Jan 2024). It can be easily implemented yourself") // deprecated on Aug 2023
   Stream<bool> get isDiscoveringServices => _isDiscoveringServices.stream;
-  
+
   /// Stream of bluetooth services offered by the remote device
   ///   - this stream is only updated when you call discoverServices()
   @Deprecated("planed for removal (Jan 2024). It can be easily implemented yourself") // deprecated on Aug 2023

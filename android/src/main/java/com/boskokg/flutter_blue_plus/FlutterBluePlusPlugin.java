@@ -1902,7 +1902,6 @@ public class FlutterBluePlusPlugin implements
         if(device.getName() != null) {
             map.put("local_name", device.getName());
         }
-        map.put("type", device.getType());
         return map;
     }
 
