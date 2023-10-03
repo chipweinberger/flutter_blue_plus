@@ -1094,17 +1094,7 @@ public class FlutterBluePlusPlugin implements
 
                     // already bonded?
                     if (device.getBondState() == BluetoothDevice.BOND_BONDED) {
-
-                        // see: BmBondStateResponse
-                        HashMap<String, Object> response = new HashMap<>();
-                        response.put("remote_id", remoteId);
-                        response.put("bond_state", bmBondStateEnum(BluetoothDevice.BOND_BONDED));
-                        response.put("bond_failed", false);
-                        response.put("bond_lost", false);
-
-                        // the dart code always waits on this
-                        invokeMethodUIThread("OnBondStateChanged", response);
-
+                        log(LogLevel.WARNING, "[FBP-Android] already bonded");
                         result.success(false); // no work to do
                         break;
                     }
@@ -1127,17 +1117,7 @@ public class FlutterBluePlusPlugin implements
 
                     // already removed?
                     if (device.getBondState() == BluetoothDevice.BOND_NONE) {
-
-                        // see: BmBondStateResponse
-                        HashMap<String, Object> response = new HashMap<>();
-                        response.put("remote_id", remoteId);
-                        response.put("bond_state", bmBondStateEnum(BluetoothDevice.BOND_NONE));
-                        response.put("bond_failed", false);
-                        response.put("bond_lost", false);
-
-                        // the dart code always waits on this
-                        invokeMethodUIThread("OnBondStateChanged", response);
-
+                        log(LogLevel.WARNING, "[FBP-Android] already not bonded");
                         result.success(false); // no work to do
                         break;
                     }

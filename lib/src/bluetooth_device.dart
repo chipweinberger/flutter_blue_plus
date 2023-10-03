@@ -193,8 +193,9 @@ class BluetoothDevice {
   ///  - uses the GAP Device Name characteristic (0x2A00)
   Stream<String> get onNameChanged {
     // check iOS or macOS
-    if (Platform.isIOS == false && Platform.isMacOS == false ) {
-      throw FlutterBluePlusException(ErrorPlatform.dart, "onNameChanged", FbpErrorCode.applePlatformOnly.index, "iOS-macOS-only");
+    if (Platform.isIOS == false && Platform.isMacOS == false) {
+      throw FlutterBluePlusException(
+          ErrorPlatform.dart, "onNameChanged", FbpErrorCode.applePlatformOnly.index, "iOS-macOS-only");
     }
     return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnNameChanged")
@@ -206,11 +207,12 @@ class BluetoothDevice {
 
   /// Services Changed Stream (iOS & macOS only)
   ///  - uses the GAP Services Changed characteristic (0x2A05)
-  ///  - you must re-call discoverServices() 
+  ///  - you must re-call discoverServices()
   Stream<void> get onServicesChanged {
     // check iOS or macOS
-    if (Platform.isIOS == false && Platform.isMacOS == false ) {
-      throw FlutterBluePlusException(ErrorPlatform.dart, "onServicesChanged", FbpErrorCode.applePlatformOnly.index, "iOS-macOS-only");
+    if (Platform.isIOS == false && Platform.isMacOS == false) {
+      throw FlutterBluePlusException(
+          ErrorPlatform.dart, "onServicesChanged", FbpErrorCode.applePlatformOnly.index, "iOS-macOS-only");
     }
     return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnServicesChanged")
@@ -394,15 +396,17 @@ class BluetoothDevice {
       Future<BmBondStateResponse> futureResponse = responseStream.first;
 
       // invoke
-      await FlutterBluePlus._invokeMethod('createBond', remoteId.str);
+      bool changed = await FlutterBluePlus._invokeMethod('createBond', remoteId.str);
 
-      // wait for response
-      BmBondStateResponse bs = await futureResponse.fbpTimeout(timeout, "createBond");
+      // only wait for next state to if we changed something
+      if (changed) {
+        BmBondStateResponse bs = await futureResponse.fbpTimeout(timeout, "createBond");
 
-      // success?
-      if (bs.bondState != BmBondStateEnum.bonded) {
-        throw FlutterBluePlusException(ErrorPlatform.dart, "createBond", FbpErrorCode.createBondFailed.hashCode,
-            "Failed to create bond. ${bs.bondState}");
+        // success?
+        if (bs.bondState != BmBondStateEnum.bonded) {
+          throw FlutterBluePlusException(ErrorPlatform.dart, "createBond", FbpErrorCode.createBondFailed.hashCode,
+              "Failed to create bond. ${bs.bondState}");
+        }
       }
     } finally {
       opMutex.give();
@@ -433,15 +437,17 @@ class BluetoothDevice {
       Future<BmBondStateResponse> futureResponse = responseStream.first;
 
       // invoke
-      await FlutterBluePlus._invokeMethod('removeBond', remoteId.str);
+      bool changed = await FlutterBluePlus._invokeMethod('removeBond', remoteId.str);
 
-      // wait for response
-      BmBondStateResponse bs = await futureResponse.fbpTimeout(timeout, "removeBond");
+      // only wait for next bond state to if we changed something
+      if (changed) {
+        BmBondStateResponse bs = await futureResponse.fbpTimeout(timeout, "removeBond");
 
-      // success?
-      if (bs.bondState != BmBondStateEnum.none) {
-        throw FlutterBluePlusException(ErrorPlatform.dart, "createBond", FbpErrorCode.removeBondFailed.hashCode,
-            "Failed to remove bond. ${bs.bondState}");
+        // success?
+        if (bs.bondState != BmBondStateEnum.none) {
+          throw FlutterBluePlusException(ErrorPlatform.dart, "createBond", FbpErrorCode.removeBondFailed.hashCode,
+              "Failed to remove bond. ${bs.bondState}");
+        }
       }
     } finally {
       opMutex.give();
