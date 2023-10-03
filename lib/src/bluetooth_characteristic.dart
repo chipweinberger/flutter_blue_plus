@@ -238,14 +238,16 @@ class BluetoothCharacteristic {
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmOnDescriptorWrite> futureResponse = responseStream.first;
 
-      await FlutterBluePlus._invokeMethod('setNotification', request.toMap());
+      bool hasCCCD = await FlutterBluePlus._invokeMethod('setNotification', request.toMap());
 
-      // wait for response, so that we can check for success
-      BmOnDescriptorWrite response = await futureResponse.fbpTimeout(timeout, "setNotifyValue");
+      // wait for CCCD descriptor to be written?
+      if (hasCCCD) {
+        BmOnDescriptorWrite response = await futureResponse.fbpTimeout(timeout, "setNotifyValue");
 
-      // failed?
-      if (!response.success) {
-        throw FlutterBluePlusException(_nativeError, "setNotifyValue", response.errorCode, response.errorString);
+        // failed?
+        if (!response.success) {
+          throw FlutterBluePlusException(_nativeError, "setNotifyValue", response.errorCode, response.errorString);
+        }
       }
 
       // update CCCD descriptor

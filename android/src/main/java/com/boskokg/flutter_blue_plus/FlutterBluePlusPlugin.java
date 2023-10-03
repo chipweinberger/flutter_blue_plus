@@ -870,7 +870,7 @@ public class FlutterBluePlusPlugin implements
                         // The arduino "bluno" devices are an example.
                         String uuid = uuid128(characteristic.getUuid());
                         log(LogLevel.WARNING, "[FBP-Android] CCCD descriptor for characteristic not found: " + uuid);
-                        result.success(null);
+                        result.success(false);
                         return;
                     }
 
@@ -922,7 +922,7 @@ public class FlutterBluePlusPlugin implements
                         }
                     }
 
-                    result.success(null);
+                    result.success(true);
                     break;
                 }
 
