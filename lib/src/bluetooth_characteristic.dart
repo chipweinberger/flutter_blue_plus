@@ -98,8 +98,10 @@ class BluetoothCharacteristic {
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmOnCharacteristicReceived> futureResponse = responseStream.first;
 
+      // invoke
       await FlutterBluePlus._invokeMethod('readCharacteristic', request.toMap());
 
+      // wait for response
       BmOnCharacteristicReceived response = await futureResponse.fbpTimeout(timeout, "readCharacteristic");
 
       // failed?
@@ -178,6 +180,7 @@ class BluetoothCharacteristic {
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmOnCharacteristicWritten> futureResponse = responseStream.first;
 
+      // invoke
       await FlutterBluePlus._invokeMethod('writeCharacteristic', request.toMap());
 
       // wait for response so that we can:
@@ -238,6 +241,7 @@ class BluetoothCharacteristic {
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmOnDescriptorWrite> futureResponse = responseStream.first;
 
+      // invoke
       bool hasCCCD = await FlutterBluePlus._invokeMethod('setNotification', request.toMap());
 
       // wait for CCCD descriptor to be written?

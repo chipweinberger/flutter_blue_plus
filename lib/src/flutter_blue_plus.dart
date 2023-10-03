@@ -73,8 +73,10 @@ class FlutterBluePlus {
     // Start listening now, before invokeMethod, to ensure we don't miss the response
     Future<BluetoothAdapterState> futureResponse = responseStream.first;
 
+    // invoke
     await _invokeMethod('turnOn');
 
+    // wait for response
     await futureResponse.fbpTimeout(timeout, "turnOn");
   }
 
@@ -414,8 +416,10 @@ class FlutterBluePlus {
     // Start listening now, before invokeMethod, to ensure we don't miss the response
     Future<BluetoothAdapterState> futureResponse = responseStream.first;
 
+    // invoke
     await _invokeMethod('turnOff');
 
+    // wait for response
     await futureResponse.fbpTimeout(timeout, "turnOff");
   }
 

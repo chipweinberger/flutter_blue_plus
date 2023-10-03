@@ -96,6 +96,7 @@ class BluetoothDevice {
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmConnectionStateResponse> futureState = responseStream.first;
 
+      // invoke
       bool changed = await FlutterBluePlus._invokeMethod('disconnect', remoteId.str);
 
       // only wait for disconnection if weren't already disconnected
@@ -132,6 +133,7 @@ class BluetoothDevice {
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmDiscoverServicesResult> futureResponse = responseStream.first;
 
+      // invoke
       await FlutterBluePlus._invokeMethod('discoverServices', remoteId.str);
 
       // wait for response
@@ -248,6 +250,7 @@ class BluetoothDevice {
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmReadRssiResult> futureResponse = responseStream.first;
 
+      // invoke
       await FlutterBluePlus._invokeMethod('readRssi', remoteId.str);
 
       // wait for response
@@ -302,8 +305,10 @@ class BluetoothDevice {
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<int> futureResponse = responseStream.first;
 
+      // invoke
       await FlutterBluePlus._invokeMethod('requestMtu', request.toMap());
 
+      // wait for response
       mtu = await futureResponse.fbpTimeout(timeout, "requestMtu");
     } finally {
       opMutex.give();
@@ -331,6 +336,7 @@ class BluetoothDevice {
       connectionPriority: _bmConnectionPriorityEnum(connectionPriorityRequest),
     );
 
+    // invoke
     await FlutterBluePlus._invokeMethod('requestConnectionPriority', request.toMap());
   }
 
@@ -363,6 +369,7 @@ class BluetoothDevice {
       phyOptions: option.index,
     );
 
+    // invoke
     await FlutterBluePlus._invokeMethod('setPreferredPhy', request.toMap());
   }
 
@@ -469,6 +476,7 @@ class BluetoothDevice {
           ErrorPlatform.dart, "clearGattCache", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
+    // invoke
     await FlutterBluePlus._invokeMethod('clearGattCache', remoteId.str);
   }
 

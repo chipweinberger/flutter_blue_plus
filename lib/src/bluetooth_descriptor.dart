@@ -83,8 +83,10 @@ class BluetoothDescriptor {
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmOnDescriptorRead> futureResponse = responseStream.first;
 
+      // invoke
       await FlutterBluePlus._invokeMethod('readDescriptor', request.toMap());
 
+      // wait for response
       BmOnDescriptorRead response = await futureResponse.fbpTimeout(timeout, "readDescriptor");
 
       // failed?
@@ -136,8 +138,10 @@ class BluetoothDescriptor {
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmOnDescriptorWrite> futureResponse = responseStream.first;
 
+      // invoke
       await FlutterBluePlus._invokeMethod('writeDescriptor', request.toMap());
 
+      // wait for response
       BmOnDescriptorWrite response = await futureResponse.fbpTimeout(timeout, "writeDescriptor");
 
       // failed?
