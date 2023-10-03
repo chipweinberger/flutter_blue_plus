@@ -486,7 +486,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 [self.didWriteWithoutResponse setObject:args forKey:remoteId];
             }
 
-            result(@(YES));
+            result(@(true));
         }
         else if ([@"readDescriptor" isEqualToString:call.method])
         {

@@ -278,7 +278,7 @@ public class FlutterBluePlusPlugin implements
                     // set global var
                     logLevel = LogLevel.values()[idx];
 
-                    result.success(null);
+                    result.success(true);
                     break;
                 }
 
@@ -435,7 +435,7 @@ public class FlutterBluePlusPlugin implements
 
                         scanner.startScan(filters, settings, getScanCallback());
 
-                        result.success(null);
+                        result.success(true);
                     });
                     break;
                 }
@@ -448,7 +448,7 @@ public class FlutterBluePlusPlugin implements
                         scanner.stopScan(getScanCallback());
                     }
 
-                    result.success(null);
+                    result.success(true);
                     break;
                 }
 
@@ -574,7 +574,7 @@ public class FlutterBluePlusPlugin implements
                         break;
                     }
 
-                    result.success(null);
+                    result.success(true);
                     break;
                 }
 
@@ -617,7 +617,7 @@ public class FlutterBluePlusPlugin implements
                         break;
                     }
 
-                    result.success(null);
+                    result.success(true);
                     break;
                 }
 
@@ -708,7 +708,7 @@ public class FlutterBluePlusPlugin implements
                         }
                     }
 
-                    result.success(null);
+                    result.success(true);
                     break;
                 }
 
@@ -752,7 +752,7 @@ public class FlutterBluePlusPlugin implements
                         break;
                     }
 
-                    result.success(null);
+                    result.success(true);
                     break;
                 }
 
@@ -825,7 +825,7 @@ public class FlutterBluePlusPlugin implements
                         }
                     }
 
-                    result.success(null);
+                    result.success(true);
                     break;
                 }
 
@@ -946,7 +946,7 @@ public class FlutterBluePlusPlugin implements
                         break;
                     }
 
-                    result.success(null);
+                    result.success(true);
                     break;
                 }
 
@@ -967,7 +967,7 @@ public class FlutterBluePlusPlugin implements
                         break;
                     }
 
-                    result.success(null);
+                    result.success(true);
                     break;
                 }
 
@@ -993,7 +993,7 @@ public class FlutterBluePlusPlugin implements
                         break;
                     }
 
-                    result.success(null);
+                    result.success(true);
                     break;
                 }
 
@@ -1041,7 +1041,7 @@ public class FlutterBluePlusPlugin implements
                     // set preferred phy
                     gatt.setPreferredPhy(txPhy, rxPhy, phyOptions);
 
-                    result.success(null);
+                    result.success(true);
                     break;
                 }
 
@@ -1105,7 +1105,7 @@ public class FlutterBluePlusPlugin implements
                         // the dart code always waits on this
                         invokeMethodUIThread("OnBondStateChanged", response);
 
-                        result.success(true); // no work to do
+                        result.success(false); // no work to do
                         break;
                     }
 
@@ -1115,7 +1115,7 @@ public class FlutterBluePlusPlugin implements
                         break;
                     }
 
-                    result.success(null);
+                    result.success(true);
                     break;
                 }
 
@@ -1138,7 +1138,7 @@ public class FlutterBluePlusPlugin implements
                         // the dart code always waits on this
                         invokeMethodUIThread("OnBondStateChanged", response);
 
-                        result.success(true); // no work to do
+                        result.success(false); // no work to do
                         break;
                     }
 
@@ -1172,7 +1172,7 @@ public class FlutterBluePlusPlugin implements
 
                     refreshMethod.invoke(gatt);
 
-                    result.success(null);
+                    result.success(true);
                     break;
                 }
 
