@@ -282,7 +282,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 if (_logLevel >= debug) {
                     NSLog(@"[FBP-iOS] already connected");
                 }
-                result(@(1)); // no work to do
+                result(@(false)); // no work to do
                 return;
             }
 
@@ -320,7 +320,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             [_centralManager connectPeripheral:peripheral options:options];
             
-            result(@(0));
+            result(@(true));
         }
         else if ([@"disconnect" isEqualToString:call.method])
         {
@@ -333,13 +333,13 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 if (_logLevel >= debug) {
                     NSLog(@"[FBP-iOS] already disconnected");
                 }
-                result(@(1)); // no work to do
+                result(@(false)); // no work to do
                 return;
             }
 
             [_centralManager cancelPeripheralConnection:peripheral];
             
-            result(@(0));
+            result(@(true));
         }
         else if ([@"discoverServices" isEqualToString:call.method])
         {

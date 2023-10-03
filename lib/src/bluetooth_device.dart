@@ -60,10 +60,11 @@ class BluetoothDevice {
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmConnectionStateResponse> futureState = responseStream.first;
 
-      int alreadyConnected = await FlutterBluePlus._invokeMethod('connect', request.toMap());
+      // invoke
+      bool changed = await FlutterBluePlus._invokeMethod('connect', request.toMap());
 
-      if (alreadyConnected == 0) {
-        // wait for result
+      // only wait for connection if we weren't already connected
+      if (changed) {
         BmConnectionStateResponse response = await futureState.fbpTimeout(timeout.inSeconds, "connect");
 
         // failure?
@@ -95,10 +96,10 @@ class BluetoothDevice {
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmConnectionStateResponse> futureState = responseStream.first;
 
-      int alreadyDisconnected = await FlutterBluePlus._invokeMethod('disconnect', remoteId.str);
+      bool changed = await FlutterBluePlus._invokeMethod('disconnect', remoteId.str);
 
-      if (alreadyDisconnected == 0) {
-        // wait for disconnection
+      // only wait for disconnection if weren't already disconnected
+      if (changed) {
         await futureState.fbpTimeout(timeout, "disconnect");
       }
     } finally {
@@ -398,7 +399,7 @@ class BluetoothDevice {
       // invoke
       bool changed = await FlutterBluePlus._invokeMethod('createBond', remoteId.str);
 
-      // only wait for next state to if we changed something
+      // only wait for 'bonded' if we weren't already bonded
       if (changed) {
         BmBondStateResponse bs = await futureResponse.fbpTimeout(timeout, "createBond");
 
@@ -439,7 +440,7 @@ class BluetoothDevice {
       // invoke
       bool changed = await FlutterBluePlus._invokeMethod('removeBond', remoteId.str);
 
-      // only wait for next bond state to if we changed something
+      // only wait for 'unbonded' state if we weren't already unbonded
       if (changed) {
         BmBondStateResponse bs = await futureResponse.fbpTimeout(timeout, "removeBond");
 

@@ -512,7 +512,7 @@ public class FlutterBluePlusPlugin implements
                         BluetoothGatt gatt = mConnectedDevices.get(remoteId);
                         if (gatt != null) {
                             log(LogLevel.DEBUG, "[FBP-Android] already connected");
-                            result.success(1);  // no work to do
+                            result.success(false);  // no work to do
                             return;
                         } 
 
@@ -530,7 +530,7 @@ public class FlutterBluePlusPlugin implements
                             return;
                         }
 
-                        result.success(0);
+                        result.success(true);
                     });
                     break;
                 }
@@ -543,7 +543,7 @@ public class FlutterBluePlusPlugin implements
                     BluetoothGatt gatt = mConnectedDevices.get(remoteId);
                     if (gatt == null) {
                         log(LogLevel.DEBUG, "[FBP-Android] already disconnected");
-                        result.success(1);  // no work to do
+                        result.success(false);  // no work to do
                         return;
                     }
 
@@ -553,7 +553,7 @@ public class FlutterBluePlusPlugin implements
                 
                     gatt.disconnect();
 
-                    result.success(0);
+                    result.success(true);
                     break;
                 }
 
