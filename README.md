@@ -597,6 +597,26 @@ Some ble devices have buggy software and stop sending data
 
 ---
 
+### onValueReceived data is split up
+
+You are probably forgetting to increase the android mtu.
+
+```dart
+if (Platform.isAndroid) {
+    await device.requestMtu(512);
+}
+```
+
+Verify that the mtu is large enough to hold your message.
+
+```dart
+device.mtu
+```
+
+If it still happens, it is a problem with your peripheral device.
+
+---
+
 ### onValueReceived is called with duplicate data
 
 You are probably forgetting to cancel the original `stream.listen` resulting in multiple listens.

@@ -5,8 +5,8 @@
 * **[Improve]** iOS: use log level macro
 
 ## 1.16.3
-* **[Android]** fix deprecations
 * **[Fix]** Android: setNotify would timeout if CCCD descriptor does not exist
+* **[Android]** fix deprecations
 * **[Improve]** removeIfGone: only push to scanResults when list changes
 
 ## 1.16.2
