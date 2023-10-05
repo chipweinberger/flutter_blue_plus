@@ -231,9 +231,9 @@ class FlutterBluePlus {
 
   /// Sets the internal FlutterBlue log level
   static void setLogLevel(LogLevel level, {color = true}) async {
-    await _invokeMethod('setLogLevel', level.index);
     _logLevel = level;
     _logColor = color;
+    await _invokeMethod('setLogLevel', level.index);
   }
 
   /// Request Bluetooth PHY support
@@ -259,15 +259,10 @@ class FlutterBluePlus {
       return;
     }
 
-    // avoid infinite recursion: must set this
-    // to true before we call setLogLevel!
     _initialized = true;
 
     // set platform method handler
     _methods.setMethodCallHandler(_methodCallHandler);
-
-    // set default log level
-    setLogLevel(logLevel);
 
     // hot restart
     if ((await _methods.invokeMethod('flutterHotRestart')) != 0) {
