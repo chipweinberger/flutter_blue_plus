@@ -1,3 +1,9 @@
+
+## 1.16.4
+* **[Fix]** setLogLevel would be ignored due to being called twice
+* **[Improve]** android: use log level consistently
+* **[Improve]** iOS: use log level macro
+
 ## 1.16.3
 * **[Android]** fix deprecations
 * **[Fix]** Android: setNotify would timeout if CCCD descriptor does not exist
