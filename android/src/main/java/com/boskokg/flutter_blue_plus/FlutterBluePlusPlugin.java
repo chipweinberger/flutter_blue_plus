@@ -212,6 +212,7 @@ public class FlutterBluePlusPlugin implements
     //  ██████  ██   ██  ███████  ███████
 
     @Override
+    @SuppressWarnings({"deprecation", "unchecked"}) // needed for compatability, type safety uses bluetooth_msgs.dart
     public void onMethodCall(@NonNull MethodCall call,
                                  @NonNull Result result)
     {
@@ -1446,6 +1447,7 @@ public class FlutterBluePlusPlugin implements
     private final BroadcastReceiver mBluetoothBondStateReceiver = new BroadcastReceiver()
     {
         @Override
+        @SuppressWarnings("deprecation") // need for compatability
         public void onReceive(Context context, Intent intent)
         {
             final String action = intent.getAction();
@@ -1455,7 +1457,13 @@ public class FlutterBluePlusPlugin implements
                 return;
             }
 
-            final BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+            // BluetoothDevice
+            final BluetoothDevice device;
+            if (Build.VERSION.SDK_INT >= 33) { // Android 13 (August 2022)
+                device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, BluetoothDevice.class);
+            } else {
+                device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+            }
 
             final int cur = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.ERROR);
             final int prev = intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, -1);
@@ -1638,8 +1646,10 @@ public class FlutterBluePlusPlugin implements
             invokeMethodUIThread("OnDiscoverServicesResult", response);
         }
 
+        // replacement for onCharacteristicRead
         @Override
-        public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic)
+        @TargetApi(33)
+        public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, byte[] value)
         {
             // this callback is only for notifications & indications
             log(LogLevel.DEBUG, "[FBP-Android] onCharacteristicChanged: uuid: " + uuid128(characteristic.getUuid()));
@@ -1652,7 +1662,7 @@ public class FlutterBluePlusPlugin implements
             response.put("service_uuid", uuid128(pair.primary));
             response.put("secondary_service_uuid", pair.secondary != null ? uuid128(pair.secondary) : null);
             response.put("characteristic_uuid", uuid128(characteristic.getUuid()));
-            response.put("value", bytesToHex(characteristic.getValue()));
+            response.put("value", value);
             response.put("success", 1);
             response.put("error_code", 0);
             response.put("error_string", gattErrorString(0));
@@ -1661,6 +1671,7 @@ public class FlutterBluePlusPlugin implements
         }
 
         @Override
+        @SuppressWarnings("deprecation") // needed for older android compatability
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status)
         {
             // this callback is only for explicit characteristic reads
@@ -1668,13 +1679,18 @@ public class FlutterBluePlusPlugin implements
 
             ServicePair pair = getServicePair(gatt, characteristic);
 
+            // this was deprecated in API level 33 because the api makes it look like
+            // you could always call getValue on a descriptor. But in reality, this
+            // only works after a *read* has been made
+            byte[] value = characteristic.getValue();
+
             // see: BmOnCharacteristicReceived
             HashMap<String, Object> response = new HashMap<>();
             response.put("remote_id", gatt.getDevice().getAddress());
             response.put("service_uuid", uuid128(pair.primary));
             response.put("secondary_service_uuid", pair.secondary != null ? uuid128(pair.secondary) : null);
             response.put("characteristic_uuid", uuid128(characteristic.getUuid()));
-            response.put("value", bytesToHex(characteristic.getValue()));
+            response.put("value", bytesToHex(value));
             response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
             response.put("error_code", status);
             response.put("error_string", gattErrorString(status));
@@ -1731,6 +1747,7 @@ public class FlutterBluePlusPlugin implements
         }
 
         @Override
+        @SuppressWarnings("deprecation") // needed for older android compatability
         public void onDescriptorRead(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status)
         {
             log(LogLevel.DEBUG, "[FBP-Android] onDescriptorRead: uuid: " + uuid128(descriptor.getUuid()) + " status: " + status);

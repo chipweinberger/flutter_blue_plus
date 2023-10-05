@@ -15,5 +15,12 @@ android {
         minSdkVersion 21
     }
 
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile) {
+            options.compilerArgs << "-Xlint:deprecation"
+            options.compilerArgs << "-Xlint:unchecked"
+        }
+    }
+
     namespace 'com.boskokg.flutter_blue_plus'
 }
