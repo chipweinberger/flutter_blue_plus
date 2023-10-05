@@ -1,5 +1,9 @@
 part of flutter_blue_plus;
 
+
+/// State of the bluetooth adapter.
+enum BluetoothAdapterState { unknown, unavailable, unauthorized, turningOn, on, turningOff, off }
+
 class DisconnectReason {
   final ErrorPlatform platform;
   final int? code; // specific to platform
@@ -109,3 +113,9 @@ enum PhyOption { noPreferred, s2, s8 }
 
 @Deprecated('Use Phy instead')
 enum PhyType { le1m, le2m, leCoded }
+
+@Deprecated('Use BluetoothConnectionState instead')
+enum BluetoothDeviceState { disconnected, connecting, connected, disconnecting }
+
+@Deprecated('Use BluetoothAdapterState instead')
+enum BluetoothState { unknown, unavailable, unauthorized, turningOn, on, turningOff, off }

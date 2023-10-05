@@ -460,9 +460,6 @@ enum LogLevel {
   verbose, //5
 }
 
-/// State of the bluetooth adapter.
-enum BluetoothAdapterState { unknown, unavailable, unauthorized, turningOn, on, turningOff, off }
-
 class ScanMode {
   const ScanMode(this.value);
   static const lowPower = ScanMode(0);
