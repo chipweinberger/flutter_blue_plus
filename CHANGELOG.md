@@ -1,17 +1,22 @@
+## 1.16.3
+* **[Android]** fix deprecations
+* **[Fix]** Android: setNotify would timeout if CCCD descriptor does not exist
+* **[Improve]** removeIfGone: only push to scanResults when list changes
+
 ## 1.16.2
-**[Fix]** platform check in `onNameChanged` & `onServicesChanged` was incorrect
+* **[Fix]** platform check in `onNameChanged` & `onServicesChanged` was incorrect
 
 ## 1.16.1
-**[Add]** iOS: add support for `onServicesChanged` & `onNameChanged`
+* **[Add]** iOS: add support for `onServicesChanged` & `onNameChanged`
 
 ## 1.16.0
 This release simplifies BluetoothDevice construction.
-**[Breaking Change]** remove `BluetoothDevice.type` & `BluetoothDevice.localName` from constructor for simplicity
-**[Breaking Change]** remove `servicesStream` & `isDiscoveringServices` deprecated functions
-**[Rename]** `localName` -> `platformName` to reflect platform specific behavior
-**[Fix]** `setNotifyValue` must take `descWrite` mutex
-**[Fix]** `localName` was broken when using `connectedSystemDevices` (regression 1.15.10)
-**[Add]** Android: getPhySupport
+* **[Breaking Change]** remove `BluetoothDevice.type` & `BluetoothDevice.localName` from constructor for simplicity
+* **[Breaking Change]** remove `servicesStream` & `isDiscoveringServices` deprecated functions
+* **[Rename]** `localName` -> `platformName` to reflect platform specific behavior
+* **[Fix]** `setNotifyValue` must take `descWrite` mutex
+* **[Fix]** `localName` was broken when using `connectedSystemDevices` (regression 1.15.10)
+* **[Add]** Android: getPhySupport
 
 ## 1.15.10
 * **[Fix]** iOS: localName does not match Android
