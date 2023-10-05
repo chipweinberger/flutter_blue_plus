@@ -154,7 +154,7 @@ class _FindDevicesScreenState extends State<FindDevicesScreen> {
           onRefresh: () {
             setState(() {}); // force refresh of connectedSystemDevices
             if (FlutterBluePlus.isScanningNow == false) {
-              FlutterBluePlus.startScan(timeout: const Duration(seconds: 15), androidUsesFineLocation: false);
+              FlutterBluePlus.startScan(timeout: const Duration(seconds: 15));
             }
             return Future.delayed(Duration(milliseconds: 500)); // show refresh icon breifly
           },
@@ -264,7 +264,7 @@ class _FindDevicesScreenState extends State<FindDevicesScreen> {
                   child: const Text("SCAN"),
                   onPressed: () async {
                     try {
-                      await FlutterBluePlus.startScan(timeout: const Duration(seconds: 15), androidUsesFineLocation: false);
+                      await FlutterBluePlus.startScan(timeout: const Duration(seconds: 15));
                     } catch (e) {
                       final snackBar = snackBarFail(prettyException("Start Scan Error:", e));
                       snackBarKeyB.currentState?.removeCurrentSnackBar();
