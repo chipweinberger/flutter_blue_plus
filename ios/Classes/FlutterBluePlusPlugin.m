@@ -132,7 +132,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             [@"flutterHotRestart" isEqualToString:call.method] == false &&
             [@"connectedCount" isEqualToString:call.method] == false &&
             [@"setLogLevel" isEqualToString:call.method] == false &&
-            [@"isAvailable" isEqualToString:call.method] == false &&
+            [@"isSupported" isEqualToString:call.method] == false &&
             [@"getAdapterName" isEqualToString:call.method] == false &&
             [@"getAdapterState" isEqualToString:call.method] == false) {
             NSString* s = @"the device does not have bluetooth";
@@ -178,7 +178,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             result(@YES);
             return;
         }
-        else if ([@"isAvailable" isEqualToString:call.method])
+        else if ([@"isSupported" isEqualToString:call.method])
         {
             result(self.centralManager != nil ? @(YES) : @(NO));
         }

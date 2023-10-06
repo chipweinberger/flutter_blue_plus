@@ -49,8 +49,8 @@ class FlutterBluePlus {
 
   static LogLevel get logLevel => _logLevel;
 
-  /// Checks whether the device allows Bluetooth for your app
-  static Future<bool> get isAvailable async => await _invokeMethod('isAvailable');
+  /// Checks whether the hardware supports Bluetooth
+  static Future<bool> get isSupported async => await _invokeMethod('isSupported');
 
   /// Return the friendly Bluetooth name of the local Bluetooth adapter
   static Future<String> get adapterName async => await _invokeMethod('getAdapterName');
@@ -433,6 +433,9 @@ class FlutterBluePlus {
 
   @Deprecated('Use connectedSystemDevices instead')
   static Future<List<BluetoothDevice>> get connectedDevices => connectedSystemDevices;
+
+  @Deprecated('Use isSupported instead')
+  static Future<bool> get isAvailable async => await isSupported;
 
   @Deprecated('removed. read MIGRATION.md for simple alternatives')
   static Stream<ScanResult> scan(
