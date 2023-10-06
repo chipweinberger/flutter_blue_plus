@@ -1,3 +1,6 @@
+## 1.16.7
+* **[Rename]** isAvailable -> isSupported
+
 ## 1.16.6
 * **[Example]** Refactor: hugely refactored to use stateful widgets
 * **[Example]** Fix: stream already listened to error
