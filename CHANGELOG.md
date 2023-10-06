@@ -1,3 +1,7 @@
+## 1.16.5
+* **[Fix]** iOS: iOS Unhandled Exception: type 'int' is not a subtype of type 'bool' (regression 1.16.3)
+* **[Improve]** android: prepend logs with '[FBP]'
+* **[Java]** rename com.boskokg.flutter_blue_plus -> com.lib.flutter_blue_plus to be more generic
 
 ## 1.16.4
 * **[Fix]** setLogLevel would be ignored due to being called twice
