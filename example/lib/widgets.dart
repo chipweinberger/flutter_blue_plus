@@ -2,6 +2,8 @@
 // All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -48,54 +50,35 @@ class ConnectedDeviceTile extends StatelessWidget {
   }
 }
 
-
-class ScanResultTile extends StatelessWidget {
+class ScanResultTile extends StatefulWidget {
   const ScanResultTile({Key? key, required this.result, this.onTap}) : super(key: key);
 
   final ScanResult result;
   final VoidCallback? onTap;
 
-  Widget _buildTitle(BuildContext context) {
-    if (result.device.platformName.isNotEmpty) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            result.device.platformName,
-            overflow: TextOverflow.ellipsis,
-          ),
-          Text(
-            result.device.remoteId.toString(),
-            style: Theme.of(context).textTheme.bodySmall,
-          )
-        ],
-      );
-    } else {
-      return Text(result.device.remoteId.toString());
-    }
+  @override
+  State<ScanResultTile> createState() => _ScanResultTileState();
+}
+
+class _ScanResultTileState extends State<ScanResultTile> {
+  BluetoothConnectionState _connectionState = BluetoothConnectionState.disconnected;
+
+  late StreamSubscription<BluetoothConnectionState> _connectionStateSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _connectionStateSubscription = widget.result.device.connectionState.listen((state) {
+      _connectionState = state;
+      setState(() {});
+    });
   }
 
-  Widget _buildAdvRow(BuildContext context, String title, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(title, style: Theme.of(context).textTheme.bodySmall),
-          const SizedBox(
-            width: 12.0,
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: Theme.of(context).textTheme.bodySmall?.apply(color: Colors.black),
-              softWrap: true,
-            ),
-          ),
-        ],
-      ),
-    );
+  @override
+  void dispose() {
+    _connectionStateSubscription.cancel();
+    super.dispose();
   }
 
   String getNiceHexArray(List<int> bytes) {
@@ -124,30 +107,82 @@ class ScanResultTile extends StatelessWidget {
     return res.join(', ');
   }
 
+  bool get isConnected {
+    return _connectionState == BluetoothConnectionState.connected;
+  }
+
+  Widget _buildTitle(BuildContext context) {
+    if (widget.result.device.platformName.isNotEmpty) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            widget.result.device.platformName,
+            overflow: TextOverflow.ellipsis,
+          ),
+          Text(
+            widget.result.device.remoteId.toString(),
+            style: Theme.of(context).textTheme.bodySmall,
+          )
+        ],
+      );
+    } else {
+      return Text(widget.result.device.remoteId.toString());
+    }
+  }
+
+  Widget _buildConnectButton(BuildContext context) {
+    return ElevatedButton(
+      child: isConnected ? const Text('OPEN') : const Text('CONNECT'),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+      ),
+      onPressed: (widget.result.advertisementData.connectable) ? widget.onTap : null,
+    );
+  }
+
+  Widget _buildAdvRow(BuildContext context, String title, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(title, style: Theme.of(context).textTheme.bodySmall),
+          const SizedBox(
+            width: 12.0,
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: Theme.of(context).textTheme.bodySmall?.apply(color: Colors.black),
+              softWrap: true,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ExpansionTile(
       title: _buildTitle(context),
-      leading: Text(result.rssi.toString()),
-      trailing: ElevatedButton(
-        child: const Text('CONNECT'),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.black,
-          foregroundColor: Colors.white,
-        ),
-        onPressed: (result.advertisementData.connectable) ? onTap : null,
-      ),
+      leading: Text(widget.result.rssi.toString()),
+      trailing: _buildConnectButton(context),
       children: <Widget>[
-        _buildAdvRow(context, 'Complete Local Name', result.advertisementData.localName),
-        _buildAdvRow(context, 'Tx Power Level', '${result.advertisementData.txPowerLevel ?? 'N/A'}'),
-        _buildAdvRow(context, 'Manufacturer Data', getNiceManufacturerData(result.advertisementData.manufacturerData)),
+        _buildAdvRow(context, 'Complete Local Name', widget.result.advertisementData.localName),
+        _buildAdvRow(context, 'Tx Power Level', '${widget.result.advertisementData.txPowerLevel ?? 'N/A'}'),
+        _buildAdvRow(
+            context, 'Manufacturer Data', getNiceManufacturerData(widget.result.advertisementData.manufacturerData)),
         _buildAdvRow(
             context,
             'Service UUIDs',
-            (result.advertisementData.serviceUuids.isNotEmpty)
-                ? result.advertisementData.serviceUuids.join(', ').toUpperCase()
+            (widget.result.advertisementData.serviceUuids.isNotEmpty)
+                ? widget.result.advertisementData.serviceUuids.join(', ').toUpperCase()
                 : 'N/A'),
-        _buildAdvRow(context, 'Service Data', getNiceServiceData(result.advertisementData.serviceData)),
+        _buildAdvRow(context, 'Service Data', getNiceServiceData(widget.result.advertisementData.serviceData)),
       ],
     );
   }
@@ -336,7 +371,6 @@ class AdapterStateTile extends StatelessWidget {
   }
 }
 
-
 String prettyException(String prefix, dynamic e) {
   if (e is FlutterBluePlusException) {
     return "$prefix ${e.description}";
@@ -345,5 +379,3 @@ String prettyException(String prefix, dynamic e) {
   }
   return prefix + e.toString();
 }
-
-
