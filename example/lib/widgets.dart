@@ -8,10 +8,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
-class ConnectedDeviceTile extends StatelessWidget {
+class ConnectedDeviceTile extends StatefulWidget {
   final BluetoothDevice device;
   final VoidCallback onOpen;
-  final Function(BluetoothDevice) onConnect;
+  final VoidCallback onConnect;
 
   const ConnectedDeviceTile({
     required this.device,
@@ -21,31 +21,44 @@ class ConnectedDeviceTile extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<ConnectedDeviceTile> createState() => _ConnectedDeviceTileState();
+}
+
+class _ConnectedDeviceTileState extends State<ConnectedDeviceTile> {
+
+  BluetoothConnectionState _connectionState = BluetoothConnectionState.disconnected;
+
+  late StreamSubscription<BluetoothConnectionState> _connectionStateSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _connectionStateSubscription = widget.device.connectionState.listen((state) {
+      _connectionState = state;
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _connectionStateSubscription.cancel();
+    super.dispose();
+  }
+
+  bool get isConnected {
+    return _connectionState == BluetoothConnectionState.connected;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return StreamBuilder<BluetoothConnectionState>(
-      stream: device.connectionState,
-      initialData: BluetoothConnectionState.disconnected,
-      builder: (c, snapshot) {
-        Widget trailingWidget;
-        if (snapshot.data == BluetoothConnectionState.connected) {
-          trailingWidget = ElevatedButton(
-            child: const Text('OPEN'),
-            onPressed: onOpen,
-          );
-        } else if (snapshot.data == BluetoothConnectionState.disconnected) {
-          trailingWidget = ElevatedButton(
-            child: const Text('CONNECT'),
-            onPressed: () => onConnect(device),
-          );
-        } else {
-          trailingWidget = Text(snapshot.data.toString().toUpperCase().split('.')[1]);
-        }
-        return ListTile(
-          title: Text(device.platformName),
-          subtitle: Text(device.remoteId.toString()),
-          trailing: trailingWidget,
-        );
-      },
+    return ListTile(
+      title: Text(widget.device.platformName),
+      subtitle: Text(widget.device.remoteId.toString()),
+      trailing: ElevatedButton(
+        child: isConnected ? const Text('OPEN') : const Text('CONNECT'),
+        onPressed: isConnected ? widget.onOpen : widget.onConnect,
+      ),
     );
   }
 }

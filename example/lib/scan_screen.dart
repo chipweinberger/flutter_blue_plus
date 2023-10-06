@@ -118,7 +118,7 @@ class _ScanScreenState extends State<ScanScreen> {
                 settings: RouteSettings(name: '/DeviceScreen'),
               ),
             ),
-            onConnect: onConnectPressed,
+            onConnect: () => onConnectPressed(d),
           ),
         )
         .toList();
