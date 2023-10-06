@@ -5,19 +5,12 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'bluetooth_off_screen.dart';
 import 'scan_screen.dart';
-
-final snackBarKeyA = GlobalKey<ScaffoldMessengerState>();
-final snackBarKeyB = GlobalKey<ScaffoldMessengerState>();
-final snackBarKeyC = GlobalKey<ScaffoldMessengerState>();
-final Map<DeviceIdentifier, ValueNotifier<bool>> isConnectingOrDisconnecting = {};
-final Map<DeviceIdentifier, StreamController<List<BluetoothService>>> servicesStream = {};
 
 void main() {
   if (Platform.isAndroid) {
@@ -102,13 +95,4 @@ class BluetoothAdapterStateObserver extends NavigatorObserver {
     _btStateSubscription?.cancel();
     _btStateSubscription = null;
   }
-}
-
-String prettyException(String prefix, dynamic e) {
-  if (e is FlutterBluePlusException) {
-    return "$prefix ${e.description}";
-  } else if (e is PlatformException) {
-    return "$prefix ${e.message}";
-  }
-  return prefix + e.toString();
 }

@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
+import 'global.dart';
 import 'widgets.dart';
 import 'device_screen.dart';
-import 'main.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({Key? key}) : super(key: key);
@@ -59,9 +59,7 @@ class _ScanScreenState extends State<ScanScreen> {
     try {
       await FlutterBluePlus.startScan(timeout: const Duration(seconds: 15));
     } catch (e) {
-      final snackBar = snackBarFail(prettyException("Start Scan Error:", e));
-      snackBarKeyB.currentState?.removeCurrentSnackBar();
-      snackBarKeyB.currentState?.showSnackBar(snackBar);
+      Global.showSnackbar(ABC.b, prettyException("Start Scan Error:", e), success: false);
     }
     setState(() {}); // force refresh of connectedSystemDevices
   }
@@ -70,23 +68,18 @@ class _ScanScreenState extends State<ScanScreen> {
     try {
       FlutterBluePlus.stopScan();
     } catch (e) {
-      final snackBar = snackBarFail(prettyException("Stop Scan Error:", e));
-      snackBarKeyB.currentState?.removeCurrentSnackBar();
-      snackBarKeyB.currentState?.showSnackBar(snackBar);
+      Global.showSnackbar(ABC.b, prettyException("Stop Scan Error:", e), success: false);
     }
   }
 
   void onConnectPressed(BluetoothDevice device) {
     MaterialPageRoute route = MaterialPageRoute(
         builder: (context) {
-          isConnectingOrDisconnecting[device.remoteId] ??= ValueNotifier(true);
-          isConnectingOrDisconnecting[device.remoteId]!.value = true;
+          Global.setIsConnectingOrDisconnecting(device.remoteId, true);
           device.connect(timeout: Duration(seconds: 35)).catchError((e) {
-            final snackBar = snackBarFail(prettyException("Connect Error:", e));
-            snackBarKeyC.currentState?.removeCurrentSnackBar();
-            snackBarKeyC.currentState?.showSnackBar(snackBar);
+            Global.showSnackbar(ABC.c, prettyException("Connect Error:", e), success: false);
           }).then((v) {
-            isConnectingOrDisconnecting[device.remoteId]!.value = false;
+            Global.setIsConnectingOrDisconnecting(device.remoteId, false);
           });
           return DeviceScreen(device: device);
         },
@@ -98,7 +91,7 @@ class _ScanScreenState extends State<ScanScreen> {
     if (FlutterBluePlus.isScanningNow == false) {
       FlutterBluePlus.startScan(timeout: const Duration(seconds: 15));
     }
-    setState(() {}); 
+    setState(() {});
     return Future.delayed(Duration(milliseconds: 500));
   }
 
@@ -115,33 +108,37 @@ class _ScanScreenState extends State<ScanScreen> {
   }
 
   List<Widget> _buildConnectedDeviceTiles(BuildContext context) {
-    return _connectedDevices.map(
-      (d) => ConnectedDeviceTile(
-        device: d,
-        onOpen: () => Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => DeviceScreen(device: d),
-            settings: RouteSettings(name: '/DeviceScreen'),
+    return _connectedDevices
+        .map(
+          (d) => ConnectedDeviceTile(
+            device: d,
+            onOpen: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => DeviceScreen(device: d),
+                settings: RouteSettings(name: '/DeviceScreen'),
+              ),
+            ),
+            onConnect: onConnectPressed,
           ),
-        ),
-        onConnect: onConnectPressed,
-      ),
-    ).toList();
+        )
+        .toList();
   }
 
   List<Widget> _buildScanResultTiles(BuildContext context) {
-    return _scanResults.map(
-      (r) => ScanResultTile(
-        result: r,
-        onTap: () => onConnectPressed(r.device),
-      ),
-    ).toList();
+    return _scanResults
+        .map(
+          (r) => ScanResultTile(
+            result: r,
+            onTap: () => onConnectPressed(r.device),
+          ),
+        )
+        .toList();
   }
 
   @override
   Widget build(BuildContext context) {
     return ScaffoldMessenger(
-      key: snackBarKeyB,
+      key: Global.snackBarKeyB,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Find Devices'),
