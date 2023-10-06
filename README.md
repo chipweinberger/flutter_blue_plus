@@ -380,7 +380,7 @@ flutterBlue.startScan(timeout: Duration(seconds: 4), androidUsesFineLocation: tr
 Add the following line in your `project/android/app/proguard-rules.pro` file:
 
 ```
--keep class com.boskokg.flutter_blue_plus.* { *; }
+-keep class com.lib.flutter_blue_plus.* { *; }
 ```
 
 to avoid seeing the following kind errors in your `release` builds:

@@ -1,4 +1,4 @@
-group 'com.boskokg.flutter_blue_plus'
+group 'com.lib.flutter_blue_plus'
 version '1.0'
 
 apply plugin: 'com.android.library'
@@ -22,5 +22,5 @@ android {
         }
     }
 
-    namespace 'com.boskokg.flutter_blue_plus'
+    namespace 'com.lib.flutter_blue_plus'
 }

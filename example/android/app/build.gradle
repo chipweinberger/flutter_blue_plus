@@ -33,7 +33,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.boskokg.flutter_blue_plus_example"
+        applicationId "com.lib.flutter_blue_plus_example"
         minSdkVersion 21
         targetSdkVersion 33
         versionCode flutterVersionCode.toInteger()
@@ -50,7 +50,7 @@ android {
             minifyEnabled false
         }
     }
-    namespace 'com.boskokg.flutter_blue_plus_example'
+    namespace 'com.lib.flutter_blue_plus_example'
 }
 
 flutter {

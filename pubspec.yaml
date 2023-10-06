@@ -15,7 +15,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.boskokg.flutter_blue_plus
+        package: com.lib.flutter_blue_plus
         pluginClass: FlutterBluePlusPlugin
       ios:
         pluginClass: FlutterBluePlusPlugin
