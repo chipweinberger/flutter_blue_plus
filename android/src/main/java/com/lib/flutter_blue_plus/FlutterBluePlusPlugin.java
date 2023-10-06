@@ -2067,16 +2067,16 @@ public class FlutterBluePlusPlugin implements
         }
         switch(level) {
             case DEBUG:
-                Log.d(TAG, "[FBP]" + message);
+                Log.d(TAG, "[FBP] " + message);
                 break;
             case WARNING:
-                Log.w(TAG, "[FBP]" + message);
+                Log.w(TAG, "[FBP] " + message);
                 break;
             case ERROR:
-                Log.e(TAG, "[FBP]" + message);
+                Log.e(TAG, "[FBP] " + message);
                 break;
             default:
-                Log.d(TAG, "[FBP]" + message);
+                Log.d(TAG, "[FBP] " + message);
                 break;
         }
     }
