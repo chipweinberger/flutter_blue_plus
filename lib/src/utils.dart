@@ -331,6 +331,8 @@ class _NewStreamWithInitialValueTransformer<T> extends StreamTransformerBase<T, 
 
     controller = StreamController<T>.broadcast(
       onListen: () {
+        // Emit the initial value
+        controller?.add(initialValue);
         subscription = stream.listen(controller?.add, onError: controller?.addError, onDone: () {
           controller?.close();
         });
