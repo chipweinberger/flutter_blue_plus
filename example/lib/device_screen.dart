@@ -20,14 +20,11 @@ class _DeviceScreenState extends State<DeviceScreen> {
   int? _rssi;
   int? _mtuSize;
   BluetoothConnectionState _connectionState = BluetoothConnectionState.disconnected;
-  List<BluetoothService> _services = [];
   bool _isDiscoveringServices = false;
-  bool _isConnectingOrDisconnecting = false;
 
   late StreamSubscription<BluetoothConnectionState> _connectionStateSubscription;
   late StreamSubscription<int> _rssiSubscription;
   late StreamSubscription<int> _mtuSubscription;
-  late StreamSubscription<List<BluetoothService>> _servicesSubscription;
 
   @override
   void initState() {
@@ -47,6 +44,12 @@ class _DeviceScreenState extends State<DeviceScreen> {
       _mtuSize = value;
       setState(() {});
     });
+
+    Global.listenToIsConnectingOrDisconnecting(widget.device.remoteId, (value) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 
   @override
@@ -54,7 +57,6 @@ class _DeviceScreenState extends State<DeviceScreen> {
     _connectionStateSubscription.cancel();
     _rssiSubscription.cancel();
     _mtuSubscription.cancel();
-    _servicesSubscription.cancel();
     super.dispose();
   }
 
@@ -165,8 +167,11 @@ class _DeviceScreenState extends State<DeviceScreen> {
     }
   }
 
-  List<Widget> _buildServiceTiles(BuildContext context) {
-    return _services
+  List<Widget> _buildServiceTiles(BuildContext context, BluetoothDevice d) {
+    if (d.servicesList == null) {
+      return [];
+    }
+    return d.servicesList!
         .map(
           (s) => ServiceTile(
             service: s,
@@ -266,7 +271,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
   }
 
   Widget buildConnectButton(BuildContext context) {
-    if (_isConnectingOrDisconnecting) {
+    if (Global.getIsConnectingOrDisconnecting(widget.device.remoteId)) {
       return buildSpinner(context);
     } else {
       return buildConnectOrDisconnectButton(context);
@@ -292,7 +297,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
                 trailing: buildGetServices(context),
               ),
               buildMtuTile(context),
-              ..._buildServiceTiles(context),
+              ..._buildServiceTiles(context, widget.device),
             ],
           ),
         ),

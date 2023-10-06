@@ -18,24 +18,37 @@ class Global {
 
   static GlobalKey<ScaffoldMessengerState> getSnackbar(ABC abc) {
     switch (abc) {
-      case ABC.a: return snackBarKeyA;
-      case ABC.b: return snackBarKeyB;
-      case ABC.c: return snackBarKeyC;
+      case ABC.a:
+        return snackBarKeyA;
+      case ABC.b:
+        return snackBarKeyB;
+      case ABC.c:
+        return snackBarKeyC;
     }
   }
 
   static showSnackbar(ABC abc, String msg, {required bool success}) {
     final snackBar = success
-      ? SnackBar(content: Text(msg), backgroundColor: Colors.blue)
-      : SnackBar(content: Text(msg), backgroundColor: Colors.red);
+        ? SnackBar(content: Text(msg), backgroundColor: Colors.blue)
+        : SnackBar(content: Text(msg), backgroundColor: Colors.red);
     getSnackbar(abc).currentState?.removeCurrentSnackBar();
     getSnackbar(abc).currentState?.showSnackBar(snackBar);
+  }
+
+  static getIsConnectingOrDisconnecting(DeviceIdentifier remoteId) {
+    isConnectingOrDisconnecting[remoteId] ??= ValueNotifier(false);
+    return isConnectingOrDisconnecting[remoteId]!.value;
   }
 
   static setIsConnectingOrDisconnecting(DeviceIdentifier remoteId, bool value) {
     isConnectingOrDisconnecting[remoteId] ??= ValueNotifier(false);
     isConnectingOrDisconnecting[remoteId]!.value = value;
   }
+
+  static listenToIsConnectingOrDisconnecting(DeviceIdentifier remoteId, Function(bool) callback) {
+    isConnectingOrDisconnecting[remoteId] ??= ValueNotifier(false);
+    isConnectingOrDisconnecting[remoteId]!.addListener(() {
+      callback(isConnectingOrDisconnecting[remoteId]!.value);
+    });
+  }
 }
-
-

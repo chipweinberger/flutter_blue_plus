@@ -28,17 +28,20 @@ class BluetoothOffScreen extends StatelessWidget {
   }
 
   Widget buildTurnOnButton(BuildContext context) {
-    return ElevatedButton(
-      child: const Text('TURN ON'),
-      onPressed: () async {
-        try {
-          if (Platform.isAndroid) {
-            await FlutterBluePlus.turnOn();
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: ElevatedButton(
+        child: const Text('TURN ON'),
+        onPressed: () async {
+          try {
+            if (Platform.isAndroid) {
+              await FlutterBluePlus.turnOn();
+            }
+          } catch (e) {
+            Global.showSnackbar(ABC.a, prettyException("Error Turning On:", e), success: false);
           }
-        } catch (e) {
-          Global.showSnackbar(ABC.a, prettyException("Error Turning On:", e), success: false);
-        }
-      },
+        },
+      ),
     );
   }
 
@@ -54,7 +57,7 @@ class BluetoothOffScreen extends StatelessWidget {
             children: <Widget>[
               buildBluetoothOffIcon(context),
               buildTitle(context),
-              if (Platform.isAndroid == false) buildTurnOnButton(context),
+              if (Platform.isAndroid) buildTurnOnButton(context),
             ],
           ),
         ),
