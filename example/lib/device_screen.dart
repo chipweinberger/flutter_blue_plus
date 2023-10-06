@@ -214,33 +214,31 @@ class _DeviceScreenState extends State<DeviceScreen> {
     }
   }
 
-  List<Widget> _buildServiceTiles(BuildContext context, List<BluetoothService> services) {
-    return services
-        .map(
-          (s) => ServiceTile(
-            service: s,
-            characteristicTiles: s.characteristics
-                .map(
-                  (c) => CharacteristicTile(
-                    characteristic: c,
-                    onReadPressed: () => onReadPressed(c),
-                    onWritePressed: () => onWritePressed(c),
-                    onNotificationPressed: () => onSubscribePressed(c),
-                    descriptorTiles: c.descriptors
-                        .map(
-                          (d) => DescriptorTile(
-                            descriptor: d,
-                            onReadPressed: () => onReadDescriptorPressed(d),
-                            onWritePressed: () => onWriteDescriptorPressed(d),
-                          ),
-                        )
-                        .toList(),
-                  ),
-                )
-                .toList(),
-          ),
-        )
-        .toList();
+  List<Widget> _buildServiceTiles(BuildContext context) {
+    return _services.map(
+      (s) => ServiceTile(
+        service: s,
+        characteristicTiles: s.characteristics
+            .map((c) => _buildCharacteristicTile(c))
+            .toList(),
+      ),
+    ).toList();
+  }
+
+  CharacteristicTile _buildCharacteristicTile(BluetoothCharacteristic c) {
+    return CharacteristicTile(
+      characteristic: c,
+      onReadPressed: () => onReadPressed(c),
+      onWritePressed: () => onWritePressed(c),
+      onNotificationPressed: () => onSubscribePressed(c),
+      descriptorTiles: c.descriptors.map(
+        (d) => DescriptorTile(
+          descriptor: d,
+          onReadPressed: () => onReadDescriptorPressed(d),
+          onWritePressed: () => onWriteDescriptorPressed(d),
+        ),
+      ).toList(),
+    );
   }
 
   Widget buildSpinner(BuildContext context) {
@@ -333,7 +331,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
                     onPressed: onRequestMtuPressed,
                   )),
               Column(
-                children: _buildServiceTiles(context, widget.device.servicesList ?? []),
+                children: _buildServiceTiles(context),
               )
             ],
           ),

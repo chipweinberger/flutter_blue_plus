@@ -11,7 +11,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'bluetooth_off_screen.dart';
-import 'scan_view.dart';
+import 'scan_screen.dart';
 
 final snackBarKeyA = GlobalKey<ScaffoldMessengerState>();
 final snackBarKeyB = GlobalKey<ScaffoldMessengerState>();
@@ -33,6 +33,48 @@ void main() {
     });
   } else {
     runApp(const FlutterBlueApp());
+  }
+}
+
+class FlutterBlueApp extends StatefulWidget {
+  const FlutterBlueApp({Key? key}) : super(key: key);
+
+  @override
+  State<FlutterBlueApp> createState() => _FlutterBlueAppState();
+}
+
+class _FlutterBlueAppState extends State<FlutterBlueApp> {
+  BluetoothAdapterState _adapterState = BluetoothAdapterState.unknown;
+
+  late StreamSubscription<BluetoothAdapterState> _adapterStateStateSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _adapterStateStateSubscription = FlutterBluePlus.adapterState.listen((state) {
+      _adapterState = state;
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _adapterStateStateSubscription.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Widget screen = _adapterState == BluetoothAdapterState.on
+      ? const ScanScreen()
+      : BluetoothOffScreen(adapterState: _adapterState);
+
+    return MaterialApp(
+      color: Colors.lightBlue,
+      home: screen,
+      navigatorObservers: [BluetoothAdapterStateObserver()],
+    );
   }
 }
 
@@ -59,30 +101,6 @@ class BluetoothAdapterStateObserver extends NavigatorObserver {
     // Cancel the subscription when the route is popped
     _btStateSubscription?.cancel();
     _btStateSubscription = null;
-  }
-}
-
-class FlutterBlueApp extends StatelessWidget {
-  const FlutterBlueApp({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      color: Colors.lightBlue,
-      home: StreamBuilder<BluetoothAdapterState>(
-          stream: FlutterBluePlus.adapterState,
-          initialData: BluetoothAdapterState.unknown,
-          builder: (c, snapshot) {
-            final adapterState = snapshot.data;
-            if (adapterState == BluetoothAdapterState.on) {
-              return const ScanScreen();
-            } else {
-              FlutterBluePlus.stopScan();
-              return BluetoothOffScreen(adapterState: adapterState);
-            }
-          }),
-      navigatorObservers: [BluetoothAdapterStateObserver()],
-    );
   }
 }
 

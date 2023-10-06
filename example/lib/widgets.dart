@@ -5,6 +5,49 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
+class ConnectedDeviceTile extends StatelessWidget {
+  final BluetoothDevice device;
+  final VoidCallback onOpen;
+  final Function(BluetoothDevice) onConnect;
+
+  const ConnectedDeviceTile({
+    required this.device,
+    required this.onOpen,
+    required this.onConnect,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<BluetoothConnectionState>(
+      stream: device.connectionState,
+      initialData: BluetoothConnectionState.disconnected,
+      builder: (c, snapshot) {
+        Widget trailingWidget;
+        if (snapshot.data == BluetoothConnectionState.connected) {
+          trailingWidget = ElevatedButton(
+            child: const Text('OPEN'),
+            onPressed: onOpen,
+          );
+        } else if (snapshot.data == BluetoothConnectionState.disconnected) {
+          trailingWidget = ElevatedButton(
+            child: const Text('CONNECT'),
+            onPressed: () => onConnect(device),
+          );
+        } else {
+          trailingWidget = Text(snapshot.data.toString().toUpperCase().split('.')[1]);
+        }
+        return ListTile(
+          title: Text(device.platformName),
+          subtitle: Text(device.remoteId.toString()),
+          trailing: trailingWidget,
+        );
+      },
+    );
+  }
+}
+
+
 class ScanResultTile extends StatelessWidget {
   const ScanResultTile({Key? key, required this.result, this.onTap}) : super(key: key);
 
