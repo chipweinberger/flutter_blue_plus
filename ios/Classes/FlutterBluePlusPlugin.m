@@ -175,7 +175,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         {
             NSNumber *idx = [call arguments];
             _logLevel = (LogLevel)[idx integerValue];
-            result(@(true));
+            result(@YES);
             return;
         }
         else if ([@"isAvailable" isEqualToString:call.method])
@@ -241,12 +241,12 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // Start scanning
             [self->_centralManager scanForPeripheralsWithServices:uuids options:scanOpts];
 
-            result(@(true));
+            result(@YES);
         }
         else if ([@"stopScan" isEqualToString:call.method])
         {
             [self->_centralManager stopScan];
-            result(@(true));
+            result(@YES);
         }
         else if ([@"getConnectedSystemDevices" isEqualToString:call.method])
         {
@@ -281,7 +281,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
             if (peripheral != nil) {
                 Log(LDEBUG, @"already connected");
-                result(@(false)); // no work to do
+                result(@NO); // no work to do
                 return;
             }
 
@@ -319,7 +319,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             [_centralManager connectPeripheral:peripheral options:options];
             
-            result(@(true));
+            result(@YES);
         }
         else if ([@"disconnect" isEqualToString:call.method])
         {
@@ -330,13 +330,13 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
             if (peripheral == nil) {
                 Log(LDEBUG, @"already disconnected");
-                result(@(false)); // no work to do
+                result(@NO); // no work to do
                 return;
             }
 
             [_centralManager cancelPeripheralConnection:peripheral];
             
-            result(@(true));
+            result(@YES);
         }
         else if ([@"discoverServices" isEqualToString:call.method])
         {
@@ -358,7 +358,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // start discovery
             [peripheral discoverServices:nil];
 
-            result(@(true));
+            result(@YES);
         }
         else if ([@"readCharacteristic" isEqualToString:call.method])
         {
@@ -399,7 +399,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // Trigger a read
             [peripheral readValueForCharacteristic:characteristic];
 
-            result(@(true));
+            result(@YES);
         }
         else if ([@"writeCharacteristic" isEqualToString:call.method])
         {
@@ -483,7 +483,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 [self.didWriteWithoutResponse setObject:args forKey:remoteId];
             }
 
-            result(@(true));
+            result(@YES);
         }
         else if ([@"readDescriptor" isEqualToString:call.method])
         {
@@ -524,7 +524,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             [peripheral readValueForDescriptor:descriptor];
 
-            result(@(true));
+            result(@YES);
         }
         else if ([@"writeDescriptor" isEqualToString:call.method])
         {
@@ -577,7 +577,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // Write descriptor
             [peripheral writeValue:[self convertHexToData:value] forDescriptor:descriptor];
 
-            result(@(true));
+            result(@YES);
         }
         else if ([@"setNotification" isEqualToString:call.method])
         {
@@ -621,7 +621,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // Set notification value
             [peripheral setNotifyValue:[enable boolValue] forCharacteristic:characteristic];
             
-            result(@(true));
+            result(@YES);
         }
         else if ([@"requestMtu" isEqualToString:call.method])
         {
@@ -644,7 +644,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             [peripheral readRSSI];
 
-            result(@(true));
+            result(@YES);
         }
         else if([@"requestConnectionPriority" isEqualToString:call.method])
         {
