@@ -149,8 +149,9 @@ class _OnDoneTransformer<T> extends StreamTransformerBase<T, T> {
   Stream<T> bind(Stream<T> stream) {
     if (stream.isBroadcast) {
       return _bindBroadcast(stream);
+    } else {
+      return _bindSingleSubscription(stream);
     }
-    return _bindSingleSubscription(stream);
   }
 
   Stream<T> _bindSingleSubscription(Stream<T> stream) {
@@ -214,9 +215,9 @@ class _OnCancelTransformer<T> extends StreamTransformerBase<T, T> {
   Stream<T> bind(Stream<T> stream) {
     if (stream.isBroadcast) {
       return _bindBroadcast(stream);
+    } else {
+      return _bindSingleSubscription(stream);
     }
-
-    return _bindSingleSubscription(stream);
   }
 
   Stream<T> _bindSingleSubscription(Stream<T> stream) {
@@ -284,7 +285,11 @@ class _NewStreamWithInitialValueTransformer<T> extends StreamTransformerBase<T, 
 
   @override
   Stream<T> bind(Stream<T> stream) {
-    return _bindSingleSubscription(stream);
+    if (stream.isBroadcast) {
+      return _bindBroadcast(stream);
+    } else {
+      return _bindSingleSubscription(stream);
+    }
   }
 
   Stream<T> _bindSingleSubscription(Stream<T> stream) {
@@ -313,6 +318,25 @@ class _NewStreamWithInitialValueTransformer<T> extends StreamTransformerBase<T, 
       },
       onCancel: () {
         return subscription?.cancel();
+      },
+      sync: true,
+    );
+
+    return controller.stream;
+  }
+
+  Stream<T> _bindBroadcast(Stream<T> stream) {
+    StreamController<T>? controller;
+    StreamSubscription<T>? subscription;
+
+    controller = StreamController<T>.broadcast(
+      onListen: () {
+        subscription = stream.listen(controller?.add, onError: controller?.addError, onDone: () {
+          controller?.close();
+        });
+      },
+      onCancel: () {
+        subscription?.cancel();
       },
       sync: true,
     );
@@ -458,4 +482,3 @@ extension RemoveWhere<T> on List<T> {
     return this.length != initialLength;
   }
 }
-
