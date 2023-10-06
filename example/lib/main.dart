@@ -383,8 +383,8 @@ class DeviceScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    servicesStream[device.remoteId] ??= StreamController<List<BluetoothService>>();
-    isDiscoveringServices[device.remoteId] ??= StreamController<bool>();
+    servicesStream[device.remoteId] ??= StreamController<List<BluetoothService>>.broadcast();
+    isDiscoveringServices[device.remoteId] ??= StreamController<bool>.broadcast();
     return ScaffoldMessenger(
       key: snackBarKeyC,
       child: Scaffold(
@@ -509,11 +509,11 @@ class DeviceScreen extends StatelessWidget {
                             TextButton(
                               child: const Text("Get Services"),
                               onPressed: () async {
-                                isDiscoveringServices[device.remoteId] ??= StreamController<bool>();
+                                isDiscoveringServices[device.remoteId] ??= StreamController<bool>.broadcast();
                                 isDiscoveringServices[device.remoteId]!.add(true);
                                 try {
                                   await device.discoverServices();
-                                  servicesStream[device.remoteId] ??= StreamController<List<BluetoothService>>();
+                                  servicesStream[device.remoteId] ??= StreamController<List<BluetoothService>>.broadcast();
                                   servicesStream[device.remoteId]!.add(device.servicesList ?? []);
                                   final snackBar = snackBarGood("Discover Services: Success");
                                   snackBarKeyC.currentState?.removeCurrentSnackBar();
