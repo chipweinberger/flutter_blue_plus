@@ -1,3 +1,8 @@
+## 1.16.6
+* **[Example]** Refactor: hugely refactored to use stateful widgets
+* **[Example]** Fix: stream already listened to error
+* **[Improve]** connectionState & mtu: use broadcast stream
+
 ## 1.16.5
 * **[Fix]** iOS: iOS Unhandled Exception: type 'int' is not a subtype of type 'bool' (regression 1.16.3)
 * **[Improve]** android: prepend logs with '[FBP]'
