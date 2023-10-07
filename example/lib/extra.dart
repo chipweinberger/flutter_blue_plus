@@ -2,7 +2,6 @@ import 'utils.dart';
 
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
-// used for BluetoothDevice.Extra
 final Map<DeviceIdentifier, StreamControllerEx<bool>> _global = {};
 
 /// connect & disconnect + update stream

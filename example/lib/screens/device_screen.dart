@@ -50,7 +50,6 @@ class _DeviceScreenState extends State<DeviceScreen> {
     });
 
     _isConnectingOrDisconnectingSubscription = widget.device.isConnectingOrDisconnecting.listen((value) {
-      print("isConnectingOrDisconnecting $value");
       _isConnectingOrDisconnecting = value;
       setState(() {});
     });
@@ -268,7 +267,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
         ));
   }
 
-  Widget buildconnectDeviceutton(BuildContext context) {
+  Widget buildConnectButton(BuildContext context) {
     if (_isConnectingOrDisconnecting) {
       return buildSpinner(context);
     } else {
@@ -283,7 +282,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(widget.device.platformName),
-          actions: [buildconnectDeviceutton(context)],
+          actions: [buildConnectButton(context)],
         ),
         body: SingleChildScrollView(
           child: Column(

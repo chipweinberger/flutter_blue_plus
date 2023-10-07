@@ -19,8 +19,6 @@ class ScanScreen extends StatefulWidget {
 class _ScanScreenState extends State<ScanScreen> {
   List<BluetoothDevice> _connectedDevices = [];
   List<ScanResult> _scanResults = [];
-
-  late StreamSubscription<List<BluetoothDevice>> _connectedDevicesSubscription;
   late StreamSubscription<List<ScanResult>> _scanResultsSubscription;
   late StreamSubscription<bool> _isScanningSubscription;
 
@@ -30,11 +28,6 @@ class _ScanScreenState extends State<ScanScreen> {
 
     // Initial data fetch
     FlutterBluePlus.connectedSystemDevices.then((devices) {
-      _connectedDevices = devices;
-      setState(() {});
-    });
-
-    _connectedDevicesSubscription = Stream.fromFuture(FlutterBluePlus.connectedSystemDevices).listen((devices) {
       _connectedDevices = devices;
       setState(() {});
     });
@@ -51,7 +44,6 @@ class _ScanScreenState extends State<ScanScreen> {
 
   @override
   void dispose() {
-    _connectedDevicesSubscription.cancel();
     _scanResultsSubscription.cancel();
     _isScanningSubscription.cancel();
     super.dispose();
