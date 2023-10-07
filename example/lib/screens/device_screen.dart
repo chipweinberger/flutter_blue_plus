@@ -27,7 +27,6 @@ class _DeviceScreenState extends State<DeviceScreen> {
 
   late StreamSubscription<BluetoothConnectionState> _connectionStateSubscription;
   late StreamSubscription<bool> _isConnectingOrDisconnectingSubscription;
-  late StreamSubscription<int> _rssiSubscription;
   late StreamSubscription<int> _mtuSubscription;
 
   @override
@@ -39,7 +38,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
       setState(() {});
     });
 
-    _rssiSubscription = rssiStream(maxItems: 1).listen((value) {
+    widget.device.readRssi().then((value) {
       _rssi = value;
       setState(() {});
     });
@@ -58,7 +57,6 @@ class _DeviceScreenState extends State<DeviceScreen> {
   @override
   void dispose() {
     _connectionStateSubscription.cancel();
-    _rssiSubscription.cancel();
     _mtuSubscription.cancel();
     _isConnectingOrDisconnectingSubscription.cancel();
     super.dispose();
@@ -300,25 +298,5 @@ class _DeviceScreenState extends State<DeviceScreen> {
         ),
       ),
     );
-  }
-
-  Stream<int> rssiStream({Duration frequency = const Duration(seconds: 5), int? maxItems = null}) async* {
-    var isConnected = true;
-    final subscription = widget.device.connectionState.listen((v) {
-      isConnected = v == BluetoothConnectionState.connected;
-    });
-    int i = 0;
-    while (isConnected && (maxItems == null || i < maxItems)) {
-      try {
-        yield await widget.device.readRssi();
-      } catch (e) {
-        print("Error reading RSSI: $e");
-        break;
-      }
-      await Future.delayed(frequency);
-      i++;
-    }
-    // Device disconnected, stopping RSSI stream
-    subscription.cancel();
   }
 }
