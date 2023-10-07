@@ -1,3 +1,6 @@
+## 1.16.9
+* **[Example]** cleaned up Characteristic tile code
+
 ## 1.16.8
 * **[Fix]** streams were not sending their initial values
 * **[Example]** discoverServices: stay on screen after diconnection
