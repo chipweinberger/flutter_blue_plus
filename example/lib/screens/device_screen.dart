@@ -21,6 +21,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
   int? _rssi;
   int? _mtuSize;
   BluetoothConnectionState _connectionState = BluetoothConnectionState.disconnected;
+  List<BluetoothService> _services = [];
   bool _isDiscoveringServices = false;
   bool _isConnectingOrDisconnecting = false;
 
@@ -96,7 +97,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
       _isDiscoveringServices = true;
     });
     try {
-      await widget.device.discoverServices();
+      _services = await widget.device.discoverServices();
       Snackbar.show(ABC.c, "Discover Services: Success", success: true);
     } catch (e) {
       Snackbar.show(ABC.c, prettyException("Discover Services Error:", e), success: false);
@@ -168,10 +169,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
   }
 
   List<Widget> _buildServiceTiles(BuildContext context, BluetoothDevice d) {
-    if (d.servicesList == null) {
-      return [];
-    }
-    return d.servicesList!
+    return _services
         .map(
           (s) => ServiceTile(
             service: s,
