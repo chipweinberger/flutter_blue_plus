@@ -135,7 +135,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             [@"isSupported" isEqualToString:call.method] == false &&
             [@"getAdapterName" isEqualToString:call.method] == false &&
             [@"getAdapterState" isEqualToString:call.method] == false) {
-            NSString* s = @"the device does not have bluetooth";
+            NSString* s = @"the device does not support bluetooth";
             result([FlutterError errorWithCode:@"bluetoothUnavailable" message:s details:NULL]);
             return;
         }
@@ -1648,11 +1648,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
 - (int)getMaxPayload:(CBPeripheral *)peripheral forType:(CBCharacteristicWriteType)writeType allowLongWrite:(bool)allowLongWrite
 {
-    // 512 this comes from the BLE spec. Characteritics should not 
-    // be longer than 512. Android also enforces this as the maximum.
-    int maxAttrLen = 512; 
-
-    // if splitting is disabled, we can only write up to MTU-3
+    // if allowLongWrite is disabled, we can only write up to MTU-3
     if (allowLongWrite == false) {
         writeType = CBCharacteristicWriteWithoutResponse;
     }
@@ -1660,7 +1656,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // For withoutResponse, or allowLongWrite == false
     //   iOS returns MTU-3. In theory, MTU can be as high as 65535 (16-bit).
     //   I've seen iOS return 524 for this value. But typically it is lower.
-    //   The MTU is negotiated by the OS, and depends on iOS version.
+    //   The MTU negotiated by the OS depends on iOS version.
     //
     // For withResponse, 
     //   iOS typically returns a constant value of 512, regardless of MTU. 
@@ -1669,8 +1665,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     // In order to operate the same on both iOS & Android, we enforce a 
     // maximum of 512, which is the same as android. This is also the
-    // maxAttrLen of the BLE specification.
-    return MIN(maxForType, maxAttrLen);
+    // maxAttrLen of a characteristic in the BLE specification.
+    return MIN(maxForType, 512);
 }
 
 - (int)getMtu:(CBPeripheral *)peripheral

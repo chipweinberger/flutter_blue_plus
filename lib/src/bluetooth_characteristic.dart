@@ -126,7 +126,7 @@ class BluetoothCharacteristic {
   /// Writes a characteristic.
   ///  - [withoutResponse]: the write is not guaranteed and always returns immediately with success.
   ///  - [withResponse]: the write returns error on failure
-  ///  - [allowLongWrite]: if set, writes 'withResponse' larger than MTU are allowed (up to 512 bytes).
+  ///  - [allowLongWrite]: if set, larger writes > MTU are allowed (up to 512 bytes).
   ///       This should be used with caution.
   ///         1. it can only be used *with* response
   ///         2. the peripheral device must support the 'long write' ble protocol.

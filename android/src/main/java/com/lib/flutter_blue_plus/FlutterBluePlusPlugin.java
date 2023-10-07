@@ -235,7 +235,7 @@ public class FlutterBluePlusPlugin implements
                 "isSupported".equals(call.method) == false &&
                 "getAdapterName".equals(call.method) == false &&
                 "getAdapterState".equals(call.method) == false) {
-                result.error("bluetoothUnavailable", "the device does not have bluetooth", null);
+                result.error("bluetoothUnavailable", "the device does not support bluetooth", null);
                 return;
             }
 

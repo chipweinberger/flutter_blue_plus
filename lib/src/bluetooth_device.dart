@@ -164,7 +164,7 @@ class BluetoothDevice {
     return DisconnectReason(_nativeError, code, description);
   }
 
-  /// The current connection state of the device to this application
+  /// The current connection state *of our app* to the device
   Stream<BluetoothConnectionState> get connectionState {
     // initial value - Note: we only care about the current connection state of
     // *our* app, which is why we can use our cached value, or assume disconnected
@@ -328,7 +328,7 @@ class BluetoothDevice {
     // check android
     if (Platform.isAndroid == false) {
       throw FlutterBluePlusException(
-          ErrorPlatform.dart, "setPreferredPhy", FbpErrorCode.androidOnly.index, "android-only");
+          ErrorPlatform.dart, "requestConnectionPriority", FbpErrorCode.androidOnly.index, "android-only");
     }
 
     // check connected
