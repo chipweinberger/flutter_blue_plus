@@ -3,8 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
-import 'global.dart';
-import 'widgets.dart';
+import '../global.dart';
+import '../widgets/connected_device_tile.dart';
+import '../widgets/scan_result_tile.dart';
 import 'device_screen.dart';
 
 class ScanScreen extends StatefulWidget {
