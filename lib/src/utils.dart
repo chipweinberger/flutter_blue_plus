@@ -72,7 +72,11 @@ class _StreamController<T> {
 
   _StreamController({required T initialValue}) : this.latestValue = initialValue;
 
-  Stream<T> get stream => _controller.stream;
+  Stream<T> get stream {
+    return latestValue != null
+      ? _controller.stream.newStreamWithInitialValue(latestValue!)
+      : _controller.stream;
+  }
 
   T get value => latestValue;
 
