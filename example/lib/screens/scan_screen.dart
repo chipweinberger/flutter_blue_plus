@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import 'device_screen.dart';
-import '../snackbar.dart';
+import '../utils/snackbar.dart';
 import '../widgets/connected_device_tile.dart';
 import '../widgets/scan_result_tile.dart';
-import '../extra.dart';
+import '../utils/extra.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({Key? key}) : super(key: key);
