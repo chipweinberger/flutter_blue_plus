@@ -1,3 +1,6 @@
+## 1.16.10
+* **[Fix]** BluetoothDevice: don't wait for timeout if device becomes disconnected
+
 ## 1.16.9
 * **[Example]** cleaned up Characteristic tile code
 
