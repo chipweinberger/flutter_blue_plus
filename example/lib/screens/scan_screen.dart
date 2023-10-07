@@ -3,10 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
-import '../global.dart';
+import 'device_screen.dart';
+import '../snackbar.dart';
 import '../widgets/connected_device_tile.dart';
 import '../widgets/scan_result_tile.dart';
-import 'device_screen.dart';
+import '../extra.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({Key? key}) : super(key: key);
@@ -60,7 +61,7 @@ class _ScanScreenState extends State<ScanScreen> {
     try {
       await FlutterBluePlus.startScan(timeout: const Duration(seconds: 15));
     } catch (e) {
-      Global.showSnackbar(ABC.b, prettyException("Start Scan Error:", e), success: false);
+      Snackbar.show(ABC.b, prettyException("Start Scan Error:", e), success: false);
     }
     setState(() {}); // force refresh of connectedSystemDevices
   }
@@ -69,18 +70,15 @@ class _ScanScreenState extends State<ScanScreen> {
     try {
       FlutterBluePlus.stopScan();
     } catch (e) {
-      Global.showSnackbar(ABC.b, prettyException("Stop Scan Error:", e), success: false);
+      Snackbar.show(ABC.b, prettyException("Stop Scan Error:", e), success: false);
     }
   }
 
   void onConnectPressed(BluetoothDevice device) {
     MaterialPageRoute route = MaterialPageRoute(
         builder: (context) {
-          Global.setIsConnectingOrDisconnecting(device.remoteId, true);
-          device.connect(timeout: Duration(seconds: 35)).catchError((e) {
-            Global.showSnackbar(ABC.c, prettyException("Connect Error:", e), success: false);
-          }).then((v) {
-            Global.setIsConnectingOrDisconnecting(device.remoteId, false);
+          device.connectDevice().catchError((e) {
+            Snackbar.show(ABC.c, prettyException("Connect Error:", e), success: false);
           });
           return DeviceScreen(device: device);
         },
@@ -139,7 +137,7 @@ class _ScanScreenState extends State<ScanScreen> {
   @override
   Widget build(BuildContext context) {
     return ScaffoldMessenger(
-      key: Global.snackBarKeyB,
+      key: Snackbar.snackBarKeyB,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Find Devices'),

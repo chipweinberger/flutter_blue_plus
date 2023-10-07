@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import '../widgets/service_tile.dart';
-import '../global.dart';
+import '../snackbar.dart';
+import '../extra.dart';
 
 class DeviceScreen extends StatefulWidget {
   final BluetoothDevice device;
@@ -21,8 +22,10 @@ class _DeviceScreenState extends State<DeviceScreen> {
   int? _mtuSize;
   BluetoothConnectionState _connectionState = BluetoothConnectionState.disconnected;
   bool _isDiscoveringServices = false;
+  bool _isConnectingOrDisconnecting = false;
 
   late StreamSubscription<BluetoothConnectionState> _connectionStateSubscription;
+  late StreamSubscription<bool> _isConnectingOrDisconnectingSubscription;
   late StreamSubscription<int> _rssiSubscription;
   late StreamSubscription<int> _mtuSubscription;
 
@@ -45,10 +48,10 @@ class _DeviceScreenState extends State<DeviceScreen> {
       setState(() {});
     });
 
-    Global.listenToIsConnectingOrDisconnecting(widget.device.remoteId, (value) {
-      if (mounted) {
-        setState(() {});
-      }
+    _isConnectingOrDisconnectingSubscription = widget.device.isConnectingOrDisconnecting.listen((value) {
+      print("isConnectingOrDisconnecting $value");
+      _isConnectingOrDisconnecting = value;
+      setState(() {});
     });
   }
 
@@ -57,6 +60,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
     _connectionStateSubscription.cancel();
     _rssiSubscription.cancel();
     _mtuSubscription.cancel();
+    _isConnectingOrDisconnectingSubscription.cancel();
     super.dispose();
   }
 
@@ -69,26 +73,22 @@ class _DeviceScreenState extends State<DeviceScreen> {
     return _connectionState == BluetoothConnectionState.connected;
   }
 
-  Future onConnectButtonPressed() async {
-    Global.setIsConnectingOrDisconnecting(widget.device.remoteId, true);
+  Future onConnectPressed() async {
     try {
-      await widget.device.connect(timeout: Duration(seconds: 35));
-      Global.showSnackbar(ABC.c, "Connect: Success", success: true);
+      await widget.device.connectDevice();
+      Snackbar.show(ABC.c, "Connect: Success", success: true);
     } catch (e) {
-      Global.showSnackbar(ABC.c, prettyException("Connect Error:", e), success: false);
+      Snackbar.show(ABC.c, prettyException("Connect Error:", e), success: false);
     }
-    Global.setIsConnectingOrDisconnecting(widget.device.remoteId, false);
   }
 
-  Future onDisconnectButtonPressed() async {
-    Global.setIsConnectingOrDisconnecting(widget.device.remoteId, true);
+  Future onDisconnectPressed() async {
     try {
-      await widget.device.disconnect();
-      Global.showSnackbar(ABC.c, "Disconnect: Success", success: true);
+      await widget.device.disconnectDevice();
+      Snackbar.show(ABC.c, "Disconnect: Success", success: true);
     } catch (e) {
-      Global.showSnackbar(ABC.c, prettyException("Disconnect Error:", e), success: false);
+      Snackbar.show(ABC.c, prettyException("Disconnect Error:", e), success: false);
     }
-    Global.setIsConnectingOrDisconnecting(widget.device.remoteId, false);
   }
 
   Future onDiscoverServicesPressed() async {
@@ -97,9 +97,9 @@ class _DeviceScreenState extends State<DeviceScreen> {
     });
     try {
       await widget.device.discoverServices();
-      Global.showSnackbar(ABC.c, "Discover Services: Success", success: true);
+      Snackbar.show(ABC.c, "Discover Services: Success", success: true);
     } catch (e) {
-      Global.showSnackbar(ABC.c, prettyException("Discover Services Error:", e), success: false);
+      Snackbar.show(ABC.c, prettyException("Discover Services Error:", e), success: false);
     }
     setState(() {
       _isDiscoveringServices = false;
@@ -109,30 +109,30 @@ class _DeviceScreenState extends State<DeviceScreen> {
   Future onRequestMtuPressed() async {
     try {
       await widget.device.requestMtu(223);
-      Global.showSnackbar(ABC.c, "Request Mtu: Success", success: true);
+      Snackbar.show(ABC.c, "Request Mtu: Success", success: true);
     } catch (e) {
-      Global.showSnackbar(ABC.c, prettyException("Change Mtu Error:", e), success: false);
+      Snackbar.show(ABC.c, prettyException("Change Mtu Error:", e), success: false);
     }
   }
 
   Future onReadPressed(BluetoothCharacteristic c) async {
     try {
       await c.read();
-      Global.showSnackbar(ABC.c, "Read: Success", success: true);
+      Snackbar.show(ABC.c, "Read: Success", success: true);
     } catch (e) {
-      Global.showSnackbar(ABC.c, prettyException("Read Error:", e), success: false);
+      Snackbar.show(ABC.c, prettyException("Read Error:", e), success: false);
     }
   }
 
   Future onWritePressed(BluetoothCharacteristic c) async {
     try {
       await c.write(_getRandomBytes(), withoutResponse: c.properties.writeWithoutResponse);
-      Global.showSnackbar(ABC.c, "Write: Success", success: true);
+      Snackbar.show(ABC.c, "Write: Success", success: true);
       if (c.properties.read) {
         await c.read();
       }
     } catch (e) {
-      Global.showSnackbar(ABC.c, prettyException("Write Error:", e), success: false);
+      Snackbar.show(ABC.c, prettyException("Write Error:", e), success: false);
     }
   }
 
@@ -140,30 +140,30 @@ class _DeviceScreenState extends State<DeviceScreen> {
     try {
       String op = c.isNotifying == false ? "Subscribe" : "Unubscribe";
       await c.setNotifyValue(c.isNotifying == false);
-      Global.showSnackbar(ABC.c, "$op : Success", success: true);
+      Snackbar.show(ABC.c, "$op : Success", success: true);
       if (c.properties.read) {
         await c.read();
       }
     } catch (e) {
-      Global.showSnackbar(ABC.c, prettyException("Subscribe Error:", e), success: false);
+      Snackbar.show(ABC.c, prettyException("Subscribe Error:", e), success: false);
     }
   }
 
   Future onReadDescriptorPressed(BluetoothDescriptor d) async {
     try {
       await d.read();
-      Global.showSnackbar(ABC.c, "Descriptor Read : Success", success: true);
+      Snackbar.show(ABC.c, "Descriptor Read : Success", success: true);
     } catch (e) {
-      Global.showSnackbar(ABC.c, prettyException("Descriptor Read Error:", e), success: false);
+      Snackbar.show(ABC.c, prettyException("Descriptor Read Error:", e), success: false);
     }
   }
 
   Future onWriteDescriptorPressed(BluetoothDescriptor d) async {
     try {
       await d.write(_getRandomBytes());
-      Global.showSnackbar(ABC.c, "Descriptor Write : Success", success: true);
+      Snackbar.show(ABC.c, "Descriptor Write : Success", success: true);
     } catch (e) {
-      Global.showSnackbar(ABC.c, prettyException("Descriptor Write Error:", e), success: false);
+      Snackbar.show(ABC.c, prettyException("Descriptor Write Error:", e), success: false);
     }
   }
 
@@ -214,7 +214,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
 
   Widget buildConnectOrDisconnectButton(BuildContext context) {
     return TextButton(
-        onPressed: isConnected ? onDisconnectButtonPressed : onConnectButtonPressed,
+        onPressed: isConnected ? onDisconnectPressed : onConnectPressed,
         child: Text(
           isConnected ? "DISCONNECT" : "CONNECT",
           style: Theme.of(context).primaryTextTheme.labelLarge?.copyWith(color: Colors.white),
@@ -270,8 +270,8 @@ class _DeviceScreenState extends State<DeviceScreen> {
         ));
   }
 
-  Widget buildConnectButton(BuildContext context) {
-    if (Global.getIsConnectingOrDisconnecting(widget.device.remoteId)) {
+  Widget buildconnectDeviceutton(BuildContext context) {
+    if (_isConnectingOrDisconnecting) {
       return buildSpinner(context);
     } else {
       return buildConnectOrDisconnectButton(context);
@@ -281,11 +281,11 @@ class _DeviceScreenState extends State<DeviceScreen> {
   @override
   Widget build(BuildContext context) {
     return ScaffoldMessenger(
-      key: Global.snackBarKeyC,
+      key: Snackbar.snackBarKeyC,
       child: Scaffold(
         appBar: AppBar(
           title: Text(widget.device.platformName),
-          actions: [buildConnectButton(context)],
+          actions: [buildconnectDeviceutton(context)],
         ),
         body: SingleChildScrollView(
           child: Column(

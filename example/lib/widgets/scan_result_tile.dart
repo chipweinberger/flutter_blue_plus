@@ -88,7 +88,7 @@ class _ScanResultTileState extends State<ScanResultTile> {
     }
   }
 
-  Widget _buildConnectButton(BuildContext context) {
+  Widget _buildconnectDeviceutton(BuildContext context) {
     return ElevatedButton(
       child: isConnected ? const Text('OPEN') : const Text('CONNECT'),
       style: ElevatedButton.styleFrom(
@@ -126,7 +126,7 @@ class _ScanResultTileState extends State<ScanResultTile> {
     return ExpansionTile(
       title: _buildTitle(context),
       leading: Text(widget.result.rssi.toString()),
-      trailing: _buildConnectButton(context),
+      trailing: _buildconnectDeviceutton(context),
       children: <Widget>[
         _buildAdvRow(context, 'Complete Local Name', widget.result.advertisementData.localName),
         _buildAdvRow(context, 'Tx Power Level', '${widget.result.advertisementData.txPowerLevel ?? 'N/A'}'),
