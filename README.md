@@ -214,8 +214,8 @@ import 'dart:math';
 //    2. it can only be used *with* response to avoid data loss
 //    3. The characteristic must support split data
 extension splitWrite on BluetoothCharacteristic {
-  Future<void> splitWrite(List<int> value, int mtu, {int timeout = 15}) async {
-    int chunk = mtu-3;
+  Future<void> splitWrite(List<int> value, {int timeout = 15}) async {
+    int chunk = (await device.mtu.first) - 3; // 3 bytes ble overhead
     for (int i = 0; i < value.length; i += chunk) {
       List<int> subvalue = value.sublist(i, min(i + chunk, value.length));
       await write(subvalue, withoutResponse:false, timeout: timeout);
