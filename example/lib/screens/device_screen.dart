@@ -33,13 +33,11 @@ class _DeviceScreenState extends State<DeviceScreen> {
   void initState() {
     super.initState();
 
-    _connectionStateSubscription = widget.device.connectionState.listen((state) {
+    _connectionStateSubscription = widget.device.connectionState.listen((state) async {
       _connectionState = state;
-      setState(() {});
-    });
-
-    widget.device.readRssi().then((value) {
-      _rssi = value;
+      if (state == BluetoothConnectionState.connected && _rssi == null) {
+        _rssi = await widget.device.readRssi();
+      }
       setState(() {});
     });
 
