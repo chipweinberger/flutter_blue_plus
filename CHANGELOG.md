@@ -1,3 +1,9 @@
+## 1.16.8
+* **[Fix]** streams were not sending their initial values
+* **[Example]** discoverServices: stay on screen after diconnection
+* **[Example]** simplified connectingOrDisconnecting code
+* **[Example]** organize into 'screens' and 'widgets' folders
+
 ## 1.16.7
 * **[Rename]** isAvailable -> isSupported
 
