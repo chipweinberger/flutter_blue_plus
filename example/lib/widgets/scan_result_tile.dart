@@ -1,10 +1,7 @@
-
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-
 
 class ScanResultTile extends StatefulWidget {
   const ScanResultTile({Key? key, required this.result, this.onTap}) : super(key: key);
@@ -38,29 +35,28 @@ class _ScanResultTileState extends State<ScanResultTile> {
   }
 
   String getNiceHexArray(List<int> bytes) {
-    return '[${bytes.map((i) => i.toRadixString(16).padLeft(2, '0')).join(', ')}]'.toUpperCase();
+    return '[${bytes.map((i) => i.toRadixString(16).padLeft(2, '0')).join(', ')}]';
   }
 
   String getNiceManufacturerData(Map<int, List<int>> data) {
     if (data.isEmpty) {
       return 'N/A';
     }
-    List<String> res = [];
-    data.forEach((id, bytes) {
-      res.add('${id.toRadixString(16).toUpperCase()}: ${getNiceHexArray(bytes)}');
-    });
-    return res.join(', ');
+    return data.entries
+        .map((entry) => '${entry.key.toRadixString(16)}: ${getNiceHexArray(entry.value)}')
+        .join(', ')
+        .toUpperCase();
   }
 
   String getNiceServiceData(Map<String, List<int>> data) {
     if (data.isEmpty) {
       return 'N/A';
     }
-    List<String> res = [];
-    data.forEach((id, bytes) {
-      res.add('${id.toUpperCase()}: ${getNiceHexArray(bytes)}');
-    });
-    return res.join(', ');
+    return data.entries.map((v) => '${v.key}: ${getNiceHexArray(v.value)}').join(', ').toUpperCase();
+  }
+
+  String getNiceServiceUuids(List<String> serviceUuids) {
+    return serviceUuids.isEmpty ? 'N/A' : serviceUuids.join(', ').toUpperCase();
   }
 
   bool get isConnected {
@@ -123,22 +119,17 @@ class _ScanResultTileState extends State<ScanResultTile> {
 
   @override
   Widget build(BuildContext context) {
+    var adv = widget.result.advertisementData;
     return ExpansionTile(
       title: _buildTitle(context),
       leading: Text(widget.result.rssi.toString()),
       trailing: _buildConnectButton(context),
       children: <Widget>[
-        _buildAdvRow(context, 'Complete Local Name', widget.result.advertisementData.localName),
-        _buildAdvRow(context, 'Tx Power Level', '${widget.result.advertisementData.txPowerLevel ?? 'N/A'}'),
-        _buildAdvRow(
-            context, 'Manufacturer Data', getNiceManufacturerData(widget.result.advertisementData.manufacturerData)),
-        _buildAdvRow(
-            context,
-            'Service UUIDs',
-            (widget.result.advertisementData.serviceUuids.isNotEmpty)
-                ? widget.result.advertisementData.serviceUuids.join(', ').toUpperCase()
-                : 'N/A'),
-        _buildAdvRow(context, 'Service Data', getNiceServiceData(widget.result.advertisementData.serviceData)),
+        _buildAdvRow(context, 'Complete Local Name', adv.localName),
+        _buildAdvRow(context, 'Tx Power Level', '${adv.txPowerLevel ?? 'N/A'}'),
+        _buildAdvRow(context, 'Manufacturer Data', getNiceManufacturerData(adv.manufacturerData)),
+        _buildAdvRow(context, 'Service UUIDs', getNiceServiceUuids(adv.serviceUuids)),
+        _buildAdvRow(context, 'Service Data', getNiceServiceData(adv.serviceData)),
       ],
     );
   }

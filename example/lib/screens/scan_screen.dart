@@ -26,7 +26,6 @@ class _ScanScreenState extends State<ScanScreen> {
   void initState() {
     super.initState();
 
-    // Initial data fetch
     FlutterBluePlus.connectedSystemDevices.then((devices) {
       _connectedDevices = devices;
       setState(() {});
@@ -49,7 +48,7 @@ class _ScanScreenState extends State<ScanScreen> {
     super.dispose();
   }
 
-  Future onStartScanPressed() async {
+  Future onScanPressed() async {
     try {
       await FlutterBluePlus.startScan(timeout: const Duration(seconds: 15));
     } catch (e) {
@@ -58,7 +57,7 @@ class _ScanScreenState extends State<ScanScreen> {
     setState(() {}); // force refresh of connectedSystemDevices
   }
 
-  Future onStopScanPressed() async {
+  Future onStopPressed() async {
     try {
       FlutterBluePlus.stopScan();
     } catch (e) {
@@ -90,11 +89,11 @@ class _ScanScreenState extends State<ScanScreen> {
     if (FlutterBluePlus.isScanningNow) {
       return FloatingActionButton(
         child: const Icon(Icons.stop),
-        onPressed: onStopScanPressed,
+        onPressed: onStopPressed,
         backgroundColor: Colors.red,
       );
     } else {
-      return FloatingActionButton(child: const Text("SCAN"), onPressed: onStartScanPressed);
+      return FloatingActionButton(child: const Text("SCAN"), onPressed: onScanPressed);
     }
   }
 

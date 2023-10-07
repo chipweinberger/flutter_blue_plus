@@ -2,31 +2,31 @@
 * **[Example]** cleaned up Characteristic tile code
 
 ## 1.16.8
-* **[Fix]** streams were not sending their initial values
+* **[Fix]** `scanResults` & `isScanning` streams were not re-emitting their current value on listen
 * **[Example]** discoverServices: stay on screen after diconnection
-* **[Example]** simplified connectingOrDisconnecting code
+* **[Example]** simplified `connectingOrDisconnecting` code
 * **[Example]** organize into 'screens' and 'widgets' folders
 
 ## 1.16.7
-* **[Rename]** isAvailable -> isSupported
+* **[Rename]** `isAvailable` -> `isSupported`
 
 ## 1.16.6
 * **[Example]** Refactor: hugely refactored to use stateful widgets
 * **[Example]** Fix: stream already listened to error
-* **[Improve]** connectionState & mtu: use broadcast stream
+* **[Improve]** `connectionState` & `mtu`: use broadcast stream
 
 ## 1.16.5
 * **[Fix]** iOS: iOS Unhandled Exception: type 'int' is not a subtype of type 'bool' (regression 1.16.3)
 * **[Improve]** android: prepend logs with '[FBP]'
-* **[Java]** rename com.boskokg.flutter_blue_plus -> com.lib.flutter_blue_plus to be more generic
+* **[Java]** rename `com.boskokg.flutter_blue_plus` -> `com.lib.flutter_blue_plus` to be more generic
 
 ## 1.16.4
-* **[Fix]** setLogLevel would be ignored due to being called twice
+* **[Fix]** `setLogLevel` would be ignored due to being called twice
 * **[Improve]** android: use log level consistently
 * **[Improve]** iOS: use log level macro
 
 ## 1.16.3
-* **[Fix]** Android: setNotify would timeout if CCCD descriptor does not exist
+* **[Fix]** Android: `setNotify` would timeout if CCCD descriptor does not exist
 * **[Android]** fix deprecations
 * **[Improve]** removeIfGone: only push to scanResults when list changes
 
@@ -46,7 +46,7 @@ This release simplifies BluetoothDevice construction.
 * **[Add]** Android: getPhySupport
 
 ## 1.15.10
-* **[Fix]** iOS: localName does not match Android
+* **[Fix]** iOS: `localName` does not match Android
 * **[Fix]** flutterHotRestart: error was thrown if device did not have bluetooth adapter
 
 ## 1.15.9

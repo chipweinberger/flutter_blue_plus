@@ -144,7 +144,6 @@ var subscription = FlutterBluePlus.scanResults.listen(
 );
 
 // Start scanning
-// Note: You should always call `scanResults.listen` before you call startScan!
 await FlutterBluePlus.startScan();
 
 // Stop scanning
@@ -165,7 +164,6 @@ device.connectionState.listen((BluetoothConnectionState state) async {
 });
 
 // Connect to the device
-// Note: You should always call `connectionState.listen` before you call connect!
 await device.connect();
 
 // Disconnect from device
