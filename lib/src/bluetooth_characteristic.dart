@@ -17,6 +17,9 @@ class BluetoothCharacteristic {
   // convenience accessor
   Guid get uuid => characteristicUuid;
 
+  /// convenience accessor
+  BluetoothDevice get device => BluetoothDevice(remoteId: remoteId);
+
   /// this variable is updated:
   ///   - *live* if you call onValueReceived.listen() or lastValueStream.listen() & setNotifyValue(true)
   ///   - *once* if you call read()
@@ -102,7 +105,9 @@ class BluetoothCharacteristic {
       await FlutterBluePlus._invokeMethod('readCharacteristic', request.toMap());
 
       // wait for response
-      BmOnCharacteristicReceived response = await futureResponse.fbpTimeout(timeout, "readCharacteristic");
+      BmOnCharacteristicReceived response = await futureResponse
+          .fbpTimeout(timeout, "readCharacteristic")
+          .fbpEnsureConnected(device, "readCharacteristic");
 
       // failed?
       if (!response.success) {
@@ -186,7 +191,9 @@ class BluetoothCharacteristic {
       // wait for response so that we can:
       //  1. check for success (writeWithResponse)
       //  2. wait until the packet has been sent, to prevent iOS & Android dropping packets (writeWithoutResponse)
-      BmOnCharacteristicWritten response = await futureResponse.fbpTimeout(timeout, "writeCharacteristic");
+      BmOnCharacteristicWritten response = await futureResponse
+          .fbpTimeout(timeout, "writeCharacteristic")
+          .fbpEnsureConnected(device, "writeCharacteristic");
 
       // failed?
       if (!response.success) {
@@ -246,7 +253,9 @@ class BluetoothCharacteristic {
 
       // wait for CCCD descriptor to be written?
       if (hasCCCD) {
-        BmOnDescriptorWrite response = await futureResponse.fbpTimeout(timeout, "setNotifyValue");
+        BmOnDescriptorWrite response = await futureResponse
+            .fbpTimeout(timeout, "setNotifyValue")
+            .fbpEnsureConnected(device, "setNotifyValue");
 
         // failed?
         if (!response.success) {

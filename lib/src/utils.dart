@@ -53,11 +53,46 @@ extension AddOrUpdate<T> on List<T> {
 }
 
 extension FutureTimeout<T> on Future<T> {
-  Future<T> fbpTimeout(int seconds, String errorName) {
+  Future<T> fbpTimeout(int seconds, String function) {
     return this.timeout(Duration(seconds: seconds), onTimeout: () {
       throw FlutterBluePlusException(
-          ErrorPlatform.dart, errorName, FbpErrorCode.timeout.index, "Timed out after ${seconds}s");
+          ErrorPlatform.dart, function, FbpErrorCode.timeout.index, "Timed out after ${seconds}s");
     });
+  }
+
+  Future<T> fbpEnsureConnected(BluetoothDevice device, String function) {
+    // Create a completer to represent the result of this extended Future.
+    var completer = Completer<T>();
+
+    // disconnection listener.
+    var subscription = device.connectionState.listen((event) {
+      if (event == BluetoothConnectionState.disconnected) {
+        if (!completer.isCompleted) {
+          completer.completeError(FlutterBluePlusException(
+            ErrorPlatform.dart, 
+            function, 
+            FbpErrorCode.deviceIsDisconnected.index, 
+            "Device is disconnected"
+          ));
+        }
+      }
+    });
+
+    // When the original future completes
+    // complete our completer and cancel the subscription.
+    this.then((value) {
+      if (!completer.isCompleted) {
+        subscription.cancel();
+        completer.complete(value);
+      }
+    }).catchError((error) {
+      if (!completer.isCompleted) {
+        subscription.cancel();
+        completer.completeError(error);
+      }
+    });
+
+    return completer.future;
   }
 }
 

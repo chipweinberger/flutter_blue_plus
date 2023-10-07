@@ -137,7 +137,9 @@ class BluetoothDevice {
       await FlutterBluePlus._invokeMethod('discoverServices', remoteId.str);
 
       // wait for response
-      BmDiscoverServicesResult response = await futureResponse.fbpTimeout(timeout, "discoverServices");
+      BmDiscoverServicesResult response = await futureResponse
+          .fbpTimeout(timeout, "discoverServices")
+          .fbpEnsureConnected(this, "discoverServices");
 
       // failed?
       if (!response.success) {
@@ -254,7 +256,9 @@ class BluetoothDevice {
       await FlutterBluePlus._invokeMethod('readRssi', remoteId.str);
 
       // wait for response
-      BmReadRssiResult response = await futureResponse.fbpTimeout(timeout, "readRssi");
+      BmReadRssiResult response = await futureResponse
+          .fbpTimeout(timeout, "readRssi")
+          .fbpEnsureConnected(this, "readRssi");
 
       // failed?
       if (!response.success) {
@@ -309,7 +313,9 @@ class BluetoothDevice {
       await FlutterBluePlus._invokeMethod('requestMtu', request.toMap());
 
       // wait for response
-      mtu = await futureResponse.fbpTimeout(timeout, "requestMtu");
+      mtu = await futureResponse
+          .fbpTimeout(timeout, "requestMtu")
+          .fbpEnsureConnected(this, "requestMtu");
     } finally {
       opMutex.give();
     }
@@ -408,7 +414,9 @@ class BluetoothDevice {
 
       // only wait for 'bonded' if we weren't already bonded
       if (changed) {
-        BmBondStateResponse bs = await futureResponse.fbpTimeout(timeout, "createBond");
+        BmBondStateResponse bs = await futureResponse
+            .fbpTimeout(timeout, "createBond")
+            .fbpEnsureConnected(this, "createBond");
 
         // success?
         if (bs.bondState != BmBondStateEnum.bonded) {
@@ -449,7 +457,9 @@ class BluetoothDevice {
 
       // only wait for 'unbonded' state if we weren't already unbonded
       if (changed) {
-        BmBondStateResponse bs = await futureResponse.fbpTimeout(timeout, "removeBond");
+        BmBondStateResponse bs = await futureResponse
+            .fbpTimeout(timeout, "removeBond")
+            .fbpEnsureConnected(this, "removeBond");
 
         // success?
         if (bs.bondState != BmBondStateEnum.none) {

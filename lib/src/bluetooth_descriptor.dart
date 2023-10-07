@@ -13,6 +13,9 @@ class BluetoothDescriptor {
   /// convenience accessor
   Guid get uuid => descriptorUuid;
 
+  /// convenience accessor
+  BluetoothDevice get device => BluetoothDevice(remoteId: remoteId);
+
   /// this variable is updated:
   ///   - *live* if you call onValueReceived.listen() or lastValueStream.listen()
   ///   - *once* if you call read()
@@ -49,8 +52,8 @@ class BluetoothDescriptor {
   Future<List<int>> read({int timeout = 15}) async {
     // check connected
     if (FlutterBluePlus._isDeviceConnected(remoteId) == false) {
-      throw FlutterBluePlusException(ErrorPlatform.dart, "readDescriptor",
-        FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
+      throw FlutterBluePlusException(
+          ErrorPlatform.dart, "readDescriptor", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
     // Only allow a single read to be underway at any time, per-characteristic, per-device.
@@ -87,7 +90,9 @@ class BluetoothDescriptor {
       await FlutterBluePlus._invokeMethod('readDescriptor', request.toMap());
 
       // wait for response
-      BmOnDescriptorRead response = await futureResponse.fbpTimeout(timeout, "readDescriptor");
+      BmOnDescriptorRead response = await futureResponse
+          .fbpTimeout(timeout, "readDescriptor")
+          .fbpEnsureConnected(device, "readDescriptor");
 
       // failed?
       if (!response.success) {
@@ -106,8 +111,8 @@ class BluetoothDescriptor {
   Future<void> write(List<int> value, {int timeout = 15}) async {
     // check connected
     if (FlutterBluePlus._isDeviceConnected(remoteId) == false) {
-      throw FlutterBluePlusException(ErrorPlatform.dart, "writeDescriptor",
-        FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
+      throw FlutterBluePlusException(
+          ErrorPlatform.dart, "writeDescriptor", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
     // Only allow a single write to be underway at any time, per-characteristic, per-device.
@@ -142,7 +147,9 @@ class BluetoothDescriptor {
       await FlutterBluePlus._invokeMethod('writeDescriptor', request.toMap());
 
       // wait for response
-      BmOnDescriptorWrite response = await futureResponse.fbpTimeout(timeout, "writeDescriptor");
+      BmOnDescriptorWrite response = await futureResponse
+          .fbpTimeout(timeout, "writeDescriptor")
+          .fbpEnsureConnected(device, "writeDescriptor");
 
       // failed?
       if (!response.success) {
@@ -153,7 +160,6 @@ class BluetoothDescriptor {
       String key = "$serviceUuid:$characteristicUuid:$descriptorUuid";
       FlutterBluePlus._lastDescs[remoteId] ??= {};
       FlutterBluePlus._lastDescs[remoteId]![key] = value;
-
     } finally {
       writeMutex.give();
     }
