@@ -908,6 +908,10 @@ public class FlutterBluePlusPlugin implements
                         descriptorValue  = BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE;
                     }
 
+                    // remember the data we are writing
+                    String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + CCCD;
+                    mWriteDesc.put(key, bytesToHex(descriptorValue));
+
                     // write descriptor
                     if (Build.VERSION.SDK_INT >= 33) { // Android 13 (August 2022)
 
@@ -1781,7 +1785,7 @@ public class FlutterBluePlusPlugin implements
 
             // what data did we write?
             String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid;
-            String value = mWriteChr.get(key);
+            String value = mWriteChr.get(key) != null ? mWriteChr.get(key) : "";
             mWriteChr.remove(key);
 
             // see: BmCharacteristicData
@@ -1865,7 +1869,7 @@ public class FlutterBluePlusPlugin implements
 
             // what data did we write?
             String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + descriptorUuid;
-            String value = mWriteDesc.get(key);
+            String value = mWriteDesc.get(key) != null ? mWriteDesc.get(key) : "";
             mWriteDesc.remove(key);
 
             // see: BmDescriptorData

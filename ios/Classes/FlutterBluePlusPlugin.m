@@ -1216,7 +1216,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     // what data did we write?
     NSString *key = [NSString stringWithFormat:@"%@:%@:%@", remoteId, serviceUuid, characteristicUuid];
-    NSString *value = self.writeChrs[key];
+    NSString *value = self.writeChrs[key] ? self.writeChrs[key] : @"";
     [self.writeChrs removeObjectForKey:key];
 
     // See BmCharacteristicData
@@ -1326,7 +1326,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     // what data did we write?
     NSString *key = [NSString stringWithFormat:@"%@:%@:%@:%@", remoteId, serviceUuid, characteristicUuid, descriptorUuid];
-    NSString *value = self.writeChrs[key];
+    NSString *value = self.writeChrs[key] ? self.writeChrs[key] : @"";
     [self.writeDescs removeObjectForKey:key];
     
     // See BmDescriptorData
