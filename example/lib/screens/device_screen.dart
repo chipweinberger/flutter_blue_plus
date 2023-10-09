@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -63,11 +62,6 @@ class _DeviceScreenState extends State<DeviceScreen> {
     super.dispose();
   }
 
-  List<int> _getRandomBytes() {
-    final math = Random();
-    return [math.nextInt(255), math.nextInt(255), math.nextInt(255), math.nextInt(255)];
-  }
-
   bool get isConnected {
     return _connectionState == BluetoothConnectionState.connected;
   }
@@ -114,58 +108,6 @@ class _DeviceScreenState extends State<DeviceScreen> {
     }
   }
 
-  Future onReadPressed(BluetoothCharacteristic c) async {
-    try {
-      await c.read();
-      Snackbar.show(ABC.c, "Read: Success", success: true);
-    } catch (e) {
-      Snackbar.show(ABC.c, prettyException("Read Error:", e), success: false);
-    }
-  }
-
-  Future onWritePressed(BluetoothCharacteristic c) async {
-    try {
-      await c.write(_getRandomBytes(), withoutResponse: c.properties.writeWithoutResponse);
-      Snackbar.show(ABC.c, "Write: Success", success: true);
-      if (c.properties.read) {
-        await c.read();
-      }
-    } catch (e) {
-      Snackbar.show(ABC.c, prettyException("Write Error:", e), success: false);
-    }
-  }
-
-  Future onSubscribePressed(BluetoothCharacteristic c) async {
-    try {
-      String op = c.isNotifying == false ? "Subscribe" : "Unubscribe";
-      await c.setNotifyValue(c.isNotifying == false);
-      Snackbar.show(ABC.c, "$op : Success", success: true);
-      if (c.properties.read) {
-        await c.read();
-      }
-    } catch (e) {
-      Snackbar.show(ABC.c, prettyException("Subscribe Error:", e), success: false);
-    }
-  }
-
-  Future onReadDescriptorPressed(BluetoothDescriptor d) async {
-    try {
-      await d.read();
-      Snackbar.show(ABC.c, "Descriptor Read : Success", success: true);
-    } catch (e) {
-      Snackbar.show(ABC.c, prettyException("Descriptor Read Error:", e), success: false);
-    }
-  }
-
-  Future onWriteDescriptorPressed(BluetoothDescriptor d) async {
-    try {
-      await d.write(_getRandomBytes());
-      Snackbar.show(ABC.c, "Descriptor Write : Success", success: true);
-    } catch (e) {
-      Snackbar.show(ABC.c, prettyException("Descriptor Write Error:", e), success: false);
-    }
-  }
-
   List<Widget> _buildServiceTiles(BuildContext context, BluetoothDevice d) {
     return _services
         .map(
@@ -180,18 +122,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
   CharacteristicTile _buildCharacteristicTile(BluetoothCharacteristic c) {
     return CharacteristicTile(
       characteristic: c,
-      onReadPressed: () => onReadPressed(c),
-      onWritePressed: () => onWritePressed(c),
-      onNotificationPressed: () => onSubscribePressed(c),
-      descriptorTiles: c.descriptors
-          .map(
-            (d) => DescriptorTile(
-              descriptor: d,
-              onReadPressed: () => onReadDescriptorPressed(d),
-              onWritePressed: () => onWriteDescriptorPressed(d),
-            ),
-          )
-          .toList(),
+      descriptorTiles: c.descriptors.map((d) => DescriptorTile(descriptor: d)).toList(),
     );
   }
 

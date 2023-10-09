@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+
+import "../utils/snackbar.dart";
 
 ////////////////////////////////////////////////////////////
 //    _____ ______ _______      _______ _____ ______
@@ -54,18 +57,8 @@ class ServiceTile extends StatelessWidget {
 class CharacteristicTile extends StatefulWidget {
   final BluetoothCharacteristic characteristic;
   final List<DescriptorTile> descriptorTiles;
-  final Future<void> Function()? onReadPressed;
-  final Future<void> Function()? onWritePressed;
-  final Future<void> Function()? onNotificationPressed;
 
-  const CharacteristicTile(
-      {Key? key,
-      required this.characteristic,
-      required this.descriptorTiles,
-      this.onReadPressed,
-      this.onWritePressed,
-      this.onNotificationPressed})
-      : super(key: key);
+  const CharacteristicTile({Key? key, required this.characteristic, required this.descriptorTiles}) : super(key: key);
 
   @override
   State<CharacteristicTile> createState() => _CharacteristicTileState();
@@ -74,12 +67,12 @@ class CharacteristicTile extends StatefulWidget {
 class _CharacteristicTileState extends State<CharacteristicTile> {
   List<int> _value = [];
 
-  late StreamSubscription<List<int>> _onValueReceivedSubscription;
+  late StreamSubscription<List<int>> _lastValueSubscription;
 
   @override
   void initState() {
     super.initState();
-    _onValueReceivedSubscription = widget.characteristic.lastValueStream.listen((value) {
+    _lastValueSubscription = widget.characteristic.lastValueStream.listen((value) {
       _value = value;
       setState(() {});
     });
@@ -87,8 +80,50 @@ class _CharacteristicTileState extends State<CharacteristicTile> {
 
   @override
   void dispose() {
-    _onValueReceivedSubscription.cancel();
+    _lastValueSubscription.cancel();
     super.dispose();
+  }
+
+  BluetoothCharacteristic get c => widget.characteristic;
+
+  List<int> _getRandomBytes() {
+    final math = Random();
+    return [math.nextInt(255), math.nextInt(255), math.nextInt(255), math.nextInt(255)];
+  }
+
+  Future onReadPressed() async {
+    try {
+      await c.read();
+      Snackbar.show(ABC.c, "Read: Success", success: true);
+    } catch (e) {
+      Snackbar.show(ABC.c, prettyException("Read Error:", e), success: false);
+    }
+  }
+
+  Future onWritePressed() async {
+    try {
+      await c.write(_getRandomBytes(), withoutResponse: c.properties.writeWithoutResponse);
+      Snackbar.show(ABC.c, "Write: Success", success: true);
+      if (c.properties.read) {
+        await c.read();
+      }
+    } catch (e) {
+      Snackbar.show(ABC.c, prettyException("Write Error:", e), success: false);
+    }
+  }
+
+  Future onSubscribePressed() async {
+    try {
+      String op = c.isNotifying == false ? "Subscribe" : "Unubscribe";
+      await c.setNotifyValue(c.isNotifying == false);
+      Snackbar.show(ABC.c, "$op : Success", success: true);
+      if (c.properties.read) {
+        await c.read();
+      }
+      setState(() {});
+    } catch (e) {
+      Snackbar.show(ABC.c, prettyException("Subscribe Error:", e), success: false);
+    }
   }
 
   Widget buildUuid(BuildContext context) {
@@ -105,7 +140,7 @@ class _CharacteristicTileState extends State<CharacteristicTile> {
     return TextButton(
         child: Text("Read"),
         onPressed: () async {
-          await widget.onReadPressed!();
+          await onReadPressed();
           setState(() {});
         });
   }
@@ -115,7 +150,7 @@ class _CharacteristicTileState extends State<CharacteristicTile> {
     return TextButton(
         child: Text(withoutResp ? "WriteNoResp" : "Write"),
         onPressed: () async {
-          await widget.onWritePressed!();
+          await onWritePressed();
           setState(() {});
         });
   }
@@ -125,7 +160,7 @@ class _CharacteristicTileState extends State<CharacteristicTile> {
     return TextButton(
         child: Text(isNotifying ? "Unsubscribe" : "Subscribe"),
         onPressed: () async {
-          await widget.onNotificationPressed!();
+          await onSubscribePressed();
           setState(() {});
         });
   }
@@ -175,10 +210,8 @@ class _CharacteristicTileState extends State<CharacteristicTile> {
 // |_____/|______|_____/ \_____|
 class DescriptorTile extends StatefulWidget {
   final BluetoothDescriptor descriptor;
-  final VoidCallback? onReadPressed;
-  final VoidCallback? onWritePressed;
 
-  const DescriptorTile({Key? key, required this.descriptor, this.onReadPressed, this.onWritePressed}) : super(key: key);
+  const DescriptorTile({Key? key, required this.descriptor}) : super(key: key);
 
   @override
   State<DescriptorTile> createState() => _DescriptorTileState();
@@ -187,12 +220,12 @@ class DescriptorTile extends StatefulWidget {
 class _DescriptorTileState extends State<DescriptorTile> {
   List<int> _value = [];
 
-  late StreamSubscription<List<int>> _onValueReceivedSubscription;
+  late StreamSubscription<List<int>> _lastValueSubscription;
 
   @override
   void initState() {
     super.initState();
-    _onValueReceivedSubscription = widget.descriptor.lastValueStream.listen((value) {
+    _lastValueSubscription = widget.descriptor.lastValueStream.listen((value) {
       _value = value;
       setState(() {});
     });
@@ -200,8 +233,33 @@ class _DescriptorTileState extends State<DescriptorTile> {
 
   @override
   void dispose() {
-    _onValueReceivedSubscription.cancel();
+    _lastValueSubscription.cancel();
     super.dispose();
+  }
+
+  BluetoothDescriptor get d => widget.descriptor;
+
+  List<int> _getRandomBytes() {
+    final math = Random();
+    return [math.nextInt(255), math.nextInt(255), math.nextInt(255), math.nextInt(255)];
+  }
+
+  Future onReadPressed() async {
+    try {
+      await d.read();
+      Snackbar.show(ABC.c, "Descriptor Read : Success", success: true);
+    } catch (e) {
+      Snackbar.show(ABC.c, prettyException("Descriptor Read Error:", e), success: false);
+    }
+  }
+
+  Future onWritePressed() async {
+    try {
+      await d.write(_getRandomBytes());
+      Snackbar.show(ABC.c, "Descriptor Write : Success", success: true);
+    } catch (e) {
+      Snackbar.show(ABC.c, prettyException("Descriptor Write Error:", e), success: false);
+    }
   }
 
   Widget buildUuid(BuildContext context) {
@@ -217,14 +275,14 @@ class _DescriptorTileState extends State<DescriptorTile> {
   Widget buildReadButton(BuildContext context) {
     return TextButton(
       child: Text("Read"),
-      onPressed: widget.onReadPressed,
+      onPressed: onReadPressed,
     );
   }
 
   Widget buildWriteButton(BuildContext context) {
     return TextButton(
       child: Text("Write"),
-      onPressed: widget.onWritePressed,
+      onPressed: onWritePressed,
     );
   }
 
