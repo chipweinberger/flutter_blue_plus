@@ -1,3 +1,6 @@
+## 1.16.12
+* **[Fix]** Android: onValueReceived was not working on Android 12 & lower (regression 1.16.3)
+
 ## 1.16.11
 * **[Fix]** Android: onCharacteristicReceived not being called (regression 1.16.3)
 
