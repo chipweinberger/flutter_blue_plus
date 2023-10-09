@@ -404,7 +404,7 @@ class BmReadCharacteristicRequest {
   }
 }
 
-class BmOnCharacteristicReceived {
+class BmOnCharacteristicData {
   final String remoteId;
   final Guid serviceUuid;
   final Guid? secondaryServiceUuid;
@@ -414,7 +414,7 @@ class BmOnCharacteristicReceived {
   final int? errorCode;
   final String? errorString;
 
-  BmOnCharacteristicReceived({
+  BmOnCharacteristicData({
     required this.remoteId,
     required this.serviceUuid,
     required this.secondaryServiceUuid,
@@ -425,45 +425,13 @@ class BmOnCharacteristicReceived {
     required this.errorString,
   });
 
-  factory BmOnCharacteristicReceived.fromMap(Map<dynamic, dynamic> json) {
-    return BmOnCharacteristicReceived(
+  factory BmOnCharacteristicData.fromMap(Map<dynamic, dynamic> json) {
+    return BmOnCharacteristicData(
       remoteId: json['remote_id'],
       serviceUuid: Guid(json['service_uuid']),
       secondaryServiceUuid: json['secondary_service_uuid'] != null ? Guid(json['secondary_service_uuid']) : null,
       characteristicUuid: Guid(json['characteristic_uuid']),
       value: _hexDecode(json['value']),
-      success: json['success'] != 0,
-      errorCode: json['error_code'],
-      errorString: json['error_string'],
-    );
-  }
-}
-
-class BmOnCharacteristicWritten {
-  final String remoteId;
-  final Guid serviceUuid;
-  final Guid? secondaryServiceUuid;
-  final Guid characteristicUuid;
-  final bool success;
-  final int? errorCode;
-  final String? errorString;
-
-  BmOnCharacteristicWritten({
-    required this.remoteId,
-    required this.serviceUuid,
-    required this.secondaryServiceUuid,
-    required this.characteristicUuid,
-    required this.success,
-    required this.errorCode,
-    required this.errorString,
-  });
-
-  factory BmOnCharacteristicWritten.fromMap(Map<dynamic, dynamic> json) {
-    return BmOnCharacteristicWritten(
-      remoteId: json['remote_id'],
-      serviceUuid: Guid(json['service_uuid']),
-      secondaryServiceUuid: json['secondary_service_uuid'] != null ? Guid(json['secondary_service_uuid']) : null,
-      characteristicUuid: Guid(json['characteristic_uuid']),
       success: json['success'] != 0,
       errorCode: json['error_code'],
       errorString: json['error_string'],

@@ -97,6 +97,7 @@ public class FlutterBluePlusPlugin implements
     private final Map<String, BluetoothGatt> mConnectedDevices = new ConcurrentHashMap<>();
     private final Map<String, Integer> mMtu = new ConcurrentHashMap<>();
     private final Map<String, Boolean> mAutoConnect = new ConcurrentHashMap<>();
+    private final Map<String, String> mWriteChr = new ConcurrentHashMap<>();
     private int lastEventId = 1452;
     private final Map<Integer, OperationOnPermission> operationsOnPermission = new HashMap<>();
 
@@ -680,6 +681,10 @@ public class FlutterBluePlusPlugin implements
                         result.error("writeCharacteristic", s, null);
                         break;
                     }
+
+                    // remember the data we are writing
+                    String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid;
+                    mWriteChr.put(key, value);
 
                     // write characteristic
                     if (Build.VERSION.SDK_INT >= 33) { // Android 13 (August 2022)
@@ -1385,6 +1390,7 @@ public class FlutterBluePlusPlugin implements
 
         mConnectedDevices.clear();
         mMtu.clear();
+        mWriteChr.clear();
     }
 
     /////////////////////////////////////////////////////////////////////////////////////
@@ -1595,7 +1601,7 @@ public class FlutterBluePlusPlugin implements
                 mConnectedDevices.put(remoteId, gatt);
 
                 // default minimum mtu
-                mMtu.put(remoteId, 23); 
+                mMtu.put(remoteId, 23);
             }
 
             // disconnected?
@@ -1655,7 +1661,7 @@ public class FlutterBluePlusPlugin implements
 
             ServicePair pair = getServicePair(gatt, characteristic);
 
-            // see: BmOnCharacteristicReceived
+            // see: BmOnCharacteristicData
             HashMap<String, Object> response = new HashMap<>();
             response.put("remote_id", gatt.getDevice().getAddress());
             response.put("service_uuid", uuid128(pair.primary));
@@ -1735,7 +1741,7 @@ public class FlutterBluePlusPlugin implements
             // only works after a *read* has been made
             byte[] value = characteristic.getValue();
 
-            // see: BmOnCharacteristicReceived
+            // see: BmOnCharacteristicData
             HashMap<String, Object> response = new HashMap<>();
             response.put("remote_id", gatt.getDevice().getAddress());
             response.put("service_uuid", uuid128(pair.primary));
@@ -1761,12 +1767,24 @@ public class FlutterBluePlusPlugin implements
 
             ServicePair pair = getServicePair(gatt, characteristic);
 
-            // see: BmOnCharacteristicWritten
+            // for convenience
+            String remoteId = gatt.getDevice().getAddress();
+            String serviceUuid = uuid128(pair.primary);
+            String secondaryServiceUuid = pair.secondary != null ? uuid128(pair.secondary) : null;
+            String characteristicUuid = uuid128(characteristic.getUuid());
+
+            // what data did we write?
+            String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid;
+            String value = mWriteChr.get(key);
+            mWriteChr.remove(key);
+
+            // see: BmOnCharacteristicData
             HashMap<String, Object> response = new HashMap<>();
-            response.put("remote_id", gatt.getDevice().getAddress());
-            response.put("service_uuid", uuid128(pair.primary));
-            response.put("secondary_service_uuid", pair.secondary != null ? uuid128(pair.secondary) : null);
-            response.put("characteristic_uuid", uuid128(characteristic.getUuid()));
+            response.put("remote_id", remoteId);
+            response.put("service_uuid", serviceUuid);
+            response.put("secondary_service_uuid", secondaryServiceUuid);
+            response.put("characteristic_uuid", characteristicUuid);
+            response.put("value", value);
             response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
             response.put("error_code", status);
             response.put("error_string", gattErrorString(status));

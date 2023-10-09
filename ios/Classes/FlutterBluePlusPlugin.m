@@ -1165,7 +1165,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     ServicePair *pair = [self getServicePair:peripheral characteristic:characteristic];
 
-    // See BmOnCharacteristicReceived
+    // See BmOnCharacteristicData
     NSDictionary* result = @{
         @"remote_id":               [peripheral.identifier UUIDString],
         @"service_uuid":            [pair.primary.UUID uuid128],
@@ -1184,7 +1184,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     didWriteValueForCharacteristic:(CBCharacteristic *)characteristic
                              error:(NSError *)error
 {
-    // this callback is called after write() is explicitly called
+    // Note:
+    //  - this callback is only called for writeWithResponse
     if (error) {
         Log(LERROR, @"didWriteValueForCharacteristic: [Error] %@", [error localizedDescription]);
     } else {
@@ -1193,12 +1194,13 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     ServicePair *pair = [self getServicePair:peripheral characteristic:characteristic];
 
-    // See BmOnCharacteristicWritten
+    // See BmOnCharacteristicData
     NSDictionary* result = @{
         @"remote_id":               [peripheral.identifier UUIDString],
         @"service_uuid":            [pair.primary.UUID uuid128],
         @"secondary_service_uuid":  pair.secondary ? [pair.secondary.UUID uuid128] : [NSNull null],
         @"characteristic_uuid":     [characteristic.UUID uuid128],
+        @"value":                   [self convertDataToHex:characteristic.value],
         @"success":                 @(error == nil),
         @"error_string":            error ? [error localizedDescription] : [NSNull null],
         @"error_code":              error ? @(error.code) : [NSNull null],
@@ -1365,12 +1367,13 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     ServicePair *pair = [self getServicePair:peripheral characteristic:characteristic];
 
-    // See BmOnCharacteristicWritten
+    // See BmOnCharacteristicData
     NSDictionary* result = @{
         @"remote_id":               [peripheral.identifier UUIDString],
         @"service_uuid":            [pair.primary.UUID uuid128],
         @"secondary_service_uuid":  pair.secondary ? [pair.secondary.UUID uuid128] : [NSNull null],
         @"characteristic_uuid":     [characteristic.UUID uuid128],
+        @"value":                   [self convertDataToHex:characteristic.value],
         @"success":                 @(error == nil),
         @"error_string":            error ? [error localizedDescription] : [NSNull null],
         @"error_code":              error ? @(error.code) : [NSNull null],

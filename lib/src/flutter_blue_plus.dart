@@ -341,8 +341,8 @@ class FlutterBluePlus {
     }
 
     // keep track of characteristic values
-    if (call.method == "OnCharacteristicReceived") {
-      BmOnCharacteristicReceived r = BmOnCharacteristicReceived.fromMap(call.arguments);
+    if (call.method == "OnCharacteristicReceived" || call.method == "OnCharacteristicWritten") {
+      BmOnCharacteristicData r = BmOnCharacteristicData.fromMap(call.arguments);
       if (r.success == true) {
         DeviceIdentifier d = DeviceIdentifier(r.remoteId);
         _lastChrs[d] ??= {};

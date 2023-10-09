@@ -38,7 +38,15 @@ class BluetoothCharacteristic {
 
   /// same as onValueReceived, but the stream immediately starts
   /// with lastValue as its first value to not cause delay
-  Stream<List<int>> get lastValueStream => onValueReceived.newStreamWithInitialValue(lastValue);
+  Stream<List<int>> get lastValueStream => FlutterBluePlus._methodStream.stream
+      .where((m) => m.method == "OnCharacteristicReceived" ||  m.method == "OnCharacteristicWritten")
+      .map((m) => m.arguments)
+      .map((args) => BmOnCharacteristicData.fromMap(args))
+      .where((p) => p.remoteId == remoteId.toString())
+      .where((p) => p.serviceUuid == serviceUuid)
+      .where((p) => p.characteristicUuid == characteristicUuid)
+      .where((p) => p.success == true)
+      .map((c) => c.value).newStreamWithInitialValue(lastValue);
 
   // this stream is updated:
   //   - after read() is called
@@ -46,7 +54,7 @@ class BluetoothCharacteristic {
   Stream<List<int>> get onValueReceived => FlutterBluePlus._methodStream.stream
       .where((m) => m.method == "OnCharacteristicReceived")
       .map((m) => m.arguments)
-      .map((args) => BmOnCharacteristicReceived.fromMap(args))
+      .map((args) => BmOnCharacteristicData.fromMap(args))
       .where((p) => p.remoteId == remoteId.toString())
       .where((p) => p.serviceUuid == serviceUuid)
       .where((p) => p.characteristicUuid == characteristicUuid)
@@ -93,19 +101,19 @@ class BluetoothCharacteristic {
       var responseStream = FlutterBluePlus._methodStream.stream
           .where((m) => m.method == "OnCharacteristicReceived")
           .map((m) => m.arguments)
-          .map((args) => BmOnCharacteristicReceived.fromMap(args))
+          .map((args) => BmOnCharacteristicData.fromMap(args))
           .where((p) => p.remoteId == request.remoteId)
           .where((p) => p.serviceUuid == request.serviceUuid)
           .where((p) => p.characteristicUuid == request.characteristicUuid);
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
-      Future<BmOnCharacteristicReceived> futureResponse = responseStream.first;
+      Future<BmOnCharacteristicData> futureResponse = responseStream.first;
 
       // invoke
       await FlutterBluePlus._invokeMethod('readCharacteristic', request.toMap());
 
       // wait for response
-      BmOnCharacteristicReceived response = await futureResponse
+      BmOnCharacteristicData response = await futureResponse
           .fbpTimeout(timeout, "readCharacteristic")
           .fbpEnsureConnected(device, "readCharacteristic");
 
@@ -177,13 +185,13 @@ class BluetoothCharacteristic {
       var responseStream = FlutterBluePlus._methodStream.stream
           .where((m) => m.method == "OnCharacteristicWritten")
           .map((m) => m.arguments)
-          .map((args) => BmOnCharacteristicWritten.fromMap(args))
+          .map((args) => BmOnCharacteristicData.fromMap(args))
           .where((p) => p.remoteId == request.remoteId)
           .where((p) => p.serviceUuid == request.serviceUuid)
           .where((p) => p.characteristicUuid == request.characteristicUuid);
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
-      Future<BmOnCharacteristicWritten> futureResponse = responseStream.first;
+      Future<BmOnCharacteristicData> futureResponse = responseStream.first;
 
       // invoke
       await FlutterBluePlus._invokeMethod('writeCharacteristic', request.toMap());
@@ -191,7 +199,7 @@ class BluetoothCharacteristic {
       // wait for response so that we can:
       //  1. check for success (writeWithResponse)
       //  2. wait until the packet has been sent, to prevent iOS & Android dropping packets (writeWithoutResponse)
-      BmOnCharacteristicWritten response = await futureResponse
+      BmOnCharacteristicData response = await futureResponse
           .fbpTimeout(timeout, "writeCharacteristic")
           .fbpEnsureConnected(device, "writeCharacteristic");
 
