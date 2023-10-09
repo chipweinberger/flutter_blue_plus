@@ -1290,7 +1290,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"error_code":             error ? @(error.code) : [NSNull null],
     };
 
-    [_methodChannel invokeMethod:@"BmOnDescriptorWrite" arguments:result];
+    [_methodChannel invokeMethod:@"OnDescriptorWrite" arguments:result];
 }
 
 - (void)peripheralDidUpdateName:(CBPeripheral *)peripheral
