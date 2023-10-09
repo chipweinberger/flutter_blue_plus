@@ -21,8 +21,9 @@ class BluetoothCharacteristic {
   BluetoothDevice get device => BluetoothDevice(remoteId: remoteId);
 
   /// this variable is updated:
-  ///   - *live* if you call onValueReceived.listen() or lastValueStream.listen() & setNotifyValue(true)
+  ///   - *live* if you call setNotifyValue(true)
   ///   - *once* if you call read()
+  ///   - *once* if you call write()
   List<int> get lastValue {
     String key = "$serviceUuid:$characteristicUuid";
     return FlutterBluePlus._lastChrs[remoteId]?[key] ?? [];
@@ -36,8 +37,11 @@ class BluetoothCharacteristic {
         descriptors = p.descriptors.map((d) => BluetoothDescriptor.fromProto(d)).toList(),
         properties = CharacteristicProperties.fromProto(p.properties);
 
-  /// same as onValueReceived, but the stream immediately starts
-  /// with lastValue as its first value to not cause delay
+  /// this stream emits values:
+  ///   - anytime `read()` is called
+  ///   - anytime `write()` is called
+  ///   - anytime a notification arrives (if subscribed)
+  ///   - and when first listened to, it re-emits the last value for convenience
   Stream<List<int>> get lastValueStream => FlutterBluePlus._methodStream.stream
       .where((m) => m.method == "OnCharacteristicReceived" ||  m.method == "OnCharacteristicWritten")
       .map((m) => m.arguments)
@@ -48,9 +52,9 @@ class BluetoothCharacteristic {
       .where((p) => p.success == true)
       .map((c) => c.value).newStreamWithInitialValue(lastValue);
 
-  // this stream is updated:
-  //   - after read() is called
-  //   - when a notification arrives
+  /// this stream emits values:
+  ///   - anytime `read()` is called
+  ///   - anytime a notification arrives (if subscribed)
   Stream<List<int>> get onValueReceived => FlutterBluePlus._methodStream.stream
       .where((m) => m.method == "OnCharacteristicReceived")
       .map((m) => m.arguments)

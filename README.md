@@ -240,13 +240,14 @@ await d.write([0x12, 0x34])
 
 ### Set notifications and listen to changes
 
-If onValueReceived is never called, see [Common Problems](#common-problems) in the README.
+If `onValueReceived` is never called, see [Common Problems](#common-problems) in the README.
 
 ```dart
 // Setup Listener for characteristic reads
-// If this is never called, see "Common Problems" in the README
 final subscription = characteristic.onValueReceived.listen((value) {
-    // do something with new value
+    // onValueReceived is updated:
+    //   - after read() is called
+    //   - when a notification arrives
 });
 
 // listen for disconnection
@@ -260,6 +261,22 @@ device.connectionState.listen((BluetoothConnectionState state) {
 // enable notifications
 await characteristic.setNotifyValue(true);
 ```
+
+### Last Value Stream
+
+`lastValueStream` is very similar to `onValueReceived`.
+
+The main difference is that it is also updated when `write()` is called.
+
+`lastValueStream` is updated:
+* anytime `read()` is called
+* anytime `write()` is called
+* anytime a notification arrives (if subscribed)
+* and when first listened to, it re-emits the last value for convenience.
+
+Due to interleaving reads, write, and notify in a single stream, is only meant for small characteristics (< 512 bytes), where each read, write, and notify always transfers the entire value.
+
+If the above requirement is true, `lastValueStream` is useful because it is updated **anytime** the value changes for **any reason**.
 
 ### Get Connected System Devices
 
@@ -569,15 +586,17 @@ Bluetooth is a complicated system service, and can enter a bad state.
 
 ---
 
-### onValueReceived is never called
+### onValueReceived (or lastValueStream) is never called
 
 **1. you are not subscribed OR not calling read**
 
 Your device will only send values after you call `await characteristic.setNotifyValue(true)`, or `await characteristic.read()`
 
-**2. you are calling write instead of read**
+**2. you are not calling the right function**
 
-`onValueReceived` is only called for reads & notifies, not writes.
+`lastValueStream` is called for reads & notifies &  writes.
+
+`onValueReceived` is only called for reads & notifies, but **not** writes.
 
 You can do a single read with `await characteristic.read(...)`
 
@@ -595,7 +614,7 @@ Some ble devices have buggy software and stop sending data
 
 ---
 
-### onValueReceived data is split up
+### onValueReceived (or lastValueStream) data is split up
 
 You are probably forgetting to increase the android mtu.
 
@@ -615,7 +634,7 @@ If it still happens, it is a problem with your peripheral device.
 
 ---
 
-### onValueReceived is called with duplicate data
+### onValueReceived (or lastValueStream) is called with duplicate data
 
 You are probably forgetting to cancel the original `stream.listen` resulting in multiple listens.
 
