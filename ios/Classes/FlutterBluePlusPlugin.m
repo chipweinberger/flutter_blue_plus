@@ -1587,8 +1587,16 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     {
         NSData* data = nil;
         if (d.value) {
-            int value = [d.value intValue];
-            data = [NSData dataWithBytes:&value length:sizeof(value)];
+            @try {
+                  if  ([d.value isKindOfClass:NSNumber.class]) {
+                      int value = [d.value intValue];
+                      data = [NSData dataWithBytes:&value length:sizeof(value)];
+                  }else if([d.value isKindOfClass:NSData.class]) {
+                      data = d.value;
+                  }
+              } @catch (NSException *exception) {
+                  NSLog(@"%@", exception.reason);
+              }
         }
     
         // See: BmBluetoothDescriptor
