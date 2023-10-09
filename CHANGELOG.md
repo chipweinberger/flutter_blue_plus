@@ -1,3 +1,6 @@
+## 1.16.11
+* **[Fix]** Android: onCharacteristicReceived not being called (regression 1.16.3)
+
 ## 1.16.10
 * **[Fix]** BluetoothDevice: don't wait for timeout if device becomes disconnected
 
