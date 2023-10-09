@@ -1667,7 +1667,7 @@ public class FlutterBluePlusPlugin implements
 
             ServicePair pair = getServicePair(gatt, characteristic);
 
-            // see: BmOnCharacteristicData
+            // see: BmCharacteristicData
             HashMap<String, Object> response = new HashMap<>();
             response.put("remote_id", gatt.getDevice().getAddress());
             response.put("service_uuid", uuid128(pair.primary));
@@ -1695,7 +1695,7 @@ public class FlutterBluePlusPlugin implements
             // only works after a *read* has been made
             byte[] value = characteristic.getValue();
 
-            // see: BmOnCharacteristicReceived
+            // see: BmCharacteristicData
             HashMap<String, Object> response = new HashMap<>();
             response.put("remote_id", gatt.getDevice().getAddress());
             response.put("service_uuid", uuid128(pair.primary));
@@ -1718,7 +1718,7 @@ public class FlutterBluePlusPlugin implements
 
             ServicePair pair = getServicePair(gatt, characteristic);
 
-            // see: BmOnCharacteristicReceived
+            // see: BmCharacteristicData
             HashMap<String, Object> response = new HashMap<>();
             response.put("remote_id", gatt.getDevice().getAddress());
             response.put("service_uuid", uuid128(pair.primary));
@@ -1747,7 +1747,7 @@ public class FlutterBluePlusPlugin implements
             // only works after a *read* has been made
             byte[] value = characteristic.getValue();
 
-            // see: BmOnCharacteristicData
+            // see: BmCharacteristicData
             HashMap<String, Object> response = new HashMap<>();
             response.put("remote_id", gatt.getDevice().getAddress());
             response.put("service_uuid", uuid128(pair.primary));
@@ -1784,7 +1784,7 @@ public class FlutterBluePlusPlugin implements
             String value = mWriteChr.get(key);
             mWriteChr.remove(key);
 
-            // see: BmOnCharacteristicData
+            // see: BmCharacteristicData
             HashMap<String, Object> response = new HashMap<>();
             response.put("remote_id", remoteId);
             response.put("service_uuid", serviceUuid);

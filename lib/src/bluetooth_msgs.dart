@@ -404,7 +404,7 @@ class BmReadCharacteristicRequest {
   }
 }
 
-class BmOnCharacteristicData {
+class BmCharacteristicData {
   final String remoteId;
   final Guid serviceUuid;
   final Guid? secondaryServiceUuid;
@@ -414,7 +414,7 @@ class BmOnCharacteristicData {
   final int? errorCode;
   final String? errorString;
 
-  BmOnCharacteristicData({
+  BmCharacteristicData({
     required this.remoteId,
     required this.serviceUuid,
     required this.secondaryServiceUuid,
@@ -425,8 +425,8 @@ class BmOnCharacteristicData {
     required this.errorString,
   });
 
-  factory BmOnCharacteristicData.fromMap(Map<dynamic, dynamic> json) {
-    return BmOnCharacteristicData(
+  factory BmCharacteristicData.fromMap(Map<dynamic, dynamic> json) {
+    return BmCharacteristicData(
       remoteId: json['remote_id'],
       serviceUuid: Guid(json['service_uuid']),
       secondaryServiceUuid: json['secondary_service_uuid'] != null ? Guid(json['secondary_service_uuid']) : null,

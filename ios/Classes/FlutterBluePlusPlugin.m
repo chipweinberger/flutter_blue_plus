@@ -1165,7 +1165,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     ServicePair *pair = [self getServicePair:peripheral characteristic:characteristic];
 
-    // See BmOnCharacteristicData
+    // See BmCharacteristicData
     NSDictionary* result = @{
         @"remote_id":               [peripheral.identifier UUIDString],
         @"service_uuid":            [pair.primary.UUID uuid128],
@@ -1194,7 +1194,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     ServicePair *pair = [self getServicePair:peripheral characteristic:characteristic];
 
-    // See BmOnCharacteristicData
+    // See BmCharacteristicData
     NSDictionary* result = @{
         @"remote_id":               [peripheral.identifier UUIDString],
         @"service_uuid":            [pair.primary.UUID uuid128],
@@ -1384,7 +1384,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     ServicePair *pair = [self getServicePair:peripheral characteristic:characteristic];
 
-    // See BmOnCharacteristicData
+    // See BmCharacteristicData
     NSDictionary* result = @{
         @"remote_id":               [peripheral.identifier UUIDString],
         @"service_uuid":            [pair.primary.UUID uuid128],
