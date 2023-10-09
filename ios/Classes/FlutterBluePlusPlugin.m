@@ -57,6 +57,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 @property(nonatomic) NSMutableArray *characteristicsThatNeedDiscovered;
 @property(nonatomic) NSMutableDictionary *didWriteWithoutResponse;
 @property(nonatomic) NSMutableDictionary *peripheralMtu;
+@property(nonatomic) NSMutableDictionary *writeChrs;
+@property(nonatomic) NSMutableDictionary *writeDescs;
 @property(nonatomic) NSTimer *checkForMtuChangesTimer;
 @property(nonatomic) LogLevel logLevel;
 @end
@@ -74,6 +76,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     instance.characteristicsThatNeedDiscovered = [NSMutableArray new];
     instance.didWriteWithoutResponse = [NSMutableDictionary new];
     instance.peripheralMtu = [NSMutableDictionary new];
+    instance.writeChrs = [NSMutableDictionary new];
+    instance.writeDescs = [NSMutableDictionary new];
     instance.logLevel = LDEBUG;
 
     [registrar addMethodCallDelegate:instance channel:methodChannel];
@@ -410,7 +414,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSString  *serviceUuid          = args[@"service_uuid"];
             NSString  *secondaryServiceUuid = args[@"secondary_service_uuid"];
             NSNumber  *writeTypeNumber      = args[@"write_type"];
-            NSNumber  *allowLongWrite          = args[@"allow_long_write"];
+            NSNumber  *allowLongWrite       = args[@"allow_long_write"];
             NSString  *value                = args[@"value"];
             
             // Find peripheral
@@ -474,6 +478,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                     return;
                 }
             }
+
+            // remember the data we are writing
+            NSString *key = [NSString stringWithFormat:@"%@:%@:%@", remoteId, serviceUuid, characteristicUuid];
+            [self.writeChrs setObject:value forKey:key];
                   
             // Write to characteristic
             [peripheral writeValue:[self convertHexToData:value] forCharacteristic:characteristic type:writeType];
@@ -573,6 +581,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 result([FlutterError errorWithCode:@"writeDescriptor" message:error.localizedDescription details:NULL]);
                 return;
             }
+
+            // remember the data we are writing
+            NSString *key = [NSString stringWithFormat:@"%@:%@:%@:%@", remoteId, serviceUuid, characteristicUuid, descriptorUuid];
+            [self.writeDescs setObject:value forKey:key];
 
             // Write descriptor
             [peripheral writeValue:[self convertHexToData:value] forDescriptor:descriptor];
@@ -861,6 +873,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     [self.characteristicsThatNeedDiscovered removeAllObjects];
     [self.didWriteWithoutResponse removeAllObjects];
     [self.peripheralMtu removeAllObjects];
+    [self.writeChrs removeAllObjects];
+    [self.writeDescs removeAllObjects];
 }
 
 ////////////////////////////////////
@@ -1194,13 +1208,24 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     ServicePair *pair = [self getServicePair:peripheral characteristic:characteristic];
 
+    // for convenience
+    NSString *remoteId = [peripheral.identifier UUIDString];
+    NSString *serviceUuid = [pair.primary.UUID uuid128];
+    NSString *secondaryServiceUuid = pair.secondary ? [pair.secondary.UUID uuid128] : nil;
+    NSString *characteristicUuid = [characteristic.UUID uuid128];
+
+    // what data did we write?
+    NSString *key = [NSString stringWithFormat:@"%@:%@:%@", remoteId, serviceUuid, characteristicUuid];
+    NSString *value = self.writeChrs[key];
+    [self.writeChrs removeObjectForKey:key];
+
     // See BmCharacteristicData
     NSDictionary* result = @{
-        @"remote_id":               [peripheral.identifier UUIDString],
-        @"service_uuid":            [pair.primary.UUID uuid128],
-        @"secondary_service_uuid":  pair.secondary ? [pair.secondary.UUID uuid128] : [NSNull null],
-        @"characteristic_uuid":     [characteristic.UUID uuid128],
-        @"value":                   [self convertDataToHex:characteristic.value],
+        @"remote_id":               remoteId,
+        @"service_uuid":            serviceUuid,
+        @"secondary_service_uuid":  pair.secondary ? secondaryServiceUuid : [NSNull null],
+        @"characteristic_uuid":     characteristicUuid,
+        @"value":                   value,
         @"success":                 @(error == nil),
         @"error_string":            error ? [error localizedDescription] : [NSNull null],
         @"error_code":              error ? @(error.code) : [NSNull null],
@@ -1292,16 +1317,26 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     ServicePair *pair = [self getServicePair:peripheral characteristic:descriptor.characteristic];
 
-    NSData* data = [self descriptorToData:descriptor];
+    // for convenience
+    NSString *remoteId = [peripheral.identifier UUIDString];
+    NSString *serviceUuid = [pair.primary.UUID uuid128];
+    NSString *secondaryServiceUuid = pair.secondary ? [pair.secondary.UUID uuid128] : nil;
+    NSString *characteristicUuid = [descriptor.characteristic.UUID uuid128];
+    NSString *descriptorUuid = [descriptor.UUID uuid128];
+
+    // what data did we write?
+    NSString *key = [NSString stringWithFormat:@"%@:%@:%@:%@", remoteId, serviceUuid, characteristicUuid, descriptorUuid];
+    NSString *value = self.writeChrs[key];
+    [self.writeDescs removeObjectForKey:key];
     
     // See BmDescriptorData
     NSDictionary* result = @{
-        @"remote_id":              [peripheral.identifier UUIDString],
-        @"service_uuid":           [pair.primary.UUID uuid128],
-        @"secondary_service_uuid": pair.secondary ? [pair.secondary.UUID uuid128] : [NSNull null],
-        @"characteristic_uuid":    [descriptor.characteristic.UUID uuid128],
-        @"descriptor_uuid":        [descriptor.UUID uuid128],
-        @"value":                  [self convertDataToHex:data],
+        @"remote_id":              remoteId,
+        @"service_uuid":           serviceUuid,
+        @"secondary_service_uuid": pair.secondary ? secondaryServiceUuid : [NSNull null],
+        @"characteristic_uuid":    characteristicUuid,
+        @"descriptor_uuid":        descriptorUuid,
+        @"value":                  value,
         @"success":                @(error == nil),
         @"error_string":           error ? [error localizedDescription] : [NSNull null],
         @"error_code":             error ? @(error.code) : [NSNull null],

@@ -16,9 +16,9 @@ class BluetoothDescriptor {
   /// convenience accessor
   BluetoothDevice get device => BluetoothDevice(remoteId: remoteId);
 
-  /// this stream emits values:
-  ///   - *live* if you call onValueReceived.listen() or lastValueStream.listen()
-  ///   - *once* if you call read()
+  /// this variable is updated:
+  ///   - anytime `read()` is called
+  ///   - anytime `write()` is called
   List<int> get lastValue {
     String key = "$serviceUuid:$characteristicUuid:$descriptorUuid";
     return FlutterBluePlus._lastDescs[remoteId]?[key] ?? [];

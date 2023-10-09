@@ -21,9 +21,9 @@ class BluetoothCharacteristic {
   BluetoothDevice get device => BluetoothDevice(remoteId: remoteId);
 
   /// this variable is updated:
-  ///   - *live* if you call setNotifyValue(true)
-  ///   - *once* if you call read()
-  ///   - *once* if you call write()
+  ///   - anytime `read()` is called
+  ///   - anytime `write()` is called
+  ///   - anytime a notification arrives (if subscribed)
   List<int> get lastValue {
     String key = "$serviceUuid:$characteristicUuid";
     return FlutterBluePlus._lastChrs[remoteId]?[key] ?? [];
