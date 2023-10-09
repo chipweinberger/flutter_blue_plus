@@ -1580,9 +1580,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
 - (NSDictionary*)bmBluetoothCharacteristic:(CBPeripheral *)peripheral
                             characteristic:(CBCharacteristic *)characteristic
-
-- (NSDictionary*)bmBluetoothCharacteristic:(CBPeripheral *)peripheral
-                            characteristic:(CBCharacteristic *)characteristic
 {
     // descriptors
     NSMutableArray *descriptors = [NSMutableArray new];
