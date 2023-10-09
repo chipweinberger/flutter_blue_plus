@@ -164,11 +164,6 @@ class BluetoothDescriptor {
       if (!response.success) {
         throw FlutterBluePlusException(_nativeError, "writeDescriptor", response.errorCode, response.errorString);
       }
-
-      // update lastValue
-      String key = "$serviceUuid:$characteristicUuid:$descriptorUuid";
-      FlutterBluePlus._lastDescs[remoteId] ??= {};
-      FlutterBluePlus._lastDescs[remoteId]![key] = value;
     } finally {
       writeMutex.give();
     }
