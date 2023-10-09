@@ -1,3 +1,12 @@
+
+## 1.17.0
+This release improves `lastValue` & `lastValueStream`.
+* **[Breaking Change/Fix]** should update `lastValue` & `lastValueStream` when `write()` is called
+* **[Feature]** Android: support `onNameChanged` & `onServicesChanged` characteristics
+* **[Fix]** iOS: `discoverServices` crash [_NSInlineData intValue]: unrecognized selector sent to instance
+* **[Fix]** iOS: `descriptor.write()` would timeout or not work (regression somewhere around ~1.7.0)
+* **[Fix]** `isNotifying` was not updated by `setNotifyValue(false)` (regression somewhere around ~1.9.0)
+
 ## 1.16.12
 * **[Fix]** Android: onValueReceived was not working on Android 12 & lower (regression 1.16.3)
 
