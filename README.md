@@ -246,8 +246,8 @@ If `onValueReceived` is never called, see [Common Problems](#common-problems) in
 // Setup Listener for characteristic reads
 final subscription = characteristic.onValueReceived.listen((value) {
     // onValueReceived is updated:
-    //   - after read() is called
-    //   - when a notification arrives
+    //   - anytime read() is called
+    //   - anytime a notification arrives (if subscribed)
 });
 
 // listen for disconnection
@@ -264,19 +264,33 @@ await characteristic.setNotifyValue(true);
 
 ### Last Value Stream
 
-`lastValueStream` is very similar to `onValueReceived`.
+Most people prefer to use`lastValueStream` instead of `onValueReceived` for small characteristics (< 512 bytes).
 
-The main difference is that it is also updated when `write()` is called.
+The difference? It is also updated when `write()` is called. So, it is updated **anytime** the value changes for **any reason**.
 
-`lastValueStream` is updated:
-* anytime `read()` is called
-* anytime `write()` is called
-* anytime a notification arrives (if subscribed)
-* and when first listened to, it re-emits the last value for convenience.
+But, due to interleaving writes, reads, and notifies all together in a single stream, it should only be used for small characteristics where each read, write, or notify always transfers the entire value. Otherwise, the stream would emit partial data from multiple sources and not be very useful.
 
-Due to interleaving reads, write, and notify in a single stream, is only meant for small characteristics (< 512 bytes), where each read, write, and notify always transfers the entire value.
+```dart
+// Setup Listener for characteristic reads & writes
+final subscription = characteristic.lastValueStream.listen((value) {
+    //lastValueStream` is updated:
+    //   - anytime read() is called
+    //   - anytime write() is called
+    //   - anytime a notification arrives (if subscribed)
+    //   - also when first listened to, it re-emits the last value for convenience.
+});
 
-If the above requirement is true, `lastValueStream` is useful because it is updated **anytime** the value changes for **any reason**.
+// listen for disconnection
+device.connectionState.listen((BluetoothConnectionState state) {
+    if (state == BluetoothConnectionState.disconnected) {
+        // stop listening to characteristic
+        subscription.cancel();
+    }
+});
+
+// enable notifications
+await characteristic.setNotifyValue(true);
+```
 
 ### Get Connected System Devices
 
