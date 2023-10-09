@@ -8,7 +8,7 @@
 
 **Note: this plugin is continuous work from [FlutterBlue](https://github.com/pauldemarco/flutter_blue) since maintenance stopped.**
 
-Migrating to FlutterBluePlus? See [Migration Guides](MIGRATION.md)
+Migrating from [FlutterBlue](https://github.com/pauldemarco/flutter_blue)? See [Migration Guides](MIGRATION.md)
 
 ## Contents
 
