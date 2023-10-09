@@ -1580,25 +1580,14 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
 - (NSDictionary*)bmBluetoothCharacteristic:(CBPeripheral *)peripheral
                             characteristic:(CBCharacteristic *)characteristic
+
+- (NSDictionary*)bmBluetoothCharacteristic:(CBPeripheral *)peripheral
+                            characteristic:(CBCharacteristic *)characteristic
 {
     // descriptors
-    NSMutableArray *descriptorProtos = [NSMutableArray new];
+    NSMutableArray *descriptors = [NSMutableArray new];
     for (CBDescriptor *d in [characteristic descriptors])
     {
-        NSData* data = nil;
-        if (d.value) {
-            @try {
-                  if  ([d.value isKindOfClass:NSNumber.class]) {
-                      int value = [d.value intValue];
-                      data = [NSData dataWithBytes:&value length:sizeof(value)];
-                  }else if([d.value isKindOfClass:NSData.class]) {
-                      data = d.value;
-                  }
-              } @catch (NSException *exception) {
-                  NSLog(@"%@", exception.reason);
-              }
-        }
-    
         // See: BmBluetoothDescriptor
         NSDictionary* desc = @{
             @"remote_id":              [peripheral.identifier UUIDString],
@@ -1608,7 +1597,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             @"descriptor_uuid":        [d.UUID uuid128],
         };
 
-        [descriptorProtos addObject:desc];
+        [descriptors addObject:desc];
     }
 
     ServicePair *pair = [self getServicePair:peripheral characteristic:characteristic];
@@ -1635,7 +1624,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"service_uuid":           [pair.primary.UUID uuid128],
         @"secondary_service_uuid": pair.secondary ? [pair.secondary.UUID uuid128] : [NSNull null],
         @"characteristic_uuid":    [characteristic.UUID uuid128],
-        @"descriptors":            descriptorProtos,
+        @"descriptors":            descriptors,
         @"properties":             propsMap,
     };
 }
