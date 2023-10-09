@@ -43,14 +43,15 @@ class BluetoothCharacteristic {
   ///   - anytime a notification arrives (if subscribed)
   ///   - and when first listened to, it re-emits the last value for convenience
   Stream<List<int>> get lastValueStream => FlutterBluePlus._methodStream.stream
-      .where((m) => m.method == "OnCharacteristicReceived" ||  m.method == "OnCharacteristicWritten")
+      .where((m) => m.method == "OnCharacteristicReceived" || m.method == "OnCharacteristicWritten")
       .map((m) => m.arguments)
       .map((args) => BmCharacteristicData.fromMap(args))
       .where((p) => p.remoteId == remoteId.toString())
       .where((p) => p.serviceUuid == serviceUuid)
       .where((p) => p.characteristicUuid == characteristicUuid)
       .where((p) => p.success == true)
-      .map((c) => c.value).newStreamWithInitialValue(lastValue);
+      .map((c) => c.value)
+      .newStreamWithInitialValue(lastValue);
 
   /// this stream emits values:
   ///   - anytime `read()` is called
@@ -265,23 +266,14 @@ class BluetoothCharacteristic {
 
       // wait for CCCD descriptor to be written?
       if (hasCCCD) {
-        BmDescriptorData response = await futureResponse
-            .fbpTimeout(timeout, "setNotifyValue")
-            .fbpEnsureConnected(device, "setNotifyValue");
+        BmDescriptorData response =
+            await futureResponse.fbpTimeout(timeout, "setNotifyValue").fbpEnsureConnected(device, "setNotifyValue");
 
         // failed?
         if (!response.success) {
           throw FlutterBluePlusException(_nativeError, "setNotifyValue", response.errorCode, response.errorString);
         }
       }
-
-      // update CCCD descriptor
-      // On iOS, if a characteristic supports both notify and indicate, it uses notifications.
-      // We match this behavior on Android.
-      String key = "$serviceUuid:$characteristicUuid:${cccdUuid.toString()}";
-      List<int> value = properties.notify ? [1] : (properties.indicate ? [2] : [0]);
-      FlutterBluePlus._lastDescs[remoteId] ??= {};
-      FlutterBluePlus._lastDescs[remoteId]![key] = value;
     } finally {
       writeMutex.give();
     }
