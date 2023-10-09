@@ -465,12 +465,12 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 |                           |      Android       |        iOS         | Throws | Description                                                |
 | :------------------------ | :----------------: | :----------------: | :----: | :----------------------------------------------------------|
 | platformName              | :white_check_mark: | :white_check_mark: |        | The platform cached name of the device                     |
-| onNameChanged          🌀 |                    | :white_check_mark: |        | The GAP Device Name Characteristic (0x2A00) changed        |
+| onNameChanged          🌀 | :white_check_mark: | :white_check_mark: |        | The GAP Device Name Characteristic (0x2A00) changed        |
 | connect                   | :white_check_mark: | :white_check_mark: | :fire: | Establishes a connection to the device                     |
 | disconnect                | :white_check_mark: | :white_check_mark: | :fire: | Cancels an active or pending connection to the device      |
 | discoverServices          | :white_check_mark: | :white_check_mark: | :fire: | Discover services                                          |
 | servicesList              | :white_check_mark: | :white_check_mark: |        | The list of services that were discovered                  |
-| onServicesChanged      🌀 |                    | :white_check_mark: |        | Services changes & must be rediscovered                    |
+| onServicesChanged      🌀 | :white_check_mark: | :white_check_mark: |        | The services changed & must be rediscovered                |
 | connectionState        🌀 | :white_check_mark: | :white_check_mark: |        | Stream of connection changes for the Bluetooth Device      |
 | mtu                    🌀 | :white_check_mark: | :white_check_mark: | :fire: | Stream of mtu size changes                                 |
 | readRssi                  | :white_check_mark: | :white_check_mark: | :fire: | Read RSSI from a connected device                          |

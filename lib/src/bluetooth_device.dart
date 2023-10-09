@@ -137,9 +137,8 @@ class BluetoothDevice {
       await FlutterBluePlus._invokeMethod('discoverServices', remoteId.str);
 
       // wait for response
-      BmDiscoverServicesResult response = await futureResponse
-          .fbpTimeout(timeout, "discoverServices")
-          .fbpEnsureConnected(this, "discoverServices");
+      BmDiscoverServicesResult response =
+          await futureResponse.fbpTimeout(timeout, "discoverServices").fbpEnsureConnected(this, "discoverServices");
 
       // failed?
       if (!response.success) {
@@ -194,37 +193,65 @@ class BluetoothDevice {
         .newStreamWithInitialValue(initialValue);
   }
 
-  /// Name Changed Stream (iOS & macOS only)
+  /// Name Changed Stream
   ///  - uses the GAP Device Name characteristic (0x2A00)
-  Stream<String> get onNameChanged {
-    // check iOS or macOS
-    if (Platform.isIOS == false && Platform.isMacOS == false) {
-      throw FlutterBluePlusException(
-          ErrorPlatform.dart, "onNameChanged", FbpErrorCode.applePlatformOnly.index, "iOS-macOS-only");
+  Stream<String> get onNameChanged async* {
+    if (Platform.isIOS || Platform.isMacOS) {
+      yield* FlutterBluePlus._methodStream.stream
+          .where((m) => m.method == "OnNameChanged")
+          .map((m) => m.arguments)
+          .map((args) => BmBluetoothDevice.fromMap(args))
+          .where((p) => p.remoteId == remoteId.str)
+          .map((m) => m.platformName ?? "");
+    } else {
+      final Guid gattUuid = Guid("00001800-0000-1000-8000-00805F9B34FB");
+      final Guid nameUuid = Guid("00002A00-0000-1000-8000-00805F9B34FB");
+      BluetoothService? svc = servicesList?._firstWhereOrNull((svc) => svc.uuid == gattUuid);
+      if (svc == null) {
+        throw FlutterBluePlusException(
+            ErrorPlatform.dart, "onNameChanged", FbpErrorCode.serviceNotFound.index, "GATT Service Not Found");
+      }
+      BluetoothCharacteristic? chr = svc.characteristics._firstWhereOrNull((chr) => chr.uuid == nameUuid);
+      if (chr == null) {
+        throw FlutterBluePlusException(
+            ErrorPlatform.dart, "onNameChanged", FbpErrorCode.characteristicNotFound.index, "GAP Name Not Found");
+      }
+      if (chr.isNotifying == false) {
+        await chr.setNotifyValue(true);
+      }
+      yield* chr.lastValueStream.map((value) => utf8.decode(value));
     }
-    return FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "OnNameChanged")
-        .map((m) => m.arguments)
-        .map((args) => BmBluetoothDevice.fromMap(args))
-        .where((p) => p.remoteId == remoteId.str)
-        .map((m) => m.platformName ?? "");
   }
 
-  /// Services Changed Stream (iOS & macOS only)
+  /// Services Changed Stream
   ///  - uses the GAP Services Changed characteristic (0x2A05)
   ///  - you must re-call discoverServices()
-  Stream<void> get onServicesChanged {
-    // check iOS or macOS
-    if (Platform.isIOS == false && Platform.isMacOS == false) {
-      throw FlutterBluePlusException(
-          ErrorPlatform.dart, "onServicesChanged", FbpErrorCode.applePlatformOnly.index, "iOS-macOS-only");
+  Stream<void> get onServicesChanged async* {
+    if (Platform.isIOS || Platform.isMacOS) {
+      yield* FlutterBluePlus._methodStream.stream
+          .where((m) => m.method == "OnServicesChanged")
+          .map((m) => m.arguments)
+          .map((args) => BmBluetoothDevice.fromMap(args))
+          .where((p) => p.remoteId == remoteId.str)
+          .map((m) => null);
+    } else {
+      final Guid gattUuid = Guid("00001800-0000-1000-8000-00805F9B34FB");
+      final Guid changeUuid = Guid("00002A05-0000-1000-8000-00805F9B34FB");
+      BluetoothService? svc = servicesList?._firstWhereOrNull((svc) => svc.uuid == gattUuid);
+      if (svc == null) {
+        throw FlutterBluePlusException(
+            ErrorPlatform.dart, "onServicesChanged", FbpErrorCode.serviceNotFound.index, "GATT Service Not Found");
+      }
+      BluetoothCharacteristic? chr = svc.characteristics._firstWhereOrNull((chr) => chr.uuid == changeUuid);
+      if (chr == null) {
+        throw FlutterBluePlusException(
+            ErrorPlatform.dart, "onServicesChanged", FbpErrorCode.characteristicNotFound.index, "GAP Name Not Found");
+      }
+      if (chr.isNotifying == false) {
+        await chr.setNotifyValue(true);
+      }
+      yield* chr.onValueReceived.map((value) => utf8.decode(value));
     }
-    return FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "OnServicesChanged")
-        .map((m) => m.arguments)
-        .map((args) => BmBluetoothDevice.fromMap(args))
-        .where((p) => p.remoteId == remoteId.str)
-        .map((m) => null);
   }
 
   /// Read the RSSI of connected remote device
@@ -256,9 +283,8 @@ class BluetoothDevice {
       await FlutterBluePlus._invokeMethod('readRssi', remoteId.str);
 
       // wait for response
-      BmReadRssiResult response = await futureResponse
-          .fbpTimeout(timeout, "readRssi")
-          .fbpEnsureConnected(this, "readRssi");
+      BmReadRssiResult response =
+          await futureResponse.fbpTimeout(timeout, "readRssi").fbpEnsureConnected(this, "readRssi");
 
       // failed?
       if (!response.success) {
@@ -313,9 +339,7 @@ class BluetoothDevice {
       await FlutterBluePlus._invokeMethod('requestMtu', request.toMap());
 
       // wait for response
-      mtu = await futureResponse
-          .fbpTimeout(timeout, "requestMtu")
-          .fbpEnsureConnected(this, "requestMtu");
+      mtu = await futureResponse.fbpTimeout(timeout, "requestMtu").fbpEnsureConnected(this, "requestMtu");
     } finally {
       opMutex.give();
     }
@@ -414,9 +438,8 @@ class BluetoothDevice {
 
       // only wait for 'bonded' if we weren't already bonded
       if (changed) {
-        BmBondStateResponse bs = await futureResponse
-            .fbpTimeout(timeout, "createBond")
-            .fbpEnsureConnected(this, "createBond");
+        BmBondStateResponse bs =
+            await futureResponse.fbpTimeout(timeout, "createBond").fbpEnsureConnected(this, "createBond");
 
         // success?
         if (bs.bondState != BmBondStateEnum.bonded) {
@@ -457,9 +480,8 @@ class BluetoothDevice {
 
       // only wait for 'unbonded' state if we weren't already unbonded
       if (changed) {
-        BmBondStateResponse bs = await futureResponse
-            .fbpTimeout(timeout, "removeBond")
-            .fbpEnsureConnected(this, "removeBond");
+        BmBondStateResponse bs =
+            await futureResponse.fbpTimeout(timeout, "removeBond").fbpEnsureConnected(this, "removeBond");
 
         // success?
         if (bs.bondState != BmBondStateEnum.none) {

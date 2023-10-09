@@ -601,6 +601,8 @@ enum FbpErrorCode {
   createBondFailed,
   removeBondFailed,
   deviceIsDisconnected,
+  serviceNotFound,
+  characteristicNotFound,
 }
 
 class FlutterBluePlusException implements Exception {
