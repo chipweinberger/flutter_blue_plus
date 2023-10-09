@@ -268,7 +268,7 @@ Most people prefer to use`lastValueStream` instead of `onValueReceived` for smal
 
 The difference? It is also updated when `write()` is called. So, it is updated **anytime** the value changes for **any reason**.
 
-It should only be used for small characteristics where each read, write, or notify always transfers the entire value. Otherwise, the various prtial data emitted would be unintelligible.
+It should only be used for small characteristics where each read, write, or notify always transfers the entire value. Otherwise, the partial data emitted would be unintelligible.
 
 ```dart
 // Setup Listener for characteristic reads & writes
