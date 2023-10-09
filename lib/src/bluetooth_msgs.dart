@@ -532,7 +532,7 @@ class BmWriteDescriptorRequest {
 }
 
 
-class BmOnDescriptorRead {
+class BmDescriptorData {
   final String remoteId;
   final Guid serviceUuid;
   final Guid? secondaryServiceUuid;
@@ -543,7 +543,7 @@ class BmOnDescriptorRead {
   final int? errorCode;
   final String? errorString;
 
-  BmOnDescriptorRead({
+  BmDescriptorData({
     required this.remoteId,
     required this.serviceUuid,
     required this.secondaryServiceUuid,
@@ -555,49 +555,14 @@ class BmOnDescriptorRead {
     required this.errorString,
   });
 
-  factory BmOnDescriptorRead.fromMap(Map<dynamic, dynamic> json) {
-    return BmOnDescriptorRead(
+  factory BmDescriptorData.fromMap(Map<dynamic, dynamic> json) {
+    return BmDescriptorData(
       remoteId: json['remote_id'],
       serviceUuid: Guid(json['service_uuid']),
       secondaryServiceUuid: json['secondary_service_uuid'] != null ? Guid(json['secondary_service_uuid']) : null,
       characteristicUuid: Guid(json['characteristic_uuid']),
       descriptorUuid: Guid(json['descriptor_uuid']),
       value: _hexDecode(json['value']),
-      success: json['success'] != 0,
-      errorCode: json['error_code'],
-      errorString: json['error_string'],
-    );
-  }
-}
-
-class BmOnDescriptorWrite {
-  final String remoteId;
-  final Guid serviceUuid;
-  final Guid? secondaryServiceUuid;
-  final Guid characteristicUuid;
-  final Guid descriptorUuid;
-  final bool success;
-  final int? errorCode;
-  final String? errorString;
-
-  BmOnDescriptorWrite({
-    required this.remoteId,
-    required this.serviceUuid,
-    required this.secondaryServiceUuid,
-    required this.characteristicUuid,
-    required this.descriptorUuid,
-    required this.success,
-    required this.errorCode,
-    required this.errorString,
-  });
-
-  factory BmOnDescriptorWrite.fromMap(Map<dynamic, dynamic> json) {
-    return BmOnDescriptorWrite(
-      remoteId: json['remote_id'],
-      serviceUuid: Guid(json['service_uuid']),
-      secondaryServiceUuid: json['secondary_service_uuid'] != null ? Guid(json['secondary_service_uuid']) : null,
-      characteristicUuid: Guid(json['characteristic_uuid']),
-      descriptorUuid: Guid(json['descriptor_uuid']),
       success: json['success'] != 0,
       errorCode: json['error_code'],
       errorString: json['error_string'],

@@ -244,24 +244,24 @@ class BluetoothCharacteristic {
 
       // Notifications & Indications are configured by writing to the
       // Client Characteristic Configuration Descriptor (CCCD)
-      Stream<BmOnDescriptorWrite> responseStream = FlutterBluePlus._methodStream.stream
-          .where((m) => m.method == "OnDescriptorWrite")
+      Stream<BmDescriptorData> responseStream = FlutterBluePlus._methodStream.stream
+          .where((m) => m.method == "OnDescriptorWritten")
           .map((m) => m.arguments)
-          .map((args) => BmOnDescriptorWrite.fromMap(args))
+          .map((args) => BmDescriptorData.fromMap(args))
           .where((p) => p.remoteId == request.remoteId)
           .where((p) => p.serviceUuid == request.serviceUuid)
           .where((p) => p.characteristicUuid == request.characteristicUuid)
           .where((p) => p.descriptorUuid == cccdUuid);
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
-      Future<BmOnDescriptorWrite> futureResponse = responseStream.first;
+      Future<BmDescriptorData> futureResponse = responseStream.first;
 
       // invoke
       bool hasCCCD = await FlutterBluePlus._invokeMethod('setNotification', request.toMap());
 
       // wait for CCCD descriptor to be written?
       if (hasCCCD) {
-        BmOnDescriptorWrite response = await futureResponse
+        BmDescriptorData response = await futureResponse
             .fbpTimeout(timeout, "setNotifyValue")
             .fbpEnsureConnected(device, "setNotifyValue");
 

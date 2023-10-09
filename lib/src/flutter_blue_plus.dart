@@ -351,8 +351,8 @@ class FlutterBluePlus {
     }
 
     // keep track of descriptor values
-    if (call.method == "OnDescriptorRead") {
-      BmOnDescriptorRead r = BmOnDescriptorRead.fromMap(call.arguments);
+    if (call.method == "OnDescriptorRead" || call.method == "OnDescriptorWritten") {
+      BmDescriptorData r = BmDescriptorData.fromMap(call.arguments);
       if (r.success == true) {
         DeviceIdentifier d = DeviceIdentifier(r.remoteId);
         _lastDescs[d] ??= {};

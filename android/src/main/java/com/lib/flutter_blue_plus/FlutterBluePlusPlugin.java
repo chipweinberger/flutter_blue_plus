@@ -98,6 +98,7 @@ public class FlutterBluePlusPlugin implements
     private final Map<String, Integer> mMtu = new ConcurrentHashMap<>();
     private final Map<String, Boolean> mAutoConnect = new ConcurrentHashMap<>();
     private final Map<String, String> mWriteChr = new ConcurrentHashMap<>();
+    private final Map<String, String> mWriteDesc = new ConcurrentHashMap<>();
     private int lastEventId = 1452;
     private final Map<Integer, OperationOnPermission> operationsOnPermission = new HashMap<>();
 
@@ -806,6 +807,10 @@ public class FlutterBluePlusPlugin implements
                         break;
                     }
 
+                    // remember the data we are writing
+                    String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + descriptorUuid;
+                    mWriteDesc.put(key, value);
+
                     // write descriptor
                     if (Build.VERSION.SDK_INT >= 33) { // Android 13 (August 2022)
 
@@ -1391,6 +1396,7 @@ public class FlutterBluePlusPlugin implements
         mConnectedDevices.clear();
         mMtu.clear();
         mWriteChr.clear();
+        mWriteDesc.clear();
     }
 
     /////////////////////////////////////////////////////////////////////////////////////
@@ -1800,7 +1806,7 @@ public class FlutterBluePlusPlugin implements
 
             ServicePair pair = getServicePair(gatt, descriptor.getCharacteristic());
 
-            // see: BmOnDescriptorRead
+            // see: BmDescriptorData
             HashMap<String, Object> response = new HashMap<>();
             response.put("remote_id", gatt.getDevice().getAddress());
             response.put("service_uuid", uuid128(pair.primary));
@@ -1828,7 +1834,7 @@ public class FlutterBluePlusPlugin implements
             // only works after a *read* has been made, not a *write*.
             byte[] value = descriptor.getValue();
 
-            // see: BmOnDescriptorRead
+            // see: BmDescriptorData
             HashMap<String, Object> response = new HashMap<>();
             response.put("remote_id", gatt.getDevice().getAddress());
             response.put("service_uuid", uuid128(pair.primary));
@@ -1850,18 +1856,31 @@ public class FlutterBluePlusPlugin implements
 
             ServicePair pair = getServicePair(gatt, descriptor.getCharacteristic());
 
-            // see: BmOnDescriptorWrite
+            // for convenience
+            String remoteId = gatt.getDevice().getAddress();
+            String serviceUuid = uuid128(pair.primary);
+            String secondaryServiceUuid = pair.secondary != null ? uuid128(pair.secondary) : null;
+            String characteristicUuid = uuid128(descriptor.getCharacteristic().getUuid());
+            String descriptorUuid = uuid128(descriptor.getUuid());
+
+            // what data did we write?
+            String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + descriptorUuid;
+            String value = mWriteDesc.get(key);
+            mWriteDesc.remove(key);
+
+            // see: BmDescriptorData
             HashMap<String, Object> response = new HashMap<>();
-            response.put("remote_id", gatt.getDevice().getAddress());
-            response.put("service_uuid", uuid128(pair.primary));
-            response.put("secondary_service_uuid", pair.secondary != null ? uuid128(pair.secondary) : null);
-            response.put("characteristic_uuid", uuid128(descriptor.getCharacteristic().getUuid()));
-            response.put("descriptor_uuid", uuid128(descriptor.getUuid()));
+            response.put("remote_id", remoteId);
+            response.put("service_uuid", serviceUuid);
+            response.put("secondary_service_uuid", secondaryServiceUuid);
+            response.put("characteristic_uuid", characteristicUuid);
+            response.put("descriptor_uuid", descriptorUuid);
+            response.put("value", value);
             response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
             response.put("error_code", status);
             response.put("error_string", gattErrorString(status));
 
-            invokeMethodUIThread("OnDescriptorWrite", response);
+            invokeMethodUIThread("OnDescriptorWritten", response);
         }
 
         @Override

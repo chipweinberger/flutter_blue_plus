@@ -1220,20 +1220,34 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     }
 
     ServicePair *pair = [self getServicePair:peripheral characteristic:characteristic];
+
+    // Oddly iOS does not update the CCCD descriptors when didUpdateNotificationState is called. 
+    // So instead of using characteristic.descriptors we have to manually recreate the
+    // CCCD descriptor using isNotifying & characteristic.properties
+    int value = 0;
+    if(characteristic.isNotifying) {
+        // in iOS, if a characteristic supports both indications and notifications, 
+        // then CoreBluetooth will default to indications
+        bool supportsNotify = (characteristic.properties & CBCharacteristicPropertyNotify) != 0;
+        bool supportsIndicate = (characteristic.properties & CBCharacteristicPropertyIndicate) != 0;
+        if (characteristic.isNotifying && supportsIndicate) {value = 2;} // '2' comes from the CCCD BLE spec
+        if (characteristic.isNotifying && supportsNotify) {value = 1;} // '1' comes from the CCCD BLE spec
+    }
     
-    // See BmOnDescriptorWrite
+    // See BmDescriptorData
     NSDictionary* result = @{
         @"remote_id":              [peripheral.identifier UUIDString],
         @"service_uuid":           [pair.primary.UUID uuid128],
         @"secondary_service_uuid": pair.secondary ? [pair.secondary.UUID uuid128] : [NSNull null],
         @"characteristic_uuid":    [characteristic.UUID uuid128],
         @"descriptor_uuid":        @"00002902-0000-1000-8000-00805f9b34fb", // uuid of CCCD
+        @"value":                  [self convertDataToHex:[NSData dataWithBytes:&value length:sizeof(value)]],
         @"success":                @(error == nil),
         @"error_string":           error ? [error localizedDescription] : [NSNull null],
         @"error_code":             error ? @(error.code) : [NSNull null],
     };
 
-    [_methodChannel invokeMethod:@"OnDescriptorWrite" arguments:result];
+    [_methodChannel invokeMethod:@"OnDescriptorWritten" arguments:result];
 }
 
 - (void)peripheral:(CBPeripheral *)peripheral
@@ -1250,7 +1264,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     NSData* data = [self descriptorToData:descriptor];
     
-    // See BmOnDescriptorRead
+    // See BmDescriptorData
     NSDictionary* result = @{
         @"remote_id":              [peripheral.identifier UUIDString],
         @"service_uuid":           [pair.primary.UUID uuid128],
@@ -1277,20 +1291,23 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     }
 
     ServicePair *pair = [self getServicePair:peripheral characteristic:descriptor.characteristic];
+
+    NSData* data = [self descriptorToData:descriptor];
     
-    // See BmOnDescriptorWrite
+    // See BmDescriptorData
     NSDictionary* result = @{
         @"remote_id":              [peripheral.identifier UUIDString],
         @"service_uuid":           [pair.primary.UUID uuid128],
         @"secondary_service_uuid": pair.secondary ? [pair.secondary.UUID uuid128] : [NSNull null],
         @"characteristic_uuid":    [descriptor.characteristic.UUID uuid128],
         @"descriptor_uuid":        [descriptor.UUID uuid128],
+        @"value":                  [self convertDataToHex:data],
         @"success":                @(error == nil),
         @"error_string":           error ? [error localizedDescription] : [NSNull null],
         @"error_code":             error ? @(error.code) : [NSNull null],
     };
 
-    [_methodChannel invokeMethod:@"OnDescriptorWrite" arguments:result];
+    [_methodChannel invokeMethod:@"OnDescriptorWritten" arguments:result];
 }
 
 - (void)peripheralDidUpdateName:(CBPeripheral *)peripheral
