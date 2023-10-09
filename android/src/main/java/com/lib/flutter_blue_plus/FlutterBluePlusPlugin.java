@@ -1646,9 +1646,8 @@ public class FlutterBluePlusPlugin implements
             invokeMethodUIThread("OnDiscoverServicesResult", response);
         }
 
-        // replacement for onCharacteristicRead
         @Override
-        @TargetApi(33)
+        @TargetApi(33) // newer function, replaces onCharacteristicRead & adds byte[] value argument
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, byte[] value)
         {
             // this callback is only for notifications & indications
@@ -1662,7 +1661,7 @@ public class FlutterBluePlusPlugin implements
             response.put("service_uuid", uuid128(pair.primary));
             response.put("secondary_service_uuid", pair.secondary != null ? uuid128(pair.secondary) : null);
             response.put("characteristic_uuid", uuid128(characteristic.getUuid()));
-            response.put("value", value);
+            response.put("value", bytesToHex(value));
             response.put("success", 1);
             response.put("error_code", 0);
             response.put("error_string", gattErrorString(0));
@@ -1724,7 +1723,7 @@ public class FlutterBluePlusPlugin implements
         }
 
         @Override
-        @TargetApi(33)
+        @TargetApi(33) // newer function, passes byte[] value
         public void onDescriptorRead(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status, byte[] value)
         {
             log(LogLevel.DEBUG, "onDescriptorRead: uuid: " + uuid128(descriptor.getUuid()) + " status: " + status);
