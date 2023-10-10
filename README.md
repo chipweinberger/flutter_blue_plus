@@ -212,7 +212,7 @@ import 'dart:math';
 // writeSplit should be used with caution.
 //    1. due to splitting, `characteristic.read()` will return partial data.
 //    2. it can only be used *with* response to avoid data loss
-//    3. The characteristic must support split data
+//    3. The characteristic must be designed to support split data
 extension splitWrite on BluetoothCharacteristic {
   Future<void> splitWrite(List<int> value, {int timeout = 15}) async {
     int chunk = (await device.mtu.first) - 3; // 3 bytes ble overhead
@@ -243,7 +243,7 @@ await d.write([0x12, 0x34])
 If `onValueReceived` is never called, see [Common Problems](#common-problems) in the README.
 
 ```dart
-// Setup Listener for characteristic reads
+// Setup Listener for characteristic reads & notifies
 final subscription = characteristic.onValueReceived.listen((value) {
     // onValueReceived is updated:
     //   - anytime read() is called
@@ -264,14 +264,12 @@ await characteristic.setNotifyValue(true);
 
 ### Last Value Stream
 
-Most people prefer to use`lastValueStream` instead of `onValueReceived` for small characteristics (< 512 bytes).
+`lastValueStream` is an alternative to `onValueReceived`. It emits a value any time the characteristic changes, **including writes.**
 
-The difference? It is also updated when `write()` is called. So, it is updated **anytime** the value changes for **any reason**.
-
-It should only be used for small characteristics where each read, write, or notify always transfers the entire value. Otherwise, the partial data emitted would be unintelligible.
+It is very convenient for simple characteristics that support both WRITE and READ (and/or NOTIFY). **e.g.** a "light switch toggle" characteristic. 
 
 ```dart
-// Setup Listener for characteristic reads & writes
+// Setup Listener for characteristic reads & writes & notifies
 final subscription = characteristic.lastValueStream.listen((value) {
     //lastValueStream` is updated:
     //   - anytime read() is called
@@ -493,7 +491,7 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 | isNotifying        | :white_check_mark: | :white_check_mark: |        | Are notifications or indications currently enabled             |
 | onValueReceived 🌀 | :white_check_mark: | :white_check_mark: |        | Stream of characteristic value updates received from the device|
 | lastValue          | :white_check_mark: | :white_check_mark: |        | The most recent value of the characteristic                    |
-| lastValueStream 🌀 | :white_check_mark: | :white_check_mark: |        | Stream of lastValue + onValueReceived                          |
+| lastValueStream 🌀 | :white_check_mark: | :white_check_mark: |        | Stream of onValueReceived + writes                             |
 
 ### BluetoothDescriptor API
 
@@ -504,7 +502,7 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 | write              | :white_check_mark: | :white_check_mark: | :fire: | Writes the value of the descriptor             |
 | onValueReceived 🌀 | :white_check_mark: | :white_check_mark: |        | Stream of descriptor value reads & writes      |
 | lastValue          | :white_check_mark: | :white_check_mark: |        | The most recent value of the descriptor        |
-| lastValueStream 🌀 | :white_check_mark: | :white_check_mark: |        | Stream of lastValue + onValueReceived          |
+| lastValueStream 🌀 | :white_check_mark: | :white_check_mark: |        | Stream of onValueReceived + writes             |
 
 ## Debugging
 
@@ -602,25 +600,19 @@ Bluetooth is a complicated system service, and can enter a bad state.
 
 ### onValueReceived (or lastValueStream) is never called
 
-**1. you are not subscribed OR not calling read**
+**1. you are not calling the right function**
 
-Your device will only send values after you call `await characteristic.setNotifyValue(true)`, or `await characteristic.read()`
+`lastValueStream` is called for `await chr.read()` & `await chr.write()` & `await chr.setNotifyValue(true)` 
 
-**2. you are not calling the right function**
+`onValueReceived` is only called for `await chr.read()` & `await chr.setNotifyValue(true)` 
 
-`lastValueStream` is called for reads & notifies &  writes.
+**2. your device has nothing to send**
 
-`onValueReceived` is only called for reads & notifies, but **not** writes.
-
-You can do a single read with `await characteristic.read(...)`
-
-**3. your device has nothing to send**
-
-If you are using `setNotifyValue`, your device chooses when to send data.
+If you are using `await chr.setNotifyValue(true)`, your _device_ chooses when to send data.
 
 Try interacting with your device to get it to send new data.
 
-**4. your device has bugs**
+**3. your device has bugs**
 
 Try rebooting your ble device. 
 
