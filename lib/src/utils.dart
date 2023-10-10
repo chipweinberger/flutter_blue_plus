@@ -60,7 +60,7 @@ extension FutureTimeout<T> on Future<T> {
     });
   }
 
-  Future<T> fbpEnsureConnected(BluetoothDevice device, String function) {
+  Future<T> fbpEnsureDeviceIsConnected(BluetoothDevice device, String function) {
     // Create a completer to represent the result of this extended Future.
     var completer = Completer<T>();
 
@@ -73,6 +73,41 @@ extension FutureTimeout<T> on Future<T> {
             function, 
             FbpErrorCode.deviceIsDisconnected.index, 
             "Device is disconnected"
+          ));
+        }
+      }
+    });
+
+    // When the original future completes
+    // complete our completer and cancel the subscription.
+    this.then((value) {
+      if (!completer.isCompleted) {
+        subscription.cancel();
+        completer.complete(value);
+      }
+    }).catchError((error) {
+      if (!completer.isCompleted) {
+        subscription.cancel();
+        completer.completeError(error);
+      }
+    });
+
+    return completer.future;
+  }
+
+  Future<T> fbpEnsureAdapterIsOn(String function) {
+    // Create a completer to represent the result of this extended Future.
+    var completer = Completer<T>();
+
+    // disconnection listener.
+    var subscription = FlutterBluePlus.adapterState.listen((event) {
+      if (event == BluetoothAdapterState.off || event == BluetoothAdapterState.turningOff) {
+        if (!completer.isCompleted) {
+          completer.completeError(FlutterBluePlusException(
+            ErrorPlatform.dart, 
+            function, 
+            FbpErrorCode.adapterIsOff.index, 
+            "Bluetooth adapter is off"
           ));
         }
       }

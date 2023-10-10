@@ -94,27 +94,27 @@ class FlutterBluePlus {
           .map((s) => _bmToAdapterState(s.adapterState))
           .newStreamWithInitialValue(_bmToAdapterState(_adapterStateNow!));
     } else {
-        // start listening now so we do not miss any
-        // changes while we get the initial value
-        var buffer = _BufferStream.listen(FlutterBluePlus._methodStream.stream
-            .where((m) => m.method == "OnAdapterStateChanged")
-            .map((m) => m.arguments)
-            .map((args) => BmBluetoothAdapterState.fromMap(args))
-            .map((s) => _bmToAdapterState(s.adapterState)));
+      // start listening now so we do not miss any
+      // changes while we get the initial value
+      var buffer = _BufferStream.listen(FlutterBluePlus._methodStream.stream
+          .where((m) => m.method == "OnAdapterStateChanged")
+          .map((m) => m.arguments)
+          .map((args) => BmBluetoothAdapterState.fromMap(args))
+          .map((s) => _bmToAdapterState(s.adapterState)));
 
-        // initial state
-        BluetoothAdapterState initialValue = await _invokeMethod('getAdapterState')
-            .then((args) => BmBluetoothAdapterState.fromMap(args))
-            .then((s) => _bmToAdapterState(s.adapterState));
+      // initial state
+      BluetoothAdapterState initialValue = await _invokeMethod('getAdapterState')
+          .then((args) => BmBluetoothAdapterState.fromMap(args))
+          .then((s) => _bmToAdapterState(s.adapterState));
 
-        // make sure the initial value has not become out of date
-        // while we were awaiting for the initial state
-        if (buffer.hasReceivedValue == false) {
-          yield initialValue;
-        }
+      // make sure the initial value has not become out of date
+      // while we were awaiting for the initial state
+      if (buffer.hasReceivedValue == false) {
+        yield initialValue;
+      }
 
-        // stream
-        yield* buffer.stream;
+      // stream
+      yield* buffer.stream;
     }
   }
 
@@ -618,6 +618,7 @@ enum FbpErrorCode {
   deviceIsDisconnected,
   serviceNotFound,
   characteristicNotFound,
+  adapterIsOff,
 }
 
 class FlutterBluePlusException implements Exception {

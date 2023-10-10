@@ -101,8 +101,10 @@ class BluetoothDescriptor {
       await FlutterBluePlus._invokeMethod('readDescriptor', request.toMap());
 
       // wait for response
-      BmDescriptorData response =
-          await futureResponse.fbpTimeout(timeout, "readDescriptor").fbpEnsureConnected(device, "readDescriptor");
+      BmDescriptorData response = await futureResponse
+          .fbpEnsureAdapterIsOn("readDescriptor")
+          .fbpEnsureDeviceIsConnected(device, "readDescriptor")
+          .fbpTimeout(timeout, "readDescriptor");
 
       // failed?
       if (!response.success) {
@@ -157,8 +159,10 @@ class BluetoothDescriptor {
       await FlutterBluePlus._invokeMethod('writeDescriptor', request.toMap());
 
       // wait for response
-      BmDescriptorData response =
-          await futureResponse.fbpTimeout(timeout, "writeDescriptor").fbpEnsureConnected(device, "writeDescriptor");
+      BmDescriptorData response = await futureResponse
+          .fbpEnsureAdapterIsOn("writeDescriptor")
+          .fbpEnsureDeviceIsConnected(device, "writeDescriptor")
+          .fbpTimeout(timeout, "writeDescriptor");
 
       // failed?
       if (!response.success) {

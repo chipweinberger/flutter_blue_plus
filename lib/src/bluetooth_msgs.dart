@@ -570,14 +570,14 @@ class BmDescriptorData {
   }
 }
 
-class BmSetNotificationRequest {
+class BmSetNotifyValueRequest {
   final String remoteId;
   final Guid serviceUuid;
   final Guid? secondaryServiceUuid;
   final Guid characteristicUuid;
   final bool enable;
 
-  BmSetNotificationRequest({
+  BmSetNotifyValueRequest({
     required this.remoteId,
     required this.serviceUuid,
     required this.secondaryServiceUuid,

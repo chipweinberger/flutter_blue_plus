@@ -840,9 +840,9 @@ public class FlutterBluePlusPlugin implements
                     break;
                 }
 
-                case "setNotification":
+                case "setNotifyValue":
                 {
-                    // see: BmSetNotificationRequest
+                    // see: BmSetNotifyValueRequest
                     HashMap<String, Object> data = call.arguments();
                     String remoteId =             (String) data.get("remote_id");
                     String serviceUuid =          (String) data.get("service_uuid");
@@ -853,14 +853,14 @@ public class FlutterBluePlusPlugin implements
                     // check connection
                     BluetoothGatt gatt = mConnectedDevices.get(remoteId);
                     if(gatt == null) {
-                        result.error("setNotification", "device is disconnected", null);
+                        result.error("setNotifyValue", "device is disconnected", null);
                         break;
                     }
 
                     // find characteristic
                     ChrFound found = locateCharacteristic(gatt, serviceUuid, secondaryServiceUuid, characteristicUuid);
                     if (found.error != null) {
-                        result.error("setNotification", found.error, null);
+                        result.error("setNotifyValue", found.error, null);
                         break;
                     }
 
@@ -868,7 +868,7 @@ public class FlutterBluePlusPlugin implements
 
                     // configure local Android device to listen for characteristic changes
                     if(!gatt.setCharacteristicNotification(characteristic, enable)){
-                        result.error("setNotification",
+                        result.error("setNotifyValue",
                             "gatt.setCharacteristicNotification(" + enable + ") returned false", null);
                         break;
                     }
@@ -894,7 +894,7 @@ public class FlutterBluePlusPlugin implements
                         boolean canIndicate = (characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE) > 0;
 
                         if(!canIndicate && !canNotify) {
-                            result.error("setNotification",
+                            result.error("setNotifyValue",
                                 "neither NOTIFY nor INDICATE properties are supported by this BLE characteristic", null);
                             break;
                         }
@@ -918,7 +918,7 @@ public class FlutterBluePlusPlugin implements
                         int rv = gatt.writeDescriptor(cccd, descriptorValue);
                         if (rv != BluetoothStatusCodes.SUCCESS) {
                             String s = "gatt.writeDescriptor() returned " + rv + " : " + bluetoothStatusString(rv);
-                            result.error("setNotification", s, null);
+                            result.error("setNotifyValue", s, null);
                             break;
                         }
 
@@ -926,13 +926,13 @@ public class FlutterBluePlusPlugin implements
 
                         // set new value
                         if (!cccd.setValue(descriptorValue)) {
-                            result.error("setNotification", "cccd.setValue() returned false", null);
+                            result.error("setNotifyValue", "cccd.setValue() returned false", null);
                             break;
                         }
 
                         // update notifications on remote BLE device
                         if (!gatt.writeDescriptor(cccd)) {
-                            result.error("setNotification", "gatt.writeDescriptor() returned false", null);
+                            result.error("setNotifyValue", "gatt.writeDescriptor() returned false", null);
                             break;
                         }
                     }

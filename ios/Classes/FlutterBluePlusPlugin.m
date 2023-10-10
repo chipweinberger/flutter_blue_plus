@@ -591,9 +591,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             result(@YES);
         }
-        else if ([@"setNotification" isEqualToString:call.method])
+        else if ([@"setNotifyValue" isEqualToString:call.method])
         {
-            // See BmSetNotificationRequest
+            // See BmSetNotifyValueRequest
             NSDictionary *args = (NSDictionary*)call.arguments;
             NSString   *remoteId              = args[@"remote_id"];
             NSString   *serviceUuid           = args[@"service_uuid"];
@@ -605,7 +605,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
             if (peripheral == nil) {
                 NSString* s = @"device is disconnected";
-                result([FlutterError errorWithCode:@"setNotification" message:s details:remoteId]);
+                result([FlutterError errorWithCode:@"setNotifyValue" message:s details:remoteId]);
                 return;
             }
 
@@ -617,7 +617,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                                                        secondaryServiceId:secondaryServiceUuid
                                                                     error:&error];
             if (characteristic == nil) {
-                result([FlutterError errorWithCode:@"setNotification" message:error.localizedDescription details:NULL]);
+                result([FlutterError errorWithCode:@"setNotifyValue" message:error.localizedDescription details:NULL]);
                 return;
             }
 
@@ -626,7 +626,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             bool canIndicate = (characteristic.properties & CBCharacteristicPropertyIndicate) != 0;
             if(!canIndicate && !canNotify) {
                 NSString* s = @"neither NOTIFY nor INDICATE properties are supported by this BLE characteristic";
-                result([FlutterError errorWithCode:@"setNotification" message:s details:NULL]);
+                result([FlutterError errorWithCode:@"setNotifyValue" message:s details:NULL]);
                 return;
             }
 

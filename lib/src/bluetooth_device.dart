@@ -65,7 +65,8 @@ class BluetoothDevice {
 
       // only wait for connection if we weren't already connected
       if (changed) {
-        BmConnectionStateResponse response = await futureState.fbpTimeout(timeout.inSeconds, "connect");
+        BmConnectionStateResponse response =
+            await futureState.fbpEnsureAdapterIsOn("connect").fbpTimeout(timeout.inSeconds, "connect");
 
         // failure?
         if (response.connectionState == BmConnectionStateEnum.disconnected) {
@@ -101,7 +102,7 @@ class BluetoothDevice {
 
       // only wait for disconnection if weren't already disconnected
       if (changed) {
-        await futureState.fbpTimeout(timeout, "disconnect");
+        await futureState.fbpEnsureAdapterIsOn("disconnect").fbpTimeout(timeout, "disconnect");
       }
     } finally {
       opMutex.give();
@@ -137,8 +138,10 @@ class BluetoothDevice {
       await FlutterBluePlus._invokeMethod('discoverServices', remoteId.str);
 
       // wait for response
-      BmDiscoverServicesResult response =
-          await futureResponse.fbpTimeout(timeout, "discoverServices").fbpEnsureConnected(this, "discoverServices");
+      BmDiscoverServicesResult response = await futureResponse
+          .fbpEnsureAdapterIsOn("discoverServices")
+          .fbpEnsureDeviceIsConnected(this, "discoverServices")
+          .fbpTimeout(timeout, "discoverServices");
 
       // failed?
       if (!response.success) {
@@ -283,8 +286,10 @@ class BluetoothDevice {
       await FlutterBluePlus._invokeMethod('readRssi', remoteId.str);
 
       // wait for response
-      BmReadRssiResult response =
-          await futureResponse.fbpTimeout(timeout, "readRssi").fbpEnsureConnected(this, "readRssi");
+      BmReadRssiResult response = await futureResponse
+          .fbpEnsureAdapterIsOn("readRssi")
+          .fbpEnsureDeviceIsConnected(this, "readRssi")
+          .fbpTimeout(timeout, "readRssi");
 
       // failed?
       if (!response.success) {
@@ -339,7 +344,10 @@ class BluetoothDevice {
       await FlutterBluePlus._invokeMethod('requestMtu', request.toMap());
 
       // wait for response
-      mtu = await futureResponse.fbpTimeout(timeout, "requestMtu").fbpEnsureConnected(this, "requestMtu");
+      mtu = await futureResponse
+          .fbpEnsureAdapterIsOn("requestMtu")
+          .fbpEnsureDeviceIsConnected(this, "requestMtu")
+          .fbpTimeout(timeout, "requestMtu");
     } finally {
       opMutex.give();
     }
@@ -438,8 +446,10 @@ class BluetoothDevice {
 
       // only wait for 'bonded' if we weren't already bonded
       if (changed) {
-        BmBondStateResponse bs =
-            await futureResponse.fbpTimeout(timeout, "createBond").fbpEnsureConnected(this, "createBond");
+        BmBondStateResponse bs = await futureResponse
+            .fbpEnsureAdapterIsOn("createBond")
+            .fbpEnsureDeviceIsConnected(this, "createBond")
+            .fbpTimeout(timeout, "createBond");
 
         // success?
         if (bs.bondState != BmBondStateEnum.bonded) {
@@ -480,8 +490,10 @@ class BluetoothDevice {
 
       // only wait for 'unbonded' state if we weren't already unbonded
       if (changed) {
-        BmBondStateResponse bs =
-            await futureResponse.fbpTimeout(timeout, "removeBond").fbpEnsureConnected(this, "removeBond");
+        BmBondStateResponse bs = await futureResponse
+            .fbpEnsureAdapterIsOn("removeBond")
+            .fbpEnsureDeviceIsConnected(this, "removeBond")
+            .fbpTimeout(timeout, "removeBond");
 
         // success?
         if (bs.bondState != BmBondStateEnum.none) {
@@ -525,35 +537,35 @@ class BluetoothDevice {
       // getBondState is not able to detect bondLost & bondFailed
       BluetoothBondState initialValue = _bmToBondState(FlutterBluePlus._bondStates[remoteId]!);
       yield* FlutterBluePlus._methodStream.stream
-            .where((m) => m.method == "OnBondStateChanged")
-            .map((m) => m.arguments)
-            .map((args) => BmBondStateResponse.fromMap(args))
-            .where((p) => p.remoteId == remoteId.str)
-            .map((p) => _bmToBondState(p))
-            .newStreamWithInitialValue(initialValue);
+          .where((m) => m.method == "OnBondStateChanged")
+          .map((m) => m.arguments)
+          .map((args) => BmBondStateResponse.fromMap(args))
+          .where((p) => p.remoteId == remoteId.str)
+          .map((p) => _bmToBondState(p))
+          .newStreamWithInitialValue(initialValue);
     } else {
-        // start listening now so we do not miss any changes
-        // while we get the inital bond state
-        var buffer = _BufferStream.listen(FlutterBluePlus._methodStream.stream
-            .where((m) => m.method == "OnBondStateChanged")
-            .map((m) => m.arguments)
-            .map((args) => BmBondStateResponse.fromMap(args))
-            .where((p) => p.remoteId == remoteId.str)
-            .map((p) => _bmToBondState(p)));
+      // start listening now so we do not miss any changes
+      // while we get the inital bond state
+      var buffer = _BufferStream.listen(FlutterBluePlus._methodStream.stream
+          .where((m) => m.method == "OnBondStateChanged")
+          .map((m) => m.arguments)
+          .map((args) => BmBondStateResponse.fromMap(args))
+          .where((p) => p.remoteId == remoteId.str)
+          .map((p) => _bmToBondState(p)));
 
-        // must get the initial state from the system.
-        BluetoothBondState initialValue = await FlutterBluePlus._methods
-            .invokeMethod('getBondState', remoteId.str)
-            .then((args) => BmBondStateResponse.fromMap(args))
-            .then((p) => _bmToBondState(p));
+      // must get the initial state from the system.
+      BluetoothBondState initialValue = await FlutterBluePlus._methods
+          .invokeMethod('getBondState', remoteId.str)
+          .then((args) => BmBondStateResponse.fromMap(args))
+          .then((p) => _bmToBondState(p));
 
-        // make sure the initial value has not become out of date
-        // while we were awaiting for the initial value
-        if (buffer.hasReceivedValue == false) {
-          yield initialValue;
-        }
-        // stream
-        yield* buffer.stream;
+      // make sure the initial value has not become out of date
+      // while we were awaiting for the initial value
+      if (buffer.hasReceivedValue == false) {
+        yield initialValue;
+      }
+      // stream
+      yield* buffer.stream;
     }
   }
 

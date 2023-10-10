@@ -119,8 +119,9 @@ class BluetoothCharacteristic {
 
       // wait for response
       BmCharacteristicData response = await futureResponse
-          .fbpTimeout(timeout, "readCharacteristic")
-          .fbpEnsureConnected(device, "readCharacteristic");
+          .fbpEnsureAdapterIsOn("readCharacteristic")
+          .fbpEnsureDeviceIsConnected(device, "readCharacteristic")
+          .fbpTimeout(timeout, "readCharacteristic");
 
       // failed?
       if (!response.success) {
@@ -205,8 +206,9 @@ class BluetoothCharacteristic {
       //  1. check for success (writeWithResponse)
       //  2. wait until the packet has been sent, to prevent iOS & Android dropping packets (writeWithoutResponse)
       BmCharacteristicData response = await futureResponse
-          .fbpTimeout(timeout, "writeCharacteristic")
-          .fbpEnsureConnected(device, "writeCharacteristic");
+          .fbpEnsureAdapterIsOn("writeCharacteristic")
+          .fbpEnsureDeviceIsConnected(device, "writeCharacteristic")
+          .fbpTimeout(timeout, "writeCharacteristic");
 
       // failed?
       if (!response.success) {
@@ -239,7 +241,7 @@ class BluetoothCharacteristic {
     await writeMutex.take();
 
     try {
-      var request = BmSetNotificationRequest(
+      var request = BmSetNotifyValueRequest(
         remoteId: remoteId.toString(),
         serviceUuid: serviceUuid,
         secondaryServiceUuid: null,
@@ -262,12 +264,14 @@ class BluetoothCharacteristic {
       Future<BmDescriptorData> futureResponse = responseStream.first;
 
       // invoke
-      bool hasCCCD = await FlutterBluePlus._invokeMethod('setNotification', request.toMap());
+      bool hasCCCD = await FlutterBluePlus._invokeMethod('setNotifyValue', request.toMap());
 
       // wait for CCCD descriptor to be written?
       if (hasCCCD) {
-        BmDescriptorData response =
-            await futureResponse.fbpTimeout(timeout, "setNotifyValue").fbpEnsureConnected(device, "setNotifyValue");
+        BmDescriptorData response = await futureResponse
+            .fbpEnsureAdapterIsOn("setNotifyValue")
+            .fbpEnsureDeviceIsConnected(device, "setNotifyValue")
+            .fbpTimeout(timeout, "setNotifyValue");
 
         // failed?
         if (!response.success) {
