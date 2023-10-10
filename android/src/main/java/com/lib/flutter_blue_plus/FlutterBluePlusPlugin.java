@@ -1950,8 +1950,17 @@ public class FlutterBluePlusPlugin implements
 
         ScanRecord adv = result.getScanRecord();
 
+        boolean connectable;
+        if(Build.VERSION.SDK_INT >= 26) { // Android 8.0, August 2017
+            connectable = result.isConnectable();
+        } else {
+            // Prior to Android 8.0, it is not possible to get if connectable.
+            // Previously, we used to check `adv.getAdvertiseFlags() & 0x2` but that
+            // returns if the device wants to be *discoverable*, which is not the same thing.
+            connectable = true;
+        }
+
         String                  localName    = adv != null ?  adv.getDeviceName()                : null;
-        boolean                 connectable  = adv != null ? (adv.getAdvertiseFlags() & 0x2) > 0 : false;
         int                     txPower      = adv != null ?  adv.getTxPowerLevel()              : min;
         SparseArray<byte[]>     manufData    = adv != null ?  adv.getManufacturerSpecificData()  : null;
         List<ParcelUuid>        serviceUuids = adv != null ?  adv.getServiceUuids()              : null;
