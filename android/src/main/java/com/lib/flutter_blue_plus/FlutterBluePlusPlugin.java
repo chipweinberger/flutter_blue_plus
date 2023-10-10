@@ -1987,7 +1987,7 @@ public class FlutterBluePlusPlugin implements
 
         HashMap<String, Object> map = new HashMap<>();
         map.put("local_name",        localName);
-        map.put("connectable",       connectable);
+        map.put("connectable",       connectable ? 1 : 0);
         map.put("tx_power_level",    txPower      != min  ? txPower       : null);
         map.put("manufacturer_data", manufData    != null ? manufDataB    : null);
         map.put("service_data",      serviceData  != null ? serviceDataB  : null);
