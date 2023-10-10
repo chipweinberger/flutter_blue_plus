@@ -841,6 +841,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         if ([func isEqualToString:@"adapterTurnOff"]) {
             // inexplicably, iOS does not call 'didDisconnectPeripheral' when
             // the adapter is turned off, so we must send these responses manually
+            
+            // Note: when the adapter is turned off, it is an 'api misuse'
+            // to call cancelPeripheralConnection. It is implied.
 
             // See BmConnectionStateResponse
             NSDictionary *result = @{
@@ -856,8 +859,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         
         if ([func isEqualToString:@"flutterHotRestart"]) {
             // request disconnection
-            // Note: when the adapter is turned off, it is an 'api misuse'
-            // to call cancelPeripheralConnection as that is implicit
             [self.centralManager cancelPeripheralConnection:peripheral];
         }
     }
