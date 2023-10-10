@@ -66,13 +66,11 @@ class _ScanScreenState extends State<ScanScreen> {
   }
 
   void onConnectPressed(BluetoothDevice device) {
+    device.connectDevice().catchError((e) {
+      Snackbar.show(ABC.c, prettyException("Connect Error:", e), success: false);
+    });
     MaterialPageRoute route = MaterialPageRoute(
-        builder: (context) {
-          device.connectDevice().catchError((e) {
-            Snackbar.show(ABC.c, prettyException("Connect Error:", e), success: false);
-          });
-          return DeviceScreen(device: device);
-        },
+        builder: (context) => DeviceScreen(device: device),
         settings: RouteSettings(name: '/DeviceScreen'));
     Navigator.of(context).push(route);
   }
