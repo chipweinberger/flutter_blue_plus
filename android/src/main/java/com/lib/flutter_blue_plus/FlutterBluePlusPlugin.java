@@ -1076,7 +1076,7 @@ public class FlutterBluePlusPlugin implements
                     break;
                 }
 
-                case "getInitialBondState":
+                case "getBondState":
                 {
                     String remoteId = (String) call.arguments;
 
