@@ -39,6 +39,9 @@ class FlutterBluePlus {
   /// timeout for scanning that can be cancelled by stopScan
   static Timer? _scanTimeout;
 
+  /// the last known adapter state
+  static BmAdapterStateEnum? _adapterStateNow;
+
   /// FlutterBluePlus log level
   static LogLevel _logLevel = LogLevel.debug;
   static bool _logColor = true;
@@ -82,26 +85,37 @@ class FlutterBluePlus {
 
   /// Gets the current state of the Bluetooth module
   static Stream<BluetoothAdapterState> get adapterState async* {
-    // start listening now so we do not miss any changes
-    var buffer = _BufferStream.listen(FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "OnAdapterStateChanged")
-        .map((m) => m.arguments)
-        .map((args) => BmBluetoothAdapterState.fromMap(args))
-        .map((s) => _bmToBluetoothAdapterState(s.adapterState)));
+    // already have the initial value?
+    if (_adapterStateNow != null) {
+      yield* FlutterBluePlus._methodStream.stream
+          .where((m) => m.method == "OnAdapterStateChanged")
+          .map((m) => m.arguments)
+          .map((args) => BmBluetoothAdapterState.fromMap(args))
+          .map((s) => _bmToAdapterState(s.adapterState))
+          .newStreamWithInitialValue(_bmToAdapterState(_adapterStateNow!));
+    } else {
+        // start listening now so we do not miss any
+        // changes while we get the initial value
+        var buffer = _BufferStream.listen(FlutterBluePlus._methodStream.stream
+            .where((m) => m.method == "OnAdapterStateChanged")
+            .map((m) => m.arguments)
+            .map((args) => BmBluetoothAdapterState.fromMap(args))
+            .map((s) => _bmToAdapterState(s.adapterState)));
 
-    // initial state
-    BluetoothAdapterState initialValue = await _invokeMethod('getAdapterState')
-        .then((args) => BmBluetoothAdapterState.fromMap(args))
-        .then((s) => _bmToBluetoothAdapterState(s.adapterState));
+        // initial state
+        BluetoothAdapterState initialValue = await _invokeMethod('getAdapterState')
+            .then((args) => BmBluetoothAdapterState.fromMap(args))
+            .then((s) => _bmToAdapterState(s.adapterState));
 
-    // make sure the initial value has not become out of date
-    // while we were awaiting for the initial state
-    if (buffer.hasReceivedValue == false) {
-      yield initialValue;
+        // make sure the initial value has not become out of date
+        // while we were awaiting for the initial state
+        if (buffer.hasReceivedValue == false) {
+          yield initialValue;
+        }
+
+        // stream
+        yield* buffer.stream;
     }
-
-    // stream
-    yield* buffer.stream;
   }
 
   /// Retrieve a list of connected devices
@@ -286,6 +300,7 @@ class FlutterBluePlus {
     // keep track of adapter states
     if (call.method == "OnAdapterStateChanged") {
       BmBluetoothAdapterState r = BmBluetoothAdapterState.fromMap(call.arguments);
+      _adapterStateNow = r.adapterState;
       if (isScanningNow && r.adapterState != BmAdapterStateEnum.on) {
         _stopScan(invokePlatform: false);
       }

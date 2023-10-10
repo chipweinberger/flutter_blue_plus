@@ -31,7 +31,7 @@ enum BluetoothConnectionState {
   disconnecting
 }
 
-BluetoothConnectionState _bmToBluetoothConnectionState(BmConnectionStateEnum value) {
+BluetoothConnectionState _bmToConnectionState(BmConnectionStateEnum value) {
   switch (value) {
     case BmConnectionStateEnum.disconnected:
       return BluetoothConnectionState.disconnected;
@@ -40,7 +40,7 @@ BluetoothConnectionState _bmToBluetoothConnectionState(BmConnectionStateEnum val
   }
 }
 
-BluetoothAdapterState _bmToBluetoothAdapterState(BmAdapterStateEnum value) {
+BluetoothAdapterState _bmToAdapterState(BmAdapterStateEnum value) {
   switch (value) {
     case BmAdapterStateEnum.unknown:
       return BluetoothAdapterState.unknown;
@@ -59,7 +59,7 @@ BluetoothAdapterState _bmToBluetoothAdapterState(BmAdapterStateEnum value) {
   }
 }
 
-BmConnectionPriorityEnum _bmConnectionPriorityEnum(ConnectionPriority value) {
+BmConnectionPriorityEnum _bmFromConnectionPriority(ConnectionPriority value) {
   switch (value) {
     case ConnectionPriority.balanced:
       return BmConnectionPriorityEnum.balanced;
@@ -70,7 +70,7 @@ BmConnectionPriorityEnum _bmConnectionPriorityEnum(ConnectionPriority value) {
   }
 }
 
-BluetoothBondState _bmToBluetoothBondState(BmBondStateResponse value) {
+BluetoothBondState _bmToBondState(BmBondStateResponse value) {
   switch (value.bondState) {
     case BmBondStateEnum.none:
       if (value.bondFailed) {
