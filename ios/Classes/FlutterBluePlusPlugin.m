@@ -154,7 +154,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             [self.centralManager stopScan];
 
-            [self disconnectAllDevices:false];
+            [self disconnectAllDevices:@"flutterHotRestart"];
 
             Log(LDEBUG, @"connectedPeripherals: %lu", self.connectedPeripherals.count);
 
@@ -827,19 +827,21 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     return nil;
 }
 
-- (void)disconnectAllDevices:(bool)isAdapterOff
+- (void)disconnectAllDevices:(NSString*)func
 {
-    Log(LDEBUG, @"disconnectAllDevices");
+    Log(LDEBUG, @"disconnectAllDevices(%@)", func);
 
     // request disconnections
     for (NSString *key in self.connectedPeripherals)
     {
         CBPeripheral *peripheral = [self.connectedPeripherals objectForKey:key];
+
         Log(LDEBUG, @"calling disconnect: %@", key);
 
-        // inexplicably, iOS does not call 'didDisconnectPeripheral' when
-        // the adapter is turned off, so we must send these responses manually
-        if (isAdapterOff) {
+        if ([func isEqualToString:@"adapterTurnOff"]) {
+            // inexplicably, iOS does not call 'didDisconnectPeripheral' when
+            // the adapter is turned off, so we must send these responses manually
+
             // See BmConnectionStateResponse
             NSDictionary *result = @{
                 @"remote_id":                [[peripheral identifier] UUIDString],
@@ -850,17 +852,20 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             // Send connection state
             [_methodChannel invokeMethod:@"OnConnectionStateChanged" arguments:result];
-        } else {
+        } 
+        
+        if ([func isEqualToString:@"flutterHotRestart"]) {
             // request disconnection
             // Note: when the adapter is turned off, it is an 'api misuse'
-            // to call cancelPeripheralConnection as it is implicit
+            // to call cancelPeripheralConnection as that is implicit
             [self.centralManager cancelPeripheralConnection:peripheral];
         }
     }
 
-    // iOS does not call 'didDisconnectPeripheral' after the
-    //  adapter is turned off, so we must clear this ourself
-    if (isAdapterOff) {
+    // normally connectedPeripherals will be updated by 'didDisconnectPeripheral',
+    // but iOS does not call 'didDisconnectPeripheral' when the
+    // adapter is turned off, so we must clear it ourself
+    if ([func isEqualToString:@"adapterTurnOff"]) {
         [self.connectedPeripherals removeAllObjects];
     }
 
@@ -944,7 +949,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     // was the adapter turned off?
     if (self->_centralManager.state != CBManagerStatePoweredOn) {
-        [self disconnectAllDevices:true];
+        [self disconnectAllDevices:@"adapterTurnOff"];
     }
 
     int adapterState = [self bmAdapterStateEnum:self->_centralManager.state];
