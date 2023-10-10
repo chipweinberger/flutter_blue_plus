@@ -1,3 +1,8 @@
+## 1.17.1
+* **[Fix]** timeout when connect is called when adapter is off
+* **[Fix]** android: was not calling disconnect callback when adapter turned off
+* **[Fix]** android: connectable flag was not working (regression 1.7.0)
+* **[Improve]** do not re-get adapterState when we already have it
 
 ## 1.17.0
 This release improves `lastValue` & `lastValueStream`.
