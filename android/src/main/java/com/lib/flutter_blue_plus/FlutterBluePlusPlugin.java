@@ -157,7 +157,7 @@ public class FlutterBluePlusPlugin implements
 
         pluginBinding = null;
 
-        disconnectAllDevices(true /* closeAll? */);
+        disconnectAllDevices("onDetachedFromEngine");
 
         context.unregisterReceiver(mBluetoothBondStateReceiver);
         context.unregisterReceiver(mBluetoothAdapterStateReceiver);
@@ -256,7 +256,7 @@ public class FlutterBluePlusPlugin implements
                         scanner.stopScan(getScanCallback());
                     }
 
-                    disconnectAllDevices(true  /* closeAll? */);
+                    disconnectAllDevices("flutterHotRestart");
 
                     log(LogLevel.DEBUG, "connectedPeripherals: " + mConnectedDevices.size());
 
@@ -1367,9 +1367,9 @@ public class FlutterBluePlusPlugin implements
         }
     }
 
-    private void disconnectAllDevices(boolean closeAll)
+    private void disconnectAllDevices(String func)
     {
-        log(LogLevel.DEBUG, "disconnectAllDevices");
+        log(LogLevel.DEBUG, "disconnectAllDevices("+func+")");
 
         // request disconnections
         for (BluetoothGatt gatt : mConnectedDevices.values()) {
@@ -1380,11 +1380,21 @@ public class FlutterBluePlusPlugin implements
                 log(LogLevel.DEBUG, "calling disconnect: " + remoteId);
                 gatt.disconnect();
 
+                // callback
+                if (func == "adapterTurnOff") {
+                    // make sure disconnect callback is called.
+                    // for some reason android does not always call this
+                    mGattCallback.onConnectionStateChange(gatt, 0, BluetoothProfile.STATE_DISCONNECTED);
+                }
+
                 // not autoconnected?
-                boolean notAutoConnected = mAutoConnect.get(remoteId) == null || mAutoConnect.get(remoteId) == false;
+                boolean notAutoConnected = mAutoConnect.get(remoteId) == false;
 
                 // close
-                if (closeAll || notAutoConnected) {
+                if (func == "flutterHotRestart" || 
+                    func == "onDetachedFromEngine" || 
+                    (func == "adapterTurnOff" && notAutoConnected))
+                {
                     // it is important to close after disconnection, otherwise we will 
                     // quickly run out of bluetooth resources, preventing new connections
                     log(LogLevel.DEBUG, "calling close: " + remoteId);
@@ -1435,7 +1445,7 @@ public class FlutterBluePlusPlugin implements
             // disconnect all devices
             if (adapterState == BluetoothAdapter.STATE_TURNING_OFF || 
                 adapterState == BluetoothAdapter.STATE_OFF) {
-                disconnectAllDevices(false  /* closeAll? */);
+                disconnectAllDevices("adapterTurnOff");
             }
             
             // see: BmBluetoothAdapterState
