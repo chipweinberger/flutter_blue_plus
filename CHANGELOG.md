@@ -410,7 +410,7 @@ This release improves error handling and reliability.
 This release marks the end of major work to improve reliability and
 simplicity of the FlutterBluePlus codebase. Please submit bug reports.
 
-* **[BREAKING CHANGE]** Android: When `read()` is called `onValueChangedStream` is pushed to as well. This change was made to make both platforms behave the same way. It is an unavoidable limitation of iOS. See: https://github.com/boskokg/flutter_blue_plus/issues/419
+* **[Breaking Change/Fix]** Android: When `read()` is called `onValueChangedStream` is pushed to as well. This change was made to make both platforms behave the same way. It is an unavoidable limitation of iOS. See: https://github.com/boskokg/flutter_blue_plus/issues/419
 * **[fix]** Android/iOS: mtu check minus 3 issue (reggression in 1.8.3)
 * **[fix]** Dart: BluetoothCharacteristic.state variable not working (bug introduced 1.8.6)
 * **[fix]** Dart: FlutterBluePlus.state variable not working (bug introduced 1.8.6)

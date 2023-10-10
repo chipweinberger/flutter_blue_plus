@@ -1,6 +1,5 @@
 part of flutter_blue_plus;
 
-
 /// State of the bluetooth adapter.
 enum BluetoothAdapterState { unknown, unavailable, unauthorized, turningOn, on, turningOff, off }
 
@@ -9,6 +8,14 @@ class DisconnectReason {
   final int? code; // specific to platform
   final String? description;
   DisconnectReason(this.platform, this.code, this.description);
+  @override
+  String toString() {
+    return 'DisconnectReason{'
+        'platform: $platform, '
+        'code: $code, '
+        '$description'
+        '}';
+  }
 }
 
 enum BluetoothConnectionState {

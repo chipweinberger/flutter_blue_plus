@@ -159,7 +159,7 @@ device.connectionState.listen((BluetoothConnectionState state) async {
         // 1. typically, start a periodic timer that tries to 
         //    periodically reconnect, or just call connect() again right now
         // 2. you must always re-discover services after disconnection!
-        // 3. you should cancel subscriptions to all characteristics you listened to
+        // 3. you should cancel all stream subscriptions
     }
 });
 
@@ -168,6 +168,22 @@ await device.connect();
 
 // Disconnect from device
 await device.disconnect();
+```
+
+### Get MTU and request larger size
+
+```dart
+// remember to cancel this subscriptions when disconnected!
+final mtuSubscription = device.mtu.listen((int mtu) {
+    // iOS: initial value is always 23, but iOS will quickly negotiate a higher value
+    // android: you must request higher mtu yourself
+    print("mtu $mtu");
+});
+
+// Very important!
+if (Platform.isAndroid) {
+    await device.requestMtu(512);
+}
 ```
 
 ### Discover services
@@ -180,16 +196,22 @@ services.forEach((service) {
 });
 ```
 
-### Read and write characteristics
+### Read Characteristics
 
 ```dart
 // Reads all characteristics
 var characteristics = service.characteristics;
 for(BluetoothCharacteristic c in characteristics) {
-    List<int> value = await c.read();
-    print(value);
+    if (c.properties.read) {
+        List<int> value = await c.read();
+        print(value);
+    }
 }
+```
 
+### Write Characteristic
+
+```dart
 // Writes to a characteristic
 await c.write([0x12, 0x34]);
 ```
@@ -243,19 +265,11 @@ await d.write([0x12, 0x34])
 If `onValueReceived` is never called, see [Common Problems](#common-problems) in the README.
 
 ```dart
-// Setup Listener for characteristic reads & notifies
-final subscription = characteristic.onValueReceived.listen((value) {
+// remember to cancel this subscriptions when disconnected!
+final chrSubscription = characteristic.onValueReceived.listen((value) {
     // onValueReceived is updated:
     //   - anytime read() is called
     //   - anytime a notification arrives (if subscribed)
-});
-
-// listen for disconnection
-device.connectionState.listen((BluetoothConnectionState state) {
-    if (state == BluetoothConnectionState.disconnected) {
-        // stop listening to characteristic
-        subscription.cancel();
-    }
 });
 
 // enable notifications
@@ -269,21 +283,13 @@ await characteristic.setNotifyValue(true);
 It is very convenient for simple characteristics that support both WRITE and READ (and/or NOTIFY). **e.g.** a "light switch toggle" characteristic. 
 
 ```dart
-// Setup Listener for characteristic reads & writes & notifies
-final subscription = characteristic.lastValueStream.listen((value) {
+// remember to cancel this subscriptions when disconnected!
+final chrSubscription = characteristic.lastValueStream.listen((value) {
     //lastValueStream` is updated:
     //   - anytime read() is called
     //   - anytime write() is called
     //   - anytime a notification arrives (if subscribed)
     //   - also when first listened to, it re-emits the last value for convenience.
-});
-
-// listen for disconnection
-device.connectionState.listen((BluetoothConnectionState state) {
-    if (state == BluetoothConnectionState.disconnected) {
-        // stop listening to characteristic
-        subscription.cancel();
-    }
 });
 
 // enable notifications
@@ -295,36 +301,13 @@ await characteristic.setNotifyValue(true);
 These devices are already connected to the system, but must be reconnected by *your app* before you can communicate with them.
 
 ```dart
-List<BluetoothDevice> connectedSystemDevices = await FlutterBluePlus.connectedSystemDevices;
-for (var d in connectedSystemDevices) {
+List<BluetoothDevice> devs = await FlutterBluePlus.connectedSystemDevices;
+for (var d in devs) {
     await d.connect(); // Must connect *our* app to the device
     await d.discoverServices();
 }
 ```
 
-### Read the MTU and request larger size
-
-```dart
-final subscription = device.mtu.listen((int mtu) {
-    // iOS: initial value is always 23, but iOS will quickly negotiate a higher value
-    // android: you must request higher mtu yourself
-    print("mtu $mtu");
-});
-
-// listen for disconnection
-device.connectionState.listen((BluetoothConnectionState state) {
-    if (state == BluetoothConnectionState.disconnected) {
-        // stop listening to mtu stream
-        subscription.cancel();
-    }
-});
-
-
-// (Android Only)
-if (Platform.isAndroid) {
-    await device.requestMtu(512);
-}
-```
 ### Create Bond (Android Only)
 
 **Note:** calling this is usually not necessary!! The platform will do it automatically. 
