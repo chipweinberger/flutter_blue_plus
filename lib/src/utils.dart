@@ -216,13 +216,13 @@ class _NewStreamWithInitialValueTransformer<T> extends StreamTransformerBase<T, 
   @override
   Stream<T> bind(Stream<T> stream) {
     if (stream.isBroadcast) {
-      return _bindBroadcast(stream);
+      return _bind(stream).asBroadcastStream();
     } else {
-      return _bindSingleSubscription(stream);
+      return _bind(stream);
     }
   }
 
-  Stream<T> _bindSingleSubscription(Stream<T> stream) {
+  Stream<T> _bind(Stream<T> stream) {
     StreamController<T>? controller;
     StreamSubscription<T>? subscription;
 
@@ -248,28 +248,6 @@ class _NewStreamWithInitialValueTransformer<T> extends StreamTransformerBase<T, 
       },
       onCancel: () {
         return subscription?.cancel();
-      },
-      sync: true,
-    );
-
-    return controller.stream;
-  }
-
-  Stream<T> _bindBroadcast(Stream<T> stream) {
-    StreamController<T>? controller;
-    StreamSubscription<T>? subscription;
-
-    controller = StreamController<T>.broadcast(
-      onListen: () {
-        // Emit the initial value
-        controller?.add(initialValue);
-
-        subscription = stream.listen(controller?.add, onError: controller?.addError, onDone: () {
-          controller?.close();
-        });
-      },
-      onCancel: () {
-        subscription?.cancel();
       },
       sync: true,
     );
