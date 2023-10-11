@@ -213,144 +213,6 @@ class _BufferStream<T> {
   }
 }
 
-// helper for 'doOnDone' method for streams.
-class _OnDoneTransformer<T> extends StreamTransformerBase<T, T> {
-  final Function onDone;
-
-  _OnDoneTransformer({required this.onDone});
-
-  @override
-  Stream<T> bind(Stream<T> stream) {
-    if (stream.isBroadcast) {
-      return _bindBroadcast(stream);
-    } else {
-      return _bindSingleSubscription(stream);
-    }
-  }
-
-  Stream<T> _bindSingleSubscription(Stream<T> stream) {
-    StreamController<T>? controller;
-    StreamSubscription<T>? subscription;
-
-    controller = StreamController<T>(
-      onListen: () {
-        subscription = stream.listen(
-          controller?.add,
-          onError: controller?.addError,
-          onDone: () {
-            onDone();
-            controller?.close();
-          },
-        );
-      },
-      onPause: ([Future<dynamic>? resumeSignal]) {
-        subscription?.pause(resumeSignal);
-      },
-      onResume: () {
-        subscription?.resume();
-      },
-      onCancel: () {
-        return subscription?.cancel();
-      },
-      sync: true,
-    );
-
-    return controller.stream;
-  }
-
-  Stream<T> _bindBroadcast(Stream<T> stream) {
-    StreamController<T>? controller;
-    StreamSubscription<T>? subscription;
-
-    controller = StreamController<T>.broadcast(
-      onListen: () {
-        subscription = stream.listen(controller?.add, onError: controller?.addError, onDone: () {
-          onDone();
-          controller?.close();
-        });
-      },
-      onCancel: () {
-        subscription?.cancel();
-      },
-      sync: true,
-    );
-
-    return controller.stream;
-  }
-}
-
-// helper for 'doOnCancel' method for streams.
-class _OnCancelTransformer<T> extends StreamTransformerBase<T, T> {
-  final Function onCancel;
-
-  _OnCancelTransformer({required this.onCancel});
-
-  @override
-  Stream<T> bind(Stream<T> stream) {
-    if (stream.isBroadcast) {
-      return _bindBroadcast(stream);
-    } else {
-      return _bindSingleSubscription(stream);
-    }
-  }
-
-  Stream<T> _bindSingleSubscription(Stream<T> stream) {
-    StreamController<T>? controller;
-    StreamSubscription<T>? subscription;
-
-    controller = StreamController<T>(
-      onListen: () {
-        subscription = stream.listen(
-          controller?.add,
-          onError: (Object error) {
-            controller?.addError(error);
-            controller?.close();
-          },
-          onDone: controller?.close,
-        );
-      },
-      onPause: ([Future<dynamic>? resumeSignal]) {
-        subscription?.pause(resumeSignal);
-      },
-      onResume: () {
-        subscription?.resume();
-      },
-      onCancel: () {
-        onCancel();
-        return subscription?.cancel();
-      },
-      sync: true,
-    );
-
-    return controller.stream;
-  }
-
-  Stream<T> _bindBroadcast(Stream<T> stream) {
-    StreamController<T>? controller;
-    StreamSubscription<T>? subscription;
-
-    controller = StreamController<T>.broadcast(
-      onListen: () {
-        subscription = stream.listen(
-          controller?.add,
-          onError: (Object error) {
-            controller?.addError(error);
-            controller?.close();
-          },
-          onDone: controller?.close,
-        );
-      },
-      onCancel: () {
-        onCancel();
-        subscription?.cancel();
-      },
-      sync: true,
-    );
-
-    return controller.stream;
-  }
-}
-
 // Helper for 'newStreamWithInitialValue' method for streams.
 class _NewStreamWithInitialValueTransformer<T> extends StreamTransformerBase<T, T> {
   final T initialValue;
@@ -407,6 +269,7 @@ class _NewStreamWithInitialValueTransformer<T> extends StreamTransformerBase<T, 
       onListen: () {
         // Emit the initial value
         controller?.add(initialValue);
+        
         subscription = stream.listen(controller?.add, onError: controller?.addError, onDone: () {
           controller?.close();
         });
@@ -418,20 +281,6 @@ class _NewStreamWithInitialValueTransformer<T> extends StreamTransformerBase<T, 
     );
 
     return controller.stream;
-  }
-}
-
-extension _StreamDoOnDone<T> on Stream<T> {
-  // ignore: unused_element
-  Stream<T> doOnDone(void Function() onDone) {
-    return transform(_OnDoneTransformer(onDone: onDone));
-  }
-}
-
-extension _StreamDoOnCancel<T> on Stream<T> {
-  // ignore: unused_element
-  Stream<T> doOnCancel(void Function() onCancel) {
-    return transform(_OnCancelTransformer(onCancel: onCancel));
   }
 }
 
