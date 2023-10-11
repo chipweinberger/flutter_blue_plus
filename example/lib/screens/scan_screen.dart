@@ -19,6 +19,7 @@ class ScanScreen extends StatefulWidget {
 class _ScanScreenState extends State<ScanScreen> {
   List<BluetoothDevice> _connectedDevices = [];
   List<ScanResult> _scanResults = [];
+  bool _isScanning = false;
   late StreamSubscription<List<ScanResult>> _scanResultsSubscription;
   late StreamSubscription<bool> _isScanningSubscription;
 
@@ -37,6 +38,7 @@ class _ScanScreenState extends State<ScanScreen> {
     });
 
     _isScanningSubscription = FlutterBluePlus.isScanning.listen((state) {
+      _isScanning = state;
       setState(() {});
     });
   }
@@ -70,13 +72,12 @@ class _ScanScreenState extends State<ScanScreen> {
       Snackbar.show(ABC.c, prettyException("Connect Error:", e), success: false);
     });
     MaterialPageRoute route = MaterialPageRoute(
-        builder: (context) =>  DeviceScreen(device: device),
-        settings: RouteSettings(name: '/DeviceScreen'));
+        builder: (context) => DeviceScreen(device: device), settings: RouteSettings(name: '/DeviceScreen'));
     Navigator.of(context).push(route);
   }
 
   Future onRefresh() {
-    if (FlutterBluePlus.isScanningNow == false) {
+    if (_isScanning == false) {
       FlutterBluePlus.startScan(timeout: const Duration(seconds: 15));
     }
     setState(() {});
