@@ -3,30 +3,15 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import 'screens/bluetooth_off_screen.dart';
 import 'screens/scan_screen.dart';
 
 void main() {
-  if (Platform.isAndroid) {
-    WidgetsFlutterBinding.ensureInitialized();
-    [
-      Permission.location,
-      Permission.storage,
-      Permission.bluetooth,
-      Permission.bluetoothConnect,
-      Permission.bluetoothScan
-    ].request().then((status) {
-      runApp(const FlutterBlueApp());
-    });
-  } else {
-    runApp(const FlutterBlueApp());
-  }
+  runApp(const FlutterBlueApp());
 }
 
 class FlutterBlueApp extends StatefulWidget {
@@ -65,6 +50,7 @@ class _FlutterBlueAppState extends State<FlutterBlueApp> {
     return MaterialApp(
       color: Colors.lightBlue,
       home: screen,
+      showPerformanceOverlay: true,
       navigatorObservers: [BluetoothAdapterStateObserver()],
     );
   }
