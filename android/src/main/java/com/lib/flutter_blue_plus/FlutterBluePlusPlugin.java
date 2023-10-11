@@ -328,6 +328,12 @@ public class FlutterBluePlusPlugin implements
 
                     ensurePermissions(permissions, (granted, perm) -> {
 
+                        if (granted == false) {
+                            result.error("turnOn",
+                                String.format("FlutterBluePlus requires %s permission", perm), null);
+                            return;
+                        }
+
                         if (mBluetoothAdapter.isEnabled()) {
                             result.success(true); // no work to do
                             return;
@@ -356,6 +362,12 @@ public class FlutterBluePlusPlugin implements
                     }
 
                     ensurePermissions(permissions, (granted, perm) -> {
+
+                        if (granted == false) {
+                            result.error("turnOff",
+                                String.format("FlutterBluePlus requires %s permission", perm), null);
+                            return;
+                        }
 
                         if (mBluetoothAdapter.isEnabled() == false) {
                             result.success(true); // no work to do
@@ -400,7 +412,8 @@ public class FlutterBluePlusPlugin implements
                     ensurePermissions(permissions, (granted, perm) -> {
 
                         if (granted == false) {
-                            result.error("startScan", String.format("FlutterBluePlus requires %s permission", perm), null);
+                            result.error("startScan", 
+                                String.format("FlutterBluePlus requires %s permission", perm), null);
                             return;
                         }
 
@@ -465,7 +478,7 @@ public class FlutterBluePlusPlugin implements
 
                     ensurePermissions(permissions, (granted, perm) -> {
 
-                        if (!granted) {
+                        if (granted == false) {
                             result.error("getConnectedSystemDevices",
                                 String.format("FlutterBluePlus requires %s permission", perm), null);
                             return;
@@ -497,7 +510,7 @@ public class FlutterBluePlusPlugin implements
 
                     ensurePermissions(permissions, (granted, perm) -> {
 
-                        if (!granted) {
+                        if (granted == false) {
                             result.error("connect",
                                 String.format("FlutterBluePlus requires %s for new connection", perm), null);
                             return;
