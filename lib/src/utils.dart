@@ -69,11 +69,7 @@ extension FutureTimeout<T> on Future<T> {
       if (event == BluetoothConnectionState.disconnected) {
         if (!completer.isCompleted) {
           completer.completeError(FlutterBluePlusException(
-            ErrorPlatform.dart, 
-            function, 
-            FbpErrorCode.deviceIsDisconnected.index, 
-            "Device is disconnected"
-          ));
+              ErrorPlatform.dart, function, FbpErrorCode.deviceIsDisconnected.index, "Device is disconnected"));
         }
       }
     });
@@ -104,11 +100,7 @@ extension FutureTimeout<T> on Future<T> {
       if (event == BluetoothAdapterState.off || event == BluetoothAdapterState.turningOff) {
         if (!completer.isCompleted) {
           completer.completeError(FlutterBluePlusException(
-            ErrorPlatform.dart, 
-            function, 
-            FbpErrorCode.adapterIsOff.index, 
-            "Bluetooth adapter is off"
-          ));
+              ErrorPlatform.dart, function, FbpErrorCode.adapterIsOff.index, "Bluetooth adapter is off"));
         }
       }
     });
@@ -143,9 +135,11 @@ class _StreamController<T> {
   _StreamController({required T initialValue}) : this.latestValue = initialValue;
 
   Stream<T> get stream {
-    return latestValue != null
-      ? _controller.stream.newStreamWithInitialValue(latestValue!)
-      : _controller.stream;
+    if (latestValue != null) {
+      return _controller.stream.newStreamWithInitialValue(latestValue!);
+    } else {
+      return _controller.stream;
+    }
   }
 
   T get value => latestValue;
@@ -269,7 +263,7 @@ class _NewStreamWithInitialValueTransformer<T> extends StreamTransformerBase<T, 
       onListen: () {
         // Emit the initial value
         controller?.add(initialValue);
-        
+
         subscription = stream.listen(controller?.add, onError: controller?.addError, onDone: () {
           controller?.close();
         });
