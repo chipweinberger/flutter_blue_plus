@@ -3,6 +3,17 @@
 
 Breaking changes in FlutterBluePlus, listed version by version.
 
+## 1.8.6
+* renamed: BluetoothDevice.id -> remoteId
+* renamed: FlutterBluePlus.name -> adapterName
+* renamed: BluetoothDevice.name -> platformName
+* renamed: FlutterBluePlus.state -> adapterState 
+* renamed: BluetoothDevice.state -> connectionState
+
+## 1.9.0
+
+* Android: push to `onValueReceived` when read() is called, to match iOS behavior
+
 ## 1.10.0
 
 ### .instance removed
@@ -13,10 +24,12 @@ i.e. `FlutterBluePlus.instance.startScan` becomes `FlutterBluePlus.startScan`
 
 ### turnOn and turnOff
 
-Typically no code changes are required. However:
+* they now wait for completion if you use `await`
+* they throw on error, instead of returning false
 
-* they now properly wait for completion if you use `await`
-* they throw on error, instead of return true & false
+## 1.11.0
+
+* renamed: connectedDevices -> connectedSystemDevices
 
 ## 1.15.0
 
@@ -155,3 +168,13 @@ await FlutterBluePlus.startScan(timeout: Duration(seconds: 10));
 
 BluetoothDevice? myDevice = await myDeviceFuture;
 ```
+
+## 1.16.0
+
+* renamed: BluetoothDevice.localName -> platformName
+* deleted: `BluetoothDevice.type` & `BluetoothDevice.localName` from constructor
+* deleted: `servicesStream` & `isDiscoveringServices` 
+
+## 1.17.0
+
+* `lastValue` & `lastValueStream` are now updated when `write()` is called
