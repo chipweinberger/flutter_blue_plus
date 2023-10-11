@@ -18,7 +18,7 @@ extension Extra on BluetoothDevice {
   }
 
   // connect & update stream
-  Future<void> connectDevice() async {
+  Future<void> connectAndUpdateStream() async {
     _stream.add(true);
     try {
       await connect();
@@ -28,7 +28,7 @@ extension Extra on BluetoothDevice {
   }
 
   // disconnect & update stream
-  Future<void> disconnectDevice() async {
+  Future<void> disconnectAndUpdateStream() async {
     _stream.add(true);
     try {
       await disconnect();

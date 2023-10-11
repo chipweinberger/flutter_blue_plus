@@ -70,7 +70,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
 
   Future onConnectPressed() async {
     try {
-      await widget.device.connectDevice();
+      await widget.device.connectAndUpdateStream();
       Snackbar.show(ABC.c, "Connect: Success", success: true);
     } catch (e) {
       Snackbar.show(ABC.c, prettyException("Connect Error:", e), success: false);
@@ -79,7 +79,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
 
   Future onDisconnectPressed() async {
     try {
-      await widget.device.disconnectDevice();
+      await widget.device.disconnectAndUpdateStream();
       Snackbar.show(ABC.c, "Disconnect: Success", success: true);
     } catch (e) {
       Snackbar.show(ABC.c, prettyException("Disconnect Error:", e), success: false);
