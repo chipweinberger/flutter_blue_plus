@@ -1,3 +1,6 @@
+## 1.17.3
+* **[Fix]** android: turnOn throws exception if permission denied
+
 ## 1.17.2
 This bug affected mtu, lastValueStream, adapterState, & bondState.
 * **[Fix]** newStreamWithInitialValue was not emitting initial value. (regression 1.16.6)
