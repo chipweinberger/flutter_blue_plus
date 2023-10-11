@@ -1,3 +1,6 @@
+## 1.17.5
+* **[Example]** accidentally left performanceOverlay enabled (regression 1.17.3)
+
 ## 1.17.4
 * **[Example]** remove PermissionHandler dependency. It is no longer needed.
 * **[Example]** ScanScreen: use ListView instead of SingleChildScrollView
