@@ -2,13 +2,13 @@ import 'utils.dart';
 
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
-final Map<DeviceIdentifier, StreamControllerEx<bool>> _global = {};
+final Map<DeviceIdentifier, StreamControllerReemit<bool>> _global = {};
 
 /// connect & disconnect + update stream
 extension Extra on BluetoothDevice {
   // convenience
-  StreamControllerEx<bool> get _stream {
-    _global[remoteId] ??= StreamControllerEx(initialValue: false);
+  StreamControllerReemit<bool> get _stream {
+    _global[remoteId] ??= StreamControllerReemit(initialValue: false);
     return _global[remoteId]!;
   }
 

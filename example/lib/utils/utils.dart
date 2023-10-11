@@ -1,20 +1,17 @@
-
 import 'dart:async';
 
 // It is essentially a stream but:
 //  1. we cache the latestValue of the stream
 //  2. the "latestValue" is re-emitted whenever the stream is listened to
-class StreamControllerEx<T> {
+class StreamControllerReemit<T> {
   T? _latestValue;
 
   final StreamController<T> _controller = StreamController<T>.broadcast();
 
-  StreamControllerEx({T? initialValue}) : _latestValue = initialValue;
+  StreamControllerReemit({T? initialValue}) : _latestValue = initialValue;
 
   Stream<T> get stream {
-    return _latestValue != null
-        ? _controller.stream.newStreamWithInitialValue(_latestValue!)
-        : _controller.stream;
+    return _latestValue != null ? _controller.stream.newStreamWithInitialValue(_latestValue!) : _controller.stream;
   }
 
   T? get value => _latestValue;
@@ -29,14 +26,12 @@ class StreamControllerEx<T> {
   }
 }
 
-
 // return a new stream that imediately emits an initial value
 extension _StreamNewStreamWithInitialValue<T> on Stream<T> {
   Stream<T> newStreamWithInitialValue(T initialValue) {
     return transform(_NewStreamWithInitialValueTransformer(initialValue));
   }
 }
-
 
 // Helper for 'newStreamWithInitialValue' method for streams.
 class _NewStreamWithInitialValueTransformer<T> extends StreamTransformerBase<T, T> {
@@ -47,13 +42,13 @@ class _NewStreamWithInitialValueTransformer<T> extends StreamTransformerBase<T, 
   @override
   Stream<T> bind(Stream<T> stream) {
     if (stream.isBroadcast) {
-      return _bindBroadcast(stream);
+      return _bind(stream).asBroadcastStream();
     } else {
-      return _bindSingleSubscription(stream);
+      return _bind(stream);
     }
   }
 
-  Stream<T> _bindSingleSubscription(Stream<T> stream) {
+  Stream<T> _bind(Stream<T> stream) {
     StreamController<T>? controller;
     StreamSubscription<T>? subscription;
 
@@ -79,27 +74,6 @@ class _NewStreamWithInitialValueTransformer<T> extends StreamTransformerBase<T, 
       },
       onCancel: () {
         return subscription?.cancel();
-      },
-      sync: true,
-    );
-
-    return controller.stream;
-  }
-
-  Stream<T> _bindBroadcast(Stream<T> stream) {
-    StreamController<T>? controller;
-    StreamSubscription<T>? subscription;
-
-    controller = StreamController<T>.broadcast(
-      onListen: () {
-        // Emit the initial value
-        controller?.add(initialValue);
-        subscription = stream.listen(controller?.add, onError: controller?.addError, onDone: () {
-          controller?.close();
-        });
-      },
-      onCancel: () {
-        subscription?.cancel();
       },
       sync: true,
     );
