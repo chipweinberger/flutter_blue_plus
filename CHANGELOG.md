@@ -1,3 +1,7 @@
+## 1.17.4
+* **[Example]** remove PermissionHandler dependency. It is no longer needed.
+* **[Example]** ScanScreen: use ListView instead of SingleChildScrollView
+
 ## 1.17.3
 * **[Fix]** android: turnOn throws exception if permission denied
 
