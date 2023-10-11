@@ -1,3 +1,7 @@
+## 1.17.2
+This bug affected mtu, lastValueStream, adapterState, & bondState.
+* **[Fix]** newStreamWithInitialValue was not emitting initial value. (regression 1.16.6)
+
 ## 1.17.1
 * **[Fix]** timeout when connect is called when adapter is off
 * **[Fix]** android: was not calling disconnect callback when adapter turned off
