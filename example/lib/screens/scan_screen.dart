@@ -134,13 +134,11 @@ class _ScanScreenState extends State<ScanScreen> {
         ),
         body: RefreshIndicator(
           onRefresh: onRefresh,
-          child: SingleChildScrollView(
-            child: Column(
-              children: <Widget>[
-                ..._buildConnectedDeviceTiles(context),
-                ..._buildScanResultTiles(context),
-              ],
-            ),
+          child: ListView(
+            children: <Widget>[
+              ..._buildConnectedDeviceTiles(context),
+              ..._buildScanResultTiles(context),
+            ],
           ),
         ),
         floatingActionButton: buildScanButton(context),
