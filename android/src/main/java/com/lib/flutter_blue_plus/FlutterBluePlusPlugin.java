@@ -1686,7 +1686,7 @@ public class FlutterBluePlusPlugin implements
         }
 
         @Override
-        @TargetApi(33) // newer function adds byte[] value argument
+        @TargetApi(33) // newer function with byte[] value argument
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, byte[] value)
         {
             // this callback is only for notifications & indications
@@ -1709,70 +1709,13 @@ public class FlutterBluePlusPlugin implements
         }
 
         @Override
-        @SuppressWarnings("deprecation") // needed for android 12 & lower compatability
-        public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic)
-        {
-            // this callback is only for notifications & indications
-            log(LogLevel.DEBUG, "onCharacteristicChanged: uuid: " + uuid128(characteristic.getUuid()));
-
-            ServicePair pair = getServicePair(gatt, characteristic);
-
-            // getValue() was deprecated in API level 33 because the function makes it look like
-            // you could always call getValue on a characteristic. But in reality, this
-            // only works after a *read* has been made
-            byte[] value = characteristic.getValue();
-
-            // see: BmCharacteristicData
-            HashMap<String, Object> response = new HashMap<>();
-            response.put("remote_id", gatt.getDevice().getAddress());
-            response.put("service_uuid", uuid128(pair.primary));
-            response.put("secondary_service_uuid", pair.secondary != null ? uuid128(pair.secondary) : null);
-            response.put("characteristic_uuid", uuid128(characteristic.getUuid()));
-            response.put("value", bytesToHex(value));
-            response.put("success", 1);
-            response.put("error_code", 0);
-            response.put("error_string", gattErrorString(0));
-
-            invokeMethodUIThread("OnCharacteristicReceived", response);
-        }
-
-        @Override
-        @TargetApi(33) // newer function adds byte[] value argument
+        @TargetApi(33) // newer function with byte[] value argument
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, byte[] value, int status)
         {
             // this callback is only for explicit characteristic reads
             log(LogLevel.DEBUG, "onCharacteristicRead: uuid: " + uuid128(characteristic.getUuid()) + " status: " + status);
 
             ServicePair pair = getServicePair(gatt, characteristic);
-
-            // see: BmCharacteristicData
-            HashMap<String, Object> response = new HashMap<>();
-            response.put("remote_id", gatt.getDevice().getAddress());
-            response.put("service_uuid", uuid128(pair.primary));
-            response.put("secondary_service_uuid", pair.secondary != null ? uuid128(pair.secondary) : null);
-            response.put("characteristic_uuid", uuid128(characteristic.getUuid()));
-            response.put("value", bytesToHex(value));
-            response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
-            response.put("error_code", status);
-            response.put("error_string", gattErrorString(status));
-
-            invokeMethodUIThread("OnCharacteristicReceived", response);
-        }
-        
-
-        @Override
-        @SuppressWarnings("deprecation") // needed for android 12 & lower compatability
-        public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status)
-        {
-            // this callback is only for explicit characteristic reads
-            log(LogLevel.DEBUG, "onCharacteristicRead: uuid: " + uuid128(characteristic.getUuid()) + " status: " + status);
-
-            ServicePair pair = getServicePair(gatt, characteristic);
-
-            // getValue() was deprecated in API level 33 because the function makes it look like
-            // you could always call getValue on a characteristic. But in reality, this
-            // only works after a *read* has been made
-            byte[] value = characteristic.getValue();
 
             // see: BmCharacteristicData
             HashMap<String, Object> response = new HashMap<>();
@@ -1832,34 +1775,6 @@ public class FlutterBluePlusPlugin implements
             log(LogLevel.DEBUG, "onDescriptorRead: uuid: " + uuid128(descriptor.getUuid()) + " status: " + status);
 
             ServicePair pair = getServicePair(gatt, descriptor.getCharacteristic());
-
-            // see: BmDescriptorData
-            HashMap<String, Object> response = new HashMap<>();
-            response.put("remote_id", gatt.getDevice().getAddress());
-            response.put("service_uuid", uuid128(pair.primary));
-            response.put("secondary_service_uuid", pair.secondary != null ? uuid128(pair.secondary) : null);
-            response.put("characteristic_uuid", uuid128(descriptor.getCharacteristic().getUuid()));
-            response.put("descriptor_uuid", uuid128(descriptor.getUuid()));
-            response.put("value", bytesToHex(value));
-            response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
-            response.put("error_code", status);
-            response.put("error_string", gattErrorString(status));
-
-            invokeMethodUIThread("OnDescriptorRead", response);
-        }
-
-        @Override
-        @SuppressWarnings("deprecation") // needed for android 12 & lower compatability
-        public void onDescriptorRead(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status)
-        {
-            log(LogLevel.DEBUG, "onDescriptorRead: uuid: " + uuid128(descriptor.getUuid()) + " status: " + status);
-
-            ServicePair pair = getServicePair(gatt, descriptor.getCharacteristic());
-
-            // this was deprecated in API level 33 because the api makes it look like
-            // you could always call getValue on a descriptor. But in reality, this
-            // only works after a *read* has been made, not a *write*.
-            byte[] value = descriptor.getValue();
 
             // see: BmDescriptorData
             HashMap<String, Object> response = new HashMap<>();
@@ -1952,6 +1867,37 @@ public class FlutterBluePlusPlugin implements
 
             invokeMethodUIThread("OnMtuChanged", response);
         }
+
+        @Override
+        @SuppressWarnings("deprecation") // needed for android 12 & lower compatability
+        public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic)
+        {
+            // getValue() was deprecated in API level 33 because the function makes it look like
+            // you could always call getValue on a characteristic. But in reality, this
+            // only works after a *read* has been made
+            this.onCharacteristicChanged(gatt, characteristic, characteristic.getValue());
+        }
+        
+        @Override
+        @SuppressWarnings("deprecation") // needed for android 12 & lower compatability
+        public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status)
+        {
+            // getValue() was deprecated in API level 33 because the function makes it look like
+            // you could always call getValue on a characteristic. But in reality, this
+            // only works after a *read* has been made
+            this.onCharacteristicRead(gatt, characteristic, characteristic.getValue(), status);
+        }
+
+        @Override
+        @SuppressWarnings("deprecation") // needed for android 12 & lower compatability
+        public void onDescriptorRead(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status)
+        {
+            // getValue() was deprecated in API level 33 because the api makes it look like
+            // you could always call getValue on a descriptor. But in reality, this
+            // only works after a *read* has been made, not a *write*.
+            this.onDescriptorRead(gatt, descriptor, status, descriptor.getValue());
+        }
+
     }; // BluetoothGattCallback
 
     //////////////////////////////////////////////////////////////////////
