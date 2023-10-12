@@ -433,10 +433,10 @@ simplicity of the FlutterBluePlus codebase. Please submit bug reports.
 * **[fix]** Android/iOS: mtu check minus 3 issue (reggression in 1.8.3)
 * **[fix]** Dart: BluetoothCharacteristic.state variable not working (bug introduced 1.8.6)
 * **[fix]** Dart: FlutterBluePlus.state variable not working (bug introduced 1.8.6)
-* **[improve]** Dart: deprecate: BluetoothCharacteristic.value -> lastValueStream
-* **[improve]** Dart: deprecate: BluetoothDescriptor.value -> lastValueStream
-* **[improve]** Dart: deprecate: BluetoothCharacteristic.onValueChangedStream -> onValueReceived
-* **[improve]** Dart: deprecate: BluetoothDescriptor.onValueChangedStream -> onValueReceived
+* **[rename]** BluetoothCharacteristic.value -> lastValueStream
+* **[rename]** BluetoothDescriptor.value -> lastValueStream
+* **[rename]** BluetoothCharacteristic.onValueChangedStream -> onValueReceived
+* **[rename]** BluetoothDescriptor.onValueChangedStream -> onValueReceived
 * **[refactor]** Dart: adapterState to use methodChannel
 * **[refactor]** Dart: various 'bm' message schemas to use simpler characteristic structure
 * **[refactor]** Dart: BmSetNotificationResponse removed. It is simpler to reuse BmWriteDescriptorResponse
