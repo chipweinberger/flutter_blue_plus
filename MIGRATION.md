@@ -4,15 +4,19 @@
 Breaking changes in FlutterBluePlus, listed version by version.
 
 ## 1.8.6
-* renamed: BluetoothDevice.id -> remoteId
-* renamed: FlutterBluePlus.name -> adapterName
-* renamed: BluetoothDevice.name -> platformName
-* renamed: FlutterBluePlus.state -> adapterState 
-* renamed: BluetoothDevice.state -> connectionState
+* **renamed:** `BluetoothDevice.id` -> `remoteId`
+* **renamed:** `FlutterBluePlus.name` -> `adapterName`
+* **renamed:** `BluetoothDevice.name` -> `platformName`
+* **renamed:** `FlutterBluePlus.state` -> `adapterState`
+* **renamed:** `BluetoothDevice.state` -> `connectionState`
 
 ## 1.9.0
 
-* Android: push to `onValueReceived` when read() is called, to match iOS behavior
+* **Behavior Change:** Android: push to `onValueReceived` when read() is called, to match iOS behavior
+* **renamed:** `BluetoothCharacteristic.value` -> `lastValueStream`
+* **renamed:** `BluetoothDescriptor.value` -> `lastValueStream`
+* **renamed:** `BluetoothCharacteristic.onValueChangedStream` -> `onValueReceived`
+* **renamed:** `BluetoothDescriptor.onValueChangedStream` -> `onValueReceived`
 
 ## 1.10.0
 
@@ -29,7 +33,7 @@ i.e. `FlutterBluePlus.instance.startScan` becomes `FlutterBluePlus.startScan`
 
 ## 1.11.0
 
-* renamed: connectedDevices -> connectedSystemDevices
+* **renamed:** `connectedDevices` -> `connectedSystemDevices`
 
 ## 1.15.0
 
@@ -171,10 +175,10 @@ BluetoothDevice? myDevice = await myDeviceFuture;
 
 ## 1.16.0
 
-* renamed: BluetoothDevice.localName -> platformName
-* deleted: `BluetoothDevice.type` & `BluetoothDevice.localName` from constructor
-* deleted: `servicesStream` & `isDiscoveringServices` 
+* **renamed:** `BluetoothDevice.localName` -> `platformName`
+* **deleted:** `BluetoothDevice.type` & `BluetoothDevice.localName` from constructor
+* **deleted:** `servicesStream` & `isDiscoveringServices` 
 
 ## 1.17.0
 
-* `lastValue` & `lastValueStream` are now updated when `write()` is called
+* **Behavior Change:** `lastValue` & `lastValueStream` are now updated when `write()` is called
