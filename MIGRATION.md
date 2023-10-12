@@ -12,7 +12,7 @@ Breaking changes in FlutterBluePlus, listed version by version.
 
 ## 1.9.0
 
-* **Behavior Change:** Android: push to `onValueReceived` when read() is called, to match iOS behavior
+* **Behavior Change:** Android: push to `onValueReceived` when `read()` is called, to match iOS behavior
 * **renamed:** `BluetoothCharacteristic.value` -> `lastValueStream`
 * **renamed:** `BluetoothDescriptor.value` -> `lastValueStream`
 * **renamed:** `BluetoothCharacteristic.onValueChangedStream` -> `onValueReceived`
