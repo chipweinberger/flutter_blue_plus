@@ -1,3 +1,7 @@
+## 1.18.0
+This release improves `bondState` stream
+* **[Breaking Change]** bondState: directly expose prevBond instead of lost/failed flags
+
 ## 1.17.6
 * **[Fix]** scanResults: clear scan results on stopScan (regression 1.16.8)
 
