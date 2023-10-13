@@ -182,3 +182,7 @@ BluetoothDevice? myDevice = await myDeviceFuture;
 ## 1.17.0
 
 * **Behavior Change:** `lastValue` & `lastValueStream` are now updated when `write()` is called
+
+## 1.18.0
+
+* **Breaking Change** bondState: directly expose prevBond instead of lost/failed flags

@@ -1,3 +1,6 @@
+## 1.18.3
+* **[Refactor]** bondState: finish refactor started in 1.18.0
+
 ## 1.18.2
 * **[Fix]** bondState: must *explicitly* check for null prevState (regression 1.18.0)
 
