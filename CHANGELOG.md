@@ -1,3 +1,6 @@
+## 1.18.1
+* **[Fix]** bondState: handle null prevState
+
 ## 1.18.0
 This release improves `bondState` stream
 * **[Breaking Change]** bondState: directly expose prevBond instead of lost/failed flags
