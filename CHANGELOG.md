@@ -638,7 +638,11 @@ This release closes many open issues on Github.
 
 * First public release
 
-## Versions made while fixing bugs in fork https://github.com/boskokg/flutter_blue:
+---
+
+# FORKED FLUTTER_BLUE
+
+---
 
 ## 0.12.0
 
@@ -676,12 +680,6 @@ This release closes many open issues on Github.
 * Android protobuf-gradle-plugin:0.8.15 -> 0.8.17
 * Ios example upgrade to latest flutter 2.5
 * deprecated/removed widgets fixed in example
-
----
-
-# FORKED FLUTTER_BLUE
-
----
 
 ## 0.8.0
 * Migrate the plugin to null safety.
