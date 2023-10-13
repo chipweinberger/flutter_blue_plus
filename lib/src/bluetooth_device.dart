@@ -535,13 +535,13 @@ class BluetoothDevice {
     if (FlutterBluePlus._bondStates[remoteId] != null) {
       // we prefer to use the cached bond state (if available) because
       // getBondState is not able to return the previous bondState
-      BluetoothBondState initialValue = _bmToBondState(FlutterBluePlus._bondStates[remoteId]!);
+      BluetoothBondState initialValue = _bmToBluetoothBondState(FlutterBluePlus._bondStates[remoteId]!);
       yield* FlutterBluePlus._methodStream.stream
           .where((m) => m.method == "OnBondStateChanged")
           .map((m) => m.arguments)
           .map((args) => BmBondStateResponse.fromMap(args))
           .where((p) => p.remoteId == remoteId.str)
-          .map((p) => _bmToBondState(p))
+          .map((p) => _bmToBluetoothBondState(p))
           .newStreamWithInitialValue(initialValue);
     } else {
       // start listening now so we do not miss any changes
@@ -551,13 +551,13 @@ class BluetoothDevice {
           .map((m) => m.arguments)
           .map((args) => BmBondStateResponse.fromMap(args))
           .where((p) => p.remoteId == remoteId.str)
-          .map((p) => _bmToBondState(p)));
+          .map((p) => _bmToBluetoothBondState(p)));
 
       // must get the initial state from the system.
       BluetoothBondState initialValue = await FlutterBluePlus._methods
           .invokeMethod('getBondState', remoteId.str)
           .then((args) => BmBondStateResponse.fromMap(args))
-          .then((p) => _bmToBondState(p));
+          .then((p) => _bmToBluetoothBondState(p));
 
       // make sure the initial value has not become out of date
       if (buffer.hasReceivedValue == false) {
