@@ -173,7 +173,7 @@ await device.disconnect();
 ### Get MTU and request larger size
 
 ```dart
-// remember to cancel this subscriptions when disconnected!
+// remember to cancel this subscription when disconnected!
 final mtuSubscription = device.mtu.listen((int mtu) {
     // iOS: initial value is always 23, but iOS will quickly negotiate a higher value
     // android: you must request higher mtu yourself
@@ -189,7 +189,7 @@ if (Platform.isAndroid) {
 ### Discover services
 
 ```dart
-// Note: You must call discoverServices after every connection!
+// Note: You must call discoverServices after every re-connection!
 List<BluetoothService> services = await device.discoverServices();
 services.forEach((service) {
     // do something with service
@@ -265,7 +265,7 @@ await d.write([0x12, 0x34])
 If `onValueReceived` is never called, see [Common Problems](#common-problems) in the README.
 
 ```dart
-// remember to cancel this subscriptions when disconnected!
+// remember to cancel this subscription when disconnected!
 final chrSubscription = characteristic.onValueReceived.listen((value) {
     // onValueReceived is updated:
     //   - anytime read() is called
@@ -283,7 +283,7 @@ await characteristic.setNotifyValue(true);
 It is very convenient for simple characteristics that support both WRITE and READ (and/or NOTIFY). **e.g.** a "light switch toggle" characteristic. 
 
 ```dart
-// remember to cancel this subscriptions when disconnected!
+// remember to cancel this subscription when disconnected!
 final chrSubscription = characteristic.lastValueStream.listen((value) {
     //lastValueStream` is updated:
     //   - anytime read() is called
@@ -315,7 +315,8 @@ for (var d in devs) {
 However, you can force the popup to show sooner.
 
 ```dart
-  device.bondState.listen((value) {
+  // remember to cancel this subscription when disconnected!
+  final bondStateSubscription = device.bondState.listen((value) {
     print(value);
   });
 
