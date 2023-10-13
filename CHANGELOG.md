@@ -1,5 +1,8 @@
+## 1.18.2
+* **[Fix]** bondState: must *explicitly* check for null prevState (regression 1.18.0)
+
 ## 1.18.1
-* **[Fix]** bondState: handle null prevState
+* **[Fix]** bondState: handle null prevState (regression 1.18.0)
 
 ## 1.18.0
 This release improves `bondState` stream
