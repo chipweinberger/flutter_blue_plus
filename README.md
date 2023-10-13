@@ -315,8 +315,15 @@ for (var d in devs) {
 However, you can force the popup to show sooner.
 
 ```dart
-  /// Force the bonding popup to show now (Android Only) 
+  device.bondState.listen((value) {
+    print(value);
+  });
+
+  // Force the bonding popup to show now (Android Only) 
   await device.createBond();
+
+  // remove bond
+  await device.removeBond();
 ```
 
 ## Getting Started
