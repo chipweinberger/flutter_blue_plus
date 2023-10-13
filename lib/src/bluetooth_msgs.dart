@@ -781,7 +781,7 @@ class BmBondStateResponse {
     return BmBondStateResponse(
       remoteId: json['remote_id'],
       bondState: BmBondStateEnum.values[json['bond_state']],
-      prevState: json['prev_state'],
+      prevState: json['prev_state'] ? BmBondStateEnum.values[json['prev_state']] : null,
     );
   }
 }
