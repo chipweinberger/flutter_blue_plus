@@ -99,7 +99,7 @@ BondState _bmToBondStateEnum(BmBondStateEnum value) {
   }
 }
 
-BluetoothBondState _bmToBluetoothBondState(BmBondStateResponse value) {
+BluetoothBondState _bmToBondState(BmBondStateResponse value) {
   return BluetoothBondState(
       current: _bmToBondStateEnum(value.bondState),
       prev: value.prevState != null ? _bmToBondStateEnum(value.prevState!) : null);
