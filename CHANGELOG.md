@@ -1,3 +1,6 @@
+## 1.17.6
+* **[Fix]** scanResults: clear scan results on stopScan (regression 1.16.8)
+
 ## 1.17.5
 * **[Example]** accidentally left performanceOverlay enabled (regression 1.17.4)
 
