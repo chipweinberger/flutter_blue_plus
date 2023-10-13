@@ -1100,8 +1100,7 @@ public class FlutterBluePlusPlugin implements
                     HashMap<String, Object> response = new HashMap<>();
                     response.put("remote_id", remoteId);
                     response.put("bond_state", bmBondStateEnum(device.getBondState()));
-                    response.put("bond_failed", false);
-                    response.put("bond_lost", false);
+                    response.put("prev_state", null);
 
                     result.success(response);
                     break;
@@ -1511,15 +1510,11 @@ public class FlutterBluePlusPlugin implements
 
             String remoteId = device.getAddress();
 
-            boolean lost = cur == BluetoothDevice.BOND_NONE && prev == BluetoothDevice.BOND_BONDED;
-            boolean fail = cur == BluetoothDevice.BOND_NONE && prev == BluetoothDevice.BOND_BONDING;
-
             // see: BmBondStateResponse
             HashMap<String, Object> map = new HashMap<>();
             map.put("remote_id", remoteId);
             map.put("bond_state", bmBondStateEnum(cur));
-            map.put("bond_failed", cur == BluetoothDevice.BOND_NONE && prev == BluetoothDevice.BOND_BONDING);
-            map.put("bond_lost", cur == BluetoothDevice.BOND_NONE && prev == BluetoothDevice.BOND_BONDED);
+            map.put("prev_state", bmBondStateEnum(prev));
 
             invokeMethodUIThread("OnBondStateChanged", map);
         }

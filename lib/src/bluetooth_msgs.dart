@@ -769,22 +769,19 @@ enum BmBondStateEnum {
 class BmBondStateResponse {
   final String remoteId;
   final BmBondStateEnum bondState;
-  final bool bondFailed; // only possible when bondState.none
-  final bool bondLost;   // only possible when bondState.none
+  final BmBondStateEnum? prevState;
 
   BmBondStateResponse({
     required this.remoteId,
     required this.bondState,
-    required this.bondFailed,
-    required this.bondLost,
+    required this.prevState,
   });
 
   factory BmBondStateResponse.fromMap(Map<dynamic, dynamic> json) {
     return BmBondStateResponse(
       remoteId: json['remote_id'],
       bondState: BmBondStateEnum.values[json['bond_state']],
-      bondFailed: json['bond_failed'],
-      bondLost: json['bond_lost'],
+      prevState: json['prev_state'],
     );
   }
 }

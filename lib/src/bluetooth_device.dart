@@ -534,7 +534,7 @@ class BluetoothDevice {
     // do we already have the initial state?
     if (FlutterBluePlus._bondStates[remoteId] != null) {
       // we prefer to use the cached bond state (if available) because
-      // getBondState is not able to detect bondLost & bondFailed
+      // getBondState is not able to return the previous bondState
       BluetoothBondState initialValue = _bmToBondState(FlutterBluePlus._bondStates[remoteId]!);
       yield* FlutterBluePlus._methodStream.stream
           .where((m) => m.method == "OnBondStateChanged")
@@ -560,7 +560,6 @@ class BluetoothDevice {
           .then((p) => _bmToBondState(p));
 
       // make sure the initial value has not become out of date
-      // while we were awaiting for the initial value
       if (buffer.hasReceivedValue == false) {
         yield initialValue;
       }

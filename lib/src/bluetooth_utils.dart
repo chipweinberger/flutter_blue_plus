@@ -73,12 +73,6 @@ BmConnectionPriorityEnum _bmFromConnectionPriority(ConnectionPriority value) {
 BluetoothBondState _bmToBondState(BmBondStateResponse value) {
   switch (value.bondState) {
     case BmBondStateEnum.none:
-      if (value.bondFailed) {
-        return BluetoothBondState.failed;
-      }
-      if (value.bondLost) {
-        return BluetoothBondState.lost;
-      }
       return BluetoothBondState.none;
     case BmBondStateEnum.bonding:
       return BluetoothBondState.bonding;
