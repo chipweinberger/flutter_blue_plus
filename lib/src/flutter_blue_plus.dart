@@ -235,6 +235,7 @@ class FlutterBluePlus {
 
   // for internal use
   static Future<void> _stopScan({bool invokePlatform = true}) async {
+    _scanResultsList.latestValue = []; 
     _scanSubscription?.cancel();
     _scanTimeout?.cancel();
     _isScanning.add(false);
