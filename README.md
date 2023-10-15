@@ -16,8 +16,8 @@ Migrating from [FlutterBlue](https://github.com/pauldemarco/flutter_blue)? See [
 - [Usage](#usage)
 - [Getting Started](#getting-started)
 - [Reference](#reference)
-- [Mocking](#mocking)
 - [Debugging](#debugging)
+- [Mocking](#mocking)
 - [Common Problems](#common-problems)
 
 ## Introduction
@@ -505,6 +505,10 @@ then in `pubspec.yaml` add the repo by path:
 ```
 
 Now you can edit the FlutterBluePlus code yourself.
+
+## Mocking
+
+As FlutterBluePlus has static functions, the class needs to be wrapped for mocking. Refer to the [Mocking Guide](MOCKING.md).
 
 ## Common Problems
 
