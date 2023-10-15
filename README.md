@@ -16,6 +16,7 @@ Migrating from [FlutterBlue](https://github.com/pauldemarco/flutter_blue)? See [
 - [Usage](#usage)
 - [Getting Started](#getting-started)
 - [Reference](#reference)
+- [Mocking](#mocking)
 - [Debugging](#debugging)
 - [Common Problems](#common-problems)
 
