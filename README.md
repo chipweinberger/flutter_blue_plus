@@ -430,6 +430,10 @@ In the **ios/Runner/Info.plist** let’s add:
 
 For location permissions on iOS see more at: [https://developer.apple.com/documentation/corelocation/requesting_authorization_for_location_services](https://developer.apple.com/documentation/corelocation/requesting_authorization_for_location_services)
 
+## Mocking
+
+To mock `FlutterBluePlus` for development, refer to the [Mocking Guide](MOCKING.md).
+
 ## Reference
 
 🌀 = Stream
@@ -513,10 +517,6 @@ then in `pubspec.yaml` add the repo by path:
 ```
 
 Now you can edit the FlutterBluePlus code yourself.
-
-## Mocking
-
-As FlutterBluePlus has static functions, the class needs to be wrapped for mocking. Refer to the [Mocking Guide](MOCKING.md).
 
 ## Common Problems
 

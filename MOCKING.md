@@ -4,12 +4,13 @@ How to mock `FlutterBluePlus` for testing.
 
 ## Overview
 
-Since version [1.10.0](https://pub.dev/packages/flutter_blue_plus/changelog#1100), `FlutterBluePlus.instance` has been deprecated in favor of static functions, as no platform supports multiple instances. Therefore, in order to mock `FlutterBluePlus` functions for testing, you need to:
+Since version [1.10.0](https://pub.dev/packages/flutter_blue_plus/changelog#1100), `FlutterBluePlus.instance` has been deprecated in favor of static functions. 
 
-1. Wrap `FlutterBluePlus` in a mockable class
-2. Create an instance of the mockable class
-3. Pass the instance to all classes that call `FlutterBluePlus`
-4. Mock the mockable class.
+Therefore, to mock FlutterBluePlus you must:
+
+1. Wrap `FlutterBluePlus` in a mockable non-static class
+2. Add your mocked functions to the mockable class.
+2. Use the mockable class in your code
 
 A full example is [here](https://dsavir-h.medium.com/mocking-bluetooth-in-flutter-updated-cb3b9484ae02).
 
@@ -20,8 +21,8 @@ Create the following class:
 ```dart
 import '../flutter_blue_plus.dart';
 
-///Wrapper for FlutterBluePlus in order to easily mock it
-///Wraps all static calls for testing purposes
+/// Wrapper for FlutterBluePlus in order to easily mock it
+/// Wraps all static calls for testing purposes
 class FlutterBluePlusMockable {
   Future<void> startScan({
     List<Guid> withServices = const [],
@@ -78,12 +79,6 @@ class FlutterBluePlusMockable {
     return FlutterBluePlus.turnOn(timeout: timeout);
   }
 
-  @Deprecated('Deprecated in Android SDK 33 with no replacement')
-  Future<void> turnOff({int timeout = 10}) {
-    return FlutterBluePlus.turnOff();
-  }
-
-
   Future<List<BluetoothDevice>> get connectedSystemDevices {
     return FlutterBluePlus.connectedSystemDevices;
   }
@@ -98,9 +93,13 @@ class FlutterBluePlusMockable {
 }
 ```
 
+## Mock the wrapper class
+
+Using e.g. [Mockito](https://pub.dev/packages/mockito), create a mock for the `FlutterBluePlusMockable` class, and build your tests and stubs.
+
 ## Create instance
 
-Create instance of the mockable class where needed, e.g. in `main.dart`:
+Use the mockable class where needed, e.g. in `main.dart`:
 
 ```dart
 void main() {
@@ -128,17 +127,13 @@ class MyApp extends StatelessWidget {
 }
 ```
 
-## Use instance instead of FlutterBluePlus
+## Use mock instead of FlutterBluePlus
 
 Within your code, replace all calls to `FutterBluePlus` with the mockable instance, e.g.:  
 `FlutterBluePlus.isScanning` --> `bluePlusMockable.isScanning`  
 `FlutterBluePlus.startScan` --> `bluePlusMockable.startScan`  
 `FlutterBluePlus.scanResults` --> `bluePlusMockable.scanResults`  
 etc.
-
-## Mock wrapper class
-
-Using e.g. [Mockito](https://pub.dev/packages/mockito), create a mock for the `FlutterBluePlusMockable` class, and build your tests and stubs.
 
 ## Example
 
