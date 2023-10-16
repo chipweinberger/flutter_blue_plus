@@ -10,6 +10,7 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 
+part 'src/bluetooth_manager.dart';
 part 'src/bluetooth_characteristic.dart';
 part 'src/bluetooth_descriptor.dart';
 part 'src/bluetooth_device.dart';
