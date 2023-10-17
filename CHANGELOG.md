@@ -1,3 +1,6 @@
+## 1.19.1
+* **[Add]** new method `FlutterBluePlus.connectedDevices`
+
 ## 1.19.0
 This release reverts most of the breaking changes made in 1.18.0.
 * **[Revert]** most breaking changes made to bondState stream in 1.18.0
