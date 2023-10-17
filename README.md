@@ -179,7 +179,7 @@ final mtuSubscription = device.mtu.listen((int mtu) {
     print("mtu $mtu");
 });
 
-// this is optional, but simplifies cleanup code
+// cleanup: cancel subscription when disconnected
 device.cancelWhenDisconnected(mtuSubscription);
 
 // Very important!
@@ -273,7 +273,7 @@ final chrSubscription = characteristic.onValueReceived.listen((value) {
     //   - anytime a notification arrives (if subscribed)
 });
 
-// this is optional, but simplifies cleanup code
+// cleanup: cancel subscription when disconnected
 device.cancelWhenDisconnected(chrSubscription);
 
 // enable notifications
@@ -295,7 +295,7 @@ final chrSubscription = characteristic.lastValueStream.listen((value) {
     //   - also when first listened to, it re-emits the last value for convenience.
 });
 
-// this is optional, but simplifies cleanup code
+// cleanup: cancel subscription when disconnected
 device.cancelWhenDisconnected(chrSubscription);
 
 // enable notifications
@@ -336,7 +336,7 @@ However, you can force the popup to show sooner.
         print("$value prev:{$device.prevBondState}");
     });
 
-    // this is optional, but simplifies cleanup code
+    // cleanup: cancel subscription when disconnected
     device.cancelWhenDisconnected(bsSubscription);
 
     // Force the bonding popup to show now (Android Only) 
