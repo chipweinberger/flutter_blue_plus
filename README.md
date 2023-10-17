@@ -160,7 +160,6 @@ device.connectionState.listen((BluetoothConnectionState state) async {
         // 1. typically, start a periodic timer that tries to 
         //    periodically reconnect, or just call connect() again right now
         // 2. you must always re-discover services after disconnection!
-        // 3. you should cancel all stream subscriptions
     }
 });
 
@@ -174,12 +173,14 @@ await device.disconnect();
 ### Get MTU and request larger size
 
 ```dart
-// remember to cancel this subscription when disconnected!
 final mtuSubscription = device.mtu.listen((int mtu) {
     // iOS: initial value is always 23, but iOS will quickly negotiate a higher value
     // android: you must request higher mtu yourself
     print("mtu $mtu");
 });
+
+// this is optional, but simplifies cleanup code
+device.cancelWhenDisconnected(mtuSubscription);
 
 // Very important!
 if (Platform.isAndroid) {
@@ -266,12 +267,14 @@ await d.write([0x12, 0x34])
 If `onValueReceived` is never called, see [Common Problems](#common-problems) in the README.
 
 ```dart
-// remember to cancel this subscription when disconnected!
 final chrSubscription = characteristic.onValueReceived.listen((value) {
     // onValueReceived is updated:
     //   - anytime read() is called
     //   - anytime a notification arrives (if subscribed)
 });
+
+// this is optional, but simplifies cleanup code
+device.cancelWhenDisconnected(chrSubscription);
 
 // enable notifications
 await characteristic.setNotifyValue(true);
@@ -284,7 +287,6 @@ await characteristic.setNotifyValue(true);
 It is very convenient for simple characteristics that support both WRITE and READ (and/or NOTIFY). **e.g.** a "light switch toggle" characteristic. 
 
 ```dart
-// remember to cancel this subscription when disconnected!
 final chrSubscription = characteristic.lastValueStream.listen((value) {
     //lastValueStream` is updated:
     //   - anytime read() is called
@@ -292,6 +294,9 @@ final chrSubscription = characteristic.lastValueStream.listen((value) {
     //   - anytime a notification arrives (if subscribed)
     //   - also when first listened to, it re-emits the last value for convenience.
 });
+
+// this is optional, but simplifies cleanup code
+device.cancelWhenDisconnected(chrSubscription);
 
 // enable notifications
 await characteristic.setNotifyValue(true);
@@ -327,16 +332,18 @@ for (var d in devs) {
 However, you can force the popup to show sooner.
 
 ```dart
-  // remember to cancel this subscription when disconnected!
-  final bondStateSubscription = device.bondState.listen((value) {
-    print("$value prev:{$device.prevBondState}");
-  });
+    final bsSubscription = device.bondState.listen((value) {
+        print("$value prev:{$device.prevBondState}");
+    });
 
-  // Force the bonding popup to show now (Android Only) 
-  await device.createBond();
+    // this is optional, but simplifies cleanup code
+    device.cancelWhenDisconnected(bsSubscription);
 
-  // remove bond
-  await device.removeBond();
+    // Force the bonding popup to show now (Android Only) 
+    await device.createBond();
+
+    // remove bond
+    await device.removeBond();
 ```
 
 ## Getting Started
@@ -652,18 +659,15 @@ If it still happens, it is a problem with your peripheral device.
 
 You are probably forgetting to cancel the original `stream.listen` resulting in multiple listens.
 
-The easiest solution is to cancel all device subscriptions during disconnection.
+The easiest solution is to use `device.cancelWhenDisconnected(susbscription)` to cancel device subscriptions.
 
 ```dart
 final subscription = characteristic.onValueReceived.listen((value) {
     // ...
 });
 
-device.connectionState.listen((BluetoothConnectionState state) {
-    if (state == BluetoothConnectionState.disconnected) {
-        subscription.cancel(); // must cancel!
-    }
-});
+// make sure you have this line!
+device.cancelWhenDisconnected(susbscription);
 
 await characteristic.setNotifyValue(true);
 ```

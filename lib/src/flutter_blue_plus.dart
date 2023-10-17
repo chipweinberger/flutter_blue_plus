@@ -26,6 +26,7 @@ class FlutterBluePlus {
   static final Map<DeviceIdentifier, Map<String, List<int>>> _lastChrs = {};
   static final Map<DeviceIdentifier, Map<String, List<int>>> _lastDescs = {};
   static final Map<DeviceIdentifier, String> _platformNames = {};
+  static final Map<DeviceIdentifier, List<StreamSubscription>> _subscriptions = {};
 
   /// stream used for the isScanning public api
   static final _isScanning = _StreamController<bool>(initialValue: false);
@@ -317,13 +318,16 @@ class FlutterBluePlus {
     // keep track of connection states
     if (call.method == "OnConnectionStateChanged") {
       BmConnectionStateResponse r = BmConnectionStateResponse.fromMap(call.arguments);
-      _connectionStates[DeviceIdentifier(r.remoteId)] = r;
+      var remoteId = DeviceIdentifier(r.remoteId);
+      _connectionStates[remoteId] = r;
       if (r.connectionState == BmConnectionStateEnum.disconnected) {
-        _knownServices.remove(DeviceIdentifier(r.remoteId));
-        _bondStates.remove(DeviceIdentifier(r.remoteId));
-        _mtuValues.remove(DeviceIdentifier(r.remoteId));
-        _lastChrs.remove(DeviceIdentifier(r.remoteId));
-        _lastDescs.remove(DeviceIdentifier(r.remoteId));
+        _subscriptions[remoteId]?.forEach((s) => s.cancel());
+        _knownServices.remove(remoteId);
+        _bondStates.remove(remoteId);
+        _mtuValues.remove(remoteId);
+        _lastChrs.remove(remoteId);
+        _lastDescs.remove(remoteId);
+        _subscriptions.remove(remoteId);
       }
     }
 

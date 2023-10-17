@@ -29,6 +29,20 @@ class BluetoothDevice {
     return FlutterBluePlus._knownServices[remoteId]?.services.map((p) => BluetoothService.fromProto(p)).toList();
   }
 
+  /// Register a subscription to be canceled when the device is disconnected.
+  /// This function simplifies cleanup, to prevent duplicate stream subscriptions.
+  ///   - this is an optional convenience function
+  ///   - prevents accidentally creating duplicate subscriptions on each reconnection.
+  ///   - if already disconnected, the stream will be immediately canceled 
+  void cancelWhenDisconnected(StreamSubscription subscription) {
+    if (FlutterBluePlus._isDeviceConnected(remoteId) == false) {
+      subscription.cancel();
+    } else {
+      FlutterBluePlus._subscriptions[remoteId] ??= [];
+      FlutterBluePlus._subscriptions[remoteId]!.add(subscription);
+    }
+  }
+
   /// Establishes a connection to the Bluetooth Device.
   ///   [autoConnect] Android only. reconnect whenever the device is found. This only
   ///   works if the device is in the Bluetooth scan cache or it is has been bonded before.
