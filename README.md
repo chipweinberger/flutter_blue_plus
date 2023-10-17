@@ -318,7 +318,7 @@ However, you can force the popup to show sooner.
 ```dart
   // remember to cancel this subscription when disconnected!
   final bondStateSubscription = device.bondState.listen((value) {
-    print(value);
+    print("$value prev:{$device.prevBondState}");
   });
 
   // Force the bonding popup to show now (Android Only) 

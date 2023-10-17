@@ -1,8 +1,8 @@
 ## 1.19.0
 This release reverts most of the breaking changes made in 1.18.0.
 * **[Revert]** most breaking changes made to bondState stream in 1.18.0
-* **[Unchanged]** bond lost/failed have been are replaced in favor of directly exposing prevBondState
-* **[Add]** method to get `device.prevBondState` 
+* **[Unchanged]** bond lost/failed are replaced by prevBondState
+* **[Add]** method device.prevBondState
 * **[Fix]** android: adapterName must request permission
 
 ## 1.18.3
