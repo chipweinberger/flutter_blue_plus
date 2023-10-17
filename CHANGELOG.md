@@ -1,3 +1,6 @@
+## 1.19.2
+* **[Add]** new method `device.cancelWhenDisconnected(subscription)`
+
 ## 1.19.1
 * **[Add]** new method `FlutterBluePlus.connectedDevices`
 
