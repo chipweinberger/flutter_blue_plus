@@ -533,31 +533,30 @@ class BluetoothDevice {
 
     // do we already have the initial state?
     if (FlutterBluePlus._bondStates[remoteId] != null) {
-      // we prefer to use the cached bond state (if available) because
-      // getBondState is not able to return the previous bondState
-      BluetoothBondState initialValue = _bmToBondState(FlutterBluePlus._bondStates[remoteId]!);
+      // we prefer to use the cached bond state, if available
+      BluetoothBondState initialValue = _bmToBondState(FlutterBluePlus._bondStates[remoteId]!.bondState);
       yield* FlutterBluePlus._methodStream.stream
           .where((m) => m.method == "OnBondStateChanged")
           .map((m) => m.arguments)
           .map((args) => BmBondStateResponse.fromMap(args))
           .where((p) => p.remoteId == remoteId.str)
-          .map((p) => _bmToBondState(p))
+          .map((p) => _bmToBondState(p.bondState))
           .newStreamWithInitialValue(initialValue);
     } else {
       // start listening now so we do not miss any changes
-      // while we get the inital bond state
+      // while we are getting the inital bond state
       var buffer = _BufferStream.listen(FlutterBluePlus._methodStream.stream
           .where((m) => m.method == "OnBondStateChanged")
           .map((m) => m.arguments)
           .map((args) => BmBondStateResponse.fromMap(args))
           .where((p) => p.remoteId == remoteId.str)
-          .map((p) => _bmToBondState(p)));
+          .map((p) => _bmToBondState(p.bondState)));
 
       // must get the initial state from the system.
       BluetoothBondState initialValue = await FlutterBluePlus._methods
           .invokeMethod('getBondState', remoteId.str)
           .then((args) => BmBondStateResponse.fromMap(args))
-          .then((p) => _bmToBondState(p));
+          .then((p) => _bmToBondState(p.bondState));
 
       // make sure the initial value has not become out of date
       if (buffer.hasReceivedValue == false) {
@@ -565,6 +564,16 @@ class BluetoothDevice {
       }
       // stream
       yield* buffer.stream;
+    }
+  }
+
+  /// Get the previous bondState of the device (Android Only)
+  BluetoothBondState? get prevBondState {
+    if (FlutterBluePlus._bondStates[remoteId] != null &&
+        FlutterBluePlus._bondStates[remoteId]!.prevState != null) {
+      return _bmToBondState(FlutterBluePlus._bondStates[remoteId]!.prevState!);
+    } else {
+      return null;
     }
   }
 

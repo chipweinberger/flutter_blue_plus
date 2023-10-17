@@ -70,39 +70,20 @@ BmConnectionPriorityEnum _bmFromConnectionPriority(ConnectionPriority value) {
   }
 }
 
-class BluetoothBondState {
-  final BondState current;
-  final BondState? prev;
-  BluetoothBondState({required this.current, required this.prev});
-  @override
-  String toString() {
-    return 'BluetoothBondState{'
-        'current: $current, '
-        'prev: $prev, '
-        '}';
-  }
-}
-
 // [none] no bond
 // [bonding] bonding is in progress
 // [bonded] bond success
-enum BondState { none, bonding, bonded }
+enum BluetoothBondState { none, bonding, bonded }
 
-BondState _bmToBondStateEnum(BmBondStateEnum value) {
+BluetoothBondState _bmToBondState(BmBondStateEnum value) {
   switch (value) {
     case BmBondStateEnum.none:
-      return BondState.none;
+      return BluetoothBondState.none;
     case BmBondStateEnum.bonding:
-      return BondState.bonding;
+      return BluetoothBondState.bonding;
     case BmBondStateEnum.bonded:
-      return BondState.bonded;
+      return BluetoothBondState.bonded;
   }
-}
-
-BluetoothBondState _bmToBondState(BmBondStateResponse value) {
-  return BluetoothBondState(
-      current: _bmToBondStateEnum(value.bondState),
-      prev: value.prevState != null ? _bmToBondStateEnum(value.prevState!) : null);
 }
 
 enum ConnectionPriority { balanced, high, lowPower }
