@@ -118,7 +118,14 @@ class FlutterBluePlus {
     }
   }
 
-  /// Retrieve a list of connected devices
+  /// list of devices currently connected to your app
+  static List<BluetoothDevice> get connectedDevices {
+    var copy = Map<DeviceIdentifier, BmConnectionStateResponse>.from(_connectionStates);
+    copy.removeWhere((key, value) => value.connectionState == BmConnectionStateEnum.disconnected);
+    return copy.values.map((v) => BluetoothDevice(remoteId: DeviceIdentifier(v.remoteId))).toList();
+  }
+
+  /// Retrieve a list of system connected devices
   /// - The list includes devices connected by other apps
   /// - You must still call device.connect() to connect them to *your app*
   static Future<List<BluetoothDevice>> get connectedSystemDevices async {
@@ -235,7 +242,7 @@ class FlutterBluePlus {
 
   // for internal use
   static Future<void> _stopScan({bool invokePlatform = true}) async {
-    _scanResultsList.latestValue = []; 
+    _scanResultsList.latestValue = [];
     _scanSubscription?.cancel();
     _scanTimeout?.cancel();
     _isScanning.add(false);
@@ -446,9 +453,6 @@ class FlutterBluePlus {
 
   @Deprecated('No longer needed, remove this from your code')
   static void get instance => null;
-
-  @Deprecated('Use connectedSystemDevices instead')
-  static Future<List<BluetoothDevice>> get connectedDevices => connectedSystemDevices;
 
   @Deprecated('Use isSupported instead')
   static Future<bool> get isAvailable async => await isSupported;

@@ -297,6 +297,17 @@ final chrSubscription = characteristic.lastValueStream.listen((value) {
 await characteristic.setNotifyValue(true);
 ```
 
+### Get Connected Devices
+
+Get devices currently connected to your app.
+
+```dart
+List<BluetoothDevice> devs = FlutterBluePlus.connectedDevices;
+for (var d in devs) {
+    print(d);
+}
+```
+
 ### Get Connected System Devices
 
 These devices are already connected to the system, but must be reconnected by *your app* before you can communicate with them.
@@ -450,7 +461,8 @@ To mock `FlutterBluePlus` for development, refer to the [Mocking Guide](MOCKING.
 | scanResults         🌀 | :white_check_mark: | :white_check_mark: |        | Stream of live scan results                                |
 | isScanning          🌀 | :white_check_mark: | :white_check_mark: |        | Stream of current scanning state                           |
 | isScanningNow          | :white_check_mark: | :white_check_mark: |        | Is a scan currently running?                               |
-| connectedSystemDevices | :white_check_mark: | :white_check_mark: |        | List of already connected devices, including by other apps |
+| connectedDevices       | :white_check_mark: | :white_check_mark: |        | List of devices connected to your app                      |
+| connectedSystemDevices | :white_check_mark: | :white_check_mark: |        | List of devices connected to the system, even by other apps|
 | setLogLevel            | :white_check_mark: | :white_check_mark: |        | Configure plugin log level                                 |
 | getPhySupport          | :white_check_mark: |                    | :fire: | Get supported bluetooth phy codings                        |
 
