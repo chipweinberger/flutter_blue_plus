@@ -569,12 +569,8 @@ class BluetoothDevice {
 
   /// Get the previous bondState of the device (Android Only)
   BluetoothBondState? get prevBondState {
-    if (FlutterBluePlus._bondStates[remoteId] != null &&
-        FlutterBluePlus._bondStates[remoteId]!.prevState != null) {
-      return _bmToBondState(FlutterBluePlus._bondStates[remoteId]!.prevState!);
-    } else {
-      return null;
-    }
+    var b = FlutterBluePlus._bondStates[remoteId]?.prevState;
+    return b != null ? _bmToBondState(b) : null;
   }
 
   @override
