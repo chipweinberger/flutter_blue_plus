@@ -1,4 +1,5 @@
 ## 1.20.0
+This release renames `connectedSystemDevices`.
 * **[Rename]** `connectedSystemDevices` -> `systemDevices`, because they must be re-connected by *your* app
 
 ## 1.19.2
