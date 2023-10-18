@@ -119,13 +119,6 @@ class FlutterBluePlus {
     }
   }
 
-  /// Retrieve a list of devices currently connected to your app
-  static List<BluetoothDevice> get connectedDevices {
-    var copy = Map<DeviceIdentifier, BmConnectionStateResponse>.from(_connectionStates);
-    copy.removeWhere((key, value) => value.connectionState == BmConnectionStateEnum.disconnected);
-    return copy.values.map((v) => BluetoothDevice(remoteId: DeviceIdentifier(v.remoteId))).toList();
-  }
-
   /// Retrieve a list of devices currently connected to the system
   /// - The list includes devices connected to by *any* app
   /// - You must still call device.connect() to connect them to *your app*
