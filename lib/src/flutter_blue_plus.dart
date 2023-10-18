@@ -123,8 +123,8 @@ class FlutterBluePlus {
   /// - The list includes devices connected to by *any* app
   /// - You must still call device.connect() to connect them to *your app*
   static Future<List<BluetoothDevice>> get systemDevices async {
-    BmConnectedDevicesResponse response =
-        await _invokeMethod('getSystemDevices').then((args) => BmConnectedDevicesResponse.fromMap(args));
+    BmDevicesList response =
+        await _invokeMethod('getSystemDevices').then((args) => BmDevicesList.fromMap(args));
     for (BmBluetoothDevice device in response.devices) {
       if (device.platformName != null) {
         _platformNames[DeviceIdentifier(device.remoteId)] = device.platformName!;
@@ -136,7 +136,7 @@ class FlutterBluePlus {
   /// Retrieve a list of bonded devices (Android only)
   static Future<List<BluetoothDevice>> get bondedDevices {
     return _invokeMethod('getBondedDevices')
-        .then((args) => BmConnectedDevicesResponse.fromMap(args))
+        .then((args) => BmDevicesList.fromMap(args))
         .then((p) => p.devices)
         .then((p) => p.map((d) => BluetoothDevice.fromProto(d)).toList());
   }

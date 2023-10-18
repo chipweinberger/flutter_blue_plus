@@ -624,18 +624,18 @@ class BmConnectionStateResponse {
   }
 }
 
-class BmConnectedDevicesResponse {
+class BmDevicesList {
   final List<BmBluetoothDevice> devices;
 
-  BmConnectedDevicesResponse({required this.devices});
+  BmDevicesList({required this.devices});
 
-  factory BmConnectedDevicesResponse.fromMap(Map<dynamic, dynamic> json) {
+  factory BmDevicesList.fromMap(Map<dynamic, dynamic> json) {
     // convert to BmBluetoothDevice
     List<BmBluetoothDevice> devices = [];
     for (var i = 0; i < json['devices'].length; i++) {
       devices.add(BmBluetoothDevice.fromMap(json['devices'][i]));
     }
-    return BmConnectedDevicesResponse(devices: devices);
+    return BmDevicesList(devices: devices);
   }
 }
 

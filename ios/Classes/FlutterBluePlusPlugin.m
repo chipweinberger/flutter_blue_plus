@@ -267,7 +267,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 [deviceProtos addObject:[self bmBluetoothDevice:p]];
             }
 
-            // See BmConnectedDevicesResponse
+            // See BmDevicesList
             NSDictionary* response = @{
                 @"devices": deviceProtos,
             };
