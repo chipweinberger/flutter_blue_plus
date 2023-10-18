@@ -1,3 +1,6 @@
+## 1.20.1
+* **[Remove]** `FlutterBluePlus.connectedDevices`. This API needs more thought.
+
 ## 1.20.0
 This release renames `connectedSystemDevices`.
 * **[Rename]** `connectedSystemDevices` -> `systemDevices`, because they must be re-connected by *your* app
