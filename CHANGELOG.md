@@ -1,3 +1,6 @@
+## 1.20.0
+* **[Rename]** `connectedSystemDevices` -> `systemDevices`, because they must be re-connected by *your* app
+
 ## 1.19.2
 * **[Add]** new method `device.cancelWhenDisconnected(subscription)`
 
