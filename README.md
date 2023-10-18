@@ -660,7 +660,7 @@ If it still happens, it is a problem with your peripheral device.
 
 You are probably forgetting to cancel the original `stream.listen` resulting in multiple listens.
 
-The easiest solution is to use `device.cancelWhenDisconnected(susbscription)` to cancel device subscriptions.
+The easiest solution is to use `device.cancelWhenDisconnected(subscription)` to cancel device subscriptions.
 
 ```dart
 final subscription = characteristic.onValueReceived.listen((value) {
@@ -668,7 +668,7 @@ final subscription = characteristic.onValueReceived.listen((value) {
 });
 
 // make sure you have this line!
-device.cancelWhenDisconnected(susbscription);
+device.cancelWhenDisconnected(subscription);
 
 await characteristic.setNotifyValue(true);
 ```
