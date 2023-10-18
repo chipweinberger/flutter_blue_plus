@@ -482,7 +482,7 @@ public class FlutterBluePlusPlugin implements
                     break;
                 }
 
-                case "getConnectedSystemDevices":
+                case "getSystemDevices":
                 {
                     ArrayList<String> permissions = new ArrayList<>();
 
@@ -493,7 +493,7 @@ public class FlutterBluePlusPlugin implements
                     ensurePermissions(permissions, (granted, perm) -> {
 
                         if (granted == false) {
-                            result.error("getConnectedSystemDevices",
+                            result.error("getSystemDevices",
                                 String.format("FlutterBluePlus requires %s permission", perm), null);
                             return;
                         }

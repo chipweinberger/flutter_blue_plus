@@ -313,12 +313,14 @@ for (var d in devs) {
 }
 ```
 
-### Get Connected System Devices
+### Get System Devices
 
-These devices are already connected to the system, but must be reconnected by *your app* before you can communicate with them.
+Get devices connected to the system by *any* app.
+
+Note: you must connect *your app* to them before you can communicate with them.
 
 ```dart
-List<BluetoothDevice> devs = await FlutterBluePlus.connectedSystemDevices;
+List<BluetoothDevice> devs = await FlutterBluePlus.systemDevices;
 for (var d in devs) {
     await d.connect(); // Must connect *our* app to the device
     await d.discoverServices();
@@ -469,7 +471,7 @@ To mock `FlutterBluePlus` for development, refer to the [Mocking Guide](MOCKING.
 | isScanning          🌀 | :white_check_mark: | :white_check_mark: |        | Stream of current scanning state                           |
 | isScanningNow          | :white_check_mark: | :white_check_mark: |        | Is a scan currently running?                               |
 | connectedDevices       | :white_check_mark: | :white_check_mark: |        | List of devices connected to your app                      |
-| connectedSystemDevices | :white_check_mark: | :white_check_mark: |        | List of devices connected to the system, even by other apps|
+| systemDevices          | :white_check_mark: | :white_check_mark: |        | List of devices connected to the system, even by other apps|
 | setLogLevel            | :white_check_mark: | :white_check_mark: |        | Configure plugin log level                                 |
 | getPhySupport          | :white_check_mark: |                    | :fire: | Get supported bluetooth phy codings                        |
 
@@ -559,12 +561,11 @@ These devices may be found in System Settings, but they cannot be connected to b
 - another app may have already connected to your device
 - another phone may have already connected to your device
 
-Try looking through already connected devices:
+Try looking through system devices:
 
 ```dart
-// search already connected devices, including devices
-// connected to by other apps
-List<BluetoothDevice> system = await FlutterBluePlus.connectedSystemDevices;
+// search system devices. i.e. any device connected to by *any* app
+List<BluetoothDevice> system = await FlutterBluePlus.systemDevices;
 for (var d in system) {
     print('${r.device.platformName} already connected to! ${r.device.remoteId}');
     if (d.platformName == "myBleDevice") {

@@ -27,7 +27,7 @@ class _ScanScreenState extends State<ScanScreen> {
   void initState() {
     super.initState();
 
-    FlutterBluePlus.connectedSystemDevices.then((devices) {
+    FlutterBluePlus.systemDevices.then((devices) {
       _connectedDevices = devices;
       setState(() {});
     });
@@ -56,7 +56,7 @@ class _ScanScreenState extends State<ScanScreen> {
     } catch (e) {
       Snackbar.show(ABC.b, prettyException("Start Scan Error:", e), success: false);
     }
-    setState(() {}); // force refresh of connectedSystemDevices
+    setState(() {}); // force refresh of systemDevices
   }
 
   Future onStopPressed() async {

@@ -119,19 +119,19 @@ class FlutterBluePlus {
     }
   }
 
-  /// list of devices currently connected to your app
+  /// Retrieve a list of devices currently connected to your app
   static List<BluetoothDevice> get connectedDevices {
     var copy = Map<DeviceIdentifier, BmConnectionStateResponse>.from(_connectionStates);
     copy.removeWhere((key, value) => value.connectionState == BmConnectionStateEnum.disconnected);
     return copy.values.map((v) => BluetoothDevice(remoteId: DeviceIdentifier(v.remoteId))).toList();
   }
 
-  /// Retrieve a list of system connected devices
-  /// - The list includes devices connected by other apps
+  /// Retrieve a list of devices currently connected to the system
+  /// - The list includes devices connected to by *any* app
   /// - You must still call device.connect() to connect them to *your app*
-  static Future<List<BluetoothDevice>> get connectedSystemDevices async {
+  static Future<List<BluetoothDevice>> get systemDevices async {
     BmConnectedDevicesResponse response =
-        await _invokeMethod('getConnectedSystemDevices').then((args) => BmConnectedDevicesResponse.fromMap(args));
+        await _invokeMethod('getSystemDevices').then((args) => BmConnectedDevicesResponse.fromMap(args));
     for (BmBluetoothDevice device in response.devices) {
       if (device.platformName != null) {
         _platformNames[DeviceIdentifier(device.remoteId)] = device.platformName!;
@@ -454,6 +454,9 @@ class FlutterBluePlus {
 
   @Deprecated('Use adapterState instead')
   static Stream<BluetoothAdapterState> get state => adapterState;
+
+  @Deprecated('Use systemDevices instead')
+  static Future<List<BluetoothDevice>> get connectedSystemDevices => systemDevices;
 
   @Deprecated('No longer needed, remove this from your code')
   static void get instance => null;

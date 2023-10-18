@@ -186,3 +186,7 @@ BluetoothDevice? myDevice = await myDeviceFuture;
 ## 1.18.0
 
 * **Breaking Change** bondState: directly expose prevBond instead of lost/failed flags
+
+## 1.20.0
+
+* **renamed:** `connectedSystemDevices` -> `systemDevices`, because they must be re-connected by *your* app.
