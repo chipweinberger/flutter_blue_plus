@@ -75,7 +75,7 @@ This release improves `lastValue` & `lastValueStream`.
 * **[Example]** cleaned up Characteristic tile code
 
 ## 1.16.8
-* **[Fix]** `scanResults` & `isScanning` streams were not re-emitting their current value on listen
+* **[Fix]** `scanResults` & `isScanning` streams were not re-emitting their current value on listen (regression 1.5.0)
 * **[Example]** discoverServices: stay on screen after diconnection
 * **[Example]** simplified `connectingOrDisconnecting` code
 * **[Example]** organize into 'screens' and 'widgets' folders

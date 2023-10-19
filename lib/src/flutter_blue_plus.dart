@@ -123,8 +123,7 @@ class FlutterBluePlus {
   /// - The list includes devices connected to by *any* app
   /// - You must still call device.connect() to connect them to *your app*
   static Future<List<BluetoothDevice>> get systemDevices async {
-    BmDevicesList response =
-        await _invokeMethod('getSystemDevices').then((args) => BmDevicesList.fromMap(args));
+    BmDevicesList response = await _invokeMethod('getSystemDevices').then((args) => BmDevicesList.fromMap(args));
     for (BmBluetoothDevice device in response.devices) {
       if (device.platformName != null) {
         _platformNames[DeviceIdentifier(device.remoteId)] = device.platformName!;
@@ -236,12 +235,15 @@ class FlutterBluePlus {
 
   // for internal use
   static Future<void> _stopScan({bool invokePlatform = true}) async {
-    _scanResultsList.latestValue = [];
     _scanSubscription?.cancel();
     _scanTimeout?.cancel();
     _isScanning.add(false);
-    if (invokePlatform) {
-      await _invokeMethod('stopScan');
+    try {
+      if (invokePlatform) {
+        await _invokeMethod('stopScan');
+      }
+    } finally {
+      _scanResultsList.latestValue = [];
     }
   }
 
