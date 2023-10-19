@@ -134,7 +134,7 @@ class FlutterBluePlus {
 
   /// Retrieve a list of bonded devices (Android only)
   static Future<List<BluetoothDevice>> get bondedDevices async {
-    BmDevicesList response =  _invokeMethod('getBondedDevices').then((args) => BmDevicesList.fromMap(args));
+    BmDevicesList response =  await _invokeMethod('getBondedDevices').then((args) => BmDevicesList.fromMap(args));
     for (BmBluetoothDevice device in response.devices) {
       if (device.platformName != null) {
         _platformNames[DeviceIdentifier(device.remoteId)] = device.platformName!;

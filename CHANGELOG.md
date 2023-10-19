@@ -1,3 +1,7 @@
+## 1.20.2
+* **[Fix]** cannot retrieve platform name from bondedDevices
+* **[Fix]** stopScan: should clear results *after* platform method has been called
+
 ## 1.20.1
 * **[Remove]** `FlutterBluePlus.connectedDevices`. This API needs more thought.
 
