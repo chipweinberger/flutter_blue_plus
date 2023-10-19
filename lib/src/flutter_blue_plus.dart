@@ -133,11 +133,14 @@ class FlutterBluePlus {
   }
 
   /// Retrieve a list of bonded devices (Android only)
-  static Future<List<BluetoothDevice>> get bondedDevices {
-    return _invokeMethod('getBondedDevices')
-        .then((args) => BmDevicesList.fromMap(args))
-        .then((p) => p.devices)
-        .then((p) => p.map((d) => BluetoothDevice.fromProto(d)).toList());
+  static Future<List<BluetoothDevice>> get bondedDevices async {
+    BmDevicesList response =  _invokeMethod('getBondedDevices').then((args) => BmDevicesList.fromMap(args));
+    for (BmBluetoothDevice device in response.devices) {
+      if (device.platformName != null) {
+        _platformNames[DeviceIdentifier(device.remoteId)] = device.platformName!;
+      }
+    }
+    return response.devices.map((d) => BluetoothDevice.fromProto(d)).toList();
   }
 
   /// Start a scan, and return a stream of results
