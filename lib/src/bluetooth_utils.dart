@@ -18,15 +18,21 @@ class DisconnectReason {
   }
 }
 
+class BluetoothConnectionEvent {
+  BluetoothDevice device;
+  BluetoothConnectionState connectionState;
+  BluetoothConnectionEvent(this.device, this.connectionState);
+}
+
 enum BluetoothConnectionState {
   disconnected,
   connected,
   // Deprecated: To be more precise, 'connecting' is only returned by getConnectionState (android)
-  // or CBPeripheral.state (iOS), which FlutterBluePlus does not need.
+  // or CBPeripheral.state (iOS), which FlutterBluePlus does not use.
   @Deprecated('Android & iOS dont stream this state. You can delete')
   connecting,
   // Deprecated: To be more precise, 'disconnecting' is only returned by getConnectionState (android)
-  // or CBPeripheral.state (iOS), which FlutterBluePlus does not need.
+  // or CBPeripheral.state (iOS), which FlutterBluePlus does not use.
   @Deprecated('Android & iOS dont stream this state. You can delete')
   disconnecting
 }

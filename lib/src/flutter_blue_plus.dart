@@ -119,6 +119,16 @@ class FlutterBluePlus {
     }
   }
 
+  static Stream<BluetoothConnectionEvent> get connectionEvents async* {
+      yield* FlutterBluePlus._methodStream.stream
+          .where((m) => m.method == "OnConnectionStateChanged")
+          .map((m) => m.arguments)
+          .map((args) => BmConnectionStateResponse.fromMap(args))
+          .map((s) => BluetoothConnectionEvent(
+            BluetoothDevice(remoteId: DeviceIdentifier(s.remoteId)),
+            _bmToConnectionState(s.connectionState)));
+  }
+
   /// Retrieve a list of devices currently connected to your app
   static List<BluetoothDevice> get connectedDevices {
     var copy = Map<DeviceIdentifier, BmConnectionStateResponse>.from(_connectionStates);
