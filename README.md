@@ -313,6 +313,16 @@ for (var d in devs) {
 }
 ```
 
+### All Connection Events
+
+This stream returns connections and disconnections of all devices.
+
+```dart
+final subscription = FlutterBluePlus.connectionEvents.listen((value) {
+    print("${value.device} ${value.connectionState}");
+});
+```
+
 ### Get System Devices
 
 Get devices connected to the system by *any* app.
@@ -470,7 +480,7 @@ To mock `FlutterBluePlus` for development, refer to the [Mocking Guide](MOCKING.
 | scanResults         🌀 | :white_check_mark: | :white_check_mark: |        | Stream of live scan results                                |
 | isScanning          🌀 | :white_check_mark: | :white_check_mark: |        | Stream of current scanning state                           |
 | isScanningNow          | :white_check_mark: | :white_check_mark: |        | Is a scan currently running?                               |
-| connectedDevices       | :white_check_mark: | :white_check_mark: |        | List of devices connected to your app                      |
+| connectedDevices       | :white_check_mark: | :white_check_mark: |        | List of devices connected to *your app*                      |
 | systemDevices          | :white_check_mark: | :white_check_mark: |        | List of devices connected to the system, even by other apps|
 | setLogLevel            | :white_check_mark: | :white_check_mark: |        | Configure plugin log level                                 |
 | getPhySupport          | :white_check_mark: |                    | :fire: | Get supported bluetooth phy codings                        |
@@ -480,13 +490,14 @@ To mock `FlutterBluePlus` for development, refer to the [Mocking Guide](MOCKING.
 |                           |      Android       |        iOS         | Throws | Description                                                |
 | :------------------------ | :----------------: | :----------------: | :----: | :----------------------------------------------------------|
 | platformName              | :white_check_mark: | :white_check_mark: |        | The platform cached name of the device                     |
-| onNameChanged          🌀 | :white_check_mark: | :white_check_mark: |        | The GAP Device Name Characteristic (0x2A00) changed        |
 | connect                   | :white_check_mark: | :white_check_mark: | :fire: | Establishes a connection to the device                     |
 | disconnect                | :white_check_mark: | :white_check_mark: | :fire: | Cancels an active or pending connection to the device      |
+| isConnected               | :white_check_mark: | :white_check_mark: |        | Is this device currently connected to *your app*?          |
+| connectionState        🌀 | :white_check_mark: | :white_check_mark: |        | Stream of connection changes for the Bluetooth Device      |
 | discoverServices          | :white_check_mark: | :white_check_mark: | :fire: | Discover services                                          |
 | servicesList              | :white_check_mark: | :white_check_mark: |        | The list of services that were discovered                  |
 | onServicesChanged      🌀 | :white_check_mark: | :white_check_mark: |        | The services changed & must be rediscovered                |
-| connectionState        🌀 | :white_check_mark: | :white_check_mark: |        | Stream of connection changes for the Bluetooth Device      |
+| onNameChanged          🌀 | :white_check_mark: | :white_check_mark: |        | The GAP Device Name Characteristic (0x2A00) changed        |
 | mtu                    🌀 | :white_check_mark: | :white_check_mark: | :fire: | Stream of mtu size changes                                 |
 | readRssi                  | :white_check_mark: | :white_check_mark: | :fire: | Read RSSI from a connected device                          |
 | requestMtu                | :white_check_mark: |                    | :fire: | Request to change the MTU for the device                   |
