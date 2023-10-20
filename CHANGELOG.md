@@ -1,7 +1,7 @@
 ## 1.20.3
-* **[Add]** FlutterBluePlus.connectionEvents, a stream of all connection & disconnected events
-* **[Add]** FlutterBluePlus.connectedDevices, to get currently connected devices
-* **[Add]** device.isConnected, convenience accessor
+* **[Add]** `FlutterBluePlus.connectionEvents`, a stream of all connection & disconnected events
+* **[Add]** `FlutterBluePlus.connectedDevices`, to get currently connected devices
+* **[Add]** `device.isConnected`, convenience accessor
 
 ## 1.20.2
 * **[Fix]** cannot retrieve platform name from bondedDevices

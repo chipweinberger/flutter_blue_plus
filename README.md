@@ -170,6 +170,16 @@ await device.connect();
 await device.disconnect();
 ```
 
+### All Connection Events
+
+This stream returns connections and disconnections of all devices.
+
+```dart
+final subscription = FlutterBluePlus.connectionEvents.listen((value) {
+    print("${value.device} ${value.connectionState}");
+});
+```
+
 ### Get MTU and request larger size
 
 ```dart
@@ -313,21 +323,11 @@ for (var d in devs) {
 }
 ```
 
-### All Connection Events
-
-This stream returns connections and disconnections of all devices.
-
-```dart
-final subscription = FlutterBluePlus.connectionEvents.listen((value) {
-    print("${value.device} ${value.connectionState}");
-});
-```
-
 ### Get System Devices
 
 Get devices connected to the system by *any* app.
 
-Note: you must connect *your app* to them before you can communicate with them.
+**Note:** you must connect *your app* to them before you can communicate with them.
 
 ```dart
 List<BluetoothDevice> devs = await FlutterBluePlus.systemDevices;
