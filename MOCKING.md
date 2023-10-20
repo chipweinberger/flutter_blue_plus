@@ -79,6 +79,10 @@ class FlutterBluePlusMockable {
     return FlutterBluePlus.turnOn(timeout: timeout);
   }
 
+  List<BluetoothDevice> get connectedDevices {
+    return FlutterBluePlus.connectedDevices;
+  }
+
   Future<List<BluetoothDevice>> get systemDevices {
     return FlutterBluePlus.systemDevices;
   }
