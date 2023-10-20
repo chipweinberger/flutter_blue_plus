@@ -119,6 +119,7 @@ class FlutterBluePlus {
     }
   }
 
+  /// Stream of all device connections & disconnections from your app
   static Stream<BluetoothConnectionEvent> get connectionEvents async* {
       yield* FlutterBluePlus._methodStream.stream
           .where((m) => m.method == "OnConnectionStateChanged")
@@ -284,14 +285,7 @@ class FlutterBluePlus {
 
     return await _invokeMethod('getPhySupport').then((args) => PhySupport.fromMap(args));
   }
-
-  static bool _isDeviceConnected(DeviceIdentifier remoteId) {
-    if (_connectionStates[remoteId] == null) {
-      return false;
-    }
-    return _connectionStates[remoteId]!.connectionState == BmConnectionStateEnum.connected;
-  }
-
+  
   static Future<dynamic> _initFlutterBluePlus() async {
     if (_initialized) {
       return;

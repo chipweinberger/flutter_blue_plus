@@ -62,7 +62,7 @@ class BluetoothDescriptor {
   /// Retrieves the value of a specified descriptor
   Future<List<int>> read({int timeout = 15}) async {
     // check connected
-    if (FlutterBluePlus._isDeviceConnected(remoteId) == false) {
+    if (device.isConnected == false) {
       throw FlutterBluePlusException(
           ErrorPlatform.dart, "readDescriptor", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
@@ -122,7 +122,7 @@ class BluetoothDescriptor {
   /// Writes the value of a descriptor
   Future<void> write(List<int> value, {int timeout = 15}) async {
     // check connected
-    if (FlutterBluePlus._isDeviceConnected(remoteId) == false) {
+    if (device.isConnected == false) {
       throw FlutterBluePlusException(
           ErrorPlatform.dart, "writeDescriptor", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }

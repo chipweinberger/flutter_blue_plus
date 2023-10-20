@@ -81,7 +81,7 @@ class BluetoothCharacteristic {
   /// read a characteristic
   Future<List<int>> read({int timeout = 15}) async {
     // check connected
-    if (FlutterBluePlus._isDeviceConnected(remoteId) == false) {
+    if (device.isConnected == false) {
       throw FlutterBluePlusException(
           ErrorPlatform.dart, "readCharacteristic", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
@@ -154,7 +154,7 @@ class BluetoothCharacteristic {
     }
 
     // check connected
-    if (FlutterBluePlus._isDeviceConnected(remoteId) == false) {
+    if (device.isConnected == false) {
       throw FlutterBluePlusException(ErrorPlatform.dart, "writeCharacteristic", FbpErrorCode.deviceIsDisconnected.index,
           "device is not connected");
     }
@@ -229,7 +229,7 @@ class BluetoothCharacteristic {
   ///     we'll use notifications. This is a limitation of CoreBluetooth on iOS.
   Future<bool> setNotifyValue(bool notify, {int timeout = 15}) async {
     // check connected
-    if (FlutterBluePlus._isDeviceConnected(remoteId) == false) {
+    if (device.isConnected == false) {
       throw FlutterBluePlusException(
           ErrorPlatform.dart, "setNotifyValue", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }

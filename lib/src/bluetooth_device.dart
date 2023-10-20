@@ -35,11 +35,21 @@ class BluetoothDevice {
   ///   - prevents accidentally creating duplicate subscriptions on each reconnection.
   ///   - if already disconnected, the stream will be immediately canceled 
   void cancelWhenDisconnected(StreamSubscription subscription) {
-    if (FlutterBluePlus._isDeviceConnected(remoteId) == false) {
+    if (isConnected == false) {
       subscription.cancel();
     } else {
       FlutterBluePlus._subscriptions[remoteId] ??= [];
       FlutterBluePlus._subscriptions[remoteId]!.add(subscription);
+    }
+  }
+
+  /// Returns true if this device currently connected to your app
+  bool get isConnected {
+    if (FlutterBluePlus._connectionStates[remoteId] == null) {
+      return false;
+    } else {
+      var state = FlutterBluePlus._connectionStates[remoteId]!.connectionState;
+      return state == BmConnectionStateEnum.connected;
     }
   }
 
@@ -126,7 +136,7 @@ class BluetoothDevice {
   /// Discover services, characteristics, and descriptors of the remote device
   Future<List<BluetoothService>> discoverServices({int timeout = 15}) async {
     // check connected
-    if (FlutterBluePlus._isDeviceConnected(remoteId) == false) {
+    if (isConnected == false) {
       throw FlutterBluePlusException(
           ErrorPlatform.dart, "discoverServices", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
@@ -274,7 +284,7 @@ class BluetoothDevice {
   /// Read the RSSI of connected remote device
   Future<int> readRssi({int timeout = 15}) async {
     // check connected
-    if (FlutterBluePlus._isDeviceConnected(remoteId) == false) {
+    if (isConnected == false) {
       throw FlutterBluePlusException(
           ErrorPlatform.dart, "readRssi", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
@@ -326,7 +336,7 @@ class BluetoothDevice {
     }
 
     // check connected
-    if (FlutterBluePlus._isDeviceConnected(remoteId) == false) {
+    if (isConnected == false) {
       throw FlutterBluePlusException(
           ErrorPlatform.dart, "requestMtu", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
@@ -378,7 +388,7 @@ class BluetoothDevice {
     }
 
     // check connected
-    if (FlutterBluePlus._isDeviceConnected(remoteId) == false) {
+    if (isConnected == false) {
       throw FlutterBluePlusException(ErrorPlatform.dart, "requestConnectionPriority",
           FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
@@ -409,7 +419,7 @@ class BluetoothDevice {
     }
 
     // check connected
-    if (FlutterBluePlus._isDeviceConnected(remoteId) == false) {
+    if (isConnected == false) {
       throw FlutterBluePlusException(
           ErrorPlatform.dart, "setPreferredPhy", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
@@ -434,7 +444,7 @@ class BluetoothDevice {
     }
 
     // check connected
-    if (FlutterBluePlus._isDeviceConnected(remoteId) == false) {
+    if (isConnected == false) {
       throw FlutterBluePlusException(
           ErrorPlatform.dart, "createBond", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
@@ -529,7 +539,7 @@ class BluetoothDevice {
     }
 
     // check connected
-    if (FlutterBluePlus._isDeviceConnected(remoteId) == false) {
+    if (isConnected == false) {
       throw FlutterBluePlusException(
           ErrorPlatform.dart, "clearGattCache", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
