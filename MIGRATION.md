@@ -192,4 +192,4 @@ BluetoothDevice? myDevice = await myDeviceFuture;
 * **renamed:** `connectedSystemDevices` -> `systemDevices`, because they must be re-connected by *your* app.
 
 ## 1.20.3
-* **new function:** Introduced a new `connectedDevices` function which serves a different purpose than the old function in ## 1.11.0. Returns a List of connectedDevices.
+* **new function:** Introduced a new `connectedDevices` function. Caution: a previous function used this same name. That older function is now called systemDevices.
