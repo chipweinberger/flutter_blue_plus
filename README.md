@@ -469,7 +469,7 @@ To mock `FlutterBluePlus` for development, refer to the [Mocking Guide](MOCKING.
 
 🌀 = Stream
 
-### FlutterBlue API
+### FlutterBluePlus API
 
 |                        |      Android       |        iOS         | Throws | Description                                                |
 | :--------------------- | :----------------: | :----------------: | :----: | :----------------------------------------------------------|
@@ -481,10 +481,11 @@ To mock `FlutterBluePlus` for development, refer to the [Mocking Guide](MOCKING.
 | scanResults         🌀 | :white_check_mark: | :white_check_mark: |        | Stream of live scan results                                |
 | isScanning          🌀 | :white_check_mark: | :white_check_mark: |        | Stream of current scanning state                           |
 | isScanningNow          | :white_check_mark: | :white_check_mark: |        | Is a scan currently running?                               |
-| connectedDevices       | :white_check_mark: | :white_check_mark: |        | List of devices connected to *your app*                      |
+| connectedDevices       | :white_check_mark: | :white_check_mark: |        | List of devices connected to *your app*                    |
 | systemDevices          | :white_check_mark: | :white_check_mark: |        | List of devices connected to the system, even by other apps|
 | setLogLevel            | :white_check_mark: | :white_check_mark: |        | Configure plugin log level                                 |
 | getPhySupport          | :white_check_mark: |                    | :fire: | Get supported bluetooth phy codings                        |
+
 
 ### BluetoothDevice API
 

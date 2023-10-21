@@ -10,6 +10,19 @@ class BluetoothDescriptor {
   final Guid characteristicUuid;
   final Guid descriptorUuid;
 
+  BluetoothDescriptor({
+    required this.remoteId,
+    required this.serviceUuid,
+    required this.characteristicUuid,
+    required this.descriptorUuid,
+  });
+
+  BluetoothDescriptor.fromProto(BmBluetoothDescriptor p)
+      : remoteId = DeviceIdentifier(p.remoteId),
+        serviceUuid = p.serviceUuid,
+        characteristicUuid = p.characteristicUuid,
+        descriptorUuid = p.descriptorUuid;
+
   /// convenience accessor
   Guid get uuid => descriptorUuid;
 
@@ -52,12 +65,6 @@ class BluetoothDescriptor {
       .where((p) => p.descriptorUuid == descriptorUuid)
       .where((p) => p.success == true)
       .map((p) => p.value);
-
-  BluetoothDescriptor.fromProto(BmBluetoothDescriptor p)
-      : remoteId = DeviceIdentifier(p.remoteId),
-        serviceUuid = p.serviceUuid,
-        characteristicUuid = p.characteristicUuid,
-        descriptorUuid = p.descriptorUuid;
 
   /// Retrieves the value of a specified descriptor
   Future<List<int>> read({int timeout = 15}) async {

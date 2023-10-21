@@ -11,14 +11,35 @@ class BluetoothCharacteristic {
   final Guid serviceUuid;
   final Guid? secondaryServiceUuid;
   final Guid characteristicUuid;
-  final CharacteristicProperties properties;
-  final List<BluetoothDescriptor> descriptors;
 
-  // convenience accessor
+  BluetoothCharacteristic({
+    required this.remoteId,
+    required this.serviceUuid,
+    this.secondaryServiceUuid,
+    required this.characteristicUuid,
+  });
+
+  BluetoothCharacteristic.fromProto(BmBluetoothCharacteristic p)
+      : remoteId = DeviceIdentifier(p.remoteId.toString()),
+        serviceUuid = p.serviceUuid,
+        secondaryServiceUuid = p.secondaryServiceUuid != null ? p.secondaryServiceUuid! : null,
+        characteristicUuid = p.characteristicUuid;
+
+  /// convenience accessor
   Guid get uuid => characteristicUuid;
 
   /// convenience accessor
   BluetoothDevice get device => BluetoothDevice(remoteId: remoteId);
+
+  /// Get Properties from known services
+  CharacteristicProperties get properties {
+    return _bmchr != null ? CharacteristicProperties.fromProto(_bmchr!.properties) : CharacteristicProperties();
+  }
+
+  /// Get Descriptors from known services
+  List<BluetoothDescriptor> get descriptors {
+    return _bmchr != null ? _bmchr!.descriptors.map((d) => BluetoothDescriptor.fromProto(d)).toList() : [];
+  }
 
   /// this variable is updated:
   ///   - anytime `read()` is called
@@ -28,14 +49,6 @@ class BluetoothCharacteristic {
     String key = "$serviceUuid:$characteristicUuid";
     return FlutterBluePlus._lastChrs[remoteId]?[key] ?? [];
   }
-
-  BluetoothCharacteristic.fromProto(BmBluetoothCharacteristic p)
-      : remoteId = DeviceIdentifier(p.remoteId.toString()),
-        serviceUuid = p.serviceUuid,
-        secondaryServiceUuid = p.secondaryServiceUuid != null ? p.secondaryServiceUuid! : null,
-        characteristicUuid = p.characteristicUuid,
-        descriptors = p.descriptors.map((d) => BluetoothDescriptor.fromProto(d)).toList(),
-        properties = CharacteristicProperties.fromProto(p.properties);
 
   /// this stream emits values:
   ///   - anytime `read()` is called
@@ -283,6 +296,20 @@ class BluetoothCharacteristic {
     }
 
     return true;
+  }
+
+  /// look through known services
+  BmBluetoothCharacteristic? get _bmchr {
+    if (FlutterBluePlus._knownServices[remoteId] != null) {
+      for (var s in FlutterBluePlus._knownServices[remoteId]!.services) {
+        for (var c in s.characteristics) {
+          if (c.characteristicUuid == uuid) {
+            return c;
+          }
+        }
+      }
+    }
+    return null;
   }
 
   @override
