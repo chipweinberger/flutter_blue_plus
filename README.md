@@ -351,7 +351,7 @@ However, you can force the popup to show sooner.
 
 ### Events API
 
-The events API is lets you access streams from all devices simultaneously.
+Access streams from all devices simultaneously.
 
 There are streams for:
 * events.connectionState
