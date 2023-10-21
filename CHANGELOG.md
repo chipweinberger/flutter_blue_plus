@@ -1,3 +1,7 @@
+## 1.20.5
+* **[Add]** `FlutterBluePlus.events.onNameChanged`
+* **[Add]** `FlutterBluePlus.events.onServicesChanged`
+
 ## 1.20.4
 * **[Rename]** `FlutterBluePlus.connectionEvents` -> `FlutterBluePlus.events.connectionState`
 * **[Add]** `FlutterBluePlus.events.onCharacteristicReceived`
