@@ -9,14 +9,6 @@ class BluetoothEvents {
         .map((p) => ConnectionStateEvent(p));
   }
 
-  static Stream<BondStateEvent> get bondState {
-    return FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "OnBondStateChanged")
-        .map((m) => m.arguments)
-        .map((args) => BmBondStateResponse.fromMap(args))
-        .map((p) => BondStateEvent(p));
-  }
-
   static Stream<CharacteristicReceivedEvent> get onCharacteristicReceived {
     return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnCharacteristicReceived")
@@ -31,6 +23,30 @@ class BluetoothEvents {
         .map((m) => m.arguments)
         .map((args) => BmDescriptorData.fromMap(args))
         .map((p) => DescriptorReadEvent(p));
+  }
+
+  static Stream<OnNameChangedEvent> get onNameChanged {
+    return FlutterBluePlus._methodStream.stream
+        .where((m) => m.method == "OnNameChanged")
+        .map((m) => m.arguments)
+        .map((args) => BmBluetoothDevice.fromMap(args))
+        .map((p) => OnNameChangedEvent(p));
+  }
+
+  static Stream<OnServicesChangedEvent> get onServicesChanged {
+    return FlutterBluePlus._methodStream.stream
+        .where((m) => m.method == "OnServicesChanged")
+        .map((m) => m.arguments)
+        .map((args) => BmBluetoothDevice.fromMap(args))
+        .map((p) => OnServicesChangedEvent(p));
+  }
+
+  static Stream<BondStateEvent> get bondState {
+    return FlutterBluePlus._methodStream.stream
+        .where((m) => m.method == "OnBondStateChanged")
+        .map((m) => m.arguments)
+        .map((args) => BmBondStateResponse.fromMap(args))
+        .map((p) => BondStateEvent(p));
   }
 }
 
@@ -49,19 +65,6 @@ class ConnectionStateEvent {
 
   /// the new connection state
   BluetoothConnectionState get connectionState => _bmToConnectionState(_response.connectionState);
-}
-
-// BondState
-class BondStateEvent {
-  final BmBondStateResponse _response;
-
-  BondStateEvent(this._response);
-
-  /// the relevant device
-  BluetoothDevice get device => BluetoothDevice.fromId(_response.remoteId);
-
-  /// the new bond state
-  BluetoothBondState get bondState => _bmToBondState(_response.bondState);
 }
 
 // Characteristic Received
@@ -102,4 +105,40 @@ class DescriptorReadEvent {
 
   /// the new data
   List<int> get value => _response.value;
+}
+
+// On Name Changed
+class OnNameChangedEvent {
+  final BmBluetoothDevice _response;
+
+  OnNameChangedEvent(this._response);
+
+  /// the relevant device
+  BluetoothDevice get device => BluetoothDevice.fromId(_response.remoteId);
+
+  /// the new name
+  String? get name => _response.platformName;
+}
+
+// On Services Changed
+class OnServicesChangedEvent {
+  final BmBluetoothDevice _response;
+
+  OnServicesChangedEvent(this._response);
+
+  /// the relevant device
+  BluetoothDevice get device => BluetoothDevice.fromId(_response.remoteId);
+}
+
+// BondState
+class BondStateEvent {
+  final BmBondStateResponse _response;
+
+  BondStateEvent(this._response);
+
+  /// the relevant device
+  BluetoothDevice get device => BluetoothDevice.fromId(_response.remoteId);
+
+  /// the new bond state
+  BluetoothBondState get bondState => _bmToBondState(_response.bondState);
 }

@@ -353,25 +353,18 @@ However, you can force the popup to show sooner.
 
 The events API is lets you access streams from all devices simultaneously.
 
+There are streams for:
+* events.connectionState
+* events.onCharacteristicReceived
+* events.onDescriptorRead
+* events.onNameChanged
+* events.onServicesChanged
+* events.bondState
+
 ```dart
 // listen to *any device* connection state changes 
 FlutterBluePlus.events.connectionState.listen((event)) {
     print('${event.device} ${event.connectionState}');
-}
-
-// listen to *any device*, *any characteristic* value received
-FlutterBluePlus.events.onCharacteristicReceived.listen((event)) {
-    print('${event.device} ${event.characteristic} ${event.value}');
-}
-
-// listen to *any device*, *any descriptor* value read
-FlutterBluePlus.events.onDescriptorRead.listen((event)) {
-    print('${event.device} ${event.descriptor} ${event.value}');
-}
-
-// listen to *any device*, bond state change
-FlutterBluePlus.events.bondState.listen((event)) {
-    print('${event.device} ${event.bondState}');
 }
 ```
 
@@ -509,6 +502,8 @@ To mock `FlutterBluePlus` for development, refer to the [Mocking Guide](MOCKING.
 | events.connectionState          🌀 | :white_check_mark: | :white_check_mark: |        | Stream of connection changes of *all devices*         |
 | events.onCharacteristicReceived 🌀 | :white_check_mark: | :white_check_mark: |        | Stream of characteristic value reads of *all devices* |
 | events.onDescriptorRead         🌀 | :white_check_mark: | :white_check_mark: |        | Stream of descriptor value reads of *all devices*     |
+| events.onNameChanged            🌀 | :white_check_mark: |                    |        | Stream of name changes of *all devices*               |
+| events.onServicesChanged        🌀 | :white_check_mark: |                    |        | Stream of services changes of *all devices*           |
 | events.bondState                🌀 | :white_check_mark: |                    |        | Stream of bondState changes of *all devices*          |
 
 

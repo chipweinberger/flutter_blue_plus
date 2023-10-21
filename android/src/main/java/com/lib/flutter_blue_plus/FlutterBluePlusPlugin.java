@@ -51,6 +51,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 
 import java.lang.reflect.Method;
 
@@ -1705,6 +1706,7 @@ public class FlutterBluePlusPlugin implements
                 // name changed
                 if (uuid128(characteristic.getUuid()) == "00002A00-0000-1000-8000-00805F9B34FB") {
                     HashMap<String, Object> response = bmBluetoothDevice(gatt.getDevice());
+                    response.put("platform_name", new String(value, StandardCharsets.UTF_8));
                     invokeMethodUIThread("OnNameChanged", response);
                 }
 
