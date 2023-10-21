@@ -72,6 +72,9 @@ class FlutterBluePlus {
   /// - The returned stream is never closed.
   static Stream<List<ScanResult>> get scanResults => _scanResultsList.stream;
 
+  /// Get access to all device event streams
+  static BluetoothEvents get events => BluetoothEvents();
+
   /// Turn on Bluetooth (Android only),
   static Future<void> turnOn({int timeout = 60}) async {
     Stream<BluetoothAdapterState> responseStream = adapterState.where((s) => s == BluetoothAdapterState.on);
@@ -119,16 +122,6 @@ class FlutterBluePlus {
       // stream
       yield* buffer.stream;
     }
-  }
-
-  /// Stream of all device connections & disconnections from your app
-  static Stream<BluetoothConnectionEvent> get connectionEvents async* {
-    yield* FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "OnConnectionStateChanged")
-        .map((m) => m.arguments)
-        .map((args) => BmConnectionStateResponse.fromMap(args))
-        .map((s) => BluetoothConnectionEvent(
-            BluetoothDevice(remoteId: DeviceIdentifier(s.remoteId)), _bmToConnectionState(s.connectionState)));
   }
 
   /// Retrieve a list of devices currently connected to your app

@@ -171,16 +171,6 @@ await device.connect();
 await device.disconnect();
 ```
 
-### All Connection Events
-
-This stream returns connections and disconnections of all devices.
-
-```dart
-final subscription = FlutterBluePlus.connectionEvents.listen((value) {
-    print("${value.device} ${value.connectionState}");
-});
-```
-
 ### Get MTU and request larger size
 
 ```dart
@@ -359,6 +349,32 @@ However, you can force the popup to show sooner.
     await device.removeBond();
 ```
 
+### Events API
+
+The events API is lets you access streams from all devices simultaneously.
+
+```dart
+// listen to *any device* connection state changes 
+FlutterBluePlus.events.connectionState.listen((event)) {
+    print('${event.device} ${event.connectionState}');
+}
+
+// listen to *any device*, *any characteristic* value received
+FlutterBluePlus.events.onCharacteristicReceived.listen((event)) {
+    print('${event.device} ${event.characteristic} ${event.value}');
+}
+
+// listen to *any device*, *any descriptor* value read
+FlutterBluePlus.events.onDescriptorRead.listen((event)) {
+    print('${event.device} ${event.descriptor} ${event.value}');
+}
+
+// listen to *any device*, bond state change
+FlutterBluePlus.events.bondState.listen((event)) {
+    print('${event.device} ${event.bondState}');
+}
+```
+
 ## Getting Started
 
 ### Change the minSdkVersion for Android
@@ -485,6 +501,15 @@ To mock `FlutterBluePlus` for development, refer to the [Mocking Guide](MOCKING.
 | systemDevices          | :white_check_mark: | :white_check_mark: |        | List of devices connected to the system, even by other apps|
 | setLogLevel            | :white_check_mark: | :white_check_mark: |        | Configure plugin log level                                 |
 | getPhySupport          | :white_check_mark: |                    | :fire: | Get supported bluetooth phy codings                        |
+
+### FlutterBluePlus Events API
+
+|                                    |      Android       |        iOS         | Throws | Description                                           |
+| :--------------------------------- | :----------------: | :----------------: | :----: | :-----------------------------------------------------|
+| events.connectionState          🌀 | :white_check_mark: | :white_check_mark: |        | Stream of connection changes of *all devices*         |
+| events.onCharacteristicReceived 🌀 | :white_check_mark: | :white_check_mark: |        | Stream of characteristic value reads of *all devices* |
+| events.onDescriptorRead         🌀 | :white_check_mark: | :white_check_mark: |        | Stream of descriptor value reads of *all devices*     |
+| events.bondState                🌀 | :white_check_mark: |                    |        | Stream of bondState changes of *all devices*          |
 
 
 ### BluetoothDevice API
