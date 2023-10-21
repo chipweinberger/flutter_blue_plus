@@ -1694,37 +1694,26 @@ public class FlutterBluePlusPlugin implements
             invokeMethodUIThread("OnDiscoverServicesResult", response);
         }
 
-        @Override
-        @TargetApi(33) // newer function with byte[] value argument
-        public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, byte[] value)
+        // called for both notifications & reads
+        public void onCharacteristicReceived(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, byte[] value, int status)
         {
-            // this callback is only for notifications & indications
-            log(LogLevel.DEBUG, "onCharacteristicChanged: uuid: " + uuid128(characteristic.getUuid()));
-
             ServicePair pair = getServicePair(gatt, characteristic);
 
-            // see: BmCharacteristicData
-            HashMap<String, Object> response = new HashMap<>();
-            response.put("remote_id", gatt.getDevice().getAddress());
-            response.put("service_uuid", uuid128(pair.primary));
-            response.put("secondary_service_uuid", pair.secondary != null ? uuid128(pair.secondary) : null);
-            response.put("characteristic_uuid", uuid128(characteristic.getUuid()));
-            response.put("value", bytesToHex(value));
-            response.put("success", 1);
-            response.put("error_code", 0);
-            response.put("error_string", gattErrorString(0));
+            // GATT Service?
+            if (uuid128(pair.primary) == "00001800-0000-1000-8000-00805F9B34FB") {
 
-            invokeMethodUIThread("OnCharacteristicReceived", response);
-        }
+                // name changed
+                if (uuid128(characteristic.getUuid()) == "00002A00-0000-1000-8000-00805F9B34FB") {
+                    HashMap<String, Object> response = bmBluetoothDevice(gatt.getDevice());
+                    invokeMethodUIThread("OnNameChanged", response);
+                }
 
-        @Override
-        @TargetApi(33) // newer function with byte[] value argument
-        public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, byte[] value, int status)
-        {
-            // this callback is only for explicit characteristic reads
-            log(LogLevel.DEBUG, "onCharacteristicRead: uuid: " + uuid128(characteristic.getUuid()) + " status: " + status);
-
-            ServicePair pair = getServicePair(gatt, characteristic);
+                // services changed
+                if (uuid128(characteristic.getUuid()) == "00002A05-0000-1000-8000-00805F9B34FB") {
+                    HashMap<String, Object> response = bmBluetoothDevice(gatt.getDevice());
+                    invokeMethodUIThread("OnServicesChanged", response);
+                }
+            }
 
             // see: BmCharacteristicData
             HashMap<String, Object> response = new HashMap<>();
@@ -1738,6 +1727,24 @@ public class FlutterBluePlusPlugin implements
             response.put("error_string", gattErrorString(status));
 
             invokeMethodUIThread("OnCharacteristicReceived", response);
+        }
+
+        @Override
+        @TargetApi(33) // newer function with byte[] value argument
+        public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, byte[] value)
+        {
+            // this callback is only for notifications & indications
+            log(LogLevel.DEBUG, "onCharacteristicChanged: uuid: " + uuid128(characteristic.getUuid()));
+            onCharacteristicReceived(gatt, characteristic, value, BluetoothGatt.GATT_SUCCESS);
+        }
+
+        @Override
+        @TargetApi(33) // newer function with byte[] value argument
+        public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, byte[] value, int status)
+        {
+            // this callback is only for explicit characteristic reads
+            log(LogLevel.DEBUG, "onCharacteristicRead: uuid: " + uuid128(characteristic.getUuid()) + " status: " + status);
+            onCharacteristicReceived(gatt, characteristic, value, BluetoothGatt.GATT_SUCCESS);
         }
 
         @Override

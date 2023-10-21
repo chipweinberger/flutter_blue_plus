@@ -223,62 +223,42 @@ class BluetoothDevice {
   /// Name Changed Stream
   ///  - uses the GAP Device Name characteristic (0x2A00)
   Stream<String> get onNameChanged async* {
-    if (Platform.isIOS || Platform.isMacOS) {
-      yield* FlutterBluePlus._methodStream.stream
-          .where((m) => m.method == "OnNameChanged")
-          .map((m) => m.arguments)
-          .map((args) => BmBluetoothDevice.fromMap(args))
-          .where((p) => p.remoteId == remoteId.str)
-          .map((m) => m.platformName ?? "");
-    } else {
+    if (Platform.isIOS == false && Platform.isMacOS == false) {
       final Guid gattUuid = Guid("00001800-0000-1000-8000-00805F9B34FB");
       final Guid nameUuid = Guid("00002A00-0000-1000-8000-00805F9B34FB");
       BluetoothService? svc = servicesList?._firstWhereOrNull((svc) => svc.uuid == gattUuid);
-      if (svc == null) {
-        throw FlutterBluePlusException(
-            ErrorPlatform.dart, "onNameChanged", FbpErrorCode.serviceNotFound.index, "GATT Service Not Found");
-      }
-      BluetoothCharacteristic? chr = svc.characteristics._firstWhereOrNull((chr) => chr.uuid == nameUuid);
-      if (chr == null) {
-        throw FlutterBluePlusException(
-            ErrorPlatform.dart, "onNameChanged", FbpErrorCode.characteristicNotFound.index, "GAP Name Not Found");
-      }
-      if (chr.isNotifying == false) {
+      BluetoothCharacteristic? chr = svc?.characteristics._firstWhereOrNull((chr) => chr.uuid == nameUuid);
+      if (chr != null && chr.isNotifying == false) {
         await chr.setNotifyValue(true);
       }
-      yield* chr.lastValueStream.map((value) => utf8.decode(value));
     }
+    yield* FlutterBluePlus._methodStream.stream
+        .where((m) => m.method == "OnNameChanged")
+        .map((m) => m.arguments)
+        .map((args) => BmBluetoothDevice.fromMap(args))
+        .where((p) => p.remoteId == remoteId.str)
+        .map((m) => m.platformName ?? "");
   }
 
   /// Services Changed Stream
   ///  - uses the GAP Services Changed characteristic (0x2A05)
   ///  - you must re-call discoverServices()
   Stream<void> get onServicesChanged async* {
-    if (Platform.isIOS || Platform.isMacOS) {
-      yield* FlutterBluePlus._methodStream.stream
-          .where((m) => m.method == "OnServicesChanged")
-          .map((m) => m.arguments)
-          .map((args) => BmBluetoothDevice.fromMap(args))
-          .where((p) => p.remoteId == remoteId.str)
-          .map((m) => null);
-    } else {
+    if (Platform.isIOS == false && Platform.isMacOS == false) {
       final Guid gattUuid = Guid("00001800-0000-1000-8000-00805F9B34FB");
       final Guid changeUuid = Guid("00002A05-0000-1000-8000-00805F9B34FB");
       BluetoothService? svc = servicesList?._firstWhereOrNull((svc) => svc.uuid == gattUuid);
-      if (svc == null) {
-        throw FlutterBluePlusException(
-            ErrorPlatform.dart, "onServicesChanged", FbpErrorCode.serviceNotFound.index, "GATT Service Not Found");
-      }
-      BluetoothCharacteristic? chr = svc.characteristics._firstWhereOrNull((chr) => chr.uuid == changeUuid);
-      if (chr == null) {
-        throw FlutterBluePlusException(
-            ErrorPlatform.dart, "onServicesChanged", FbpErrorCode.characteristicNotFound.index, "GAP Name Not Found");
-      }
-      if (chr.isNotifying == false) {
+      BluetoothCharacteristic? chr = svc?.characteristics._firstWhereOrNull((chr) => chr.uuid == changeUuid);
+      if (chr != null && chr.isNotifying == false) {
         await chr.setNotifyValue(true);
       }
-      yield* chr.onValueReceived.map((value) => utf8.decode(value));
     }
+    yield* FlutterBluePlus._methodStream.stream
+      .where((m) => m.method == "OnServicesChanged")
+      .map((m) => m.arguments)
+      .map((args) => BmBluetoothDevice.fromMap(args))
+      .where((p) => p.remoteId == remoteId.str)
+      .map((m) => null);
   }
 
   /// Read the RSSI of connected remote device
