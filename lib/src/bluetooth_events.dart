@@ -9,6 +9,14 @@ class BluetoothEvents {
         .map((p) => ConnectionStateEvent(p));
   }
 
+  static Stream<MtuEvent> get mtu {
+    return FlutterBluePlus._methodStream.stream
+        .where((m) => m.method == "OnMtuChanged")
+        .map((m) => m.arguments)
+        .map((args) => BmMtuChangedResponse.fromMap(args))
+        .map((p) => MtuEvent(p));
+  }
+
   static Stream<CharacteristicReceivedEvent> get onCharacteristicReceived {
     return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnCharacteristicReceived")
@@ -65,6 +73,19 @@ class ConnectionStateEvent {
 
   /// the new connection state
   BluetoothConnectionState get connectionState => _bmToConnectionState(_response.connectionState);
+}
+
+// Mtu Event
+class MtuEvent {
+  final BmMtuChangedResponse _response;
+
+  MtuEvent(this._response);
+
+  /// the relevant device
+  BluetoothDevice get device => BluetoothDevice.fromId(_response.remoteId);
+
+  /// the new mtu
+  int get mtu => _response.mtu;
 }
 
 // Characteristic Received
