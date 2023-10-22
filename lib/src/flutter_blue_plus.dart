@@ -23,9 +23,11 @@ class FlutterBluePlus {
   static final Map<DeviceIdentifier, BmDiscoverServicesResult> _knownServices = {};
   static final Map<DeviceIdentifier, BmBondStateResponse> _bondStates = {};
   static final Map<DeviceIdentifier, BmMtuChangedResponse> _mtuValues = {};
+  static final Map<DeviceIdentifier, String> _platformNames = {};
   static final Map<DeviceIdentifier, Map<String, List<int>>> _lastChrs = {};
   static final Map<DeviceIdentifier, Map<String, List<int>>> _lastDescs = {};
-  static final Map<DeviceIdentifier, String> _platformNames = {};
+  static final Map<DeviceIdentifier, Map<String, BmCharacteristicProperties>> _properties = {};
+  static final Map<DeviceIdentifier, Map<String, List<BmBluetoothDescriptor>>> _descriptors = {};
   static final Map<DeviceIdentifier, List<StreamSubscription>> _subscriptions = {};
 
   /// stream used for the isScanning public api
@@ -69,6 +71,9 @@ class FlutterBluePlus {
   /// - The list contains all the results since the scan started.
   /// - The returned stream is never closed.
   static Stream<List<ScanResult>> get scanResults => _scanResultsList.stream;
+
+  /// Get access to all device event streams
+  static BluetoothEvents get events => BluetoothEvents();
 
   /// Turn on Bluetooth (Android only),
   static Future<void> turnOn({int timeout = 60}) async {
@@ -119,17 +124,6 @@ class FlutterBluePlus {
     }
   }
 
-  /// Stream of all device connections & disconnections from your app
-  static Stream<BluetoothConnectionEvent> get connectionEvents async* {
-      yield* FlutterBluePlus._methodStream.stream
-          .where((m) => m.method == "OnConnectionStateChanged")
-          .map((m) => m.arguments)
-          .map((args) => BmConnectionStateResponse.fromMap(args))
-          .map((s) => BluetoothConnectionEvent(
-            BluetoothDevice(remoteId: DeviceIdentifier(s.remoteId)),
-            _bmToConnectionState(s.connectionState)));
-  }
-
   /// Retrieve a list of devices currently connected to your app
   static List<BluetoothDevice> get connectedDevices {
     var copy = Map<DeviceIdentifier, BmConnectionStateResponse>.from(_connectionStates);
@@ -152,7 +146,7 @@ class FlutterBluePlus {
 
   /// Retrieve a list of bonded devices (Android only)
   static Future<List<BluetoothDevice>> get bondedDevices async {
-    BmDevicesList response =  await _invokeMethod('getBondedDevices').then((args) => BmDevicesList.fromMap(args));
+    BmDevicesList response = await _invokeMethod('getBondedDevices').then((args) => BmDevicesList.fromMap(args));
     for (BmBluetoothDevice device in response.devices) {
       if (device.platformName != null) {
         _platformNames[DeviceIdentifier(device.remoteId)] = device.platformName!;
@@ -285,7 +279,7 @@ class FlutterBluePlus {
 
     return await _invokeMethod('getPhySupport').then((args) => PhySupport.fromMap(args));
   }
-  
+
   static Future<dynamic> _initFlutterBluePlus() async {
     if (_initialized) {
       return;

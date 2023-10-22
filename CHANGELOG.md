@@ -1,3 +1,13 @@
+## 1.20.5
+* **[Add]** `FlutterBluePlus.events.onNameChanged`
+* **[Add]** `FlutterBluePlus.events.onServicesChanged`
+
+## 1.20.4
+* **[Rename]** `FlutterBluePlus.connectionEvents` -> `FlutterBluePlus.events.connectionState`
+* **[Add]** `FlutterBluePlus.events.onCharacteristicReceived`
+* **[Add]** `FlutterBluePlus.events.onDescriptorRead`
+* **[Add]** `FlutterBluePlus.events.bondState`
+
 ## 1.20.3
 * **[Add]** `FlutterBluePlus.connectionEvents`, a stream of all connection & disconnected events
 * **[Add]** `FlutterBluePlus.connectedDevices`, to get currently connected devices

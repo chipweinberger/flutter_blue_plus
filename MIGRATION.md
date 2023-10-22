@@ -85,7 +85,7 @@ extension Scan on FlutterBluePlus {
 
 ### `FlutterBluePlus.startScan` doesn't return List<ScanResult> anymore
 
-**Option 1:** migrate to `FlutterBluePlus.startScan`. Example code:
+**Option 1:** migrate to `FlutterBluePlus.scanResults`. Example code:
 
 ```
 Stream<BluetoothDevice?> myDeviceStream = FlutterBluePlus.scanResults
