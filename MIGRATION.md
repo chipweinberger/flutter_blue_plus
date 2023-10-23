@@ -33,7 +33,7 @@ i.e. `FlutterBluePlus.instance.startScan` becomes `FlutterBluePlus.startScan`
 
 ## 1.11.0
 
-* **renamed:** `connectedDevices` -> `connectedSystemDevices`
+* **renamed:** `connectedDevices` -> `systemDevices`
 
 ## 1.15.0
 
