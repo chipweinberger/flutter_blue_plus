@@ -1,3 +1,6 @@
+## 1.20.6
+* **[Add]** `FlutterBluePlus.events.mtu`
+
 ## 1.20.5
 * **[Add]** `FlutterBluePlus.events.onNameChanged`
 * **[Add]** `FlutterBluePlus.events.onServicesChanged`

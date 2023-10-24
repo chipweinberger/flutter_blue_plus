@@ -33,7 +33,7 @@ class BluetoothDevice {
   /// This function simplifies cleanup, to prevent duplicate stream subscriptions.
   ///   - this is an optional convenience function
   ///   - prevents accidentally creating duplicate subscriptions on each reconnection.
-  ///   - if already disconnected, the stream will be immediately canceled 
+  ///   - if already disconnected, the stream will be immediately canceled
   void cancelWhenDisconnected(StreamSubscription subscription) {
     if (isConnected == false) {
       subscription.cancel();
@@ -254,11 +254,11 @@ class BluetoothDevice {
       }
     }
     yield* FlutterBluePlus._methodStream.stream
-      .where((m) => m.method == "OnServicesChanged")
-      .map((m) => m.arguments)
-      .map((args) => BmBluetoothDevice.fromMap(args))
-      .where((p) => p.remoteId == remoteId.str)
-      .map((m) => null);
+        .where((m) => m.method == "OnServicesChanged")
+        .map((m) => m.arguments)
+        .map((args) => BmBluetoothDevice.fromMap(args))
+        .where((p) => p.remoteId == remoteId.str)
+        .map((m) => null);
   }
 
   /// Read the RSSI of connected remote device
