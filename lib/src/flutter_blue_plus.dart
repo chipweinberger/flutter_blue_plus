@@ -71,7 +71,7 @@ class FlutterBluePlus {
   static Stream<List<ScanResult>> get scanResults => _scanResultsList.stream;
 
   /// Get access to all device event streams
-  static BluetoothEvents get events => BluetoothEvents();
+  static final BluetoothEvents events = BluetoothEvents();
 
   /// Turn on Bluetooth (Android only),
   static Future<void> turnOn({int timeout = 60}) async {

@@ -1,7 +1,7 @@
 part of flutter_blue_plus;
 
 class BluetoothEvents {
-  static Stream<ConnectionStateEvent> get connectionState {
+  Stream<ConnectionStateEvent> get connectionState {
     return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnConnectionStateChanged")
         .map((m) => m.arguments)
@@ -9,7 +9,7 @@ class BluetoothEvents {
         .map((p) => ConnectionStateEvent(p));
   }
 
-  static Stream<MtuEvent> get mtu {
+  Stream<MtuEvent> get mtu {
     return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnMtuChanged")
         .map((m) => m.arguments)
@@ -17,7 +17,7 @@ class BluetoothEvents {
         .map((p) => MtuEvent(p));
   }
 
-  static Stream<CharacteristicReceivedEvent> get onCharacteristicReceived {
+  Stream<CharacteristicReceivedEvent> get onCharacteristicReceived {
     return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnCharacteristicReceived")
         .map((m) => m.arguments)
@@ -25,7 +25,7 @@ class BluetoothEvents {
         .map((p) => CharacteristicReceivedEvent(p));
   }
 
-  static Stream<DescriptorReadEvent> get onDescriptorRead {
+  Stream<DescriptorReadEvent> get onDescriptorRead {
     return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnDescriptorRead")
         .map((m) => m.arguments)
@@ -33,7 +33,7 @@ class BluetoothEvents {
         .map((p) => DescriptorReadEvent(p));
   }
 
-  static Stream<OnNameChangedEvent> get onNameChanged {
+  Stream<OnNameChangedEvent> get onNameChanged {
     return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnNameChanged")
         .map((m) => m.arguments)
@@ -41,7 +41,7 @@ class BluetoothEvents {
         .map((p) => OnNameChangedEvent(p));
   }
 
-  static Stream<OnServicesChangedEvent> get onServicesChanged {
+  Stream<OnServicesChangedEvent> get onServicesChanged {
     return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnServicesChanged")
         .map((m) => m.arguments)
@@ -49,7 +49,7 @@ class BluetoothEvents {
         .map((p) => OnServicesChangedEvent(p));
   }
 
-  static Stream<BondStateEvent> get bondState {
+  Stream<BondStateEvent> get bondState {
     return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnBondStateChanged")
         .map((m) => m.arguments)
