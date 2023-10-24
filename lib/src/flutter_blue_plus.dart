@@ -26,8 +26,6 @@ class FlutterBluePlus {
   static final Map<DeviceIdentifier, String> _platformNames = {};
   static final Map<DeviceIdentifier, Map<String, List<int>>> _lastChrs = {};
   static final Map<DeviceIdentifier, Map<String, List<int>>> _lastDescs = {};
-  static final Map<DeviceIdentifier, Map<String, BmCharacteristicProperties>> _properties = {};
-  static final Map<DeviceIdentifier, Map<String, List<BmBluetoothDescriptor>>> _descriptors = {};
   static final Map<DeviceIdentifier, List<StreamSubscription>> _subscriptions = {};
 
   /// stream used for the isScanning public api
