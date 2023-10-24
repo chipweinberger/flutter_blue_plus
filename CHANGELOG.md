@@ -1,3 +1,6 @@
+## 1.20.7
+* **[Fix]**  events API was not accessible through `FlutterBluePlus.events`
+
 ## 1.20.6
 * **[Add]** `FlutterBluePlus.events.mtu`
 
