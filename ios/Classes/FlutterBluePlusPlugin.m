@@ -6,6 +6,8 @@
 
 #define Log(LEVEL, FORMAT, ...) [self log:LEVEL format:@"[FBP-iOS] " FORMAT, ##__VA_ARGS__]
 
+NSString * const CCCD = @"00002902-0000-1000-8000-00805f9b34fb";
+
 @interface ServicePair : NSObject
 @property (strong, nonatomic) CBService *primary;
 @property (strong, nonatomic) CBService *secondary;
@@ -24,12 +26,12 @@
     if (self.UUIDString.length == 4)
     {
         // 16-bit uuid
-        return [[NSString stringWithFormat:@"0000%@-0000-1000-8000-00805F9B34FB", self.UUIDString] lowercaseString];
+        return [[NSString stringWithFormat:@"0000%@-0000-1000-8000-00805f9b34fb", self.UUIDString] lowercaseString];
     } 
     else if (self.UUIDString.length == 8)
     {
         // 32-bit uuid
-        return [[NSString stringWithFormat:@"%@-0000-1000-8000-00805F9B34FB", self.UUIDString] lowercaseString];
+        return [[NSString stringWithFormat:@"%@-0000-1000-8000-00805f9b34fb", self.UUIDString] lowercaseString];
     }
     else {
         // 128-bit uuid
@@ -630,6 +632,12 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 return;
             }
 
+            // Check that CCCD is found, this is necessary for subscribing
+            CBDescriptor *descriptor = [self locateDescriptor:CCCD characteristic:characteristic error:nil];
+            if (descriptor == nil) {
+                Log(LWARNING, @"Warning: CCCD descriptor for characteristic not found: %@", characteristicUuid);
+            }
+
             // Set notification value
             [peripheral setNotifyValue:[enable boolValue] forCharacteristic:characteristic];
             
@@ -780,7 +788,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 - (CBDescriptor *)locateDescriptor:(NSString *)descriptorId characteristic:(CBCharacteristic *)characteristic error:(NSError**)error
 {
     CBDescriptor *descriptor = [self getDescriptorFromArray:descriptorId array:[characteristic descriptors]];
-    if (descriptor == nil)
+    if (descriptor == nil && error != nil)
     {
         NSString* format = @"descriptor not found in characteristic (desc: '%@', chr: '%@')";
         NSString* s = [NSString stringWithFormat:format, descriptorId, [characteristic.UUID uuid128]];
@@ -1271,7 +1279,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"service_uuid":           [pair.primary.UUID uuid128],
         @"secondary_service_uuid": pair.secondary ? [pair.secondary.UUID uuid128] : [NSNull null],
         @"characteristic_uuid":    [characteristic.UUID uuid128],
-        @"descriptor_uuid":        @"00002902-0000-1000-8000-00805f9b34fb", // uuid of CCCD
+        @"descriptor_uuid":        CCCD,
         @"value":                  [self convertDataToHex:[NSData dataWithBytes:&value length:sizeof(value)]],
         @"success":                @(error == nil),
         @"error_string":           error ? [error localizedDescription] : [NSNull null],
