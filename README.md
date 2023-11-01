@@ -176,6 +176,8 @@ await device.disconnect();
 
 ❗ **You must request a larger MTU on Android!** ❗ 
 
+On Android, the mtu is always 23 unless you request a larger one. On iOS & macOS, the mtu is negotiated automatically, typically 135 to 255.
+
 ```dart
 final mtuSubscription = device.mtu.listen((int mtu) {
     // iOS: initial value is always 23, but iOS will quickly negotiate a higher value
