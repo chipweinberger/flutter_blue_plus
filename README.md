@@ -15,6 +15,7 @@ Migrating from [FlutterBlue](https://github.com/pauldemarco/flutter_blue)? See [
 
 - [Introduction](#introduction)
 - [Usage](#usage)
+- [iOS vs Android](#ios-vs-android)
 - [Getting Started](#getting-started)
 - [Reference](#reference)
 - [Debugging](#debugging)
@@ -171,7 +172,9 @@ await device.connect();
 await device.disconnect();
 ```
 
-### Get MTU and request larger size
+### Request Larger MTU
+
+❗ **You must request a larger MTU on Android!** ❗ 
 
 ```dart
 final mtuSubscription = device.mtu.listen((int mtu) {
@@ -367,6 +370,24 @@ FlutterBluePlus.events.connectionState.listen((event)) {
     print('${event.device} ${event.connectionState}');
 }
 ```
+
+## iOS vs Android
+
+### RemoteId
+
+**Android:** 
+
+`05:A4:22:31:F7:ED`
+
+Android uses the mac address of the bluetooth device. It will never change.
+
+**iOS & macOS:** 
+
+`6920a902-ba0e-4a13-a35f-6bc91161c517`
+
+For privacy, iOS & macOS use a randomly generated uuid.
+
+This uuid will periodically change.
 
 ## Getting Started
 
