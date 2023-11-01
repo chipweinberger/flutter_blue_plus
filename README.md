@@ -293,7 +293,7 @@ It is very convenient for simple characteristics that support both WRITE and REA
 
 ```dart
 final chrSubscription = characteristic.lastValueStream.listen((value) {
-    //lastValueStream` is updated:
+    // lastValueStream` is updated:
     //   - anytime read() is called
     //   - anytime write() is called
     //   - anytime a notification arrives (if subscribed)
@@ -339,18 +339,18 @@ for (var d in devs) {
 However, you can force the popup to show sooner.
 
 ```dart
-    final bsSubscription = device.bondState.listen((value) {
-        print("$value prev:{$device.prevBondState}");
-    });
+final bsSubscription = device.bondState.listen((value) {
+    print("$value prev:{$device.prevBondState}");
+});
 
-    // cleanup: cancel subscription when disconnected
-    device.cancelWhenDisconnected(bsSubscription);
+// cleanup: cancel subscription when disconnected
+device.cancelWhenDisconnected(bsSubscription);
 
-    // Force the bonding popup to show now (Android Only) 
-    await device.createBond();
+// Force the bonding popup to show now (Android Only) 
+await device.createBond();
 
-    // remove bond
-    await device.removeBond();
+// remove bond
+await device.removeBond();
 ```
 
 ### Events API
