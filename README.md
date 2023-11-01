@@ -15,7 +15,6 @@ Migrating from [FlutterBlue](https://github.com/pauldemarco/flutter_blue)? See [
 
 - [Introduction](#introduction)
 - [Usage](#usage)
-- [iOS vs Android](#ios-vs-android)
 - [Getting Started](#getting-started)
 - [Reference](#reference)
 - [Debugging](#debugging)
@@ -373,24 +372,6 @@ FlutterBluePlus.events.connectionState.listen((event)) {
 }
 ```
 
-## iOS vs Android
-
-### RemoteId
-
-**Android:** 
-
-`05:A4:22:31:F7:ED`
-
-Android uses the mac address of the bluetooth device. It will never change.
-
-**iOS & macOS:** 
-
-`6920a902-ba0e-4a13-a35f-6bc91161c517`
-
-For privacy, iOS & macOS use a randomly generated uuid.
-
-This uuid will periodically change.
-
 ## Getting Started
 
 ### Change the minSdkVersion for Android
@@ -667,6 +648,20 @@ The Huawei P8 Lite is one of the reported phones to have this issue. Try stoppin
 **5. Try restarting your phone**
 
 Bluetooth is a complicated system service, and can enter a bad state.
+
+---
+
+### The remoteId is different on Android versus iOS & macOS
+
+This is expected. There is no way to avoid it.
+
+For privacy, iOS & macOS use a randomly generated uuid. This uuid will periodically change.
+
+e.g. `6920a902-ba0e-4a13-a35f-6bc91161c517`
+
+Android uses the mac address of the bluetooth device. It never changes.
+
+e.g. `05:A4:22:31:F7:ED`
 
 ---
 
