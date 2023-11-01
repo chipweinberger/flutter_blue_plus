@@ -238,7 +238,7 @@ await c.write(data, allowLongWrite:true);
 
 ```dart
 import 'dart:math';
-// writeSplit should be used with caution.
+// split write should be used with caution.
 //    1. due to splitting, `characteristic.read()` will return partial data.
 //    2. it can only be used *with* response to avoid data loss
 //    3. The characteristic must be designed to support split data
