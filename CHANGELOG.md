@@ -1,3 +1,7 @@
+## 1.20.8
+* **[Fix]** iOS: connect: return error for invalid remoteId
+* **[Improve]** iOS: log warning if CCCD is not found, like we do on android
+
 ## 1.20.7
 * **[Fix]**  events API was not accessible through `FlutterBluePlus.events`
 
