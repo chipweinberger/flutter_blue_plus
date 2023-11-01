@@ -665,7 +665,7 @@ e.g. `05:A4:22:31:F7:ED`
 
 ---
 
-### onValueReceived (or lastValueStream) is never called
+### onValueReceived is never called (or lastValueStream)
 
 **1. you are not calling the right function**
 
@@ -687,7 +687,7 @@ Some ble devices have buggy software and stop sending data
 
 ---
 
-### onValueReceived (or lastValueStream) data is split up
+### onValueReceived data is split up (or lastValueStream)
 
 You are probably forgetting to increase the android mtu.
 
@@ -707,7 +707,7 @@ If it still happens, it is a problem with your peripheral device.
 
 ---
 
-### onValueReceived (or lastValueStream) is called with duplicate data
+### onValueReceived is called with duplicate data (or lastValueStream)
 
 You are probably forgetting to cancel the original `stream.listen` resulting in multiple listens.
 
