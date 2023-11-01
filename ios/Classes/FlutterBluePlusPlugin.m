@@ -291,8 +291,15 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 return;
             }
 
-            // check the devices iOS knowns about
+            // parse
             NSUUID *uuid = [[NSUUID alloc] initWithUUIDString:remoteId];
+            if (uuid == nil)
+            {
+                result([FlutterError errorWithCode:@"connect" message:@"invalid remoteId" details:remoteId]);
+                return;
+            }
+
+            // check the devices iOS knowns about
             NSArray<CBPeripheral *> *peripherals = [_centralManager retrievePeripheralsWithIdentifiers:@[uuid]];
             for (CBPeripheral *p in peripherals)
             {
