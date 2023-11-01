@@ -1996,6 +1996,8 @@ public class FlutterBluePlusPlugin implements
         map.put("device", bmBluetoothDevice(device));
         map.put("rssi", result.getRssi());
         map.put("advertisement_data", bmAdvertisementData(result));
+        map.put("scan_bytes", bytesToHex(result.getScanRecord().getBytes()));
+
         return map;
     }
 

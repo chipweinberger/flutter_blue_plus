@@ -516,12 +516,14 @@ class ScanResult {
   final BluetoothDevice device;
   final AdvertisementData advertisementData;
   final int rssi;
+  final String scanBytes;
   final DateTime timeStamp;
 
   ScanResult({
     required this.device,
     required this.advertisementData,
     required this.rssi,
+    required this.scanBytes,
     required this.timeStamp,
   });
 
@@ -529,6 +531,7 @@ class ScanResult {
       : device = BluetoothDevice.fromProto(p.device),
         advertisementData = AdvertisementData.fromProto(p.advertisementData),
         rssi = p.rssi,
+        scanBytes = p.scanBytes,
         timeStamp = DateTime.now();
 
   @override
@@ -544,6 +547,7 @@ class ScanResult {
         'device: $device, '
         'advertisementData: $advertisementData, '
         'rssi: $rssi, '
+        'scanBytes: $scanBytes, '
         'timeStamp: $timeStamp'
         '}';
   }

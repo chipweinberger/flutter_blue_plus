@@ -142,11 +142,13 @@ class BmScanResult {
   final BmBluetoothDevice device;
   final BmAdvertisementData advertisementData;
   final int rssi;
+  final String scanBytes;
 
   BmScanResult({
     required this.device,
     required this.advertisementData,
     required this.rssi,
+    required this.scanBytes,
   });
 
   factory BmScanResult.fromMap(Map<dynamic, dynamic> json) {
@@ -154,6 +156,7 @@ class BmScanResult {
       device: BmBluetoothDevice.fromMap(json['device']),
       advertisementData: BmAdvertisementData.fromMap(json['advertisement_data']),
       rssi: json['rssi'],
+      scanBytes: json['scan_bytes'],
     );
   }
 }
