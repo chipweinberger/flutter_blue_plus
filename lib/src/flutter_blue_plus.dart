@@ -649,7 +649,8 @@ class FlutterBluePlusException implements Exception {
 
   @override
   String toString() {
-    return 'FlutterBluePlusException: $function: (code: $code) $description';
+    String sPlatform = platform.toString().split('.').last;
+    return 'FlutterBluePlusException | $function | $sPlatform-code: $code | $description';
   }
 
   @Deprecated('Use function instead')

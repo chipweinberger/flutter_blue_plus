@@ -58,6 +58,13 @@ class BluetoothEvents {
   }
 }
 
+class FbpError {
+  final int errorCode;
+  final String errorString;
+  ErrorPlatform get platform => _nativeError;
+  FbpError(this.errorCode, this.errorString);
+}
+
 //
 // Events
 //
@@ -86,6 +93,9 @@ class MtuEvent {
 
   /// the new mtu
   int get mtu => _response.mtu;
+
+  /// failed?
+  FbpError? get error => _response.success ? null : FbpError(_response.errorCode, _response.errorString);
 }
 
 // Characteristic Received
@@ -106,6 +116,9 @@ class CharacteristicReceivedEvent {
 
   /// the new data
   List<int> get value => _response.value;
+
+  /// failed?
+  FbpError? get error => _response.success ? null : FbpError(_response.errorCode, _response.errorString);
 }
 
 // Descriptor Received
@@ -126,6 +139,9 @@ class DescriptorReadEvent {
 
   /// the new data
   List<int> get value => _response.value;
+
+  /// failed?
+  FbpError? get error => _response.success ? null : FbpError(_response.errorCode, _response.errorString);
 }
 
 // On Name Changed
