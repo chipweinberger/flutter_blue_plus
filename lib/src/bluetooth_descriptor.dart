@@ -74,11 +74,9 @@ class BluetoothDescriptor {
           ErrorPlatform.dart, "readDescriptor", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
-    // Only allow a single read to be underway at any time, per-characteristic, per-device.
-    // Otherwise, there would be multiple in-flight requests and we wouldn't know which response is for us.
-    String key = remoteId.str + ":" + characteristicUuid.toString() + ":readDesc";
-    _Mutex readMutex = await _MutexFactory.getMutexForKey(key);
-    await readMutex.take();
+    // Only allow a single ble operation to be underway at a time
+    _Mutex mtx = await _MutexFactory.getMutexForKey("global");
+    await mtx.take();
 
     // return value
     List<int> readValue = [];
@@ -120,7 +118,7 @@ class BluetoothDescriptor {
 
       readValue = response.value;
     } finally {
-      readMutex.give();
+      mtx.give();
     }
 
     return readValue;
@@ -134,11 +132,9 @@ class BluetoothDescriptor {
           ErrorPlatform.dart, "writeDescriptor", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
-    // Only allow a single write to be underway at any time, per-characteristic, per-device.
-    // Otherwise, there would be multiple in-flight requests and we wouldn't know which response is for us.
-    String key = remoteId.str + ":" + characteristicUuid.toString() + ":writeDesc";
-    _Mutex writeMutex = await _MutexFactory.getMutexForKey(key);
-    await writeMutex.take();
+    // Only allow a single ble operation to be underway at a time
+    _Mutex mtx = await _MutexFactory.getMutexForKey("global");
+    await mtx.take();
 
     try {
       var request = BmWriteDescriptorRequest(

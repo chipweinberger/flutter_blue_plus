@@ -75,10 +75,8 @@ class FlutterBluePlus {
 
   /// Turn on Bluetooth (Android only),
   static Future<void> turnOn({int timeout = 60}) async {
-    Stream<BluetoothAdapterState> responseStream = adapterState.where((s) => s == BluetoothAdapterState.on);
-
     // Start listening now, before invokeMethod, to ensure we don't miss the response
-    Future<BluetoothAdapterState> futureResponse = responseStream.first;
+    Future<BluetoothAdapterState> futureResponse = adapterState.where((s) => s == BluetoothAdapterState.on).first;
 
     // invoke
     await _invokeMethod('turnOn');

@@ -61,10 +61,9 @@ class BluetoothDevice {
     Duration timeout = const Duration(seconds: 35),
     bool autoConnect = false,
   }) async {
-    // Only allow a single 'connectOrDisconnect' operation at the same time per device.
-    String key = remoteId.str + ":connectOrDisconnect";
-    _Mutex opMutex = await _MutexFactory.getMutexForKey(key);
-    await opMutex.take();
+    // Only allow a single ble operation to be underway at a time
+    _Mutex mtx = await _MutexFactory.getMutexForKey("global");
+    await mtx.take();
 
     try {
       var request = BmConnectRequest(
@@ -99,16 +98,15 @@ class BluetoothDevice {
         }
       }
     } finally {
-      opMutex.give();
+      mtx.give();
     }
   }
 
   /// Cancels connection to the Bluetooth Device
   Future<void> disconnect({int timeout = 35}) async {
-    // Only allow a single 'connectOrDisconnect' operation at the same time per device.
-    String key = remoteId.str + ":connectOrDisconnect";
-    _Mutex opMutex = await _MutexFactory.getMutexForKey(key);
-    await opMutex.take();
+    // Only allow a single ble operation to be underway at a time
+    _Mutex mtx = await _MutexFactory.getMutexForKey("global");
+    await mtx.take();
 
     try {
       var responseStream = FlutterBluePlus._methodStream.stream
@@ -129,7 +127,7 @@ class BluetoothDevice {
         await futureState.fbpEnsureAdapterIsOn("disconnect").fbpTimeout(timeout, "disconnect");
       }
     } finally {
-      opMutex.give();
+      mtx.give();
     }
   }
 
@@ -141,10 +139,9 @@ class BluetoothDevice {
           ErrorPlatform.dart, "discoverServices", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
-    // Only allow a single 'discoverServices' operation at the same time per device.
-    String key = remoteId.str + ":discoverServices";
-    _Mutex opMutex = await _MutexFactory.getMutexForKey(key);
-    await opMutex.take();
+    // Only allow a single ble operation to be underway at a time
+    _Mutex mtx = await _MutexFactory.getMutexForKey("global");
+    await mtx.take();
 
     List<BluetoothService> result = [];
 
@@ -174,7 +171,7 @@ class BluetoothDevice {
 
       result = response.services.map((p) => BluetoothService.fromProto(p)).toList();
     } finally {
-      opMutex.give();
+      mtx.give();
     }
 
     return result;
@@ -269,10 +266,9 @@ class BluetoothDevice {
           ErrorPlatform.dart, "readRssi", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
-    // Only allow a single 'readRssi' operation at the same time per device.
-    String key = remoteId.str + ":readRssi";
-    _Mutex opMutex = await _MutexFactory.getMutexForKey(key);
-    await opMutex.take();
+    // Only allow a single ble operation to be underway at a time
+    _Mutex mtx = await _MutexFactory.getMutexForKey("global");
+    await mtx.take();
 
     int rssi = 0;
 
@@ -301,7 +297,7 @@ class BluetoothDevice {
       }
       rssi = response.rssi;
     } finally {
-      opMutex.give();
+      mtx.give();
     }
 
     return rssi;
@@ -321,10 +317,9 @@ class BluetoothDevice {
           ErrorPlatform.dart, "requestMtu", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
-    // Only allow a single 'requestMtu' operation at the same time per device.
-    String key = remoteId.str + ":requestMtu";
-    _Mutex opMutex = await _MutexFactory.getMutexForKey(key);
-    await opMutex.take();
+    // Only allow a single ble operation to be underway at a time
+    _Mutex mtx = await _MutexFactory.getMutexForKey("global");
+    await mtx.take();
 
     var mtu = 0;
 
@@ -353,7 +348,7 @@ class BluetoothDevice {
           .fbpEnsureDeviceIsConnected(this, "requestMtu")
           .fbpTimeout(timeout, "requestMtu");
     } finally {
-      opMutex.give();
+      mtx.give();
     }
 
     return mtu;
@@ -429,10 +424,9 @@ class BluetoothDevice {
           ErrorPlatform.dart, "createBond", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
-    // Only allow a single 'createRemoveBond' operation at the same time per device.
-    String key = remoteId.str + ":createRemoveBond";
-    _Mutex opMutex = await _MutexFactory.getMutexForKey(key);
-    await opMutex.take();
+    // Only allow a single ble operation to be underway at a time
+    _Mutex mtx = await _MutexFactory.getMutexForKey("global");
+    await mtx.take();
 
     try {
       var responseStream = FlutterBluePlus._methodStream.stream
@@ -462,7 +456,7 @@ class BluetoothDevice {
         }
       }
     } finally {
-      opMutex.give();
+      mtx.give();
     }
   }
 
@@ -473,10 +467,9 @@ class BluetoothDevice {
       throw FlutterBluePlusException(ErrorPlatform.dart, "removeBond", FbpErrorCode.androidOnly.index, "android-only");
     }
 
-    // Only allow a single 'createRemoveBond' operation at the same time per device.
-    String key = remoteId.str + ":createRemoveBond";
-    _Mutex opMutex = await _MutexFactory.getMutexForKey(key);
-    await opMutex.take();
+    // Only allow a single ble operation to be underway at a time
+    _Mutex mtx = await _MutexFactory.getMutexForKey("global");
+    await mtx.take();
 
     try {
       var responseStream = FlutterBluePlus._methodStream.stream
@@ -506,7 +499,7 @@ class BluetoothDevice {
         }
       }
     } finally {
-      opMutex.give();
+      mtx.give();
     }
   }
 
