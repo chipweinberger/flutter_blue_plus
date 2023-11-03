@@ -144,7 +144,7 @@ class BluetoothDevice {
     // check connected
     if (isConnected == false) {
       throw FlutterBluePlusException(
-          ErrorPlatform.dart, "discoverServices", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
+          ErrorPlatform.fbp, "discoverServices", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
     // Only allow a single ble operation to be underway at a time
@@ -271,7 +271,7 @@ class BluetoothDevice {
     // check connected
     if (isConnected == false) {
       throw FlutterBluePlusException(
-          ErrorPlatform.dart, "readRssi", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
+          ErrorPlatform.fbp, "readRssi", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
     // Only allow a single ble operation to be underway at a time
@@ -316,13 +316,13 @@ class BluetoothDevice {
   Future<int> requestMtu(int desiredMtu, {int timeout = 15}) async {
     // check android
     if (Platform.isAndroid == false) {
-      throw FlutterBluePlusException(ErrorPlatform.dart, "requestMtu", FbpErrorCode.androidOnly.index, "android-only");
+      throw FlutterBluePlusException(ErrorPlatform.fbp, "requestMtu", FbpErrorCode.androidOnly.index, "android-only");
     }
 
     // check connected
     if (isConnected == false) {
       throw FlutterBluePlusException(
-          ErrorPlatform.dart, "requestMtu", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
+          ErrorPlatform.fbp, "requestMtu", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
     // Only allow a single ble operation to be underway at a time
@@ -367,12 +367,12 @@ class BluetoothDevice {
     // check android
     if (Platform.isAndroid == false) {
       throw FlutterBluePlusException(
-          ErrorPlatform.dart, "requestConnectionPriority", FbpErrorCode.androidOnly.index, "android-only");
+          ErrorPlatform.fbp, "requestConnectionPriority", FbpErrorCode.androidOnly.index, "android-only");
     }
 
     // check connected
     if (isConnected == false) {
-      throw FlutterBluePlusException(ErrorPlatform.dart, "requestConnectionPriority",
+      throw FlutterBluePlusException(ErrorPlatform.fbp, "requestConnectionPriority",
           FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
@@ -398,13 +398,13 @@ class BluetoothDevice {
     // check android
     if (Platform.isAndroid == false) {
       throw FlutterBluePlusException(
-          ErrorPlatform.dart, "setPreferredPhy", FbpErrorCode.androidOnly.index, "android-only");
+          ErrorPlatform.fbp, "setPreferredPhy", FbpErrorCode.androidOnly.index, "android-only");
     }
 
     // check connected
     if (isConnected == false) {
       throw FlutterBluePlusException(
-          ErrorPlatform.dart, "setPreferredPhy", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
+          ErrorPlatform.fbp, "setPreferredPhy", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
     var request = BmPreferredPhy(
@@ -423,13 +423,13 @@ class BluetoothDevice {
   Future<void> createBond({int timeout = 90}) async {
     // check android
     if (Platform.isAndroid == false) {
-      throw FlutterBluePlusException(ErrorPlatform.dart, "createBond", FbpErrorCode.androidOnly.index, "android-only");
+      throw FlutterBluePlusException(ErrorPlatform.fbp, "createBond", FbpErrorCode.androidOnly.index, "android-only");
     }
 
     // check connected
     if (isConnected == false) {
       throw FlutterBluePlusException(
-          ErrorPlatform.dart, "createBond", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
+          ErrorPlatform.fbp, "createBond", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
     // Only allow a single ble operation to be underway at a time
@@ -459,7 +459,7 @@ class BluetoothDevice {
 
         // success?
         if (bs.bondState != BmBondStateEnum.bonded) {
-          throw FlutterBluePlusException(ErrorPlatform.dart, "createBond", FbpErrorCode.createBondFailed.hashCode,
+          throw FlutterBluePlusException(ErrorPlatform.fbp, "createBond", FbpErrorCode.createBondFailed.hashCode,
               "Failed to create bond. ${bs.bondState}");
         }
       }
@@ -472,7 +472,7 @@ class BluetoothDevice {
   Future<void> removeBond({int timeout = 30}) async {
     // check android
     if (Platform.isAndroid == false) {
-      throw FlutterBluePlusException(ErrorPlatform.dart, "removeBond", FbpErrorCode.androidOnly.index, "android-only");
+      throw FlutterBluePlusException(ErrorPlatform.fbp, "removeBond", FbpErrorCode.androidOnly.index, "android-only");
     }
 
     // Only allow a single ble operation to be underway at a time
@@ -502,7 +502,7 @@ class BluetoothDevice {
 
         // success?
         if (bs.bondState != BmBondStateEnum.none) {
-          throw FlutterBluePlusException(ErrorPlatform.dart, "createBond", FbpErrorCode.removeBondFailed.hashCode,
+          throw FlutterBluePlusException(ErrorPlatform.fbp, "createBond", FbpErrorCode.removeBondFailed.hashCode,
               "Failed to remove bond. ${bs.bondState}");
         }
       }
@@ -516,13 +516,13 @@ class BluetoothDevice {
     // check android
     if (Platform.isAndroid == false) {
       throw FlutterBluePlusException(
-          ErrorPlatform.dart, "clearGattCache", FbpErrorCode.androidOnly.index, "android-only");
+          ErrorPlatform.fbp, "clearGattCache", FbpErrorCode.androidOnly.index, "android-only");
     }
 
     // check connected
     if (isConnected == false) {
       throw FlutterBluePlusException(
-          ErrorPlatform.dart, "clearGattCache", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
+          ErrorPlatform.fbp, "clearGattCache", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
     // invoke
@@ -533,7 +533,7 @@ class BluetoothDevice {
   Stream<BluetoothBondState> get bondState async* {
     // check android
     if (Platform.isAndroid == false) {
-      throw FlutterBluePlusException(ErrorPlatform.dart, "bondState", FbpErrorCode.androidOnly.index, "android-only");
+      throw FlutterBluePlusException(ErrorPlatform.fbp, "bondState", FbpErrorCode.androidOnly.index, "android-only");
     }
 
     // do we already have the initial state?

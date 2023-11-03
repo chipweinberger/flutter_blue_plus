@@ -270,7 +270,7 @@ class FlutterBluePlus {
     // check android
     if (Platform.isAndroid == false) {
       throw FlutterBluePlusException(
-          ErrorPlatform.dart, "getPhySupport", FbpErrorCode.androidOnly.index, "android-only");
+          ErrorPlatform.fbp, "getPhySupport", FbpErrorCode.androidOnly.index, "android-only");
     }
 
     return await _invokeMethod('getPhySupport').then((args) => PhySupport.fromMap(args));
@@ -606,7 +606,7 @@ class PhySupport {
 }
 
 enum ErrorPlatform {
-  dart,
+  fbp,
   android,
   apple,
 }

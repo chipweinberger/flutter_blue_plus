@@ -56,7 +56,7 @@ extension FutureTimeout<T> on Future<T> {
   Future<T> fbpTimeout(int seconds, String function) {
     return this.timeout(Duration(seconds: seconds), onTimeout: () {
       throw FlutterBluePlusException(
-          ErrorPlatform.dart, function, FbpErrorCode.timeout.index, "Timed out after ${seconds}s");
+          ErrorPlatform.fbp, function, FbpErrorCode.timeout.index, "Timed out after ${seconds}s");
     });
   }
 
@@ -69,7 +69,7 @@ extension FutureTimeout<T> on Future<T> {
       if (event == BluetoothConnectionState.disconnected) {
         if (!completer.isCompleted) {
           completer.completeError(FlutterBluePlusException(
-              ErrorPlatform.dart, function, FbpErrorCode.deviceIsDisconnected.index, "Device is disconnected"));
+              ErrorPlatform.fbp, function, FbpErrorCode.deviceIsDisconnected.index, "Device is disconnected"));
         }
       }
     });
@@ -100,7 +100,7 @@ extension FutureTimeout<T> on Future<T> {
       if (event == BluetoothAdapterState.off || event == BluetoothAdapterState.turningOff) {
         if (!completer.isCompleted) {
           completer.completeError(FlutterBluePlusException(
-              ErrorPlatform.dart, function, FbpErrorCode.adapterIsOff.index, "Bluetooth adapter is off"));
+              ErrorPlatform.fbp, function, FbpErrorCode.adapterIsOff.index, "Bluetooth adapter is off"));
         }
       }
     });

@@ -96,7 +96,7 @@ class BluetoothCharacteristic {
     // check connected
     if (device.isConnected == false) {
       throw FlutterBluePlusException(
-          ErrorPlatform.dart, "readCharacteristic", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
+          ErrorPlatform.fbp, "readCharacteristic", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
     // Only allow a single ble operation to be underway at a time
@@ -166,7 +166,7 @@ class BluetoothCharacteristic {
 
     // check connected
     if (device.isConnected == false) {
-      throw FlutterBluePlusException(ErrorPlatform.dart, "writeCharacteristic", FbpErrorCode.deviceIsDisconnected.index,
+      throw FlutterBluePlusException(ErrorPlatform.fbp, "writeCharacteristic", FbpErrorCode.deviceIsDisconnected.index,
           "device is not connected");
     }
 
@@ -227,7 +227,7 @@ class BluetoothCharacteristic {
     // check connected
     if (device.isConnected == false) {
       throw FlutterBluePlusException(
-          ErrorPlatform.dart, "setNotifyValue", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
+          ErrorPlatform.fbp, "setNotifyValue", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
     // Only allow a single ble operation to be underway at a time
