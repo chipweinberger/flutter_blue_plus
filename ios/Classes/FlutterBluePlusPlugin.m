@@ -930,8 +930,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 @"remote_id" :      remoteId,
                 @"mtu":             @(curMtu),
                 @"success":         @(1),
-                @"error_string":    [NSNull null],
-                @"error_code":      [NSNull null],
+                @"error_string":    @"success",
+                @"error_code":      @(0),
             };
 
             // send mtu value
@@ -1162,8 +1162,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"remote_id":       [peripheral.identifier UUIDString],
         @"services":        services,
         @"success":         error == nil ? @(1) : @(0),
-        @"error_string":    error ? [error localizedDescription] : [NSNull null],
-        @"error_code":      error ? @(error.code) : [NSNull null],
+        @"error_string":    error ? [error localizedDescription] : @"success",
+        @"error_code":      error ? @(error.code) : @(0),
     };
 
     // Send updated tree
@@ -1208,8 +1208,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"characteristic_uuid":     [characteristic.UUID uuid128],
         @"value":                   [self convertDataToHex:characteristic.value],
         @"success":                 error == nil ? @(1) : @(0),
-        @"error_string":            error ? [error localizedDescription] : [NSNull null],
-        @"error_code":              error ? @(error.code) : [NSNull null],
+        @"error_string":            error ? [error localizedDescription] : @"success",
+        @"error_code":              error ? @(error.code) : @(0),
     };
 
     [_methodChannel invokeMethod:@"OnCharacteristicReceived" arguments:result];
@@ -1248,8 +1248,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"characteristic_uuid":     characteristicUuid,
         @"value":                   value,
         @"success":                 @(error == nil),
-        @"error_string":            error ? [error localizedDescription] : [NSNull null],
-        @"error_code":              error ? @(error.code) : [NSNull null],
+        @"error_string":            error ? [error localizedDescription] : @"success",
+        @"error_code":              error ? @(error.code) : @(0),
     };
 
     [_methodChannel invokeMethod:@"OnCharacteristicWritten" arguments:result];
@@ -1289,8 +1289,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"descriptor_uuid":        CCCD,
         @"value":                  [self convertDataToHex:[NSData dataWithBytes:&value length:sizeof(value)]],
         @"success":                @(error == nil),
-        @"error_string":           error ? [error localizedDescription] : [NSNull null],
-        @"error_code":             error ? @(error.code) : [NSNull null],
+        @"error_string":           error ? [error localizedDescription] : @"success",
+        @"error_code":             error ? @(error.code) : @(0),
     };
 
     [_methodChannel invokeMethod:@"OnDescriptorWritten" arguments:result];
@@ -1319,8 +1319,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"descriptor_uuid":        [descriptor.UUID uuid128],
         @"value":                  [self convertDataToHex:data],
         @"success":                @(error == nil),
-        @"error_string":           error ? [error localizedDescription] : [NSNull null],
-        @"error_code":             error ? @(error.code) : [NSNull null],
+        @"error_string":           error ? [error localizedDescription] : @"success",
+        @"error_code":             error ? @(error.code) : @(0),
     };
 
     [_methodChannel invokeMethod:@"OnDescriptorRead" arguments:result];
@@ -1359,8 +1359,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"descriptor_uuid":        descriptorUuid,
         @"value":                  value,
         @"success":                @(error == nil),
-        @"error_string":           error ? [error localizedDescription] : [NSNull null],
-        @"error_code":             error ? @(error.code) : [NSNull null],
+        @"error_string":           error ? [error localizedDescription] : @"success",
+        @"error_code":             error ? @(error.code) : @(0),
     };
 
     [_methodChannel invokeMethod:@"OnDescriptorWritten" arguments:result];
@@ -1399,8 +1399,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"remote_id":       [peripheral.identifier UUIDString],
         @"rssi":            rssi,
         @"success":         @(error == nil),
-        @"error_string":    error ? [error localizedDescription] : [NSNull null],
-        @"error_code":      error ? @(error.code) : [NSNull null],
+        @"error_string":    error ? [error localizedDescription] : @"success",
+        @"error_code":      error ? @(error.code) : @(0),
     };
 
     [_methodChannel invokeMethod:@"OnReadRssiResult" arguments:result];
@@ -1448,8 +1448,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"characteristic_uuid":     [characteristic.UUID uuid128],
         @"value":                   [self convertDataToHex:characteristic.value],
         @"success":                 @(error == nil),
-        @"error_string":            error ? [error localizedDescription] : [NSNull null],
-        @"error_code":              error ? @(error.code) : [NSNull null],
+        @"error_string":            error ? [error localizedDescription] : @"success",
+        @"error_code":              error ? @(error.code) : @(0),
     };
 
     [_methodChannel invokeMethod:@"OnCharacteristicWritten" arguments:result];

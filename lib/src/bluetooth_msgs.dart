@@ -120,8 +120,8 @@ class BmScanSettings {
 
 class BmScanFailed {
   final bool success;
-  final int? errorCode;
-  final String? errorString;
+  final int errorCode;
+  final String errorString;
 
   BmScanFailed({
     required this.success,
@@ -357,8 +357,8 @@ class BmDiscoverServicesResult {
   final String remoteId;
   final List<BmBluetoothService> services;
   final bool success;
-  final int? errorCode;
-  final String? errorString;
+  final int errorCode;
+  final String errorString;
 
   BmDiscoverServicesResult({
     required this.remoteId,
@@ -411,8 +411,8 @@ class BmCharacteristicData {
   final Guid characteristicUuid;
   final List<int> value;
   final bool success;
-  final int? errorCode;
-  final String? errorString;
+  final int errorCode;
+  final String errorString;
 
   BmCharacteristicData({
     required this.remoteId,
@@ -540,8 +540,8 @@ class BmDescriptorData {
   final Guid descriptorUuid;
   final List<int> value;
   final bool success;
-  final int? errorCode;
-  final String? errorString;
+  final int errorCode;
+  final String errorString;
 
   BmDescriptorData({
     required this.remoteId,
@@ -657,8 +657,8 @@ class BmMtuChangedResponse {
   final String remoteId;
   final int mtu;
   final bool success;
-  final int? errorCode;
-  final String? errorString;
+  final int errorCode;
+  final String errorString;
 
   BmMtuChangedResponse({
     required this.remoteId,
@@ -683,8 +683,8 @@ class BmReadRssiResult {
   final String remoteId;
   final int rssi;
   final bool success;
-  final int? errorCode;
-  final String? errorString;
+  final int errorCode;
+  final String errorString;
 
   BmReadRssiResult({
     required this.remoteId,
