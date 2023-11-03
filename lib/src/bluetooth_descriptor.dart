@@ -172,7 +172,7 @@ class BluetoothDescriptor {
         throw FlutterBluePlusException(_nativeError, "writeDescriptor", response.errorCode, response.errorString);
       }
     } finally {
-      writeMutex.give();
+      mtx.give();
     }
 
     return Future.value();
