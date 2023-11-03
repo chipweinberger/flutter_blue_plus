@@ -1,3 +1,7 @@
+## 1.21.0
+This release greatly increases reliability on android & ios.
+* **[Improve]** only allow a single ble operation at a time.
+
 ## 1.20.8
 * **[Fix]** iOS: connect: return error for invalid remoteId
 * **[Improve]** iOS: log warning if CCCD is not found, like we do on android

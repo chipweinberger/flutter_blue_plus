@@ -193,4 +193,10 @@ BluetoothDevice? myDevice = await myDeviceFuture;
 
 ## 1.20.3
 
-* **new function:** Introduced a new `connectedDevices` function. **Caution:** a previous function used the same name. That older function is now called `systemDevices`.
+* **new function:** Introduced a new `connectedDevices` function. **Caution:** a previous function used this same name. That function is now called `systemDevices`.
+
+## 1.21.0
+
+* **Behavior Change:** only allow a single ble operation at a time.
+
+This change was made to increase reliability, at the cost of throughput.
