@@ -1,3 +1,7 @@
+## 1.22.0
+This release makes `mtu` behavior more similar on android & iOS.
+* **[Breaking Change]** android: request mtu of 512 by default.
+
 ## 1.21.0
 This release greatly increases reliability on android & ios.
 * **[Improve]** only allow a single ble operation at a time.
