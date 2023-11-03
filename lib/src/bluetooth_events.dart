@@ -9,6 +9,14 @@ class BluetoothEvents {
         .map((p) => ConnectionStateEvent(p));
   }
 
+  Stream<DiscoveredServicesEvent> get onDiscoveredServices {
+    return FlutterBluePlus._methodStream.stream
+        .where((m) => m.method == "OnDiscoverServicesResult")
+        .map((m) => m.arguments)
+        .map((args) => BmDiscoverServicesResult.fromMap(args))
+        .map((p) => DiscoveredServicesEvent(p));
+  }
+
   Stream<MtuEvent> get mtu {
     return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnMtuChanged")
@@ -66,7 +74,7 @@ class FbpError {
 }
 
 //
-// Events
+// Event Classes
 //
 
 // ConnectionState
@@ -80,6 +88,22 @@ class ConnectionStateEvent {
 
   /// the new connection state
   BluetoothConnectionState get connectionState => _bmToConnectionState(_response.connectionState);
+}
+
+// Discovered Services Event
+class DiscoveredServicesEvent {
+  final BmDiscoverServicesResult _response;
+
+  DiscoveredServicesEvent(this._response);
+
+  /// the relevant device
+  BluetoothDevice get device => BluetoothDevice.fromId(_response.remoteId);
+
+  /// the discovered services
+  List<BluetoothService> get services => _response.services.map((p) => BluetoothService.fromProto(p)).toList();
+
+  /// failed?
+  FbpError? get error => _response.success ? null : FbpError(_response.errorCode, _response.errorString);
 }
 
 // Mtu Event

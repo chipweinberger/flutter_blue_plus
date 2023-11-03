@@ -359,6 +359,7 @@ Access streams from all devices simultaneously.
 
 There are streams for:
 * events.connectionState
+* events.onDiscoveredServices
 * events.onCharacteristicReceived
 * events.onDescriptorRead
 * events.onNameChanged
@@ -521,7 +522,8 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 | isConnected               | :white_check_mark: | :white_check_mark: |        | Is this device currently connected to *your app*?          |
 | connectionState        🌀 | :white_check_mark: | :white_check_mark: |        | Stream of connection changes for the Bluetooth Device      |
 | discoverServices          | :white_check_mark: | :white_check_mark: | :fire: | Discover services                                          |
-| servicesList              | :white_check_mark: | :white_check_mark: |        | The list of services that were discovered                  |
+| servicesList              | :white_check_mark: | :white_check_mark: |        | The current list of available services                     |
+| onDiscoveredServices   🌀 | :white_check_mark: | :white_check_mark: |        | Stream of discovered services                              |
 | onServicesChanged      🌀 | :white_check_mark: | :white_check_mark: |        | The services changed & must be rediscovered                |
 | onNameChanged          🌀 | :white_check_mark: | :white_check_mark: |        | The GAP Device Name Characteristic (0x2A00) changed        |
 | mtu                    🌀 | :white_check_mark: | :white_check_mark: | :fire: | Stream of mtu size changes                                 |
