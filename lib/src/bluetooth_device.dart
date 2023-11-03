@@ -55,11 +55,13 @@ class BluetoothDevice {
 
   /// Establishes a connection to the Bluetooth Device.
   ///   [autoConnect] Android only. reconnect whenever the device is found. This only
-  ///   works if the device is in the Bluetooth scan cache or it is has been bonded before.
-  ///   The scan cache is cleared whenever bluetooth is turned off.
+  ///       works if the device is in the Bluetooth scan cache or it is has been bonded before.
+  ///       The scan cache is cleared whenever bluetooth is turned off.
+  ///   [mtu] Android only. Request a larger mtu right after connection, if set.
   Future<void> connect({
     Duration timeout = const Duration(seconds: 35),
     bool autoConnect = false,
+    int? mtu = 512,
   }) async {
     // Only allow a single ble operation to be underway at a time
     _Mutex mtx = await _MutexFactory.getMutexForKey("global");
@@ -99,6 +101,12 @@ class BluetoothDevice {
       }
     } finally {
       mtx.give();
+    }
+
+    // request larger mtu on non-apple devices
+    bool isApple = Platform.isMacOS || Platform.isIOS;
+    if (isApple == false && isConnected && mtu != null) {
+      await requestMtu(mtu);
     }
   }
 

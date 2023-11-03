@@ -200,3 +200,7 @@ BluetoothDevice? myDevice = await myDeviceFuture;
 * **Behavior Change:** only allow a single ble operation at a time.
 
 This change was made to increase reliability, at the cost of throughput.
+
+## 1.22.0
+
+* **Breaking Change:** on android, we now request an mtu of 512 by default during connection.

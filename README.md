@@ -171,23 +171,23 @@ await device.connect();
 await device.disconnect();
 ```
 
-### Request Larger MTU
+### MTU
 
-❗ **You must request a larger MTU on Android!** ❗ 
+On Android, we request an mtu of 512 by default during connection (see: `connect` function arguments).
 
-On Android, the mtu is always 23 unless you request a larger one. On iOS & macOS, the mtu is negotiated automatically, typically 135 to 255.
+On iOS & macOS, the mtu is negotiated automatically, typically 135 to 255.
 
 ```dart
 final mtuSubscription = device.mtu.listen((int mtu) {
     // iOS: initial value is always 23, but iOS will quickly negotiate a higher value
-    // android: you must request higher mtu yourself
+    // android: you must choose your preferred mtu
     print("mtu $mtu");
 });
 
 // cleanup: cancel subscription when disconnected
 device.cancelWhenDisconnected(mtuSubscription);
 
-// Very important!
+// You can also manually change the mtu yourself.
 if (Platform.isAndroid) {
     await device.requestMtu(512);
 }
@@ -688,14 +688,6 @@ Some ble devices have buggy software and stop sending data
 ---
 
 ### onValueReceived data is split up (or lastValueStream)
-
-You are probably forgetting to increase the android mtu.
-
-```dart
-if (Platform.isAndroid) {
-    await device.requestMtu(512);
-}
-```
 
 Verify that the mtu is large enough to hold your message.
 
