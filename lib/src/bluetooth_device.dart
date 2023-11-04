@@ -28,7 +28,7 @@ class BluetoothDevice {
   /// Advertised Named
   ///  - the is the name advertised by the device during scanning
   ///  - it is only set if you scan with FlutterBluePlus
-  ///  - it is cleared when the app restarts. 
+  ///  - it is cleared when the app restarts.
   ///  - not all devices advertise a name
   String get advName => FlutterBluePlus._advNames[remoteId] ?? "";
 
@@ -195,12 +195,9 @@ class BluetoothDevice {
     // in order to match iOS behavior on all platforms,
     // we always listen to the Services Changed characteristic if it exists.
     if (Platform.isIOS == false && Platform.isMacOS == false) {
-      final Guid gattUuid = Guid("00001801-0000-1000-8000-00805F9B34FB");
-      final Guid changeUuid = Guid("00002A05-0000-1000-8000-00805F9B34FB");
-      BluetoothService? gatt = servicesList?._firstWhereOrNull((svc) => svc.uuid == gattUuid);
-      BluetoothCharacteristic? chr = gatt?.characteristics._firstWhereOrNull((chr) => chr.uuid == changeUuid);
-      if (chr != null && (chr.properties.notify || chr.properties.indicate) && chr.isNotifying == false) {
-        await chr.setNotifyValue(true);
+      BluetoothCharacteristic? c = _servicesChangedCharacteristic;
+      if (c != null && (c.properties.notify || c.properties.indicate) && c.isNotifying == false) {
+        await c.setNotifyValue(true);
       }
     }
 
@@ -577,6 +574,14 @@ class BluetoothDevice {
   BluetoothBondState? get prevBondState {
     var b = FlutterBluePlus._bondStates[remoteId]?.prevState;
     return b != null ? _bmToBondState(b) : null;
+  }
+
+  /// Get the Services Changed characteristic (0x2A05)
+  BluetoothCharacteristic? get _servicesChangedCharacteristic {
+    final Guid gattUuid = Guid("00001801-0000-1000-8000-00805F9B34FB");
+    final Guid servicesChangedUuid = Guid("00002A05-0000-1000-8000-00805F9B34FB");
+    BluetoothService? gatt = servicesList?._firstWhereOrNull((svc) => svc.uuid == gattUuid);
+    return gatt?.characteristics._firstWhereOrNull((chr) => chr.uuid == servicesChangedUuid);
   }
 
   @override
