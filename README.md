@@ -511,7 +511,7 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 | events.onDescriptorRead         🌀 | :white_check_mark: | :white_check_mark: |        | Stream of descriptor value reads of *all devices*     |
 | events.onNameChanged            🌀 | :white_check_mark: | :white_check_mark: |        | Stream of name changes of *all devices*               |
 | events.onServicesReset          🌀 | :white_check_mark: | :white_check_mark: |        | Stream of services resets of *all devices*            |
-| events.bondState                🌀 | :white_check_mark: |                    |        | Stream of bondState changes of *all devices*          |
+| events.onBondStateChanged       🌀 | :white_check_mark: |                    |        | Stream of bond state changes of *all devices*         |
 
 
 ### BluetoothDevice API
