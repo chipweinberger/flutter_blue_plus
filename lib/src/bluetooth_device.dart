@@ -611,11 +611,6 @@ class BluetoothDevice {
     yield false;
   }
 
-  @Deprecated("removed. no replacement")
-  Stream<List<BluetoothService>> get servicesStream async* {
-    yield [];
-  }
-
   @Deprecated('Use createBond() instead')
   Future<void> pair() async => await createBond();
 
@@ -631,6 +626,9 @@ class BluetoothDevice {
   @Deprecated('Use connectionState instead')
   Stream<BluetoothConnectionState> get state => connectionState;
 
-  @Deprecated('Use servicesStream instead')
-  Stream<List<BluetoothService>> get services => servicesStream;
+  @Deprecated('Use onDiscoveredServices instead')
+  Stream<List<BluetoothService>> get servicesStream => onDiscoveredServices;
+
+  @Deprecated('Use onDiscoveredServices instead')
+  Stream<List<BluetoothService>> get services => onDiscoveredServices;
 }
