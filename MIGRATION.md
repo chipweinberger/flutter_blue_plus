@@ -208,3 +208,9 @@ This change was made to increase reliability, at the cost of throughput.
 ## 1.22.1
 
 * **renamed** `ErrorPlatform.dart` -> `ErrorPlatform.fbp`
+
+## 1.23.0
+* **[Rename]** `device.mtu` -> `device.onMtu` 
+* **[Rename]** `device.onServicesChanged` -> `device.onServicesReset`
+* **[Rename]** `events.connectionState` -> `events.onConnectionStateChanged`
+* **[Rename]** `events.bondState` -> `events.onBondStateChanged`

@@ -1,3 +1,11 @@
+## 1.23.0
+* **[Add]** `device.mtu` (it is now synchronous)
+* **[Rename]** `device.mtu` -> `device.onMtu` (stream)
+* **[Rename]** `device.onServicesChanged` -> `device.onServicesReset`
+* **[Rename]** `events.connectionState` -> `events.onConnectionStateChanged`
+* **[Rename]** `events.bondState` -> `events.onBondStateChanged`
+* **[Rename]** events api: prefix class names with 'On', i.e. `OnConnectionStateChangedEvent`
+
 ## 1.22.2
 * **[Remove]** `device.onDiscoveredServices`, this api needs more thought
 
