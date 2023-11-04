@@ -258,10 +258,10 @@ class BluetoothDevice {
         .map((m) => m.platformName ?? "");
   }
 
-  /// Services Changed Stream
+  /// Services Reset Stream
   ///  - uses the GAP Services Changed characteristic (0x2A05)
   ///  - you must re-call discoverServices()
-  Stream<void> get onServicesChanged async* {
+  Stream<void> get onServicesReset async* {
     if (Platform.isIOS == false && Platform.isMacOS == false) {
       final Guid gattUuid = Guid("00001800-0000-1000-8000-00805F9B34FB");
       final Guid changeUuid = Guid("00002A05-0000-1000-8000-00805F9B34FB");
@@ -272,7 +272,7 @@ class BluetoothDevice {
       }
     }
     yield* FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "OnServicesChanged")
+        .where((m) => m.method == "OnServicesReset")
         .map((m) => m.arguments)
         .map((args) => BmBluetoothDevice.fromMap(args))
         .where((p) => p.remoteId == remoteId.str)

@@ -338,8 +338,8 @@ class FlutterBluePlus {
       }
     }
 
-    // keep track of service changes
-    if (call.method == "OnServicesChanged") {
+    // keep track of services resets
+    if (call.method == "OnServicesReset") {
       BmBluetoothDevice device = BmBluetoothDevice.fromMap(call.arguments);
       _knownServices.remove(DeviceIdentifier(device.remoteId));
     }

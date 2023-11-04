@@ -1382,7 +1382,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     NSDictionary* result = [self bmBluetoothDevice:peripheral];
 
-    [_methodChannel invokeMethod:@"OnServicesChanged" arguments:result];
+    [_methodChannel invokeMethod:@"OnServicesReset" arguments:result];
 }
 
 - (void)peripheral:(CBPeripheral *)peripheral

@@ -49,12 +49,12 @@ class BluetoothEvents {
         .map((p) => OnNameChangedEvent(p));
   }
 
-  Stream<OnServicesChangedEvent> get onServicesChanged {
+  Stream<OnServicesResetEvent> get onServicesReset {
     return FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "OnServicesChanged")
+        .where((m) => m.method == "OnServicesReset")
         .map((m) => m.arguments)
         .map((args) => BmBluetoothDevice.fromMap(args))
-        .map((p) => OnServicesChangedEvent(p));
+        .map((p) => OnServicesResetEvent(p));
   }
 
   Stream<BondStateEvent> get bondState {
@@ -182,10 +182,10 @@ class OnNameChangedEvent {
 }
 
 // On Services Changed
-class OnServicesChangedEvent {
+class OnServicesResetEvent {
   final BmBluetoothDevice _response;
 
-  OnServicesChangedEvent(this._response);
+  OnServicesResetEvent(this._response);
 
   /// the relevant device
   BluetoothDevice get device => BluetoothDevice.fromId(_response.remoteId);

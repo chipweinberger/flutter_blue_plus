@@ -510,7 +510,7 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 | events.onCharacteristicReceived 🌀 | :white_check_mark: | :white_check_mark: |        | Stream of characteristic value reads of *all devices* |
 | events.onDescriptorRead         🌀 | :white_check_mark: | :white_check_mark: |        | Stream of descriptor value reads of *all devices*     |
 | events.onNameChanged            🌀 | :white_check_mark: | :white_check_mark: |        | Stream of name changes of *all devices*               |
-| events.onServicesChanged        🌀 | :white_check_mark: | :white_check_mark: |        | Stream of services changes of *all devices*           |
+| events.onServicesReset          🌀 | :white_check_mark: | :white_check_mark: |        | Stream of services resets of *all devices*            |
 | events.bondState                🌀 | :white_check_mark: |                    |        | Stream of bondState changes of *all devices*          |
 
 
@@ -525,7 +525,7 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 | connectionState        🌀 | :white_check_mark: | :white_check_mark: |        | Stream of connection changes for the Bluetooth Device      |
 | discoverServices          | :white_check_mark: | :white_check_mark: | :fire: | Discover services                                          |
 | servicesList              | :white_check_mark: | :white_check_mark: |        | The current list of available services                     |
-| onServicesChanged      🌀 | :white_check_mark: | :white_check_mark: |        | The services changed & must be rediscovered                |
+| onServicesReset        🌀 | :white_check_mark: | :white_check_mark: |        | The services changed & must be rediscovered                |
 | onNameChanged          🌀 | :white_check_mark: | :white_check_mark: |        | The GAP Device Name Characteristic (0x2A00) changed        |
 | mtu                       | :white_check_mark: | :white_check_mark: |        | The current mtu value                                      |
 | onMtu                  🌀 | :white_check_mark: | :white_check_mark: | :fire: | Stream of mtu current value + changes                      |

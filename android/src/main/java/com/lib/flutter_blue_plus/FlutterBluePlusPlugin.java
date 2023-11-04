@@ -1712,7 +1712,7 @@ public class FlutterBluePlusPlugin implements
                 // services changed
                 if (uuid128(characteristic.getUuid()) == "00002A05-0000-1000-8000-00805F9B34FB") {
                     HashMap<String, Object> response = bmBluetoothDevice(gatt.getDevice());
-                    invokeMethodUIThread("OnServicesChanged", response);
+                    invokeMethodUIThread("OnServicesReset", response);
                 }
             }
 
