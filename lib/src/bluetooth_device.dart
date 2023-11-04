@@ -235,7 +235,7 @@ class BluetoothDevice {
   }
 
   /// The current MTU size in bytes
-  int get mtu {
+  int get mtuNow {
     // get initial value from our cache
     return FlutterBluePlus._mtuValues[remoteId]?.mtu ?? 23;
   }
@@ -243,7 +243,7 @@ class BluetoothDevice {
   /// Stream emits a value:
   ///   - immediately when first listened to
   ///   - whenever the mtu changes
-  Stream<int> get onMtu {
+  Stream<int> get mtu {
     // get initial value from our cache
     int initialValue = FlutterBluePlus._mtuValues[remoteId]?.mtu ?? 23;
     return FlutterBluePlus._methodStream.stream
