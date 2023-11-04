@@ -363,7 +363,7 @@ There are streams for:
 * events.onCharacteristicReceived
 * events.onDescriptorRead
 * events.onNameChanged
-* events.onServicesChanged
+* events.onServicesReset
 * events.onBondStateChanged
 
 ```dart
