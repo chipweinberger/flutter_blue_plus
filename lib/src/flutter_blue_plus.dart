@@ -25,6 +25,7 @@ class FlutterBluePlus {
   static final Map<DeviceIdentifier, BmMtuChangedResponse> _mtuValues = {};
   static final Map<DeviceIdentifier, String> _platformNames = {};
   static final Map<DeviceIdentifier, String> _gapNames = {};
+  static final Map<DeviceIdentifier, String> _advNames = {};
   static final Map<DeviceIdentifier, Map<String, List<int>>> _lastChrs = {};
   static final Map<DeviceIdentifier, Map<String, List<int>>> _lastDescs = {};
   static final Map<DeviceIdentifier, List<StreamSubscription>> _subscriptions = {};
@@ -212,14 +213,19 @@ class FlutterBluePlus {
               _nativeError, "scan", response.failed!.errorCode, response.failed!.errorString);
         }
 
+        // convert
+        ScanResult sr = ScanResult.fromProto(response.result!);
+
         // cache platformName
         BmBluetoothDevice device = response.result!.device;
         if (device.platformName != null) {
           _platformNames[DeviceIdentifier(device.remoteId)] = device.platformName!;
         }
 
-        // convert
-        ScanResult sr = ScanResult.fromProto(response.result!);
+        // cache advertised name
+        if (sr.advertisementData.localName.isNotEmpty) {
+          _advNames[DeviceIdentifier(device.remoteId)] = sr.advertisementData.localName;
+        }
 
         // add result to output
         if (oneByOne) {

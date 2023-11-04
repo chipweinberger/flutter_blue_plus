@@ -519,7 +519,8 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 |                           |      Android       |        iOS         | Throws | Description                                                |
 | :------------------------ | :----------------: | :----------------: | :----: | :----------------------------------------------------------|
 | platformName              | :white_check_mark: | :white_check_mark: |        | The platform preferred name of the device                  |
-| gapName                   | :white_check_mark: | :white_check_mark: |        | The name from the Device Name Characteristic (0x2A00)      |
+| advName                   | :white_check_mark: | :white_check_mark: |        | The advertised name of the device found during scanning    |
+| gapName                   | :white_check_mark: | :white_check_mark: |        | The gap name from the Device Name Characteristic (0x2A00)  |
 | onGapName              🌀 | :white_check_mark: | :white_check_mark: |        | Stream of current GAP name + changes                       |
 | connect                   | :white_check_mark: | :white_check_mark: | :fire: | Establishes a connection to the device                     |
 | disconnect                | :white_check_mark: | :white_check_mark: | :fire: | Cancels an active or pending connection to the device      |

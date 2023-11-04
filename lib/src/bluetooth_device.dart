@@ -19,11 +19,18 @@ class BluetoothDevice {
 
   /// platform name
   /// - iOS: uses GAP name characteristic 0x2A00 if it exists, otherwise advertised name
-  /// - Android: always uses advertised name
+  /// - Android: always a cached advertised name
+  /// - these names usually persist between app restarts
   String get platformName => FlutterBluePlus._platformNames[remoteId] ?? "";
 
+  /// Advertised Named
+  ///  - the is the name advertised by the device during scanning
+  ///  - it is cleared when the app restarts. You must rescan.
+  ///  - not all devices advertise a name
+  String get advName => FlutterBluePlus._advNames[remoteId] ?? "";
+
   /// GAP name
-  ///  - this comes the from GAP name characteristic 0x2A00, if it exists
+  ///  - this name comes the from GAP name characteristic 0x2A00, if it exists
   ///  - you must first discover services
   String get gapName => FlutterBluePlus._gapNames[remoteId] ?? "";
 
