@@ -89,6 +89,7 @@ public class FlutterBluePlusPlugin implements
 
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
+    private boolean mIsScanning = false;
 
     private FlutterPluginBinding pluginBinding;
     private ActivityPluginBinding activityBinding;
@@ -157,6 +158,15 @@ public class FlutterBluePlusPlugin implements
         log(LogLevel.DEBUG, "onDetachedFromEngine");
 
         pluginBinding = null;
+
+        // stop scanning
+        if (mBluetoothAdapter != null && mIsScanning) {
+            BluetoothLeScanner scanner = mBluetoothAdapter.getBluetoothLeScanner();
+            if (scanner != null) {
+                scanner.stopScan(getScanCallback());
+                mIsScanning = false;
+            }
+        }
 
         disconnectAllDevices("onDetachedFromEngine");
 
@@ -252,9 +262,11 @@ public class FlutterBluePlusPlugin implements
                         break;
                     }
 
+                    // stop scanning
                     BluetoothLeScanner scanner = mBluetoothAdapter.getBluetoothLeScanner();
-                    if(scanner != null) {
+                    if(scanner != null && mIsScanning) {
                         scanner.stopScan(getScanCallback());
+                        mIsScanning = false;
                     }
 
                     disconnectAllDevices("flutterHotRestart");
@@ -466,6 +478,8 @@ public class FlutterBluePlusPlugin implements
 
                         scanner.startScan(filters, settings, getScanCallback());
 
+                        mIsScanning = true;
+
                         result.success(true);
                     });
                     break;
@@ -477,6 +491,7 @@ public class FlutterBluePlusPlugin implements
 
                     if(scanner != null) {
                         scanner.stopScan(getScanCallback());
+                        mIsScanning = false;
                     }
 
                     result.success(true);
