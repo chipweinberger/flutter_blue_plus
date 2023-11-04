@@ -529,7 +529,6 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 | onNameChanged          🌀 | :white_check_mark: | :white_check_mark: |        | The GAP Device Name Characteristic (0x2A00) changed        |
 | mtu                       | :white_check_mark: | :white_check_mark: |        | The current mtu value                                      |
 | onMtu                  🌀 | :white_check_mark: | :white_check_mark: | :fire: | Stream of mtu current value + changes                      |
-| onMtuChanged           🌀 | :white_check_mark: | :white_check_mark: | :fire: | Stream of mtu changes only                                 |
 | readRssi                  | :white_check_mark: | :white_check_mark: | :fire: | Read RSSI from a connected device                          |
 | requestMtu                | :white_check_mark: |                    | :fire: | Request to change the MTU for the device                   |
 | requestConnectionPriority | :white_check_mark: |                    | :fire: | Request to update a high priority, low latency connection  |
