@@ -160,6 +160,11 @@ public class FlutterBluePlusPlugin implements
 
         disconnectAllDevices("onDetachedFromEngine");
 
+        // perpetual scan fix //
+        BluetoothLeScanner scanner = mBluetoothAdapter.getBluetoothLeScanner();
+        scanner.stopScan(getScanCallback());
+        // end perpetual scan fix //
+
         context.unregisterReceiver(mBluetoothBondStateReceiver);
         context.unregisterReceiver(mBluetoothAdapterStateReceiver);
         context = null;
