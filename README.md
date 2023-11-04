@@ -487,6 +487,7 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 
 |                        |      Android       |        iOS         | Throws | Description                                                |
 | :--------------------- | :----------------: | :----------------: | :----: | :----------------------------------------------------------|
+| setLogLevel            | :white_check_mark: | :white_check_mark: |        | Configure plugin log level                                 |
 | isSupported            | :white_check_mark: | :white_check_mark: |        | Checks whether the device supports Bluetooth               |
 | turnOn                 | :white_check_mark: |                    | :fire: | Turns on the bluetooth adapter                             |
 | adapterState        🌀 | :white_check_mark: | :white_check_mark: |        | Stream of on & off states of the bluetooth adapter         |
@@ -497,7 +498,6 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 | isScanningNow          | :white_check_mark: | :white_check_mark: |        | Is a scan currently running?                               |
 | connectedDevices       | :white_check_mark: | :white_check_mark: |        | List of devices connected to *your app*                    |
 | systemDevices          | :white_check_mark: | :white_check_mark: |        | List of devices connected to the system, even by other apps|
-| setLogLevel            | :white_check_mark: | :white_check_mark: |        | Configure plugin log level                                 |
 | getPhySupport          | :white_check_mark: |                    | :fire: | Get supported bluetooth phy codings                        |
 
 ### FlutterBluePlus Events API
