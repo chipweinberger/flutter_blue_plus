@@ -182,6 +182,35 @@ class BluetoothDevice {
       mtx.give();
     }
 
+    // in order to match iOS behavior on all platforms,
+    // we always read & listen to the GAP Name characteristic if it exists.
+    if (Platform.isIOS == false && Platform.isMacOS == false) {
+      final Guid gapUuid = Guid("00001800-0000-1000-8000-00805F9B34FB");
+      final Guid nameUuid = Guid("00002A00-0000-1000-8000-00805F9B34FB");
+      BluetoothService? gap = servicesList?._firstWhereOrNull((svc) => svc.uuid == gapUuid);
+      BluetoothCharacteristic? chr = gap?.characteristics._firstWhereOrNull((chr) => chr.uuid == nameUuid);
+      if (chr != null) {
+        if ((chr.properties.notify || chr.properties.indicate) && chr.isNotifying == false) {
+          await chr.setNotifyValue(true);
+        }
+        if (chr.properties.read) {
+          await chr.read();
+        }
+      }
+    }
+
+    // in order to match iOS behavior on all platforms,
+    // we always listen to the Services Changed characteristic if it exists.
+    if (Platform.isIOS == false && Platform.isMacOS == false) {
+      final Guid gattUuid = Guid("00001801-0000-1000-8000-00805F9B34FB");
+      final Guid changeUuid = Guid("00002A05-0000-1000-8000-00805F9B34FB");
+      BluetoothService? gatt = servicesList?._firstWhereOrNull((svc) => svc.uuid == gattUuid);
+      BluetoothCharacteristic? chr = gatt?.characteristics._firstWhereOrNull((chr) => chr.uuid == changeUuid);
+      if (chr != null && (chr.properties.notify || chr.properties.indicate) && chr.isNotifying == false) {
+        await chr.setNotifyValue(true);
+      }
+    }
+
     return result;
   }
 
@@ -229,22 +258,14 @@ class BluetoothDevice {
         .map((m) => m.arguments)
         .map((args) => BmMtuChangedResponse.fromMap(args))
         .where((p) => p.remoteId == remoteId.str)
-        .map((p) => p.mtu).newStreamWithInitialValue(initialValue);
+        .map((p) => p.mtu)
+        .newStreamWithInitialValue(initialValue);
   }
 
   /// Stream emits a value:
   ///  - whenever the the GAP Device Name characteristic (0x2A00) changes
-  Stream<String> get onGapNameChanged async* {
-    if (Platform.isIOS == false && Platform.isMacOS == false) {
-      final Guid gattUuid = Guid("00001800-0000-1000-8000-00805F9B34FB");
-      final Guid nameUuid = Guid("00002A00-0000-1000-8000-00805F9B34FB");
-      BluetoothService? svc = servicesList?._firstWhereOrNull((svc) => svc.uuid == gattUuid);
-      BluetoothCharacteristic? chr = svc?.characteristics._firstWhereOrNull((chr) => chr.uuid == nameUuid);
-      if (chr != null && chr.isNotifying == false) {
-        await chr.setNotifyValue(true);
-      }
-    }
-    yield* FlutterBluePlus._methodStream.stream
+  Stream<String> get onGapNameChanged {
+    return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnGapNameChanged")
         .map((m) => m.arguments)
         .map((args) => BmBluetoothDevice.fromMap(args))
@@ -255,17 +276,8 @@ class BluetoothDevice {
   /// Services Reset Stream
   ///  - uses the GAP Services Changed characteristic (0x2A05)
   ///  - you must re-call discoverServices()
-  Stream<void> get onServicesReset async* {
-    if (Platform.isIOS == false && Platform.isMacOS == false) {
-      final Guid gattUuid = Guid("00001800-0000-1000-8000-00805F9B34FB");
-      final Guid changeUuid = Guid("00002A05-0000-1000-8000-00805F9B34FB");
-      BluetoothService? svc = servicesList?._firstWhereOrNull((svc) => svc.uuid == gattUuid);
-      BluetoothCharacteristic? chr = svc?.characteristics._firstWhereOrNull((chr) => chr.uuid == changeUuid);
-      if (chr != null && chr.isNotifying == false) {
-        await chr.setNotifyValue(true);
-      }
-    }
-    yield* FlutterBluePlus._methodStream.stream
+  Stream<void> get onServicesReset {
+    return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnServicesReset")
         .map((m) => m.arguments)
         .map((args) => BmBluetoothDevice.fromMap(args))
