@@ -1,7 +1,10 @@
+## 1.22.2
+* **[Remove]** `device.onDiscoveredServices`, this api needs more thought
+
 ## 1.22.1
 * **[Rename]** `ErrorPlatform.dart` -> `ErrorPlatform.fbp`
 * **[Add]** `device.onDiscoveredServices` & `events.onDiscoveredServices` streams
-* **[Add]** events: add accessors for errors
+* **[Add]** events api: add accessors for errors
 
 ## 1.22.0
 This release makes `mtu` behavior more similar on android & iOS.
