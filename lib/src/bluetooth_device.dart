@@ -155,7 +155,7 @@ class BluetoothDevice {
 
     try {
       var responseStream = FlutterBluePlus._methodStream.stream
-          .where((m) => m.method == "OnDiscoverServicesResult")
+          .where((m) => m.method == "OnDiscoveredServices")
           .map((m) => m.arguments)
           .map((args) => BmDiscoverServicesResult.fromMap(args))
           .where((p) => p.remoteId == remoteId.str);

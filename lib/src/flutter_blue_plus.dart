@@ -351,7 +351,7 @@ class FlutterBluePlus {
     }
 
     // keep track of services
-    if (call.method == "OnDiscoverServicesResult") {
+    if (call.method == "OnDiscoveredServices") {
       BmDiscoverServicesResult r = BmDiscoverServicesResult.fromMap(call.arguments);
       if (r.success == true) {
         _knownServices[DeviceIdentifier(r.remoteId)] = r;

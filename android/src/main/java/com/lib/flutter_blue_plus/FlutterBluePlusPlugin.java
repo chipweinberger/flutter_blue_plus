@@ -1691,7 +1691,7 @@ public class FlutterBluePlusPlugin implements
             response.put("error_code", status);
             response.put("error_string", gattErrorString(status));
 
-            invokeMethodUIThread("OnDiscoverServicesResult", response);
+            invokeMethodUIThread("OnDiscoveredServices", response);
         }
 
         // called for both notifications & reads

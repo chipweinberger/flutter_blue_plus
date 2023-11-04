@@ -1167,7 +1167,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     };
 
     // Send updated tree
-    [_methodChannel invokeMethod:@"OnDiscoverServicesResult" arguments:response];
+    [_methodChannel invokeMethod:@"OnDiscoveredServices" arguments:response];
 }
 
 - (void)peripheral:(CBPeripheral *)peripheral

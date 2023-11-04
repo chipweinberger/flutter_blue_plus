@@ -11,7 +11,7 @@ class BluetoothEvents {
 
   Stream<OnDiscoveredServicesEvent> get onDiscoveredServices {
     return FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "OnDiscoverServicesResult")
+        .where((m) => m.method == "OnDiscoveredServices")
         .map((m) => m.arguments)
         .map((args) => BmDiscoverServicesResult.fromMap(args))
         .map((p) => OnDiscoveredServicesEvent(p));
