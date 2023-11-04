@@ -214,3 +214,6 @@ This change was made to increase reliability, at the cost of throughput.
 * **[Rename]** `device.onServicesChanged` -> `device.onServicesReset`
 * **[Rename]** `events.connectionState` -> `events.onConnectionStateChanged`
 * **[Rename]** `events.bondState` -> `events.onBondStateChanged`
+
+## 1.24.0
+* **[Rename]** `onNameChanged` -> `onGapNameChanged`
