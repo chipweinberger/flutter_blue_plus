@@ -1,44 +1,44 @@
 part of flutter_blue_plus;
 
 class BluetoothEvents {
-  Stream<ConnectionStateEvent> get onConnectionStateChanged {
+  Stream<OnConnectionStateChangedEvent> get onConnectionStateChanged {
     return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnConnectionStateChanged")
         .map((m) => m.arguments)
         .map((args) => BmConnectionStateResponse.fromMap(args))
-        .map((p) => ConnectionStateEvent(p));
+        .map((p) => OnConnectionStateChangedEvent(p));
   }
 
-  Stream<DiscoveredServicesEvent> get onDiscoveredServices {
+  Stream<OnDiscoveredServicesEvent> get onDiscoveredServices {
     return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnDiscoverServicesResult")
         .map((m) => m.arguments)
         .map((args) => BmDiscoverServicesResult.fromMap(args))
-        .map((p) => DiscoveredServicesEvent(p));
+        .map((p) => OnDiscoveredServicesEvent(p));
   }
 
-  Stream<MtuEvent> get onMtuChanged {
+  Stream<OnMtuChangedEvent> get onMtuChanged {
     return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnMtuChanged")
         .map((m) => m.arguments)
         .map((args) => BmMtuChangedResponse.fromMap(args))
-        .map((p) => MtuEvent(p));
+        .map((p) => OnMtuChangedEvent(p));
   }
 
-  Stream<CharacteristicReceivedEvent> get onCharacteristicReceived {
+  Stream<OnCharacteristicReceivedEvent> get onCharacteristicReceived {
     return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnCharacteristicReceived")
         .map((m) => m.arguments)
         .map((args) => BmCharacteristicData.fromMap(args))
-        .map((p) => CharacteristicReceivedEvent(p));
+        .map((p) => OnCharacteristicReceivedEvent(p));
   }
 
-  Stream<DescriptorReadEvent> get onDescriptorRead {
+  Stream<OnDescriptorReadEvent> get onDescriptorRead {
     return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnDescriptorRead")
         .map((m) => m.arguments)
         .map((args) => BmDescriptorData.fromMap(args))
-        .map((p) => DescriptorReadEvent(p));
+        .map((p) => OnDescriptorReadEvent(p));
   }
 
   Stream<OnNameChangedEvent> get onNameChanged {
@@ -78,10 +78,10 @@ class FbpError {
 //
 
 // ConnectionState
-class ConnectionStateEvent {
+class OnConnectionStateChangedEvent {
   final BmConnectionStateResponse _response;
 
-  ConnectionStateEvent(this._response);
+  OnConnectionStateChangedEvent(this._response);
 
   /// the relevant device
   BluetoothDevice get device => BluetoothDevice.fromId(_response.remoteId);
@@ -91,10 +91,10 @@ class ConnectionStateEvent {
 }
 
 // Discovered Services Event
-class DiscoveredServicesEvent {
+class OnDiscoveredServicesEvent {
   final BmDiscoverServicesResult _response;
 
-  DiscoveredServicesEvent(this._response);
+  OnDiscoveredServicesEvent(this._response);
 
   /// the relevant device
   BluetoothDevice get device => BluetoothDevice.fromId(_response.remoteId);
@@ -107,10 +107,10 @@ class DiscoveredServicesEvent {
 }
 
 // Mtu Event
-class MtuEvent {
+class OnMtuChangedEvent {
   final BmMtuChangedResponse _response;
 
-  MtuEvent(this._response);
+  OnMtuChangedEvent(this._response);
 
   /// the relevant device
   BluetoothDevice get device => BluetoothDevice.fromId(_response.remoteId);
@@ -123,10 +123,10 @@ class MtuEvent {
 }
 
 // Characteristic Received
-class CharacteristicReceivedEvent {
+class OnCharacteristicReceivedEvent {
   final BmCharacteristicData _response;
 
-  CharacteristicReceivedEvent(this._response);
+  OnCharacteristicReceivedEvent(this._response);
 
   /// the relevant device
   BluetoothDevice get device => BluetoothDevice.fromId(_response.remoteId);
@@ -146,10 +146,10 @@ class CharacteristicReceivedEvent {
 }
 
 // Descriptor Received
-class DescriptorReadEvent {
+class OnDescriptorReadEvent {
   final BmDescriptorData _response;
 
-  DescriptorReadEvent(this._response);
+  OnDescriptorReadEvent(this._response);
 
   /// the relevant device
   BluetoothDevice get device => BluetoothDevice.fromId(_response.remoteId);
