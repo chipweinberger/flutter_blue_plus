@@ -1370,9 +1370,13 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 {
     Log(LDEBUG, @"didUpdateName");
 
-    NSDictionary* result = [self bmBluetoothDevice:peripheral];
+    // See BmGapName
+    NSDictionary* result = @{
+        @"remote_id":       [[peripheral identifier] UUIDString],
+        @"gap_name":        [peripheral name] ? [peripheral name] : [NSNull null],
+    };
 
-    [_methodChannel invokeMethod:@"OnNameChanged" arguments:result];
+    [_methodChannel invokeMethod:@"OnGapNameChanged" arguments:result];
 }
 
 - (void)peripheral:(CBPeripheral *)peripheral 

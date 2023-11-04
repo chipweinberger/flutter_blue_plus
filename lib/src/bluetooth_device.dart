@@ -232,9 +232,9 @@ class BluetoothDevice {
         .map((p) => p.mtu).newStreamWithInitialValue(initialValue);
   }
 
-  /// Name Changed Stream
-  ///  - uses the GAP Device Name characteristic (0x2A00)
-  Stream<String> get onNameChanged async* {
+  /// Stream emits a value:
+  ///  - whenever the the GAP Device Name characteristic (0x2A00) changes
+  Stream<String> get onGapNameChanged async* {
     if (Platform.isIOS == false && Platform.isMacOS == false) {
       final Guid gattUuid = Guid("00001800-0000-1000-8000-00805F9B34FB");
       final Guid nameUuid = Guid("00002A00-0000-1000-8000-00805F9B34FB");
@@ -245,7 +245,7 @@ class BluetoothDevice {
       }
     }
     yield* FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "OnNameChanged")
+        .where((m) => m.method == "OnGapNameChanged")
         .map((m) => m.arguments)
         .map((args) => BmBluetoothDevice.fromMap(args))
         .where((p) => p.remoteId == remoteId.str)

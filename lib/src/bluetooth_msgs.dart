@@ -216,6 +216,30 @@ class BmBluetoothDevice {
   }
 }
 
+class BmGapName {
+  String remoteId;
+  String gapName;
+
+  BmGapName({
+    required this.remoteId,
+    required this.gapName,
+  });
+
+  Map<dynamic, dynamic> toMap() {
+    final Map<dynamic, dynamic> data = {};
+    data['remote_id'] = remoteId;
+    data['gap_name'] = gapName;
+    return data;
+  }
+
+  factory BmGapName.fromMap(Map<dynamic, dynamic> json) {
+    return BmGapName(
+      remoteId: json['remote_id'],
+      gapName: json['gap_name'],
+    );
+  }
+}
+
 class BmBluetoothService {
   final String remoteId;
   final Guid serviceUuid;

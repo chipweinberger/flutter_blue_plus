@@ -331,7 +331,7 @@ class FlutterBluePlus {
     }
 
     // keep track of device name
-    if (call.method == "OnNameChanged") {
+    if (call.method == "OnGapNameChanged") {
       BmBluetoothDevice device = BmBluetoothDevice.fromMap(call.arguments);
       if (device.platformName != null) {
         _platformNames[DeviceIdentifier(device.remoteId)] = device.platformName!;

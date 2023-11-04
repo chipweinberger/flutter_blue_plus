@@ -41,12 +41,12 @@ class BluetoothEvents {
         .map((p) => OnDescriptorReadEvent(p));
   }
 
-  Stream<OnNameChangedEvent> get onNameChanged {
+  Stream<OnGapNameChangedEvent> get onGapNameChanged {
     return FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "OnNameChanged")
+        .where((m) => m.method == "OnGapNameChanged")
         .map((m) => m.arguments)
         .map((args) => BmBluetoothDevice.fromMap(args))
-        .map((p) => OnNameChangedEvent(p));
+        .map((p) => OnGapNameChangedEvent(p));
   }
 
   Stream<OnServicesResetEvent> get onServicesReset {
@@ -169,10 +169,10 @@ class OnDescriptorReadEvent {
 }
 
 // On Name Changed
-class OnNameChangedEvent {
+class OnGapNameChangedEvent {
   final BmBluetoothDevice _response;
 
-  OnNameChangedEvent(this._response);
+  OnGapNameChangedEvent(this._response);
 
   /// the relevant device
   BluetoothDevice get device => BluetoothDevice.fromId(_response.remoteId);
