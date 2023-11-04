@@ -18,9 +18,14 @@ class BluetoothDevice {
   BluetoothDevice.fromId(String remoteId) : remoteId = DeviceIdentifier(remoteId);
 
   /// platform name
-  /// - iOS: uses GAP name characteristic 0x2A00, otherwise advertised name
-  /// - Android: uses advertised name
+  /// - iOS: uses GAP name characteristic 0x2A00 if it exists, otherwise advertised name
+  /// - Android: always uses advertised name
   String get platformName => FlutterBluePlus._platformNames[remoteId] ?? "";
+
+  /// GAP name
+  ///  - this comes the from GAP name characteristic 0x2A00, if it exists
+  ///  - you must first discover services
+  String get gapName => FlutterBluePlus._gapNames[remoteId] ?? "";
 
   /// Get services
   ///  - returns null if discoverServices() has not been called
@@ -263,9 +268,12 @@ class BluetoothDevice {
   }
 
   /// Stream emits a value:
-  ///  - whenever the the GAP Device Name characteristic (0x2A00) changes
-  Stream<String> get onGapNameChanged {
-    return FlutterBluePlus._methodStream.stream
+  ///  - immediately when first listened to using our cached value
+  ///  - whenever the the GAP Device Name characteristic (0x2A00) is read
+  ///  - whenever the the GAP Device Name characteristic (0x2A00) changes, if notifications are supported by the device
+  Stream<String> get onGapName async* {
+    yield gapName; // initial value
+    yield* FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnGapNameChanged")
         .map((m) => m.arguments)
         .map((args) => BmBluetoothDevice.fromMap(args))

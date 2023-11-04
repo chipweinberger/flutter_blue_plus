@@ -24,6 +24,7 @@ class FlutterBluePlus {
   static final Map<DeviceIdentifier, BmBondStateResponse> _bondStates = {};
   static final Map<DeviceIdentifier, BmMtuChangedResponse> _mtuValues = {};
   static final Map<DeviceIdentifier, String> _platformNames = {};
+  static final Map<DeviceIdentifier, String> _gapNames = {};
   static final Map<DeviceIdentifier, Map<String, List<int>>> _lastChrs = {};
   static final Map<DeviceIdentifier, Map<String, List<int>>> _lastDescs = {};
   static final Map<DeviceIdentifier, List<StreamSubscription>> _subscriptions = {};
@@ -332,9 +333,11 @@ class FlutterBluePlus {
 
     // keep track of device name
     if (call.method == "OnGapNameChanged") {
-      BmBluetoothDevice device = BmBluetoothDevice.fromMap(call.arguments);
-      if (device.platformName != null) {
-        _platformNames[DeviceIdentifier(device.remoteId)] = device.platformName!;
+      BmGapName device = BmGapName.fromMap(call.arguments);
+      _gapNames[DeviceIdentifier(device.remoteId)] = device.gapName;
+      if (Platform.isMacOS || Platform.isIOS) {
+        // iOS & macOS use the GAP name as the platform name
+        _platformNames[DeviceIdentifier(device.remoteId)] = device.gapName;
       }
     }
 
