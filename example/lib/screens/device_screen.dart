@@ -141,15 +141,6 @@ class _DeviceScreenState extends State<DeviceScreen> {
     );
   }
 
-  Widget buildConnectOrDisconnectButton(BuildContext context) {
-    return TextButton(
-        onPressed: isConnected ? onDisconnectPressed : onConnectPressed,
-        child: Text(
-          isConnected ? "DISCONNECT" : "CONNECT",
-          style: Theme.of(context).primaryTextTheme.labelLarge?.copyWith(color: Colors.white),
-        ));
-  }
-
   Widget buildRemoteId(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -203,7 +194,12 @@ class _DeviceScreenState extends State<DeviceScreen> {
     if (_isConnectingOrDisconnecting) {
       return buildSpinner(context);
     } else {
-      return buildConnectOrDisconnectButton(context);
+      return TextButton(
+          onPressed: isConnected ? onDisconnectPressed : onConnectPressed,
+          child: Text(
+            isConnected ? "DISCONNECT" : "CONNECT",
+            style: Theme.of(context).primaryTextTheme.labelLarge?.copyWith(color: Colors.white),
+          ));
     }
   }
 
