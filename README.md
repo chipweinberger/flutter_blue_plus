@@ -530,7 +530,7 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 | servicesList              | :white_check_mark: | :white_check_mark: |        | The current list of available services                     |
 | onServicesReset        🌀 | :white_check_mark: | :white_check_mark: |        | The services changed & must be rediscovered                |
 | mtu                       | :white_check_mark: | :white_check_mark: |        | The current mtu value                                      |
-| onMtu                  🌀 | :white_check_mark: | :white_check_mark: |        | Stream of mtu current value + changes                      |
+| onMtu                  🌀 | :white_check_mark: | :white_check_mark: |        | Stream of current mtu value + changes                      |
 | readRssi                  | :white_check_mark: | :white_check_mark: | :fire: | Read RSSI from a connected device                          |
 | requestMtu                | :white_check_mark: |                    | :fire: | Request to change the MTU for the device                   |
 | requestConnectionPriority | :white_check_mark: |                    | :fire: | Request to update a high priority, low latency connection  |

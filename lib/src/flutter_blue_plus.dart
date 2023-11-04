@@ -506,9 +506,6 @@ class DeviceIdentifier {
   final String str;
   const DeviceIdentifier(this.str);
 
-  @Deprecated('Use str instead')
-  String get id => str;
-
   @override
   String toString() => str;
 
@@ -517,6 +514,9 @@ class DeviceIdentifier {
 
   @override
   bool operator ==(other) => other is DeviceIdentifier && _compareAsciiLowerCase(str, other.str) == 0;
+
+  @Deprecated('Use str instead')
+  String get id => str;
 }
 
 class ScanResult {

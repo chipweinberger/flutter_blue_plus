@@ -13,8 +13,10 @@ class BluetoothDevice {
 
   BluetoothDevice.fromProto(BmBluetoothDevice p) : remoteId = DeviceIdentifier(p.remoteId);
 
-  /// allows connecting to a known device without re-scanning
-  /// Note: this device must have been discovered by your app in a previous scan
+  /// Create a device from an id
+  ///   - to connect, this device must have been discovered by your app in a previous scan
+  ///   - iOS uses 128-bit uuids the remoteId, e.g. e006b3a7-ef7b-4980-a668-1f8005f84383
+  ///   - Android uses 48-bit mac addresses as the remoteId, e.g. 06:E5:28:3B:FD:E0
   BluetoothDevice.fromId(String remoteId) : remoteId = DeviceIdentifier(remoteId);
 
   /// platform name
@@ -25,13 +27,15 @@ class BluetoothDevice {
 
   /// Advertised Named
   ///  - the is the name advertised by the device during scanning
-  ///  - it is cleared when the app restarts. You must rescan.
+  ///  - it is only set if you scan with FlutterBluePlus
+  ///  - it is cleared when the app restarts. 
   ///  - not all devices advertise a name
   String get advName => FlutterBluePlus._advNames[remoteId] ?? "";
 
   /// GAP name
-  ///  - this name comes the from GAP name characteristic 0x2A00, if it exists
-  ///  - you must first discover services
+  ///  - this name comes the from GAP name characteristic 0x2A00
+  ///  - it is only set after you discover services
+  ///  - not all devices have a GAP name
   String get gapName => FlutterBluePlus._gapNames[remoteId] ?? "";
 
   /// Get services
