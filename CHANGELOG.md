@@ -1,9 +1,9 @@
 ## 1.22.1 to 1.26.0
 These releases changed multiple things but then changed them back. For brevity, here are the actual changes:
 * **[Behavior Change]** android: listen to Services Changed characteristic to match iOS behavior
-* **[Fix]** stop scanning when detached from engine
+* **[Fix]** android: stop scanning when detached from engine
 * **[Add]** `device.advName` returns the name found during scanning
-* **[Add]** `device.mtuNow` to synchronously get the current mtu value
+* **[Add]** `device.mtuNow` synchronously gets the current mtu value
 * **[Add]** `events.onDiscoveredServices` stream
 * **[Add]** events api: add accessors for errors
 * **[Rename]** events api: most functions & classes were renamed for consistency
