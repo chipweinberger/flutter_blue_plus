@@ -1,3 +1,6 @@
+## 1.24.1
+* **[Fix]** must stop scanning when detached from engine
+
 ## 1.24.0
 * **[Rename]** `onNameChanged` -> `onGapNameChanged`
 
