@@ -1,3 +1,8 @@
+## 1.22.1
+* **[Rename]** `ErrorPlatform.dart` -> `ErrorPlatform.fbp`
+* **[Add]** `device.onDiscoveredServices` & `events.onDiscoveredServices` streams
+* **[Add]** events: add accessors for errors
+
 ## 1.22.0
 This release makes `mtu` behavior more similar on android & iOS.
 * **[Breaking Change]** android: request mtu of 512 by default.

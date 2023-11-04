@@ -204,3 +204,7 @@ This change was made to increase reliability, at the cost of throughput.
 ## 1.22.0
 
 * **Breaking Change:** on android, we now request an mtu of 512 by default during connection.
+
+## 1.22.1
+
+* **renamed** `ErrorPlatform.dart` -> `ErrorPlatform.fbp`
