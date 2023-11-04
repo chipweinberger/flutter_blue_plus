@@ -185,17 +185,6 @@ class BluetoothDevice {
     return result;
   }
 
-  /// Stream emits a value whenever services are successfully discovered
-  Stream<List<BluetoothService>> get onDiscoveredServices {
-    return FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "OnDiscoverServicesResult")
-        .map((m) => m.arguments)
-        .map((args) => BmDiscoverServicesResult.fromMap(args))
-        .where((p) => p.remoteId == remoteId.toString())
-        .where((p) => p.success == true)
-        .map((p) => p.services.map((p) => BluetoothService.fromProto(p)).toList());
-  }
-
   /// The most recent disconnection reason
   DisconnectReason? get disconnectReason {
     if (FlutterBluePlus._connectionStates[remoteId] == null) {
@@ -626,9 +615,13 @@ class BluetoothDevice {
   @Deprecated('Use connectionState instead')
   Stream<BluetoothConnectionState> get state => connectionState;
 
-  @Deprecated('Use onDiscoveredServices instead')
-  Stream<List<BluetoothService>> get servicesStream => onDiscoveredServices;
+  @Deprecated("removed. no replacement")
+  Stream<List<BluetoothService>> get servicesStream async* {
+    yield [];
+  }
 
-  @Deprecated('Use onDiscoveredServices instead')
-  Stream<List<BluetoothService>> get services => onDiscoveredServices;
+  @Deprecated("removed. no replacement")
+  Stream<List<BluetoothService>> get services async* {
+    yield [];
+  }
 }
