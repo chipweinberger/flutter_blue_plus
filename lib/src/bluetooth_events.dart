@@ -77,7 +77,7 @@ class FbpError {
 // Event Classes
 //
 
-// ConnectionState
+// On Connection State Changed
 class OnConnectionStateChangedEvent {
   final BmConnectionStateResponse _response;
 
@@ -90,7 +90,7 @@ class OnConnectionStateChangedEvent {
   BluetoothConnectionState get connectionState => _bmToConnectionState(_response.connectionState);
 }
 
-// Discovered Services Event
+// On Discovered Services
 class OnDiscoveredServicesEvent {
   final BmDiscoverServicesResult _response;
 
@@ -106,7 +106,7 @@ class OnDiscoveredServicesEvent {
   FbpError? get error => _response.success ? null : FbpError(_response.errorCode, _response.errorString);
 }
 
-// Mtu Event
+// On Mtu Changed
 class OnMtuChangedEvent {
   final BmMtuChangedResponse _response;
 
@@ -122,7 +122,7 @@ class OnMtuChangedEvent {
   FbpError? get error => _response.success ? null : FbpError(_response.errorCode, _response.errorString);
 }
 
-// Characteristic Received
+// On Characteristic Received
 class OnCharacteristicReceivedEvent {
   final BmCharacteristicData _response;
 
@@ -145,7 +145,7 @@ class OnCharacteristicReceivedEvent {
   FbpError? get error => _response.success ? null : FbpError(_response.errorCode, _response.errorString);
 }
 
-// Descriptor Received
+// On Descriptor Received
 class OnDescriptorReadEvent {
   final BmDescriptorData _response;
 
@@ -191,7 +191,7 @@ class OnServicesResetEvent {
   BluetoothDevice get device => BluetoothDevice.fromId(_response.remoteId);
 }
 
-// BondState
+// On Bond State Changed
 class OnBondStateChangedEvent {
   final BmBondStateResponse _response;
 
