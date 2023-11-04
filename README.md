@@ -357,14 +357,14 @@ await device.removeBond();
 Access streams from all devices simultaneously.
 
 There are streams for:
-* events.connectionState
+* events.onConnectionStateChanged
 * events.onMtuChanged
 * events.onDiscoveredServices
 * events.onCharacteristicReceived
 * events.onDescriptorRead
 * events.onNameChanged
 * events.onServicesChanged
-* events.bondState
+* events.onBondStateChanged
 
 ```dart
 // listen to *any device* connection state changes 
@@ -504,8 +504,8 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 
 |                                    |      Android       |        iOS         | Throws | Description                                           |
 | :--------------------------------- | :----------------: | :----------------: | :----: | :-----------------------------------------------------|
-| events.connectionState          🌀 | :white_check_mark: | :white_check_mark: |        | Stream of connection changes of *all devices*         |
-| events.mtu                      🌀 | :white_check_mark: | :white_check_mark: |        | Stream of mtu changes of *all devices*                |
+| events.onConnectionStateChanged 🌀 | :white_check_mark: | :white_check_mark: |        | Stream of connection changes of *all devices*         |
+| events.onMtuChanged             🌀 | :white_check_mark: | :white_check_mark: |        | Stream of mtu changes of *all devices*                |
 | events.onDiscoveredServices     🌀 | :white_check_mark: | :white_check_mark: |        | Stream of services discovered of *all devices*        |
 | events.onCharacteristicReceived 🌀 | :white_check_mark: | :white_check_mark: |        | Stream of characteristic value reads of *all devices* |
 | events.onDescriptorRead         🌀 | :white_check_mark: | :white_check_mark: |        | Stream of descriptor value reads of *all devices*     |

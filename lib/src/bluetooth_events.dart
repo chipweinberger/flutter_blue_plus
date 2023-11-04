@@ -1,7 +1,7 @@
 part of flutter_blue_plus;
 
 class BluetoothEvents {
-  Stream<ConnectionStateEvent> get connectionState {
+  Stream<ConnectionStateEvent> get onConnectionStateChanged {
     return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnConnectionStateChanged")
         .map((m) => m.arguments)
