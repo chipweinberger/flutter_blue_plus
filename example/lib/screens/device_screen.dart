@@ -45,7 +45,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
       setState(() {});
     });
 
-    _mtuSubscription = widget.device.mtu.listen((value) {
+    _mtuSubscription = widget.device.onMtu.listen((value) {
       _mtuSize = value;
       setState(() {});
     });

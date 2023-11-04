@@ -17,7 +17,7 @@ class BluetoothEvents {
         .map((p) => DiscoveredServicesEvent(p));
   }
 
-  Stream<MtuEvent> get mtu {
+  Stream<MtuEvent> get onMtuChanged {
     return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnMtuChanged")
         .map((m) => m.arguments)

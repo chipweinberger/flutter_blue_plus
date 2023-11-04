@@ -178,9 +178,8 @@ On Android, we request an mtu of 512 by default during connection (see: `connect
 On iOS & macOS, the mtu is negotiated automatically, typically 135 to 255.
 
 ```dart
-final mtuSubscription = device.mtu.listen((int mtu) {
+final mtuSubscription = device.onMtu.listen((int mtu) {
     // iOS: initial value is always 23, but iOS will quickly negotiate a higher value
-    // android: you must choose your preferred mtu
     print("mtu $mtu");
 });
 
@@ -244,7 +243,7 @@ import 'dart:math';
 //    3. The characteristic must be designed to support split data
 extension splitWrite on BluetoothCharacteristic {
   Future<void> splitWrite(List<int> value, {int timeout = 15}) async {
-    int chunk = (await device.mtu.first) - 3; // 3 bytes ble overhead
+    int chunk = device.mtu - 3; // 3 bytes ble overhead
     for (int i = 0; i < value.length; i += chunk) {
       List<int> subvalue = value.sublist(i, min(i + chunk, value.length));
       await write(subvalue, withoutResponse:false, timeout: timeout);
@@ -359,7 +358,7 @@ Access streams from all devices simultaneously.
 
 There are streams for:
 * events.connectionState
-* events.mtu
+* events.onMtuChanged
 * events.onDiscoveredServices
 * events.onCharacteristicReceived
 * events.onDescriptorRead
@@ -528,7 +527,9 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 | servicesList              | :white_check_mark: | :white_check_mark: |        | The current list of available services                     |
 | onServicesChanged      🌀 | :white_check_mark: | :white_check_mark: |        | The services changed & must be rediscovered                |
 | onNameChanged          🌀 | :white_check_mark: | :white_check_mark: |        | The GAP Device Name Characteristic (0x2A00) changed        |
-| mtu                    🌀 | :white_check_mark: | :white_check_mark: | :fire: | Stream of mtu size changes                                 |
+| mtu                       | :white_check_mark: | :white_check_mark: |        | The current mtu value                                      |
+| onMtu                  🌀 | :white_check_mark: | :white_check_mark: | :fire: | Stream of mtu current value + changes                      |
+| onMtuChanged           🌀 | :white_check_mark: | :white_check_mark: | :fire: | Stream of mtu changes only                                 |
 | readRssi                  | :white_check_mark: | :white_check_mark: | :fire: | Read RSSI from a connected device                          |
 | requestMtu                | :white_check_mark: |                    | :fire: | Request to change the MTU for the device                   |
 | requestConnectionPriority | :white_check_mark: |                    | :fire: | Request to update a high priority, low latency connection  |

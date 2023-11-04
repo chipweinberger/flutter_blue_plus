@@ -248,7 +248,7 @@ This release simplifies BluetoothDevice construction.
 * **[Fix]** Android: dataLen longer than allowed (regression in 1.14.13)
 
 ## 1.14.13
-* **[Fix]** iOS: onMtuChanged was not called
+* **[Fix]** iOS: onMtu was not called
 * **[Feature]** iOS & Android: writeCharacteristic: add 'allowLongWrite' option to do longer writes
 
 ## 1.14.12
