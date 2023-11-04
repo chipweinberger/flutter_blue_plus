@@ -1717,15 +1717,6 @@ public class FlutterBluePlusPlugin implements
             // GATT Service?
             if (uuid128(pair.primary) == "00001800-0000-1000-8000-00805F9B34FB") {
 
-                // name changed
-                if (uuid128(characteristic.getUuid()) == "00002A00-0000-1000-8000-00805F9B34FB") {
-                    // see: BmGapName
-                    HashMap<String, Object> response = new HashMap<>();
-                    response.put("remote_id", gatt.getDevice().getAddress());
-                    response.put("gap_name", new String(value, StandardCharsets.UTF_8));
-                    invokeMethodUIThread("OnGapNameChanged", response);
-                }
-
                 // services changed
                 if (uuid128(characteristic.getUuid()) == "00002A05-0000-1000-8000-00805F9B34FB") {
                     HashMap<String, Object> response = bmBluetoothDevice(gatt.getDevice());

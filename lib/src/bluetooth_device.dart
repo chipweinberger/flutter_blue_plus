@@ -32,12 +32,6 @@ class BluetoothDevice {
   ///  - not all devices advertise a name
   String get advName => FlutterBluePlus._advNames[remoteId] ?? "";
 
-  /// GAP name
-  ///  - this name comes the from GAP name characteristic 0x2A00
-  ///  - it is only set after you discover services
-  ///  - not all devices have a GAP name
-  String get gapName => FlutterBluePlus._gapNames[remoteId] ?? "";
-
   /// Get services
   ///  - returns null if discoverServices() has not been called
   ///  - this is cleared on disconnection. You must call discoverServices() again
@@ -199,23 +193,6 @@ class BluetoothDevice {
     }
 
     // in order to match iOS behavior on all platforms,
-    // we always read & listen to the GAP Name characteristic if it exists.
-    if (Platform.isIOS == false && Platform.isMacOS == false) {
-      final Guid gapUuid = Guid("00001800-0000-1000-8000-00805F9B34FB");
-      final Guid nameUuid = Guid("00002A00-0000-1000-8000-00805F9B34FB");
-      BluetoothService? gap = servicesList?._firstWhereOrNull((svc) => svc.uuid == gapUuid);
-      BluetoothCharacteristic? chr = gap?.characteristics._firstWhereOrNull((chr) => chr.uuid == nameUuid);
-      if (chr != null) {
-        if ((chr.properties.notify || chr.properties.indicate) && chr.isNotifying == false) {
-          await chr.setNotifyValue(true);
-        }
-        if (chr.properties.read) {
-          await chr.read();
-        }
-      }
-    }
-
-    // in order to match iOS behavior on all platforms,
     // we always listen to the Services Changed characteristic if it exists.
     if (Platform.isIOS == false && Platform.isMacOS == false) {
       final Guid gattUuid = Guid("00001801-0000-1000-8000-00805F9B34FB");
@@ -276,20 +253,6 @@ class BluetoothDevice {
         .where((p) => p.remoteId == remoteId.str)
         .map((p) => p.mtu)
         .newStreamWithInitialValue(initialValue);
-  }
-
-  /// Stream emits a value:
-  ///  - immediately when first listened to using our cached value
-  ///  - whenever the the GAP Device Name characteristic (0x2A00) is read
-  ///  - whenever the the GAP Device Name characteristic (0x2A00) changes, if notifications are supported by the device
-  Stream<String> get onGapName async* {
-    yield gapName; // initial value
-    yield* FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "OnGapNameChanged")
-        .map((m) => m.arguments)
-        .map((args) => BmBluetoothDevice.fromMap(args))
-        .where((p) => p.remoteId == remoteId.str)
-        .map((m) => m.platformName ?? "");
   }
 
   /// Services Reset Stream
