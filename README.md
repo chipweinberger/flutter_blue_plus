@@ -505,10 +505,12 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 |                                    |      Android       |        iOS         | Throws | Description                                           |
 | :--------------------------------- | :----------------: | :----------------: | :----: | :-----------------------------------------------------|
 | events.connectionState          🌀 | :white_check_mark: | :white_check_mark: |        | Stream of connection changes of *all devices*         |
+| events.mtu                      🌀 | :white_check_mark: | :white_check_mark: |        | Stream of mtu changes of *all devices*                |
+| events.onDiscoveredServices     🌀 | :white_check_mark: | :white_check_mark: |        | Stream of services discovered of *all devices*        |
 | events.onCharacteristicReceived 🌀 | :white_check_mark: | :white_check_mark: |        | Stream of characteristic value reads of *all devices* |
 | events.onDescriptorRead         🌀 | :white_check_mark: | :white_check_mark: |        | Stream of descriptor value reads of *all devices*     |
-| events.onNameChanged            🌀 | :white_check_mark: |                    |        | Stream of name changes of *all devices*               |
-| events.onServicesChanged        🌀 | :white_check_mark: |                    |        | Stream of services changes of *all devices*           |
+| events.onNameChanged            🌀 | :white_check_mark: | :white_check_mark: |        | Stream of name changes of *all devices*               |
+| events.onServicesChanged        🌀 | :white_check_mark: | :white_check_mark: |        | Stream of services changes of *all devices*           |
 | events.bondState                🌀 | :white_check_mark: |                    |        | Stream of bondState changes of *all devices*          |
 
 
