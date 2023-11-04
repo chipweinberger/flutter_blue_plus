@@ -1,3 +1,6 @@
+## 1.24.0
+* **[Rename]** `onNameChanged` -> `onGapNameChanged`
+
 ## 1.23.0
 * **[Add]** `device.mtu` (it is now synchronous)
 * **[Rename]** `device.mtu` -> `device.onMtu` (stream)
