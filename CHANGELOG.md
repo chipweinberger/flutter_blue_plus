@@ -1,3 +1,6 @@
+## 1.25.1
+* **[Add]** `device.advName` - the advertised name of the device found when scanning
+
 ## 1.25.0
 This release changes android behavior to match iOS.
 * **[Behavior Change]** android: after discovering services, listen to GAP Name & Services Changed characteristics by default
