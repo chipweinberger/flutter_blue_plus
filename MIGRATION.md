@@ -205,20 +205,9 @@ This change was made to increase reliability, at the cost of throughput.
 
 * **Breaking Change:** on android, we now request an mtu of 512 by default during connection.
 
-## 1.22.1
-
-* **renamed** `ErrorPlatform.dart` -> `ErrorPlatform.fbp`
-
-## 1.23.0
-* **[Rename]** `device.mtu` -> `device.onMtu` 
+## 1.22.1 to 1.26.0
+These releases changed multiple things but then changed them back. For brevity, here are the actual changes:
+* **[Behavior Change]** android: always listen to Services Changed characteristic, to match iOS behavior
 * **[Rename]** `device.onServicesChanged` -> `device.onServicesReset`
-* **[Rename]** `events.connectionState` -> `events.onConnectionStateChanged`
-* **[Rename]** `events.bondState` -> `events.onBondStateChanged`
-
-## 1.24.0
-* **[Rename]** `onNameChanged` -> `onGapNameChanged`
-
-## 1.25.0
-This release changes android behavior to match iOS.
-* **[Behavior Change]** android: after discovering services, listen to GAP Name & Services Changed characteristics by default
-* **[Rename]** `device.onGapNameChanged` -> `device.onGapName`
+* **[Remove]** `device.onNameChanged`, in favor of only exposing `events.onNameChanged`
+* **[Rename]** events api: most functions & classes were renamed for consistency

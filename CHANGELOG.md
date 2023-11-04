@@ -1,33 +1,14 @@
-## 1.25.1
-* **[Add]** `device.advName` - the advertised name of the device found when scanning
-
-## 1.25.0
-This release changes android behavior to match iOS.
-* **[Behavior Change]** android: after discovering services, listen to GAP Name & Services Changed characteristics by default
-* **[Rename]** `device.onGapNameChanged` -> `device.onGapName`
-* **[Add]** `device.gapName`
-
-## 1.24.1
-* **[Fix]** must stop scanning when detached from engine
-
-## 1.24.0
-* **[Rename]** `onNameChanged` -> `onGapNameChanged`
-
-## 1.23.0
-* **[Add]** `device.mtu` (it is now synchronous)
-* **[Rename]** `device.mtu` -> `device.onMtu` (stream)
-* **[Rename]** `device.onServicesChanged` -> `device.onServicesReset`
-* **[Rename]** `events.connectionState` -> `events.onConnectionStateChanged`
-* **[Rename]** `events.bondState` -> `events.onBondStateChanged`
-* **[Rename]** events api: prefix class names with 'On', i.e. `OnConnectionStateChangedEvent`
-
-## 1.22.2
-* **[Remove]** `device.onDiscoveredServices`, this api needs more thought
-
-## 1.22.1
-* **[Rename]** `ErrorPlatform.dart` -> `ErrorPlatform.fbp`
-* **[Add]** `device.onDiscoveredServices` & `events.onDiscoveredServices` streams
+## 1.22.1 to 1.26.0
+These releases changed multiple things but then changed them back. For brevity, here are the actual changes:
+* **[Behavior Change]** android: listen to Services Changed characteristic to match iOS behavior
+* **[Fix]** stop scanning when detached from engine
+* **[Add]** `device.advName` returns the name found during scanning
+* **[Add]** `device.mtuNow` to synchronously get the current mtu value
+* **[Add]** `events.onDiscoveredServices` stream
 * **[Add]** events api: add accessors for errors
+* **[Rename]** events api: most functions & classes were renamed for consistency
+* **[Rename]** `device.onServicesChanged` -> `device.onServicesReset`
+* **[Remove]** `device.onNameChanged`, in favor of only exposing `events.onNameChanged`
 
 ## 1.22.0
 This release makes `mtu` behavior more similar on android & iOS.
