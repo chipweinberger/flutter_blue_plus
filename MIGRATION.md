@@ -217,3 +217,8 @@ This change was made to increase reliability, at the cost of throughput.
 
 ## 1.24.0
 * **[Rename]** `onNameChanged` -> `onGapNameChanged`
+
+## 1.25.0
+This release changes android behavior to match iOS.
+* **[Behavior Change]** android: after discovering services, listen to GAP Name & Services Changed characteristics by default
+* **[Rename]** `device.onGapNameChanged` -> `device.onGapName`

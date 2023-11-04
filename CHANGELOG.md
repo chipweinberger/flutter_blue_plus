@@ -1,8 +1,8 @@
 ## 1.25.0
 This release changes android behavior to match iOS.
-* **[Behavior Change]** android: when discovering services listen to GAP Name & Services Changed characteristics by default
+* **[Behavior Change]** android: after discovering services, listen to GAP Name & Services Changed characteristics by default
 * **[Rename]** `device.onGapNameChanged` -> `device.onGapName`
-* **[Add]** `device.onGapName`
+* **[Add]** `device.gapName`
 
 ## 1.24.1
 * **[Fix]** must stop scanning when detached from engine
