@@ -311,6 +311,11 @@ class FlutterBluePlus {
       print("[FBP] $func result: $result");
     }
 
+    // android only
+    if (call.method == "OnDetachedFromEngine") {
+      _stopScan(invokePlatform: false);
+    }
+
     // keep track of adapter states
     if (call.method == "OnAdapterStateChanged") {
       BmBluetoothAdapterState r = BmBluetoothAdapterState.fromMap(call.arguments);

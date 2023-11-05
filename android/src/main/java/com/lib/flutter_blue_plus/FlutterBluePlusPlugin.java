@@ -157,6 +157,8 @@ public class FlutterBluePlusPlugin implements
     {
         log(LogLevel.DEBUG, "onDetachedFromEngine");
 
+        invokeMethodUIThread("OnDetachedFromEngine", new HashMap<>());
+
         pluginBinding = null;
 
         // stop scanning
