@@ -482,6 +482,7 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 ## Reference
 
 🌀 = Stream
+⚡ = synchronous
 
 ### FlutterBluePlus API
 
@@ -495,8 +496,8 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 | stopScan               | :white_check_mark: | :white_check_mark: | :fire: | Stop an existing scan for Ble devices                      |
 | scanResults         🌀 | :white_check_mark: | :white_check_mark: |        | Stream of live scan results                                |
 | isScanning          🌀 | :white_check_mark: | :white_check_mark: |        | Stream of current scanning state                           |
-| isScanningNow          | :white_check_mark: | :white_check_mark: |        | Is a scan currently running?                               |
-| connectedDevices       | :white_check_mark: | :white_check_mark: |        | List of devices connected to *your app*                    |
+| isScanningNow       ⚡  | :white_check_mark: | :white_check_mark: |        | Is a scan currently running?                               |
+| connectedDevices    ⚡  | :white_check_mark: | :white_check_mark: |        | List of devices connected to *your app*                    |
 | systemDevices          | :white_check_mark: | :white_check_mark: | :fire: | List of devices connected to the system, even by other apps|
 | getPhySupport          | :white_check_mark: |                    | :fire: | Get supported bluetooth phy codings                        |
 
@@ -518,17 +519,17 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 
 |                           |      Android       |        iOS         | Throws | Description                                                |
 | :------------------------ | :----------------: | :----------------: | :----: | :----------------------------------------------------------|
-| platformName              | :white_check_mark: | :white_check_mark: |        | The platform preferred name of the device                  |
-| advName                   | :white_check_mark: | :white_check_mark: |        | The advertised name of the device found during scanning    |
+| platformName            ⚡ | :white_check_mark: | :white_check_mark: |        | The platform preferred name of the device                  |
+| advName                 ⚡ | :white_check_mark: | :white_check_mark: |        | The advertised name of the device found during scanning    |
 | connect                   | :white_check_mark: | :white_check_mark: | :fire: | Establishes a connection to the device                     |
 | disconnect                | :white_check_mark: | :white_check_mark: | :fire: | Cancels an active or pending connection to the device      |
-| isConnected               | :white_check_mark: | :white_check_mark: |        | Is this device currently connected to *your app*?          |
+| isConnected             ⚡ | :white_check_mark: | :white_check_mark: |        | Is this device currently connected to *your app*?          |
 | connectionState        🌀 | :white_check_mark: | :white_check_mark: |        | Stream of connection changes for the Bluetooth Device      |
 | discoverServices          | :white_check_mark: | :white_check_mark: | :fire: | Discover services                                          |
-| servicesList              | :white_check_mark: | :white_check_mark: |        | The current list of available services                     |
+| servicesList            ⚡ | :white_check_mark: | :white_check_mark: |        | The current list of available services                     |
 | onServicesReset        🌀 | :white_check_mark: | :white_check_mark: |        | The services changed & must be rediscovered                |
 | mtu                    🌀 | :white_check_mark: | :white_check_mark: |        | Stream of current mtu value + changes                      |
-| mtuNow                    | :white_check_mark: | :white_check_mark: |        | The current mtu value                                      |
+| mtuNow                  ⚡ | :white_check_mark: | :white_check_mark: |        | The current mtu value                                      |
 | readRssi                  | :white_check_mark: | :white_check_mark: | :fire: | Read RSSI from a connected device                          |
 | requestMtu                | :white_check_mark: |                    | :fire: | Request to change the MTU for the device                   |
 | requestConnectionPriority | :white_check_mark: |                    | :fire: | Request to update a high priority, low latency connection  |
@@ -542,7 +543,7 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 
 |                    |      Android       |        iOS         | Throws | Description                                                    |
 | :----------------- | :----------------: | :----------------: | :----: | :--------------------------------------------------------------|
-| uuid               | :white_check_mark: | :white_check_mark: |        | The uuid of characeristic                                      |
+| uuid             ⚡ | :white_check_mark: | :white_check_mark: |        | The uuid of characeristic                                      |
 | read               | :white_check_mark: | :white_check_mark: | :fire: | Retrieves the value of the characteristic                      |
 | write              | :white_check_mark: | :white_check_mark: | :fire: | Writes the value of the characteristic                         |
 | setNotifyValue     | :white_check_mark: | :white_check_mark: | :fire: | Sets notifications or indications on the characteristic        |
@@ -555,11 +556,11 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 
 |                    |      Android       |        iOS         | Throws | Description                                    |
 | :----              | :----------------: | :----------------: | :----: | :----------------------------------------------|
-| uuid               | :white_check_mark: | :white_check_mark: |        | The uuid of descriptor                         |
+| uuid             ⚡ | :white_check_mark: | :white_check_mark: |        | The uuid of descriptor                         |
 | read               | :white_check_mark: | :white_check_mark: | :fire: | Retrieves the value of the descriptor          |
 | write              | :white_check_mark: | :white_check_mark: | :fire: | Writes the value of the descriptor             |
 | onValueReceived 🌀 | :white_check_mark: | :white_check_mark: |        | Stream of descriptor value reads & writes      |
-| lastValue          | :white_check_mark: | :white_check_mark: |        | The most recent value of the descriptor        |
+| lastValue        ⚡ | :white_check_mark: | :white_check_mark: |        | The most recent value of the descriptor        |
 | lastValueStream 🌀 | :white_check_mark: | :white_check_mark: |        | Stream of onValueReceived + writes             |
 
 ## Debugging
