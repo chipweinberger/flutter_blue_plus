@@ -255,12 +255,9 @@ class FlutterBluePlus {
     _scanSubscription?.cancel();
     _scanTimeout?.cancel();
     _isScanning.add(false);
-    try {
-      if (invokePlatform) {
-        await _invokeMethod('stopScan');
-      }
-    } finally {
-      _scanResultsList.latestValue = [];
+    _scanResultsList.latestValue = [];
+    if (invokePlatform) {
+      await _invokeMethod('stopScan');
     }
   }
 
