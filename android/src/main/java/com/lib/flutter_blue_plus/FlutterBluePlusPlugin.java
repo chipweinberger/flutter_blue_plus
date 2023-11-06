@@ -1974,7 +1974,7 @@ public class FlutterBluePlusPlugin implements
             response.put("error_code", status);
             response.put("error_string", gattErrorString(status));
 
-            invokeMethodUIThread("OnReadRssiResult", response);
+            invokeMethodUIThread("OnReadRssi", response);
         }
 
         @Override

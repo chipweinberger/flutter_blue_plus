@@ -313,7 +313,7 @@ class BluetoothDevice {
 
     try {
       var responseStream = FlutterBluePlus._methodStream.stream
-          .where((m) => m.method == "OnReadRssiResult")
+          .where((m) => m.method == "OnReadRssi")
           .map((m) => m.arguments)
           .map((args) => BmReadRssiResult.fromMap(args))
           .where((p) => (p.remoteId == remoteId.str));

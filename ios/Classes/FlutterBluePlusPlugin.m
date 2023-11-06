@@ -1431,7 +1431,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"error_code":      error ? @(error.code) : @(0),
     };
 
-    [_methodChannel invokeMethod:@"OnReadRssiResult" arguments:result];
+    [_methodChannel invokeMethod:@"OnReadRssi" arguments:result];
 }
 
 - (void)peripheralIsReadyToSendWriteWithoutResponse:(CBPeripheral *)peripheral

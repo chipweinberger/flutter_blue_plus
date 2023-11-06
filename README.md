@@ -359,10 +359,13 @@ Access streams from all devices simultaneously.
 There are streams for:
 * events.onConnectionStateChanged
 * events.onMtuChanged
+* events.onReadRssi
+* events.onServicesReset
 * events.onDiscoveredServices
 * events.onCharacteristicReceived
+* events.onCharacteristicWritten
 * events.onDescriptorRead
-* events.onServicesReset
+* events.onDescriptorWritten
 * events.onNameChanged (iOS Only)
 * events.onBondStateChanged (Android Only)
 
@@ -507,10 +510,13 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 | :--------------------------------- | :----------------: | :----------------: | :----: | :-----------------------------------------------------|
 | events.onConnectionStateChanged 🌀 | :white_check_mark: | :white_check_mark: |        | Stream of connection changes of *all devices*         |
 | events.onMtuChanged             🌀 | :white_check_mark: | :white_check_mark: |        | Stream of mtu changes of *all devices*                |
+| events.onReadRssi               🌀 | :white_check_mark: | :white_check_mark: |        | Stream of rssi reads of *all devices*                 |
+| events.onServicesReset          🌀 | :white_check_mark: | :white_check_mark: |        | Stream of services resets of *all devices*            |
 | events.onDiscoveredServices     🌀 | :white_check_mark: | :white_check_mark: |        | Stream of services discovered of *all devices*        |
 | events.onCharacteristicReceived 🌀 | :white_check_mark: | :white_check_mark: |        | Stream of characteristic value reads of *all devices* |
+| events.onCharacteristicWritten  🌀 | :white_check_mark: | :white_check_mark: |        | Stream of characteristic value writes of *all devices*|
 | events.onDescriptorRead         🌀 | :white_check_mark: | :white_check_mark: |        | Stream of descriptor value reads of *all devices*     |
-| events.onServicesReset          🌀 | :white_check_mark: | :white_check_mark: |        | Stream of services resets of *all devices*            |
+| events.onDescriptorWritten      🌀 | :white_check_mark: | :white_check_mark: |        | Stream of descriptor value writes of *all devices*    |
 | events.onBondStateChanged       🌀 | :white_check_mark: |                    |        | Stream of android bond state changes of *all devices* |
 | events.onNameChanged            🌀 |                    | :white_check_mark: |        | Stream of iOS name changes of *all devices*           |
 
