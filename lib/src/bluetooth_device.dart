@@ -43,9 +43,10 @@ class BluetoothDevice {
   /// This function simplifies cleanup, to prevent duplicate stream subscriptions.
   ///   - this is an optional convenience function
   ///   - prevents accidentally creating duplicate subscriptions on each reconnection.
-  ///   - if already disconnected, the stream will be immediately canceled
-  void cancelWhenDisconnected(StreamSubscription subscription) {
-    if (isConnected == false) {
+  ///   - [next] if true, the the stream will be canceled only on the *next* disconnection.
+  ///     This is useful if you like to set up your subscriptions before you call connect.
+  void cancelWhenDisconnected(StreamSubscription subscription, {bool next = false}) {
+    if (isConnected == false && next == false) {
       subscription.cancel();
     } else {
       FlutterBluePlus._subscriptions[remoteId] ??= [];
