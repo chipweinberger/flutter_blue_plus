@@ -33,7 +33,7 @@ i.e. `FlutterBluePlus.instance.startScan` becomes `FlutterBluePlus.startScan`
 
 ## 1.11.0
 
-* **renamed:** `connectedDevices` -> `systemDevices`
+* **renamed:** `connectedDevices` -> `connectedSystemDevices`
 
 ## 1.15.0
 
@@ -193,7 +193,7 @@ BluetoothDevice? myDevice = await myDeviceFuture;
 
 ## 1.20.3
 
-* **new function:** Introduced a new `connectedDevices` function. **Caution:** a previous function used this same name. That function is now called `systemDevices`.
+ **Caution:** this release introduces a new function called `connectedDevices`. Before `1.11.0`, there used to be a function with this same name. That older function has since been renamed to `systemDevices`.
 
 ## 1.21.0
 
