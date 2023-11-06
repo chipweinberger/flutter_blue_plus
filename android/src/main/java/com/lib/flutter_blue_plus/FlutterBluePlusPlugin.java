@@ -618,6 +618,9 @@ public class FlutterBluePlusPlugin implements
                         // remove
                         mCurrentlyConnectingDevices.remove(remoteId);
 
+                        // cleanup
+                        gatt.close();
+
                         // see: BmConnectionStateResponse
                         HashMap<String, Object> response = new HashMap<>();
                         response.put("remote_id", remoteId);
