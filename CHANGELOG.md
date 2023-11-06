@@ -1,3 +1,6 @@
+## 1.26.4
+* **[Add]** cancelWhenDisconnected: option to cancel on *next* disconnection
+
 ## 1.26.3
 * **[Add]** `events.onReadRssi`
 * **[Add]** `events.onCharacteristicWritten`
