@@ -1,3 +1,7 @@
+## 1.26.2
+* **[Fix]** android: close gatt after canceling an in-progress connnection
+* **[Improve]** android: wait until bonding completes for better reliability
+
 ## 1.26.1
 * **[Feature]** add support for canceling an in progress connection using `device.disconnect`
 * **[Fix]** connection timeouts did not actually cancel the connection attempt
