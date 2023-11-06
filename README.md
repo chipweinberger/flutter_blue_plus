@@ -542,7 +542,7 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 | bondState              🌀 | :white_check_mark: |                    |        | Stream of device bond state. Can be useful on Android      |
 | createBond                | :white_check_mark: |                    | :fire: | Force a system pairing dialogue to show, if needed         |
 | removeBond                | :white_check_mark: |                    | :fire: | Remove Bluetooth Bond of device                            |
-| setPreferredPhy           | :white_check_mark: |                    |        | Set preferred RX and TX phy for connection and phy options |
+| setPreferredPhy           | :white_check_mark: |                    | :fire: | Set preferred RX and TX phy for connection and phy options |
 | clearGattCache            | :white_check_mark: |                    | :fire: | Clear android cache of service discovery results           |
 
 ### BluetoothCharacteristic API
