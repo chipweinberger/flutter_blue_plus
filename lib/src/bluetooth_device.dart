@@ -73,10 +73,10 @@ class BluetoothDevice {
     bool autoConnect = false,
     int? mtu = 512,
   }) async {
+
     // make sure no one else is calling disconnect
     _Mutex dmtx = await _MutexFactory.getMutexForKey("disconnect");
-    await dmtx.take();
-    bool gotDmtx = true;
+    bool dtook = await dmtx.take();
 
     // Only allow a single ble operation to be underway at a time
     _Mutex mtx = await _MutexFactory.getMutexForKey("global");
@@ -102,8 +102,7 @@ class BluetoothDevice {
 
       // we return the disconnect mutex now so that this
       // connection attempt can be canceled by calling disconnect
-      dmtx.give();
-      gotDmtx = false;
+      dtook = dmtx.give();
 
       // only wait for connection if we weren't already connected
       if (changed) {
@@ -121,15 +120,15 @@ class BluetoothDevice {
         if (response.connectionState == BmConnectionStateEnum.disconnected) {
           if (response.disconnectReasonCode == 23789258) {
             throw FlutterBluePlusException(
-              ErrorPlatform.fbp, "connect", FbpErrorCode.connectionCanceled.index, "connection canceled");
+                ErrorPlatform.fbp, "connect", FbpErrorCode.connectionCanceled.index, "connection canceled");
           } else {
             throw FlutterBluePlusException(
-              _nativeError, "connect", response.disconnectReasonCode, response.disconnectReasonString);
+                _nativeError, "connect", response.disconnectReasonCode, response.disconnectReasonString);
           }
         }
       }
     } finally {
-      if (gotDmtx) {
+      if (dtook) {
         dmtx.give();
       }
       mtx.give();
