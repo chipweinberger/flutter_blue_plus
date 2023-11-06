@@ -250,7 +250,7 @@ class FlutterBluePlus {
     await _stopScan();
   }
 
-  // for internal use
+  /// for internal use
   static Future<void> _stopScan({bool invokePlatform = true}) async {
     _scanSubscription?.cancel();
     _scanTimeout?.cancel();
@@ -639,6 +639,7 @@ enum FbpErrorCode {
   serviceNotFound,
   characteristicNotFound,
   adapterIsOff,
+  connectionCanceled,
 }
 
 class FlutterBluePlusException implements Exception {

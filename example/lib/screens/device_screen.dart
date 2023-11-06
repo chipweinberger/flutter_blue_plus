@@ -24,10 +24,12 @@ class _DeviceScreenState extends State<DeviceScreen> {
   BluetoothConnectionState _connectionState = BluetoothConnectionState.disconnected;
   List<BluetoothService> _services = [];
   bool _isDiscoveringServices = false;
-  bool _isConnectingOrDisconnecting = false;
+  bool _isConnecting = false;
+  bool _isDisconnecting = false;
 
   late StreamSubscription<BluetoothConnectionState> _connectionStateSubscription;
-  late StreamSubscription<bool> _isConnectingOrDisconnectingSubscription;
+  late StreamSubscription<bool> _isConnectingSubscription;
+  late StreamSubscription<bool> _isDisconnectingSubscription;
   late StreamSubscription<int> _mtuSubscription;
 
   @override
@@ -50,8 +52,13 @@ class _DeviceScreenState extends State<DeviceScreen> {
       setState(() {});
     });
 
-    _isConnectingOrDisconnectingSubscription = widget.device.isConnectingOrDisconnecting.listen((value) {
-      _isConnectingOrDisconnecting = value;
+    _isConnectingSubscription = widget.device.isConnecting.listen((value) {
+      _isConnecting = value;
+      setState(() {});
+    });
+
+    _isDisconnectingSubscription = widget.device.isDisconnecting.listen((value) {
+      _isDisconnecting = value;
       setState(() {});
     });
   }
@@ -60,7 +67,8 @@ class _DeviceScreenState extends State<DeviceScreen> {
   void dispose() {
     _connectionStateSubscription.cancel();
     _mtuSubscription.cancel();
-    _isConnectingOrDisconnectingSubscription.cancel();
+    _isConnectingSubscription.cancel();
+    _isDisconnectingSubscription.cancel();
     super.dispose();
   }
 
@@ -73,7 +81,20 @@ class _DeviceScreenState extends State<DeviceScreen> {
       await widget.device.connectAndUpdateStream();
       Snackbar.show(ABC.c, "Connect: Success", success: true);
     } catch (e) {
-      Snackbar.show(ABC.c, prettyException("Connect Error:", e), success: false);
+      if (e is FlutterBluePlusException && e.code == FbpErrorCode.connectionCanceled.index) {
+        // ignore connections canceled by the user
+      } else {
+        Snackbar.show(ABC.c, prettyException("Connect Error:", e), success: false);
+      }
+    }
+  }
+
+  Future onCancelPressed() async {
+    try {
+      await widget.device.disconnectAndUpdateStream(queue: false);
+      Snackbar.show(ABC.c, "Cancel: Success", success: true);
+    } catch (e) {
+      Snackbar.show(ABC.c, prettyException("Cancel Error:", e), success: false);
     }
   }
 
@@ -191,16 +212,15 @@ class _DeviceScreenState extends State<DeviceScreen> {
   }
 
   Widget buildConnectButton(BuildContext context) {
-    if (_isConnectingOrDisconnecting) {
-      return buildSpinner(context);
-    } else {
-      return TextButton(
-          onPressed: isConnected ? onDisconnectPressed : onConnectPressed,
+    return Row(children: [
+      if (_isConnecting || _isDisconnecting) buildSpinner(context),
+      TextButton(
+          onPressed: _isConnecting ? onCancelPressed : (isConnected ? onDisconnectPressed : onConnectPressed),
           child: Text(
-            isConnected ? "DISCONNECT" : "CONNECT",
+            _isConnecting ? "CANCEL" : (isConnected ? "DISCONNECT" : "CONNECT"),
             style: Theme.of(context).primaryTextTheme.labelLarge?.copyWith(color: Colors.white),
-          ));
-    }
+          ))
+    ]);
   }
 
   @override

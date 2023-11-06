@@ -73,6 +73,11 @@ class BluetoothDevice {
     bool autoConnect = false,
     int? mtu = 512,
   }) async {
+    // make sure no one else is calling disconnect
+    _Mutex dmtx = await _MutexFactory.getMutexForKey("disconnect");
+    await dmtx.take();
+    bool gotDmtx = true;
+
     // Only allow a single ble operation to be underway at a time
     _Mutex mtx = await _MutexFactory.getMutexForKey("global");
     await mtx.take();
@@ -87,10 +92,7 @@ class BluetoothDevice {
           .where((m) => m.method == "OnConnectionStateChanged")
           .map((m) => m.arguments)
           .map((args) => BmConnectionStateResponse.fromMap(args))
-          .where((p) => p.remoteId == remoteId.str)
-          .where((p) =>
-              p.connectionState == BmConnectionStateEnum.disconnected ||
-              p.connectionState == BmConnectionStateEnum.connected);
+          .where((p) => p.remoteId == remoteId.str);
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmConnectionStateResponse> futureState = responseStream.first;
@@ -98,18 +100,38 @@ class BluetoothDevice {
       // invoke
       bool changed = await FlutterBluePlus._invokeMethod('connect', request.toMap());
 
+      // we return the disconnect mutex now so that this
+      // connection attempt can be canceled by calling disconnect
+      dmtx.give();
+      gotDmtx = false;
+
       // only wait for connection if we weren't already connected
       if (changed) {
-        BmConnectionStateResponse response =
-            await futureState.fbpEnsureAdapterIsOn("connect").fbpTimeout(timeout.inSeconds, "connect");
+        BmConnectionStateResponse response = await futureState
+            .fbpEnsureAdapterIsOn("connect")
+            .fbpTimeout(timeout.inSeconds, "connect")
+            .catchError((e) async {
+          if (e is FlutterBluePlusException && e.code == FbpErrorCode.timeout.index) {
+            await FlutterBluePlus._invokeMethod('disconnect', remoteId.str); // cancel connection attempt
+          }
+          throw e;
+        });
 
         // failure?
         if (response.connectionState == BmConnectionStateEnum.disconnected) {
-          throw FlutterBluePlusException(
+          if (response.disconnectReasonCode == 23789258) {
+            throw FlutterBluePlusException(
+              ErrorPlatform.fbp, "connect", FbpErrorCode.connectionCanceled.index, "connection canceled");
+          } else {
+            throw FlutterBluePlusException(
               _nativeError, "connect", response.disconnectReasonCode, response.disconnectReasonString);
+          }
         }
       }
     } finally {
+      if (gotDmtx) {
+        dmtx.give();
+      }
       mtx.give();
     }
 
@@ -121,10 +143,19 @@ class BluetoothDevice {
   }
 
   /// Cancels connection to the Bluetooth Device
-  Future<void> disconnect({int timeout = 35}) async {
-    // Only allow a single ble operation to be underway at a time
+  ///   - [queue] If true, this disconnect request will be executed after all other operations complete.
+  ///     If false, this disconnect request will be executed right now, i.e. skipping to the front
+  ///     of the fbp operation queue, which is useful to cancel an in-progress connection attempt.
+  Future<void> disconnect({int timeout = 35, bool queue = true}) async {
+    // Only allow a single disconnect operation at a time
+    _Mutex dtx = await _MutexFactory.getMutexForKey("disconnect");
+    await dtx.take();
+
+    // Only allow a single ble operation to be underway at a time?
     _Mutex mtx = await _MutexFactory.getMutexForKey("global");
-    await mtx.take();
+    if (queue) {
+      await mtx.take();
+    }
 
     try {
       var responseStream = FlutterBluePlus._methodStream.stream
@@ -145,7 +176,10 @@ class BluetoothDevice {
         await futureState.fbpEnsureAdapterIsOn("disconnect").fbpTimeout(timeout, "disconnect");
       }
     } finally {
-      mtx.give();
+      dtx.give();
+      if (queue) {
+        mtx.give();
+      }
     }
   }
 

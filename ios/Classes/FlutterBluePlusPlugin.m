@@ -55,6 +55,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 @property(nonatomic, retain) CBCentralManager *centralManager;
 @property(nonatomic) NSMutableDictionary *knownPeripherals;
 @property(nonatomic) NSMutableDictionary *connectedPeripherals;
+@property(nonatomic) NSMutableDictionary *currentlyConnectingPeripherals;
 @property(nonatomic) NSMutableArray *servicesThatNeedDiscovered;
 @property(nonatomic) NSMutableArray *characteristicsThatNeedDiscovered;
 @property(nonatomic) NSMutableDictionary *didWriteWithoutResponse;
@@ -74,6 +75,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     instance.methodChannel = methodChannel;
     instance.knownPeripherals = [NSMutableDictionary new];
     instance.connectedPeripherals = [NSMutableDictionary new];
+    instance.currentlyConnectingPeripherals = [NSMutableDictionary new];
     instance.servicesThatNeedDiscovered = [NSMutableArray new];
     instance.characteristicsThatNeedDiscovered = [NSMutableArray new];
     instance.didWriteWithoutResponse = [NSMutableDictionary new];
@@ -331,6 +333,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             } 
 
             [_centralManager connectPeripheral:peripheral options:options];
+
+            // add to currently connecting peripherals
+            [self.currentlyConnectingPeripherals setObject:peripheral forKey:remoteId];
             
             result(@YES);
         }
@@ -340,7 +345,14 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSString *remoteId = [call arguments];
 
             // already disconnected?
-            CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
+            CBPeripheral *peripheral = nil;
+            if (peripheral == nil) {
+                Log(LDEBUG, @"disconnect: canceling connection in progress");
+                peripheral = [self.currentlyConnectingPeripherals objectForKey:remoteId];
+            }
+            if (peripheral == nil) {
+                peripheral = [self getConnectedPeripheral:remoteId];
+            }
             if (peripheral == nil) {
                 Log(LDEBUG, @"already disconnected");
                 result(@NO); // no work to do
@@ -864,7 +876,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSDictionary *result = @{
                 @"remote_id":                [[peripheral identifier] UUIDString],
                 @"connection_state":         @([self bmConnectionStateEnum:CBPeripheralStateDisconnected]),
-                @"disconnect_reason_code":   @(57), // just a random value, could be anything.
+                @"disconnect_reason_code":   @(1573878), // just a random value, could be anything.
                 @"disconnect_reason_string": @"Bluetooth turned off",
             };
 
@@ -883,6 +895,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // adapter is turned off, so we must clear it ourself
     if ([func isEqualToString:@"adapterTurnOff"]) {
         [self.connectedPeripherals removeAllObjects];
+        [self.currentlyConnectingPeripherals removeAllObjects];
     }
 
     // note: we do *not* clear self.knownPeripherals
@@ -1010,6 +1023,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // remember the connected peripherals of *this app*
     [self.connectedPeripherals setObject:peripheral forKey:remoteId];
 
+    // remove from currently connecting peripherals
+    [self.currentlyConnectingPeripherals removeObjectForKey:remoteId];
+
     // Register self as delegate for peripheral
     peripheral.delegate = self;
 
@@ -1041,6 +1057,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // remember the connected peripherals of *this app*
     [self.connectedPeripherals removeObjectForKey:remoteId];
 
+    // remove from currently connecting peripherals
+    [self.currentlyConnectingPeripherals removeObjectForKey:remoteId];
+
     // clear negotiated mtu
     [self.peripheralMtu removeObjectForKey:peripheral];
 
@@ -1051,8 +1070,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     NSDictionary *result = @{
         @"remote_id":                remoteId,
         @"connection_state":         @([self bmConnectionStateEnum:peripheral.state]),
-        @"disconnect_reason_code":   error ? @(error.code) : [NSNull null],
-        @"disconnect_reason_string": error ? [error localizedDescription] : [NSNull null],
+        @"disconnect_reason_code":   error ? @(error.code) : @(23789258),
+        @"disconnect_reason_string": error ? [error localizedDescription] : @("connection canceled"),
     };
 
     // Send connection state
@@ -1069,6 +1088,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     } else {
         Log(LDEBUG, @"didFailToConnectPeripheral");
     }
+
+    NSString* remoteId = [[peripheral identifier] UUIDString];
+
+    // remove from currently connecting peripherals
+    [self.currentlyConnectingPeripherals removeObjectForKey:remoteId];
 
     // See BmConnectionStateResponse
     NSDictionary *result = @{

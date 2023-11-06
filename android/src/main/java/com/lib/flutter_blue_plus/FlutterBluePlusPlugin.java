@@ -97,6 +97,7 @@ public class FlutterBluePlusPlugin implements
     static final private String CCCD = "00002902-0000-1000-8000-00805f9b34fb";
 
     private final Map<String, BluetoothGatt> mConnectedDevices = new ConcurrentHashMap<>();
+    private final Map<String, BluetoothGatt> mCurrentlyConnectingDevices = new ConcurrentHashMap<>();
     private final Map<String, Integer> mMtu = new ConcurrentHashMap<>();
     private final Map<String, Boolean> mAutoConnect = new ConcurrentHashMap<>();
     private final Map<String, String> mWriteChr = new ConcurrentHashMap<>();
@@ -578,6 +579,9 @@ public class FlutterBluePlusPlugin implements
                             return;
                         }
 
+                        // add to currently connecting peripherals
+                        mCurrentlyConnectingDevices.put(remoteId, gatt);
+
                         result.success(true);
                     });
                     break;
@@ -588,7 +592,14 @@ public class FlutterBluePlusPlugin implements
                     String remoteId = (String) call.arguments;
 
                     // already disconnected?
-                    BluetoothGatt gatt = mConnectedDevices.get(remoteId);
+                    BluetoothGatt gatt = null;
+                    if (gatt == null) {
+                        log(LogLevel.DEBUG, "disconnect: canceling connection in progress");
+                        gatt = mCurrentlyConnectingDevices.get(remoteId);
+                    }
+                    if (gatt == null) {
+                        gatt = mConnectedDevices.get(remoteId);;
+                    }
                     if (gatt == null) {
                         log(LogLevel.DEBUG, "already disconnected");
                         result.success(false);  // no work to do
@@ -600,6 +611,22 @@ public class FlutterBluePlusPlugin implements
                     mAutoConnect.put(remoteId, false);
                 
                     gatt.disconnect();
+
+                    // was connecting?
+                    if (mCurrentlyConnectingDevices.get(remoteId) != null) {
+
+                        // remove
+                        mCurrentlyConnectingDevices.remove(remoteId);
+
+                        // see: BmConnectionStateResponse
+                        HashMap<String, Object> response = new HashMap<>();
+                        response.put("remote_id", remoteId);
+                        response.put("connection_state", bmConnectionStateEnum(BluetoothProfile.STATE_DISCONNECTED));
+                        response.put("disconnect_reason_code", 23789258); // random value
+                        response.put("disconnect_reason_string", "connection canceled");
+
+                        invokeMethodUIThread("OnConnectionStateChanged", response);
+                    }
 
                     result.success(true);
                     break;
@@ -1451,6 +1478,7 @@ public class FlutterBluePlusPlugin implements
         }
 
         mConnectedDevices.clear();
+        mCurrentlyConnectingDevices.clear();
         mMtu.clear();
         mWriteChr.clear();
         mWriteDesc.clear();
@@ -1659,6 +1687,9 @@ public class FlutterBluePlusPlugin implements
                 // add to connected devices
                 mConnectedDevices.put(remoteId, gatt);
 
+                // remove from currently connecting devices
+                mCurrentlyConnectingDevices.remove(remoteId);
+
                 // default minimum mtu
                 mMtu.put(remoteId, 23);
             }
@@ -1668,6 +1699,9 @@ public class FlutterBluePlusPlugin implements
 
                 // remove from connected devices
                 mConnectedDevices.remove(remoteId);
+
+                // remove from currently connecting devices
+                mCurrentlyConnectingDevices.remove(remoteId);
 
                 // we cannot call 'close' for autoconnect
                 // because it prevents autoconnect from working

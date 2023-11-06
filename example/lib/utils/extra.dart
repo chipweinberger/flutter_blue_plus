@@ -2,38 +2,50 @@ import 'utils.dart';
 
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
-final Map<DeviceIdentifier, StreamControllerReemit<bool>> _global = {};
+final Map<DeviceIdentifier, StreamControllerReemit<bool>> _cglobal = {};
+final Map<DeviceIdentifier, StreamControllerReemit<bool>> _dglobal = {};
 
 /// connect & disconnect + update stream
 extension Extra on BluetoothDevice {
   // convenience
-  StreamControllerReemit<bool> get _stream {
-    _global[remoteId] ??= StreamControllerReemit(initialValue: false);
-    return _global[remoteId]!;
+  StreamControllerReemit<bool> get _cstream {
+    _cglobal[remoteId] ??= StreamControllerReemit(initialValue: false);
+    return _cglobal[remoteId]!;
+  }
+
+  // convenience
+  StreamControllerReemit<bool> get _dstream {
+    _dglobal[remoteId] ??= StreamControllerReemit(initialValue: false);
+    return _dglobal[remoteId]!;
   }
 
   // get stream
-  Stream<bool> get isConnectingOrDisconnecting {
-    return _stream.stream;
+  Stream<bool> get isConnecting {
+    return _cstream.stream;
+  }
+
+  // get stream
+  Stream<bool> get isDisconnecting {
+    return _dstream.stream;
   }
 
   // connect & update stream
   Future<void> connectAndUpdateStream() async {
-    _stream.add(true);
+    _cstream.add(true);
     try {
-      await connect();
+      await connect(mtu: null);
     } finally {
-      _stream.add(false);
+      _cstream.add(false);
     }
   }
 
   // disconnect & update stream
-  Future<void> disconnectAndUpdateStream() async {
-    _stream.add(true);
+  Future<void> disconnectAndUpdateStream({bool queue = true}) async {
+    _dstream.add(true);
     try {
-      await disconnect();
+      await disconnect(queue: queue);
     } finally {
-      _stream.add(false);
+      _dstream.add(false);
     }
   }
 }
