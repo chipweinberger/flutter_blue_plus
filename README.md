@@ -553,9 +553,9 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 | read               | :white_check_mark: | :white_check_mark: | :fire: | Retrieves the value of the characteristic                      |
 | write              | :white_check_mark: | :white_check_mark: | :fire: | Writes the value of the characteristic                         |
 | setNotifyValue     | :white_check_mark: | :white_check_mark: | :fire: | Sets notifications or indications on the characteristic        |
-| isNotifying        | :white_check_mark: | :white_check_mark: |        | Are notifications or indications currently enabled             |
+| isNotifying      ⚡ | :white_check_mark: | :white_check_mark: |        | Are notifications or indications currently enabled             |
 | onValueReceived 🌀 | :white_check_mark: | :white_check_mark: |        | Stream of characteristic value updates received from the device|
-| lastValue          | :white_check_mark: | :white_check_mark: |        | The most recent value of the characteristic                    |
+| lastValue        ⚡ | :white_check_mark: | :white_check_mark: |        | The most recent value of the characteristic                    |
 | lastValueStream 🌀 | :white_check_mark: | :white_check_mark: |        | Stream of onValueReceived + writes                             |
 
 ### BluetoothDescriptor API
