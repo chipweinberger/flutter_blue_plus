@@ -1,3 +1,7 @@
+## 1.26.1
+* **[Feature]** add support for canceling an in progress connection using `device.disconnect`
+* **[Fix]** connection timeouts did not actually cancel the connection attempt
+
 ## 1.22.1 to 1.26.0
 These releases changed multiple things but then changed them back. For brevity, here are the actual changes:
 * **[Behavior Change]** android: listen to Services Changed characteristic to match iOS behavior
