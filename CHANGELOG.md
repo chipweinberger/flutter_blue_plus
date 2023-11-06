@@ -1,3 +1,8 @@
+## 1.26.3
+* **[Add]** `events.onReadRssi`
+* **[Add]** `events.onCharacteristicWritten`
+* **[Add]** `events.onDescriptorWritten`
+
 ## 1.26.2
 * **[Fix]** android: close gatt after canceling an in-progress connnection
 * **[Improve]** android: wait until bonding completes for better reliability
