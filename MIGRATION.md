@@ -191,3 +191,9 @@ These releases changed multiple things but then changed them back. For brevity, 
 * **[Rename]** `device.onServicesChanged` -> `device.onServicesReset`
 * **[Remove]** `device.onNameChanged`, in favor of only exposing `events.onNameChanged`
 * **[Rename]** events api: most functions & classes were renamed for consistency
+
+## 1.27.0
+
+* **[Breaking Change]** scanning: `continousUpdates` is now false by default - it is not typically needed & hurts perf. 
+
+If your app uses `startScan.removeIfGone`, or your app continually checks the value of `scanResult.timestamp` or `scanResult.rssi`, then you will need to explicitly set `continousUpdates` to true.

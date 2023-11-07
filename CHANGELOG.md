@@ -1,3 +1,7 @@
+## 1.27.0
+This release improves the default scanning behavior.
+* **[Breaking Change]** scanning: make `continousUpdates` false by default - it is not typically needed & hurts perf. If your app uses `startScan.removeIfGone`, or your app continually checks the value of `scanResult.timestamp` or `scanResult.rssi`, then you will need to explicitly set `continousUpdates` to true.
+
 ## 1.26.6
 * **[Fix]** android: scanning would not work if `continuousUpdates` was false 
 
