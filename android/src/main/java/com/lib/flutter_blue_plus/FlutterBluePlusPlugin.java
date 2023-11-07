@@ -103,6 +103,7 @@ public class FlutterBluePlusPlugin implements
     private final Map<String, Boolean> mAutoConnect = new ConcurrentHashMap<>();
     private final Map<String, String> mWriteChr = new ConcurrentHashMap<>();
     private final Map<String, String> mWriteDesc = new ConcurrentHashMap<>();
+    private final Map<String, BluetoothDevice> mScanSeen = new ConcurrentHashMap<>();
     private HashMap<String, Object> mScanFilters = new HashMap<String, Object>();
     
     private final Map<Integer, OperationOnPermission> operationsOnPermission = new HashMap<>();
@@ -468,6 +469,10 @@ public class FlutterBluePlusPlugin implements
                             int cbt = continuousUpdates ? 
                                 ScanSettings.CALLBACK_TYPE_ALL_MATCHES :
                                 ScanSettings.CALLBACK_TYPE_FIRST_MATCH;
+                            // 'first match' requires filters
+                            if (withServices.size() + withRemoteIds.size() + withNames.size() == 0) {
+                                cbt = ScanSettings.CALLBACK_TYPE_ALL_MATCHES;
+                            }
                             builder.setCallbackType(cbt);
                         }
                         ScanSettings settings = builder.build();
@@ -493,8 +498,11 @@ public class FlutterBluePlusPlugin implements
                             filters.add(f);
                         }
 
-                        // remember scan filters for later
+                        // remember for later
                         mScanFilters = data;
+
+                        // clear seen devices
+                        mScanSeen.clear();
 
                         scanner.startScan(filters, settings, getScanCallback());
 
@@ -1707,6 +1715,17 @@ public class FlutterBluePlusPlugin implements
 
                     BluetoothDevice device = result.getDevice();
                     String remoteId = device.getAddress();
+
+                    // already saw this device?
+                    boolean alreadySeen = mScanSeen.containsKey(remoteId);
+
+                    // add to seen devices
+                    mScanSeen.put(remoteId, device);
+
+                    // filter seen devices?
+                    if (alreadySeen && !(boolean) mScanFilters.get("continuous_updates")) {
+                        return;
+                    }
 
                     // filter keywords
                     if (result != null && result.getScanRecord() != null) {
