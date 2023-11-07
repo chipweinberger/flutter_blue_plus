@@ -103,8 +103,10 @@ public class FlutterBluePlusPlugin implements
     private final Map<String, Boolean> mAutoConnect = new ConcurrentHashMap<>();
     private final Map<String, String> mWriteChr = new ConcurrentHashMap<>();
     private final Map<String, String> mWriteDesc = new ConcurrentHashMap<>();
-    private int lastEventId = 1452;
+    private HashMap<String, Object> mScanFilters = new HashMap<String, Object>();
+    
     private final Map<Integer, OperationOnPermission> operationsOnPermission = new HashMap<>();
+    private int lastEventId = 1452;
 
     private final int enableBluetoothRequestCode = 1879842617;
 
@@ -420,15 +422,16 @@ public class FlutterBluePlusPlugin implements
 
                     // see: BmScanSettings
                     HashMap<String, Object> data = call.arguments();
-                    List<String> serviceUuids = (List<String>) data.get("service_uuids");
-                    List<String> macAddresses = (List<String>) data.get("mac_addresses");
-                    boolean allowDuplicates =        (boolean) data.get("allow_duplicates");
-                    int scanMode =                       (int) data.get("android_scan_mode");
-                    boolean usesFineLocation =       (boolean) data.get("android_uses_fine_location");
+                    List<String> withServices =  (List<String>) data.get("with_services");
+                    List<String> withRemoteIds = (List<String>) data.get("with_remote_ids");
+                    List<String> withNames =     (List<String>) data.get("with_names");
+                    boolean continuousUpdates =       (boolean) data.get("continuous_updates");
+                    int androidScanMode =                 (int) data.get("android_scan_mode");
+                    boolean androidUsesFineLocation = (boolean) data.get("android_uses_fine_location");
 
                     if (Build.VERSION.SDK_INT >= 31) { // Android 12 (October 2021)
                         permissions.add(Manifest.permission.BLUETOOTH_SCAN);
-                        if (usesFineLocation) {
+                        if (androidUsesFineLocation) {
                             permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
                         }
                         // it is unclear why this is needed, but some phones throw a
@@ -454,31 +457,44 @@ public class FlutterBluePlusPlugin implements
                             return;
                         }
 
-                        ScanSettings settings;
+                        // build scan settings
+                        ScanSettings.Builder builder = new ScanSettings.Builder();
+                        builder.setScanMode(androidScanMode);
                         if (Build.VERSION.SDK_INT >= 26) { // Android 8.0 (August 2017)
-                            settings = new ScanSettings.Builder()
-                                .setPhy(ScanSettings.PHY_LE_ALL_SUPPORTED)
-                                .setLegacy(false)
-                                .setScanMode(scanMode)
-                                .build();
-                        } else {
-                            settings = new ScanSettings.Builder()
-                                .setScanMode(scanMode).build();
+                            builder.setPhy(ScanSettings.PHY_LE_ALL_SUPPORTED);
+                            builder.setLegacy(false);
                         }
-
-                        List<ScanFilter> filters = new ArrayList<>();
+                        if (Build.VERSION.SDK_INT >= 23) { // Android 6.0 (October 2015)
+                            int cbt = continuousUpdates ? 
+                                ScanSettings.CALLBACK_TYPE_ALL_MATCHES :
+                                ScanSettings.CALLBACK_TYPE_FIRST_MATCH;
+                            builder.setCallbackType(cbt);
+                        }
+                        ScanSettings settings = builder.build();
                         
-                        for (int i = 0; i < macAddresses.size(); i++) {
-                            String macAddress = macAddresses.get(i);
-                            ScanFilter f = new ScanFilter.Builder().setDeviceAddress(macAddress).build();
-                            filters.add(f);
-                        }
+                        // scan filters
+                        List<ScanFilter> filters = new ArrayList<>();
 
-                        for (int i = 0; i < serviceUuids.size(); i++) {
-                            String uuid = serviceUuids.get(i);
+                        for (int i = 0; i < withServices.size(); i++) {
+                            String uuid = withServices.get(i);
                             ScanFilter f = new ScanFilter.Builder().setServiceUuid(ParcelUuid.fromString(uuid)).build();
                             filters.add(f);
                         }
+                        
+                        for (int i = 0; i < withRemoteIds.size(); i++) {
+                            String address = withRemoteIds.get(i);
+                            ScanFilter f = new ScanFilter.Builder().setDeviceAddress(address).build();
+                            filters.add(f);
+                        }
+
+                        for (int i = 0; i < withNames.size(); i++) {
+                            String name = withNames.get(i);
+                            ScanFilter f = new ScanFilter.Builder().setDeviceName(name).build();
+                            filters.add(f);
+                        }
+
+                        // remember scan filters for later
+                        mScanFilters = data;
 
                         scanner.startScan(filters, settings, getScanCallback());
 
@@ -1471,6 +1487,21 @@ public class FlutterBluePlusPlugin implements
         return null;
     }
 
+    private boolean filterKeywords(List<String> keywords, String target) {
+        if (keywords.isEmpty()) {
+            return true;
+        }
+        if (target == null) {
+            return false;
+        }
+        for (String k : keywords) {
+            if (target.contains(k)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private int getMaxPayload(String remoteId, int writeType, boolean allowLongWrite)
     {
         // 512 this comes from the BLE spec. Characteritics should not 
@@ -1667,6 +1698,7 @@ public class FlutterBluePlusPlugin implements
             scanCallback = new ScanCallback()
             {
                 @Override
+                @SuppressWarnings("unchecked") // type safety uses bluetooth_msgs.dart
                 public void onScanResult(int callbackType, ScanResult result)
                 {
                     log(LogLevel.VERBOSE, "onScanResult");
@@ -1675,6 +1707,15 @@ public class FlutterBluePlusPlugin implements
 
                     BluetoothDevice device = result.getDevice();
                     String remoteId = device.getAddress();
+
+                    // filter keywords
+                    if (result != null && result.getScanRecord() != null) {
+                        String name = result.getScanRecord().getDeviceName();
+                        List<String> keywords = (List<String>) mScanFilters.get("with_keywords");
+                        if (filterKeywords(keywords, name) == false) {
+                            return;
+                        }
+                    }
 
                     // see BmScanResult
                     HashMap<String, Object> sr = bmScanResult(device, result);

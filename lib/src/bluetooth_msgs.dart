@@ -87,31 +87,31 @@ class BmAdvertisementData {
 }
 
 class BmScanSettings {
-  final List<Guid> serviceUuids;
-  final List<String> macAddresses;
-  final bool allowDuplicates;
+  final List<Guid> withServices;
+  final List<String> withRemoteIds;
+  final List<String> withNames;
+  final List<String> withKeywords;
+  final bool continuousUpdates;
   final int androidScanMode;
   final bool androidUsesFineLocation;
 
   BmScanSettings({
-    required this.serviceUuids,
-    required this.macAddresses,
-    required this.allowDuplicates,
+    required this.withServices,
+    required this.withRemoteIds,
+    required this.withNames,
+    required this.withKeywords,
+    required this.continuousUpdates,
     required this.androidScanMode,
     required this.androidUsesFineLocation,
   });
 
   Map<dynamic, dynamic> toMap() {
-    // Cast serviceUuid to strings
-    List<String> s = [];
-    for (var val in serviceUuids) {
-      s.add(val.toString());
-    }
-
     final Map<dynamic, dynamic> data = {};
-    data['service_uuids'] = s;
-    data['mac_addresses'] = macAddresses;
-    data['allow_duplicates'] = allowDuplicates;
+    data['with_services'] = withServices.map((s) => s.toString()).toList();
+    data['with_remote_ids'] = withRemoteIds;
+    data['with_names'] = withNames;
+    data['with_keywords'] = withKeywords;
+    data['continuous_updates'] = continuousUpdates;
     data['android_scan_mode'] = androidScanMode;
     data['android_uses_fine_location'] = androidUsesFineLocation;
     return data;
@@ -554,7 +554,6 @@ class BmWriteDescriptorRequest {
     return data;
   }
 }
-
 
 class BmDescriptorData {
   final String remoteId;

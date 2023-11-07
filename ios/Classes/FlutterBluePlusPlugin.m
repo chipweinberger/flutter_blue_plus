@@ -62,6 +62,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 @property(nonatomic) NSMutableDictionary *peripheralMtu;
 @property(nonatomic) NSMutableDictionary *writeChrs;
 @property(nonatomic) NSMutableDictionary *writeDescs;
+@property(nonatomic) NSDictionary *scanFilters;
 @property(nonatomic) NSTimer *checkForMtuChangesTimer;
 @property(nonatomic) LogLevel logLevel;
 @end
@@ -229,25 +230,28 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         else if ([@"startScan" isEqualToString:call.method])
         {
             // See BmScanSettings
-            NSDictionary *args = (NSDictionary*)call.arguments;
-            NSArray   *serviceUuids    = args[@"service_uuids"];
-            NSNumber  *allowDuplicates = args[@"allow_duplicates"];
+            NSDictionary *args = (NSDictionary*) call.arguments;
+            NSArray   *withServices    = args[@"with_services"];
+            NSNumber  *continuousUpdates = args[@"continuous_updates"];
 
-            // UUID Service filter
-            NSArray *uuids = [NSArray array];
-            for (int i = 0; i < [serviceUuids count]; i++) {
-                NSString *u = serviceUuids[i];
-                uuids = [uuids arrayByAddingObject:[CBUUID UUIDWithString:u]];
-            }
+            // remember this for later
+            self.scanFilters = args;
 
-            // Allow duplicates?
+            // allowDuplicates?
             NSMutableDictionary<NSString *, id> *scanOpts = [NSMutableDictionary new];
-            if ([allowDuplicates boolValue]) {
+            if ([continuousUpdates boolValue]) {
                 [scanOpts setObject:[NSNumber numberWithBool:YES] forKey:CBCentralManagerScanOptionAllowDuplicatesKey];
             }
 
-            // Start scanning
-            [self->_centralManager scanForPeripheralsWithServices:uuids options:scanOpts];
+            // services filter
+            NSArray *services = [NSArray array];
+            for (int i = 0; i < [withServices count]; i++) {
+                NSString *uuid = withServices[i];
+                services = [services arrayByAddingObject:[CBUUID UUIDWithString:uuid]];
+            }
+
+            // start scanning
+            [self->_centralManager scanForPeripheralsWithServices:services options:scanOpts];
 
             result(@YES);
         }
@@ -1002,6 +1006,23 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     
     [self.knownPeripherals setObject:peripheral forKey:remoteId];
 
+    NSString *localName = advertisementData[CBAdvertisementDataLocalNameKey];
+
+    // remoteIds
+    if (![self filterRemoteIds:self.scanFilters[@"with_remote_ids"] target:remoteId]) {
+        return;
+    }
+
+    // names
+    if (![self filterNames:self.scanFilters[@"with_names"] target:localName]) {
+        return;
+    }
+
+    // keywords
+    if (![self filterKeywords:self.scanFilters[@"with_keywords"] target:localName]) {
+        return;
+    }
+
     // See BmScanResult
     NSDictionary *result = [self bmScanResult:peripheral advertisementData:advertisementData RSSI:RSSI];
 
@@ -1681,6 +1702,57 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 // ██    ██    ██     ██  ██       ███████ 
 // ██    ██    ██     ██  ██            ██ 
 //  ██████     ██     ██  ███████  ███████ 
+
+- (BOOL)filterKeywords:(NSArray<NSString *> *)keywords
+                target:(NSString *)target
+{
+    if (keywords.count == 0) {
+        return YES;
+    }
+    if (target == nil) {
+        return NO;
+    }
+    for (NSString *k in keywords) {
+        if ([target rangeOfString:k].location != NSNotFound) {
+            return YES;
+        }
+    }
+    return NO;
+}
+
+- (BOOL)filterNames:(NSArray<NSString *> *)names
+                target:(NSString *)target
+{
+    if (names.count == 0) {
+        return YES;
+    }
+    if (target == nil) {
+        return NO;
+    }
+    for (NSString *n in names) {
+        if ([target isEqualToString:n]) {
+            return YES;
+        }
+    }
+    return NO;
+}
+
+- (BOOL)filterRemoteIds:(NSArray<NSString *> *)remoteIds
+                target:(NSString *)target
+{
+    if (remoteIds.count == 0) {
+        return YES;
+    }
+    if (target == nil) {
+        return NO;
+    }
+    for (NSString *r in remoteIds) {
+        if ([[target lowercaseString] isEqualToString:[r lowercaseString]]) {
+            return YES;
+        }
+    }
+    return NO;
+}
 
 - (NSString *)convertDataToHex:(NSData *)data 
 {

@@ -153,18 +153,32 @@ class FlutterBluePlus {
   }
 
   /// Start a scan, and return a stream of results
+  ///   - [withServices] filter by advertised services
+  ///   - [withRemoteIds] filter for known remoteIds (iOS uses 128-bit ids, android uses withRemoteIds)
+  ///   - [withNames] filter by advertised names (exact match)
+  ///   - [withKeywords] filter by advertised names (match any substring)
   ///   - [timeout] calls stopScan after a specified duration
   ///   - [removeIfGone] if true, remove devices after they've stopped advertising for X duration
+  ///   - [continuousUpdates] if true, 'lastSeen' & 'rssi' are continually updated. This takes more power.
   ///   - [oneByOne] if true, we will stream every advertistment one by one, including duplicates.
-  ///    If false, we deduplicate the advertisements, and return a list of devices.
+  ///                If false, we deduplicate the advertisements, and return a list of devices.
+  ///   - [androidScanMode] choose the android scan mode to use when scanning
   ///   - [androidUsesFineLocation] request ACCESS_FINE_LOCATION permission at runtime
   static Future<void> startScan({
     List<Guid> withServices = const [],
+    List<String> withRemoteIds = const [],
+    List<String> withNames = const [],
+    List<String> withKeywords = const [],
     Duration? timeout,
     Duration? removeIfGone,
+    bool continuousUpdates = true,
     bool oneByOne = false,
+    AndroidScanMode androidScanMode = AndroidScanMode.lowLatency,
     bool androidUsesFineLocation = false,
   }) async {
+    // check args
+    assert(removeIfGone == null || continuousUpdates, "removeIfGone requires continuousUpdates");
+
     // stop existing scan
     if (_isScanning.latestValue == true) {
       await stopScan();
@@ -174,10 +188,12 @@ class FlutterBluePlus {
     _isScanning.add(true);
 
     var settings = BmScanSettings(
-        serviceUuids: withServices,
-        macAddresses: [],
-        allowDuplicates: true,
-        androidScanMode: ScanMode.lowLatency.value,
+        withServices: withServices,
+        withRemoteIds: withRemoteIds,
+        withNames: withNames,
+        withKeywords: withKeywords,
+        continuousUpdates: continuousUpdates,
+        androidScanMode: androidScanMode.value,
         androidUsesFineLocation: androidUsesFineLocation);
 
     Stream<BmScanResponse> responseStream = FlutterBluePlus._methodStream.stream
@@ -195,6 +211,9 @@ class FlutterBluePlus {
     late Stream<BmScanResponse?> outputStream = removeIfGone != null
         ? _mergeStreams([_scanBuffer.stream, Stream.periodic(Duration(milliseconds: 250))])
         : _scanBuffer.stream;
+
+    // start by pushing an empty array
+    _scanResultsList.add([]);
 
     List<ScanResult> output = [];
 
@@ -473,14 +492,7 @@ class FlutterBluePlus {
   static Future<bool> get isAvailable async => await isSupported;
 
   @Deprecated('removed. read MIGRATION.md for simple alternatives')
-  static Stream<ScanResult> scan(
-          {ScanMode scanMode = ScanMode.lowLatency,
-          List<Guid> withServices = const [],
-          List<String> macAddresses = const [],
-          Duration? timeout,
-          bool allowDuplicates = false,
-          bool androidUsesFineLocation = false}) =>
-      throw Exception;
+  static Stream<ScanResult> scan() => throw Exception;
 }
 
 /// Log levels for FlutterBlue
@@ -493,12 +505,12 @@ enum LogLevel {
   verbose, //5
 }
 
-class ScanMode {
-  const ScanMode(this.value);
-  static const lowPower = ScanMode(0);
-  static const balanced = ScanMode(1);
-  static const lowLatency = ScanMode(2);
-  static const opportunistic = ScanMode(-1);
+class AndroidScanMode {
+  const AndroidScanMode(this.value);
+  static const lowPower = AndroidScanMode(0);
+  static const balanced = AndroidScanMode(1);
+  static const lowLatency = AndroidScanMode(2);
+  static const opportunistic = AndroidScanMode(-1);
   final int value;
 }
 
