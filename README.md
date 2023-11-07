@@ -131,15 +131,10 @@ If your device is not found, see [Common Problems](#common-problems).
 
 ```dart
 // Setup Listener for scan results.
-// device not found? see "Common Problems" in the README
-Set<DeviceIdentifier> seen = {};
-var subscription = FlutterBluePlus.scanResults.listen(
-    (results) {
-        for (ScanResult r in results) {
-            if (seen.contains(r.device.remoteId) == false) {
-                print('${r.device.remoteId}: "${r.advertisementData.localName}" found! rssi: ${r.rssi}');
-                seen.add(r.device.remoteId);
-            }
+var subscription = FlutterBluePlus.scanResults.listen((results) {
+        if (results.isNotEmpty) {
+            ScanResult r = results.last; // the most recently found device
+            print('${r.device.remoteId}: "${r.advertisementData.localName}" found!');
         }
     },
     onError(e) => print(e);

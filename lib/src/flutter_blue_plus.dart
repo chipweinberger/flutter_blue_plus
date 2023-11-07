@@ -171,7 +171,7 @@ class FlutterBluePlus {
     List<String> withKeywords = const [],
     Duration? timeout,
     Duration? removeIfGone,
-    bool continuousUpdates = true,
+    bool continuousUpdates = false,
     bool oneByOne = false,
     AndroidScanMode androidScanMode = AndroidScanMode.lowLatency,
     bool androidUsesFineLocation = false,

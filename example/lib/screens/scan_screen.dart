@@ -52,7 +52,7 @@ class _ScanScreenState extends State<ScanScreen> {
 
   Future onScanPressed() async {
     try {
-      await FlutterBluePlus.startScan(timeout: const Duration(seconds: 15));
+      await FlutterBluePlus.startScan(timeout: const Duration(seconds: 15), continuousUpdates: true);
     } catch (e) {
       Snackbar.show(ABC.b, prettyException("Start Scan Error:", e), success: false);
     }

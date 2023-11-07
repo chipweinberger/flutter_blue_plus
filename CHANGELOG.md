@@ -1,5 +1,5 @@
 ## 1.26.6
-* **[Fix]** android scanning: if `continuousUpdates` was false scanning would not work
+* **[Fix]** android: scanning would not work if `continuousUpdates` was false 
 
 ## 1.26.5
 * **[Add]** scanning: `withRemoteIds`, `withNames`, `withKeywords` filters
