@@ -1,3 +1,6 @@
+## 1.26.6
+* **[Fix]** android scanning: if `continuousUpdates` was false scanning would not work
+
 ## 1.26.5
 * **[Add]** scanning: `withRemoteIds`, `withNames`, `withKeywords` filters
 * **[Add]** scanning: expose `androidScanMode` again
