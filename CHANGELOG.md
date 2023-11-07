@@ -1,3 +1,8 @@
+## 1.26.5
+* **[Add]** scanning: `withRemoteIds`, `withNames`, `withKeywords` filters
+* **[Add]** scanning: expose `androidScanMode` again
+* **[Add]** scanning: `continousUpdates` option replaces former `allowDuplicates` option
+
 ## 1.26.4
 * **[Add]** cancelWhenDisconnected: option to cancel on *next* disconnection
 

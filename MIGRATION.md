@@ -153,26 +153,6 @@ await FlutterBluePlus.startScan(timeout: Duration(seconds:15));
 await FlutterBluePlus.isScanning.where((value) => value == false).first;
 ```
 
-### `FlutterBluePlus.startScan` doesn't support macAddress filtering anymore
-
-You can easily filter by mac address yourself. 
-
-```
-Stream<BluetoothDevice?> myDeviceStream = FlutterBluePlus.scanResults
-    .map((list) => list.where(device) => device.remoteId == Guid("be6e0363-906a-4af6-9417-4b6085eb2e94"))
-    .where((list) => list.isNotEmpty)
-    .map((list) => list.first)
-
-// start listening before we call startScan so we do not miss the result
-Future<BluetoothDevice?> myDeviceFuture = myDeviceStream.first
-    .timeout(Duration(seconds: 10))
-    .catchError((error) => null);
-
-await FlutterBluePlus.startScan(timeout: Duration(seconds: 10));
-
-BluetoothDevice? myDevice = await myDeviceFuture;
-```
-
 ## 1.16.0
 
 * **renamed:** `BluetoothDevice.localName` -> `platformName`
