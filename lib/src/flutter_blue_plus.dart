@@ -154,13 +154,13 @@ class FlutterBluePlus {
 
   /// Start a scan, and return a stream of results
   ///   - [withServices] filter by advertised services
-  ///   - [withRemoteIds] filter for known remoteIds (iOS uses 128-bit ids, android uses withRemoteIds)
+  ///   - [withRemoteIds] filter for known remoteIds (iOS: uses 128-bit guid, android: uses 48-bit mac address)
   ///   - [withNames] filter by advertised names (exact match)
-  ///   - [withKeywords] filter by advertised names (match any substring)
+  ///   - [withKeywords] filter by advertised names (matches any substring)
   ///   - [timeout] calls stopScan after a specified duration
   ///   - [removeIfGone] if true, remove devices after they've stopped advertising for X duration
   ///   - [continuousUpdates] if true, 'lastSeen' & 'rssi' are continually updated. This takes more power.
-  ///   - [oneByOne] if true, we will stream every advertistment one by one, including duplicates.
+  ///   - [oneByOne] if true, we will stream every advertistment one by one, possibly including duplicates.
   ///                If false, we deduplicate the advertisements, and return a list of devices.
   ///   - [androidScanMode] choose the android scan mode to use when scanning
   ///   - [androidUsesFineLocation] request ACCESS_FINE_LOCATION permission at runtime
