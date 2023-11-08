@@ -1,3 +1,6 @@
+## 1.27.1
+* **[Add]** android: add forceIndications option to setNotifyValue
+
 ## 1.27.0
 This release improves the default scanning behavior.
 * **[Breaking Change]** scanning: make `continousUpdates` false by default - it is not typically needed & hurts perf. If your app uses `startScan.removeIfGone`, or your app continually checks the value of `scanResult.timestamp` or `scanResult.rssi`, then you will need to explicitly set `continousUpdates` to true.
