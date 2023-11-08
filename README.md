@@ -157,8 +157,9 @@ subscription.cancel();
 device.connectionState.listen((BluetoothConnectionState state) async {
     if (state == BluetoothConnectionState.disconnected) {
         // 1. typically, start a periodic timer that tries to 
-        //    periodically reconnect, or just call connect() again right now
+        //    reconnect, or just call connect() again right now
         // 2. you must always re-discover services after disconnection!
+        print("${device.disconnectReasonCode} ${device.disconnectReasonDescription});
     }
 });
 
@@ -264,9 +265,9 @@ for(BluetoothDescriptor d in descriptors) {
 await d.write([0x12, 0x34])
 ```
 
-### Set notifications and listen to changes
+### Subscribe to a characteristic
 
-If `onValueReceived` is never called, see [Common Problems](#common-problems) in the README.
+// If `onValueReceived` is never called, see [Common Problems](#common-problems) in the README.
 
 ```dart
 final chrSubscription = characteristic.onValueReceived.listen((value) {
@@ -278,7 +279,9 @@ final chrSubscription = characteristic.onValueReceived.listen((value) {
 // cleanup: cancel subscription when disconnected
 device.cancelWhenDisconnected(chrSubscription);
 
-// enable notifications
+// subscribe
+// Note: If a characteristic supports both **notifications** and **indications**,
+// it will default to **notifications**. This matches how CoreBluetooth works on iOS.
 await characteristic.setNotifyValue(true);
 ```
 
