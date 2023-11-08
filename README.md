@@ -251,20 +251,6 @@ extension splitWrite on BluetoothCharacteristic {
 }
 ```
 
-### Read and write descriptors
-
-```dart
-// Reads all descriptors
-var descriptors = characteristic.descriptors;
-for(BluetoothDescriptor d in descriptors) {
-    List<int> value = await d.read();
-    print(value);
-}
-
-// Writes to a descriptor
-await d.write([0x12, 0x34])
-```
-
 ### Subscribe to a characteristic
 
 // If `onValueReceived` is never called, see [Common Problems](#common-problems) in the README.
@@ -305,6 +291,20 @@ device.cancelWhenDisconnected(chrSubscription);
 
 // enable notifications
 await characteristic.setNotifyValue(true);
+```
+
+### Read and write descriptors
+
+```dart
+// Reads all descriptors
+var descriptors = characteristic.descriptors;
+for(BluetoothDescriptor d in descriptors) {
+    List<int> value = await d.read();
+    print(value);
+}
+
+// Writes to a descriptor
+await d.write([0x12, 0x34])
 ```
 
 ### Get Connected Devices
