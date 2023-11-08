@@ -166,8 +166,8 @@ class BluetoothCharacteristic {
 
     // check connected
     if (device.isConnected == false) {
-      throw FlutterBluePlusException(ErrorPlatform.fbp, "writeCharacteristic", FbpErrorCode.deviceIsDisconnected.index,
-          "device is not connected");
+      throw FlutterBluePlusException(
+          ErrorPlatform.fbp, "writeCharacteristic", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
     // Only allow a single ble operation to be underway at a time
@@ -222,12 +222,18 @@ class BluetoothCharacteristic {
 
   /// Sets notifications or indications for the characteristic.
   ///   - If a characteristic supports both notifications and indications,
-  ///     we'll use notifications. This is a limitation of CoreBluetooth on iOS.
-  Future<bool> setNotifyValue(bool notify, {int timeout = 15}) async {
+  ///     we use notifications. This is a limitation of CoreBluetooth on iOS.
+  ///   - [forceIndications] Android Only. force indications to be used instead of notifications.
+  Future<bool> setNotifyValue(bool notify, {int timeout = 15, bool forceIndications = false}) async {
     // check connected
     if (device.isConnected == false) {
       throw FlutterBluePlusException(
           ErrorPlatform.fbp, "setNotifyValue", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
+    }
+
+    // check
+    if (Platform.isMacOS || Platform.isIOS) {
+      assert(forceIndications == false, "iOS & macOS do not support forcing indications");
     }
 
     // Only allow a single ble operation to be underway at a time
@@ -240,6 +246,7 @@ class BluetoothCharacteristic {
         serviceUuid: serviceUuid,
         secondaryServiceUuid: null,
         characteristicUuid: characteristicUuid,
+        forceIndications: forceIndications,
         enable: notify,
       );
 

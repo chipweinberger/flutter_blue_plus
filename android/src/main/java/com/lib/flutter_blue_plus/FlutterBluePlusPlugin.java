@@ -965,6 +965,7 @@ public class FlutterBluePlusPlugin implements
                     String serviceUuid =          (String) data.get("service_uuid");
                     String secondaryServiceUuid = (String) data.get("secondary_service_uuid");
                     String characteristicUuid =   (String) data.get("characteristic_uuid");
+                    boolean forceIndications =   (boolean) data.get("force_indications");
                     boolean enable =             (boolean) data.get("enable");
 
                     // check connection
@@ -1019,10 +1020,17 @@ public class FlutterBluePlusPlugin implements
                             break;
                         }
 
+                        if (forceIndications && !canIndicate) {
+                            result.error("setNotifyValue","INDICATE not supported by this BLE characteristic", null);
+                            break;
+                        }
+
                         // If a characteristic supports both notifications and indications,
-                        // we'll use notifications. This matches how CoreBluetooth works on iOS.
-                        if(canIndicate) {descriptorValue = BluetoothGattDescriptor.ENABLE_INDICATION_VALUE;}
-                        if(canNotify)   {descriptorValue = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE;}
+                        // we use notifications. This matches how CoreBluetooth works on iOS.
+                        // Except of course, if forceIndications is enabled.
+                        if(canIndicate)      {descriptorValue = BluetoothGattDescriptor.ENABLE_INDICATION_VALUE;}
+                        if(canNotify)        {descriptorValue = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE;}
+                        if(forceIndications) {descriptorValue = BluetoothGattDescriptor.ENABLE_INDICATION_VALUE;}
 
                     } else {
                         descriptorValue  = BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE;

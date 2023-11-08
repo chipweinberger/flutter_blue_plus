@@ -598,6 +598,7 @@ class BmSetNotifyValueRequest {
   final Guid serviceUuid;
   final Guid? secondaryServiceUuid;
   final Guid characteristicUuid;
+  final bool forceIndications;
   final bool enable;
 
   BmSetNotifyValueRequest({
@@ -605,6 +606,7 @@ class BmSetNotifyValueRequest {
     required this.serviceUuid,
     required this.secondaryServiceUuid,
     required this.characteristicUuid,
+    required this.forceIndications,
     required this.enable,
   });
 
@@ -614,6 +616,7 @@ class BmSetNotifyValueRequest {
     data['service_uuid'] = serviceUuid.toString();
     data['secondary_service_uuid'] = secondaryServiceUuid?.toString();
     data['characteristic_uuid'] = characteristicUuid.toString();
+    data['force_indications'] = forceIndications;
     data['enable'] = enable;
     return data;
   }
