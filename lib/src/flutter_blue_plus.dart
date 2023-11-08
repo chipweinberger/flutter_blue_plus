@@ -154,7 +154,7 @@ class FlutterBluePlus {
 
   /// Start a scan, and return a stream of results
   ///   - [withServices] filter by advertised services
-  ///   - [withRemoteIds] filter for known remoteIds (iOS: uses 128-bit guid, android: uses 48-bit mac address)
+  ///   - [withRemoteIds] filter for known remoteIds (iOS: 128-bit guid, android: 48-bit mac address)
   ///   - [withNames] filter by advertised names (exact match)
   ///   - [withKeywords] filter by advertised names (matches any substring)
   ///   - [timeout] calls stopScan after a specified duration

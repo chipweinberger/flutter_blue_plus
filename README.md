@@ -145,6 +145,9 @@ await FlutterBluePlus.startScan();
 
 // Stop scanning
 await FlutterBluePlus.stopScan();
+
+// cancel to prevent duplicate listeners
+subscription.cancel();
 ```
 
 ### Connect to a device
