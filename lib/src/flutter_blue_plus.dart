@@ -536,17 +536,18 @@ class MsdFilter {
   int manufacturerId;
 
   // filter for this data
-  List<int>? data;
+  List<int> data;
 
   // For any bit in the mask, set it the 1 if it needs to match
   // the one in manufacturer data, otherwise set it to 0.
   // The 'mask' must have the same length as 'data'.
-  List<int>? mask;
+  List<int> mask;
 
-  MsdFilter(this.manufacturerId, {this.data, this.mask});
+  MsdFilter(this.manufacturerId, {this.data = const [], this.mask = const []});
 
   // convert to bmMsg
   BmMsdFilter get _bm {
+    assert(mask.isEmpty || (data.length == mask.length), "mask & data must be same length");
     return BmMsdFilter(manufacturerId, data, mask);
   }
 }
@@ -555,17 +556,18 @@ class ServiceDataFilter {
   Guid service;
 
   // filter for this data
-  List<int>? data;
+  List<int> data;
 
   // For any bit in the mask, set it the 1 if it needs to match
   // the one in service data, otherwise set it to 0.
   // The 'mask' must have the same length as 'data'.
-  List<int>? mask;
+  List<int> mask;
 
-  ServiceDataFilter(this.service, {this.data, this.mask});
+  ServiceDataFilter(this.service, {this.data = const [], this.mask = const []});
 
   // convert to bmMsg
   BmServiceDataFilter get _bm {
+    assert(mask.isEmpty || (data.length == mask.length), "mask & data must be same length");
     return BmServiceDataFilter(service, data, mask);
   }
 }

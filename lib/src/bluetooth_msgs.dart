@@ -44,14 +44,14 @@ class BmMsdFilter {
 
 class BmServiceDataFilter {
   Guid service;
-  List<int>? data;
-  List<int>? mask;
+  List<int> data;
+  List<int> mask;
   BmServiceDataFilter(this.service, this.data, this.mask);
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> map = {};
     map['service'] = service.uuid128;
-    map['data'] = _hexEncode(data ?? []);
-    map['mask'] = _hexEncode(mask ?? []);
+    map['data'] = _hexEncode(data);
+    map['mask'] = _hexEncode(mask);
     return map;
   }
 }
