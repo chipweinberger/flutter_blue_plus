@@ -1744,12 +1744,12 @@ public class FlutterBluePlusPlugin implements
                         }
                     }
 
-                    // see BmScanResult
-                    HashMap<String, Object> sr = bmScanResult(device, result);
+                    // see BmScanAdvertisement
+                    HashMap<String, Object> sAdv = bmScanAdvertisement(device, result);
 
                     // see BmScanResponse
                     HashMap<String, Object> response = new HashMap<>();
-                    response.put("result", sr);
+                    response.put("advertisement", sAdv);
 
                     invokeMethodUIThread("OnScanResponse", response);
                 }
@@ -2111,7 +2111,7 @@ public class FlutterBluePlusPlugin implements
     // ██   ██  ██       ██       ██       ██       ██   ██       ██ 
     // ██   ██  ███████  ███████  ██       ███████  ██   ██  ███████ 
 
-    HashMap<String, Object> bmAdvertisementData(ScanResult result) {
+    HashMap<String, Object> bmScanAdvertisement(BluetoothDevice device, ScanResult result) {
 
         int min = Integer.MIN_VALUE;
 
@@ -2127,7 +2127,7 @@ public class FlutterBluePlusPlugin implements
             connectable = true;
         }
 
-        String                  localName    = adv != null ?  adv.getDeviceName()                : null;
+        String                  advName      = adv != null ?  adv.getDeviceName()                : null;
         int                     txPower      = adv != null ?  adv.getTxPowerLevel()              : min;
         SparseArray<byte[]>     manufData    = adv != null ?  adv.getManufacturerSpecificData()  : null;
         List<ParcelUuid>        serviceUuids = adv != null ?  adv.getServiceUuids()              : null;
@@ -2161,24 +2161,21 @@ public class FlutterBluePlusPlugin implements
             }
         }
 
+        // See: BmScanAdvertisement
         HashMap<String, Object> map = new HashMap<>();
-        map.put("local_name",        localName);
+        map.put("remote_id",         device.getAddress());
+        map.put("platform_name",     device.getName());
+        map.put("adv_name",          advName);
         map.put("connectable",       connectable ? 1 : 0);
         map.put("tx_power_level",    txPower      != min  ? txPower       : null);
         map.put("manufacturer_data", manufData    != null ? manufDataB    : null);
         map.put("service_data",      serviceData  != null ? serviceDataB  : null);
         map.put("service_uuids",     serviceUuids != null ? serviceUuidsB : null);
-        return map;
-    }
-
-    HashMap<String, Object> bmScanResult(BluetoothDevice device, ScanResult result) {
-        HashMap<String, Object> map = new HashMap<>();
-        map.put("device", bmBluetoothDevice(device));
         map.put("rssi", result.getRssi());
-        map.put("advertisement_data", bmAdvertisementData(result));
         return map;
     }
 
+    // See: BmBluetoothDevice
     HashMap<String, Object> bmBluetoothDevice(BluetoothDevice device) {
         HashMap<String, Object> map = new HashMap<>();
         map.put("remote_id", device.getAddress());
@@ -2202,6 +2199,7 @@ public class FlutterBluePlusPlugin implements
             includedServices.add(bmBluetoothService(device, included, gatt));
         }
 
+        // See: BmBluetoothService
         HashMap<String, Object> map = new HashMap<>();
         map.put("remote_id", device.getAddress());
         map.put("service_uuid", uuid128(service.getUuid()));
@@ -2220,6 +2218,7 @@ public class FlutterBluePlusPlugin implements
             descriptors.add(bmBluetoothDescriptor(device, d));
         }
 
+        // See: BmBluetoothCharacteristic
         HashMap<String, Object> map = new HashMap<>();
         map.put("remote_id", device.getAddress());
         map.put("service_uuid", uuid128(pair.primary));
@@ -2230,6 +2229,7 @@ public class FlutterBluePlusPlugin implements
         return map;
     }
 
+    // See: BmBluetoothDescriptor
     HashMap<String, Object> bmBluetoothDescriptor(BluetoothDevice device, BluetoothGattDescriptor descriptor) {
         HashMap<String, Object> map = new HashMap<>();
         map.put("remote_id", device.getAddress());
@@ -2239,6 +2239,7 @@ public class FlutterBluePlusPlugin implements
         return map;
     }
 
+    // See: BmCharacteristicProperties
     HashMap<String, Object> bmCharacteristicProperties(int properties) {
         HashMap<String, Object> props = new HashMap<>();
         props.put("broadcast",                      (properties & 1)   != 0 ? 1 : 0);
@@ -2254,6 +2255,7 @@ public class FlutterBluePlusPlugin implements
         return props;
     }
 
+    // See: BmConnectionStateEnum
     static int bmConnectionStateEnum(int cs) {
         switch (cs) {
             case BluetoothProfile.STATE_DISCONNECTED:  return 0;
@@ -2262,6 +2264,7 @@ public class FlutterBluePlusPlugin implements
         }
     }
 
+    // See: BmAdapterStateEnum
     static int bmAdapterStateEnum(int as) {
         switch (as) {
             case BluetoothAdapter.STATE_OFF:          return 6;
@@ -2272,6 +2275,7 @@ public class FlutterBluePlusPlugin implements
         }
     }
 
+    // See: BmBondStateEnum
     static int bmBondStateEnum(int bs) {
         switch (bs) {
             case BluetoothDevice.BOND_NONE:    return 0;
@@ -2281,6 +2285,7 @@ public class FlutterBluePlusPlugin implements
         }
     }
 
+    // See: BmConnectionPriority
     static int bmConnectionPriorityParse(int value) {
         switch(value) {
             case 0: return BluetoothGatt.CONNECTION_PRIORITY_BALANCED;

@@ -28,64 +28,6 @@ class BmBluetoothAdapterState {
   }
 }
 
-class BmAdvertisementData {
-  final String? localName;
-  final bool connectable;
-  final int? txPowerLevel;
-  final Map<int, List<int>> manufacturerData;
-  final Map<String, List<int>> serviceData;
-
-  // We use strings and not Guid because advertisement UUIDs can
-  // be 32-bit UUIDs, 64-bit, etc i.e. "FE56"
-  List<String> serviceUuids;
-
-  BmAdvertisementData({
-    required this.localName,
-    required this.connectable,
-    required this.txPowerLevel,
-    required this.manufacturerData,
-    required this.serviceData,
-    required this.serviceUuids,
-  });
-
-  factory BmAdvertisementData.fromMap(Map<dynamic, dynamic> json) {
-    // Get raw data
-    var rawManufacturerData = json['manufacturer_data'] ?? {};
-    var rawServiceData = json['service_data'] ?? {};
-    var rawServiceUuids = json['service_uuids'] ?? [];
-
-    // Cast the data to the right type
-    Map<int, List<int>> manufacturerData = {};
-    for (var key in rawManufacturerData.keys) {
-      manufacturerData[key] = _hexDecode(rawManufacturerData[key]);
-    }
-
-    // Cast the data to the right type
-    Map<String, List<int>> serviceData = {};
-    for (var key in rawServiceData.keys) {
-      serviceData[key] = _hexDecode(rawServiceData[key]);
-    }
-
-    // Cast the data to the right type
-    // Note: we use strings and not Guid because advertisement UUIDs can
-    // be 32-bit UUIDs, 64-bit, etc i.e. "FE56"
-    List<String> serviceUuids = [];
-    for (var val in rawServiceUuids) {
-      serviceUuids.add(val);
-    }
-
-    // Construct the BmAdvertisementData
-    return BmAdvertisementData(
-      localName: json['local_name'],
-      connectable: json['connectable'] != 0,
-      txPowerLevel: json['tx_power_level'],
-      manufacturerData: manufacturerData,
-      serviceData: serviceData,
-      serviceUuids: serviceUuids,
-    );
-  }
-}
-
 class BmScanSettings {
   final List<Guid> withServices;
   final List<String> withRemoteIds;
@@ -138,38 +80,81 @@ class BmScanFailed {
   }
 }
 
-class BmScanResult {
-  final BmBluetoothDevice device;
-  final BmAdvertisementData advertisementData;
+class BmScanAdvertisement {
+  final String remoteId;
+  final String? platformName;
+  final String? advName;
+  final bool connectable;
+  final int? txPowerLevel;
+  final Map<int, List<int>> manufacturerData;
+  final Map<String, List<int>> serviceData;
+  final List<String> serviceUuids; // 32, 64, or 128 bit uuid
   final int rssi;
 
-  BmScanResult({
-    required this.device,
-    required this.advertisementData,
+  BmScanAdvertisement({
+    required this.remoteId,
+    required this.platformName,
+    required this.advName,
+    required this.connectable,
+    required this.txPowerLevel,
+    required this.manufacturerData,
+    required this.serviceData,
+    required this.serviceUuids,
     required this.rssi,
   });
 
-  factory BmScanResult.fromMap(Map<dynamic, dynamic> json) {
-    return BmScanResult(
-      device: BmBluetoothDevice.fromMap(json['device']),
-      advertisementData: BmAdvertisementData.fromMap(json['advertisement_data']),
+  factory BmScanAdvertisement.fromMap(Map<dynamic, dynamic> json) {
+    // Get raw data
+    var rawManufacturerData = json['manufacturer_data'] ?? {};
+    var rawServiceData = json['service_data'] ?? {};
+    var rawServiceUuids = json['service_uuids'] ?? [];
+
+    // Cast the data to the right type
+    Map<int, List<int>> manufacturerData = {};
+    for (var key in rawManufacturerData.keys) {
+      manufacturerData[key] = _hexDecode(rawManufacturerData[key]);
+    }
+
+    // Cast the data to the right type
+    Map<String, List<int>> serviceData = {};
+    for (var key in rawServiceData.keys) {
+      serviceData[key] = _hexDecode(rawServiceData[key]);
+    }
+
+    // Cast the data to the right type
+    // Note: we use strings and not Guid because advertisement UUIDs can
+    // be 32-bit UUIDs, 64-bit, etc i.e. "FE56"
+    List<String> serviceUuids = [];
+    for (var val in rawServiceUuids) {
+      serviceUuids.add(val);
+    }
+
+    return BmScanAdvertisement(
+      remoteId: json['remote_id'],
+      platformName: json['platform_name'],
+      advName: json['adv_name'],
+      connectable: json['connectable'] != null ? json['connectable'] != 0 : false,
+      txPowerLevel: json['tx_power_level'],
+      manufacturerData: manufacturerData,
+      serviceData: serviceData,
+      serviceUuids: serviceUuids,
       rssi: json['rssi'],
     );
   }
 }
 
 class BmScanResponse {
-  final BmScanResult? result;
+  final BmScanAdvertisement? advertisement;
   final BmScanFailed? failed;
 
   BmScanResponse({
-    required this.result,
+    required this.advertisement,
     required this.failed,
   });
 
   factory BmScanResponse.fromMap(Map<dynamic, dynamic> json) {
     return BmScanResponse(
-      result: json['result'] != null ? BmScanResult.fromMap(json['result']) : null,
+      advertisement: json['advertisement'] != null ? BmScanAdvertisement.fromMap(json['advertisement']) : null,
       failed: json['failed'] != null ? BmScanFailed.fromMap(json['failed']) : null,
     );
   }

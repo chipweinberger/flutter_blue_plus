@@ -1023,12 +1023,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         return;
     }
 
-    // See BmScanResult
-    NSDictionary *result = [self bmScanResult:peripheral advertisementData:advertisementData RSSI:RSSI];
-
     // See BmScanResponse
     NSDictionary *response = @{
-        @"result": result,
+        @"advertisement": [self bmScanAdvertisement:remoteId advertisementData:advertisementData RSSI:RSSI],
     };
 
     [_methodChannel invokeMethod:@"OnScanResponse" arguments:response];
@@ -1532,11 +1529,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     return 0;
 }
 
-- (NSDictionary *)bmScanResult:(CBPeripheral *)peripheral
+- (NSDictionary *)bmScanAdvertisement:(NSString*)remoteId
              advertisementData:(NSDictionary<NSString *, id> *)advertisementData
                           RSSI:(NSNumber *)RSSI
 {
-    NSString     *localName      = advertisementData[CBAdvertisementDataLocalNameKey];
+    NSString     *advName        = advertisementData[CBAdvertisementDataLocalNameKey];
     NSNumber     *connectable    = advertisementData[CBAdvertisementDataIsConnectable];
     NSNumber     *txPower        = advertisementData[CBAdvertisementDataTxPowerLevelKey];
     NSData       *manufData      = advertisementData[CBAdvertisementDataManufacturerDataKey];
@@ -1582,21 +1579,24 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         serviceDataB = [mutable copy];
     }
 
-    // See BmAdvertisementData
-    NSDictionary* advData = @{
-        @"local_name":         localName     ? localName     : [NSNull null],
+    // platform name
+    NSString* platformName = nil;
+    if ([self.knownPeripherals objectForKey:remoteId] != nil) {
+        CBPeripheral* peripheral = [self.knownPeripherals objectForKey:remoteId];
+        platformName = peripheral.name;
+    }
+
+    // See BmScanAdvertisement
+    return @{
+        @"remote_id":          remote_id,
+        @"platform_name":      platformName,
+        @"adv_name":           advName,
         @"connectable":        connectable   ? connectable   : @(0),
         @"tx_power_level":     txPower       ? txPower       : [NSNull null],
         @"manufacturer_data":  manufDataB    ? manufDataB    : [NSNull null],
         @"service_uuids":      serviceUuidsB ? serviceUuidsB : [NSNull null],
         @"service_data":       serviceDataB  ? serviceDataB  : [NSNull null],
-    };
-  
-    // See BmScanResult
-    return @{
-        @"device":             [self bmBluetoothDevice:peripheral],
-        @"advertisement_data": advData,
-        @"rssi":               RSSI ? RSSI : [NSNull null],
+        @"rssi":               RSSI          ? RSSI          : [NSNull null],
     };
 }
 

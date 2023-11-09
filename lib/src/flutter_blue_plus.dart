@@ -231,19 +231,20 @@ class FlutterBluePlus {
               _nativeError, "scan", response.failed!.errorCode, response.failed!.errorString);
         }
 
-        // convert
-        ScanResult sr = ScanResult.fromProto(response.result!);
+        BmScanAdvertisement bm = response.advertisement!;
 
         // cache platformName
-        BmBluetoothDevice device = response.result!.device;
-        if (device.platformName != null) {
-          _platformNames[DeviceIdentifier(device.remoteId)] = device.platformName!;
+        if (bm.platformName != null) {
+          _platformNames[DeviceIdentifier(bm.remoteId)] = bm.platformName!;
         }
 
         // cache advertised name
-        if (sr.advertisementData.localName.isNotEmpty) {
-          _advNames[DeviceIdentifier(device.remoteId)] = sr.advertisementData.localName;
+        if (bm.advName != null) {
+          _advNames[DeviceIdentifier(bm.remoteId)] = bm.advName!;
         }
+
+        // convert
+        ScanResult sr = ScanResult.fromProto(bm);
 
         // add result to output
         if (oneByOne) {
@@ -544,9 +545,9 @@ class ScanResult {
     required this.timeStamp,
   });
 
-  ScanResult.fromProto(BmScanResult p)
-      : device = BluetoothDevice.fromProto(p.device),
-        advertisementData = AdvertisementData.fromProto(p.advertisementData),
+  ScanResult.fromProto(BmScanAdvertisement p)
+      : device = BluetoothDevice.fromId(p.remoteId),
+        advertisementData = AdvertisementData.fromProto(p),
         rssi = p.rssi,
         timeStamp = DateTime.now();
 
@@ -588,8 +589,8 @@ class AdvertisementData {
     required this.serviceUuids,
   });
 
-  AdvertisementData.fromProto(BmAdvertisementData p)
-      : localName = p.localName ?? "",
+  AdvertisementData.fromProto(BmScanAdvertisement p)
+      : localName = p.advName ?? "",
         txPowerLevel = p.txPowerLevel,
         connectable = p.connectable,
         manufacturerData = p.manufacturerData,
