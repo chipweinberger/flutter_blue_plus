@@ -335,7 +335,7 @@ public class FlutterBluePlusPlugin implements
 
                 case "getAdapterState":
                 {
-                    // get adapterState, if we can
+                    // get adapterState, if we have permission
                     int adapterState = -1; // unknown
                     try {
                         adapterState = mBluetoothAdapter.getState();
@@ -453,6 +453,13 @@ public class FlutterBluePlusPlugin implements
                             return;
                         }
 
+                        // check adapter
+                        if (isAdapterOn() == false) {
+                            result.error("startScan", String.format("bluetooth must be turned on"), null);
+                            return;
+                        }
+
+                        // get scanner
                         BluetoothLeScanner scanner = mBluetoothAdapter.getBluetoothLeScanner();
                         if(scanner == null) {
                             result.error("startScan", String.format("getBluetoothLeScanner() is null. Is the Adapter on?"), null);
@@ -574,6 +581,12 @@ public class FlutterBluePlusPlugin implements
                         if (granted == false) {
                             result.error("connect",
                                 String.format("FlutterBluePlus requires %s for new connection", perm), null);
+                            return;
+                        }
+
+                        // check adapter
+                        if (isAdapterOn() == false) {
+                            result.error("connect", String.format("bluetooth must be turned on"), null);
                             return;
                         }
 
@@ -2377,6 +2390,16 @@ public class FlutterBluePlusPlugin implements
                 log(LogLevel.WARNING, "invokeMethodUIThread: tried to call method on closed channel: " + method);
             }
         });
+    }
+
+    private boolean isAdapterOn()
+    {
+        // get adapterState, if we have permission
+        try {
+            return mBluetoothAdapter.getState() == BluetoothAdapter.STATE_ON;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private static byte[] hexToBytes(String s) {
