@@ -622,7 +622,7 @@ class AdvertisementData {
   }
 
   @Deprecated('use advName instead')
-  String? get localName => advName;
+  String get localName => advName;
 }
 
 class PhySupport {
