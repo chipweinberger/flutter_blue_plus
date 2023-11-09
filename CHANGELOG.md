@@ -1,3 +1,6 @@
+## 1.27.5
+* **[Fix]** android: typo compile error
+
 ## 1.27.4
 * **[Fix]** accidentally changed advertisementData.localName to nullable
 
