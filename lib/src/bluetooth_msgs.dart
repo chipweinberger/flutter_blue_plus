@@ -49,7 +49,7 @@ class BmServiceDataFilter {
   BmServiceDataFilter(this.service, this.data, this.mask);
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> map = {};
-    map['service'] = service.uuid128;
+    map['service'] = service.uuid;
     map['data'] = _hexEncode(data);
     map['mask'] = _hexEncode(mask);
     return map;
@@ -83,7 +83,7 @@ class BmScanSettings {
 
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> data = {};
-    data['with_services'] = withServices.map((s) => s.uuid128).toList();
+    data['with_services'] = withServices.map((s) => s.uuid).toList();
     data['with_remote_ids'] = withRemoteIds;
     data['with_names'] = withNames;
     data['with_keywords'] = withKeywords;
@@ -434,9 +434,9 @@ class BmReadCharacteristicRequest {
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> data = {};
     data['remote_id'] = remoteId;
-    data['service_uuid'] = serviceUuid.uuid128;
-    data['secondary_service_uuid'] = secondaryServiceUuid?.uuid128;
-    data['characteristic_uuid'] = characteristicUuid.uuid128;
+    data['service_uuid'] = serviceUuid.uuid;
+    data['secondary_service_uuid'] = secondaryServiceUuid?.uuid;
+    data['characteristic_uuid'] = characteristicUuid.uuid;
     return data;
   }
 }
@@ -494,10 +494,10 @@ class BmReadDescriptorRequest {
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> data = {};
     data['remote_id'] = remoteId;
-    data['service_uuid'] = serviceUuid.uuid128;
-    data['secondary_service_uuid'] = secondaryServiceUuid?.uuid128;
-    data['characteristic_uuid'] = characteristicUuid.uuid128;
-    data['descriptor_uuid'] = descriptorUuid.uuid128;
+    data['service_uuid'] = serviceUuid.uuid;
+    data['secondary_service_uuid'] = secondaryServiceUuid?.uuid;
+    data['characteristic_uuid'] = characteristicUuid.uuid;
+    data['descriptor_uuid'] = descriptorUuid.uuid;
     return data;
   }
 }
@@ -529,9 +529,9 @@ class BmWriteCharacteristicRequest {
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> data = {};
     data['remote_id'] = remoteId;
-    data['service_uuid'] = serviceUuid.uuid128;
-    data['secondary_service_uuid'] = secondaryServiceUuid?.uuid128;
-    data['characteristic_uuid'] = characteristicUuid.uuid128;
+    data['service_uuid'] = serviceUuid.uuid;
+    data['secondary_service_uuid'] = secondaryServiceUuid?.uuid;
+    data['characteristic_uuid'] = characteristicUuid.uuid;
     data['write_type'] = writeType.index;
     data['allow_long_write'] = allowLongWrite ? 1 : 0;
     data['value'] = _hexEncode(value);
@@ -559,10 +559,10 @@ class BmWriteDescriptorRequest {
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> data = {};
     data['remote_id'] = remoteId;
-    data['service_uuid'] = serviceUuid.uuid128;
-    data['secondary_service_uuid'] = secondaryServiceUuid?.uuid128;
-    data['characteristic_uuid'] = characteristicUuid.uuid128;
-    data['descriptor_uuid'] = descriptorUuid.uuid128;
+    data['service_uuid'] = serviceUuid.uuid;
+    data['secondary_service_uuid'] = secondaryServiceUuid?.uuid;
+    data['characteristic_uuid'] = characteristicUuid.uuid;
+    data['descriptor_uuid'] = descriptorUuid.uuid;
     data['value'] = _hexEncode(value);
     return data;
   }
@@ -626,9 +626,9 @@ class BmSetNotifyValueRequest {
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> data = {};
     data['remote_id'] = remoteId;
-    data['service_uuid'] = serviceUuid.uuid128;
-    data['secondary_service_uuid'] = secondaryServiceUuid?.uuid128;
-    data['characteristic_uuid'] = characteristicUuid.uuid128;
+    data['service_uuid'] = serviceUuid.uuid;
+    data['secondary_service_uuid'] = secondaryServiceUuid?.uuid;
+    data['characteristic_uuid'] = characteristicUuid.uuid;
     data['force_indications'] = forceIndications;
     data['enable'] = enable;
     return data;
