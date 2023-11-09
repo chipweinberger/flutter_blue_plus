@@ -104,6 +104,7 @@ public class FlutterBluePlusPlugin implements
     private final Map<String, String> mWriteChr = new ConcurrentHashMap<>();
     private final Map<String, String> mWriteDesc = new ConcurrentHashMap<>();
     private final Map<String, BluetoothDevice> mScanSeen = new ConcurrentHashMap<>();
+    private final Map<String, Integer> mScanCounts = new ConcurrentHashMap<>();
     private HashMap<String, Object> mScanFilters = new HashMap<String, Object>();
     
     private final Map<Integer, OperationOnPermission> operationsOnPermission = new HashMap<>();
@@ -503,6 +504,7 @@ public class FlutterBluePlusPlugin implements
 
                         // clear seen devices
                         mScanSeen.clear();
+                        mScanCounts.clear();
 
                         scanner.startScan(filters, settings, getScanCallback());
 
@@ -1708,6 +1710,13 @@ public class FlutterBluePlusPlugin implements
 
     private ScanCallback scanCallback;
 
+    private int scanCountIncrement(String remoteId) {
+        if (mScanCounts.get(remoteId) == null) {mScanCounts.put(remoteId, 0);}
+        int count = mScanCounts.get(remoteId);
+        mScanCounts.put(remoteId, count+1);
+        return count;
+    }
+
     private ScanCallback getScanCallback()
     {
         if(scanCallback == null) {
@@ -1731,8 +1740,16 @@ public class FlutterBluePlusPlugin implements
                     // add to seen devices
                     mScanSeen.put(remoteId, device);
 
+                    // increment count
+                    int count = scanCountIncrement(remoteId);   
+
                     // filter seen devices?
                     if (alreadySeen && !(boolean) mScanFilters.get("continuous_updates")) {
+                        return;
+                    }
+
+                    // divisor
+                    if ((count % (int) mScanFilters.get("continuous_divisor")) != 0) {
                         return;
                     }
 

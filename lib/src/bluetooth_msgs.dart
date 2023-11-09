@@ -34,6 +34,7 @@ class BmScanSettings {
   final List<String> withNames;
   final List<String> withKeywords;
   final bool continuousUpdates;
+  final int continuousDivisor;
   final int androidScanMode;
   final bool androidUsesFineLocation;
 
@@ -43,6 +44,7 @@ class BmScanSettings {
     required this.withNames,
     required this.withKeywords,
     required this.continuousUpdates,
+    required this.continuousDivisor,
     required this.androidScanMode,
     required this.androidUsesFineLocation,
   });
@@ -54,6 +56,7 @@ class BmScanSettings {
     data['with_names'] = withNames;
     data['with_keywords'] = withKeywords;
     data['continuous_updates'] = continuousUpdates;
+    data['continuous_divisor'] = continuousDivisor;
     data['android_scan_mode'] = androidScanMode;
     data['android_uses_fine_location'] = androidUsesFineLocation;
     return data;

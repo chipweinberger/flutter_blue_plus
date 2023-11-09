@@ -62,6 +62,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 @property(nonatomic) NSMutableDictionary *peripheralMtu;
 @property(nonatomic) NSMutableDictionary *writeChrs;
 @property(nonatomic) NSMutableDictionary *writeDescs;
+@property(nonatomic) NSMutableDictionary *scanCounts;
 @property(nonatomic) NSDictionary *scanFilters;
 @property(nonatomic) NSTimer *checkForMtuChangesTimer;
 @property(nonatomic) LogLevel logLevel;
@@ -83,6 +84,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     instance.peripheralMtu = [NSMutableDictionary new];
     instance.writeChrs = [NSMutableDictionary new];
     instance.writeDescs = [NSMutableDictionary new];
+    instance.scanCounts = [NSMutableDictionary new];
     instance.logLevel = LDEBUG;
 
     [registrar addMethodCallDelegate:instance channel:methodChannel];
@@ -249,6 +251,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 NSString *uuid = withServices[i];
                 services = [services arrayByAddingObject:[CBUUID UUIDWithString:uuid]];
             }
+
+            // clear counts
+            [self.scanCounts removeAllObjects];
 
             // start scanning
             [self->_centralManager scanForPeripheralsWithServices:services options:scanOpts];
@@ -1004,9 +1009,19 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     NSString* remoteId = [[peripheral identifier] UUIDString];
     
+    // add to known peripherals
     [self.knownPeripherals setObject:peripheral forKey:remoteId];
 
+    // increment scan count
+    NSInteger count = [self scanCountIncrement:remoteId];
+
+    // get advName
     NSString *advName = advertisementData[CBAdvertisementDataLocalNameKey];
+
+    // divisor
+    if (count % [self.scanFilters[@"continuous_divisor"] integerValue] != 0) {
+        return;
+    }
 
     // remoteIds
     if (![self filterRemoteIds:self.scanFilters[@"with_remote_ids"] target:remoteId]) {
@@ -1703,6 +1718,13 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 // ██    ██    ██     ██  ██       ███████ 
 // ██    ██    ██     ██  ██            ██ 
 //  ██████     ██     ██  ███████  ███████ 
+
+- (NSInteger)scanCountIncrement:(NSString *)remoteId {
+    if (!self.scanCounts[remoteId]) {self.scanCounts[remoteId] = @(0);}
+    NSInteger count = [self.scanCounts[remoteId] integerValue];
+    self.scanCounts[remoteId] = @(count + 1);
+    return count;
+}
 
 - (BOOL)filterKeywords:(NSArray<NSString *> *)keywords
                 target:(NSString *)target

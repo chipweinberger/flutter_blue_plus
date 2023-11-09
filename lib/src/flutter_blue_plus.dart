@@ -160,8 +160,11 @@ class FlutterBluePlus {
   ///   - [timeout] calls stopScan after a specified duration
   ///   - [removeIfGone] if true, remove devices after they've stopped advertising for X duration
   ///   - [continuousUpdates] if true, 'lastSeen' & 'rssi' are continually updated. This takes more power.
+  ///   - [continuousDivisor] Useful to help performance. If divisor is 3, then two-thirds of advertisements are
+  ///          ignored, and one-third are processed. This reduces main-thread usage caused by the platform channel.
+  ///          This argument only matters for continuousUpdates mode.
   ///   - [oneByOne] if true, we will stream every advertistment one by one, possibly including duplicates.
-  ///                If false, we deduplicate the advertisements, and return a list of devices.
+  ///          If false, we deduplicate the advertisements, and return a list of devices.
   ///   - [androidScanMode] choose the android scan mode to use when scanning
   ///   - [androidUsesFineLocation] request ACCESS_FINE_LOCATION permission at runtime
   static Future<void> startScan({
@@ -172,6 +175,7 @@ class FlutterBluePlus {
     Duration? timeout,
     Duration? removeIfGone,
     bool continuousUpdates = false,
+    int continuousDivisor = 4,
     bool oneByOne = false,
     AndroidScanMode androidScanMode = AndroidScanMode.lowLatency,
     bool androidUsesFineLocation = false,
@@ -179,6 +183,7 @@ class FlutterBluePlus {
     // check args
     assert(removeIfGone == null || continuousUpdates, "removeIfGone requires continuousUpdates");
     assert(removeIfGone == null || !oneByOne, "removeIfGone is not compatible with oneByOne");
+    assert(continuousDivisor >= 1, "divisor must be >= 1");
 
     // stop existing scan
     if (_isScanning.latestValue == true) {
@@ -194,6 +199,7 @@ class FlutterBluePlus {
         withNames: withNames,
         withKeywords: withKeywords,
         continuousUpdates: continuousUpdates,
+        continuousDivisor: continuousDivisor,
         androidScanMode: androidScanMode.value,
         androidUsesFineLocation: androidUsesFineLocation);
 

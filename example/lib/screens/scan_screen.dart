@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -52,7 +53,11 @@ class _ScanScreenState extends State<ScanScreen> {
 
   Future onScanPressed() async {
     try {
-      await FlutterBluePlus.startScan(timeout: const Duration(seconds: 15), continuousUpdates: true);
+      // android is slow when asking for all advertisments,
+      // so instead we only ask for 1/8 of them
+      int divisor = Platform.isAndroid ? 8 : 1;
+      await FlutterBluePlus.startScan(
+          timeout: const Duration(seconds: 15), continuousUpdates: true, continuousDivisor: divisor);
     } catch (e) {
       Snackbar.show(ABC.b, prettyException("Start Scan Error:", e), success: false);
     }
