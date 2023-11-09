@@ -550,6 +550,7 @@ public class FlutterBluePlusPlugin implements
                             devList.add(bmBluetoothDevice(d));
                         }
 
+                        // See: BmDevicesList
                         HashMap<String, Object> response = new HashMap<>();
                         response.put("devices", devList);
 
