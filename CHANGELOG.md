@@ -1,3 +1,6 @@
+## 1.27.4
+* **[Fix]** accidentally changed advertisementData.localName to nullable
+
 ## 1.27.3
 * **[Perf]** scanning: add `continuousDivisor` option to reduce platform channel & main-thread usage
 
