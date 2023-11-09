@@ -1,3 +1,7 @@
+## 1.27.2
+* **[Perf]** scanning: only send advertisment keys over platform channel when they exist
+* **[Rename]** `advertisementData.localName` -> `advertisementData.advName`
+
 ## 1.27.1
 * **[Add]** android: add forceIndications option to setNotifyValue
 

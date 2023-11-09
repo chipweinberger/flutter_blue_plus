@@ -197,3 +197,7 @@ These releases changed multiple things but then changed them back. For brevity, 
 * **[Breaking Change]** scanning: `continousUpdates` is now false by default - it is not typically needed & hurts perf. 
 
 If your app uses `startScan.removeIfGone`, or your app continually checks the value of `scanResult.timestamp` or `scanResult.rssi`, then you will need to explicitly set `continousUpdates` to true.
+
+## 1.27.2
+
+* **[Rename]** `advertisementData.localName` -> `advertisementData.advName`
