@@ -1784,7 +1784,7 @@ public class FlutterBluePlusPlugin implements
 
                     // see BmScanResponse
                     HashMap<String, Object> response = new HashMap<>();
-                    response.put("advertisements", new ArrayList<>(););
+                    response.put("advertisements", new ArrayList<>());
                     response.put("success", 0);
                     response.put("error_code", errorCode);
                     response.put("error_string", scanFailedString(errorCode));
