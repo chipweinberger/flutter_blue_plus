@@ -129,6 +129,8 @@ if (Platform.isAndroid) {
 
 If your device is not found, see [Common Problems](#common-problems).
 
+It is recommended to set scan filters to reduce main thread & platform channel usage.
+
 ```dart
 // Setup Listener for scan results.
 var subscription = FlutterBluePlus.scanResults.listen((results) {
