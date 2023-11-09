@@ -2162,16 +2162,17 @@ public class FlutterBluePlusPlugin implements
         }
 
         // See: BmScanAdvertisement
+        // perf: only add keys if they exists
         HashMap<String, Object> map = new HashMap<>();
-        map.put("remote_id",         device.getAddress());
-        map.put("platform_name",     device.getName());
-        map.put("adv_name",          advName);
-        map.put("connectable",       connectable ? 1 : 0);
-        map.put("tx_power_level",    txPower      != min  ? txPower       : null);
-        map.put("manufacturer_data", manufData    != null ? manufDataB    : null);
-        map.put("service_data",      serviceData  != null ? serviceDataB  : null);
-        map.put("service_uuids",     serviceUuids != null ? serviceUuidsB : null);
-        map.put("rssi", result.getRssi());
+        if (device.getAddress() != null) {map.put("remote_id", device.getAddress());};
+        if (device.getName() != null)    {map.put("platform_name", device.getName());}
+        if (connectable)                 {map.put("connectable", 1);}
+        if (advName != null)             {map.put("adv_name", advName);}
+        if (txPower != min)              {map.put("tx_power_level", txPower);}
+        if (manufData != null)           {map.put("manufacturer_data", manufDataB);}
+        if (serviceData != null)         {map.put("service_data", serviceDataB);}
+        if (serviceUuids != null)        {map.put("service_uuids", serviceUuidsB);}
+        if (result.getRssi() != 0)       {map.put("rssi", result.getRssi());};
         return map;
     }
 

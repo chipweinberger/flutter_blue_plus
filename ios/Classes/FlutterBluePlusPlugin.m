@@ -1587,17 +1587,18 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     }
 
     // See BmScanAdvertisement
-    return @{
-        @"remote_id":          remote_id,
-        @"platform_name":      platformName,
-        @"adv_name":           advName,
-        @"connectable":        connectable   ? connectable   : @(0),
-        @"tx_power_level":     txPower       ? txPower       : [NSNull null],
-        @"manufacturer_data":  manufDataB    ? manufDataB    : [NSNull null],
-        @"service_uuids":      serviceUuidsB ? serviceUuidsB : [NSNull null],
-        @"service_data":       serviceDataB  ? serviceDataB  : [NSNull null],
-        @"rssi":               RSSI          ? RSSI          : [NSNull null],
-    };
+    // perf: only add keys if they exist
+    NSMutableDictionary *map = [NSMutableDictionary dictionary];
+    if (remoteId)              {map[@"remote_id"] = remoteId;}
+    if (platformName)          {map[@"platform_name"] = platformName;}
+    if (advName)               {map[@"adv_name"] = advName;}
+    if (connectable.boolValue) {map[@"connectable"] = connectable;}
+    if (txPower)               {map[@"tx_power_level"] = txPower;}
+    if (manufDataB)            {map[@"manufacturer_data"] = manufDataB;}
+    if (serviceUuidsB)         {map[@"service_uuids"] = serviceUuidsB;}
+    if (serviceDataB)          {map[@"service_data"] = serviceDataB;}
+    if (RSSI)                  {map[@"rssi"] = RSSI;}
+    return map;
 }
 
 - (NSDictionary *)bmBluetoothDevice:(CBPeripheral *)peripheral
