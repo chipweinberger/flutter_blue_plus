@@ -1,3 +1,6 @@
+## 1.27.6
+* **[Improve]** add more checks for bluetooth being off
+
 ## 1.27.5
 * **[Fix]** android: typo compile error
 
