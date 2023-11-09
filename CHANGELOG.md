@@ -1,3 +1,7 @@
+## 1.28.1
+* **[Feature]** scanning: add `serviceData` filter
+* **[Feature]** scanning: add `msd` filter
+
 ## 1.28.0
 * **[Fix]** android: advertised UUIDs were 128-bit instead of the actual length
 * **[Guid]** add support for 16-bit and 32-bit uuids
