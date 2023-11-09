@@ -35,9 +35,27 @@ class Guid {
 
   static bool _checkLen(int len) {
     if (!(len == 16 || len == 4 || len == 2)) {
-      throw FormatException("GUID must be 16, 32, or 128 bit, yours: ${len*8}-bit");
+      throw FormatException("GUID must be 16, 32, or 128 bit, yours: ${len * 8}-bit");
     }
     return true;
+  }
+
+  String get uuid128 {
+    if (bytes.length == 2) {
+      // 16-bit uuid
+      return '0000${_hexEncode(bytes)}-0000-1000-8000-00805f9b34fb'.toLowerCase();
+    }
+    if (bytes.length == 4) {
+      // 32-bit uuid
+      return '${_hexEncode(bytes)}-0000-1000-8000-00805f9b34fb'.toLowerCase();
+    }
+    // 128-bit uuid
+    String one = _hexEncode(bytes.sublist(0, 4));
+    String two = _hexEncode(bytes.sublist(4, 6));
+    String three = _hexEncode(bytes.sublist(6, 8));
+    String four = _hexEncode(bytes.sublist(8, 10));
+    String five = _hexEncode(bytes.sublist(10, 16));
+    return "$one-$two-$three-$four-$five".toLowerCase();
   }
 
   @override
@@ -51,25 +69,12 @@ class Guid {
       return _hexEncode(bytes);
     }
     // 128-bit uuid
-    String one = _hexEncode(bytes.sublist(0, 4));
-    String two = _hexEncode(bytes.sublist(4, 6));
-    String three = _hexEncode(bytes.sublist(6, 8));
-    String four = _hexEncode(bytes.sublist(8, 10));
-    String five = _hexEncode(bytes.sublist(10, 16));
-    return "$one-$two-$three-$four-$five";
+    return uuid128;
   }
 
   @override
   operator ==(other) => other is Guid && hashCode == other.hashCode;
 
   @override
-  int get hashCode {
-    const int prime1 = 9007199254740881;
-    const int prime2 = 8388880508472777;
-    int hash = 0;
-    for (int value in bytes) {
-      hash = (hash * prime1 + value) % prime2;
-    }
-    return hash;
-  }
+  int get hashCode => uuid128.hashCode;
 }
