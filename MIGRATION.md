@@ -201,3 +201,7 @@ If your app uses `startScan.removeIfGone`, or your app continually checks the va
 ## 1.27.2
 
 * **[Rename]** `advertisementData.localName` -> `advertisementData.advName`
+
+## 1.28.0
+
+* **[Breaking Change]** use GUID for `advertisingData.serviceUuids` & `advertisingData.serviceData` instead of String
