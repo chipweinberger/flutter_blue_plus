@@ -570,7 +570,7 @@ class ScanResult {
 }
 
 class AdvertisementData {
-  final String localName;
+  final String advName;
   final int? txPowerLevel;
   final bool connectable;
   final Map<int, List<int>> manufacturerData;
@@ -581,7 +581,7 @@ class AdvertisementData {
   final List<String> serviceUuids;
 
   AdvertisementData({
-    required this.localName,
+    required this.advName,
     required this.txPowerLevel,
     required this.connectable,
     required this.manufacturerData,
@@ -590,7 +590,7 @@ class AdvertisementData {
   });
 
   AdvertisementData.fromProto(BmScanAdvertisement p)
-      : localName = p.advName ?? "",
+      : advName = p.advName ?? "",
         txPowerLevel = p.txPowerLevel,
         connectable = p.connectable,
         manufacturerData = p.manufacturerData,
@@ -600,7 +600,7 @@ class AdvertisementData {
   @override
   String toString() {
     return 'AdvertisementData{'
-        'localName: $localName, '
+        'advName: $advName, '
         'txPowerLevel: $txPowerLevel, '
         'connectable: $connectable, '
         'manufacturerData: $manufacturerData, '
@@ -608,6 +608,9 @@ class AdvertisementData {
         'serviceUuids: $serviceUuids'
         '}';
   }
+
+  @Deprecated('use advName instead')
+  String? get localName => advName;
 }
 
 class PhySupport {

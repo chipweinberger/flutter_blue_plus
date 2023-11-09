@@ -125,7 +125,7 @@ class _ScanResultTileState extends State<ScanResultTile> {
       leading: Text(widget.result.rssi.toString()),
       trailing: _buildConnectButton(context),
       children: <Widget>[
-        _buildAdvRow(context, 'Complete Local Name', adv.localName),
+        _buildAdvRow(context, 'Complete Local Name', adv.advName),
         _buildAdvRow(context, 'Tx Power Level', '${adv.txPowerLevel ?? 'N/A'}'),
         _buildAdvRow(context, 'Manufacturer Data', getNiceManufacturerData(adv.manufacturerData)),
         _buildAdvRow(context, 'Service UUIDs', getNiceServiceUuids(adv.serviceUuids)),

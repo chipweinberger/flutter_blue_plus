@@ -1006,7 +1006,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     
     [self.knownPeripherals setObject:peripheral forKey:remoteId];
 
-    NSString *localName = advertisementData[CBAdvertisementDataLocalNameKey];
+    NSString *advName = advertisementData[CBAdvertisementDataLocalNameKey];
 
     // remoteIds
     if (![self filterRemoteIds:self.scanFilters[@"with_remote_ids"] target:remoteId]) {
@@ -1014,12 +1014,12 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     }
 
     // names
-    if (![self filterNames:self.scanFilters[@"with_names"] target:localName]) {
+    if (![self filterNames:self.scanFilters[@"with_names"] target:advName]) {
         return;
     }
 
     // keywords
-    if (![self filterKeywords:self.scanFilters[@"with_keywords"] target:localName]) {
+    if (![self filterKeywords:self.scanFilters[@"with_keywords"] target:advName]) {
         return;
     }
 

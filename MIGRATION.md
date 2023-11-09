@@ -90,7 +90,7 @@ extension Scan on FlutterBluePlus {
 ```
 Stream<BluetoothDevice?> myDeviceStream = FlutterBluePlus.scanResults
     .map((list) => list.first)
-    .where((r) => r.advertisementData.localName == "myDeviceName")
+    .where((r) => r.advertisementData.advName == "myDeviceName")
     .map((r) => r.device);
 
 // start listening before we call startScan so we do not miss the result

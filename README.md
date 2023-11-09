@@ -134,7 +134,7 @@ If your device is not found, see [Common Problems](#common-problems).
 var subscription = FlutterBluePlus.scanResults.listen((results) {
         if (results.isNotEmpty) {
             ScanResult r = results.last; // the most recently found device
-            print('${r.device.remoteId}: "${r.advertisementData.localName}" found!');
+            print('${r.device.remoteId}: "${r.advertisementData.advName}" found!');
         }
     },
     onError(e) => print(e);
