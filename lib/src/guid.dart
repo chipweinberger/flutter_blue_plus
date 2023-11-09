@@ -4,56 +4,66 @@
 
 part of flutter_blue_plus;
 
+// Supports 16-bit, 32-bit, or 128-bit UUIDs
 class Guid {
-  final List<int> _bytes;
-  final int _hashCode;
+  final List<int> bytes;
 
-  Guid._internal(List<int> bytes)
-      : _bytes = bytes,
-        _hashCode = _calcHashCode(bytes);
+  Guid.empty() : bytes = List.filled(16, 0);
 
-  Guid(String input) : this._internal(_fromString(input));
+  Guid.fromBytes(this.bytes) : assert(_checkLen(bytes.length), 'GUID must be 16, 32, or 128 bit.');
 
-  Guid.fromMac(String input) : this._internal(_fromMacString(input));
+  Guid.fromString(String input) : bytes = _fromString(input);
 
-  Guid.empty() : this._internal(List.filled(16, 0));
-
-  static List<int> _fromMacString(String input) {
-    input = _removeNonHexCharacters(input);
-    final bytes = _hexDecode(input);
-
-    if (bytes.length != 6) {
-      throw FormatException("Guid.fromString: The guid format is invalid: $input");
-    }
-
-    return bytes + List<int>.filled(10, 0);
-  }
+  Guid(String input) : bytes = _fromString(input);
 
   static List<int> _fromString(String input) {
-    // If input has empty value assign a default value
     if (input.isEmpty) {
-      input = "00000000-0000-0000-0000-000000000000";
+      return List.filled(16, 0);
     }
 
-    input = _removeNonHexCharacters(input);
-    final bytes = _hexDecode(input);
+    input = input.replaceAll('-', '');
 
-    if (bytes.length != 16) {
-      throw FormatException("Guid.fromString: The guid format is invalid: $input");
+    List<int>? bytes = _tryHexDecode(input);
+    if (bytes == null) {
+      throw FormatException("GUID not hex format: $input");
     }
+
+    _checkLen(bytes.length);
 
     return bytes;
   }
 
-  static String _removeNonHexCharacters(String sourceString) {
-    return String.fromCharCodes(sourceString.runes.where((r) =>
-            (r >= 48 && r <= 57) || // characters 0 to 9
-            (r >= 65 && r <= 70) || // characters A to F
-            (r >= 97 && r <= 102) // characters a to f
-        ));
+  static bool _checkLen(int len) {
+    if (!(len == 16 || len == 4 || len == 2)) {
+      throw FormatException("GUID must be 16, 32, or 128 bit, yours: ${len*8}-bit");
+    }
+    return true;
   }
 
-  static int _calcHashCode(List<int> bytes) {
+  @override
+  String toString() {
+    // 16-bit uuid
+    if (bytes.length == 2) {
+      return _hexEncode(bytes);
+    }
+    // 32-bit uuid
+    if (bytes.length == 4) {
+      return _hexEncode(bytes);
+    }
+    // 128-bit uuid
+    String one = _hexEncode(bytes.sublist(0, 4));
+    String two = _hexEncode(bytes.sublist(4, 6));
+    String three = _hexEncode(bytes.sublist(6, 8));
+    String four = _hexEncode(bytes.sublist(8, 10));
+    String five = _hexEncode(bytes.sublist(10, 16));
+    return "$one-$two-$three-$four-$five";
+  }
+
+  @override
+  operator ==(other) => other is Guid && hashCode == other.hashCode;
+
+  @override
+  int get hashCode {
     const int prime1 = 9007199254740881;
     const int prime2 = 8388880508472777;
     int hash = 0;
@@ -62,34 +72,4 @@ class Guid {
     }
     return hash;
   }
-
-  @override
-  String toString() {
-    String one = _hexEncode(_bytes.sublist(0, 4));
-    String two = _hexEncode(_bytes.sublist(4, 6));
-    String three = _hexEncode(_bytes.sublist(6, 8));
-    String four = _hexEncode(_bytes.sublist(8, 10));
-    String five = _hexEncode(_bytes.sublist(10, 16));
-    return "$one-$two-$three-$four-$five";
-  }
-
-  String toMac() {
-    String one = _hexEncode(_bytes.sublist(0, 1));
-    String two = _hexEncode(_bytes.sublist(1, 2));
-    String three = _hexEncode(_bytes.sublist(2, 3));
-    String four = _hexEncode(_bytes.sublist(3, 4));
-    String five = _hexEncode(_bytes.sublist(4, 5));
-    String six = _hexEncode(_bytes.sublist(5, 6));
-    return "$one:$two:$three:$four:$five:$six".toUpperCase();
-  }
-
-  List<int> toByteArray() {
-    return _bytes;
-  }
-
-  @override
-  operator ==(other) => other is Guid && hashCode == other.hashCode;
-
-  @override
-  int get hashCode => _hashCode;
 }
