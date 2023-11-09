@@ -1782,15 +1782,12 @@ public class FlutterBluePlusPlugin implements
 
                     super.onScanFailed(errorCode);
 
-                    // see: BmScanFailed
-                    HashMap<String, Object> failed = new HashMap<>();
-                    failed.put("success", 0);
-                    failed.put("error_code", errorCode);
-                    failed.put("error_string", scanFailedString(errorCode));
-
                     // see BmScanResponse
                     HashMap<String, Object> response = new HashMap<>();
-                    response.put("failed", failed);
+                    response.put("advertisements", new ArrayList<>(););
+                    response.put("success", 0);
+                    response.put("error_code", errorCode);
+                    response.put("error_string", scanFailedString(errorCode));
 
                     invokeMethodUIThread("OnScanResponse", response);
                 }

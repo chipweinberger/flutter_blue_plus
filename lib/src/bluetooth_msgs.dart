@@ -63,26 +63,6 @@ class BmScanSettings {
   }
 }
 
-class BmScanFailed {
-  final bool success;
-  final int errorCode;
-  final String errorString;
-
-  BmScanFailed({
-    required this.success,
-    required this.errorCode,
-    required this.errorString,
-  });
-
-  factory BmScanFailed.fromMap(Map<dynamic, dynamic> json) {
-    return BmScanFailed(
-      success: json['success'] != 0,
-      errorCode: json['error_code'],
-      errorString: json['error_string'],
-    );
-  }
-}
-
 class BmScanAdvertisement {
   final String remoteId;
   final String? platformName;
@@ -148,11 +128,15 @@ class BmScanAdvertisement {
 
 class BmScanResponse {
   final List<BmScanAdvertisement> advertisements;
-  final BmScanFailed? failed;
+  final bool success;
+  final int errorCode;
+  final String errorString;
 
   BmScanResponse({
     required this.advertisements,
-    required this.failed,
+    required this.success,
+    required this.errorCode,
+    required this.errorString,
   });
 
   factory BmScanResponse.fromMap(Map<dynamic, dynamic> json) {
@@ -161,9 +145,13 @@ class BmScanResponse {
       advertisements.add(BmScanAdvertisement.fromMap(item));
     }
 
+    bool success = json['success'] == null || json['success'] == 0;
+
     return BmScanResponse(
       advertisements: advertisements,
-      failed: json['failed'] != null ? BmScanFailed.fromMap(json['failed']) : null,
+      success: success,
+      errorCode: !success ? json['error_code'] : 0,
+      errorString: !success? json['error_string'] : "",
     );
   }
 }
