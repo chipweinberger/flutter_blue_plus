@@ -159,7 +159,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 return;
             }
 
-            [self.centralManager stopScan];
+            if ([self isAdapterOn]) {
+                [self.centralManager stopScan];
+            }
 
             [self disconnectAllDevices:@"flutterHotRestart"];
 
@@ -236,6 +238,13 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSArray   *withServices    = args[@"with_services"];
             NSNumber  *continuousUpdates = args[@"continuous_updates"];
 
+            // check adapter state
+            if ([self isAdapterOn] == false) {
+                NSString* s = @"bluetooth must be turned on";
+                result([FlutterError errorWithCode:@"startScan" message:s details:NULL]);
+                return;
+            }
+
             // remember this for later
             self.scanFilters = args;
 
@@ -293,6 +302,13 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSDictionary* args = (NSDictionary*)call.arguments;
             NSString  *remoteId       = args[@"remote_id"];
             NSNumber  *autoConnect    = args[@"auto_connect"];
+
+            // check adapter state
+            if ([self isAdapterOn] == false) {
+                NSString* s = @"bluetooth must be turned on";
+                result([FlutterError errorWithCode:@"connect" message:s details:NULL]);
+                return;
+            }
 
             // already connected?
             CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
@@ -893,7 +909,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             [_methodChannel invokeMethod:@"OnConnectionStateChanged" arguments:result];
         } 
         
-        if ([func isEqualToString:@"flutterHotRestart"]) {
+        if ([func isEqualToString:@"flutterHotRestart"] && [self isAdapterOn]) {
             // request disconnection
             [self.centralManager cancelPeripheralConnection:peripheral];
         }
@@ -1718,6 +1734,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 // ██    ██    ██     ██  ██       ███████ 
 // ██    ██    ██     ██  ██            ██ 
 //  ██████     ██     ██  ███████  ███████ 
+
+- (bool)isAdapterOn
+{
+    return self.centralManager.state == CBManagerStatePoweredOn;
+}
 
 - (NSInteger)scanCountIncrement:(NSString *)remoteId {
     if (!self.scanCounts[remoteId]) {self.scanCounts[remoteId] = @(0);}
