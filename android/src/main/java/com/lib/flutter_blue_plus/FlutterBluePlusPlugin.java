@@ -427,6 +427,7 @@ public class FlutterBluePlusPlugin implements
                     List<String> withServices =  (List<String>) data.get("with_services");
                     List<String> withRemoteIds = (List<String>) data.get("with_remote_ids");
                     List<String> withNames =     (List<String>) data.get("with_names");
+                    List<Object> withMsd =       (List<Object>) data.get("with_msd");
                     boolean continuousUpdates =       (boolean) data.get("continuous_updates");
                     int androidScanMode =                 (int) data.get("android_scan_mode");
                     boolean androidUsesFineLocation = (boolean) data.get("android_uses_fine_location");
@@ -485,24 +486,42 @@ public class FlutterBluePlusPlugin implements
                         }
                         ScanSettings settings = builder.build();
                         
-                        // scan filters
+                        // set filters
                         List<ScanFilter> filters = new ArrayList<>();
 
+                        // services
                         for (int i = 0; i < withServices.size(); i++) {
                             String uuid = withServices.get(i);
                             ScanFilter f = new ScanFilter.Builder().setServiceUuid(ParcelUuid.fromString(uuid)).build();
                             filters.add(f);
                         }
                         
+                        // remoteIds
                         for (int i = 0; i < withRemoteIds.size(); i++) {
                             String address = withRemoteIds.get(i);
                             ScanFilter f = new ScanFilter.Builder().setDeviceAddress(address).build();
                             filters.add(f);
                         }
 
+                        // names
                         for (int i = 0; i < withNames.size(); i++) {
                             String name = withNames.get(i);
                             ScanFilter f = new ScanFilter.Builder().setDeviceName(name).build();
+                            filters.add(f);
+                        }
+
+                        // msd
+                        for (int i = 0; i < withMsd.size(); i++) {
+                            Object m = withMsd.get(i);
+                            int id =                  (int) m.get("manufacturer_id");
+                            byte[] data = hexToBytes((String) m.get("data"));
+                            byte[] mask = hexToBytes((String) m.get("mask"));
+                            ScanFilter f = null;
+                            if (mask.length == 0) {
+                                f = new ScanFilter.Builder().setManufacturerData(id, data).build();
+                            } else {
+                                f = new ScanFilter.Builder().setManufacturerData(id, data, mask).build();
+                            }
                             filters.add(f);
                         }
 

@@ -1031,8 +1031,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // increment scan count
     NSInteger count = [self scanCountIncrement:remoteId];
 
-    // get advName
+    // advertising data
     NSString *advName = advertisementData[CBAdvertisementDataLocalNameKey];
+    NSData *advMsd = advertisementData[CBAdvertisementDataManufacturerDataKey];
 
     // divisor
     if (count % [self.scanFilters[@"continuous_divisor"] integerValue] != 0) {
@@ -1051,6 +1052,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     // keywords
     if (![self filterKeywords:self.scanFilters[@"with_keywords"] target:advName]) {
+        return;
+    }
+
+    // msd
+    if (![self filterMsd:self.scanFilters[@"with_msd"] msd:advMsd]) {
         return;
     }
 
@@ -1796,6 +1802,62 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         }
     }
     return NO;
+}
+
+- (BOOL)filterMsd:(NSArray<NSDictionary*>*)filters
+              msd:(NSData *)msd
+{
+    if (filters.count == 0) {
+        return YES;
+    }
+    if (msd == nil || msd.length == 0) {
+        return NO;
+    }
+    for (NSDictionary *f in filters) {
+        NSNumber *manufacturerId            = f[@"manufacturer_id"];
+        NSData *data = [self convertHexToData:f[@"data"]];
+        NSData *mask = [self convertHexToData:f[@"mask"]];
+
+        // first 2 bytes are manufacturer id
+        unsigned short mId = 0;
+        [msd getBytes:&mId length:2];
+
+        // mask
+        if (mask.length == 0 && data.length > 0) {
+            uint8_t *bytes = malloc(data.length);
+            memset(bytes, 1, data.length); 
+            mask = [NSData dataWithBytesNoCopy:bytes length:data.length freeWhenDone:YES];
+        }
+
+        // trim off first 2 bytes
+        NSData* trim = [msd subdataWithRange:NSMakeRange(2, msd.length - 2)];
+
+        // manufacturer id & data
+        if(mId == [manufacturerId integerValue] && [self findData:data inData:trim usingMask:mask]) {
+            return YES;
+        }
+    }
+    return NO;
+}
+
+- (BOOL)findData:(NSData *)find inData:(NSData *)data usingMask:(NSData *)mask {
+    // Ensure find & mask are same length
+    if ([find length] != [mask length]) {
+        return NO;
+    }
+    
+    const uint8_t *bFind = [find bytes];
+    const uint8_t *bData = [data bytes];
+    const uint8_t *bMask = [mask bytes];
+    
+    for (NSUInteger i = 0; i < [find length]; i++) {
+        // Perform bitwise AND with mask and then compare
+        if ((bFind[i] & bMask[i]) != (bData[i] & bMask[i])) {
+            return NO;
+        }
+    }
+    
+    return YES;
 }
 
 - (NSString *)convertDataToHex:(NSData *)data 

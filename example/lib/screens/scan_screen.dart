@@ -36,8 +36,7 @@ class _ScanScreenState extends State<ScanScreen> {
     _scanResultsSubscription = FlutterBluePlus.scanResults.listen((results) {
       _scanResults = results;
       setState(() {});
-    },
-    onError: (e) {
+    }, onError: (e) {
       Snackbar.show(ABC.b, prettyException("Scan Error:", e), success: false);
     });
 

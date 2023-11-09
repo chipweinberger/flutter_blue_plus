@@ -28,11 +28,26 @@ class BmBluetoothAdapterState {
   }
 }
 
+class BmMsdFilter {
+  int manufacturerId;
+  List<int>? data;
+  List<int>? mask;
+  BmMsdFilter(this.manufacturerId, this.data, this.mask);
+  Map<dynamic, dynamic> toMap() {
+    final Map<dynamic, dynamic> map = {};
+    map['manufacturer_id'] = manufacturerId;
+    map['data'] = _hexEncode(data ?? []);
+    map['mask'] = _hexEncode(mask ?? []);
+    return map;
+  }
+}
+
 class BmScanSettings {
   final List<Guid> withServices;
   final List<String> withRemoteIds;
   final List<String> withNames;
   final List<String> withKeywords;
+  final List<BmMsdFilter> withMsd;
   final bool continuousUpdates;
   final int continuousDivisor;
   final int androidScanMode;
@@ -43,6 +58,7 @@ class BmScanSettings {
     required this.withRemoteIds,
     required this.withNames,
     required this.withKeywords,
+    required this.withMsd,
     required this.continuousUpdates,
     required this.continuousDivisor,
     required this.androidScanMode,
@@ -55,6 +71,7 @@ class BmScanSettings {
     data['with_remote_ids'] = withRemoteIds;
     data['with_names'] = withNames;
     data['with_keywords'] = withKeywords;
+    data['with_msd'] = withMsd.map((d) => d.toMap()).toList();
     data['continuous_updates'] = continuousUpdates;
     data['continuous_divisor'] = continuousDivisor;
     data['android_scan_mode'] = androidScanMode;
@@ -149,7 +166,7 @@ class BmScanResponse {
       advertisements: advertisements,
       success: success,
       errorCode: !success ? json['error_code'] : 0,
-      errorString: !success? json['error_string'] : "",
+      errorString: !success ? json['error_string'] : "",
     );
   }
 }

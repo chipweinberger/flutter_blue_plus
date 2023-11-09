@@ -157,6 +157,7 @@ class FlutterBluePlus {
   ///   - [withRemoteIds] filter for known remoteIds (iOS: 128-bit guid, android: 48-bit mac address)
   ///   - [withNames] filter by advertised names (exact match)
   ///   - [withKeywords] filter by advertised names (matches any substring)
+  ///   - [withMsd] filter by manfacture specific data
   ///   - [timeout] calls stopScan after a specified duration
   ///   - [removeIfGone] if true, remove devices after they've stopped advertising for X duration
   ///   - [continuousUpdates] if true, 'lastSeen', 'rssi', etc, are continually updated. This takes more power.
@@ -173,6 +174,7 @@ class FlutterBluePlus {
     List<String> withRemoteIds = const [],
     List<String> withNames = const [],
     List<String> withKeywords = const [],
+    List<MsdFilter> withMsd = const [],
     Duration? timeout,
     Duration? removeIfGone,
     bool continuousUpdates = false,
@@ -199,6 +201,7 @@ class FlutterBluePlus {
         withRemoteIds: withRemoteIds,
         withNames: withNames,
         withKeywords: withKeywords,
+        withMsd: withMsd.map((d) => d._bm).toList(),
         continuousUpdates: continuousUpdates,
         continuousDivisor: continuousDivisor,
         androidScanMode: androidScanMode.value,
@@ -235,8 +238,7 @@ class FlutterBluePlus {
       } else {
         // failure?
         if (response.success == false) {
-          throw FlutterBluePlusException(
-              _nativeError, "scan", response.errorCode, response.errorString);
+          throw FlutterBluePlusException(_nativeError, "scan", response.errorCode, response.errorString);
         }
 
         // iterate through advertisements
@@ -525,6 +527,25 @@ class AndroidScanMode {
   static const lowLatency = AndroidScanMode(2);
   static const opportunistic = AndroidScanMode(-1);
   final int value;
+}
+
+class MsdFilter {
+  int manufacturerId;
+
+  // filter for this data
+  List<int>? data;
+
+  // For any bit in the mask, set it the 1 if it needs to match
+  // the one in manufacturer data, otherwise set it to 0.
+  // The 'mask' must have the same length as 'data'.
+  List<int>? mask;
+
+  MsdFilter(this.manufacturerId, {this.data, this.mask});
+
+  // convert to bmMsg
+  BmMsdFilter get _bm {
+    return BmMsdFilter(manufacturerId, data, mask);
+  }
 }
 
 class DeviceIdentifier {
