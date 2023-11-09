@@ -1,3 +1,6 @@
+## 1.28.3
+* **[Improve]** guid: add uuid short representation
+
 ## 1.28.2
 * **[Improve]** add length checks to MsdFilter & ServiceDataFilter
 * **[Improve]** guid: more consistent handling of 16,32, vs 128 bit guids
