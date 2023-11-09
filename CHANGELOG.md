@@ -1,3 +1,6 @@
+## 1.27.3
+* **[Perf]** scanning: add `continuousDivisor` option to reduce platform channel & main-thread usage
+
 ## 1.27.2
 * **[Perf]** scanning: only send advertisment keys over platform channel when they exist
 * **[Rename]** `advertisementData.localName` -> `advertisementData.advName`

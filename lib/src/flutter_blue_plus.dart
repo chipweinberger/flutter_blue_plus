@@ -162,7 +162,7 @@ class FlutterBluePlus {
   ///   - [continuousUpdates] if true, 'lastSeen' & 'rssi' are continually updated. This takes more power.
   ///   - [continuousDivisor] Useful to help performance. If divisor is 3, then two-thirds of advertisements are
   ///          ignored, and one-third are processed. This reduces main-thread usage caused by the platform channel.
-  ///          This argument only matters for continuousUpdates mode.
+  ///          This argument only matters for continuousUpdates mode. If divisor is 1, all advertisements are returned.
   ///   - [oneByOne] if true, we will stream every advertistment one by one, possibly including duplicates.
   ///          If false, we deduplicate the advertisements, and return a list of devices.
   ///   - [androidScanMode] choose the android scan mode to use when scanning
