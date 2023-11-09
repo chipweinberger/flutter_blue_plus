@@ -1605,7 +1605,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     if (serviceUuids != nil) {
         NSMutableArray *mutable = [[NSMutableArray alloc] init];
         for (CBUUID *uuid in serviceUuids) {
-            [mutable addObject:uuid.UUIDString];
+            [mutable addObject:[uuid uuid128]];
         }
         serviceUuidsB = [mutable copy];
     }
@@ -1617,7 +1617,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         NSMutableDictionary *mutable = [[NSMutableDictionary alloc] init];
         for (CBUUID *uuid in serviceData) {
             NSString* hex = [self convertDataToHex:serviceData[uuid]];
-            [mutable setObject:hex forKey:uuid.UUIDString];
+            [mutable setObject:hex forKey:[uuid uuid128]];
         }
         serviceDataB = [mutable copy];
     }

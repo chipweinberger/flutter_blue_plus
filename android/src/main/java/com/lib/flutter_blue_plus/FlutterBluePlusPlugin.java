@@ -2209,7 +2209,7 @@ public class FlutterBluePlusPlugin implements
             for (Map.Entry<ParcelUuid, byte[]> entry : serviceData.entrySet()) {
                 ParcelUuid key = entry.getKey();
                 byte[] value = entry.getValue();
-                serviceDataB.put(key.getUuid().toString(), bytesToHex(value));
+                serviceDataB.put(uuid128(key.getUuid()), bytesToHex(value));
             }
         }
 
@@ -2217,7 +2217,7 @@ public class FlutterBluePlusPlugin implements
         List<String> serviceUuidsB = new ArrayList<String>();
         if(serviceUuids != null) {
             for (ParcelUuid s : serviceUuids) {
-                serviceUuidsB.add(s.getUuid().toString());
+                serviceUuidsB.add(uuid128(s.getUuid()));
             }
         }
 
