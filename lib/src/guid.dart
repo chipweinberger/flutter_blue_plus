@@ -40,6 +40,7 @@ class Guid {
     return true;
   }
 
+  // 128-bit representation
   String get uuid128 {
     if (bytes.length == 2) {
       // 16-bit uuid
@@ -58,19 +59,24 @@ class Guid {
     return "$one-$two-$three-$four-$five".toLowerCase();
   }
 
-  @override
-  String toString() {
-    // 16-bit uuid
-    if (bytes.length == 2) {
-      return _hexEncode(bytes);
+  // shortest representation
+  String get uuid {
+    bool starts = uuid128.startsWith('0000');
+    bool ends = uuid128.contains('-0000-1000-8000-00805f9b34fb');
+    if (starts && ends) {
+      // 16-bit
+      return _hexEncode(bytes.sublist(0, 2));
     }
-    // 32-bit uuid
-    if (bytes.length == 4) {
-      return _hexEncode(bytes);
+    if (ends) {
+      // 32-bit
+      return _hexEncode(bytes.sublist(0, 4));
     }
-    // 128-bit uuid
+    // 128-bit
     return uuid128;
   }
+
+  @override
+  String toString() => uuid;
 
   @override
   operator ==(other) => other is Guid && hashCode == other.hashCode;
