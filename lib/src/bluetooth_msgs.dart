@@ -70,8 +70,8 @@ class BmScanAdvertisement {
   final bool connectable;
   final int? txPowerLevel;
   final Map<int, List<int>> manufacturerData;
-  final Map<String, List<int>> serviceData;
-  final List<String> serviceUuids; // 32, 64, or 128 bit uuid
+  final Map<Guid, List<int>> serviceData;
+  final List<Guid> serviceUuids;
   final int rssi;
 
   BmScanAdvertisement({
@@ -99,17 +99,15 @@ class BmScanAdvertisement {
     }
 
     // Cast the data to the right type
-    Map<String, List<int>> serviceData = {};
+    Map<Guid, List<int>> serviceData = {};
     for (var key in rawServiceData.keys) {
-      serviceData[key] = _hexDecode(rawServiceData[key]);
+      serviceData[Guid(key)] = _hexDecode(rawServiceData[key]);
     }
 
     // Cast the data to the right type
-    // Note: we use strings and not Guid because advertisement UUIDs can
-    // be 32-bit UUIDs, 64-bit, etc i.e. "FE56"
-    List<String> serviceUuids = [];
+    List<Guid> serviceUuids = [];
     for (var val in rawServiceUuids) {
-      serviceUuids.add(val);
+      serviceUuids.add(Guid(val));
     }
 
     return BmScanAdvertisement(

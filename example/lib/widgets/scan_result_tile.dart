@@ -39,24 +39,18 @@ class _ScanResultTileState extends State<ScanResultTile> {
   }
 
   String getNiceManufacturerData(Map<int, List<int>> data) {
-    if (data.isEmpty) {
-      return 'N/A';
-    }
     return data.entries
         .map((entry) => '${entry.key.toRadixString(16)}: ${getNiceHexArray(entry.value)}')
         .join(', ')
         .toUpperCase();
   }
 
-  String getNiceServiceData(Map<String, List<int>> data) {
-    if (data.isEmpty) {
-      return 'N/A';
-    }
+  String getNiceServiceData(Map<Guid, List<int>> data) {
     return data.entries.map((v) => '${v.key}: ${getNiceHexArray(v.value)}').join(', ').toUpperCase();
   }
 
-  String getNiceServiceUuids(List<String> serviceUuids) {
-    return serviceUuids.isEmpty ? 'N/A' : serviceUuids.join(', ').toUpperCase();
+  String getNiceServiceUuids(List<Guid> serviceUuids) {
+    return serviceUuids.join(', ').toUpperCase();
   }
 
   bool get isConnected {
@@ -125,11 +119,16 @@ class _ScanResultTileState extends State<ScanResultTile> {
       leading: Text(widget.result.rssi.toString()),
       trailing: _buildConnectButton(context),
       children: <Widget>[
-        _buildAdvRow(context, 'Complete Local Name', adv.advName),
-        _buildAdvRow(context, 'Tx Power Level', '${adv.txPowerLevel ?? 'N/A'}'),
-        _buildAdvRow(context, 'Manufacturer Data', getNiceManufacturerData(adv.manufacturerData)),
-        _buildAdvRow(context, 'Service UUIDs', getNiceServiceUuids(adv.serviceUuids)),
-        _buildAdvRow(context, 'Service Data', getNiceServiceData(adv.serviceData)),
+        if (adv.advName.isNotEmpty)
+          _buildAdvRow(context, 'Name', adv.advName),
+        if (adv.txPowerLevel != null)
+          _buildAdvRow(context, 'Tx Power Level', '${adv.txPowerLevel}'),
+        if (adv.manufacturerData.isNotEmpty)
+          _buildAdvRow(context, 'Manufacturer Data', getNiceManufacturerData(adv.manufacturerData)),
+        if (adv.serviceUuids.isNotEmpty)
+          _buildAdvRow(context, 'Service UUIDs', getNiceServiceUuids(adv.serviceUuids)),
+        if (adv.serviceData.isNotEmpty)
+          _buildAdvRow(context, 'Service Data', getNiceServiceData(adv.serviceData)),
       ],
     );
   }

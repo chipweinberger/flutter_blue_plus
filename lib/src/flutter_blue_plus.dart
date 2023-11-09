@@ -586,11 +586,8 @@ class AdvertisementData {
   final int? txPowerLevel;
   final bool connectable;
   final Map<int, List<int>> manufacturerData;
-  final Map<String, List<int>> serviceData;
-
-  // Note: we use strings and not Guids because advertisement UUIDs can
-  // be 32-bit UUIDs, 64-bit, etc i.e. "FE56"
-  final List<String> serviceUuids;
+  final Map<Guid, List<int>> serviceData;
+  final List<Guid> serviceUuids;
 
   AdvertisementData({
     required this.advName,
