@@ -158,6 +158,7 @@ class FlutterBluePlus {
   ///   - [withNames] filter by advertised names (exact match)
   ///   - [withKeywords] filter by advertised names (matches any substring)
   ///   - [withMsd] filter by manfacture specific data
+  ///   - [withServiceData] filter by service data
   ///   - [timeout] calls stopScan after a specified duration
   ///   - [removeIfGone] if true, remove devices after they've stopped advertising for X duration
   ///   - [continuousUpdates] if true, 'lastSeen', 'rssi', etc, are continually updated. This takes more power.
@@ -175,6 +176,7 @@ class FlutterBluePlus {
     List<String> withNames = const [],
     List<String> withKeywords = const [],
     List<MsdFilter> withMsd = const [],
+    List<ServiceDataFilter> withServiceData = const [],
     Duration? timeout,
     Duration? removeIfGone,
     bool continuousUpdates = false,
@@ -202,6 +204,7 @@ class FlutterBluePlus {
         withNames: withNames,
         withKeywords: withKeywords,
         withMsd: withMsd.map((d) => d._bm).toList(),
+        withServiceData: withServiceData.map((d) => d._bm).toList(),
         continuousUpdates: continuousUpdates,
         continuousDivisor: continuousDivisor,
         androidScanMode: androidScanMode.value,
@@ -545,6 +548,25 @@ class MsdFilter {
   // convert to bmMsg
   BmMsdFilter get _bm {
     return BmMsdFilter(manufacturerId, data, mask);
+  }
+}
+
+class ServiceDataFilter {
+  Guid service;
+
+  // filter for this data
+  List<int>? data;
+
+  // For any bit in the mask, set it the 1 if it needs to match
+  // the one in service data, otherwise set it to 0.
+  // The 'mask' must have the same length as 'data'.
+  List<int>? mask;
+
+  ServiceDataFilter(this.service, {this.data, this.mask});
+
+  // convert to bmMsg
+  BmServiceDataFilter get _bm {
+    return BmServiceDataFilter(service, data, mask);
   }
 }
 

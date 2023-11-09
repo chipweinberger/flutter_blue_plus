@@ -424,13 +424,14 @@ public class FlutterBluePlusPlugin implements
 
                     // see: BmScanSettings
                     HashMap<String, Object> data = call.arguments();
-                    List<String> withServices =  (List<String>) data.get("with_services");
-                    List<String> withRemoteIds = (List<String>) data.get("with_remote_ids");
-                    List<String> withNames =     (List<String>) data.get("with_names");
-                    List<Object> withMsd =       (List<Object>) data.get("with_msd");
-                    boolean continuousUpdates =       (boolean) data.get("continuous_updates");
-                    int androidScanMode =                 (int) data.get("android_scan_mode");
-                    boolean androidUsesFineLocation = (boolean) data.get("android_uses_fine_location");
+                    List<String> withServices =    (List<String>) data.get("with_services");
+                    List<String> withRemoteIds =   (List<String>) data.get("with_remote_ids");
+                    List<String> withNames =       (List<String>) data.get("with_names");
+                    List<Object> withMsd =         (List<Object>) data.get("with_msd");
+                    List<Object> withServiceData = (List<Object>) data.get("with_service_data");
+                    boolean continuousUpdates =         (boolean) data.get("continuous_updates");
+                    int androidScanMode =                   (int) data.get("android_scan_mode");
+                    boolean androidUsesFineLocation =   (boolean) data.get("android_uses_fine_location");
 
                     if (Build.VERSION.SDK_INT >= 31) { // Android 12 (October 2021)
                         permissions.add(Manifest.permission.BLUETOOTH_SCAN);
@@ -512,15 +513,30 @@ public class FlutterBluePlusPlugin implements
 
                         // msd
                         for (int i = 0; i < withMsd.size(); i++) {
-                            Object m = withMsd.get(i);
-                            int id =                  (int) m.get("manufacturer_id");
-                            byte[] data = hexToBytes((String) m.get("data"));
-                            byte[] mask = hexToBytes((String) m.get("mask"));
+                            HashMap<String, Object> m = (HashMap<String, Object>) withMsd.get(i);
+                            int id =                    (int) m.get("manufacturer_id");
+                            byte[] mdata = hexToBytes((String) m.get("data"));
+                            byte[] mask =  hexToBytes((String) m.get("mask"));
                             ScanFilter f = null;
                             if (mask.length == 0) {
-                                f = new ScanFilter.Builder().setManufacturerData(id, data).build();
+                                f = new ScanFilter.Builder().setManufacturerData(id, mdata).build();
                             } else {
-                                f = new ScanFilter.Builder().setManufacturerData(id, data, mask).build();
+                                f = new ScanFilter.Builder().setManufacturerData(id, mdata, mask).build();
+                            }
+                            filters.add(f);
+                        }
+
+                        // service data
+                        for (int i = 0; i < withServiceData.size(); i++) {
+                            HashMap<String, Object> m = (HashMap<String, Object>) withServiceData.get(i);
+                            ParcelUuid s = ParcelUuid.fromString((String) m.get("service"));
+                            byte[] mdata =             hexToBytes((String) m.get("data"));
+                            byte[] mask =              hexToBytes((String) m.get("mask"));
+                            ScanFilter f = null;
+                            if (mask.length == 0) {
+                                f = new ScanFilter.Builder().setServiceData(s, mdata).build();
+                            } else {
+                                f = new ScanFilter.Builder().setServiceData(s, mdata, mask).build();
                             }
                             filters.add(f);
                         }
@@ -2193,7 +2209,7 @@ public class FlutterBluePlusPlugin implements
             for (Map.Entry<ParcelUuid, byte[]> entry : serviceData.entrySet()) {
                 ParcelUuid key = entry.getKey();
                 byte[] value = entry.getValue();
-                serviceDataB.put(key.getUuid().toString()), bytesToHex(value));
+                serviceDataB.put(key.getUuid().toString(), bytesToHex(value));
             }
         }
 

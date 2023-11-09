@@ -1034,6 +1034,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // advertising data
     NSString *advName = advertisementData[CBAdvertisementDataLocalNameKey];
     NSData *advMsd = advertisementData[CBAdvertisementDataManufacturerDataKey];
+    NSDictionary* advSd = advertisementData[CBAdvertisementDataServiceDataKey];
 
     // divisor
     if (count % [self.scanFilters[@"continuous_divisor"] integerValue] != 0) {
@@ -1057,6 +1058,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     // msd
     if (![self filterMsd:self.scanFilters[@"with_msd"] msd:advMsd]) {
+        return;
+    }
+
+    // service data
+    if (![self filterServiceData:self.scanFilters[@"with_service_data"] sd:advSd]) {
         return;
     }
 
@@ -1799,6 +1805,39 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     for (NSString *r in remoteIds) {
         if ([[target lowercaseString] isEqualToString:[r lowercaseString]]) {
             return YES;
+        }
+    }
+    return NO;
+}
+
+- (BOOL)filterServiceData:(NSArray<NSDictionary*>*)filters
+                       sd:(NSDictionary *)sd
+{
+    if (filters.count == 0) {
+        return YES;
+    }
+    if (sd == nil || sd.count == 0) {
+        return NO;
+    }
+    for (NSDictionary *f in filters) {
+        NSString *service                   = f[@"service"];
+        NSData *data = [self convertHexToData:f[@"data"]];
+        NSData *mask = [self convertHexToData:f[@"mask"]];
+
+        // mask
+        if (mask.length == 0 && data.length > 0) {
+            uint8_t *bytes = malloc(data.length);
+            memset(bytes, 1, data.length); 
+            mask = [NSData dataWithBytesNoCopy:bytes length:data.length freeWhenDone:YES];
+        }
+
+        // found a match?
+        for (CBUUID *uuid in sd) {
+            NSString* a = [uuid.UUIDString lowercaseString];
+            NSString* b = [service lowercaseString];
+            if([a isEqualToString:b] && [self findData:data inData:sd[uuid] usingMask:mask]) {
+                return YES;
+            }
         }
     }
     return NO;
