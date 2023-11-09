@@ -1,3 +1,7 @@
+## 1.28.5
+* **[Fix]** GUID: guid.uuid still had a bug
+* **[Internal]** use short UUID where possible
+
 ## 1.28.4
 * **[Fix]** guid: uuid was returning 0000 for 16 bit uuid
 * **[Guid]** guid.uuid should return lowercase
