@@ -178,6 +178,7 @@ class FlutterBluePlus {
   }) async {
     // check args
     assert(removeIfGone == null || continuousUpdates, "removeIfGone requires continuousUpdates");
+    assert(removeIfGone == null || !oneByOne, "removeIfGone is not compatible with oneByOne");
 
     // stop existing scan
     if (_isScanning.latestValue == true) {
@@ -231,30 +232,34 @@ class FlutterBluePlus {
               _nativeError, "scan", response.failed!.errorCode, response.failed!.errorString);
         }
 
-        BmScanAdvertisement bm = response.advertisement!;
+        // iterate through advertisements
+        for (BmScanAdvertisement bm in response.advertisements) {
+          // cache platformName
+          if (bm.platformName != null) {
+            _platformNames[DeviceIdentifier(bm.remoteId)] = bm.platformName!;
+          }
 
-        // cache platformName
-        if (bm.platformName != null) {
-          _platformNames[DeviceIdentifier(bm.remoteId)] = bm.platformName!;
+          // cache advertised name
+          if (bm.advName != null) {
+            _advNames[DeviceIdentifier(bm.remoteId)] = bm.advName!;
+          }
+
+          // convert
+          ScanResult sr = ScanResult.fromProto(bm);
+
+          if (oneByOne) {
+            // push single item
+            _scanResultsList.add([sr]);
+          } else {
+            // add result to output
+            output.addOrUpdate(sr);
+          }
         }
 
-        // cache advertised name
-        if (bm.advName != null) {
-          _advNames[DeviceIdentifier(bm.remoteId)] = bm.advName!;
+        // push entire list
+        if (!oneByOne) {
+          _scanResultsList.add(List.from(output));
         }
-
-        // convert
-        ScanResult sr = ScanResult.fromProto(bm);
-
-        // add result to output
-        if (oneByOne) {
-          output = [sr];
-        } else {
-          output.addOrUpdate(sr);
-        }
-
-        // push to stream
-        _scanResultsList.add(List.from(output));
       }
     });
 

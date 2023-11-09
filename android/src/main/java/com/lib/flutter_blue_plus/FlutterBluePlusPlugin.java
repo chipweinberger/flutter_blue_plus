@@ -1744,12 +1744,9 @@ public class FlutterBluePlusPlugin implements
                         }
                     }
 
-                    // see BmScanAdvertisement
-                    HashMap<String, Object> sAdv = bmScanAdvertisement(device, result);
-
                     // see BmScanResponse
                     HashMap<String, Object> response = new HashMap<>();
-                    response.put("advertisement", sAdv);
+                    response.put("advertisements", Arrays.asList(bmScanAdvertisement(device, result)));
 
                     invokeMethodUIThread("OnScanResponse", response);
                 }

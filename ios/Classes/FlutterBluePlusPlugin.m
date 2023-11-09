@@ -1025,7 +1025,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     // See BmScanResponse
     NSDictionary *response = @{
-        @"advertisement": [self bmScanAdvertisement:remoteId advertisementData:advertisementData RSSI:RSSI],
+        @"advertisements": @[[self bmScanAdvertisement:remoteId advertisementData:advertisementData RSSI:RSSI]],
     };
 
     [_methodChannel invokeMethod:@"OnScanResponse" arguments:response];

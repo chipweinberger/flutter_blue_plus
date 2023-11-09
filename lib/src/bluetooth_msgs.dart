@@ -144,17 +144,22 @@ class BmScanAdvertisement {
 }
 
 class BmScanResponse {
-  final BmScanAdvertisement? advertisement;
+  final List<BmScanAdvertisement> advertisements;
   final BmScanFailed? failed;
 
   BmScanResponse({
-    required this.advertisement,
+    required this.advertisements,
     required this.failed,
   });
 
   factory BmScanResponse.fromMap(Map<dynamic, dynamic> json) {
+    List<BmScanAdvertisement> advertisements = [];
+    for (var item in json['advertisements']) {
+      advertisements.add(BmScanAdvertisement.fromMap(item));
+    }
+
     return BmScanResponse(
-      advertisement: json['advertisement'] != null ? BmScanAdvertisement.fromMap(json['advertisement']) : null,
+      advertisements: advertisements,
       failed: json['failed'] != null ? BmScanFailed.fromMap(json['failed']) : null,
     );
   }
