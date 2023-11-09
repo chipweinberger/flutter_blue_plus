@@ -65,11 +65,11 @@ class Guid {
     bool ends = uuid128.contains('-0000-1000-8000-00805f9b34fb');
     if (starts && ends) {
       // 16-bit
-      return _hexEncode(bytes.sublist(0, 2));
+      return _hexEncode(bytes.sublist(0, 2)).toLowerCase();
     }
     if (ends) {
       // 32-bit
-      return _hexEncode(bytes.sublist(0, 4));
+      return _hexEncode(bytes.sublist(0, 4)).toLowerCase();
     }
     // 128-bit
     return uuid128;
