@@ -1,5 +1,9 @@
+## 1.28.6
+* **[Improve]** simplify api: clear `knownServices` & `lastValues` on reconnection instead of disconnection
+* **[Improve]** dont clear `bondState` cache when device is disconnected. unecessary.
+
 ## 1.28.5
-* **[Fix]** GUID: guid.uuid still had a bug
+* **[Fix]** GUID: `guid.uuid` still had a bug
 * **[Internal]** use short UUID where possible
 
 ## 1.28.4
@@ -10,8 +14,8 @@
 * **[Improve]** guid: add uuid short representation
 
 ## 1.28.2
-* **[Improve]** add length checks to MsdFilter & ServiceDataFilter
-* **[Improve]** guid: more consistent handling of 16,32, vs 128 bit guids
+* **[Improve]** add length checks to `MsdFilter` & `ServiceDataFilter`
+* **[Improve]** guid: more consistent handling of 16, 32, vs 128 bit guids
 
 ## 1.28.1
 * **[Feature]** scanning: add `serviceData` filter
