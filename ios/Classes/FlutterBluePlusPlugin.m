@@ -1267,7 +1267,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     if (error) {
         Log(LERROR, @"didUpdateValueForCharacteristic: [Error] %@", [error localizedDescription]);
     } else {
-        Log(LDEBUG, @"didUpdateValueForCharacteristic %@", [peripheral.identifier UUIDString]);
+        Log(LDEBUG, @"didUpdateValueForCharacteristic");
     }
 
     ServicePair *pair = [self getServicePair:peripheral characteristic:characteristic];
