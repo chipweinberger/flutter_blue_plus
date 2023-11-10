@@ -12,7 +12,6 @@ class Snackbar {
   static final snackBarKeyA = GlobalKey<ScaffoldMessengerState>();
   static final snackBarKeyB = GlobalKey<ScaffoldMessengerState>();
   static final snackBarKeyC = GlobalKey<ScaffoldMessengerState>();
-  static final Map<DeviceIdentifier, ValueNotifier<bool>> isConnectingOrDisconnecting = {};
 
   static GlobalKey<ScaffoldMessengerState> getSnackbar(ABC abc) {
     switch (abc) {
