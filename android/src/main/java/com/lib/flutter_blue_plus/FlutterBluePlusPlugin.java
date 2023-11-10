@@ -118,9 +118,8 @@ public class FlutterBluePlusPlugin implements
 
     public FlutterBluePlusPlugin() {}
 
-    public String uuid128(UUID obj)
+    public String uuid128(String uuid)
     {
-        String uuid = obj.toString(); 
         if (uuid.length() == 4)
         {
             // 16-bit uuid
@@ -141,7 +140,7 @@ public class FlutterBluePlusPlugin implements
     // shortest representation
     public String uuidStr(UUID uuid) {
 
-        String u128 = uuid128(uuid);
+        String u128 = uuid128(uuid.toString());
 
         boolean starts = u128.startsWith("0000");
         boolean ends = u128.endsWith("-0000-1000-8000-00805f9b34fb");
@@ -516,8 +515,8 @@ public class FlutterBluePlusPlugin implements
 
                         // services
                         for (int i = 0; i < withServices.size(); i++) {
-                            String uuid = withServices.get(i);
-                            ScanFilter f = new ScanFilter.Builder().setServiceUuid(ParcelUuid.fromString(uuid)).build();
+                            ParcelUuid s = ParcelUuid.fromString(uuid128(withServices.get(i)));
+                            ScanFilter f = new ScanFilter.Builder().setServiceUuid(s).build();
                             filters.add(f);
                         }
                         
