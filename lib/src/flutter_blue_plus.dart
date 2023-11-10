@@ -366,7 +366,6 @@ class FlutterBluePlus {
       _connectionStates[remoteId] = r;
       if (r.connectionState == BmConnectionStateEnum.disconnected) {
         _subscriptions[remoteId]?.forEach((s) => s.cancel());
-        _bondStates.remove(remoteId);
         _mtuValues.remove(remoteId);
         _subscriptions.remove(remoteId);
       }
