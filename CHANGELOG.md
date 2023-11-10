@@ -1,3 +1,6 @@
+## 1.28.8
+* **[Fix]** android: GUID issues related to scanning
+
 ## 1.28.7
 * **[Fix]** android: GUID starting with 0000 were misinterpretted (regression 1.28.5)
 
@@ -6,7 +9,6 @@
 * **[Improve]** dont clear `bondState` cache when device is disconnected. unecessary.
 
 ## 1.28.5
-* **[Fix]** GUID: `guid.uuid` still had a bug
 * **[Internal]** use short UUID where possible
 
 ## 1.28.4
