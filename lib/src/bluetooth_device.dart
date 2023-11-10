@@ -20,10 +20,10 @@ class BluetoothDevice {
   BluetoothDevice.fromId(String remoteId) : remoteId = DeviceIdentifier(remoteId);
 
   /// platform name
-  /// - this is the device name that is kept track of by the platform 
+  /// - this is the device name that is kept track of by the platform
   /// - this name usually persist between app restarts
   /// - iOS: uses GAP name characteristic 0x2A00 if it exists, otherwise advertised name
-  /// - Android: always a cached advertised name
+  /// - Android: always uses advertised name
   String get platformName => FlutterBluePlus._platformNames[remoteId] ?? "";
 
   /// Advertised Named
@@ -34,10 +34,15 @@ class BluetoothDevice {
   String get advName => FlutterBluePlus._advNames[remoteId] ?? "";
 
   /// Get services
-  ///  - returns null if discoverServices() has not been called
-  ///  - this is cleared on disconnection. You must call discoverServices() again
-  List<BluetoothService>? get servicesList {
-    return FlutterBluePlus._knownServices[remoteId]?.services.map((p) => BluetoothService.fromProto(p)).toList();
+  ///  - returns empty if discoverServices() has not been called
+  ///    or if your device does not have any services (rare)
+  List<BluetoothService> get servicesList {
+    BmDiscoverServicesResult? result = FlutterBluePlus._knownServices[remoteId];
+    if (result == null) {
+      return [];
+    } else {
+      return result.services.map((p) => BluetoothService.fromProto(p)).toList();
+    }
   }
 
   /// Register a subscription to be canceled when the device is disconnected.
@@ -75,7 +80,6 @@ class BluetoothDevice {
     bool autoConnect = false,
     int? mtu = 512,
   }) async {
-
     // make sure no one else is calling disconnect
     _Mutex dmtx = await _MutexFactory.getMutexForKey("disconnect");
     bool dtook = await dmtx.take();

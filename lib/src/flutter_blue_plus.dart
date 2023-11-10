@@ -246,7 +246,7 @@ class FlutterBluePlus {
 
         // iterate through advertisements
         for (BmScanAdvertisement bm in response.advertisements) {
-          // cache platformName
+          // cache platform name
           if (bm.platformName != null) {
             _platformNames[DeviceIdentifier(bm.remoteId)] = bm.platformName!;
           }
