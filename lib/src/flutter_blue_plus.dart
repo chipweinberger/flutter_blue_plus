@@ -365,14 +365,13 @@ class FlutterBluePlus {
       var remoteId = DeviceIdentifier(r.remoteId);
       _connectionStates[remoteId] = r;
       if (r.connectionState == BmConnectionStateEnum.disconnected) {
+        // cancel subscriptions
         _subscriptions[remoteId]?.forEach((s) => s.cancel());
-        _mtuValues.remove(remoteId);
         _subscriptions.remove(remoteId);
-      }
-      if (r.connectionState == BmConnectionStateEnum.connected) {
-        _knownServices.remove(remoteId);
-        _lastChrs.remove(remoteId);
-        _lastDescs.remove(remoteId);
+        // To make FBP easier to use, we purposely do not clear knownServices,
+        // lastChrs, or lastDescs, otherwise values would disappear suddenly.
+        // We also don't clear the bondState cache, for faster performance.
+        _mtuValues.remove(remoteId);  
       }
     }
 
