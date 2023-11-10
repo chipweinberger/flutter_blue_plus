@@ -118,48 +118,53 @@ public class FlutterBluePlusPlugin implements
 
     public FlutterBluePlusPlugin() {}
 
-    public String uuid128(String uuid)
+    // returns 128-bit representation
+    public String uuid128(Object uuid)
     {
-        if (uuid.length() == 4)
+        if (!(uuid instanceof UUID) && !(uuid instanceof String)) {
+            throw new IllegalArgumentException("input must be UUID or String");
+        }
+
+        String s = uuid.toString();
+
+        if (s.length() == 4)
         {
             // 16-bit uuid
-            return String.format("0000%s-0000-1000-8000-00805f9b34fb", uuid).toLowerCase();
+            return String.format("0000%s-0000-1000-8000-00805f9b34fb", s).toLowerCase();
         } 
-        else if (uuid.length() == 8)
+        else if (s.length() == 8)
         {
             // 32-bit uuid
-            return String.format("%s-0000-1000-8000-00805f9b34fb", uuid).toLowerCase();
+            return String.format("%s-0000-1000-8000-00805f9b34fb", s).toLowerCase();
         }
         else
         {
             // 128-bit uuid
-            return uuid.toLowerCase();
+            return s.toLowerCase();
         }
     }
 
-    // shortest representation
-    public String uuidStr(UUID uuid) {
-
-        String u128 = uuid128(uuid.toString());
-
-        boolean starts = u128.startsWith("0000");
-        boolean ends = u128.endsWith("-0000-1000-8000-00805f9b34fb");
-
+    // returns shortest representation
+    public String uuidStr(Object uuid)
+    {
+        String s = uuid128(uuid);
+        boolean starts = s.startsWith("0000");
+        boolean ends = s.endsWith("-0000-1000-8000-00805f9b34fb");
         if (starts && ends)
-        {   // 16-bit
-            return u128.substring(4,8);
+        {   
+            // 16-bit
+            return s.substring(4,8);
         }
         else if (ends) 
         {
             // 32-bit
-            return u128.substring(0,8);
+            return s.substring(0,8);
         } 
         else 
         {
             // 128-bit
-            return u128;
-        }   
-        
+            return s;
+        }    
     }
 
     @Override
@@ -1550,7 +1555,7 @@ public class FlutterBluePlusPlugin implements
     private BluetoothGattService getServiceFromArray(String uuid, List<BluetoothGattService> array)
     {
         for (BluetoothGattService s : array) {
-            if (uuidStr(s.getUuid()).equals(uuid)) {
+            if (uuid128(s.getUuid()).equals(uuid128(uuid))) {
                 return s;
             }
         }
@@ -1560,7 +1565,7 @@ public class FlutterBluePlusPlugin implements
     private BluetoothGattCharacteristic getCharacteristicFromArray(String uuid, List<BluetoothGattCharacteristic> array)
     {
         for (BluetoothGattCharacteristic c : array) {
-            if (uuidStr(c.getUuid()).equals(uuid)) {
+            if (uuid128(c.getUuid()).equals(uuid128(uuid))) {
                 return c;
             }
         }
@@ -1570,7 +1575,7 @@ public class FlutterBluePlusPlugin implements
     private BluetoothGattDescriptor getDescriptorFromArray(String uuid, List<BluetoothGattDescriptor> array)
     {
         for (BluetoothGattDescriptor d : array) {
-            if (uuidStr(d.getUuid()).equals(uuid)) {
+            if (uuid128(d.getUuid()).equals(uuid128(uuid))) {
                 return d;
             }
         }
