@@ -150,7 +150,7 @@ public class FlutterBluePlusPlugin implements
         {   // 16-bit
             return u128.substring(4,8);
         }
-        else if (starts) 
+        else if (ends) 
         {
             // 32-bit
             return u128.substring(0,8);
