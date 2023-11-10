@@ -83,7 +83,7 @@ class BmScanSettings {
 
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> data = {};
-    data['with_services'] = withServices.map((s) => s.uuid).toList();
+    data['with_services'] = withServices.map((s) => s.uuid128).toList();
     data['with_remote_ids'] = withRemoteIds;
     data['with_names'] = withNames;
     data['with_keywords'] = withKeywords;
