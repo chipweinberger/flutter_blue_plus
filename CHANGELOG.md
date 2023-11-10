@@ -1,3 +1,6 @@
+## 1.28.9
+* **[Improve]** to make FBP easier to use, never clear `knownServices`, `lastChrs`, or `lastDescs`
+
 ## 1.28.8
 * **[Fix]** android: GUID issues related to scanning
 
