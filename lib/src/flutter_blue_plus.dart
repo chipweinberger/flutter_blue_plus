@@ -190,13 +190,14 @@ class FlutterBluePlus {
     assert(removeIfGone == null || !oneByOne, "removeIfGone is not compatible with oneByOne");
     assert(continuousDivisor >= 1, "divisor must be >= 1");
 
-    // stop existing scan
+    // already scanning?
     if (_isScanning.latestValue == true) {
-      await stopScan();
+      // stop existing scan
+      await _stopScan(pushToStream: false);
+    } else {
+      // push to stream
+      _isScanning.add(true);
     }
-
-    // push to stream
-    _isScanning.add(true);
 
     var settings = BmScanSettings(
         withServices: withServices,
@@ -288,11 +289,13 @@ class FlutterBluePlus {
   }
 
   /// for internal use
-  static Future<void> _stopScan({bool invokePlatform = true}) async {
+  static Future<void> _stopScan({bool invokePlatform = true, bool pushToStream = true}) async {
     _scanSubscription?.cancel();
     _scanTimeout?.cancel();
-    _isScanning.add(false);
     _scanResultsList.latestValue = [];
+    if (pushToStream) {
+      _isScanning.add(false);
+    }
     if (invokePlatform) {
       await _invokeMethod('stopScan');
     }
@@ -371,7 +374,7 @@ class FlutterBluePlus {
         // To make FBP easier to use, we purposely do not clear knownServices,
         // lastChrs, or lastDescs, otherwise values would disappear suddenly.
         // We also don't clear the bondState cache, for faster performance.
-        _mtuValues.remove(remoteId);  
+        _mtuValues.remove(remoteId);
       }
     }
 
