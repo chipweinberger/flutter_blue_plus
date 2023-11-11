@@ -455,6 +455,7 @@ public class FlutterBluePlusPlugin implements
                     List<String> withServices =    (List<String>) data.get("with_services");
                     List<String> withRemoteIds =   (List<String>) data.get("with_remote_ids");
                     List<String> withNames =       (List<String>) data.get("with_names");
+                    List<String> withKeywords =    (List<String>) data.get("with_keywords");
                     List<Object> withMsd =         (List<Object>) data.get("with_msd");
                     List<Object> withServiceData = (List<Object>) data.get("with_service_data");
                     boolean continuousUpdates =         (boolean) data.get("continuous_updates");
@@ -537,6 +538,17 @@ public class FlutterBluePlusPlugin implements
                             String name = withNames.get(i);
                             ScanFilter f = new ScanFilter.Builder().setDeviceName(name).build();
                             filters.add(f);
+                        }
+
+                        // keywords
+                        if (withKeywords.size() > 0) {
+                            // device must advertise a name
+                            int a1 = ScanRecord.DATA_TYPE_LOCAL_NAME_SHORT;
+                            int a2 = ScanRecord.DATA_TYPE_LOCAL_NAME_COMPLETE;
+                            ScanFilter f1 = new ScanFilter.Builder().setAdvertisingDataType(a1).build();
+                            ScanFilter f2 = new ScanFilter.Builder().setAdvertisingDataType(a2).build();
+                            filters.add(f1);
+                            filters.add(f2);
                         }
 
                         // msd
