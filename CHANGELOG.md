@@ -1,3 +1,8 @@
+## 1.28.10
+* **[Perf]** android: filter out devices without names if scan.withKeywords is set
+* **[Fix]** calling scan multiple times would breifly push isScanning=false
+* **[Improve]** servicesList: return empty instead of null
+
 ## 1.28.9
 * **[Improve]** to make FBP easier to use, never clear `knownServices`, `lastChrs`, or `lastDescs`
 
