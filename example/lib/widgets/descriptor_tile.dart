@@ -63,7 +63,7 @@ class _DescriptorTileState extends State<DescriptorTile> {
   }
 
   Widget buildUuid(BuildContext context) {
-    String uuid = '0x${widget.descriptor.uuid.toString().toUpperCase()}';
+    String uuid = '0x${widget.descriptor.uuid.str.toUpperCase()}';
     return Text(uuid, style: TextStyle(fontSize: 13));
   }
 

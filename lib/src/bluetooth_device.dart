@@ -628,8 +628,8 @@ class BluetoothDevice {
 
   /// Get the Services Changed characteristic (0x2A05)
   BluetoothCharacteristic? get _servicesChangedCharacteristic {
-    final Guid gattUuid = Guid("00001801-0000-1000-8000-00805F9B34FB");
-    final Guid servicesChangedUuid = Guid("00002A05-0000-1000-8000-00805F9B34FB");
+    final Guid gattUuid = Guid("1801");
+    final Guid servicesChangedUuid = Guid("2A05");
     BluetoothService? gatt = servicesList._firstWhereOrNull((svc) => svc.uuid == gattUuid);
     return gatt?.characteristics._firstWhereOrNull((chr) => chr.uuid == servicesChangedUuid);
   }
