@@ -153,7 +153,7 @@ class BmScanAdvertisement {
       manufacturerData: manufacturerData,
       serviceData: serviceData,
       serviceUuids: serviceUuids,
-      rssi: json['rssi'],
+      rssi: json['rssi'] != null ? json['rssi'] : 0,
     );
   }
 }
