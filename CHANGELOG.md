@@ -3,8 +3,8 @@
 * **[Add]** connect: `timeout` argument is now optional. infinite timeout is possible on iOS
 
 ## 1.28.10
-* **[Perf]** android: filter out devices without names if scan.withKeywords is set
-* **[Fix]** calling scan multiple times would breifly push isScanning=false
+* **[Perf]** android: filter out devices without names if `scan.withKeywords` is set
+* **[Fix]** calling scan multiple times would breifly push `isScanning=false`
 * **[Improve]** servicesList: return empty instead of null
 
 ## 1.28.9
@@ -39,7 +39,7 @@
 * **[Feature]** scanning: add `msd` filter
 
 ## 1.28.0
-* **[Breaking Change]** `guid.toString()` now returns 16-bit short uuid when possibe
+* **[Breaking Change]** `guid.toString()` now returns 16-bit short uuid when possible
 * **[Breaking Change]** return GUIDs for `advertisingData.serviceUuids` & `advertisingData.serviceData` instead of String
 * **[Guid]** add support for 16-bit and 32-bit uuids
 * **[Fix]** android: advertised UUIDs were 128-bit instead of the actual length
