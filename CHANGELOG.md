@@ -1,3 +1,7 @@
+## 1.28.11
+* **[Rename]** `giud.uuid` -> `guid.str` & `guid.uuid128` -> `guid.str128`
+* **[Add]** connect: `timeout` argument is now optional. infinite timeout is possible on iOS
+
 ## 1.28.10
 * **[Perf]** android: filter out devices without names if scan.withKeywords is set
 * **[Fix]** calling scan multiple times would breifly push isScanning=false
