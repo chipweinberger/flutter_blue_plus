@@ -204,4 +204,5 @@ If your app uses `startScan.removeIfGone`, or your app continually checks the va
 
 ## 1.28.0
 
+* **[Breaking Change]** `guid.toString()` now returns 16-bit short uuid when possibe
 * **[Breaking Change]** use GUID for `advertisingData.serviceUuids` & `advertisingData.serviceData` instead of String

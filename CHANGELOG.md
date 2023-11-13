@@ -35,9 +35,10 @@
 * **[Feature]** scanning: add `msd` filter
 
 ## 1.28.0
-* **[Fix]** android: advertised UUIDs were 128-bit instead of the actual length
+* **[Breaking Change]** `guid.toString()` now returns 16-bit short uuid when possibe
+* **[Breaking Change]** return GUIDs for `advertisingData.serviceUuids` & `advertisingData.serviceData` instead of String
 * **[Guid]** add support for 16-bit and 32-bit uuids
-* **[Breaking Change]** use GUID for `advertisingData.serviceUuids` & `advertisingData.serviceData` instead of String
+* **[Fix]** android: advertised UUIDs were 128-bit instead of the actual length
 
 ## 1.27.6
 * **[Improve]** add more checks for bluetooth being off
