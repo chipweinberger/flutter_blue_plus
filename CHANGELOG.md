@@ -1,3 +1,6 @@
+## 1.28.12
+* **[Fix]** crash if rssi was zero on android (regression 1.27.2)
+
 ## 1.28.11
 * **[Rename]** `giud.uuid` -> `guid.str` & `guid.uuid128` -> `guid.str128`
 * **[Add]** connect: `timeout` argument is now optional. infinite timeout is possible on iOS
