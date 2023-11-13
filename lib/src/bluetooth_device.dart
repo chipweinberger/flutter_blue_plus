@@ -71,16 +71,23 @@ class BluetoothDevice {
   }
 
   /// Establishes a connection to the Bluetooth Device.
+  ///   [timeout] If null, return early without actually waiting for a connection to be established.
+  ///      - the connection request will still be sent to the system
+  ///      - on iOS, it will never timeout. The connection will happen whenever it happens.
+  ///        However, if the bluetooth adapter is turned off the request is canceled and you must
+  ///        call `connect` again when the adapter is re-enabled.
+  ///      - on Android a maximum 30s timeout will always apply.
+  ///      - `device.connectionState` will be updated when connection is successful or failed. 
   ///   [autoConnect] Android only, reconnect whenever the device is found.
-  ///      - Using AutoConnect is not recommended. 
-  ///      - AutoConnect only works if the device is in the Bluetooth scan cache or has been bonded before.
-  ///      - The scan cache is cleared whenever bluetooth is turned off. 
-  ///      - AutoConnect results in a slower connection process compared to a direct connection
+  ///      - using AutoConnect is not recommended. 
+  ///      - autoConnect only works if the device is in the Bluetooth scan cache or has been bonded before.
+  ///      - the scan cache is cleared whenever bluetooth is turned off. 
+  ///      - autoConnect results in a slower connection process compared to a direct connection
   ///        because it relies on the internal scheduling of background scans.
-  ///      - Autoconnect is disabled when you manually call disconnect
+  ///      - autoconnect is disabled when you manually call disconnect
   ///   [mtu] Android only. Request a larger mtu right after connection, if set.
   Future<void> connect({
-    Duration timeout = const Duration(seconds: 35),
+    Duration? timeout = const Duration(seconds: 35),
     bool autoConnect = false,
     int? mtu = 512,
   }) async {
@@ -115,7 +122,7 @@ class BluetoothDevice {
       dtook = dmtx.give();
 
       // only wait for connection if we weren't already connected
-      if (changed) {
+      if (changed && timeout != null) {
         BmConnectionStateResponse response = await futureState
             .fbpEnsureAdapterIsOn("connect")
             .fbpTimeout(timeout.inSeconds, "connect")
