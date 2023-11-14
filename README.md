@@ -142,6 +142,9 @@ var subscription = FlutterBluePlus.scanResults.listen((results) {
     onError(e) => print(e);
 );
 
+// Wait for Bluetooth to be On
+await FlutterBluePlus.adapterState.where((val) => val == BluetoothAdapterState.on).first;
+
 // Start scanning
 await FlutterBluePlus.startScan();
 
