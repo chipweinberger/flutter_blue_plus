@@ -94,7 +94,7 @@ Setting `LogLevel.verbose` shows *all* data in and out.
 <img width="600" alt="Screenshot 2023-07-27 at 4 53 08 AM" src="https://github.com/boskokg/flutter_blue_plus/assets/1863934/ee37d702-2752-4402-bf26-fc661728c1c3">
 
 
-### Handle Bluetooth On & Off
+### Bluetooth On & Off
 
 **Note:** On iOS, a "*This app would like to use Bluetooth*" system dialogue appears on first call to any FlutterBluePlus method. 
  
