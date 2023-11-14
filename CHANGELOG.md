@@ -1,3 +1,6 @@
+## 1.28.13
+* **[Fix]** `isNotifying`` was not set to false on disconnection (regression 1.28.9)
+
 ## 1.28.12
 * **[Fix]** crash if rssi was zero on android (regression 1.27.2)
 
