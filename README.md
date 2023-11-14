@@ -142,7 +142,8 @@ var subscription = FlutterBluePlus.scanResults.listen((results) {
     onError(e) => print(e);
 );
 
-// Wait for Bluetooth to be On
+// Wait for Bluetooth enabled & permission granted
+// In your real app you should use `FlutterBluePlus.adapterState.listen` to handle all states
 await FlutterBluePlus.adapterState.where((val) => val == BluetoothAdapterState.on).first;
 
 // Start scanning
