@@ -227,7 +227,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             // check adapter state
             if ([self isAdapterOn] == false) {
-                NSString* s = @"bluetooth must be turned on";
+                NSString* as = [self cbManagerStateString:self.centralManager.state];
+                NSString* s = [NSString stringWithFormat:@"bluetooth must be turned on. (%@)", as];
                 result([FlutterError errorWithCode:@"startScan" message:s details:NULL]);
                 return;
             }
@@ -292,7 +293,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             // check adapter state
             if ([self isAdapterOn] == false) {
-                NSString* s = @"bluetooth must be turned on";
+                NSString* as = [self cbManagerStateString:self.centralManager.state];
+                NSString* s = [NSString stringWithFormat:@"bluetooth must be turned on. (%@)", as];
                 result([FlutterError errorWithCode:@"connect" message:s details:NULL]);
                 return;
             }
