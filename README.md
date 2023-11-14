@@ -788,6 +788,28 @@ Maybe your device crashed, or is not sending a response due to software bugs.
 
 Bluetooth is wireless and will not always work.
 
+---
+
+### "bluetooth must be turned on"
+
+You need to wait for the bluetooth adapter to fully turn on. 
+
+`await FlutterBluePlus.adapterState.where((state) => state == BluetoothAdapterState.on).first;`
+
+You can also use `FlutterBluePlus.adapterState.listen(...)`. See [Usage](#usage).
+
+---
+
+### ANDROID_SPECIFIC_ERROR
+
+There is no 100% solution.  
+
+FBP already has mitigations for this error, but Android will still fail with this code randomly. 
+
+The recommended solution is to `catch` the error, and retry.
+
+
+
 
 
 
