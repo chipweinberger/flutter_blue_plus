@@ -371,10 +371,15 @@ class FlutterBluePlus {
         // cancel subscriptions
         _subscriptions[remoteId]?.forEach((s) => s.cancel());
         _subscriptions.remove(remoteId);
-        // To make FBP easier to use, we purposely do not clear knownServices,
-        // lastChrs, or lastDescs, otherwise values would disappear suddenly.
-        // We also don't clear the bondState cache, for faster performance.
+        // reset known mtu
         _mtuValues.remove(remoteId);
+        // must clear lastDescs so that 'isNotifying' is set to false
+        _lastDescs.remove(remoteId);
+        // for api consistency, also clear characteristic values
+        _lastChrs.remove(remoteId);
+        // to make FBP easier to use, we purposely do not clear knownServices.
+        // otherwise `device.servicesList` would be very annoying to use.
+        // We also don't clear the `bondState` cache, for faster performance.
       }
     }
 
