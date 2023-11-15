@@ -541,14 +541,16 @@ public class FlutterBluePlusPlugin implements
                         }
 
                         // keywords
-                        if (withKeywords.size() > 0) {
-                            // device must advertise a name
-                            int a1 = ScanRecord.DATA_TYPE_LOCAL_NAME_SHORT;
-                            int a2 = ScanRecord.DATA_TYPE_LOCAL_NAME_COMPLETE;
-                            ScanFilter f1 = new ScanFilter.Builder().setAdvertisingDataType(a1).build();
-                            ScanFilter f2 = new ScanFilter.Builder().setAdvertisingDataType(a2).build();
-                            filters.add(f1);
-                            filters.add(f2);
+                        if (Build.VERSION.SDK_INT >= 33) { // Android 13 (August 2022)
+                            if (withKeywords.size() > 0) {
+                                // device must advertise a name
+                                int a1 = ScanRecord.DATA_TYPE_LOCAL_NAME_SHORT;
+                                int a2 = ScanRecord.DATA_TYPE_LOCAL_NAME_COMPLETE;
+                                ScanFilter f1 = new ScanFilter.Builder().setAdvertisingDataType(a1).build();
+                                ScanFilter f2 = new ScanFilter.Builder().setAdvertisingDataType(a2).build();
+                                filters.add(f1);
+                                filters.add(f2);
+                            }
                         }
 
                         // msd
