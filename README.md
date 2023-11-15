@@ -160,7 +160,7 @@ subscription.cancel();
 
 ```dart
 // listen for disconnection
-device.connectionState.listen((BluetoothConnectionState state) async {
+var subscription = device.connectionState.listen((BluetoothConnectionState state) async {
     if (state == BluetoothConnectionState.disconnected) {
         // 1. typically, start a periodic timer that tries to 
         //    reconnect, or just call connect() again right now
@@ -174,6 +174,9 @@ await device.connect();
 
 // Disconnect from device
 await device.disconnect();
+
+// cancel to prevent duplicate listeners
+subscription.cancel();
 ```
 
 ### MTU
@@ -183,13 +186,13 @@ On Android, we request an mtu of 512 by default during connection (see: `connect
 On iOS & macOS, the mtu is negotiated automatically, typically 135 to 255.
 
 ```dart
-final mtuSubscription = device.onMtu.listen((int mtu) {
+final subscription = device.onMtu.listen((int mtu) {
     // iOS: initial value is always 23, but iOS will quickly negotiate a higher value
     print("mtu $mtu");
 });
 
 // cleanup: cancel subscription when disconnected
-device.cancelWhenDisconnected(mtuSubscription);
+device.cancelWhenDisconnected(subscription);
 
 // You can also manually change the mtu yourself.
 if (Platform.isAndroid) {
@@ -262,14 +265,14 @@ extension splitWrite on BluetoothCharacteristic {
 // If `onValueReceived` is never called, see [Common Problems](#common-problems) in the README.
 
 ```dart
-final chrSubscription = characteristic.onValueReceived.listen((value) {
+final subscription = characteristic.onValueReceived.listen((value) {
     // onValueReceived is updated:
     //   - anytime read() is called
     //   - anytime a notification arrives (if subscribed)
 });
 
 // cleanup: cancel subscription when disconnected
-device.cancelWhenDisconnected(chrSubscription);
+device.cancelWhenDisconnected(subscription);
 
 // subscribe
 // Note: If a characteristic supports both **notifications** and **indications**,
@@ -284,7 +287,7 @@ await characteristic.setNotifyValue(true);
 It is very convenient for simple characteristics that support both WRITE and READ (and/or NOTIFY). **e.g.** a "light switch toggle" characteristic. 
 
 ```dart
-final chrSubscription = characteristic.lastValueStream.listen((value) {
+final subscription = characteristic.lastValueStream.listen((value) {
     // lastValueStream` is updated:
     //   - anytime read() is called
     //   - anytime write() is called
@@ -293,7 +296,7 @@ final chrSubscription = characteristic.lastValueStream.listen((value) {
 });
 
 // cleanup: cancel subscription when disconnected
-device.cancelWhenDisconnected(chrSubscription);
+device.cancelWhenDisconnected(subscription);
 
 // enable notifications
 await characteristic.setNotifyValue(true);
