@@ -1,3 +1,6 @@
+## 1.28.14
+* **[Fix]** `setAdvertisingDataType` crash on android 10 and below (regression 1.28.10)
+
 ## 1.28.13
 * **[Fix]** `isNotifying`` was not set to false on disconnection (regression 1.28.9)
 
