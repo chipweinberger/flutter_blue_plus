@@ -807,6 +807,14 @@ You can also use `FlutterBluePlus.adapterState.listen(...)`. See [Usage](#usage)
 
 ---
 
+### iOS: "[Error] The connection has timed out unexpectedly."
+
+You can google this error. It is a common iOS ble error code.
+
+It means your device stopped working. FlutterBluePlus cannot fix it.
+
+---
+
 ### ANDROID_SPECIFIC_ERROR
 
 There is no 100% solution.  
