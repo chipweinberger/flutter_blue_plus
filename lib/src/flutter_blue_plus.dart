@@ -449,7 +449,7 @@ class FlutterBluePlus {
     dynamic out;
 
     // only allow 1 invocation at a time (guarentees that hot restart finishes)
-    _Mutex mtx = await _MutexFactory.getMutexForKey("invokeMethod");
+    _Mutex mtx = _MutexFactory.getMutexForKey("invokeMethod");
     await mtx.take();
 
     try {
