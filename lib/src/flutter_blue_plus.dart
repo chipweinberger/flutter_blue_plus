@@ -66,11 +66,17 @@ class FlutterBluePlus {
   /// are we scanning right now?
   static bool get isScanningNow => _isScanning.latestValue;
 
-  /// Returns a stream of List<ScanResult> results while a scan is in progress.
+  /// a stream of scan results 
+  /// - if you re-listen to the stream it re-emits the previous results
   /// - the list contains all the results since the scan started
-  /// - if you listen to scanResults again after scanning stops, it will return empty.
   /// - the returned stream is never closed.
   static Stream<List<ScanResult>> get scanResults => _scanResults.stream;
+
+  /// a stream of scan results 
+  /// - it only emits values while the scan is in progress
+  /// - the list contains all the results since the scan started
+  /// - the returned stream is never closed.
+  static Stream<List<ScanResult>> get onScanResults => _scanResults.stream.skip(1);
 
   /// Get access to all device event streams
   static final BluetoothEvents events = BluetoothEvents();
@@ -293,7 +299,6 @@ class FlutterBluePlus {
   static Future<void> _stopScan({bool invokePlatform = true, bool pushToStream = true}) async {
     _scanSubscription?.cancel();
     _scanTimeout?.cancel();
-    _scanResults.latestValue = [];
     if (pushToStream) {
       _isScanning.add(false);
     }
