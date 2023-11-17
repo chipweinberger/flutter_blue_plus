@@ -66,6 +66,9 @@ class FlutterBluePlus {
   /// are we scanning right now?
   static bool get isScanningNow => _isScanning.latestValue;
 
+  /// the most recent scan results
+  static List<ScanResult> get lastScanResults => _scanResults.latestValue;
+
   /// a stream of scan results 
   /// - if you re-listen to the stream it re-emits the previous results
   /// - the list contains all the results since the scan started
