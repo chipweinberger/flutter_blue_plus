@@ -67,7 +67,8 @@ class FlutterBluePlus {
   static bool get isScanningNow => _isScanning.latestValue;
 
   /// Returns a stream of List<ScanResult> results while a scan is in progress.
-  /// - The list contains all the results since the scan started.
+  /// - the list contains all the results since the scan started until stopScan or scan timeout
+  /// - after stopScan or scan timeout the list is cleared. If you re-listen, the list will be empty.
   /// - The returned stream is never closed.
   static Stream<List<ScanResult>> get scanResults => _scanResultsList.stream;
 
