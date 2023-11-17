@@ -33,7 +33,7 @@ class FlutterBluePlus {
   static final _isScanning = _StreamController<bool>(initialValue: false);
 
   /// stream used for the scanResults public api
-  static final _scanResultsList = _StreamController<List<ScanResult>>(initialValue: []);
+  static final _scanResults = _StreamController<List<ScanResult>>(initialValue: []);
 
   /// the subscription to the scan results stream
   static StreamSubscription<BmScanResponse?>? _scanSubscription;
@@ -70,7 +70,7 @@ class FlutterBluePlus {
   /// - the list contains all the results since the scan started
   /// - if you listen to scanResults again after scanning stops, it will return empty.
   /// - the returned stream is never closed.
-  static Stream<List<ScanResult>> get scanResults => _scanResultsList.stream;
+  static Stream<List<ScanResult>> get scanResults => _scanResults.stream;
 
   /// Get access to all device event streams
   static final BluetoothEvents events = BluetoothEvents();
@@ -229,7 +229,7 @@ class FlutterBluePlus {
         : _scanBuffer.stream;
 
     // start by pushing an empty array
-    _scanResultsList.add([]);
+    _scanResults.add([]);
 
     List<ScanResult> output = [];
 
@@ -238,7 +238,7 @@ class FlutterBluePlus {
       if (response == null) {
         // if null, this is just a periodic update to remove old results
         if (output._removeWhere((elm) => DateTime.now().difference(elm.timeStamp) > removeIfGone!)) {
-          _scanResultsList.add(List.from(output)); // push to stream
+          _scanResults.add(List.from(output)); // push to stream
         }
       } else {
         // failure?
@@ -263,7 +263,7 @@ class FlutterBluePlus {
 
           if (oneByOne) {
             // push single item
-            _scanResultsList.add([sr]);
+            _scanResults.add([sr]);
           } else {
             // add result to output
             output.addOrUpdate(sr);
@@ -272,7 +272,7 @@ class FlutterBluePlus {
 
         // push entire list
         if (!oneByOne) {
-          _scanResultsList.add(List.from(output));
+          _scanResults.add(List.from(output));
         }
       }
     });
@@ -293,7 +293,7 @@ class FlutterBluePlus {
   static Future<void> _stopScan({bool invokePlatform = true, bool pushToStream = true}) async {
     _scanSubscription?.cancel();
     _scanTimeout?.cancel();
-    _scanResultsList.latestValue = [];
+    _scanResults.latestValue = [];
     if (pushToStream) {
       _isScanning.add(false);
     }
