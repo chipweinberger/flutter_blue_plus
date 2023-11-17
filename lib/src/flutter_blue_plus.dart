@@ -69,17 +69,21 @@ class FlutterBluePlus {
   /// the most recent scan results
   static List<ScanResult> get lastScanResults => _scanResults.latestValue;
 
-  /// a stream of scan results 
+  /// a stream of scan results
   /// - if you re-listen to the stream it re-emits the previous results
   /// - the list contains all the results since the scan started
   /// - the returned stream is never closed.
   static Stream<List<ScanResult>> get scanResults => _scanResults.stream;
 
-  /// a stream of scan results 
-  /// - it only emits values while the scan is in progress
-  /// - the list contains all the results since the scan started
-  /// - the returned stream is never closed.
-  static Stream<List<ScanResult>> get onScanResults => _scanResults.stream.skip(1);
+  /// This is the same as scanResults, except:
+  /// - it *never* re-emits previous results.
+  static Stream<List<ScanResult>> get onScanResults {
+    if (lastScanResults.isNotEmpty) {
+      return _scanResults.stream.skip(1);
+    } else {
+      return _scanResults.stream;
+    }
+  }
 
   /// Get access to all device event streams
   static final BluetoothEvents events = BluetoothEvents();
