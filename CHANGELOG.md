@@ -1,8 +1,5 @@
-## 1.29.2
-* **[Improve]** onScanResults: more refinement of api
-
-## 1.29.1
-* **[Improve]** slightly improve the behavior of `onScanResults`
+## 1.29.1 to 1.29.3
+* **[Improve]** more refinements to `onScanResults`
 
 ## 1.29.0
 * **[Breaking Change]** scanResults: do not clear results after `stopScan`. If you want results cleared use `onScanResults` instead.
