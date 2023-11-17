@@ -1,3 +1,6 @@
+## 1.29.2
+* **[Improve]** onScanResults: more refinement of api
+
 ## 1.29.1
 * **[Improve]** slightly improve the behavior of `onScanResults`
 
