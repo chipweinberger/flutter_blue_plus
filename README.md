@@ -133,7 +133,7 @@ It is recommended to set scan filters to reduce main thread & platform channel u
 
 ```dart
 // listen to scan results
-// Note: `onScanResults` returns live scan results only
+// Note: `onScanResults` only returns live scan results, i.e. during scanning
 // Use: `scanResults` if you want live scan results *or* the previous results
 var subscription = FlutterBluePlus.onScanResults.listen((results) {
         if (results.isNotEmpty) {
