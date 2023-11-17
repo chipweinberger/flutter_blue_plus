@@ -132,7 +132,9 @@ If your device is not found, see [Common Problems](#common-problems).
 It is recommended to set scan filters to reduce main thread & platform channel usage.
 
 ```dart
-// Setup Listener for scan results.
+// listen to scan results
+// Note: scanResults are cleared after stopScan or scan timeout. 
+// If you re-listen after stopScan or scanTimeout, the results will be empty.
 var subscription = FlutterBluePlus.scanResults.listen((results) {
         if (results.isNotEmpty) {
             ScanResult r = results.last; // the most recently found device
