@@ -76,11 +76,12 @@ class FlutterBluePlus {
   static Stream<List<ScanResult>> get scanResults => _scanResults.stream;
 
   /// This is the same as scanResults, except:
-  /// - it *never* re-emits previous results after scanning stops.
+  /// - it *does not* re-emit previous results after scanning stops.
   static Stream<List<ScanResult>> get onScanResults {
     if (_scanResults.latestValue.isEmpty || isScanningNow) {
       return _scanResults.stream;
     } else {
+      // skip previous results
       return _scanResults.stream.skip(1);
     }
   }

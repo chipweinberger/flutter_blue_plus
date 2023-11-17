@@ -133,8 +133,8 @@ It is recommended to set scan filters to reduce main thread & platform channel u
 
 ```dart
 // listen to scan results
-// Note: `onScanResults` does not re-emit previous results after scanning stops.
-// See: `scanResults` if you want it to emit current *or* previous results
+// Note: `onScanResults` returns live scan results only
+// Use: `scanResults` if you want live scan results *or* the previous results
 var subscription = FlutterBluePlus.onScanResults.listen((results) {
         if (results.isNotEmpty) {
             ScanResult r = results.last; // the most recently found device
@@ -509,7 +509,9 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 | adapterState        🌀 | :white_check_mark: | :white_check_mark: |        | Stream of on & off states of the bluetooth adapter         |
 | startScan              | :white_check_mark: | :white_check_mark: | :fire: | Starts a scan for Ble devices                              |
 | stopScan               | :white_check_mark: | :white_check_mark: | :fire: | Stop an existing scan for Ble devices                      |
-| scanResults         🌀 | :white_check_mark: | :white_check_mark: |        | Stream of live scan results                                |
+| onScanResults       🌀 | :white_check_mark: | :white_check_mark: |        | Stream of live scan results                                |
+| scanResults         🌀 | :white_check_mark: | :white_check_mark: |        | Stream of live scan results or previous results            |
+| lastScanResults     ⚡  | :white_check_mark: | :white_check_mark: |        | The most recent scan results                               |
 | isScanning          🌀 | :white_check_mark: | :white_check_mark: |        | Stream of current scanning state                           |
 | isScanningNow       ⚡  | :white_check_mark: | :white_check_mark: |        | Is a scan currently running?                               |
 | connectedDevices    ⚡  | :white_check_mark: | :white_check_mark: |        | List of devices connected to *your app*                    |
