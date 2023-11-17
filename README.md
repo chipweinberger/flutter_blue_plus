@@ -133,12 +133,14 @@ It is recommended to set scan filters to reduce main thread & platform channel u
 
 ```dart
 // listen to scan results
-// Note: scanResults are cleared after stopScan or scan timeout. 
-// If you re-listen after stopScan or scanTimeout, the results will be empty.
+// Note: If you listen to scanResults again after scanning stops, it will return empty.
 var subscription = FlutterBluePlus.scanResults.listen((results) {
         if (results.isNotEmpty) {
             ScanResult r = results.last; // the most recently found device
             print('${r.device.remoteId}: "${r.advertisementData.advName}" found!');
+            // optional: to access the results even after scanning stops,
+            // copy them to a global or static variable.
+            _globalResults = results;
         }
     },
     onError(e) => print(e);
