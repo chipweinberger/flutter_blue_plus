@@ -133,8 +133,8 @@ It is recommended to set scan filters to reduce main thread & platform channel u
 
 ```dart
 // listen to scan results
-// Note: `onScanResults` only returns results while scanning is in progress
-// See: `scanResults` if you also want access to previous results
+// Note: `onScanResults` does not re-emit previous results after scanning stops.
+// See: `scanResults` if you want it to emit current *or* previous results
 var subscription = FlutterBluePlus.onScanResults.listen((results) {
         if (results.isNotEmpty) {
             ScanResult r = results.last; // the most recently found device
