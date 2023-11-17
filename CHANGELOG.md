@@ -1,3 +1,7 @@
+## 1.29.0
+* **[Breaking Change]** scanResults: do not clear results after `stopScan`. If you want results cleared use `onScanResults` instead.
+* **[Add]** `lastScanResults` to synchronously get the most recent results
+
 ## 1.28.14
 * **[Fix]** `setAdvertisingDataType` crash on android 10 and below (regression 1.28.10)
 

@@ -206,3 +206,7 @@ If your app uses `startScan.removeIfGone`, or your app continually checks the va
 
 * **[Breaking Change]** `guid.toString()` now returns 16-bit short uuid when possibe
 * **[Breaking Change]** use GUID for `advertisingData.serviceUuids` & `advertisingData.serviceData` instead of String
+
+## 1.29.0
+
+* **[Breaking Change]** scanResults: do not clear results after `stopScan`. If you want results cleared, use `onScanResults` instead.
