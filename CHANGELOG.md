@@ -24,7 +24,7 @@
 ## 1.28.10
 * **[Perf]** android: filter out devices without names if `scan.withKeywords` is set
 * **[Fix]** calling scan multiple times would breifly push `isScanning=false`
-* **[Improve]** servicesList: return empty instead of null
+* **[Improve]** `servicesList`: return empty instead of null
 
 ## 1.28.9
 * **[Improve]** to make FBP easier to use, never clear `knownServices`
@@ -44,10 +44,10 @@
 
 ## 1.28.4
 * **[Fix]** guid: uuid was returning 0000 for 16 bit uuid (regression in 1.28.3)
-* **[Guid]** guid.uuid should return lowercase
+* **[Guid]** `guid.uuid` should return lowercase
 
 ## 1.28.3
-* **[Improve]** guid: add uuid short representation
+* **[Improve]** guid: add `uuid` short representation
 
 ## 1.28.2
 * **[Improve]** add length checks to `MsdFilter` & `ServiceDataFilter`
@@ -109,12 +109,12 @@ This release improves the default scanning behavior.
 ## 1.26.1
 * **[Feature]** add support for canceling an in progress connection using `device.disconnect`
 * **[Fix]** connection timeouts did not actually cancel the connection attempt (regression in 1.5.0)
-* **[Fix]** android: update isScanning when onDetachedFromEngine is called (bug in original `flutter_blue`)
+* **[Fix]** android: update `isScanning` when `onDetachedFromEngine` is called (bug in original `flutter_blue`)
 
 ## 1.22.1 to 1.26.0
 These releases changed multiple things but then changed them back. For brevity, here are the actual changes:
 * **[Behavior Change]** android: listen to Services Changed characteristic to match iOS behavior
-* **[Fix]** android: stop scanning when detached from engine  (bug in original `flutter_blue`)
+* **[Fix]** android: stop scanning when detached from engine (bug in original `flutter_blue`)
 * **[Add]** `device.advName` returns the name found during scanning
 * **[Add]** `device.mtuNow` synchronously gets the current mtu value
 * **[Add]** `events.onDiscoveredServices` stream
@@ -218,10 +218,10 @@ This bug affected `mtu`, `lastValueStream`, `adapterState`, & `bondState`.
 
 ## 1.17.0
 This release improves `lastValue` & `lastValueStream`.
-* **[Breaking Change/Fix]** should update `lastValue` & `lastValueStream` when `write()` is called
+* **[Breaking Change/Fix]** should update `lastValue` & `lastValueStream` when `write` is called
 * **[Feature]** Android: support `onNameChanged` & `onServicesChanged` characteristics
 * **[Fix]** iOS: `discoverServices` crash "[_NSInlineData intValue]: unrecognized selector sent to instance" (bug in original `flutter_blue`)
-* **[Fix]** iOS: `descriptor.write()` would timeout or not work (regression somewhere around ~1.7.0)
+* **[Fix]** iOS: `descriptor.write` would timeout or not work (regression somewhere around ~1.7.0)
 * **[Fix]** `isNotifying` was not updated by `setNotifyValue(false)` (regression somewhere around ~1.9.0)
 
 ## 1.16.12
@@ -466,7 +466,7 @@ This release improves bonding support.
 
 ## 1.12.11
 * **[Fix]** Android: potential null dereference if the platform does not have bluetooth (bug in original `flutter_blue`)
-* **[Fix]** Android: DeadObjectException: close all connections when bluetooth is turned off (bug in original `flutter_blue`)
+* **[Fix]** Android: `DeadObjectException`: close all connections when bluetooth is turned off (bug in original `flutter_blue`)
 
 ## 1.12.10
 * **[Fix]** iOS: `isAvailable` returns false the first time, incorrectly (bug in original `flutter_blue`)
@@ -613,7 +613,7 @@ This release improves error handling and reliability.
 * **[Improve]** Example: add error handling
 
 ## 1.9.2
-* **[Fix]** Dart: readRssi: "Invalid argument: Instance of 'DeviceIdentifier'" (regression in 1.9.0)
+* **[Fix]** Dart: `readRssi`: "Invalid argument: Instance of 'DeviceIdentifier'" (regression in 1.9.0)
 
 ## 1.9.1
 * **[Fix]** Dart: crash in scanning due to assuming uuid is Guid format when it might not (regression in 1.9.0)
@@ -672,7 +672,7 @@ simplicity of the FlutterBluePlus codebase. Please submit bug reports.
 * **[refactor]** iOS: unify try catch blocks
 
 ## 1.8.2
-* **[Improve]** Android: support sdk 33 for writeCharacteristic and `writeDescriptor`
+* **[Improve]** Android: support sdk 33 for `writeCharacteristic` and `writeDescriptor`
 * **[Improve]** Android: calling `connect` on already connected device is now considered success
 * **[Improve]** Android: return more specific error for `locateGatt` issue
 * **[Improve]** Android: `shouldClearGattCache` is now called after connection, not before
@@ -768,7 +768,7 @@ This release closes many open issues on Github.
 * **[Improve]** Example: android permissions
 * **[Improve]** Dart: add isScanningNow variable
 * **[Improve]** add support for macOS
-* **[Improve]** Android: replace deprecated bluetooth enable with 'Enable-Intent'
+* **[Improve]** Android: replace deprecated bluetooth enable with `Enable-Intent`
 * **[Improve]** Android: Removed `maxSdkVersion=30` in manifest
 * **[Improve]** Android: add function: `setPreferredPh`
 * **[Improve]** Android: add function: `removeBond`
