@@ -188,7 +188,7 @@ On Android, we request an mtu of 512 by default during connection (see: `connect
 On iOS & macOS, the mtu is negotiated automatically, typically 135 to 255.
 
 ```dart
-final subscription = device.onMtu.listen((int mtu) {
+final subscription = device.mtu.listen((int mtu) {
     // iOS: initial value is always 23, but iOS will quickly negotiate a higher value
     print("mtu $mtu");
 });
@@ -253,7 +253,7 @@ import 'dart:math';
 //    3. The characteristic must be designed to support split data
 extension splitWrite on BluetoothCharacteristic {
   Future<void> splitWrite(List<int> value, {int timeout = 15}) async {
-    int chunk = device.mtu - 3; // 3 bytes ble overhead
+    int chunk = device.mtuNow - 3; // 3 bytes ble overhead
     for (int i = 0; i < value.length; i += chunk) {
       List<int> subvalue = value.sublist(i, min(i + chunk, value.length));
       await write(subvalue, withoutResponse:false, timeout: timeout);
