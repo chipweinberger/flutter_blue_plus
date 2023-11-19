@@ -383,7 +383,7 @@ There are streams for:
 
 ```dart
 // listen to *any device* connection state changes 
-FlutterBluePlus.events.connectionState.listen((event)) {
+FlutterBluePlus.events.onConnectionStateChanged.listen((event)) {
     print('${event.device} ${event.connectionState}');
 }
 ```
