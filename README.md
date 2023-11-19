@@ -827,6 +827,14 @@ FBP already has mitigations for this error, but Android will still fail with thi
 
 The recommended solution is to `catch` the error, and retry.
 
+---
+
+### MissingPluginException(No implementation found for method XXXX ...)
+
+If you just added flutter_blue_plus to your pubspec.yaml, a hot reload / hot restart is not enough.
+
+You need to fully stop your app and run again so that the native plugins are loaded.
+
 
 
 
