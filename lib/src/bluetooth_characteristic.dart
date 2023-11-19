@@ -291,9 +291,11 @@ class BluetoothCharacteristic {
   BmBluetoothCharacteristic? get _bmchr {
     if (FlutterBluePlus._knownServices[remoteId] != null) {
       for (var s in FlutterBluePlus._knownServices[remoteId]!.services) {
-        for (var c in s.characteristics) {
-          if (c.characteristicUuid == uuid) {
-            return c;
+        if (s.serviceUuid == serviceUuid) {
+          for (var c in s.characteristics) {
+            if (c.characteristicUuid == uuid) {
+              return c;
+            }
           }
         }
       }
