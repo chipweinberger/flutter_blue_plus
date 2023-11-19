@@ -1,3 +1,6 @@
+## 1.29.4
+* **[Fix]** characteristics with same UUID could return wrong `properties` or `descriptors` (regression in 1.20.4)
+
 ## 1.29.1 to 1.29.3
 * **[Improve]** more refinements to `onScanResults`
 
