@@ -2,17 +2,17 @@
 * **[Improve]** more refinements to `onScanResults`
 
 ## 1.29.0
-* **[Breaking Change]** scanResults: do not clear results after `stopScan`. If you want results cleared use `onScanResults` instead.
+* **[Breaking Change]** `scanResults`: do not clear results after `stopScan`. If you want results cleared use `onScanResults` instead.
 * **[Add]** `lastScanResults` to synchronously get the most recent results
 
 ## 1.28.14
-* **[Fix]** `setAdvertisingDataType` crash on android 10 and below (regression 1.28.10)
+* **[Fix]** `setAdvertisingDataType` crash on android 10 and below (regression in 1.28.10)
 
 ## 1.28.13
-* **[Fix]** `isNotifying`` was not set to false on disconnection (regression 1.28.9)
+* **[Fix]** `isNotifying` was not set to false on disconnection (regression in 1.28.9)
 
 ## 1.28.12
-* **[Fix]** crash if rssi was zero on android (regression 1.27.2)
+* **[Fix]** crash if `rssi` was zero on android (regression in 1.27.2)
 
 ## 1.28.11
 * **[Rename]** `giud.uuid` -> `guid.str` & `guid.uuid128` -> `guid.str128`
@@ -27,10 +27,10 @@
 * **[Improve]** to make FBP easier to use, never clear `knownServices`
 
 ## 1.28.8
-* **[Fix]** android: GUID issues related to scanning
+* **[Fix]** android: GUID issues related to scanning (regression in 1.28.3)
 
 ## 1.28.7
-* **[Fix]** android: GUID starting with 0000 were misinterpretted (regression 1.28.5)
+* **[Fix]** android: GUID starting with 0000 were misinterpretted (regression in 1.28.5)
 
 ## 1.28.6
 * **[Improve]** simplify api: clear `knownServices` on reconnection instead of disconnection
@@ -40,7 +40,7 @@
 * **[Internal]** use short UUID where possible
 
 ## 1.28.4
-* **[Fix]** guid: uuid was returning 0000 for 16 bit uuid
+* **[Fix]** guid: uuid was returning 0000 for 16 bit uuid (regression in 1.28.3)
 * **[Guid]** guid.uuid should return lowercase
 
 ## 1.28.3
@@ -56,18 +56,18 @@
 
 ## 1.28.0
 * **[Breaking Change]** `guid.toString()` now returns 16-bit short uuid when possible
-* **[Breaking Change]** return GUIDs for `advertisingData.serviceUuids` & `advertisingData.serviceData` instead of String
+* **[Breaking Change]** return `GUID`s for `advertisingData.serviceUuids` & `advertisingData.serviceData` instead of String
 * **[Guid]** add support for 16-bit and 32-bit uuids
-* **[Fix]** android: advertised UUIDs were 128-bit instead of the actual length
+* **[Fix]** android: advertised UUIDs were 128-bit instead of the actual length (regression in 1.14.17)
 
 ## 1.27.6
 * **[Improve]** add more checks for bluetooth being off
 
 ## 1.27.5
-* **[Fix]** android: typo compile error
+* **[Fix]** android: typo compile error (regression in 1.27.3)
 
 ## 1.27.4
-* **[Fix]** accidentally changed advertisementData.localName to nullable
+* **[Fix]** accidentally changed `advertisementData.localName` to nullable (regression in 1.27.3)
 
 ## 1.27.3
 * **[Perf]** scanning: add `continuousDivisor` option to reduce platform channel & main-thread usage
@@ -77,14 +77,14 @@
 * **[Rename]** `advertisementData.localName` -> `advertisementData.advName`
 
 ## 1.27.1
-* **[Add]** android: add forceIndications option to setNotifyValue
+* **[Add]** android: add `forceIndications` option to `setNotifyValue`
 
 ## 1.27.0
 This release improves the default scanning behavior.
 * **[Breaking Change]** scanning: make `continousUpdates` false by default - it is not typically needed & hurts perf. If your app uses `startScan.removeIfGone`, or your app continually checks the value of `scanResult.timestamp` or `scanResult.rssi`, then you will need to explicitly set `continousUpdates` to true.
 
 ## 1.26.6
-* **[Fix]** android: scanning would not work if `continuousUpdates` was false 
+* **[Fix]** android: scanning would not work if `continuousUpdates` was false  (regression in 1.26.5)
 
 ## 1.26.5
 * **[Add]** scanning: `withRemoteIds`, `withNames`, `withKeywords` filters
@@ -92,7 +92,7 @@ This release improves the default scanning behavior.
 * **[Add]** scanning: `continuousUpdates` option replaces former `allowDuplicates` option
 
 ## 1.26.4
-* **[Add]** cancelWhenDisconnected: option to cancel on *next* disconnection
+* **[Add]** `cancelWhenDisconnected`: option to cancel on *next* disconnection
 
 ## 1.26.3
 * **[Add]** `events.onReadRssi`
@@ -100,18 +100,18 @@ This release improves the default scanning behavior.
 * **[Add]** `events.onDescriptorWritten`
 
 ## 1.26.2
-* **[Fix]** android: close gatt after canceling an in-progress connnection
+* **[Fix]** android: close gatt after canceling an in-progress connnection  (regression in 1.26.1)
 * **[Improve]** android: wait until bonding completes for better reliability
 
 ## 1.26.1
 * **[Feature]** add support for canceling an in progress connection using `device.disconnect`
-* **[Fix]** connection timeouts did not actually cancel the connection attempt
-* **[Fix]** android: update isScanning when onDetachedFromEngine is called
+* **[Fix]** connection timeouts did not actually cancel the connection attempt (regression in 1.5.0)
+* **[Fix]** android: update isScanning when onDetachedFromEngine is called (bug in original `flutter_blue`)
 
 ## 1.22.1 to 1.26.0
 These releases changed multiple things but then changed them back. For brevity, here are the actual changes:
 * **[Behavior Change]** android: listen to Services Changed characteristic to match iOS behavior
-* **[Fix]** android: stop scanning when detached from engine
+* **[Fix]** android: stop scanning when detached from engine  (bug in original `flutter_blue`)
 * **[Add]** `device.advName` returns the name found during scanning
 * **[Add]** `device.mtuNow` synchronously gets the current mtu value
 * **[Add]** `events.onDiscoveredServices` stream
@@ -129,7 +129,7 @@ This release greatly increases reliability on android & ios.
 * **[Improve]** only allow a single ble operation at a time.
 
 ## 1.20.8
-* **[Fix]** iOS: connect: return error for invalid remoteId
+* **[Fix]** iOS: connect: return error for invalid `remoteId`  (bug in original `flutter_blue`)
 * **[Improve]** iOS: log warning if CCCD is not found, like we do on android
 
 ## 1.20.7
@@ -154,8 +154,8 @@ This release greatly increases reliability on android & ios.
 * **[Add]** `device.isConnected`, convenience accessor
 
 ## 1.20.2
-* **[Fix]** cannot retrieve platform name from bondedDevices
-* **[Fix]** stopScan: should clear results *after* platform method has been called
+* **[Fix]** cannot retrieve platform name from `bondedDevices`  (regression)
+* **[Fix]** `stopScan`: should clear results *after* platform method has been called  (bug in original `flutter_blue`)
 
 ## 1.20.1
 * **[Remove]** `FlutterBluePlus.connectedDevices`. This API needs more thought.
@@ -172,70 +172,70 @@ This release renames `connectedSystemDevices`.
 
 ## 1.19.0
 This release reverts most of the breaking changes made in 1.18.0.
-* **[Revert]** most breaking changes made to bondState stream in 1.18.0
-* **[Unchanged]** bond lost/failed are replaced by prevBondState
-* **[Add]** method device.prevBondState
-* **[Fix]** android: adapterName must request permission
+* **[Revert]** most breaking changes made to `bondState` stream in 1.18.0
+* **[Unchanged]** bond lost/failed are replaced by `prevBondState`
+* **[Add]** method `device.prevBondState`
+* **[Fix]** android: `adapterName` must request permission  (bug in original `flutter_blue`)
 
 ## 1.18.3
-* **[Refactor]** bondState: finish refactor started in 1.18.0
+* **[Refactor]** `bondState`: finish refactor started in 1.18.0
 
 ## 1.18.2
-* **[Fix]** bondState: must *explicitly* check for null prevState (regression 1.18.0)
+* **[Fix]** `bondState`: must *explicitly* check for null `prevState` (regression in 1.18.0)
 
 ## 1.18.1
-* **[Fix]** bondState: handle null prevState (regression 1.18.0)
+* **[Fix]** `bondState`: handle null `prevState` (regression in 1.18.0)
 
 ## 1.18.0
 This release improves `bondState` stream
-* **[Breaking Change]** bondState: directly expose prevBond instead of lost/failed flags
+* **[Breaking Change]** `bondState`: directly expose `prevBond` instead of lost/failed flags
 
 ## 1.17.6
-* **[Fix]** scanResults: clear scan results on stopScan (regression 1.16.8)
+* **[Fix]** `scanResults`: clear scan results on `stopScan` (regression in 1.16.8)
 
 ## 1.17.5
-* **[Example]** accidentally left performanceOverlay enabled (regression 1.17.4)
+* **[Example]** accidentally left `performanceOverlay` enabled (regression in 1.17.4)
 
 ## 1.17.4
-* **[Example]** remove PermissionHandler dependency. It is no longer needed.
-* **[Example]** ScanScreen: use ListView instead of SingleChildScrollView
+* **[Example]** remove `PermissionHandler` dependency. It is no longer needed.
+* **[Example]** ScanScreen: use `ListView` instead of `SingleChildScrollView`
 
 ## 1.17.3
-* **[Fix]** android: turnOn throws exception if permission denied
+* **[Fix]** android: `turnOn` throws exception if permission denied  (bug in original `flutter_blue`)
 
 ## 1.17.2
-This bug affected mtu, lastValueStream, adapterState, & bondState.
-* **[Fix]** newStreamWithInitialValue was not emitting initial value. (regression 1.16.6)
+This bug affected `mtu`, `lastValueStream`, `adapterState`, & `bondState`.
+* **[Fix]** `newStreamWithInitialValue` was not emitting initial value. (regression in 1.16.6)
 
 ## 1.17.1
-* **[Fix]** timeout when connect is called when adapter is off
-* **[Fix]** android: was not calling disconnect callback when adapter turned off
-* **[Fix]** android: connectable flag was not working (regression 1.7.0)
-* **[Improve]** do not re-get adapterState when we already have it
+* **[Fix]** timeout when `connect` is called when adapter is off (bug in original `flutter_blue`)
+* **[Fix]** android: was not calling `disconnect` callback when adapter turned off (bug in original `flutter_blue`)
+* **[Fix]** android: `connectable` flag was not working (regression in 1.7.0)
+* **[Improve]** do not re-get `adapterState` when we already have it
 
 ## 1.17.0
 This release improves `lastValue` & `lastValueStream`.
 * **[Breaking Change/Fix]** should update `lastValue` & `lastValueStream` when `write()` is called
 * **[Feature]** Android: support `onNameChanged` & `onServicesChanged` characteristics
-* **[Fix]** iOS: `discoverServices` crash [_NSInlineData intValue]: unrecognized selector sent to instance
+* **[Fix]** iOS: `discoverServices` crash "[_NSInlineData intValue]: unrecognized selector sent to instance" (bug in original `flutter_blue`)
 * **[Fix]** iOS: `descriptor.write()` would timeout or not work (regression somewhere around ~1.7.0)
 * **[Fix]** `isNotifying` was not updated by `setNotifyValue(false)` (regression somewhere around ~1.9.0)
 
 ## 1.16.12
-* **[Fix]** Android: onValueReceived was not working on Android 12 & lower (regression 1.16.3)
+* **[Fix]** Android: `onValueReceived` was not working on Android 12 & lower (regression in 1.16.3)
 
 ## 1.16.11
-* **[Fix]** Android: onCharacteristicReceived not being called (regression 1.16.3)
+* **[Fix]** Android: `onCharacteristicReceived` not being called (regression in 1.16.3)
 
 ## 1.16.10
-* **[Fix]** BluetoothDevice: don't wait for timeout if device becomes disconnected
+* **[Fix]** BluetoothDevice: don't wait for timeout if device becomes disconnected (bug in original `flutter_blue`)
 
 ## 1.16.9
 * **[Example]** cleaned up Characteristic tile code
 
 ## 1.16.8
-* **[Fix]** `scanResults` & `isScanning` streams were not re-emitting their current value on listen (regression 1.5.0)
-* **[Example]** discoverServices: stay on screen after diconnection
+* **[Fix]** `scanResults` & `isScanning` streams were not re-emitting their current value on listen (regression in 1.5.0)
+* **[Example]** `discoverServices`: stay on screen after diconnection
 * **[Example]** simplified `connectingOrDisconnecting` code
 * **[Example]** organize into 'screens' and 'widgets' folders
 
@@ -248,19 +248,19 @@ This release improves `lastValue` & `lastValueStream`.
 * **[Improve]** `connectionState` & `mtu`: use broadcast stream
 
 ## 1.16.5
-* **[Fix]** iOS: iOS Unhandled Exception: type 'int' is not a subtype of type 'bool' (regression 1.16.3)
+* **[Fix]** iOS: iOS Unhandled Exception: type 'int' is not a subtype of type 'bool' (regression in 1.16.3)
 * **[Improve]** android: prepend logs with '[FBP]'
 * **[Java]** rename `com.boskokg.flutter_blue_plus` -> `com.lib.flutter_blue_plus` to be more generic
 
 ## 1.16.4
-* **[Fix]** `setLogLevel` would be ignored due to being called twice
+* **[Fix]** `setLogLevel` would be ignored due to being called twice (regression in 1.10.0)
 * **[Improve]** android: use log level consistently
 * **[Improve]** iOS: use log level macro
 
 ## 1.16.3
-* **[Fix]** Android: `setNotify` would timeout if CCCD descriptor does not exist
+* **[Fix]** Android: `setNotify` would timeout if CCCD descriptor does not exist (regression in 1.5.0)
 * **[Android]** fix deprecations
-* **[Improve]** removeIfGone: only push to scanResults when list changes
+* **[Improve]** `removeIfGone`: only push to scanResults when list changes
 
 ## 1.16.2
 * **[Fix]** platform check in `onNameChanged` & `onServicesChanged` was incorrect
@@ -273,44 +273,44 @@ This release simplifies BluetoothDevice construction.
 * **[Breaking Change]** remove `BluetoothDevice.type` & `BluetoothDevice.localName` from constructor for simplicity
 * **[Breaking Change]** remove `servicesStream` & `isDiscoveringServices` deprecated functions
 * **[Rename]** `localName` -> `platformName` to reflect platform specific behavior
-* **[Fix]** `setNotifyValue` must take `descWrite` mutex
-* **[Fix]** `localName` was broken when using `connectedSystemDevices` (regression 1.15.10)
-* **[Add]** Android: getPhySupport
+* **[Fix]** `setNotifyValue` must take `descWrite` mutex (bug in original `flutter_blue`)
+* **[Fix]** `localName` was broken when using `connectedSystemDevices` (regression in 1.15.10)
+* **[Add]** Android: `getPhySupport`
 
 ## 1.15.10
-* **[Fix]** iOS: `localName` does not match Android
-* **[Fix]** flutterHotRestart: error was thrown if device did not have bluetooth adapter
+* **[Fix]** iOS: `localName` does not match Android (bug in original `flutter_blue`)
+* **[Fix]** flutterHotRestart: error was thrown if device did not have bluetooth adapter (regression in 1.14.19)
 
 ## 1.15.9
-* **[Fix]** iOS: adapter turnOff: edge case when adapter is turned off while scanning
-* **[Fix]** iOS: adapter turnOff: disconnect handlers not firing when adapter turned off
-* **[Fix]** iOS: adapter turnOff: API MISUSE when adapter is turned off
-* **[Cleanup]** Hot Restart: use separate conenctedCount method for clarity
+* **[Fix]** iOS: adapter turnOff: edge case when adapter is turned off while scanning (bug in original `flutter_blue`)
+* **[Fix]** iOS: adapter turnOff: disconnect handlers not firing when adapter turned off (bug in original `flutter_blue`)
+* **[Fix]** iOS: adapter turnOff: API MISUSE when adapter is turned off (bug in original `flutter_blue`)
+* **[Cleanup]** Hot Restart: use separate `connectedCount` method for clarity
 
 ## 1.15.8
-* **[Fix]** if any platform exception happens, fbp will deadlock (regression 1.14.20)
+* **[Fix]** if any platform exception happens, fbp will deadlock (regression in 1.14.20)
 
 ## 1.15.7
-* **[Fix]** android: turning bluetooth off would not fully disconnect devices (regression 1.14.19)
+* **[Fix]** android: turning bluetooth off would not fully disconnect devices (regression in 1.14.19)
 
 ## 1.15.6
-* **[Fix]** iOS: turning bluetooth off would not fully disconnect devices (regression 1.14.19)
+* **[Fix]** iOS: turning bluetooth off would not fully disconnect devices (regression in 1.14.19)
 * **[Readme]** add v1.15.0 migration guides
 
 ## 1.15.5
 * **[Fix]** `firstWhereOrNull` conflict (regression in 1.15.0)
 
 ## 1.15.4
-* **[Fix]** some typos in disconnect exceptions (from 1.15.3)
+* **[Fix]** some typos in disconnect exceptions (regression in 1.15.3)
 
 ## 1.15.3
 * **[Improve]** prefer dart exceptions over platform exceptions when device is disconnected
 
 ## 1.15.2
-* **[Fix]** stopScan was not awaiting for invokeMethod
+* **[Fix]** `stopScan` was not awaiting for invokeMethod (regression in 1.15.0)
 
 ## 1.15.1
-* **[Fix]** FlutterBluePlus.scanResults should always return list copy to avoid iteration exceptions
+* **[Fix]** `FlutterBluePlus.scanResults` should always return list copy to avoid iteration exceptions (regression in 1.15.0)
 
 ## 1.15.0
 ## Scanning API Changes
@@ -328,295 +328,295 @@ This release simplifies BluetoothDevice construction.
 - **(improvement)** if you call `startScan` twice, it will cancel the previous scan, instead of throwing an exception
 
 ## 1.14.24
-* **[Fix]** Android: setNotifyValue: (code: 5) notifications were not updated
-* **[Fix]** Hot Restart: stop scanning when hot restarting
+* **[Fix]** Android: `setNotifyValue`: "(code: 5) notifications were not updated" (regression in 1.14.23)
+* **[Fix]** Hot Restart: stop scanning when hot restarting (bug in original `flutter_blue`)
 
 ## 1.14.23
-* **[Fix]** setNotifyValue & others must be cleared after disconnection (regression in 1.14.21)
+* **[Fix]** `setNotifyValue` & others must be cleared after disconnection (regression in 1.14.21)
 
 ## 1.14.22
 * **[Fix]** Android: Hot Restart: could get stuck in infinite loop (regression in 1.14.19)
 
 ## 1.14.21
-* **[Refactor]** dart: store lastValue at global level so Desc & Chr classes are fully immutable
+* **[Refactor]** dart: store `lastValue` at global level so Desc & Chr classes are fully immutable
 
 ## 1.14.20
 * **[Fix]** iOS: Hot Restart: could get stuck in infinite loop (regression in 1.14.19)
 
 ## 1.14.19
-* **[Fix]** Hot Restart: close all connections when dart vm is restarted
+* **[Fix]** Hot Restart: close all connections when dart vm is restarted (bug in original `flutter_blue`)
 
 ## 1.14.18
-* **[Fix]** Android: crash uuid128 null deref (regression in 1.14.17)
+* **[Fix]** Android: crash `uuid128` null deref (regression in 1.14.17)
 
 ## 1.14.17
-* **[Fix]** Android: shortUUID: characteristic not found
+* **[Fix]** Android: shortUUID: characteristic not found (bug in original `flutter_blue`)
 
 ## 1.14.16
 * **[Fix]** macOS: lower required version to 10.11 (equivalent to  iOS 9.0)
 
 ## 1.14.15
-* **[Rename]** allowSplits -> allowLongWrite
+* **[Rename]** `allowSplits` -> `allowLongWrite`
 
 ## 1.14.14
-* **[Fix]** Android: dataLen longer than allowed (regression in 1.14.13)
+* **[Fix]** Android: "dataLen longer than allowed" (regression in 1.14.13)
 
 ## 1.14.13
-* **[Fix]** iOS: onMtu was not called
-* **[Feature]** iOS & Android: writeCharacteristic: add 'allowLongWrite' option to do longer writes
+* **[Fix]** iOS: onMtu was not called (bug in original `flutter_blue`)
+* **[Feature]** iOS & Android: `writeCharacteristic`: add `allowLongWrite` option to do longer writes
 
 ## 1.14.12
-* **[Fix]** Android: autoconnect was not working. regressed sometimes after 1.4.0
-* **[Cleanup]** Android: cleanup bmAdvertisementData
+* **[Fix]** Android: `autoconnect` was not working. (regression sometime after 1.4.0)
+* **[Cleanup]** Android: cleanup `bmAdvertisementData`
 * **[Improve]** iOS: check that characteristic supports READ, WRITE, WRITE_NO_RESP properties and throw error otherwise
 
 ## 1.14.11
-* **[Deprecate]** dart: isDiscoveringServices & servicesStream. They can be easily implemented yourself
+* **[Deprecate]** dart: `isDiscoveringServices` & `servicesStream`. They can be easily implemented yourself
 
 ## 1.14.10
-* **[Fix]** iOS: scan results with empty manufacturer data was not parsed
+* **[Fix]** iOS: scan results with empty manufacturer data was not parsed (bug in original `flutter_blue`)
 
 ## 1.14.9
-* **[Fix]** iOS: disconnect reason code & string are mixed up
+* **[Fix]** iOS: `disconnectReasonCode` & `disconnectReasonString` are mixed up (bug from when feature was added)
 
 ## 1.14.8
-* **[Feature]** Dart: add device.disconnectReason
-* **[Improve]** Dart: breaking change: rename bondState() -> bondState
-* **[Fix]** Dart: calling connect or disconnect multiple times should not re-push to connectionState stream (regression in 1.14.0)
-* **[Fix]** Android: calling connect or disconnect multiple times could fail(regression in 1.14.7)
-* **[Fix]** Android: security exception on startScan for some phones (regression in 1.13.4)
-* **[Fix]** Dart: various streams could push values out of order 
+* **[Feature]** Dart: add `device.disconnectReason`
+* **[Improve]** Dart: breaking change: rename `bondState()` -> `bondState`
+* **[Fix]** Dart: calling `connect` or `disconnect` multiple times should not re-push to connectionState stream (regression in 1.14.0)
+* **[Fix]** Android: calling `connect` or `disconnect` multiple times could fail(regression in 1.14.7)
+* **[Fix]** Android: security exception on `startScan` for some phones (regression in 1.13.4)
+* **[Fix]** Dart: various streams could push values out of order (bug in original `flutter_blue`)
 
 ## 1.14.7
  **[Fix]** Android: connected & disconnected states not received (regression in 1.14.4)
 
 ## 1.14.6
- **[Fix]** iOS: disconnect would timeout if already disconnected (regression 1.14.0)
+ **[Fix]** iOS: `disconnect` would timeout if already disconnected (regression in 1.14.0)
 
 ## 1.14.5
-* **[improve]** Dart: adapterState, bondState, mtu, connectiontate could miss changes due to race conditions
+* **[Improve]** Dart: `adapterState`, `bondState`, `mtu`, `connectiontate` could miss changes due to race conditions
 
 ## 1.14.4
-* **[improve]** Dart: deprecate `disconnecting` & `connecting` states, they're not actually streamed by Android or iOS
-* **[improve]** Dart: increase default connection timeout 15 -> 35 seconds to slightly exceed android & iOS defaults
-* **[improve]** Example: unsubscribe snackbar showed 'Subscribe: Success' incorrectly
-* **[improve]** Example: add snackbar color blue & red for success & fail
-* **[improve]** Example: add spinner while connecting or disconnecting
-* **[improve]** Example: do not continually call connectedSystemDevice & RSSI
+* **[Improve]** Dart: deprecate `disconnecting` & `connecting` states, they're not actually streamed by Android or iOS
+* **[Improve]** Dart: increase default connection timeout 15 -> 35 seconds to slightly exceed android & iOS defaults
+* **[Improve]** Example: unsubscribe snackbar showed 'Subscribe: Success' incorrectly
+* **[Improve]** Example: add snackbar color blue & red for success & fail
+* **[Improve]** Example: add spinner while connecting or disconnecting
+* **[Improve]** Example: do not continually call `connectedSystemDevice` & RSSI
 
 ## 1.14.3
-* **[Fix]** Example: was using deprecated variable name
+* **[Improve]** Example: was using deprecated variable name
 
 ## 1.14.2
-* **[improve]** Dart: knownServices should be fully cleared on disconnection
-* **[improve]** Dart: error handling: return more descriptive timeout exceptions
+* **[Improve]** Dart: `knownServices` should be fully cleared on disconnection
+* **[Improve]** Dart: error handling: return more descriptive timeout exceptions
 
 ## 1.14.1
-* **[improve]** Dart: each FlutterBluePlusException should have unique code for handling
+* **[Improve]** Dart: each `FlutterBluePlusException` should have unique code for handling
 
 ## 1.14.0
 This release improves bonding support.
-* **[feature]** Android:  expose BluetoothDevice.bondState
+* **[feature]** Android:  expose `BluetoothDevice.bondState`
 * **[remove]** changes regarding bond state made in 1.13.0 in favor of exposing bondState
 * **[refactor]** BluetoothDevice & Android bond handling to improve reliablility & error handling.
-* **[fix]** Dart: BluetoothDevice: connect & disconnect and others could incorrectly timeout (unlikely race conditions) 
-* **[fix]** Dart: BluetoothDevice: getBondState, getMtu, getConnectionState could skip values (unlikely race conditions) 
-* **[fix]** Dart: clear servicesList after disconnection. Android requires you call discoverServices again
-* **[fix]** Example:  Subscribe button was not updating
-* **[improve]** Android: prefer result.error over exceptions
-* **[improve]** Example: show snackbars on success as well
+* **[Fix]** Dart: BluetoothDevice: `connect` & `disconnect` and others could incorrectly timeout (bug in original `flutter_blue`)
+* **[Fix]** Dart: BluetoothDevice: `getBondState`, `getMtu`, `getConnectionState` could skip values (bug in original `flutter_blue`)
+* **[Fix]** Dart: clear `servicesList` after disconnection. Android requires you call `discoverServices` again
+* **[Improve]** Example:  Subscribe button was not updating
+* **[Improve]** Android: prefer `result.error` over exceptions
+* **[Improve]** Example: show snackbars on success as well
 
 ## 1.13.4
-* **[fix]** Android: discoverServices never returns (regression in 1.13.0)
-* **[fix]** Android: turnOn & turnOff must check for permissions
-* **[fix]** Android: startScan should not required BLUETOOTH_CONNECT permission
+* **[Fix]** Android: `discoverServices` never returns (regression in 1.13.0)
+* **[Fix]** Android: `turnOn` & `turnOff` must check for permissions (bug in original `flutter_blue`)
+* **[Fix]** Android: `startScan` should not required `BLUETOOTH_CONNECT` permission (bug in original `flutter_blue`)
 
 ## 1.13.3
-* **[fix]** Dart: be extra careful to only call connect & disconnect when necessary (regression in 1.13.0)
+* **[Fix]** Dart: be extra careful to only call connect & disconnect when necessary (regression in 1.13.0)
 
 ## 1.13.2
-* **[fix]** Dart: connect should be no-op if already connected (Regression in 1.13.1)
-* **[improve]** Dart: BluetoothDevice: use mutexes to prevent multiple in flight requests
+* **[Fix]** Dart: connect should be no-op if already connected (regression in 1.13.1)
+* **[Improve]** Dart: BluetoothDevice: use mutexes to prevent multiple in flight requests
 
 ## 1.13.1
-* **[fix]** Android/iOS:  on connection failure, return right away
-* **[improve]** Android/iOS: on connection failure, return error code and error string
+* **[Fix]** Android/iOS:  on connection failure, return right away (bug in original `flutter_blue`)
+* **[Improve]** Android/iOS: on connection failure, return error code and error string
 
 ## 1.13.0
 This release improves bonding support.
-* **[fix]** Android: discoverServices & others can fail if currently in the process of bonding
-* **[improve]** Android: createBond: check for success and throw exception on failure
-* **[improve]** Android: removeBond: return Future(void) instead of Future(Bool), and throw exception on failure
+* **[Fix]** Android: `discoverServices` & others can fail if currently in the process of bonding (bug in original `flutter_blue`)
+* **[Improve]** Android: `createBond`: check for success and throw exception on failure
+* **[Improve]** Android: `removeBond`: return `Future(void)` instead of `Future(Bool)`, and throw exception on failure
 
 ## 1.12.14
-* **[fix]** Android: min sdk is currently 21, not 19
-* **[fix]** Android: getOrDefault not available in AndroidSdkLevel < 24
-* **[improve]** Android: log: BOND changes
-* **[rename]** Android:  pair -> createBond
+* **[Fix]** Android: min sdk is currently 21, not 19 (bug in original `flutter_blue`)
+* **[Fix]** Android: `getOrDefault` not available in AndroidSdkLevel < 24 (regression in 1.7.0)
+* **[Improve]** Android: log: BOND changes
+* **[rename]** Android:  `pair` -> `createBond`
 
 ## 1.12.13
-* **[fix]** iOS: FlutterBluePlus.isAvailable 'int' is not a subtype of type 'FutureOr<bool>' (regressed in 1.12.10)
+* **[Fix]** iOS: `FlutterBluePlus.isAvailable` 'int' is not a subtype of type 'FutureOr<bool>' (regressed in 1.12.10)
 
 ## 1.12.12
-* **[fix]** Android: null ptr deref during ScanResult connectionState (regressed in 1.10.6)
+* **[Fix]** Android: null ptr deref during `ScanResult` `connectionState` (regressed in 1.10.6)
 ^^^ connectionState was added to scanResults last week. It was not a good idea, and is now fully removed.
 
 ## 1.12.11
-* **[fix]** Android: potential null dereference if the platform does not have bluetooth
-* **[fix]** Android: close all connections when bluetooth is turned off (DeadObjectException)
+* **[Fix]** Android: potential null dereference if the platform does not have bluetooth (bug in original `flutter_blue`)
+* **[Fix]** Android: DeadObjectException: close all connections when bluetooth is turned off (bug in original `flutter_blue`)
 
 ## 1.12.10
-* **[fix]** iOS: isAvailable returns false the first time, incorrectly
-* **[fix]** iOS: descriptors, must handle NSData, NSString, & NSNumber correctly
-* **[improve]** Android: turnOff is deprecated in Android
+* **[Fix]** iOS: `isAvailable` returns false the first time, incorrectly (bug in original `flutter_blue`)
+* **[Fix]** iOS: descriptors, must handle `NSData`, `NSString`, & `NSNumber` correctly (bug in original `flutter_blue`)
+* **[Improve]** Android: `turnOff` is deprecated in Android
 
 ## 1.12.9
-* **[fix]** Dart: servicesStream: 'bad state: Stream has already been listened to'
-* **[fix]** Dart: remove unecessary print('withoutResponse ')
-* **[fix]** Android: add blank AndroidManifest.xml to fix build errors in older flutter
-* **[fix]** Android/iOS: infinite recursion when included services includes itself
-* **[fix]** iOS: FlutterBluePlus.isOn returns 'no' first time even though it is on
-* **[improve]** Dart: mutex should make sure writes happen in the same order as called
-* **[improve]** Dart: setLogLevel color now optional
+* **[Fix]** Dart: `servicesStream`: 'bad state: Stream has already been listened to' (bug in original `flutter_blue`)
+* **[Fix]** Dart: remove unecessary print (regression in 1.11.7)
+* **[Fix]** Android: add blank `AndroidManifest.xml` to fix build errors in older flutter (regression in 1.12.0)
+* **[Fix]** Android/iOS: infinite recursion when included services includes itself (bug in original `flutter_blue`)
+* **[Fix]** iOS: `FlutterBluePlus.isOn` returns 'no' first time even though it is on (bug in original `flutter_blue`)
+* **[Improve]** Dart: mutex should make sure writes happen in the same order as called
+* **[Improve]** Dart: `setLogLevel` color now optional
 
 ## 1.12.8
-* **[fix]** Android: null ptr in setPreferredPhy & setConnectionPriority (regression in 1.7.0)
+* **[Fix]** Android: null ptr in `setPreferredPhy` & `setConnectionPriority` (regression in 1.7.0)
 
 ## 1.12.7
-* **[fix]** iOS: mtu returned on iOS was 3 too small
-* **[improve]** Dart: simplify mutexes. improves throughput for chrs that support write & writeWithoutResponse
+* **[Fix]** iOS: mtu returned on iOS was 3 too small (bug in original `flutter_blue`)
+* **[Improve]** Dart: simplify mutexes. improves throughput for chrs that support `write` & `writeWithoutResponse`
 
 ## 1.12.6
-* **[improve]** Dart: verbose logging: brown == data from platform
+* **[Improve]** Dart: verbose logging: brown == data from platform
 
 ## 1.12.5
-* **[improve]** Dart: add more logging when in verbose mode, with color
+* **[Improve]** Dart: add more logging when in verbose mode, with color
 
 ## 1.12.4
-* **[fix]** Android:  build error typo (Regression in 1.12.3)
+* **[Fix]** Android:  build error typo (regression in 1.12.3)
 
 ## 1.12.3
-* **[fix]** Android: mConnectionState & mMtu not cleared when onDetachedFromEngine (regression in 1.10.10)
+* **[Fix]** Android: `mConnectionState` & `mMtu` not cleared when `onDetachedFromEngine` (regression in 1.10.10)
 
 ## 1.12.2
-* **[fix]** Example:  Android: add back INTERNET permission for debug and profile modes. needed for debugging
-* **[improve]** Android: create BluetoothManager during onMethodCall, as opposed to app startup
+* **[Fix]** Example:  Android: add back `INTERNET` permission for debug and profile modes. needed for debugging (regression in 1.12.0)
+* **[Improve]** Android: create `BluetoothManager` during `onMethodCall`, as opposed to app startup
 
 ## 1.12.1
-* **[improve]** Android: simplify build.grade to not set specific gradle version. it is uneeded
+* **[Improve]** Android: simplify `build.grade` to not set specific gradle version. it is uneeded
 
 ## 1.12.0
 This release simplifies permissions.
-* **[improve]** Android: remove permissions from plugin. It is easier for user to specify everything
-* **[fix]** Dart: scan could be initiated twice causing bad state
-* **[fix]** Dart: read & write mutexs must always come from the MutexFactory to properly prevent race conditions
+* **[Improve]** Android: remove permissions from plugin. It is easier for user to specify everything
+* **[Fix]** Dart: `scan` could be initiated twice causing bad state (bug in original `flutter_blue`)
+* **[Fix]** Dart: read & write mutexs must always come from the `MutexFactory` to properly prevent race conditions 
 
 ## 1.11.8
-* **[fix]** Android/iOS:  setLogLevel, getAdapterState, getAdapterName returning error when adapter not available
+* **[Fix]** Android/iOS: `setLogLevel`, `getAdapterState`, `getAdapterName` returning error when adapter not available
 
 ## 1.11.7
-* **[fix]** Dart: ensure only 1 mutex per characteristic to prevent race issues and dropped packets
-* **[perf]** Dart:  writeWithoutResponse should use at least 1 mutex per remoteId, to improve throughput
-* **[improve]** Example: word wrapping on smaller screens
+* **[Fix]** Dart: ensure only 1 mutex per characteristic to prevent race issues and dropped packets (bug in original `flutter_blue`)
+* **[perf]** Dart:  `writeWithoutResponse` should use at least 1 mutex per `remoteId`, to improve throughput
+* **[Improve]** Example: word wrapping on smaller screens
 
 ## 1.11.6
-* **[fix]** Dart: writeWithoutResponse should have its own mutex to prevent dropped packets
+* **[Fix]** Dart: `writeWithoutResponse` should have its own mutex to prevent dropped packets (bug in original `flutter_blue`)
 
 ## 1.11.5
-* **[fix]** iOS: crash discoverServices() crash after bluetooth adapter is toggled on/off (regressed sometime after 1.4.0)
-* **[improve]** Example: dismiss DeviceScreen when bluetooth adapter is turned off
-* **[improve]** Android/iOS:  log adapterState and connectionState as strings
+* **[Fix]** iOS: crash `discoverServices` crash after bluetooth adapter is toggled on/off (regressed sometime after 1.4.0)
+* **[Improve]** Example: dismiss `DeviceScreen` when bluetooth adapter is turned off
+* **[Improve]** Android/iOS: log `adapterState` and `connectionState` as strings
 
 ## 1.11.4
-* **[fix]** Android: null ptr exception getting Mtu
+* **[Fix]** Android: null ptr exception getting Mtu (regression in 1.10.10)
 
 ## 1.11.3
-* **[fix]** Dart: writeWithoutResponse should wait for completion, to prevent dropped packets
+* **[Fix]** Dart: `writeWithoutResponse` should wait for completion, to prevent dropped packets (bug in original `flutter_blue`)
 
 ## 1.11.2
-* **[improve]** Android: remove shouldClearGattCache connect option. It should be discouraged (called manually) (added in ~1.6.0)
+* **[Improve]** Android: remove `shouldClearGattCache` connect option. It should be discouraged (called manually) (added in ~1.6.0)
 
 ## 1.11.1
-* **[improve]** Dart: add back servicesList, but with simpler api
+* **[Improve]** Dart: add back `servicesList`, but with simpler api
 
 ## 1.11.0
 This release removes recent changes to the API causing issues.
-* **[remove]** Dart:  includeConnectedSystemDevices scan setting, it was too complicated 
-* **[remove]** Dart:  servicesList (introduced in 1.10.6)
-* **[rename]** Dart:  connectedDevices -> connectedSystemDevices
+* **[remove]** Dart:  `includeConnectedSystemDevices` scan setting, it was too complicated 
+* **[remove]** Dart:  `servicesList` (introduced in 1.10.6)
+* **[rename]** Dart:  `connectedDevices` -> `connectedSystemDevices`
 
 ## 1.10.10
-* **[fix]** Android: platform exception when scanning with includeConnectedSystemDevices (Regression in 1.10.6)
-* **[fix]** Dart: characteristic write crashed for negative values (Regression in 1.7.0)
-* **[fix]** Dart: connectionState should only be concerned with *our apps* connectionState
+* **[Fix]** Android: platform exception when scanning with `includeConnectedSystemDevices` (regression in 1.10.6)
+* **[Fix]** Dart: characteristic write crashed for negative values (regression in 1.7.0)
+* **[Fix]** Dart: `connectionState` should only be concerned with *our apps* `connectionState` (bug in original `flutter_blue`)
 
 ## 1.10.9
-* **[fix]** Android: turnOn() and turnOff() could timeout if already on or already off
+* **[Fix]** Android: `turnOn` and `turnOff` could timeout if already on or already off (regression in 1.10.0)
 
 ## 1.10.8
-* **[fix]** Android: requestMtu (regression in 1.10.6)
+* **[Fix]** Android: `requestMtu` (regression in 1.10.6)
 
 ## 1.10.7
-* **[improve]** Dart: disconnect should wait for disconnect to complete
+* **[Improve]** Dart: `disconnect` should wait for disconnect to complete
 
 ## 1.10.6
-* **[improve]** Dart: for convenience, scan results now also include connected devices see: includeConnectedDevice
-* **[improve]** Dart: add connectionState to ScanResult
-* **[improve]** Dart: add BluetoothDevice.servicesList for convenience, which calls discoverServices automatically.
-* **[rename]** Dart:  BluetoothDevice.services -> BluetoothDevice.servicesStream
+* **[Improve]** Dart: for convenience, scan results now also include connected devices see: `includeConnectedDevice`
+* **[Improve]** Dart: add `connectionState` to `ScanResult`
+* **[Improve]** Dart: add `BluetoothDevice.servicesList` for convenience, which calls `discoverServices` automatically.
+* **[rename]** Dart:  `BluetoothDevice.services` -> `BluetoothDevice.servicesStream`
 
 ## 1.10.5
-* **[fix]** iOS: API MISUSE: Cancelling connection for unused peripheral.
-* **[improve]** iOS: remove unecessary search of already connected devices during connection
+* **[Fix]** iOS: "API MISUSE: Cancelling connection for unused peripheral."
+* **[Improve]** iOS: remove unecessary search of already connected devices during connection
 
 ## 1.10.4
-* **[improve]** iOS: add remoteId to error strings when connection fails, etc
+* **[Improve]** iOS: add `remoteId` to error strings when connection fails, etc
 
 ## 1.10.3
-* **[improve]** Android: handle scan failure.
-* **[improve]** Dart: add verbose log level and remove unused log levels
+* **[Improve]** Android: handle scan failure.
+* **[Improve]** Dart: add verbose log level and remove unused log levels
 
 ## 1.10.2
-* **[fix]** Dart: setLogLevel recursion (Regression in 1.10.0)
-* **[improve]** iOS: use NSError instread of obj-c exceptions to avoid uncaught exceptions
+* **[Fix]** Dart: `setLogLevel` recursion (regression in 1.10.0)
+* **[Improve]** iOS: use `NSError` instread of obj-c exceptions to avoid uncaught exceptions
 
 ## 1.10.1
-* **[improve]** Example: add error handling to descriptor read & write
+* **[Improve]** Example: add error handling to descriptor read & write
 
 ## 1.10.0
 This release improves error handling and reliability.
-* **[BREAKING CHANGE]** Dart: turnOn() & turnOff() now wait for completion, return void instead of bool, and can throw
-* **[BREAKING CHANGE]** Dart: use static functions for FlutterBluePlus instead of FlutterBluePlus.instance. Multiple instances is not supported by any platform.
-* **[improve]** readme: add error handling section
-* **[improve]** iOS: handle missing bluetooth adapter gracefully
-* **[improve]** iOS: getAdapterState && getConnectionState are more robust
-* **[improve]** Android: log method call in debug, and more consistent log messages
-* **[improve]** Example: show nicer looking errors
-* **[improve]** Example: prefer try/catch over catchError as dart debugger doesn't work with catchError as well
+* **[BREAKING CHANGE]** Dart: `turnOn` & `turnOff` now wait for completion, return void instead of bool, and can throw
+* **[BREAKING CHANGE]** Dart: use static functions for `FlutterBluePlus` instead of `FlutterBluePlus.instance`. Multiple instances is not supported by any platform.
+* **[Improve]** readme: add error handling section
+* **[Improve]** iOS: handle missing bluetooth adapter gracefully
+* **[Improve]** iOS: `getAdapterState` && `getConnectionState` are more robust
+* **[Improve]** Android: log method call in debug, and more consistent log messages
+* **[Improve]** Example: show nicer looking errors
+* **[Improve]** Example: prefer `try/catch` over `catchError` as dart debugger doesn't work with `catchError` as well
 
 ## 1.9.5
-* **[fix]** iOS: serviceUUIDs always null in scan results (regression in 1.7.0)
-* **[fix]** Example:  snackbar complaining about invalid contexts
+* **[Fix]** iOS: `serviceUUIDs` always null in scan results (regression in 1.7.0)
+* **[Fix]** Example:  snackbar complaining about invalid contexts
 
 ## 1.9.4
-* **[fix]** iOS: characteristic read not working. (regression in 1.9.0)
-* **[improve]** Dart: handle device.readRssi failure in rssiStream gracefully
+* **[Fix]** iOS: characteristic read not working. (regression in 1.9.0)
+* **[Improve]** Dart: handle `device.readRssi` failure in `rssiStream` gracefully
 
 ## 1.9.3
-* **[fix]** iOS: setNotify returning error even though it succeeded (regression in 1.9.0)
-* **[fix]** Dart: Characteristic.isNotifying was not working (regression in 1.9.0)
-* **[improve]** Dart: add back uuid convenience variable for BluetoothDescriptor (deprecated in 1.8.6)
-* **[improve]** Example: only show READ/WRITE/SUBSCRIBE buttons if the characteristic supports it
-* **[improve]** Example: add error handling
+* **[Fix]** iOS: `setNotify` returning error even though it succeeded (regression in 1.9.0)
+* **[Fix]** Dart: `Characteristic.isNotifying` was not working (regression in 1.9.0)
+* **[Improve]** Dart: add back uuid convenience variable for `BluetoothDescriptor` (deprecated in 1.8.6)
+* **[Improve]** Example: only show READ/WRITE/SUBSCRIBE buttons if the characteristic supports it
+* **[Improve]** Example: add error handling
 
 ## 1.9.2
-* **[fix]** Dart: readRssi: Invalid argument: Instance of 'DeviceIdentifier' (Regression 1.9.0)
+* **[Fix]** Dart: readRssi: "Invalid argument: Instance of 'DeviceIdentifier'" (regression in 1.9.0)
 
 ## 1.9.1
-* **[fix]** Dart: crash in scanning due to assuming uuid is Guid format when it might not (Regression 1.9.0)
-* **[improve]** Dart: BluetoothCharacteristic.onValueReceived should only stream successful reads (Bug in 1.9.0)
-* **[improve]** Dart: add convenience accessors for BluetoothService.uuid and BluetoothCharacteristic.uuid as (deprecated in 1.8.6)
-* **[improve]** Example: add macos support
+* **[Fix]** Dart: crash in scanning due to assuming uuid is Guid format when it might not (regression in 1.9.0)
+* **[Improve]** Dart: `BluetoothCharacteristic.onValueReceived` should only stream successful reads (bug in 1.9.0)
+* **[Improve]** Dart: add convenience accessors for `BluetoothService.uuid` and `BluetoothCharacteristic.uuid` as (deprecated in 1.8.6)
+* **[Improve]** Example: add macos support
 
 
 ## 1.9.0
@@ -624,156 +624,156 @@ This release improves error handling and reliability.
 This release marks the end of major work to improve reliability and
 simplicity of the FlutterBluePlus codebase. Please submit bug reports.
 
-* **[Breaking Change/Fix]** Android: When `read()` is called `onValueChangedStream` is pushed to as well. This change was made to make both platforms behave the same way. It is an unavoidable limitation of iOS. See: https://github.com/boskokg/flutter_blue_plus/issues/419
-* **[fix]** Android/iOS: mtu check minus 3 issue (reggression in 1.8.3)
-* **[fix]** Dart: BluetoothCharacteristic.state variable not working (bug introduced 1.8.6)
-* **[fix]** Dart: FlutterBluePlus.state variable not working (bug introduced 1.8.6)
-* **[rename]** BluetoothCharacteristic.value -> lastValueStream
-* **[rename]** BluetoothDescriptor.value -> lastValueStream
-* **[rename]** BluetoothCharacteristic.onValueChangedStream -> onValueReceived
-* **[rename]** BluetoothDescriptor.onValueChangedStream -> onValueReceived
-* **[refactor]** Dart: adapterState to use methodChannel
+* **[Breaking Change/Fix]** Android: When `read` is called `onValueChangedStream` is pushed to as well. This change was made to make both platforms behave the same way. It is an unavoidable limitation of iOS. See: https://github.com/boskokg/flutter_blue_plus/issues/419
+* **[Fix]** Android/iOS: mtu check minus 3 issue (reggression in 1.8.3)
+* **[Fix]** Dart: `BluetoothCharacteristic.state` variable not working (reggression in 1.8.6)
+* **[Fix]** Dart: `FlutterBluePlus.state` variable not working (reggression in 1.8.6)
+* **[rename]** `BluetoothCharacteristic.value` -> `lastValueStream`
+* **[rename]** `BluetoothDescriptor.value` -> `lastValueStream`
+* **[rename]** `BluetoothCharacteristic.onValueChangedStream` -> `onValueReceived`
+* **[rename]** `BluetoothDescriptor.onValueChangedStream` -> `onValueReceived`
+* **[refactor]** Dart: `adapterState` to use `methodChannel`
 * **[refactor]** Dart: various 'bm' message schemas to use simpler characteristic structure
-* **[refactor]** Dart: BmSetNotificationResponse removed. It is simpler to reuse BmWriteDescriptorResponse
-* **[refactor]** Android: move secondaryServiceUuid code its own getServicePair() function 
-* **[refactor]** Android: android MessageMaker to be a bit more legible
+* **[refactor]** Dart: `BmSetNotificationResponse` removed. It is simpler to reuse `BmWriteDescriptorResponse`
+* **[refactor]** Android: move `secondaryServiceUuid` code its own `getServicePair` function 
+* **[refactor]** Android: android `MessageMaker` to be a bit more legible
 
 ## 1.8.8
-* **[fix]** Android/iOS:connectionState not being updated (regression in 1.8.6)
-* **[fix]** Android: "adapterState" to "getAdapterState"
+* **[Fix]** Android/iOS: `connectionState` not being updated (regression in 1.8.6)
+* **[Fix]** Android: `adapterState` shouldve been `getAdapterState` (regression in 1.8.6)
 
 ## 1.8.7
-* **[improve]** Dart: add 15 seconds default timeout for ble communication  
+* **[Improve]** Dart: add 15 seconds default timeout for ble communication  
 
 ## 1.8.6
-* **[rename]** Dart: BluetoothDevice.id -> remoteId
-* **[rename]** Dart: uuid -> characteristicUuid / serviceUuid / descriptorUuid
-* **[rename]** Dart: FlutterBluePlus.name -> adapterName
-* **[rename]** Dart: BluetoothDevice.name -> localName
-* **[rename]** Dart: FlutterBluePlus.state -> adapterState 
-* **[rename]** Dart: BluetoothDevice.state -> connectionState
-* **[improve]** iOS: add support for autoReconnect (iOS 17 only)
+* **[rename]** Dart: `BluetoothDevice.id` -> `remoteId`
+* **[rename]** Dart: uuid -> `characteristicUuid` / `serviceUuid` / `descriptorUuid`
+* **[rename]** Dart: `FlutterBluePlus.name` -> `adapterName`
+* **[rename]** Dart: `BluetoothDevice.name` -> `localName`
+* **[rename]** Dart: `FlutterBluePlus.state` -> `adapterState` 
+* **[rename]** Dart: `BluetoothDevice.state` -> `connectionState`
+* **[Improve]** iOS: add support for `autoReconnect` (iOS 17 only)
 
 ## 1.8.5
-* **[fix]** iOS: check for nil peripheral. (regression in 1.8.3)
-* **[fix]** Android: clean up gatt servers onDetachedFromEngine
+* **[Fix]** iOS: check for nil peripheral. (regression in 1.8.3)
+* **[Fix]** Android: clean up gatt servers `onDetachedFromEngine` (bug in original `flutter_blue`)
 
 ## 1.8.4
-* **[improve]** Android: make connectivity checks more robust
+* **[Improve]** Android: make connectivity checks more robust
 
 ## 1.8.3
-* **[improve]** Android: writeCharacteristic: return error if longer than mtu
-* **[improve]** Android: add device connection checks
-* **[improve]** iOS: add mtu size checks
-* **[improve]** iOS: add device connection checks
+* **[Improve]** Android: `writeCharacteristic`: return error if longer than mtu
+* **[Improve]** Android: add device connection checks
+* **[Improve]** iOS: add mtu size checks
+* **[Improve]** iOS: add device connection checks
 * **[refactor]** iOS: unify try catch blocks
 
 ## 1.8.2
-* **[improve]** Android: support sdk 33 for writeCharacteristic and writeDescriptor
-* **[improve]** Android: calling connect() on already connected device is now considered success
-* **[improve]** Android: return more specific error for locateGatt issue
-* **[improve]** Android: shouldClearGattCache is now called after connection, not before
+* **[Improve]** Android: support sdk 33 for writeCharacteristic and `writeDescriptor`
+* **[Improve]** Android: calling `connect` on already connected device is now considered success
+* **[Improve]** Android: return more specific error for `locateGatt` issue
+* **[Improve]** Android: `shouldClearGattCache` is now called after connection, not before
 
 ## 1.8.1
-* **[fix]** Android: characteristic properties check was incorrect (regression in 1.7.8)
+* **[Fix]** Android: characteristic properties check was incorrect (regression in 1.7.8)
 
 ## 1.8.0
 This release improves error handling.
-* **[improve]** android/ios: handle errors for charactersticRead
-* **[improve]** android/ios: handle errors for readDescriptor
-* **[improve]** android/ios: handle errors for discoverServices
-* **[improve]** android/ios: handle errors for mtu
-* **[improve]** android/ios: handle errors for readRssi
-* **[improve]** android/ios: pass error string for setNotifyValue
-* **[improve]** android/ios: pass error string for charactersticWrite
-* **[improve]** android/ios: pass error string for writeDescriptor
+* **[Improve]** android/ios: handle errors for `charactersticRead`
+* **[Improve]** android/ios: handle errors for `readDescriptor`
+* **[Improve]** android/ios: handle errors for `discoverServices`
+* **[Improve]** android/ios: handle errors for `mtu`
+* **[Improve]** android/ios: handle errors for `readRssi`
+* **[Improve]** android/ios: pass error string for `setNotifyValue`
+* **[Improve]** android/ios: pass error string for `charactersticWrite`
+* **[Improve]** android/ios: pass error string for `writeDescriptor`
 
 ## 1.7.8
-* **[improve]** Android: add more useful errors for read and write characterist errors
+* **[Improve]** Android: add more useful errors for read and write characterist errors
 
 ## 1.7.7
-* **[fix]** Dart: scanning: Bad state: Cannot add event after closing.
-* **[improve]** Android: set autoConnect to false by default
-* **[improve]** Example: remove pubspec.lock so users default to latest version
+* **[Fix]** Dart: scanning: "Bad state: Cannot add event after closing" (regression in 1.5.0)
+* **[Improve]** Android: set `autoConnect` to false by default
+* **[Improve]** Example: remove `pubspec.lock` so users default to latest version
 
 ## 1.7.6
-* **[fix]** Dart: BmBluetoothService.is_primary was not set (regression in 1.7.0)
-* **[fix]** Android: BmAdvertisementData.connectable was not set (regression in 1.7.0)
-* **[fix]** Android: success was not set for writeCharacteristic, setNotification, writeDescriptor  (regression in 1.7.0) 
-* **[improve]** Android: update to gradle 8
-* **[improve]** Android: dont request ACCESS_FINE_LOCATION by default (Android 12+)
+* **[Fix]** Dart: `BmBluetoothService.is_primary` was not set (regression in 1.7.0)
+* **[Fix]** Android: `BmAdvertisementData.connectable` was not set (regression in 1.7.0)
+* **[Fix]** Android: success was not set for `writeCharacteristic`, `setNotification`, `writeDescriptor`  (regression in 1.7.0) 
+* **[Improve]** Android: update to gradle 8
+* **[Improve]** Android: dont request `ACCESS_FINE_LOCATION` by default (Android 12+)
 
 ## 1.7.5
-* **[fix]** Android: BluetoothAdapterState not being updated
-* **[improve]** Example: fix deprecations
-* **[improve]** Dart: remove analysis_options.yaml
+* **[Fix]** Android: `BluetoothAdapterState` not being updated (regression in 1.7.0)
+* **[Improve]** Example: fix deprecations
+* **[Improve]** Dart: remove `analysis_options.yaml`
 
 ## 1.7.4
-* **[fix]** Android: Android 13 access fine location error
+* **[Fix]** Android: Android 13 access fine location error (bug in original `flutter_blue`)
 
 ## 1.7.3
-* **[fix]** Android: exception thrown when descriptor.write is called (regression in 1.7.0)
+* **[Fix]** Android: exception thrown when `descriptor.write` is called (regression in 1.7.0)
 
 ## 1.7.2
-* **[fix]** Android: exception thrown when characteristic.write is called (regression in 1.7.0)
-* **[fix]** Android: bmCharacteristicProperties was not being set correctly (regression in 1.7.0)
+* **[Fix]** Android: exception thrown when `characteristic.write` is called (regression in 1.7.0)
+* **[Fix]** Android: `bmCharacteristicProperties` was not being set correctly (regression in 1.7.0)
 
 ## 1.7.1
-* **[fix]** iOS: when connecting, exception is thrown (regression in 1.7.0)
+* **[Fix]** iOS: when connecting, exception is thrown (regression in 1.7.0)
 
 ## 1.7.0
 This release removes Protobuf.
 * **[refactor]** removed protobuf dependency 
-* **[fix]** Android: turnOn and turnOff not working (regression in 1.6.1)
-* **[fix]** Dart: guid exception with serviceUUID is empty
-* **[improve]** Android: compileSdkVersion 31 -> 33
-* **[improve]** Android: increase minSdkVersion 19 -> 21 to remove lollipop checks
-* **[improve]** Android: FineLocation permission is now optional. See startScan
-* **[improve]** iOS: allow connecting without scanning if you save and reuse the remote_id
+* **[Fix]** Android: `turnOn` and `turnOff` not working (regression in 1.6.1)
+* **[Fix]** Dart: `guid` exception with `serviceUUID` is empty (bug in original `flutter_blue`)
+* **[Improve]** Android: `compileSdkVersion` 31 -> 33
+* **[Improve]** Android: increase `minSdkVersion` 19 -> 21 to remove lollipop checks
+* **[Improve]** Android: FineLocation permission is now optional. See `startScan`
+* **[Improve]** iOS: allow connecting without scanning if you save and reuse the `remote_id`
 
 ## 1.6.1
-* **[fix]** Android: compile error (regression in 1.6.0)
-* **[improve]** Android: significantly clean up all code
+* **[Fix]** Android: compile error (regression in 1.6.0)
+* **[Improve]** Android: significantly clean up all code
 
 ## 1.6.0
 This release reformats a bunch of Android code.
-* **[fix]** Dart: close BufferStream listen on stopScan
-* **[improve]** Dart: don't repropogate Mutex error
-* **[improve]** Dart: better stacktrace on error for Characteristic Read/Write
-* **[improve]** MacOS: use symbolic links to iOS version, to keep internal code in sync
-* **[improve]** Android: reformat code
+* **[Fix]** Dart: close `BufferStream` listen on stopScan (regression in 1.5.0)
+* **[Improve]** Dart: don't repropogate Mutex error
+* **[Improve]** Dart: better stacktrace on error for Characteristic Read/Write
+* **[Improve]** MacOS: use symbolic links to iOS version, to keep internal code in sync
+* **[Improve]** Android: reformat code
 
 
 ## 1.5.2
-* **[fix]** Android: setNotification was throwing exception (regression)
+* **[Fix]** Android: setNotification was throwing exception (regression in 1.5.0)
 
 ## 1.5.1
-* **[fix]** Dart: issue where startScan can hang forever (regression)
-* **[fix]** Dart: some scanResults could be missed due to race condition (theoretically)
-* **[improve]** Dart: dont export util classes & functions. they've been made library-private.
-* **[improve]** iOS: prepend all iOS logs with '[FBP-iOS]' prefix
-* **[improve]** iOS: log errors on failure
-* **[improve]** iOS: logs now adhere to logLevel
+* **[Fix]** Dart: issue where startScan can hang forever (regression in 1.5.0)
+* **[Fix]** Dart: some scanResults could be missed due to race condition (bug in original `flutter_blue`)
+* **[Improve]** Dart: dont export util classes & functions. they've been made library-private.
+* **[Improve]** iOS: prepend all iOS logs with '[FBP-iOS]' prefix
+* **[Improve]** iOS: log errors on failure
+* **[Improve]** iOS: logs now adhere to logLevel
 
 ## 1.5.0
 This release closes many open issues on Github.
-* **[fix]** Dart: writeCharacteristic (and other similar functions) exception could be missed
-* **[fix]** Dart: setNotifyValue should check for success and throw error on failure
-* **[fix]** Dart: race conditions in connect(), disconnect(), readRssi(), writeCharacteristic(), readCharacteristic()
-* **[fix]** iOS: Bluetooth adapter being stuck in unknown state
-* **[fix]** iOS: dropping packets during bulk write without response
-* **[fix]** Example: android permissions
-* **[improve]** Dart: add isScanningNow variable
-* **[improve]** add support for macOS
-* **[improve]** Android: replace deprecated bluetooth enable with 'Enable-Intent'
-* **[improve]** Android: Removed maxSdkVersion=30 in manifest
-* **[improve]** Android: add function: setPreferredPh
-* **[improve]** Android: add function: removeBond
-* **[improve]** Android: add function: requestConnectionPriority 
-* **[improve]** Android: allow for simultaneous MAC and ServiceUuid ScanFilters
-* **[improve]** Android: request location permission on Android 12+ when scanning (needed on some phones)
-* **[improve]** iOS: Use CBCentralManagerOptionShowPowerAlertKey for better UI popups
-* **[improve]** Dart: Removed RxDart and other dependencies
+* **[Fix]** Dart: `writeCharacteristic` (and other similar functions) exception could be missed (bug in original `flutter_blue`)
+* **[Fix]** Dart: `setNotifyValue` should check for success and throw error on failure (bug in original `flutter_blue`)
+* **[Fix]** Dart: race conditions in `connect`, `disconnect`, `readRssi`, `writeCharacteristic`, `readCharacteristic` (bug in original `flutter_blue`)
+* **[Fix]** iOS: Bluetooth adapter being stuck in unknown state (bug in original `flutter_blue`)
+* **[Fix]** iOS: dropping packets during bulk write without response (bug in original `flutter_blue`)
+* **[Improve]** Example: android permissions
+* **[Improve]** Dart: add isScanningNow variable
+* **[Improve]** add support for macOS
+* **[Improve]** Android: replace deprecated bluetooth enable with 'Enable-Intent'
+* **[Improve]** Android: Removed `maxSdkVersion=30` in manifest
+* **[Improve]** Android: add function: `setPreferredPh`
+* **[Improve]** Android: add function: `removeBond`
+* **[Improve]** Android: add function: `requestConnectionPriority` 
+* **[Improve]** Android: allow for simultaneous MAC and ServiceUuid ScanFilters
+* **[Improve]** Android: request location permission on Android 12+ when scanning (needed on some phones)
+* **[Improve]** iOS: Use `CBCentralManagerOptionShowPowerAlertKey` for better UI popups
+* **[Improve]** Dart: Removed RxDart and other dependencies
 
 
 ## 1.4.0
