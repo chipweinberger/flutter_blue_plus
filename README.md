@@ -1,4 +1,4 @@
-[![pub package](https://img.shields.io/pub/v/flutter_blue_plus.svg)](https://pub.dartlang.org/packages/flutter_blue_plus)
+y[![pub package](https://img.shields.io/pub/v/flutter_blue_plus.svg)](https://pub.dartlang.org/packages/flutter_blue_plus)
 [![Chat](https://img.shields.io/discord/634853295160033301.svg?style=flat-square&colorB=758ED3)](https://discord.gg/Yk5Efra)
 
 <br>
@@ -834,6 +834,8 @@ The recommended solution is to `catch` the error, and retry.
 If you just added flutter_blue_plus to your pubspec.yaml, a hot reload / hot restart is not enough.
 
 You need to fully stop your app and run again so that the native plugins are loaded.
+
+Also try `flutter clean`.
 
 
 
