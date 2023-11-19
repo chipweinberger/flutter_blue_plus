@@ -33,7 +33,7 @@
 * **[Fix]** android: GUID starting with 0000 were misinterpretted (regression 1.28.5)
 
 ## 1.28.6
-* **[Improve]** simplify api: clear `knownServices` & `lastValues` on reconnection instead of disconnection
+* **[Improve]** simplify api: clear `knownServices` on reconnection instead of disconnection
 * **[Improve]** dont clear `bondState` cache when device is disconnected. unecessary.
 
 ## 1.28.5
