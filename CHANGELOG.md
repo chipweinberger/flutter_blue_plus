@@ -1,3 +1,7 @@
+## 1.29.5
+* **[Fix]**  iOS: 'service not found' if service supports short uuid (regression 1.28.5)
+* **[Improve]**  android: handle `turnOn` user rejected
+
 ## 1.29.4
 * **[Fix]** characteristics with same UUID could return wrong `properties` or `descriptors` (regression in 1.20.4)
 
