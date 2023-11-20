@@ -836,7 +836,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 {
     for (CBService *s in array)
     {
-        if ([[s.UUID uuidStr] isEqualToString:uuid])
+        if ([s.UUID isEqual:[CBUUID UUIDWithString:uuid]])
         {
             return s;
         }
@@ -848,7 +848,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 {
     for (CBCharacteristic *c in array)
     {
-        if ([[c.UUID uuidStr] isEqualToString:uuid])
+        if ([c.UUID isEqual:[CBUUID UUIDWithString:uuid]])
         {
             return c;
         }
@@ -860,7 +860,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 {
     for (CBDescriptor *d in array)
     {
-        if ([[d.UUID uuidStr] isEqualToString:uuid])
+        if ([d.UUID isEqual:[CBUUID UUIDWithString:uuid]])
         {
             return d;
         }
