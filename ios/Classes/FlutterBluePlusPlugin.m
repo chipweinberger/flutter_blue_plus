@@ -1181,7 +1181,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // discover characteristics and secondary services
     [self.servicesToDiscover addObjectsFromArray:peripheral.services];
     for (CBService *s in [peripheral services]) {
-        Log(LDEBUG, @"Found service: %@", [s.UUID UUIDString]);
+        Log(LDEBUG, @"  svc: %@", [s.UUID UUIDString]);
         [peripheral discoverCharacteristics:nil forService:s];
         // Secondary services in the future (#8)
         // [peripheral discoverIncludedServices:nil forService:s];
@@ -1196,6 +1196,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         Log(LERROR, @"didDiscoverCharacteristicsForService: [Error] %@", [error localizedDescription]);
     } else {
         Log(LDEBUG, @"didDiscoverCharacteristicsForService");
+        Log(LDEBUG, @"  svc: %@", [service.UUID uuidStr]);
     }
 
     // Loop through and discover descriptors for characteristics
@@ -1203,6 +1204,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     [self.characteristicsToDiscover addObjectsFromArray:service.characteristics];
     for (CBCharacteristic *c in [service characteristics])
     {
+        Log(LDEBUG, @"    chr: %@", [c.UUID UUIDString]);
         [peripheral discoverDescriptorsForCharacteristic:c];
     }
 }
@@ -1215,16 +1217,23 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         Log(LERROR, @"didDiscoverDescriptorsForCharacteristic: [Error] %@", [error localizedDescription]);
     } else {
         Log(LDEBUG, @"didDiscoverDescriptorsForCharacteristic");
+        Log(LDEBUG, @"  chr: %@", [characteristic.UUID uuidStr]);
     }
 
+    // print descriptors
+    for (CBDescriptor *d in [characteristic descriptors])
+    {
+        Log(LDEBUG, @"    desc: %@", [d.UUID UUIDString]);
+    }
+
+    // have we finished discovering?
     [self.characteristicsToDiscover removeObject:characteristic];
     if (self.servicesToDiscover.count > 0 || self.characteristicsToDiscover.count > 0)
     {
-        // Still discovering
-        return;
+        return; // Still discovering
     }
 
-    // Services
+    // Add BmBluetoothServices to array
     NSMutableArray *services = [NSMutableArray new];
     for (CBService *s in [peripheral services])
     {
@@ -1269,7 +1278,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     if (error) {
         Log(LERROR, @"didUpdateValueForCharacteristic: [Error] %@", [error localizedDescription]);
     } else {
-        Log(LDEBUG, @"didUpdateValueForCharacteristic");
+        Log(LDEBUG, @"didUpdateValueForCharacteristic: %@", [characteristic.UUID uuidStr]);
     }
 
     ServicePair *pair = [self getServicePair:peripheral characteristic:characteristic];
@@ -1298,7 +1307,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     if (error) {
         Log(LERROR, @"didWriteValueForCharacteristic: [Error] %@", [error localizedDescription]);
     } else {
-        Log(LDEBUG, @"didWriteValueForCharacteristic");
+        Log(LDEBUG, @"didWriteValueForCharacteristic: %@", [characteristic.UUID uuidStr]);
     }
 
     ServicePair *pair = [self getServicePair:peripheral characteristic:characteristic];
@@ -1336,7 +1345,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     if (error) {
         Log(LERROR, @"didUpdateNotificationStateForCharacteristic: [Error] %@", [error localizedDescription]);
     } else {
-        Log(LDEBUG, @"didUpdateNotificationStateForCharacteristic");
+        Log(LDEBUG, @"didUpdateNotificationStateForCharacteristic: %@", [characteristic.UUID uuidStr]);
     }
 
     ServicePair *pair = [self getServicePair:peripheral characteristic:characteristic];
@@ -1377,7 +1386,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     if (error) {
         Log(LERROR, @"didUpdateValueForDescriptor: [Error] %@", [error localizedDescription]);
     } else {
-        Log(LDEBUG, @"didUpdateValueForDescriptor");
+        Log(LDEBUG, @"didUpdateValueForDescriptor: %@", [descriptor.UUID uuidStr]);
     }
 
     ServicePair *pair = [self getServicePair:peripheral characteristic:descriptor.characteristic];
@@ -1407,7 +1416,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     if (error) {
         Log(LERROR, @"didWriteValueForDescriptor: [Error] %@", [error localizedDescription]);
     } else {
-        Log(LDEBUG, @"didWriteValueForDescriptor");
+        Log(LDEBUG, @"didWriteValueForDescriptor %@", [descriptor.UUID uuidStr]);
     }
 
     ServicePair *pair = [self getServicePair:peripheral characteristic:descriptor.characteristic];
@@ -1442,7 +1451,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
 - (void)peripheralDidUpdateName:(CBPeripheral *)peripheral
 {
-    Log(LDEBUG, @"didUpdateName");
+    Log(LDEBUG, @"didUpdateName: %@", [peripheral name]);
 
     // See BmNameChanged
     NSDictionary* result = @{
