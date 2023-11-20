@@ -6,6 +6,7 @@ package com.lib.flutter_blue_plus;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -72,11 +73,13 @@ import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry.RequestPermissionsResultListener;
+import io.flutter.plugin.common.PluginRegistry.ActivityResultListener;
 
 public class FlutterBluePlusPlugin implements
     FlutterPlugin,
     MethodCallHandler,
     RequestPermissionsResultListener,
+    ActivityResultListener,
     ActivityAware
 {
     private static final String TAG = "[FBP-Android]";
@@ -158,7 +161,7 @@ public class FlutterBluePlusPlugin implements
         else if (ends) 
         {
             // 32-bit
-            return s.substring(0,8);
+                return s.substring(0,8);
         } 
         else 
         {
@@ -223,6 +226,7 @@ public class FlutterBluePlusPlugin implements
         log(LogLevel.DEBUG, "onAttachedToActivity");
         activityBinding = binding;
         activityBinding.addRequestPermissionsResultListener(this);
+        activityBinding.addActivityResultListener(this);
     }
 
     @Override
@@ -398,7 +402,7 @@ public class FlutterBluePlusPlugin implements
                         }
 
                         if (mBluetoothAdapter.isEnabled()) {
-                            result.success(true); // no work to do
+                            result.success(false); // no work to do
                             return;
                         }
 
@@ -1426,6 +1430,36 @@ public class FlutterBluePlusPlugin implements
         }
     }
 
+   //////////////////////////////////////////////////////////////////////
+   //  █████    ██████  ████████  ██  ██    ██  ██  ████████  ██    ██ 
+   // ██   ██  ██          ██     ██  ██    ██  ██     ██      ██  ██  
+   // ███████  ██          ██     ██  ██    ██  ██     ██       ████   
+   // ██   ██  ██          ██     ██   ██  ██   ██     ██        ██    
+   // ██   ██   ██████     ██     ██    ████    ██     ██        ██    
+   // 
+   // ██████   ███████  ███████  ██    ██  ██       ████████ 
+   // ██   ██  ██       ██       ██    ██  ██          ██    
+   // ██████   █████    ███████  ██    ██  ██          ██    
+   // ██   ██  ██            ██  ██    ██  ██          ██    
+   // ██   ██  ███████  ███████   ██████   ███████     ██    
+
+    @Override
+    public boolean onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        if (requestCode == enableBluetoothRequestCode) {
+
+            // see: BmTurnOnResponse
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("user_accepted", resultCode == Activity.RESULT_OK);
+
+            invokeMethodUIThread("OnTurnOnResponse", map);
+
+            return true;
+        }
+
+        return false; // did not handle anything
+    }
+
     //////////////////////////////////////////////////////////////////////////////////////
     // ██████   ███████  ██████   ███    ███  ██  ███████  ███████  ██   ██████   ███    ██
     // ██   ██  ██       ██   ██  ████  ████  ██  ██       ██       ██  ██    ██  ████   ██
@@ -1724,7 +1758,7 @@ public class FlutterBluePlusPlugin implements
 
             invokeMethodUIThread("OnAdapterStateChanged", map);
         }
-    };
+    };   
 
     /////////////////////////////////////////////////////////////////////////////////////
     // ██████    ██████   ███    ██  ██████

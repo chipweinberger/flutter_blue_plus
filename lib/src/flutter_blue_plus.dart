@@ -91,14 +91,30 @@ class FlutterBluePlus {
 
   /// Turn on Bluetooth (Android only),
   static Future<void> turnOn({int timeout = 60}) async {
+    var responseStream = FlutterBluePlus._methodStream.stream
+        .where((m) => m.method == "OnTurnOnResponse")
+        .map((m) => m.arguments)
+        .map((args) => BmTurnOnResponse.fromMap(args));
+
     // Start listening now, before invokeMethod, to ensure we don't miss the response
-    Future<BluetoothAdapterState> futureResponse = adapterState.where((s) => s == BluetoothAdapterState.on).first;
+    Future<BmTurnOnResponse> futureResponse = responseStream.first;
 
     // invoke
-    await _invokeMethod('turnOn');
+    bool changed = await _invokeMethod('turnOn');
 
-    // wait for response
-    await futureResponse.fbpTimeout(timeout, "turnOn");
+    // only wait if bluetooth was off
+    if (changed) {
+      // wait for response
+      BmTurnOnResponse response = await futureResponse.fbpTimeout(timeout, "turnOn");
+
+      // check response
+      if (response.userAccepted == false) {
+        throw FlutterBluePlusException(ErrorPlatform.fbp, "turnOn", FbpErrorCode.userRejected.index, "user rejected");
+      }
+
+      // wait for adapter to turn on
+      await adapterState.where((s) => s == BluetoothAdapterState.on).first.fbpTimeout(timeout, "turnOn");
+    }
   }
 
   /// Gets the current state of the Bluetooth module
@@ -732,6 +748,7 @@ enum FbpErrorCode {
   characteristicNotFound,
   adapterIsOff,
   connectionCanceled,
+  userRejected
 }
 
 class FlutterBluePlusException implements Exception {
