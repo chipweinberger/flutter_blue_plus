@@ -1181,7 +1181,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // discover characteristics and secondary services
     [self.servicesToDiscover addObjectsFromArray:peripheral.services];
     for (CBService *s in [peripheral services]) {
-        Log(LDEBUG, @"  svc: %@", [s.UUID UUIDString]);
+        Log(LDEBUG, @"  svc: %@", [s.UUID uuidStr]);
         [peripheral discoverCharacteristics:nil forService:s];
         // Secondary services in the future (#8)
         // [peripheral discoverIncludedServices:nil forService:s];
@@ -1204,7 +1204,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     [self.characteristicsToDiscover addObjectsFromArray:service.characteristics];
     for (CBCharacteristic *c in [service characteristics])
     {
-        Log(LDEBUG, @"    chr: %@", [c.UUID UUIDString]);
+        Log(LDEBUG, @"    chr: %@", [c.UUID uuidStr]);
         [peripheral discoverDescriptorsForCharacteristic:c];
     }
 }
@@ -1223,7 +1223,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // print descriptors
     for (CBDescriptor *d in [characteristic descriptors])
     {
-        Log(LDEBUG, @"    desc: %@", [d.UUID UUIDString]);
+        Log(LDEBUG, @"    desc: %@", [d.UUID uuidStr]);
     }
 
     // have we finished discovering?
@@ -1455,8 +1455,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     // See BmNameChanged
     NSDictionary* result = @{
-        @"remote_id":       [[peripheral identifier] UUIDString],
-        @"name":        [peripheral name] ? [peripheral name] : [NSNull null],
+        @"remote_id": [[peripheral identifier] UUIDString],
+        @"name":      [peripheral name] ? [peripheral name] : [NSNull null],
     };
 
     [self.methodChannel invokeMethod:@"OnNameChanged" arguments:result];
@@ -1831,7 +1831,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
         // found a match?
         for (CBUUID *uuid in sd) {
-            NSString* a = [uuid.UUIDString lowercaseString];
+            NSString* a = [uuid uuidStr];
             NSString* b = [service lowercaseString];
             if([a isEqualToString:b] && [self findData:data inData:sd[uuid] usingMask:mask]) {
                 return YES;
@@ -2007,7 +2007,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     {
         for (CBService *secondary in [primary includedServices])
         {
-            if ([[secondary.UUID UUIDString] isEqualToString:[service.UUID UUIDString]])
+            if ([secondary.UUID isEqual:service.UUID])
             {
                 result.primary = primary;
                 result.secondary = secondary;
