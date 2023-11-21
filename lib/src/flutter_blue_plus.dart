@@ -668,8 +668,8 @@ class AdvertisementData {
   final String advName;
   final int? txPowerLevel;
   final bool connectable;
-  final Map<int, List<int>> manufacturerData;
-  final Map<Guid, List<int>> serviceData;
+  final Map<int, List<int>> manufacturerData; // key: manufacturerId
+  final Map<Guid, List<int>> serviceData; // key: service guid
   final List<Guid> serviceUuids;
 
   AdvertisementData({
