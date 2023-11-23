@@ -563,7 +563,7 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 
 |                    |      Android       |        iOS         | Throws | Description                                                    |
 | :----------------- | :----------------: | :----------------: | :----: | :--------------------------------------------------------------|
-| uuid             ⚡ | :white_check_mark: | :white_check_mark: |        | The uuid of characeristic                                      |
+| uuid             ⚡ | :white_check_mark: | :white_check_mark: |        | The uuid of characteristic                                      |
 | read               | :white_check_mark: | :white_check_mark: | :fire: | Retrieves the value of the characteristic                      |
 | write              | :white_check_mark: | :white_check_mark: | :fire: | Writes the value of the characteristic                         |
 | setNotifyValue     | :white_check_mark: | :white_check_mark: | :fire: | Sets notifications or indications on the characteristic        |
@@ -618,7 +618,7 @@ These devices may be found in System Settings, but they cannot be connected to b
 **2. your device stopped advertising.**
 
 - you might need to reboot your device
-- you might need put your device in "discovery mode"
+- you might need to put your device in "discovery mode"
 - your phone may have already connected automatically
 - another app may have already connected to your device
 - another phone may have already connected to your device
@@ -656,7 +656,7 @@ Search the App Store for a BLE scanner apps and install it on your phone, and an
 
 **1. Your ble device may be low battery**
 
-Bluetooth can become erratic when your peripheral device is low battery.
+Bluetooth can become erratic when your peripheral device is low on battery.
 
 **2. Your ble device may have refused the connection or have a bug**
 
@@ -745,13 +745,13 @@ await characteristic.setNotifyValue(true);
 
 ### characteristic writes fails
 
-**1. the characeristic is not writeable**
+**1. The characteristic is not writeable**
 
-Not all characeristics support `write`.
+Not all characteristics support `write`.
  
 Your device must have configured this characteristic to support `write`.
 
-**2. the data length is too long**
+**2. The data length is too long**
 
 Characteristics only support writes up to a certain size. 
 
@@ -759,9 +759,9 @@ Characteristics only support writes up to a certain size.
 
 `write (with response)`: look in the [Usage](#usage) section for functions you can use to solve this issue.
 
-**3. the characeristic does not support writeWithoutResponse**
+**3. The characteristic does not support writeWithoutResponse**
 
-Not all characeristics support `writeWithoutResponse`. 
+Not all characteristics support `writeWithoutResponse`. 
  
 Your device must have configured this characteristic to support `writeWithoutResponse`.
 
@@ -769,7 +769,7 @@ Your device must have configured this characteristic to support `writeWithoutRes
 
 If your device turns off mid-write, it will cause a failure.
 
-**5. your bluetooth device has bugs**
+**5. Your Bluetooth device has bugs**
 
 Maybe your device crashed, or is not sending a response due to software bugs.
 
@@ -779,11 +779,11 @@ Bluetooth is wireless and will not always work.
 
 ---
 
-### characteristic read fails
+### Characteristic read fails
 
-**1. the characeristic is not readable**
+**1. the characteristic is not readable**
 
-Not all characeristics support `read`.
+Not all characteristics support `read`.
  
 Your device must have configured this characteristic to support `read`.
 
@@ -791,7 +791,7 @@ Your device must have configured this characteristic to support `read`.
 
 If your device turns off mid-read, it will cause a failure.
 
-**3. your bluetooth device has bugs**
+**3. Your Bluetooth device has bugs**
 
 Maybe your device crashed, or is not sending a response due to software bugs.
 
