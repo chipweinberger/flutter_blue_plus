@@ -106,7 +106,7 @@ public class FlutterBluePlusPlugin implements
     private final Map<String, Boolean> mAutoConnect = new ConcurrentHashMap<>();
     private final Map<String, String> mWriteChr = new ConcurrentHashMap<>();
     private final Map<String, String> mWriteDesc = new ConcurrentHashMap<>();
-    private final Map<String, BluetoothDevice> mScanSeen = new ConcurrentHashMap<>();
+    private final Map<String, String> mAdvSeen = new ConcurrentHashMap<>();
     private final Map<String, Integer> mScanCounts = new ConcurrentHashMap<>();
     private HashMap<String, Object> mScanFilters = new HashMap<String, Object>();
     
@@ -591,7 +591,7 @@ public class FlutterBluePlusPlugin implements
                         mScanFilters = data;
 
                         // clear seen devices
-                        mScanSeen.clear();
+                        mAdvSeen.clear();
                         mScanCounts.clear();
 
                         scanner.startScan(filters, settings, getScanCallback());
@@ -1857,21 +1857,25 @@ public class FlutterBluePlusPlugin implements
 
                     BluetoothDevice device = result.getDevice();
                     String remoteId = device.getAddress();
+                    ScanRecord scanRecord = result.getScanRecord();
+                    String advHex = scanRecord != null ? bytesToHex(scanRecord.getBytes()) : "";
 
-                    // already saw this device?
-                    boolean alreadySeen = mScanSeen.containsKey(remoteId);
+                    // settings
+                    boolean continuousUpdates = (boolean) mScanFilters.get("continuous_updates");
 
-                    // add to seen devices
-                    mScanSeen.put(remoteId, device);
+                    // already saw this advertisement?
+                    boolean isDuplicate = mAdvSeen.containsKey(remoteId) && mAdvSeen.get(remoteId).equals(advHex);
 
-                    // filter seen devices?
-                    if (alreadySeen && !(boolean) mScanFilters.get("continuous_updates")) {
+                    // filter duplicate advertisements?
+                    if (continuousUpdates == false && isDuplicate) {
                         return;
+                    } else {
+                        mAdvSeen.put(remoteId, advHex);
                     }
 
                     // filter keywords
-                    if (result != null && result.getScanRecord() != null) {
-                        String name = result.getScanRecord().getDeviceName();
+                    if (result != null && scanRecord != null) {
+                        String name = scanRecord.getDeviceName();
                         List<String> keywords = (List<String>) mScanFilters.get("with_keywords");
                         if (filterKeywords(keywords, name) == false) {
                             return;
