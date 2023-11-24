@@ -1,3 +1,7 @@
+## 1.29.6
+* **[Improve]** default `continuousDivisor` should be 1
+* **[Improve]** `continuousDivisor` should be applied after scan filters
+
 ## 1.29.5
 * **[Fix]**  iOS: 'service not found' if service supports short uuid (regression 1.28.5)
 * **[Improve]**  android: handle `turnOn` user rejected
