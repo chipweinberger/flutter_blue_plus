@@ -211,7 +211,7 @@ class FlutterBluePlus {
     Duration? timeout,
     Duration? removeIfGone,
     bool continuousUpdates = false,
-    int continuousDivisor = 4,
+    int continuousDivisor = 1,
     bool oneByOne = false,
     AndroidScanMode androidScanMode = AndroidScanMode.lowLatency,
     bool androidUsesFineLocation = false,
