@@ -1017,18 +1017,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // add to known peripherals
     [self.knownPeripherals setObject:peripheral forKey:remoteId];
 
-    // increment scan count
-    NSInteger count = [self scanCountIncrement:remoteId];
-
     // advertising data
     NSString *advName = advertisementData[CBAdvertisementDataLocalNameKey];
     NSData *advMsd = advertisementData[CBAdvertisementDataManufacturerDataKey];
     NSDictionary* advSd = advertisementData[CBAdvertisementDataServiceDataKey];
-
-    // divisor
-    if (count % [self.scanFilters[@"continuous_divisor"] integerValue] != 0) {
-        return;
-    }
 
     // remoteIds
     if (![self filterRemoteIds:self.scanFilters[@"with_remote_ids"] target:remoteId]) {
@@ -1052,6 +1044,14 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     // service data
     if (![self filterServiceData:self.scanFilters[@"with_service_data"] sd:advSd]) {
+        return;
+    }
+
+    // increment scan count
+    NSInteger count = [self scanCountIncrement:remoteId];
+
+    // divisor
+    if (count % [self.scanFilters[@"continuous_divisor"] integerValue] != 0) {
         return;
     }
 

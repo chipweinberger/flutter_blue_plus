@@ -1864,16 +1864,8 @@ public class FlutterBluePlusPlugin implements
                     // add to seen devices
                     mScanSeen.put(remoteId, device);
 
-                    // increment count
-                    int count = scanCountIncrement(remoteId);   
-
                     // filter seen devices?
                     if (alreadySeen && !(boolean) mScanFilters.get("continuous_updates")) {
-                        return;
-                    }
-
-                    // divisor
-                    if ((count % (int) mScanFilters.get("continuous_divisor")) != 0) {
                         return;
                     }
 
@@ -1884,6 +1876,14 @@ public class FlutterBluePlusPlugin implements
                         if (filterKeywords(keywords, name) == false) {
                             return;
                         }
+                    }
+
+                    // increment count
+                    int count = scanCountIncrement(remoteId);   
+
+                    // divisor
+                    if ((count % (int) mScanFilters.get("continuous_divisor")) != 0) {
+                        return;
                     }
 
                     // see BmScanResponse
