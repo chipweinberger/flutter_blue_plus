@@ -1860,17 +1860,13 @@ public class FlutterBluePlusPlugin implements
                     ScanRecord scanRecord = result.getScanRecord();
                     String advHex = scanRecord != null ? bytesToHex(scanRecord.getBytes()) : "";
 
-                    // settings
-                    boolean continuousUpdates = (boolean) mScanFilters.get("continuous_updates");
-
-                    // already saw this advertisement?
-                    boolean isDuplicate = mAdvSeen.containsKey(remoteId) && mAdvSeen.get(remoteId).equals(advHex);
-
-                    // filter duplicate advertisements?
-                    if (continuousUpdates == false && isDuplicate) {
-                        return;
-                    } else {
-                        mAdvSeen.put(remoteId, advHex);
+                    // filter duplicates
+                    if (((boolean) mScanFilters.get("continuous_updates")) == false) {
+                        boolean isDuplicate = mAdvSeen.containsKey(remoteId) && mAdvSeen.get(remoteId).equals(advHex);
+                        mAdvSeen.put(remoteId, advHex); // remember
+                        if (isDuplicate) {
+                            return;
+                        }
                     }
 
                     // filter keywords
@@ -1882,12 +1878,12 @@ public class FlutterBluePlusPlugin implements
                         }
                     }
 
-                    // increment count
-                    int count = scanCountIncrement(remoteId);   
-
-                    // divisor
-                    if ((count % (int) mScanFilters.get("continuous_divisor")) != 0) {
-                        return;
+                    // filter divisor
+                    if (((int) mScanFilters.get("continuous_updates")) != 0) {
+                        int count = scanCountIncrement(remoteId);   
+                        if ((count % (int) mScanFilters.get("continuous_divisor")) != 0) {
+                            return;
+                        }
                     }
 
                     // see BmScanResponse
