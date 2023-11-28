@@ -1,6 +1,6 @@
 ## 1.29.7
 * **[Fix]** scan errors should be pushed to `scanResults` stream (bug in original `flutter_blue`)
-* **[Fix]** android: scan: when `continuousUpdates` is `false`, check advert is fully duplicate before filtering (bug in original feature)
+* **[Fix]** android: scan: when `continuousUpdates` is `false`, don't filter non-duplicate adverts (bug in original feature)
 * **[Improve]** make sure `continuousDivisor` only applies when `continuousUpdates` is true
 
 ## 1.29.6
