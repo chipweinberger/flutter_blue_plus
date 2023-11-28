@@ -30,10 +30,10 @@ class FlutterBluePlus {
   static final Map<DeviceIdentifier, List<StreamSubscription>> _subscriptions = {};
 
   /// stream used for the isScanning public api
-  static final _isScanning = _StreamController<bool>(initialValue: false);
+  static final _isScanning = _StreamControllerReEmit<bool>(initialValue: false);
 
   /// stream used for the scanResults public api
-  static final _scanResults = _StreamController<List<ScanResult>>(initialValue: []);
+  static final _scanResults = _StreamControllerReEmit<List<ScanResult>>(initialValue: []);
 
   /// the subscription to the scan results stream
   static StreamSubscription<BmScanResponse?>? _scanSubscription;

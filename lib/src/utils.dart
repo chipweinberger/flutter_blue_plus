@@ -140,12 +140,12 @@ extension FutureTimeout<T> on Future<T> {
 // It is essentially a stream but:
 //  1. we cache the latestValue of the stream
 //  2. the "latestValue" is re-emitted whenever the stream is listened to
-class _StreamController<T> {
+class _StreamControllerReEmit<T> {
   T latestValue;
 
   final StreamController<T> _controller = StreamController<T>.broadcast();
 
-  _StreamController({required T initialValue}) : this.latestValue = initialValue;
+  _StreamControllerReEmit({required T initialValue}) : this.latestValue = initialValue;
 
   Stream<T> get stream {
     if (latestValue != null) {
