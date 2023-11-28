@@ -273,7 +273,7 @@ class FlutterBluePlus {
       } else {
         // failure?
         if (response.success == false) {
-          throw FlutterBluePlusException(_nativeError, "scan", response.errorCode, response.errorString);
+          _scanResults.addError(FlutterBluePlusException(_nativeError, "scan", response.errorCode, response.errorString));
         }
 
         // iterate through advertisements

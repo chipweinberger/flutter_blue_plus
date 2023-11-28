@@ -162,6 +162,10 @@ class _StreamController<T> {
     _controller.add(newValue);
   }
 
+  void addError(Object error) {
+    _controller.addError(error);
+  }
+
   void listen(Function(T) onData, {Function? onError, void Function()? onDone, bool? cancelOnError}) {
     onData(latestValue);
     _controller.stream.listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
