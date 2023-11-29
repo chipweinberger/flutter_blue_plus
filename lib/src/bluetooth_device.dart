@@ -72,11 +72,13 @@ class BluetoothDevice {
   }
 
   /// Establishes a connection to the Bluetooth Device.
-  ///   [timeout] If null, return early without actually waiting for a connection to be established.
+  ///   [timeout] If non-null:
+  ///      - if timeout occurs, cancel the connection request and throw exception
+  ///     If null:
+  ///      - return early without actually waiting for a connection to be established.
   ///      - the connection request will still be sent to the system
-  ///      - on iOS, it will never timeout. The connection will happen whenever it happens.
-  ///        However, if the bluetooth adapter is turned off the request is canceled and you must
-  ///        call `connect` again when the adapter is re-enabled.
+  ///      - on iOS, null timeout behaves as an infinite timeout. The connection will happen whenever it happens.
+  ///        However, the request is canceled if the bluetooth adapter is turned off.
   ///      - on Android a maximum 30s timeout will always apply.
   ///      - `device.connectionState` will be updated when connection is successful or failed. 
   ///   [autoConnect] Android only, reconnect whenever the device is found.
