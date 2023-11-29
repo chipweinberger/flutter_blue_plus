@@ -1,3 +1,6 @@
+## 1.29.8
+* **[Fix]** android: crash due to wrong type cast (regression in 1.29.7)
+
 ## 1.29.7
 * **[Fix]** scan errors should be pushed to `scanResults` stream (bug in original `flutter_blue`)
 * **[Fix]** android: scan: when `continuousUpdates` is `false`, don't filter non-duplicate adverts (bug in original feature)
