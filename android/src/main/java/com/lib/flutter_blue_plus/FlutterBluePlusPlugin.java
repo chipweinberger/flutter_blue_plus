@@ -1879,7 +1879,7 @@ public class FlutterBluePlusPlugin implements
                     }
 
                     // filter divisor
-                    if (((boolean) mScanFilters.get("continuous_updates")) == false) {
+                    if (((boolean) mScanFilters.get("continuous_updates")) != false) {
                         int count = scanCountIncrement(remoteId);   
                         if ((count % (int) mScanFilters.get("continuous_divisor")) != 0) {
                             return;
