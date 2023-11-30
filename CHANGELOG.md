@@ -1,3 +1,7 @@
+## 1.29.10
+* **[Fix]** android: isNotifying was not updated (regression in 1.28.5)
+* **[Improve]** accidentally logging 'canceling connection in progress' every time
+
 ## 1.29.8
 * **[Fix]** android: crash due to wrong type cast (regression in 1.29.7)
 
