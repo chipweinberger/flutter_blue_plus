@@ -6,7 +6,7 @@
 
 #define Log(LEVEL, FORMAT, ...) [self log:LEVEL format:@"[FBP-iOS] " FORMAT, ##__VA_ARGS__]
 
-NSString * const CCCD = @"00002902-0000-1000-8000-00805f9b34fb";
+NSString * const CCCD = @"2902";
 
 @interface ServicePair : NSObject
 @property (strong, nonatomic) CBService *primary;

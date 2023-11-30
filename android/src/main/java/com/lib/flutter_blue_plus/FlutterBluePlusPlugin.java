@@ -97,7 +97,7 @@ public class FlutterBluePlusPlugin implements
     private FlutterPluginBinding pluginBinding;
     private ActivityPluginBinding activityBinding;
 
-    static final private String CCCD = "00002902-0000-1000-8000-00805f9b34fb";
+    static final private String CCCD = "2902";
 
     private final Map<String, BluetoothGatt> mConnectedDevices = new ConcurrentHashMap<>();
     private final Map<String, BluetoothGatt> mCurrentlyConnectingDevices = new ConcurrentHashMap<>();
@@ -894,7 +894,7 @@ public class FlutterBluePlusPlugin implements
                     }
 
                     // remember the data we are writing
-                    String key = uuidStr(remoteId) + ":" + uuidStr(serviceUuid) + ":" + uuidStr(characteristicUuid);
+                    String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid;
                     mWriteChr.put(key, value);
 
                     // write characteristic
@@ -1024,7 +1024,7 @@ public class FlutterBluePlusPlugin implements
                     }
 
                     // remember the data we are writing
-                    String key = remoteId + ":" + uuidStr(serviceUuid) + ":" + uuidStr(characteristicUuid) + ":" + uuidStr(descriptorUuid);
+                    String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + descriptorUuid;
                     mWriteDesc.put(key, value);
 
                     // write descriptor
@@ -1136,7 +1136,7 @@ public class FlutterBluePlusPlugin implements
                     }
 
                     // remember the data we are writing
-                    String key = remoteId + ":" + uuidStr(serviceUuid) + ":" + uuidStr(characteristicUuid) + ":" + uuidStr(CCCD);
+                    String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + CCCD;
                     mWriteDesc.put(key, bytesToHex(descriptorValue));
 
                     // write descriptor
@@ -2088,7 +2088,7 @@ public class FlutterBluePlusPlugin implements
             String characteristicUuid = uuidStr(characteristic.getUuid());
 
             // what data did we write?
-            String key = uuidStr(remoteId) + ":" + uuidStr(serviceUuid) + ":" + uuidStr(characteristicUuid);
+            String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid;
             String value = mWriteChr.get(key) != null ? mWriteChr.get(key) : "";
             mWriteChr.remove(key);
 
@@ -2148,7 +2148,7 @@ public class FlutterBluePlusPlugin implements
             String descriptorUuid = uuidStr(descriptor.getUuid());
 
             // what data did we write?
-            String key = remoteId + ":" + uuidStr(serviceUuid) + ":" + uuidStr(characteristicUuid) + ":" + uuidStr(descriptorUuid);
+            String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + descriptorUuid;
             String value = mWriteDesc.get(key) != null ? mWriteDesc.get(key) : "";
             mWriteDesc.remove(key);
 
