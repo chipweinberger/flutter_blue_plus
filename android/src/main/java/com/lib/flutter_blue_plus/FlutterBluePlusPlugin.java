@@ -719,8 +719,10 @@ public class FlutterBluePlusPlugin implements
                     // already disconnected?
                     BluetoothGatt gatt = null;
                     if (gatt == null) {
-                        log(LogLevel.DEBUG, "disconnect: canceling connection in progress");
                         gatt = mCurrentlyConnectingDevices.get(remoteId);
+                        if (gatt != null) {
+                            log(LogLevel.DEBUG, "disconnect: canceling connection in progress");
+                        }
                     }
                     if (gatt == null) {
                         gatt = mConnectedDevices.get(remoteId);;

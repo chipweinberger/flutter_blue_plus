@@ -360,9 +360,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             // already disconnected?
             CBPeripheral *peripheral = nil;
-            if (peripheral == nil) {
-                Log(LDEBUG, @"disconnect: canceling connection in progress");
+            if (peripheral == nil ) {
                 peripheral = [self.currentlyConnectingPeripherals objectForKey:remoteId];
+                if (peripheral != nil) {
+                    Log(LDEBUG, @"disconnect: canceling connection in progress");
+                }   
             }
             if (peripheral == nil) {
                 peripheral = [self getConnectedPeripheral:remoteId];
