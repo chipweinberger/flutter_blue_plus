@@ -1,3 +1,6 @@
+## 1.29.11
+* **[Fix]** android: `remoteId` was wrong (regression in 1.29.10)
+
 ## 1.29.10
 * **[Fix]** android: `isNotifying` was not updated (regression in 1.28.5)
 * **[Improve]** accidentally logging 'canceling connection in progress' every time
