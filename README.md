@@ -318,6 +318,21 @@ for(BluetoothDescriptor d in descriptors) {
 await d.write([0x12, 0x34])
 ```
 
+### Services Changed Characteristic
+
+FlutterBluePlus automatically listens to the Services Changed Characteristic (0x2A05)
+
+In FlutterBluePlus, we call it `onServicesReset` because you must re-discover services.
+
+```dart
+// - uses the GAP Services Changed characteristic (0x2A05)
+// - you must call discoverServices() again
+device.onServicesReset.listen(() async {
+    print("Services Reset");
+    await device.discoverServices();
+});
+```
+
 ### Get Connected Devices
 
 Get devices currently connected to your app.
