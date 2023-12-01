@@ -1872,12 +1872,10 @@ public class FlutterBluePlusPlugin implements
                     }
 
                     // filter keywords
-                    if (result != null && scanRecord != null) {
-                        String name = scanRecord.getDeviceName();
-                        List<String> keywords = (List<String>) mScanFilters.get("with_keywords");
-                        if (filterKeywords(keywords, name) == false) {
-                            return;
-                        }
+                    String name = scanRecord != null ? scanRecord.getDeviceName() : "";
+                    List<String> keywords = (List<String>) mScanFilters.get("with_keywords");
+                    if (filterKeywords(keywords, name) == false) {
+                        return;
                     }
 
                     // filter divisor
