@@ -1052,7 +1052,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // filter divisor
     if ([self.scanFilters[@"continuous_updates"] integerValue] != 0) {
         NSInteger count = [self scanCountIncrement:remoteId];
-        if (count % [self.scanFilters[@"continuous_divisor"] integerValue] != 0) {
+        NSInteger divisor = [self.scanFilters[@"continuous_divisor"] integerValue];
+        if ((count % divisor) != 0) {
             return;
         }
     }
