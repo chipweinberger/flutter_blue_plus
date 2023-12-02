@@ -6,7 +6,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import 'device_screen.dart';
 import '../utils/snackbar.dart';
-import '../widgets/connected_device_tile.dart';
+import '../widgets/system_device_tile.dart';
 import '../widgets/scan_result_tile.dart';
 import '../utils/extra.dart';
 
@@ -18,7 +18,7 @@ class ScanScreen extends StatefulWidget {
 }
 
 class _ScanScreenState extends State<ScanScreen> {
-  List<BluetoothDevice> _connectedDevices = [];
+  List<BluetoothDevice> _systemDevices = [];
   List<ScanResult> _scanResults = [];
   bool _isScanning = false;
   late StreamSubscription<List<ScanResult>> _scanResultsSubscription;
@@ -29,8 +29,10 @@ class _ScanScreenState extends State<ScanScreen> {
     super.initState();
 
     FlutterBluePlus.systemDevices.then((devices) {
-      _connectedDevices = devices;
+      _systemDevices = devices;
       setState(() {});
+    }).catchError((e) {
+      Snackbar.show(ABC.b, prettyException("System Devices Error:", e), success: false);
     });
 
     _scanResultsSubscription = FlutterBluePlus.scanResults.listen((results) {
@@ -103,10 +105,10 @@ class _ScanScreenState extends State<ScanScreen> {
     }
   }
 
-  List<Widget> _buildConnectedDeviceTiles(BuildContext context) {
-    return _connectedDevices
+  List<Widget> _buildSystemDeviceTiles(BuildContext context) {
+    return _systemDevices
         .map(
-          (d) => ConnectedDeviceTile(
+          (d) => SystemDeviceTile(
             device: d,
             onOpen: () => Navigator.of(context).push(
               MaterialPageRoute(
@@ -143,7 +145,7 @@ class _ScanScreenState extends State<ScanScreen> {
           onRefresh: onRefresh,
           child: ListView(
             children: <Widget>[
-              ..._buildConnectedDeviceTiles(context),
+              ..._buildSystemDeviceTiles(context),
               ..._buildScanResultTiles(context),
             ],
           ),
