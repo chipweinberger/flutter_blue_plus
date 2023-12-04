@@ -1,3 +1,7 @@
+## 1.29.12
+* **[Fix]** android: `CALLBACK_TYPE_FIRST_MATCH` causes scanning issues (regression in 1.27.0)
+* **[Fix]** android: `withKeywords` wasn't filtering out adverts that have no scan record (bug in original feature)
+
 ## 1.29.11
 * **[Fix]** android: `remoteId` was wrong (regression in 1.29.10)
 
@@ -6,7 +10,7 @@
 * **[Improve]** accidentally logging 'canceling connection in progress' every time
 
 ## 1.29.9
-No changes. This version was accidentally skipped.
+* No changes. This version was accidentally skipped.
 
 ## 1.29.8
 * **[Fix]** android: crash due to wrong type cast (regression in 1.29.7)
