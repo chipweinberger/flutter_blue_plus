@@ -508,16 +508,6 @@ public class FlutterBluePlusPlugin implements
                             builder.setPhy(ScanSettings.PHY_LE_ALL_SUPPORTED);
                             builder.setLegacy(false);
                         }
-                        if (Build.VERSION.SDK_INT >= 23) { // Android 6.0 (October 2015)
-                            int cbt = continuousUpdates ? 
-                                ScanSettings.CALLBACK_TYPE_ALL_MATCHES :
-                                ScanSettings.CALLBACK_TYPE_FIRST_MATCH;
-                            // 'first match' requires filters
-                            if (withServices.size() + withRemoteIds.size() + withNames.size() == 0) {
-                                cbt = ScanSettings.CALLBACK_TYPE_ALL_MATCHES;
-                            }
-                            builder.setCallbackType(cbt);
-                        }
                         ScanSettings settings = builder.build();
                         
                         // set filters
