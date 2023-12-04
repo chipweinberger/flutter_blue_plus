@@ -1,3 +1,6 @@
+## 1.29.13
+* **[Improve]**  android: add delay before requestMtu is called to work around discoverServices timeout
+
 ## 1.29.12
 * **[Fix]** android: `CALLBACK_TYPE_FIRST_MATCH` causes scanning issues (regression in 1.27.0)
 * **[Fix]** android: `withKeywords` wasn't filtering out adverts that have no scan record (bug in original feature)
