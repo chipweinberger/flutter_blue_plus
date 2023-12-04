@@ -80,11 +80,11 @@ class BluetoothDevice {
   ///      - on iOS, null timeout behaves as an infinite timeout. The connection will happen whenever it happens.
   ///        However, the request is canceled if the bluetooth adapter is turned off.
   ///      - on Android a maximum 30s timeout will always apply.
-  ///      - `device.connectionState` will be updated when connection is successful or failed. 
+  ///      - `device.connectionState` will be updated when connection is successful or failed.
   ///   [autoConnect] Android only, reconnect whenever the device is found.
-  ///      - using AutoConnect is not recommended. 
+  ///      - using AutoConnect is not recommended.
   ///      - autoConnect only works if the device is in the Bluetooth scan cache or has been bonded before.
-  ///      - the scan cache is cleared whenever bluetooth is turned off. 
+  ///      - the scan cache is cleared whenever bluetooth is turned off.
   ///      - autoConnect results in a slower connection process compared to a direct connection
   ///        because it relies on the internal scheduling of background scans.
   ///      - autoconnect is disabled when you manually call disconnect
@@ -157,6 +157,12 @@ class BluetoothDevice {
     // request larger mtu on non-apple devices
     bool isApple = Platform.isMacOS || Platform.isIOS;
     if (isApple == false && isConnected && mtu != null) {
+      // hack: some devices automatically send a new MTU right after connection without
+      // being asked. This can cause `requestMtu` to return too early. In reality, the 
+      // `requestMtu` operation is still in progress, and subsequent calls to `discoverServices`,
+      // etc, will often timeout as a result. The solution is to add some delay before we call
+      // `requestMtu`, to hopefully avoid this race condition and not have `requestMtu` get confused.
+      await Future.delayed(Duration(milliseconds: 350));
       await requestMtu(mtu);
     }
   }
@@ -364,7 +370,7 @@ class BluetoothDevice {
 
   /// Request to change MTU (Android Only)
   ///  - returns new MTU
-  Future<int> requestMtu(int desiredMtu, {int timeout = 15}) async {
+  Future<int> requestMtu(int desiredMtu, {int predelay = 350, int timeout = 15}) async {
     // check android
     if (Platform.isAndroid == false) {
       throw FlutterBluePlusException(ErrorPlatform.fbp, "requestMtu", FbpErrorCode.androidOnly.index, "android-only");
