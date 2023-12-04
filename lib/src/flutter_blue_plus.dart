@@ -192,15 +192,16 @@ class FlutterBluePlus {
   ///   - [withServiceData] filter by service data
   ///   - [timeout] calls stopScan after a specified duration
   ///   - [removeIfGone] if true, remove devices after they've stopped advertising for X duration
-  ///   - [continuousUpdates] if true, 'advertisementData', 'rssi', etc, are continually updated. This takes more power.
+  ///   - [continuousUpdates] If `true`, we continually update 'lastSeen' & 'rssi' by processing
+  ///        duplicate advertisements. This takes more power.
   ///   - [continuousDivisor] Useful to help performance. If divisor is 3, then two-thirds of advertisements are
-  ///          ignored, and one-third are processed. This reduces main-thread usage caused by the platform channel.
-  ///          The scan counting is per-device so you always get the 1st advertisement from each device.
-  ///          This argument only matters for continuousUpdates mode. If divisor is 1, all advertisements are returned.
-  ///   - [oneByOne] if true, we will stream every advertistment one by one, possibly including duplicates.
-  ///          If false, we deduplicate the advertisements, and return a list of devices.
+  ///        ignored, and one-third are processed. This reduces main-thread usage caused by the platform channel.
+  ///        The scan counting is per-device so you always get the 1st advertisement from each device.
+  ///        If divisor is 1, all advertisements are returned. This argument only matters for `continuousUpdates` mode. 
+  ///   - [oneByOne] if `true`, we will stream every advertistment one by one, possibly including duplicates.
+  ///        If `false`, we deduplicate the advertisements, and return a list of devices.
   ///   - [androidScanMode] choose the android scan mode to use when scanning
-  ///   - [androidUsesFineLocation] request ACCESS_FINE_LOCATION permission at runtime
+  ///   - [androidUsesFineLocation] request `ACCESS_FINE_LOCATION` permission at runtime
   static Future<void> startScan({
     List<Guid> withServices = const [],
     List<String> withRemoteIds = const [],
