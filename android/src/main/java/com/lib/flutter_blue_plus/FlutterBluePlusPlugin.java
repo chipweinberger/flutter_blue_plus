@@ -639,6 +639,117 @@ public class FlutterBluePlusPlugin implements
                     break;
                 }
 
+                case "setAutoConnect":
+                {
+                    ArrayList<String> permissions = new ArrayList<>();
+
+                    if (Build.VERSION.SDK_INT >= 31) { // Android 12 (October 2021)
+                        permissions.add(Manifest.permission.BLUETOOTH_CONNECT);
+                    }
+
+                    ensurePermissions(permissions, (granted, perm) -> {
+
+                        // see: BmSetAutoConnect
+                        HashMap<String, Object> args = call.arguments();
+                        String remoteId =  (String)  args.get("remote_id");
+                        boolean enable =      ((int) args.get("enable")) != 0;
+
+                        if (granted == false) {
+                            result.error("setAutoConnect",
+                                String.format("FlutterBluePlus requires %s for new connection", perm), null);
+                            return;
+                        }
+
+                        // check adapter
+                        if (enable && isAdapterOn() == false) {
+                            result.error("setAutoConnect", String.format("bluetooth must be turned on"), null);
+                            return;
+                        }
+
+                        // already enabled?
+                        if (enable && mAutoConnected.containsKey(remoteId)) {
+                            log(LogLevel.DEBUG, "setAutoConnect: already enabled");
+                            result.success(true);
+                            return;
+                        }
+
+                        // already disabled?
+                        if (!enable && mAutoConnected.containsKey(remoteId) == false) {
+                            log(LogLevel.DEBUG, "setAutoConnect: already disabled");
+                            result.success(true);
+                            return;
+                        }
+
+                        // find peripheral
+                        BluetoothGatt gatt = null;
+                        if (gatt == null) {
+                            gatt = mCurrentlyConnectingDevices.get(remoteId);
+                        }
+                        if (gatt == null) {
+                            gatt = mConnectedDevices.get(remoteId);
+                        }
+
+                        // already disabled? (gatt null)
+                        if (!enable && gatt == null) {
+                            log(LogLevel.DEBUG, "setAutoConnect: already disabled (gatt is null)");
+                            result.success(true);
+                            return;
+                        }
+
+                        // creating new gatt?
+                        if (enable && gatt == null) {
+                            log(LogLevel.DEBUG, "setAutoConnect: creating new gatt");
+                        }
+
+                        // updating exisitng gatt?
+                        if (enable && gatt != null) {
+                            log(LogLevel.DEBUG, "setAutoConnect: updating existing gatt");
+                        }
+
+                        // wait if any device is bonding (increases reliability)
+                        waitIfBonding();
+
+                        if (enable) {
+
+                            // new gatt?
+                            boolean isNewGatt = gatt == null;
+
+                            // connect & update auto connect
+                            BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
+                            if (Build.VERSION.SDK_INT >= 23) { // Android 6.0 (October 2015)
+                                gatt = device.connectGatt(context, enable, mGattCallback, BluetoothDevice.TRANSPORT_LE);
+                            } else {
+                                gatt = device.connectGatt(context, enable, mGattCallback);
+                            }
+
+                            // error check
+                            if (gatt == null) {
+                                result.error("setAutoConnect", String.format("device.connectGatt returned null"), null);
+                                return;
+                            }
+
+                            // add to currently connecting peripherals
+                            if (isNewGatt) {
+                                mCurrentlyConnectingDevices.put(remoteId, gatt);
+                            }
+
+                            // remember 
+                            mAutoConnected.put(remoteId, true);
+
+                        } else {
+                        
+                            // disconnect
+                            gatt.disconnect();
+
+                            // remember
+                            mAutoConnected.remove(remoteId);
+                        }
+
+                        result.success(true);
+                    });
+                    break;
+                }
+
                 case "connect":
                 {
                     ArrayList<String> permissions = new ArrayList<>();
@@ -661,17 +772,17 @@ public class FlutterBluePlusPlugin implements
                             return;
                         }
 
-                        // see: BmConnectRequest
-                        HashMap<String, Object> args = call.arguments();
-                        String remoteId =  (String)  args.get("remote_id");
-                        boolean autoConnect = ((int) args.get("auto_connect")) != 0;
+                        String remoteId = (String) call.arguments;
 
-                        // remember autoconnect 
-                        mAutoConnected.put(remoteId, autoConnect);
+                        // already connecting?
+                        if (mCurrentlyConnectingDevices.get(remoteId) != null) {
+                            log(LogLevel.DEBUG, "already connecting");
+                            result.success(true);  // still work to do
+                            return;
+                        } 
 
                         // already connected?
-                        BluetoothGatt gatt = mConnectedDevices.get(remoteId);
-                        if (gatt != null) {
+                        if (mConnectedDevices.get(remoteId) != null) {
                             log(LogLevel.DEBUG, "already connected");
                             result.success(false);  // no work to do
                             return;
@@ -680,7 +791,9 @@ public class FlutterBluePlusPlugin implements
                         // wait if any device is bonding (increases reliability)
                         waitIfBonding();
 
-                        // connect with new gatt
+                        // connect
+                        BluetoothGatt gatt = null;
+                        boolean autoConnect = mAutoConnected.containsKey(remoteId);
                         BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
                         if (Build.VERSION.SDK_INT >= 23) { // Android 6.0 (October 2015)
                             gatt = device.connectGatt(context, autoConnect, mGattCallback, BluetoothDevice.TRANSPORT_LE);
@@ -725,7 +838,7 @@ public class FlutterBluePlusPlugin implements
 
                     // calling disconnect explicitly turns off autoconnect.
                     // this allows gatt resources to be reclaimed
-                    mAutoConnected.put(remoteId, false);
+                    mAutoConnected.remove(remoteId);
                 
                     // disconnect
                     gatt.disconnect();
@@ -1700,6 +1813,7 @@ public class FlutterBluePlusPlugin implements
         mMtu.clear();
         mWriteChr.clear();
         mWriteDesc.clear();
+        mAutoConnected.clear();
     }
 
     /////////////////////////////////////////////////////////////////////////////////////
@@ -1962,7 +2076,7 @@ public class FlutterBluePlusPlugin implements
 
                 // we cannot call 'close' for autoconnected devices
                 // because it prevents autoconnect from working
-                if (mAutoConnected.get(remoteId) == true) {
+                if (mAutoConnected.containsKey(remoteId)) {
                     log(LogLevel.DEBUG, "autoconnect is true. skipping gatt.close()");
                 } else {
                     // it is important to close after disconnection, otherwise we will 

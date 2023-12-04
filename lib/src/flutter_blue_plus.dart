@@ -28,6 +28,7 @@ class FlutterBluePlus {
   static final Map<DeviceIdentifier, Map<String, List<int>>> _lastChrs = {};
   static final Map<DeviceIdentifier, Map<String, List<int>>> _lastDescs = {};
   static final Map<DeviceIdentifier, List<StreamSubscription>> _subscriptions = {};
+  static final Set<DeviceIdentifier> _autoConnect = {};
 
   /// stream used for the isScanning public api
   static final _isScanning = _StreamControllerReEmit<bool>(initialValue: false);
@@ -197,7 +198,7 @@ class FlutterBluePlus {
   ///   - [continuousDivisor] Useful to help performance. If divisor is 3, then two-thirds of advertisements are
   ///        ignored, and one-third are processed. This reduces main-thread usage caused by the platform channel.
   ///        The scan counting is per-device so you always get the 1st advertisement from each device.
-  ///        If divisor is 1, all advertisements are returned. This argument only matters for `continuousUpdates` mode. 
+  ///        If divisor is 1, all advertisements are returned. This argument only matters for `continuousUpdates` mode.
   ///   - [oneByOne] if `true`, we will stream every advertistment one by one, possibly including duplicates.
   ///        If `false`, we deduplicate the advertisements, and return a list of devices.
   ///   - [androidScanMode] choose the android scan mode to use when scanning
@@ -274,7 +275,8 @@ class FlutterBluePlus {
       } else {
         // failure?
         if (response.success == false) {
-          _scanResults.addError(FlutterBluePlusException(_nativeError, "scan", response.errorCode, response.errorString));
+          _scanResults
+              .addError(FlutterBluePlusException(_nativeError, "scan", response.errorCode, response.errorString));
         }
 
         // iterate through advertisements
@@ -391,6 +393,11 @@ class FlutterBluePlus {
       if (isScanningNow && r.adapterState != BmAdapterStateEnum.on) {
         _stopScan(invokePlatform: false);
       }
+      if (r.adapterState == BmAdapterStateEnum.on) {
+        for (DeviceIdentifier d in _autoConnect) {
+          BluetoothDevice(remoteId: d).setAutoConnect(true);
+        }
+      }
     }
 
     // keep track of connection states
@@ -411,6 +418,13 @@ class FlutterBluePlus {
         // to make FBP easier to use, we purposely do not clear knownServices.
         // otherwise `device.servicesList` would be very annoying to use.
         // We also don't clear the `bondState` cache, for faster performance.
+        for (DeviceIdentifier d in _autoConnect) {
+          if (Platform.isIOS || Platform.isMacOS) {
+            // An apple, autoconnect is just a long running connection attempt
+            // so it must be restored after every disconnection
+            BluetoothDevice(remoteId: d).setAutoConnect(true);
+          }
+        }
       }
     }
 

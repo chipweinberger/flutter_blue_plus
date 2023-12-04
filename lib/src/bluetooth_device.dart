@@ -103,11 +103,6 @@ class BluetoothDevice {
     await mtx.take();
 
     try {
-      var request = BmConnectRequest(
-        remoteId: remoteId.str,
-        autoConnect: autoConnect,
-      );
-
       var responseStream = FlutterBluePlus._methodStream.stream
           .where((m) => m.method == "OnConnectionStateChanged")
           .map((m) => m.arguments)
@@ -118,7 +113,7 @@ class BluetoothDevice {
       Future<BmConnectionStateResponse> futureState = responseStream.first;
 
       // invoke
-      bool changed = await FlutterBluePlus._invokeMethod('connect', request.toMap());
+      bool changed = await FlutterBluePlus._invokeMethod('connect', remoteId.str);
 
       // we return the disconnect mutex now so that this
       // connection attempt can be canceled by calling disconnect
@@ -158,7 +153,7 @@ class BluetoothDevice {
     bool isApple = Platform.isMacOS || Platform.isIOS;
     if (isApple == false && isConnected && mtu != null) {
       // hack: some devices automatically send a new MTU right after connection without
-      // being asked. This can cause `requestMtu` to return too early. In reality, the 
+      // being asked. This can cause `requestMtu` to return too early. In reality, the
       // `requestMtu` operation is still in progress, and subsequent calls to `discoverServices`,
       // etc, will often timeout as a result. The solution is to add some delay before we call
       // `requestMtu`, to hopefully avoid this race condition and not have `requestMtu` get confused.
@@ -183,6 +178,9 @@ class BluetoothDevice {
     }
 
     try {
+      // remove from auto connect list if there
+      FlutterBluePlus._autoConnect.remove(remoteId);
+
       var responseStream = FlutterBluePlus._methodStream.stream
           .where((m) => m.method == "OnConnectionStateChanged")
           .map((m) => m.arguments)
@@ -205,6 +203,43 @@ class BluetoothDevice {
       if (queue) {
         mtx.give();
       }
+    }
+  }
+
+  /// Automatically connect to a device whenever found.
+  ///  - this function always returns immediately.
+  ///  - you must listen to `device.connectionState` to know when connection occurs 
+  ///  - calling `setAutoConnect(false)` will disconnect the device
+  ///  - calling `disconnect` is another way to disable auto connect
+  ///  - auto connect results in a slower connection process compared to a direct
+  ///    connection because it relies on the internal scheduling of background scans.
+  Future<void> setAutoConnect(bool enable) async {
+    // make sure no one else is calling disconnect
+    _Mutex dmtx = _MutexFactory.getMutexForKey("disconnect");
+    bool dtook = await dmtx.take();
+
+    // Only allow a single ble operation to be underway at a time
+    _Mutex mtx = _MutexFactory.getMutexForKey("global");
+    await mtx.take();
+
+    try {
+      var request = BmSetAutoConnect(
+        remoteId: remoteId.str,
+        enable: enable,
+      );
+
+      await FlutterBluePlus._invokeMethod('setAutoConnect', request.toMap());
+
+      if (enable) {
+        FlutterBluePlus._autoConnect.add(remoteId);
+      } else {
+        FlutterBluePlus._autoConnect.remove(remoteId);
+      }
+    } finally {
+      if (dtook) {
+        dmtx.give();
+      }
+      mtx.give();
     }
   }
 

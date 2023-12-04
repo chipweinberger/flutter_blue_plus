@@ -284,12 +284,112 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             result(response);
         }
+        else if ([@"setAutoConnect" isEqualToString:call.method])
+        {
+            // See BmSetAutoConnect
+            NSDictionary* args = (NSDictionary*)call.arguments;
+            NSString *remoteId      = args[@"remote_id"];
+            NSNumber *enable        = args[@"enable"];
+
+            // enable?
+            if (enable.integerValue != 0)
+            {
+                // check adapter state
+                if ([self isAdapterOn] == false) {
+                    NSString* as = [self cbManagerStateString:self.centralManager.state];
+                    NSString* s = [NSString stringWithFormat:@"bluetooth must be turned on. (%@)", as];
+                    result([FlutterError errorWithCode:@"setAutoConnect" message:s details:NULL]);
+                    return;
+                }
+
+                // already connecting?
+                if ([self.currentlyConnectingPeripherals objectForKey:remoteId] != nil) {
+                    Log(LDEBUG, @"setAutoConnect: already enabled (connecting)");
+                    result(@YES);
+                    return;
+                }
+
+                // already connected?
+                if ([self getConnectedPeripheral:remoteId] != nil) {
+                    Log(LDEBUG, @"setAutoConnect: already enabled (connected)");
+                    result(@YES);
+                    return;
+                }
+
+                // parse
+                NSUUID *uuid = [[NSUUID alloc] initWithUUIDString:remoteId];
+                if (uuid == nil)
+                {
+                    result([FlutterError errorWithCode:@"setAutoConnect" message:@"invalid remoteId" details:remoteId]);
+                    return;
+                }
+
+                // check the devices iOS knowns about
+                CBPeripheral *peripheral = nil;
+                for (CBPeripheral *p in [self.centralManager retrievePeripheralsWithIdentifiers:@[uuid]])
+                {
+                    if ([[p.identifier UUIDString] isEqualToString:remoteId])
+                    {
+                        peripheral = p;
+                        break;
+                    }
+                }
+                if (peripheral == nil)
+                {
+                    result([FlutterError errorWithCode:@"setAutoConnect" message:@"Peripheral not found" details:remoteId]);
+                    return;
+                }
+
+                // we must keep a strong reference to any CBPeripheral before we connect to it.
+                // Why? CoreBluetooth does not keep strong references and will warn about API MISUSE and weak ptrs.
+                [self.knownPeripherals setObject:peripheral forKey:remoteId];
+
+                // set ourself as delegate
+                peripheral.delegate = self;
+
+                // connect
+                [self.centralManager connectPeripheral:peripheral options:nil];
+
+                // add to currently connecting peripherals
+                [self.currentlyConnectingPeripherals setObject:peripheral forKey:remoteId];
+            }
+            else
+            {
+                // check adapter state
+                if ([self isAdapterOn] == false) {
+                    Log(LDEBUG, @"setAutoConnect: already disabled (adapter off)");
+                    result(@YES);
+                    return;
+                }
+
+                // already disconnected?
+                CBPeripheral *peripheral = nil;
+                if (peripheral == nil ) {
+                    peripheral = [self.currentlyConnectingPeripherals objectForKey:remoteId];
+                    if (peripheral != nil) {
+                        Log(LDEBUG, @"setAutoConnect: cancelling connection in progress");
+                        [self.currentlyConnectingPeripherals removeObjectForKey:remoteId];
+                    }   
+                }
+                if (peripheral == nil) {
+                    peripheral = [self getConnectedPeripheral:remoteId];
+                }
+                if (peripheral == nil) {
+                    Log(LDEBUG, @"setAutoConnect: already disabled (disconnected)");
+                    result(@YES);
+                    return;
+                }
+
+                // disconnect
+                [self.centralManager cancelPeripheralConnection:peripheral];
+            }
+            
+            result(@YES);
+        }
         else if ([@"connect" isEqualToString:call.method])
         {
-            // See BmConnectRequest
-            NSDictionary* args = (NSDictionary*)call.arguments;
-            NSString  *remoteId       = args[@"remote_id"];
-            NSNumber  *autoConnect    = args[@"auto_connect"];
+            // remoteId is passed raw, not in a NSDictionary
+            NSString *remoteId = [call arguments];
 
             // check adapter state
             if ([self isAdapterOn] == false) {
@@ -299,9 +399,15 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 return;
             }
 
+            // already connecting?
+            if ([self.currentlyConnectingPeripherals objectForKey:remoteId] != nil) {
+                Log(LDEBUG, @"already connecting");
+                result(@YES); // still work to do
+                return;
+            }
+
             // already connected?
-            CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
-            if (peripheral != nil) {
+            if ([self getConnectedPeripheral:remoteId] != nil) {
                 Log(LDEBUG, @"already connected");
                 result(@NO); // no work to do
                 return;
@@ -316,8 +422,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             }
 
             // check the devices iOS knowns about
-            NSArray<CBPeripheral *> *peripherals = [self.centralManager retrievePeripheralsWithIdentifiers:@[uuid]];
-            for (CBPeripheral *p in peripherals)
+            CBPeripheral *peripheral = nil;
+            for (CBPeripheral *p in [self.centralManager retrievePeripheralsWithIdentifiers:@[uuid]])
             {
                 if ([[p.identifier UUIDString] isEqualToString:remoteId])
                 {
@@ -338,15 +444,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // set ourself as delegate
             peripheral.delegate = self;
 
-            // options
-            NSMutableDictionary *options = [[NSMutableDictionary alloc] init];
-            if (@available(iOS 17, *)) {
-                // note: use CBConnectPeripheralOptionEnableAutoReconnect constant
-                // when iOS 17 is more widely available
-                [options setObject:autoConnect forKey:@"kCBConnectOptionEnableAutoReconnect"];
-            } 
-
-            [self.centralManager connectPeripheral:peripheral options:options];
+            // connect
+            [self.centralManager connectPeripheral:peripheral options:nil];
 
             // add to currently connecting peripherals
             [self.currentlyConnectingPeripherals setObject:peripheral forKey:remoteId];
@@ -364,6 +463,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 peripheral = [self.currentlyConnectingPeripherals objectForKey:remoteId];
                 if (peripheral != nil) {
                     Log(LDEBUG, @"disconnect: cancelling connection in progress");
+                    [self.currentlyConnectingPeripherals removeObjectForKey:remoteId];
                 }   
             }
             if (peripheral == nil) {
@@ -375,6 +475,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 return;
             }
 
+            // disconnect
             [self.centralManager cancelPeripheralConnection:peripheral];
             
             result(@YES);
