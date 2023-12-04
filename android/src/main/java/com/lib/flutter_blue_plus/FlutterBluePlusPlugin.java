@@ -103,7 +103,7 @@ public class FlutterBluePlusPlugin implements
     private final Map<String, BluetoothGatt> mCurrentlyConnectingDevices = new ConcurrentHashMap<>();
     private final Map<String, BluetoothDevice> mBondingDevices = new ConcurrentHashMap<>();
     private final Map<String, Integer> mMtu = new ConcurrentHashMap<>();
-    private final Map<String, Boolean> mAutoConnect = new ConcurrentHashMap<>();
+    private final Map<String, Boolean> mAutoConnected = new ConcurrentHashMap<>();
     private final Map<String, String> mWriteChr = new ConcurrentHashMap<>();
     private final Map<String, String> mWriteDesc = new ConcurrentHashMap<>();
     private final Map<String, String> mAdvSeen = new ConcurrentHashMap<>();
@@ -667,7 +667,7 @@ public class FlutterBluePlusPlugin implements
                         boolean autoConnect = ((int) args.get("auto_connect")) != 0;
 
                         // remember autoconnect 
-                        mAutoConnect.put(remoteId, autoConnect);
+                        mAutoConnected.put(remoteId, autoConnect);
 
                         // already connected?
                         BluetoothGatt gatt = mConnectedDevices.get(remoteId);
@@ -711,7 +711,7 @@ public class FlutterBluePlusPlugin implements
                     if (gatt == null) {
                         gatt = mCurrentlyConnectingDevices.get(remoteId);
                         if (gatt != null) {
-                            log(LogLevel.DEBUG, "disconnect: canceling connection in progress");
+                            log(LogLevel.DEBUG, "disconnect: cancelling connection in progress");
                         }
                     }
                     if (gatt == null) {
@@ -725,8 +725,9 @@ public class FlutterBluePlusPlugin implements
 
                     // calling disconnect explicitly turns off autoconnect.
                     // this allows gatt resources to be reclaimed
-                    mAutoConnect.put(remoteId, false);
+                    mAutoConnected.put(remoteId, false);
                 
+                    // disconnect
                     gatt.disconnect();
 
                     // was connecting?
@@ -1959,14 +1960,14 @@ public class FlutterBluePlusPlugin implements
                 // remove from currently bonding devices
                 mBondingDevices.remove(remoteId);
 
-                // we cannot call 'close' for autoconnect
+                // we cannot call 'close' for autoconnected devices
                 // because it prevents autoconnect from working
-                if (mAutoConnect.get(remoteId) == null || mAutoConnect.get(remoteId) == false) {
+                if (mAutoConnected.get(remoteId) == true) {
+                    log(LogLevel.DEBUG, "autoconnect is true. skipping gatt.close()");
+                } else {
                     // it is important to close after disconnection, otherwise we will 
                     // quickly run out of bluetooth resources, preventing new connections
                     gatt.close();
-                } else {
-                    log(LogLevel.DEBUG, "autoconnect is true. skipping gatt.close()");
                 }
             }
 

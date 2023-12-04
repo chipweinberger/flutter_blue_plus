@@ -363,7 +363,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             if (peripheral == nil ) {
                 peripheral = [self.currentlyConnectingPeripherals objectForKey:remoteId];
                 if (peripheral != nil) {
-                    Log(LDEBUG, @"disconnect: canceling connection in progress");
+                    Log(LDEBUG, @"disconnect: cancelling connection in progress");
                 }   
             }
             if (peripheral == nil) {

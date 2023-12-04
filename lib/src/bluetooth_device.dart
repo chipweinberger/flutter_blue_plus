@@ -82,7 +82,7 @@ class BluetoothDevice {
   ///      - on Android a maximum 30s timeout will always apply.
   ///      - `device.connectionState` will be updated when connection is successful or failed.
   ///   [autoConnect] Android only, reconnect whenever the device is found.
-  ///      - using AutoConnect is not recommended.
+  ///      - using AutoConnect is not recommended because it is tricky to use correctly.
   ///      - autoConnect only works if the device is in the Bluetooth scan cache or has been bonded before.
   ///      - the scan cache is cleared whenever bluetooth is turned off.
   ///      - autoConnect results in a slower connection process compared to a direct connection
