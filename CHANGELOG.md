@@ -1,5 +1,5 @@
 ## 1.29.13
-* **[Improve]**  android: add delay before requestMtu is called to work around discoverServices timeout
+* **[Improve]**  android: add delay before `requestMtu` is called to work around `discoverServices` timeout
 
 ## 1.29.12
 * **[Fix]** android: `CALLBACK_TYPE_FIRST_MATCH` causes scanning issues (regression in 1.27.0)

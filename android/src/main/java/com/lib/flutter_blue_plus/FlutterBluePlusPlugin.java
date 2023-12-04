@@ -1667,37 +1667,29 @@ public class FlutterBluePlusPlugin implements
 
         // request disconnections
         for (BluetoothGatt gatt : mConnectedDevices.values()) {
-            if(gatt != null) {
-                String remoteId = gatt.getDevice().getAddress();
 
+            if (func == "adapterTurnOff") {
+
+                // Note: 
+                //  - calling `disconnect` and `close` after the adapter
+                //    is turned off is not necessary. It is implied.
+                //    Calling them leads to a `DeadObjectException`.
+                //  - But, we must make sure the disconnect callback is called.
+                //    It's surprising but android does not invoke this callback itself.
+                mGattCallback.onConnectionStateChange(gatt, 0, BluetoothProfile.STATE_DISCONNECTED);
+
+            } else {
+
+                String remoteId = gatt.getDevice().getAddress();
+                
                 // disconnect
                 log(LogLevel.DEBUG, "calling disconnect: " + remoteId);
                 gatt.disconnect();
 
-                // callback
-                if (func == "adapterTurnOff") {
-                    // make sure disconnect callback is called.
-                    // for some reason android does not always call this
-                    mGattCallback.onConnectionStateChange(gatt, 0, BluetoothProfile.STATE_DISCONNECTED);
-                }
-
-                // not autoconnected?
-                boolean notAutoConnected = mAutoConnect.get(remoteId) == false;
-
-                // close
-                if (func == "flutterHotRestart" || 
-                    func == "onDetachedFromEngine" || 
-                    (func == "adapterTurnOff" && notAutoConnected))
-                {
-                    // it is important to close after disconnection, otherwise we will 
-                    // quickly run out of bluetooth resources, preventing new connections
-                    log(LogLevel.DEBUG, "calling close: " + remoteId);
-                    gatt.close();
-                } else {
-                    // we cannot close autoConnected devices
-                    // because this stops autoConnect from working
-                    log(LogLevel.DEBUG, "skipping close (autoConnect): " + remoteId);
-                }
+                // it is important to close after disconnection, otherwise we will 
+                // quickly run out of bluetooth resources, preventing new connections
+                log(LogLevel.DEBUG, "calling close: " + remoteId);
+                gatt.close();
             }
         }
 
