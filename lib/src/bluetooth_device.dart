@@ -85,9 +85,10 @@ class BluetoothDevice {
     int? mtu = 512,
     bool autoConnect = false,
   }) async {
-    // By default, after connection, Fbp requests a larger MTU automatically. 
-    // However, this feature is not yet compatibile with autoConnect. 
-    // If you are using autoConnect, you must call `requestMtu` yourself.
+    // If you hit this assert, must set mtu null, i.e `device.connect(mtu:null, autoConnect:true)`
+    // By default, after connection, Fbp requests a larger MTU automatically.
+    // However, this feature is not yet compatibile with autoConnect so you'll
+    // have call `requestMtu` yourself after connection (on Android).
     assert((mtu == null) || !autoConnect, "mtu and auto connect are incompatible");
 
     // make sure no one else is calling disconnect
