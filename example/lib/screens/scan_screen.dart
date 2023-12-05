@@ -28,13 +28,6 @@ class _ScanScreenState extends State<ScanScreen> {
   void initState() {
     super.initState();
 
-    FlutterBluePlus.systemDevices.then((devices) {
-      _systemDevices = devices;
-      setState(() {});
-    }).catchError((e) {
-      Snackbar.show(ABC.b, prettyException("System Devices Error:", e), success: false);
-    });
-
     _scanResultsSubscription = FlutterBluePlus.scanResults.listen((results) {
       _scanResults = results;
       setState(() {});
@@ -56,6 +49,12 @@ class _ScanScreenState extends State<ScanScreen> {
   }
 
   Future onScanPressed() async {
+    try {
+      _systemDevices = await FlutterBluePlus.systemDevices;
+    } catch (e) {
+      Snackbar.show(ABC.b, prettyException("System Devices Error:", e), success: false);
+    }
+
     try {
       // android is slow when asking for all advertisments,
       // so instead we only ask for 1/8 of them

@@ -286,8 +286,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         }
         else if ([@"connect" isEqualToString:call.method])
         {
-            // remoteId is passed raw, not in a NSDictionary
-            NSString *remoteId = [call arguments];
+            // See BmConnectRequest
+            NSDictionary* args = (NSDictionary*)call.arguments;
+            NSString  *remoteId       = args[@"remote_id"];
 
             // check adapter state
             if ([self isAdapterOn] == false) {

@@ -452,8 +452,6 @@ public class FlutterBluePlusPlugin implements
 
                 case "startScan":
                 {
-                    ArrayList<String> permissions = new ArrayList<>();
-
                     // see: BmScanSettings
                     HashMap<String, Object> data = call.arguments();
                     List<String> withServices =    (List<String>) data.get("with_services");
@@ -465,6 +463,8 @@ public class FlutterBluePlusPlugin implements
                     boolean continuousUpdates =         (boolean) data.get("continuous_updates");
                     int androidScanMode =                   (int) data.get("android_scan_mode");
                     boolean androidUsesFineLocation =   (boolean) data.get("android_uses_fine_location");
+
+                    ArrayList<String> permissions = new ArrayList<>();
 
                     if (Build.VERSION.SDK_INT >= 31) { // Android 12 (October 2021)
                         permissions.add(Manifest.permission.BLUETOOTH_SCAN);
@@ -641,6 +641,11 @@ public class FlutterBluePlusPlugin implements
 
                 case "connect":
                 {
+                    // see: BmConnectRequest
+                    HashMap<String, Object> data = call.arguments();
+                    String remoteId =    (String) data.get("remote_id");
+                    String serviceUuid = (String) data.get("service_uuid");
+
                     ArrayList<String> permissions = new ArrayList<>();
 
                     if (Build.VERSION.SDK_INT >= 31) { // Android 12 (October 2021)
@@ -660,8 +665,6 @@ public class FlutterBluePlusPlugin implements
                             result.error("connect", String.format("bluetooth must be turned on"), null);
                             return;
                         }
-
-                        String remoteId = (String) call.arguments;
 
                         // already connecting?
                         if (mCurrentlyConnectingDevices.get(remoteId) != null) {
