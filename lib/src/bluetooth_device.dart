@@ -151,12 +151,6 @@ class BluetoothDevice {
 
     // request larger mtu
     if (Platform.isAndroid && isConnected && mtu != null) {
-      // hack: some devices automatically send a new MTU right after connection without
-      // being asked. This can cause `requestMtu` to return too early while the operation 
-      // is actually still in progress. This can cause subsequent calls to `discoverServices`
-      // to timeout. By adding some delay before we call `requestMtu`, we can hopefully avoid
-      // this race condition and not have `requestMtu` return too early.
-      await Future.delayed(Duration(milliseconds: 350));
       await requestMtu(mtu);
     }
   }
@@ -367,7 +361,8 @@ class BluetoothDevice {
 
   /// Request to change MTU (Android Only)
   ///  - returns new MTU
-  Future<int> requestMtu(int desiredMtu, {int predelay = 350, int timeout = 15}) async {
+  ///  - [predelay] adds delay to avoid race conditions on some devices. see comments below.
+  Future<int> requestMtu(int desiredMtu, {double predelay = 0.35, int timeout = 15}) async {
     // check android
     if (Platform.isAndroid == false) {
       throw FlutterBluePlusException(ErrorPlatform.fbp, "requestMtu", FbpErrorCode.androidOnly.index, "android-only");
@@ -382,6 +377,17 @@ class BluetoothDevice {
     // Only allow a single ble operation to be underway at a time
     _Mutex mtx = _MutexFactory.getMutexForKey("global");
     await mtx.take();
+
+    // predelay
+    if (predelay > 0) {
+      // hack: some devices automatically send a new MTU right after connection without
+      // being asked. This can cause `requestMtu` to return too early, i.e. while its operation 
+      // is actually still in progress. That mistake can cause subsequent calls to `discoverServices`,
+      // etc, to timeout. By adding delay before we call `requestMtu`, we can hopefully avoid
+      // this race condition. Note: if your device does not send a new MTU right after connection, 
+      // you can safely disable this delay (set it to zero). Other people may need to increase it!
+      await Future.delayed(Duration(milliseconds: (predelay * 1000).toInt()));
+    }
 
     var mtu = 0;
 
