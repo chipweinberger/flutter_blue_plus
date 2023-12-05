@@ -343,8 +343,15 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // set ourself as delegate
             peripheral.delegate = self;
 
-            // connect
-            [self.centralManager connectPeripheral:peripheral options:nil];
+            // options
+            NSMutableDictionary *options = [[NSMutableDictionary alloc] init];
+            if (@available(iOS 17, *)) {
+                // note: use CBConnectPeripheralOptionEnableAutoReconnect constant
+                // when all developers can be excpected to be on iOS 17+
+                [options setObject:autoConnect forKey:@"kCBConnectOptionEnableAutoReconnect"];
+            } 
+
+            [self.centralManager connectPeripheral:peripheral options:options];
 
             // add to currently connecting peripherals
             [self.currentlyConnectingPeripherals setObject:peripheral forKey:remoteId];
