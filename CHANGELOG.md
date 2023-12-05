@@ -1,5 +1,9 @@
+## 1.30.1
+* **[Feature]** auto connect: remove `setAutoConnect` function added in 1.30.0 and go back to using `connect:autoConnect` parameter
+
 ## 1.30.0
 This release greatly improves `autoconnect` support on Android, and adds iOS support.
+* **[Breaking Change]** android: auto connect is no longer canceled when bluetooth is turned off
 * **[Fix]** android: `deadObjectExceptions` when bluetooth is turned off
 
 ## 1.29.13
