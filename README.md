@@ -66,7 +66,7 @@ flutter run
 
 ## Usage
 
-### :fire: Error Handling :fire:
+### 🔥 Error Handling 🔥
 
 Flutter Blue Plus takes error handling very seriously. 
 
