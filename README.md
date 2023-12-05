@@ -188,10 +188,12 @@ Connects whenever your device is found.
 ```dart
 // enable auto connect
 //  - you must listen to `device.connectionState` to know when connection occurs 
+//  - you never need to call `device.connect()`. This function replaces it.
 await device.setAutoConnect(true)
 
 // disable auto connect
-//  - this will imediately disconnect the device
+//  - this will immediately disconnect the device
+//  - you never need to call `device.disconnect()`. This function replaces it.
 await device.setAutoConnect(false)
 ```
 
