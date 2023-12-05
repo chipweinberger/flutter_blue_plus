@@ -406,23 +406,21 @@ class FlutterBluePlus {
       var remoteId = DeviceIdentifier(r.remoteId);
       _connectionStates[remoteId] = r;
       if (r.connectionState == BmConnectionStateEnum.disconnected) {
-        // cancel subscriptions
-        _subscriptions[remoteId]?.forEach((s) => s.cancel());
-        _subscriptions.remove(remoteId);
-        // reset known mtu
-        _mtuValues.remove(remoteId);
-        // must clear lastDescs so that 'isNotifying' is set to false
-        _lastDescs.remove(remoteId);
-        // for api consistency, also clear characteristic values
-        _lastChrs.remove(remoteId);
-        // to make FBP easier to use, we purposely do not clear knownServices.
-        // otherwise `device.servicesList` would be very annoying to use.
-        // We also don't clear the `bondState` cache, for faster performance.
-        if (_adapterStateNow == BmAdapterStateEnum.on) {
-          for (DeviceIdentifier d in _autoConnect) {
-            if (Platform.isIOS || Platform.isMacOS) {
-              // On apple, autoconnect is just a long running connection attempt
-              // so it must be restored after every disconnection
+        // to make FBP easier to use, we purposely do not clear knownServices,
+        // otherwise `servicesList` would be annoying to use.
+        // We also don't clear the `bondState` cache for faster performance.
+
+        _subscriptions[remoteId]?.forEach((s) => s.cancel()); // cancel subscriptions
+        _subscriptions.remove(remoteId); // delete subscriptions
+        _mtuValues.remove(remoteId); // reset known mtu
+        _lastDescs.remove(remoteId); // clear lastDescs so that 'isNotifying' is reset
+        _lastChrs.remove(remoteId); // for api consistency, clear characteristic values
+
+        // On apple, autoconnect is just a long running connection attempt
+        // so the connection request must be restored after disconnection
+        for (DeviceIdentifier d in _autoConnect) {
+          if (Platform.isIOS || Platform.isMacOS) {
+            if (_adapterStateNow == BmAdapterStateEnum.on) {
               BluetoothDevice(remoteId: d).connect(autoConnect: true);
             }
           }
