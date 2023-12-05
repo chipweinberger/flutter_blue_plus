@@ -1,3 +1,6 @@
+## 1.30.3
+* **[Fix]** android: connect crashes (regression 1.30.0)
+
 ## 1.30.2
 * **[Improve]** auto connect: clean up some rough edges in the api
 
