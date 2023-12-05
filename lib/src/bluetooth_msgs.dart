@@ -188,19 +188,19 @@ class BmScanResponse {
   }
 }
 
-class BmSetAutoConnect {
+class BmConnectRequest {
   String remoteId;
-  bool enable;
+  bool autoConnect;
 
-  BmSetAutoConnect({
+  BmConnectRequest({
     required this.remoteId,
-    required this.enable,
+    required this.autoConnect,
   });
 
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> data = {};
     data['remote_id'] = remoteId;
-    data['enable'] = enable ? 1 : 0;
+    data['auto_connect'] = autoConnect ? 1 : 0;
     return data;
   }
 }

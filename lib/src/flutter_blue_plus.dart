@@ -395,7 +395,7 @@ class FlutterBluePlus {
       }
       if (r.adapterState == BmAdapterStateEnum.on) {
         for (DeviceIdentifier d in _autoConnect) {
-          BluetoothDevice(remoteId: d).setAutoConnect(true);
+          BluetoothDevice(remoteId: d).connect(autoConnect: true);
         }
       }
     }
@@ -420,9 +420,9 @@ class FlutterBluePlus {
         // We also don't clear the `bondState` cache, for faster performance.
         for (DeviceIdentifier d in _autoConnect) {
           if (Platform.isIOS || Platform.isMacOS) {
-            // An apple, autoconnect is just a long running connection attempt
+            // On apple, autoconnect is just a long running connection attempt
             // so it must be restored after every disconnection
-            BluetoothDevice(remoteId: d).setAutoConnect(true);
+            BluetoothDevice(remoteId: d).connect(autoConnect: true);
           }
         }
       }

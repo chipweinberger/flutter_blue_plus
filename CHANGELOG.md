@@ -1,6 +1,5 @@
 ## 1.30.0
 This release greatly improves `autoconnect` support on Android, and adds iOS support.
-* **[Feature]** add new `setAutoConnect` function
 * **[Fix]** android: `deadObjectExceptions` when bluetooth is turned off
 
 ## 1.29.13

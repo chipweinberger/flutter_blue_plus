@@ -210,7 +210,3 @@ If your app uses `startScan.removeIfGone`, or your app continually checks the va
 ## 1.29.0
 
 * **[Breaking Change]** scanResults: do not clear results after `stopScan`. If you want results cleared, use `onScanResults` instead.
-
-## 1.30.0
-
-* **[Breaking Change]** android: `connect:autoConnect` parameter has been replaced by `setAutoConnect` function

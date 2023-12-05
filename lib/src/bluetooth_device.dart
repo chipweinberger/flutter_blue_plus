@@ -81,13 +81,12 @@ class BluetoothDevice {
   ///        However, the request is canceled if the bluetooth adapter is turned off.
   ///      - on Android a maximum 30s timeout will always apply.
   ///      - `device.connectionState` will be updated when connection is successful or failed.
-  ///   [autoConnect] Android only, reconnect whenever the device is found.
-  ///      - using AutoConnect is not recommended because it is tricky to use correctly.
-  ///      - autoConnect only works if the device is in the Bluetooth scan cache or has been bonded before.
-  ///      - the scan cache is cleared whenever bluetooth is turned off.
-  ///      - autoConnect results in a slower connection process compared to a direct connection
+  ///   [autoConnect] reconnect whenever the device is found
+  ///      - if true, this function always returns immediately & you must listen to 
+  ///        `device.connectionState` to know when connection occurs 
+  ///      - auto connect is turned off by calling `disconnect`
+  ///      - auto connect results in a slower connection process compared to a direct connection
   ///        because it relies on the internal scheduling of background scans.
-  ///      - autoconnect is disabled when you manually call disconnect
   ///   [mtu] Android only. Request a larger mtu right after connection, if set.
   Future<void> connect({
     Duration? timeout = const Duration(seconds: 35),
@@ -103,6 +102,11 @@ class BluetoothDevice {
     await mtx.take();
 
     try {
+      var request = BmConnectRequest(
+        remoteId: remoteId.str,
+        autoConnect: autoConnect,
+      );
+
       var responseStream = FlutterBluePlus._methodStream.stream
           .where((m) => m.method == "OnConnectionStateChanged")
           .map((m) => m.arguments)
@@ -113,14 +117,14 @@ class BluetoothDevice {
       Future<BmConnectionStateResponse> futureState = responseStream.first;
 
       // invoke
-      bool changed = await FlutterBluePlus._invokeMethod('connect', remoteId.str);
+      bool changed = await FlutterBluePlus._invokeMethod('connect', request.toMap());
 
       // we return the disconnect mutex now so that this
       // connection attempt can be canceled by calling disconnect
       dtook = dmtx.give();
 
       // only wait for connection if we weren't already connected
-      if (changed && timeout != null) {
+      if (changed && timeout != null && autoConnect == false) {
         BmConnectionStateResponse response = await futureState
             .fbpEnsureAdapterIsOn("connect")
             .fbpTimeout(timeout.inSeconds, "connect")
@@ -203,43 +207,6 @@ class BluetoothDevice {
       if (queue) {
         mtx.give();
       }
-    }
-  }
-
-  /// Automatically connect to a device whenever found.
-  ///  - this function always returns immediately.
-  ///  - you must listen to `device.connectionState` to know when connection occurs 
-  ///  - calling `setAutoConnect(false)` will disconnect the device
-  ///  - calling `disconnect` is another way to disable auto connect
-  ///  - auto connect results in a slower connection process compared to a direct
-  ///    connection because it relies on the internal scheduling of background scans.
-  Future<void> setAutoConnect(bool enable) async {
-    // make sure no one else is calling disconnect
-    _Mutex dmtx = _MutexFactory.getMutexForKey("disconnect");
-    bool dtook = await dmtx.take();
-
-    // Only allow a single ble operation to be underway at a time
-    _Mutex mtx = _MutexFactory.getMutexForKey("global");
-    await mtx.take();
-
-    try {
-      var request = BmSetAutoConnect(
-        remoteId: remoteId.str,
-        enable: enable,
-      );
-
-      await FlutterBluePlus._invokeMethod('setAutoConnect', request.toMap());
-
-      if (enable) {
-        FlutterBluePlus._autoConnect.add(remoteId);
-      } else {
-        FlutterBluePlus._autoConnect.remove(remoteId);
-      }
-    } finally {
-      if (dtook) {
-        dmtx.give();
-      }
-      mtx.give();
     }
   }
 
