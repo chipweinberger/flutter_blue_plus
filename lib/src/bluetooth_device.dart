@@ -72,27 +72,24 @@ class BluetoothDevice {
   }
 
   /// Establishes a connection to the Bluetooth Device.
-  ///   [timeout] If non-null:
-  ///      - if timeout occurs, cancel the connection request and throw exception
-  ///     If null:
-  ///      - return early without actually waiting for a connection to be established.
-  ///      - the connection request will still be sent to the system
-  ///      - on iOS, null timeout behaves as an infinite timeout. The connection will happen whenever it happens.
-  ///        However, the request is canceled if the bluetooth adapter is turned off.
-  ///      - on Android a maximum 30s timeout will always apply.
-  ///      - `device.connectionState` will be updated when connection is successful or failed.
+  ///   [timeout] if timeout occurs, cancel the connection request and throw exception
+  ///   [mtu] Android only. Request a larger mtu right after connection, if set.
   ///   [autoConnect] reconnect whenever the device is found
-  ///      - if true, this function always returns immediately & you must listen to 
-  ///        `device.connectionState` to know when connection occurs 
+  ///      - if true, this function always returns immediately.
+  ///      - you must listen to `connectionState` to know when connection occurs.
   ///      - auto connect is turned off by calling `disconnect`
   ///      - auto connect results in a slower connection process compared to a direct connection
   ///        because it relies on the internal scheduling of background scans.
-  ///   [mtu] Android only. Request a larger mtu right after connection, if set.
   Future<void> connect({
-    Duration? timeout = const Duration(seconds: 35),
-    bool autoConnect = false,
+    Duration timeout = const Duration(seconds: 35),
     int? mtu = 512,
+    bool autoConnect = false,
   }) async {
+    // By default, after connection, Fbp requests a larger MTU automatically. 
+    // However, this feature is not yet compatibile with autoConnect. 
+    // If you are using autoConenct, you must call `requestMtu` yourself.
+    assert((mtu != null) != autoConnect, "mtu and auto connect are incompatible");
+
     // make sure no one else is calling disconnect
     _Mutex dmtx = _MutexFactory.getMutexForKey("disconnect");
     bool dtook = await dmtx.take();
@@ -124,7 +121,7 @@ class BluetoothDevice {
       dtook = dmtx.give();
 
       // only wait for connection if we weren't already connected
-      if (changed && timeout != null && autoConnect == false) {
+      if (changed && !autoConnect) {
         BmConnectionStateResponse response = await futureState
             .fbpEnsureAdapterIsOn("connect")
             .fbpTimeout(timeout.inSeconds, "connect")
@@ -153,14 +150,13 @@ class BluetoothDevice {
       mtx.give();
     }
 
-    // request larger mtu on non-apple devices
-    bool isApple = Platform.isMacOS || Platform.isIOS;
-    if (isApple == false && isConnected && mtu != null) {
+    // request larger mtu
+    if (Platform.isAndroid && isConnected && mtu != null) {
       // hack: some devices automatically send a new MTU right after connection without
-      // being asked. This can cause `requestMtu` to return too early. In reality, the
-      // `requestMtu` operation is still in progress, and subsequent calls to `discoverServices`,
-      // etc, will often timeout as a result. The solution is to add some delay before we call
-      // `requestMtu`, to hopefully avoid this race condition and not have `requestMtu` get confused.
+      // being asked. This can cause `requestMtu` to return too early while the operation 
+      // is actually still in progress. This can cause subsequent calls to `discoverServices`
+      // to timeout. By adding some delay before we call `requestMtu`, we can hopefully avoid
+      // this race condition and not have `requestMtu` return too early.
       await Future.delayed(Duration(milliseconds: 350));
       await requestMtu(mtu);
     }

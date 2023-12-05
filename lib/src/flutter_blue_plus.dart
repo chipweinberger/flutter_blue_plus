@@ -418,11 +418,13 @@ class FlutterBluePlus {
         // to make FBP easier to use, we purposely do not clear knownServices.
         // otherwise `device.servicesList` would be very annoying to use.
         // We also don't clear the `bondState` cache, for faster performance.
-        for (DeviceIdentifier d in _autoConnect) {
-          if (Platform.isIOS || Platform.isMacOS) {
-            // On apple, autoconnect is just a long running connection attempt
-            // so it must be restored after every disconnection
-            BluetoothDevice(remoteId: d).connect(autoConnect: true);
+        if (_adapterStateNow == BmAdapterStateEnum.on) {
+          for (DeviceIdentifier d in _autoConnect) {
+            if (Platform.isIOS || Platform.isMacOS) {
+              // On apple, autoconnect is just a long running connection attempt
+              // so it must be restored after every disconnection
+              BluetoothDevice(remoteId: d).connect(autoConnect: true);
+            }
           }
         }
       }
