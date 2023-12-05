@@ -181,6 +181,20 @@ await device.disconnect();
 subscription.cancel();
 ```
 
+### Auto Connect
+
+Connects whenever your device is found.
+
+```dart
+// enable auto connect
+//  - you must listen to `device.connectionState` to know when connection occurs 
+await device.setAutoConnect(true)
+
+// disable auto connect
+//  - this will imediately disconnect the device
+await device.setAutoConnect(false)
+```
+
 ### MTU
 
 On Android, we request an mtu of 512 by default during connection (see: `connect` function arguments).
@@ -556,6 +570,7 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 | :------------------------ | :----------------: | :----------------: | :----: | :----------------------------------------------------------|
 | platformName            ⚡ | :white_check_mark: | :white_check_mark: |        | The platform preferred name of the device                  |
 | advName                 ⚡ | :white_check_mark: | :white_check_mark: |        | The advertised name of the device found during scanning    |
+| setAutoConnect            | :white_check_mark: | :white_check_mark: | :fire: | Connect whenever your device is found                      |
 | connect                   | :white_check_mark: | :white_check_mark: | :fire: | Establishes a connection to the device                     |
 | disconnect                | :white_check_mark: | :white_check_mark: | :fire: | Cancels an active or pending connection to the device      |
 | isConnected             ⚡ | :white_check_mark: | :white_check_mark: |        | Is this device currently connected to *your app*?          |
