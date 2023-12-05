@@ -85,8 +85,8 @@ class BluetoothDevice {
     int? mtu = 512,
     bool autoConnect = false,
   }) async {
-    // By default, after connection, Fbp requests a larger MTU automatically. 
-    // However, this feature is not yet compatibile with autoConnect. 
+    // By default, after connection, Fbp requests a larger MTU automatically.
+    // However, this feature is not yet compatibile with autoConnect.
     // If you are using autoConnect, you must call `requestMtu` yourself.
     assert((mtu != null) != autoConnect, "mtu and auto connect are incompatible");
 
@@ -114,7 +114,7 @@ class BluetoothDevice {
       Future<BmConnectionStateResponse> futureState = responseStream.first;
 
       // invoke
-      bool changed = await FlutterBluePlus._invokeMethod('connect', request.toMap());
+      bool changed = await FlutterBluePlus._invokeMethod('connect', request.remoteId);
 
       // we return the disconnect mutex now so that this
       // connection attempt can be canceled by calling disconnect
@@ -153,7 +153,7 @@ class BluetoothDevice {
     // request larger mtu
     if (Platform.isAndroid && isConnected && mtu != null) {
       // hack: some devices automatically send a new MTU right after connection without
-      // being asked. This can cause `requestMtu` to return too early while the operation 
+      // being asked. This can cause `requestMtu` to return too early while the operation
       // is actually still in progress. This can cause subsequent calls to `discoverServices`
       // to timeout. By adding some delay before we call `requestMtu`, we can hopefully avoid
       // this race condition and not have `requestMtu` return too early.
