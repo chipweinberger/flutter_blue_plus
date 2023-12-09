@@ -36,7 +36,10 @@ class FlutterBluePlus {
   /// stream used for the scanResults public api
   static final _scanResults = _StreamControllerReEmit<List<ScanResult>>(initialValue: []);
 
-  /// the subscription to the scan results stream
+  /// buffers the scan results
+  static _BufferStream<BmScanResponse>? _scanBuffer;
+
+  /// the subscription to the merged scan results stream
   static StreamSubscription<BmScanResponse?>? _scanSubscription;
 
   /// timeout for scanning that can be cancelled by stopScan
@@ -120,37 +123,22 @@ class FlutterBluePlus {
 
   /// Gets the current state of the Bluetooth module
   static Stream<BluetoothAdapterState> get adapterState async* {
-    // already have the initial value?
-    if (_adapterStateNow != null) {
-      yield* FlutterBluePlus._methodStream.stream
-          .where((m) => m.method == "OnAdapterStateChanged")
-          .map((m) => m.arguments)
-          .map((args) => BmBluetoothAdapterState.fromMap(args))
-          .map((s) => _bmToAdapterState(s.adapterState))
-          .newStreamWithInitialValue(_bmToAdapterState(_adapterStateNow!));
-    } else {
-      // start listening now so we do not miss any
-      // changes while we get the initial value
-      var buffer = _BufferStream.listen(FlutterBluePlus._methodStream.stream
-          .where((m) => m.method == "OnAdapterStateChanged")
-          .map((m) => m.arguments)
-          .map((args) => BmBluetoothAdapterState.fromMap(args))
-          .map((s) => _bmToAdapterState(s.adapterState)));
-
-      // initial state
-      BluetoothAdapterState initialValue = await _invokeMethod('getAdapterState')
-          .then((args) => BmBluetoothAdapterState.fromMap(args))
-          .then((s) => _bmToAdapterState(s.adapterState));
-
-      // make sure the initial value has not become out of date
-      // while we were awaiting for the initial state
-      if (buffer.hasReceivedValue == false) {
-        yield initialValue;
+    // get current state if needed
+    if (_adapterStateNow == null) {
+      BmAdapterStateEnum val =
+          await _invokeMethod('getAdapterState').then((args) => BmBluetoothAdapterState.fromMap(args).adapterState);
+      // update _adapterStateNow if it is still null after the await
+      if (_adapterStateNow == null) {
+        _adapterStateNow = val;
       }
-
-      // stream
-      yield* buffer.stream;
     }
+
+    yield* FlutterBluePlus._methodStream.stream
+        .where((m) => m.method == "OnAdapterStateChanged")
+        .map((m) => m.arguments)
+        .map((args) => BmBluetoothAdapterState.fromMap(args))
+        .map((s) => _bmToAdapterState(s.adapterState))
+        .newStreamWithInitialValue(_bmToAdapterState(_adapterStateNow!));
   }
 
   /// Retrieve a list of devices currently connected to your app
@@ -250,15 +238,15 @@ class FlutterBluePlus {
         .map((args) => BmScanResponse.fromMap(args));
 
     // Start listening now, before invokeMethod, so we do not miss any results
-    _BufferStream<BmScanResponse> _scanBuffer = _BufferStream.listen(responseStream);
+    _scanBuffer = _BufferStream.listen(responseStream);
 
     // invoke platform method
     await _invokeMethod('startScan', settings.toMap());
 
     // check every 250ms for gone devices?
     late Stream<BmScanResponse?> outputStream = removeIfGone != null
-        ? _mergeStreams([_scanBuffer.stream, Stream.periodic(Duration(milliseconds: 250))])
-        : _scanBuffer.stream;
+        ? _mergeStreams([_scanBuffer!.stream, Stream.periodic(Duration(milliseconds: 250))])
+        : _scanBuffer!.stream;
 
     // start by pushing an empty array
     _scanResults.add([]);
@@ -324,6 +312,7 @@ class FlutterBluePlus {
 
   /// for internal use
   static Future<void> _stopScan({bool invokePlatform = true, bool pushToStream = true}) async {
+    _scanBuffer?.close();
     _scanSubscription?.cancel();
     _scanTimeout?.cancel();
     if (pushToStream) {

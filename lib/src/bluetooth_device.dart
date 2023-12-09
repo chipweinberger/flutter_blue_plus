@@ -85,8 +85,8 @@ class BluetoothDevice {
     int? mtu = 512,
     bool autoConnect = false,
   }) async {
-    // If you hit this assert, must set `mtu:null`, i.e `device.connect(mtu:null, autoConnect:true)`
-    // You have call `requestMtu` yourself. `autoConnect` is not compatibile with `mtu`.
+    // If you hit this assert, you must set `mtu:null`, i.e `device.connect(mtu:null, autoConnect:true)`
+    // and you'll have to call `requestMtu` yourself. `autoConnect` is not compatibile with `mtu`.
     assert((mtu == null) || !autoConnect, "mtu and auto connect are incompatible");
 
     // make sure no one else is calling disconnect
@@ -381,10 +381,10 @@ class BluetoothDevice {
     // predelay
     if (predelay > 0) {
       // hack: some devices automatically send a new MTU right after connection without
-      // being asked. This can cause `requestMtu` to return too early, i.e. while its operation 
+      // being asked. This can cause `requestMtu` to return too early, i.e. while its operation
       // is actually still in progress. That mistake can cause subsequent calls to `discoverServices`,
       // etc, to timeout. By adding delay before we call `requestMtu`, we can hopefully avoid
-      // this race condition. Note: if your device does not send a new MTU right after connection, 
+      // this race condition. Note: if your device does not send a new MTU right after connection,
       // you can safely disable this delay (set it to zero). Other people may need to increase it!
       await Future.delayed(Duration(milliseconds: (predelay * 1000).toInt()));
     }
@@ -596,40 +596,24 @@ class BluetoothDevice {
       throw FlutterBluePlusException(ErrorPlatform.fbp, "bondState", FbpErrorCode.androidOnly.index, "android-only");
     }
 
-    // do we already have the initial state?
-    if (FlutterBluePlus._bondStates[remoteId] != null) {
-      // we prefer to use the cached bond state, if available
-      BluetoothBondState initialValue = _bmToBondState(FlutterBluePlus._bondStates[remoteId]!.bondState);
-      yield* FlutterBluePlus._methodStream.stream
-          .where((m) => m.method == "OnBondStateChanged")
-          .map((m) => m.arguments)
-          .map((args) => BmBondStateResponse.fromMap(args))
-          .where((p) => p.remoteId == remoteId.str)
-          .map((p) => _bmToBondState(p.bondState))
-          .newStreamWithInitialValue(initialValue);
-    } else {
-      // start listening now so we do not miss any changes
-      // while we are getting the inital bond state
-      var buffer = _BufferStream.listen(FlutterBluePlus._methodStream.stream
-          .where((m) => m.method == "OnBondStateChanged")
-          .map((m) => m.arguments)
-          .map((args) => BmBondStateResponse.fromMap(args))
-          .where((p) => p.remoteId == remoteId.str)
-          .map((p) => _bmToBondState(p.bondState)));
-
-      // must get the initial state from the system.
-      BluetoothBondState initialValue = await FlutterBluePlus._methods
+    // get current state if needed
+    if (FlutterBluePlus._bondStates[remoteId] == null) {
+      var val = await FlutterBluePlus._methods
           .invokeMethod('getBondState', remoteId.str)
-          .then((args) => BmBondStateResponse.fromMap(args))
-          .then((p) => _bmToBondState(p.bondState));
-
-      // make sure the initial value has not become out of date
-      if (buffer.hasReceivedValue == false) {
-        yield initialValue;
+          .then((args) => BmBondStateResponse.fromMap(args));
+      // update _bondStates if it is still null after the await
+      if (FlutterBluePlus._bondStates[remoteId] == null) {
+        FlutterBluePlus._bondStates[remoteId] = val;
       }
-      // stream
-      yield* buffer.stream;
     }
+
+    yield* FlutterBluePlus._methodStream.stream
+        .where((m) => m.method == "OnBondStateChanged")
+        .map((m) => m.arguments)
+        .map((args) => BmBondStateResponse.fromMap(args))
+        .where((p) => p.remoteId == remoteId.str)
+        .map((p) => _bmToBondState(p.bondState))
+        .newStreamWithInitialValue(_bmToBondState(FlutterBluePlus._bondStates[remoteId]!.bondState));
   }
 
   /// Get the previous bondState of the device (Android Only)
