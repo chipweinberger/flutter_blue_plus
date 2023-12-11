@@ -24,7 +24,9 @@ class _ScanResultTileState extends State<ScanResultTile> {
 
     _connectionStateSubscription = widget.result.device.connectionState.listen((state) {
       _connectionState = state;
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     });
   }
 
@@ -119,16 +121,12 @@ class _ScanResultTileState extends State<ScanResultTile> {
       leading: Text(widget.result.rssi.toString()),
       trailing: _buildConnectButton(context),
       children: <Widget>[
-        if (adv.advName.isNotEmpty)
-          _buildAdvRow(context, 'Name', adv.advName),
-        if (adv.txPowerLevel != null)
-          _buildAdvRow(context, 'Tx Power Level', '${adv.txPowerLevel}'),
+        if (adv.advName.isNotEmpty) _buildAdvRow(context, 'Name', adv.advName),
+        if (adv.txPowerLevel != null) _buildAdvRow(context, 'Tx Power Level', '${adv.txPowerLevel}'),
         if (adv.manufacturerData.isNotEmpty)
           _buildAdvRow(context, 'Manufacturer Data', getNiceManufacturerData(adv.manufacturerData)),
-        if (adv.serviceUuids.isNotEmpty)
-          _buildAdvRow(context, 'Service UUIDs', getNiceServiceUuids(adv.serviceUuids)),
-        if (adv.serviceData.isNotEmpty)
-          _buildAdvRow(context, 'Service Data', getNiceServiceData(adv.serviceData)),
+        if (adv.serviceUuids.isNotEmpty) _buildAdvRow(context, 'Service UUIDs', getNiceServiceUuids(adv.serviceUuids)),
+        if (adv.serviceData.isNotEmpty) _buildAdvRow(context, 'Service Data', getNiceServiceData(adv.serviceData)),
       ],
     );
   }

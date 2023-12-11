@@ -1,5 +1,3 @@
-
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -22,7 +20,6 @@ class SystemDeviceTile extends StatefulWidget {
 }
 
 class _SystemDeviceTileState extends State<SystemDeviceTile> {
-
   BluetoothConnectionState _connectionState = BluetoothConnectionState.disconnected;
 
   late StreamSubscription<BluetoothConnectionState> _connectionStateSubscription;
@@ -33,7 +30,9 @@ class _SystemDeviceTileState extends State<SystemDeviceTile> {
 
     _connectionStateSubscription = widget.device.connectionState.listen((state) {
       _connectionState = state;
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     });
   }
 

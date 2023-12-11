@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'dart:math';
 
@@ -6,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import "../utils/snackbar.dart";
-
 
 class DescriptorTile extends StatefulWidget {
   final BluetoothDescriptor descriptor;
@@ -27,7 +25,9 @@ class _DescriptorTileState extends State<DescriptorTile> {
     super.initState();
     _lastValueSubscription = widget.descriptor.lastValueStream.listen((value) {
       _value = value;
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     });
   }
 

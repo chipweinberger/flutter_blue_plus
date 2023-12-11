@@ -44,22 +44,30 @@ class _DeviceScreenState extends State<DeviceScreen> {
       if (state == BluetoothConnectionState.connected && _rssi == null) {
         _rssi = await widget.device.readRssi();
       }
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     });
 
     _mtuSubscription = widget.device.mtu.listen((value) {
       _mtuSize = value;
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     });
 
     _isConnectingSubscription = widget.device.isConnecting.listen((value) {
       _isConnecting = value;
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     });
 
     _isDisconnectingSubscription = widget.device.isDisconnecting.listen((value) {
       _isDisconnecting = value;
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     });
   }
 
@@ -108,18 +116,22 @@ class _DeviceScreenState extends State<DeviceScreen> {
   }
 
   Future onDiscoverServicesPressed() async {
-    setState(() {
-      _isDiscoveringServices = true;
-    });
+    if (mounted) {
+      setState(() {
+        _isDiscoveringServices = true;
+      });
+    }
     try {
       _services = await widget.device.discoverServices();
       Snackbar.show(ABC.c, "Discover Services: Success", success: true);
     } catch (e) {
       Snackbar.show(ABC.c, prettyException("Discover Services Error:", e), success: false);
     }
-    setState(() {
-      _isDiscoveringServices = false;
-    });
+    if (mounted) {
+      setState(() {
+        _isDiscoveringServices = false;
+      });
+    }
   }
 
   Future onRequestMtuPressed() async {

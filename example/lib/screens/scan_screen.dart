@@ -30,14 +30,18 @@ class _ScanScreenState extends State<ScanScreen> {
 
     _scanResultsSubscription = FlutterBluePlus.scanResults.listen((results) {
       _scanResults = results;
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     }, onError: (e) {
       Snackbar.show(ABC.b, prettyException("Scan Error:", e), success: false);
     });
 
     _isScanningSubscription = FlutterBluePlus.isScanning.listen((state) {
       _isScanning = state;
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     });
   }
 
@@ -54,7 +58,6 @@ class _ScanScreenState extends State<ScanScreen> {
     } catch (e) {
       Snackbar.show(ABC.b, prettyException("System Devices Error:", e), success: false);
     }
-
     try {
       // android is slow when asking for all advertisments,
       // so instead we only ask for 1/8 of them
@@ -64,7 +67,9 @@ class _ScanScreenState extends State<ScanScreen> {
     } catch (e) {
       Snackbar.show(ABC.b, prettyException("Start Scan Error:", e), success: false);
     }
-    setState(() {}); // force refresh of systemDevices
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future onStopPressed() async {
@@ -88,7 +93,9 @@ class _ScanScreenState extends State<ScanScreen> {
     if (_isScanning == false) {
       FlutterBluePlus.startScan(timeout: const Duration(seconds: 15));
     }
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
     return Future.delayed(Duration(milliseconds: 500));
   }
 

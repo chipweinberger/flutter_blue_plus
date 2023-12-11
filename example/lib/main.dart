@@ -16,7 +16,7 @@ void main() {
 }
 
 //
-// This widget shows BluetoothOffScreen or 
+// This widget shows BluetoothOffScreen or
 // ScanScreen depending on the adapter state
 //
 class FlutterBlueApp extends StatefulWidget {
@@ -36,7 +36,9 @@ class _FlutterBlueAppState extends State<FlutterBlueApp> {
     super.initState();
     _adapterStateStateSubscription = FlutterBluePlus.adapterState.listen((state) {
       _adapterState = state;
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     });
   }
 

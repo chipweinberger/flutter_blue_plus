@@ -28,7 +28,9 @@ class _CharacteristicTileState extends State<CharacteristicTile> {
     super.initState();
     _lastValueSubscription = widget.characteristic.lastValueStream.listen((value) {
       _value = value;
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     });
   }
 
@@ -74,7 +76,9 @@ class _CharacteristicTileState extends State<CharacteristicTile> {
       if (c.properties.read) {
         await c.read();
       }
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     } catch (e) {
       Snackbar.show(ABC.c, prettyException("Subscribe Error:", e), success: false);
     }
@@ -95,7 +99,9 @@ class _CharacteristicTileState extends State<CharacteristicTile> {
         child: Text("Read"),
         onPressed: () async {
           await onReadPressed();
-          setState(() {});
+          if (mounted) {
+            setState(() {});
+          }
         });
   }
 
@@ -105,7 +111,9 @@ class _CharacteristicTileState extends State<CharacteristicTile> {
         child: Text(withoutResp ? "WriteNoResp" : "Write"),
         onPressed: () async {
           await onWritePressed();
-          setState(() {});
+          if (mounted) {
+            setState(() {});
+          }
         });
   }
 
@@ -115,7 +123,9 @@ class _CharacteristicTileState extends State<CharacteristicTile> {
         child: Text(isNotifying ? "Unsubscribe" : "Subscribe"),
         onPressed: () async {
           await onSubscribePressed();
-          setState(() {});
+          if (mounted) {
+            setState(() {});
+          }
         });
   }
 
