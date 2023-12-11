@@ -297,9 +297,10 @@ Stream<T> _mergeStreams<T>(List<Stream<T>> streams) {
   }
 
   void handleDone() {
-    if (subscriptions.every((s) => s.isPaused)) {
-      controller.close();
+    for (var s in subscriptions) {
+      s.cancel();
     }
+    controller.close();
   }
 
   void subscribeToStream(Stream<T> stream) {
