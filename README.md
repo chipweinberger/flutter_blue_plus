@@ -508,20 +508,28 @@ PlatformException(startScan, Field androidScanMode_ for m0.e0 not found. Known f
 In the **ios/Runner/Info.plist** let’s add:
 
 ```dart
-	<dict>
-	    <key>NSBluetoothAlwaysUsageDescription</key>
-	    <string>Need BLE permission</string>
-	    <key>NSBluetoothPeripheralUsageDescription</key>
-	    <string>Need BLE permission</string>
-	    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	    <string>Need Location permission</string>
-	    <key>NSLocationAlwaysUsageDescription</key>
-	    <string>Need Location permission</string>
-	    <key>NSLocationWhenInUseUsageDescription</key>
-	    <string>Need Location permission</string>
+<dict>
+    <key>NSBluetoothAlwaysUsageDescription</key>
+    <string>This app always needs Bluetooth to function</string>
+    <key>NSBluetoothPeripheralUsageDescription</key>
+    <string>This app needs Bluetooth Peripheral to function</string>
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>This app always needs location and when in use to function</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>This app always needs location to function</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>This app needs location when in use to function</string>
 ```
 
 For location permissions on iOS see more at: [https://developer.apple.com/documentation/corelocation/requesting_authorization_for_location_services](https://developer.apple.com/documentation/corelocation/requesting_authorization_for_location_services)
+
+And in Xcode, add access to Bluetooth hardware: 
+
+`Xcode -> Runners -> Targets -> Runner-> Signing & Capabilities -> App Sandbox -> Hardware -> Enable Bluetooth`
+
+<img width="528" alt="Screenshot 2023-12-11 at 10 32 04 AM" src="https://github.com/boskokg/flutter_blue_plus/assets/1863934/554079ef-4627-4dfc-97e3-1f07f84a0f3c">
+
+
 
 ## Reference
 
@@ -837,6 +845,10 @@ You need to wait for the bluetooth adapter to fully turn on.
 `await FlutterBluePlus.adapterState.where((state) => state == BluetoothAdapterState.on).first;`
 
 You can also use `FlutterBluePlus.adapterState.listen(...)`. See [Usage](#usage).
+
+### iOS: `BluetoothAdapterState.unavailable`
+
+Added access to Bluetooth Hardware in the app's Xcode settings. See See [Getting Started](#getting-started).
 
 ---
 
