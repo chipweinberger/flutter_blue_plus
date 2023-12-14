@@ -278,7 +278,7 @@ extension splitWrite on BluetoothCharacteristic {
 
 ### Subscribe to a characteristic
 
-// If `onValueReceived` is never called, see [Common Problems](#common-problems) in the README.
+If `onValueReceived` is never called, see [Common Problems](#common-problems) in the README.
 
 ```dart
 final subscription = characteristic.onValueReceived.listen((value) {
