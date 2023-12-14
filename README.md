@@ -16,10 +16,10 @@ Migrating from [FlutterBlue](https://github.com/pauldemarco/flutter_blue)? See [
 - [Introduction](#introduction)
 - [Usage](#usage)
 - [Getting Started](#getting-started)
+- [Using Ble in App Background](#using-ble-in-app-background)
 - [Reference](#reference)
 - [Debugging](#debugging)
 - [Mocking](#mocking)
-- [Use Ble in App Background](#use-ble-in-app-background)
 - [Common Problems](#common-problems)
 
 ## Introduction
@@ -530,7 +530,30 @@ And in Xcode, add access to Bluetooth hardware:
 
 <img width="528" alt="Screenshot 2023-12-11 at 10 32 04 AM" src="https://github.com/boskokg/flutter_blue_plus/assets/1863934/554079ef-4627-4dfc-97e3-1f07f84a0f3c">
 
+## Using Ble in App Background
 
+Using Ble while the app is in the background is an advanced feature, and you should read all relevant iOS and Android documentation on it first.
+
+### iOS
+
+Documentation: https://developer.apple.com/library/archive/documentation/NetworkingInternetWeb/Conceptual/CoreBluetooth_concepts/CoreBluetoothBackgroundProcessingForIOSApps/PerformingTasksWhileYourAppIsInTheBackground.html
+
+Add the following to your `Info.plist`
+
+```
+<key>UIBackgroundModes</key>
+<array>
+    <string>bluetooth-central</string>
+</array>
+```
+
+When this key-value pair is included in the app’s Info.plist file, the system wakes up your app to process ble `read`, `write`, and `subscription` events.
+
+**Note**: Upon being woken up, an app has around 10 seconds to complete a task. Apps that spend too much time executing in the background can be throttled back by the system or killed.
+
+### Android
+
+You can try using https://pub.dev/packages/flutter_foreground_task
 
 ## Reference
 
@@ -638,31 +661,6 @@ then in `pubspec.yaml` add the repo by path:
 ```
 
 Now you can edit the FlutterBluePlus code yourself.
-
-## Use Ble in App Background
-
-Using Ble while the app is in the background is an advanced feature, and you should read all relevant iOS and Android documentation on it first.
-
-### iOS
-
-Documentation: https://developer.apple.com/library/archive/documentation/NetworkingInternetWeb/Conceptual/CoreBluetooth_concepts/CoreBluetoothBackgroundProcessingForIOSApps/PerformingTasksWhileYourAppIsInTheBackground.html
-
-Add the following to your `Info.plist`
-
-```
-<key>UIBackgroundModes</key>
-<array>
-    <string>bluetooth-central</string>
-</array>
-```
-
-When this key-value pair is included in the app’s Info.plist file, the system wakes up your app to process ble `read`, `write`, and `subscription` events.
-
-**Note**: Upon being woken up, an app has around 10 seconds to complete a task. Apps that spend too much time executing in the background can be throttled back by the system or killed.
-
-### Android
-
-You can try using https://pub.dev/packages/flutter_foreground_task
 
 ## Common Problems
 
