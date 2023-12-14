@@ -1,3 +1,7 @@
+## 1.30.5
+* **[Fix]** iOS build error (regression 1.30.4)
+* **[Fix]** android autoConnect was broken (regression 1.30.1)
+
 ## 1.30.4
 * **[Fix]** Perf: must close `adapterState`, `bondState` & `scanResults` BufferStreams
 * **[Improve]** iOS: set `kCBConnectOptionEnableAutoReconnect` option
