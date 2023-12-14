@@ -642,9 +642,9 @@ public class FlutterBluePlusPlugin implements
                 case "connect":
                 {
                     // see: BmConnectRequest
-                    HashMap<String, Object> data = call.arguments();
-                    String remoteId =    (String) data.get("remote_id");
-                    String serviceUuid = (String) data.get("service_uuid");
+                    HashMap<String, Object> args = call.arguments();
+                    String remoteId =    (String) args.get("remote_id");
+                    boolean autoConnect = ((int) args.get("auto_connect")) != 0;
 
                     ArrayList<String> permissions = new ArrayList<>();
 
@@ -685,7 +685,6 @@ public class FlutterBluePlusPlugin implements
 
                         // connect
                         BluetoothGatt gatt = null;
-                        boolean autoConnect = mAutoConnected.containsKey(remoteId);
                         BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
                         if (Build.VERSION.SDK_INT >= 23) { // Android 6.0 (October 2015)
                             gatt = device.connectGatt(context, autoConnect, mGattCallback, BluetoothDevice.TRANSPORT_LE);
@@ -701,6 +700,13 @@ public class FlutterBluePlusPlugin implements
 
                         // add to currently connecting peripherals
                         mCurrentlyConnectingDevices.put(remoteId, gatt);
+
+                        // remember autoconnect 
+                        if (autoConnect) {
+                            mAutoConnected.put(remoteId, autoConnect);
+                        } else {
+                            mAutoConnected.remove(remoteId);
+                        }
 
                         result.success(true);
                     });
