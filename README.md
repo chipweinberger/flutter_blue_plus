@@ -532,7 +532,7 @@ And in Xcode, add access to Bluetooth hardware:
 
 ## Using Ble in App Background
 
-Using Ble while the app is in the background is an advanced feature, and you should read all relevant iOS and Android documentation on it first.
+**This is an advanced use case**. FlutterBluePlus does not support everything. You may have to fork it.
 
 ### iOS
 
