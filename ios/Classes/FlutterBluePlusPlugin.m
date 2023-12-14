@@ -289,6 +289,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // See BmConnectRequest
             NSDictionary* args = (NSDictionary*)call.arguments;
             NSString  *remoteId       = args[@"remote_id"];
+            NSNumber  *autoConnect    = args[@"auto_connect"];
 
             // check adapter state
             if ([self isAdapterOn] == false) {
