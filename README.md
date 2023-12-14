@@ -646,13 +646,19 @@ Many common problems are easily solved.
 
 ### Scanning does not find my device
 
-**1. your device uses bluetooth classic, not BLE.**
+**1. try using another ble scanner app**
+
+Search the App Store for a BLE scanner apps and install it on your phone, and ideally other phones as well.
+
+Can any of the phones find your ble device?
+
+**2. your device uses bluetooth classic, not BLE.**
 
 Headphones, speakers, keyboards, mice, gamepads, & printers all use Bluetooth Classic. 
 
 These devices may be found in System Settings, but they cannot be connected to by FlutterBluePlus. FlutterBluePlus only supports Bluetooth Low Energy.
 
-**2. your device stopped advertising.**
+**3. your device stopped advertising.**
 
 - you might need to reboot your device
 - you might need to put your device in "discovery mode"
@@ -673,19 +679,11 @@ for (var d in system) {
 }
 ```
 
-**3. your scan filters are wrong.**
+**4. your scan filters are wrong.**
 
 - try removing all scan filters
 - for `withServices` to work, your device must actively advertise the serviceUUIDs it supports
 
-
-**4. try a ble scanner app**
-
-Search the App Store for a BLE scanner apps and install it on your phone, and another phone.
-
-**Question 1:** When the issue is happening, is *your phone* (the phone with your flutter app) able to scan it using the 3rd party scanner?
-
-**Question 2:** When the issue is happening, is *another phone* able to scan it using the 3rd party scanner?
 
 ---
 
