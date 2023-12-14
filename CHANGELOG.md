@@ -1,3 +1,9 @@
+## 1.30.4
+* **[Fix]** Perf: must close `adapterState`, `bondState` & `scanResults` BufferStreams
+* **[Improve]** iOS: set `kCBConnectOptionEnableAutoReconnect` option
+* **[Improve]** requestMtu: add `predelay` argument
+* **[Example]** only call `setState` if mounted
+
 ## 1.30.3
 * **[Fix]** android: connect crashes (regression in 1.30.0)
 
