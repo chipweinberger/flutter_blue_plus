@@ -567,6 +567,7 @@ You can try using https://pub.dev/packages/flutter_foreground_task
 | setLogLevel            | :white_check_mark: | :white_check_mark: |        | Configure plugin log level                                 |
 | isSupported            | :white_check_mark: | :white_check_mark: |        | Checks whether the device supports Bluetooth               |
 | turnOn                 | :white_check_mark: |                    | :fire: | Turns on the bluetooth adapter                             |
+| adapterStateNow     ⚡  | :white_check_mark: | :white_check_mark: |        | Current state of the bluetooth adapter                     |
 | adapterState        🌀 | :white_check_mark: | :white_check_mark: |        | Stream of on & off states of the bluetooth adapter         |
 | startScan              | :white_check_mark: | :white_check_mark: | :fire: | Starts a scan for Ble devices                              |
 | stopScan               | :white_check_mark: | :white_check_mark: | :fire: | Stop an existing scan for Ble devices                      |

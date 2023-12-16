@@ -61,6 +61,10 @@ class FlutterBluePlus {
   /// Checks whether the hardware supports Bluetooth
   static Future<bool> get isSupported async => await _invokeMethod('isSupported');
 
+  /// The current adapter state
+  static BluetoothAdapterState get adapterStateNow =>
+      _adapterStateNow != null ? _bmToAdapterState(_adapterStateNow!) : BluetoothAdapterState.unknown;
+
   /// Return the friendly Bluetooth name of the local Bluetooth adapter
   static Future<String> get adapterName async => await _invokeMethod('getAdapterName');
 
