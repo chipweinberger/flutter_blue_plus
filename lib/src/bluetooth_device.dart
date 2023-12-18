@@ -61,6 +61,11 @@ class BluetoothDevice {
     }
   }
 
+  /// Returns true if autoConnect is currently enabled for this device
+  bool get isAutoConnectEnabled {
+    return FlutterBluePlus._autoConnect.contains(remoteId);
+  }
+
   /// Returns true if this device currently connected to your app
   bool get isConnected {
     if (FlutterBluePlus._connectionStates[remoteId] == null) {
