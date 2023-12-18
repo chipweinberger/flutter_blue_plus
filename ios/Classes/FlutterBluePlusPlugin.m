@@ -1106,11 +1106,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     didDisconnectPeripheral:(CBPeripheral *)peripheral
                       error:(NSError *)error
 {
+    Log(LDEBUG, @"didDisconnectPeripheral:");
     if (error) {
-        // error contains the reason for the unexpected disconnection
-        Log(LERROR, @"didDisconnectPeripheral: [Error] %@", [error localizedDescription]);
-    } else {
-        Log(LDEBUG, @"didDisconnectPeripheral");
+    Log(LDEBUG, @"  error: %@", [error localizedDescription]);
     }
 
     NSString* remoteId = [[peripheral identifier] UUIDString];
@@ -1143,11 +1141,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     didFailToConnectPeripheral:(CBPeripheral *)peripheral
                          error:(NSError *)error
 {
+    Log(LDEBUG, @"didFailToConnectPeripheral:");
     if (error) {
-        // error contains the reason for the connection failure
-        Log(LERROR, @"didFailToConnectPeripheral: [Error] %@", [error localizedDescription]);
-    } else {
-        Log(LDEBUG, @"didFailToConnectPeripheral");
+    Log(LDEBUG, @"  error: %@", [error localizedDescription]);
     }
 
     NSString* remoteId = [[peripheral identifier] UUIDString];
@@ -1183,10 +1179,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 - (void)peripheral:(CBPeripheral *)peripheral
     didDiscoverServices:(NSError *)error
 {
+    Log(LDEBUG, @"didDiscoverServices:");
     if (error) {
-        Log(LERROR, @"didDiscoverServices: [Error] %@", [error localizedDescription]);
-    } else {
-        Log(LDEBUG, @"didDiscoverServices");
+    Log(LDEBUG, @"  error: %@", [error localizedDescription]);
     }
 
     // discover characteristics and secondary services
@@ -1194,7 +1189,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     for (CBService *s in [peripheral services]) {
         Log(LDEBUG, @"  svc: %@", [s.UUID uuidStr]);
         [peripheral discoverCharacteristics:nil forService:s];
-        // Secondary services in the future (#8)
+        // todo: included services
         // [peripheral discoverIncludedServices:nil forService:s];
     }
 }
@@ -1203,11 +1198,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     didDiscoverCharacteristicsForService:(CBService *)service
                                    error:(NSError *)error
 {
+    Log(LERROR, @"didDiscoverCharacteristicsForService:");
+    Log(LDEBUG, @"  svc: %@", [service.UUID uuidStr]);
     if (error) {
-        Log(LERROR, @"didDiscoverCharacteristicsForService: [Error] %@", [error localizedDescription]);
-    } else {
-        Log(LDEBUG, @"didDiscoverCharacteristicsForService");
-        Log(LDEBUG, @"  svc: %@", [service.UUID uuidStr]);
+    Log(LDEBUG, @"  error: %@", [error localizedDescription]);
     }
 
     // Loop through and discover descriptors for characteristics
@@ -1224,11 +1218,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     didDiscoverDescriptorsForCharacteristic:(CBCharacteristic *)characteristic
                                       error:(NSError *)error
 {
+    Log(LERROR, @"didDiscoverDescriptorsForCharacteristic:");
+    Log(LDEBUG, @"  chr: %@", [characteristic.UUID uuidStr]);
     if (error) {
-        Log(LERROR, @"didDiscoverDescriptorsForCharacteristic: [Error] %@", [error localizedDescription]);
-    } else {
-        Log(LDEBUG, @"didDiscoverDescriptorsForCharacteristic");
-        Log(LDEBUG, @"  chr: %@", [characteristic.UUID uuidStr]);
+    Log(LDEBUG, @"  error: %@", [error localizedDescription]);
     }
 
     // print descriptors
@@ -1268,10 +1261,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     didDiscoverIncludedServicesForService:(CBService *)service
                                     error:(NSError *)error
 {
+    Log(LERROR, @"didDiscoverIncludedServicesForService:");
+    Log(LDEBUG, @"  svc: %@", [service.UUID uuidStr]);
     if (error) {
-        Log(LERROR, @"didDiscoverIncludedServicesForService: [Error] %@", [error localizedDescription]);
-    } else {
-        Log(LDEBUG, @"didDiscoverIncludedServicesForService");
+    Log(LDEBUG, @"  error: %@", [error localizedDescription]);
     }
 
     // Loop through and discover characteristics for secondary services
@@ -1285,11 +1278,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic
                               error:(NSError *)error
 {
-    // this callback is called for notifications as well as manual reads
+    // this function is called on notifications as well as manual reads
+    Log(LDEBUG, @"didUpdateValueForCharacteristic:");
+    Log(LDEBUG, @"  chr: %@", [characteristic.UUID uuidStr]);
     if (error) {
-        Log(LERROR, @"didUpdateValueForCharacteristic: [Error] %@", [error localizedDescription]);
-    } else {
-        Log(LDEBUG, @"didUpdateValueForCharacteristic: %@", [characteristic.UUID uuidStr]);
+    Log(LDEBUG, @"  error: %@", [error localizedDescription]);
     }
 
     ServicePair *pair = [self getServicePair:peripheral characteristic:characteristic];
@@ -1313,12 +1306,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     didWriteValueForCharacteristic:(CBCharacteristic *)characteristic
                              error:(NSError *)error
 {
-    // Note:
-    //  - this callback is only called for writeWithResponse
+    // Note: this callback is only called for writeWithResponse
+    Log(LDEBUG, @"didUpdateValueForCharacteristic:");
+    Log(LDEBUG, @"  chr: %@", [characteristic.UUID uuidStr]);
     if (error) {
-        Log(LERROR, @"didWriteValueForCharacteristic: [Error] %@", [error localizedDescription]);
-    } else {
-        Log(LDEBUG, @"didWriteValueForCharacteristic: %@", [characteristic.UUID uuidStr]);
+    Log(LDEBUG, @"  error: %@", [error localizedDescription]);
     }
 
     ServicePair *pair = [self getServicePair:peripheral characteristic:characteristic];
@@ -1353,10 +1345,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     didUpdateNotificationStateForCharacteristic:(CBCharacteristic *)characteristic
                                           error:(NSError *)error
 {
+    Log(LDEBUG, @"didUpdateNotificationStateForCharacteristic:");
+    Log(LDEBUG, @"  chr: %@", [characteristic.UUID uuidStr]);
     if (error) {
-        Log(LERROR, @"didUpdateNotificationStateForCharacteristic: [Error] %@", [error localizedDescription]);
-    } else {
-        Log(LDEBUG, @"didUpdateNotificationStateForCharacteristic: %@", [characteristic.UUID uuidStr]);
+    Log(LDEBUG, @"  error: %@", [error localizedDescription]);
     }
 
     ServicePair *pair = [self getServicePair:peripheral characteristic:characteristic];
@@ -1394,10 +1386,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     didUpdateValueForDescriptor:(CBDescriptor *)descriptor
                           error:(NSError *)error
 {
+    Log(LDEBUG, @"didUpdateValueForDescriptor:");
+    Log(LDEBUG, @"  chr: %@", [descriptor.characteristic.UUID uuidStr]);
+    Log(LDEBUG, @"  desc: %@", [descriptor.UUID uuidStr]);
     if (error) {
-        Log(LERROR, @"didUpdateValueForDescriptor: [Error] %@", [error localizedDescription]);
-    } else {
-        Log(LDEBUG, @"didUpdateValueForDescriptor: %@", [descriptor.UUID uuidStr]);
+    Log(LDEBUG, @"  error: %@", [error localizedDescription]);
     }
 
     ServicePair *pair = [self getServicePair:peripheral characteristic:descriptor.characteristic];
@@ -1424,10 +1417,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     didWriteValueForDescriptor:(CBDescriptor *)descriptor
                          error:(NSError *)error
 {
+    Log(LDEBUG, @"didWriteValueForDescriptor:");
+    Log(LDEBUG, @"  chr: %@", [descriptor.characteristic.UUID uuidStr]);
+    Log(LDEBUG, @"  desc: %@", [descriptor.UUID uuidStr]);
     if (error) {
-        Log(LERROR, @"didWriteValueForDescriptor: [Error] %@", [error localizedDescription]);
-    } else {
-        Log(LDEBUG, @"didWriteValueForDescriptor %@", [descriptor.UUID uuidStr]);
+    Log(LDEBUG, @"  error: %@", [error localizedDescription]);
     }
 
     ServicePair *pair = [self getServicePair:peripheral characteristic:descriptor.characteristic];
@@ -1486,10 +1480,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 - (void)peripheral:(CBPeripheral *)peripheral
     didReadRSSI:(NSNumber *)rssi error:(NSError *)error
 {
+    Log(LDEBUG, @"didReadRSSI:");
     if (error) {
-        Log(LERROR, @"didReadRSSI: [Error] %@", [error localizedDescription]);
-    } else {
-        Log(LDEBUG, @"didReadRSSI");
+    Log(LDEBUG, @"  error: %@", [error localizedDescription]);
     }
 
     // See BmReadRssiResult
