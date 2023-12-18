@@ -21,7 +21,7 @@
 * **[Fix]** android: connect crashes (regression in 1.30.0)
 
 ## 1.30.2
-* **[Improve]** auto connect: clean up some rough edges in the api
+* **[Improve]** auto connect: assert that mtu is null in `connect`
 
 ## 1.30.1
 * **[Feature]** auto connect: remove `setAutoConnect` function added in 1.30.0 and go back to using `connect:autoConnect` parameter
