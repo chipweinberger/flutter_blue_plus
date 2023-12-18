@@ -1,10 +1,15 @@
+## 1.30.7
+* **[Fix]** `autoConnect` not always working (bug in 1.30.0)
+* **[Feature]** add `device.isAutoConnectEnabled`
+* **[Improve]**  perf: `NewStreamWithInitialValue` dont use `asBroadcastStream`
+
 ## 1.30.6
 * **[Improve]** ios log more detail
-* **[Feature]** add adapterStateNow getter
+* **[Feature]** add `adapterStateNow` getter
 
 ## 1.30.5
 * **[Fix]** iOS build error (regression 1.30.4)
-* **[Fix]** android autoConnect was broken (regression 1.30.1)
+* **[Fix]** android `autoConnect` was broken (regression 1.30.1)
 
 ## 1.30.4
 * **[Fix]** Perf: must close `adapterState`, `bondState` & `scanResults` BufferStreams
