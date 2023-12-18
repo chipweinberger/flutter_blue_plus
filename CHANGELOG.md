@@ -1,3 +1,7 @@
+## 1.30.6
+* **[Improve]** ios log more detail
+* **[Feature]** add adapterStateNow getter
+
 ## 1.30.5
 * **[Fix]** iOS build error (regression 1.30.4)
 * **[Fix]** android autoConnect was broken (regression 1.30.1)
