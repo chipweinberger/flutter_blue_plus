@@ -875,6 +875,14 @@ Added access to Bluetooth Hardware in the app's Xcode settings. See See [Getting
 
 ---
 
+### iOS: "[Error] The handle is invalid"
+
+This can mean a couple things:
+1. You never called `discoverServices` or the services were reset and must call it again
+2. In the BLE spec, ble devices send an error if they cannot process a request. A better error description would be "The BLE device cannot process this request".
+
+---
+
 ### iOS: "[Error] The connection has timed out unexpectedly."
 
 You can google this error. It is a common iOS ble error code.
