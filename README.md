@@ -190,7 +190,8 @@ Connects whenever your device is found.
 // enable auto connect
 //  - this function always returns immediately
 //  - you must listen to `device.connectionState` to know when connection occurs 
-await device.connect(autoConnect:true)
+//  - autoConnect is incompatible with mtu argument, so you must call requestMtu yourself
+await device.connect(mtu:null, autoConnect:true)
 
 // disable auto connect
 await device.disconnect()
