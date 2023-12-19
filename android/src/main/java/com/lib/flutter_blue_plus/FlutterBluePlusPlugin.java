@@ -2574,19 +2574,29 @@ public class FlutterBluePlusPlugin implements
         }
     }
 
+    // Defined in the Bluetooth Standard
     private static String gattErrorString(int value) {
         switch(value) {
-            case BluetoothGatt.GATT_SUCCESS                     : return "GATT_SUCCESS";
-            case BluetoothGatt.GATT_CONNECTION_CONGESTED        : return "GATT_CONNECTION_CONGESTED";
-            case BluetoothGatt.GATT_FAILURE                     : return "GATT_FAILURE";
-            case BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION : return "GATT_INSUFFICIENT_AUTHENTICATION";
-            case BluetoothGatt.GATT_INSUFFICIENT_AUTHORIZATION  : return "GATT_INSUFFICIENT_AUTHORIZATION";
-            case BluetoothGatt.GATT_INSUFFICIENT_ENCRYPTION     : return "GATT_INSUFFICIENT_ENCRYPTION";
-            case BluetoothGatt.GATT_INVALID_ATTRIBUTE_LENGTH    : return "GATT_INVALID_ATTRIBUTE_LENGTH";
-            case BluetoothGatt.GATT_INVALID_OFFSET              : return "GATT_INVALID_OFFSET";
-            case BluetoothGatt.GATT_READ_NOT_PERMITTED          : return "GATT_READ_NOT_PERMITTED";
-            case BluetoothGatt.GATT_REQUEST_NOT_SUPPORTED       : return "GATT_REQUEST_NOT_SUPPORTED";
-            case BluetoothGatt.GATT_WRITE_NOT_PERMITTED         : return "GATT_WRITE_NOT_PERMITTED";
+            case BluetoothGatt.GATT_SUCCESS                     : return "GATT_SUCCESS";                     // 0
+            case 0x01                                           : return "GATT_INVALID_HANDLE";              // 1
+            case BluetoothGatt.GATT_READ_NOT_PERMITTED          : return "GATT_READ_NOT_PERMITTED";          // 2
+            case BluetoothGatt.GATT_WRITE_NOT_PERMITTED         : return "GATT_WRITE_NOT_PERMITTED";         // 3
+            case 0x04                                           : return "GATT_INVALID_PDU";                 // 4
+            case BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION : return "GATT_INSUFFICIENT_AUTHENTICATION"; // 5
+            case BluetoothGatt.GATT_REQUEST_NOT_SUPPORTED       : return "GATT_REQUEST_NOT_SUPPORTED";       // 6
+            case BluetoothGatt.GATT_INVALID_OFFSET              : return "GATT_INVALID_OFFSET";              // 7
+            case BluetoothGatt.GATT_INSUFFICIENT_AUTHORIZATION  : return "GATT_INSUFFICIENT_AUTHORIZATION";  // 8
+            case BluetoothGatt.GATT_INSUFFICIENT_AUTHORIZATION  : return "GATT_PREPARE_QUEUE_FULL";          // 9
+            case 0x0a                                           : return "GATT_ATTR_NOT_FOUND";              // 10
+            case 0x0b                                           : return "GATT_ATTR_NOT_LONG";               // 11
+            case 0x0c                                           : return "GATT_INSUFFICIENT_KEY_SZ";         // 12
+            case BluetoothGatt.GATT_INVALID_ATTRIBUTE_LENGTH    : return "GATT_INVALID_ATTRIBUTE_LENGTH";    // 13
+            case 0x0e                                           : return "GATT_UNLIKELY";                    // 14
+            case BluetoothGatt.GATT_INSUFFICIENT_ENCRYPTION     : return "GATT_INSUFFICIENT_ENCRYPTION";     // 15
+            case 0x10                                           : return "GATT_UNSUPPORTED_GROUP";           // 16
+            case 0x11                                           : return "GATT_INSUFFICIENT_RES";            // 17
+            case BluetoothGatt.GATT_CONNECTION_CONGESTED        : return "GATT_CONNECTION_CONGESTED";        // 143
+            case BluetoothGatt.GATT_FAILURE                     : return "GATT_FAILURE";                     // 257
             default: return "UNKNOWN_GATT_ERROR (" + value + ")";
         }
     }
