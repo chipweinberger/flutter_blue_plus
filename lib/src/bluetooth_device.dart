@@ -210,7 +210,10 @@ class BluetoothDevice {
   }
 
   /// Discover services, characteristics, and descriptors of the remote device
-  Future<List<BluetoothService>> discoverServices({int timeout = 15}) async {
+  ///   - [subscribeToServicesChanged] Android Only: If true, after discovering services we will subscribe
+  ///     to the Services Changed Characteristic (0x2A05) used for the `device.onServicesReset` stream.
+  ///     Note: this behavior happens automatically on iOS and cannot be disabled
+  Future<List<BluetoothService>> discoverServices({bool subscribeToServicesChanged = true, int timeout = 15}) async {
     // check connected
     if (isConnected == false) {
       throw FlutterBluePlusException(
@@ -254,10 +257,12 @@ class BluetoothDevice {
 
     // in order to match iOS behavior on all platforms,
     // we always listen to the Services Changed characteristic if it exists.
-    if (Platform.isIOS == false && Platform.isMacOS == false) {
-      BluetoothCharacteristic? c = _servicesChangedCharacteristic;
-      if (c != null && (c.properties.notify || c.properties.indicate) && c.isNotifying == false) {
-        await c.setNotifyValue(true);
+    if (subscribeToServicesChanged) {
+      if (Platform.isIOS == false && Platform.isMacOS == false) {
+        BluetoothCharacteristic? c = _servicesChangedCharacteristic;
+        if (c != null && (c.properties.notify || c.properties.indicate) && c.isNotifying == false) {
+          await c.setNotifyValue(true);
+        }
       }
     }
 
