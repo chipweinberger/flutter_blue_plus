@@ -876,11 +876,76 @@ Added access to Bluetooth Hardware in the app's Xcode settings. See See [Getting
 
 ---
 
-### iOS: "[Error] The handle is invalid"
+### Bluetooth GATT Errors
 
-This can mean a couple things:
-1. You never called `discoverServices` or the services were reset and must call it again
-2. In the BLE spec, ble devices send an error if they cannot process a request. A better error description would be "The BLE device cannot process this request".
+These GATT error codes are part of the BLE Specification. 
+
+**These errors *originate from your ble device* because you are sending an invalid request.**
+
+FlutterBluePlus cannot fix these errors. You are doing something wrong.
+
+**List of GATT Errors as they appear on iOS**:
+```
+apple-code: 1  | The handle is invalid.
+apple-code: 2  | Reading is not permitted.
+apple-code: 3  | Writing is not permitted.
+apple-code: 4  | The command is invalid.
+apple-code: 6  | The request is not supported.
+apple-code: 7  | The offset is invalid.
+apple-code: 8  | Authorization is insufficient.
+apple-code: 9  | The prepare queue is full.
+apple-code: 10 | The attribute could not be found.
+apple-code: 11 | The attribute is not long.
+apple-code: 12 | The encryption key size is insufficient.
+apple-code: 13 | The value's length is invalid.
+apple-code: 14 | Unlikely error.
+apple-code: 15 | Encryption is insufficient.
+apple-code: 16 | The group type is unsupported.
+apple-code: 17 | Resources are insufficient.
+apple-code: 18 | Unknown ATT error.
+```
+
+**List of GATT Errors as they appear on Android**:
+```
+android-code: 1  | GATT_INVALID_HANDLE
+android-code: 2  | GATT_READ_NOT_PERMITTED
+android-code: 3  | GATT_WRITE_NOT_PERMITTED
+android-code: 4  | GATT_INVALID_PDU
+android-code: 5  | GATT_INSUFFICIENT_AUTHENTICATION
+android-code: 6  | GATT_REQUEST_NOT_SUPPORTED
+android-code: 7  | GATT_INVALID_OFFSET
+android-code: 8  | GATT_INSUFFICIENT_AUTHORIZATION
+android-code: 9  | GATT_PREPARE_QUEUE_FULL
+android-code: 10 | GATT_ATTR_NOT_FOUND
+android-code: 11 | GATT_ATTR_NOT_LONG
+android-code: 12 | GATT_INSUFFICIENT_KEY_SIZE
+android-code: 13 | GATT_INVALID_ATTRIBUTE_LENGTH
+android-code: 14 | GATT_UNLIKELY
+android-code: 15 | GATT_INSUFFICIENT_ENCRYPTION
+android-code: 16 | GATT_UNSUPPORTED_GROUP
+android-code: 17 | GATT_INSUFFICIENT_RESOURCES
+```
+
+**Descriptions**:
+```
+1   | Invalid Handle                 | The attribute handle given was not valid on this server.
+2   | Read Not Permitted             | The attribute cannot be read.
+3   | Write Not Permitted            | The attribute cannot be written.
+4   | Invalid PDU                    | The attribute PDU was invalid.
+5   | Insufficient Authentication    | The attribute requires authentication before it can be read or written.
+6   | Request Not Supported          | Attribute server does not support the request received from the client.
+7   | Invalid Offset                 | Offset specified was past the end of the attribute.
+8   | Insufficient Authorization     | The attribute requires an authorization before it can be read or written.
+9   | Prepare Queue Full             | Too many prepare writes have been queued.
+10  | Attribute Not Found            | No attribute found within the given attribute handle range.
+11  | Attribute Not Long             | The attribute cannot be read or written using the Read Blob or Write Blob requests.
+12  | Insufficient Key Size          | The Encryption Key Size used for encrypting this link is insufficient.
+13  | Invalid Attribute Value Length | The attribute value length is invalid for the operation.
+14  | Unlikely Error                 | The request has encountered an unlikely error and cannot be completed.
+15  | Insufficient Encryption        | The attribute requires encryption before it can be read or written.
+16  | Unsupported Group Type         | The attribute type is not a supported grouping as defined by a higher layer.
+17  | Insufficient Resources         | Insufficient Resources to complete the request.
+```
 
 ---
 
