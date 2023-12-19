@@ -52,6 +52,10 @@ This makes FlutterBluePlus very stable, and easy to maintain.
 
 Please star this repo & on [pub.dev](https://pub.dev/packages/flutter_blue_plus). We all benefit from having a larger community.
 
+## Discord 💬
+
+There is a community Discord server. [flutter_blue_discord](https://discord.gg/Yk5Efra) [![Chat](https://img.shields.io/discord/634853295160033301.svg?style=flat-square&colorB=758ED3)](https://discord.gg/Yk5Efra)
+
 ## Example
 
 FlutterBluePlus has a beautiful example app, useful to debug issues.
