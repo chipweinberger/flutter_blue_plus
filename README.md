@@ -881,6 +881,8 @@ You need to wait for the bluetooth adapter to fully turn on.
 
 You can also use `FlutterBluePlus.adapterState.listen(...)`. See [Usage](#usage).
 
+---
+
 ### iOS: `BluetoothAdapterState.unavailable`
 
 You must add access to Bluetooth Hardware in the app's Xcode settings. See See [Getting Started](#getting-started).
