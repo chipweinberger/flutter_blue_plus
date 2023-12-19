@@ -1,3 +1,6 @@
+## 1.30.8
+* **[Improve]** android: discoverServices: add `subscribeToServicesChanged` option
+
 ## 1.30.7
 * **[Fix]** `autoConnect` not always working (bug in 1.30.0)
 * **[Feature]** add `device.isAutoConnectEnabled`
