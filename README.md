@@ -54,7 +54,7 @@ Please star this repo & on [pub.dev](https://pub.dev/packages/flutter_blue_plus)
 
 ## Discord 💬
 
-There is a community Discord server. [flutter_blue_discord](https://discord.gg/Yk5Efra) [![Chat](https://img.shields.io/discord/634853295160033301.svg?style=flat-square&colorB=758ED3)](https://discord.gg/Yk5Efra)
+[![Chat](https://img.shields.io/discord/634853295160033301.svg?style=flat-square&colorB=758ED3)](https://discord.gg/Yk5Efra) There is a community Discord server. ([Link](https://discord.gg/Yk5Efra))
 
 ## Example
 
