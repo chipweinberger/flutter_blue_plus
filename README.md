@@ -38,7 +38,7 @@ If you need BLE Peripheral Role, you should check out [FlutterBlePeripheral](htt
 
 ## Cross-Platform Bluetooth Low Energy
 
-FlutterBluePlus aims to offer the most from all supported platforms: iOS, macOS, Android.
+FlutterBluePlus supports nearly every feature on all supported platforms: iOS, macOS, Android.
 
 The code is written to be simple, robust, and incredibly easy to understand.
 
@@ -872,7 +872,7 @@ You can also use `FlutterBluePlus.adapterState.listen(...)`. See [Usage](#usage)
 
 ### iOS: `BluetoothAdapterState.unavailable`
 
-Added access to Bluetooth Hardware in the app's Xcode settings. See See [Getting Started](#getting-started).
+You must add access to Bluetooth Hardware in the app's Xcode settings. See See [Getting Started](#getting-started).
 
 ---
 
