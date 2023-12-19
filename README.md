@@ -30,6 +30,13 @@ It supports BLE Central Role only (most common).
 
 If you need BLE Peripheral Role, you should check out [FlutterBlePeripheral](https://pub.dev/packages/flutter_ble_peripheral).
 
+## Tutorial
+
+If you are new to Bluetooth, you should start by reading BLE tutorials.
+* [Novel Bits BLE Tutorial](https://novelbits.io/bluetooth-low-energy-ble-complete-guide/)
+* [All About Circuits BLE Tutorial](https://www.allaboutcircuits.com/technical-articles/exploring-the-basics-of-bluetooth-low-energy-a-beginners-guide-to-ble/)
+* [Embetronicx BLE Tutorial](https://embetronicx.com/tutorials/tech_devices/bluetooth-low-energy-ble-introduction-part-1/)
+
 ## ❗ Bluetooth Classic is not supported ❗
 
  i.e. **Arduino HC-05 & HC-06,** speakers, headphones, mice, keyboards, gamepads, and more are **not** supported. These all use Bluetooth Classic.
