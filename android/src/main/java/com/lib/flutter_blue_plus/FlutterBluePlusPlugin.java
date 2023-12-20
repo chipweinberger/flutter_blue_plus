@@ -1934,9 +1934,8 @@ public class FlutterBluePlusPlugin implements
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState)
         {
-            log(LogLevel.DEBUG, "onConnectionStateChange: status: " + status +
-                " (" + hciStatusString(status) + ")" +
-                " newState: " + connectionStateString(newState));
+            log(LogLevel.DEBUG, "onConnectionStateChange:" + connectionStateString(newState));
+            log(LogLevel.DEBUG, "  status: " + hciStatusString(status));
 
             // android never uses this callback with enums values of CONNECTING or DISCONNECTING,
             // (theyre only used for gatt.getConnectionState()), but just to be
@@ -1996,7 +1995,10 @@ public class FlutterBluePlusPlugin implements
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status)
         {
-            log(LogLevel.DEBUG, "onServicesDiscovered: count: " + gatt.getServices().size() + " status: " + status);
+            LogLevel level = status == 0 ? LogLevel.DEBUG : LogLevel.ERROR;
+            log(level, "onServicesDiscovered:");
+            log(level, "  count: " + gatt.getServices().size());
+            log(level, "  status: " + status + gattErrorString(status));
 
             List<Object> services = new ArrayList<Object>();
             for(BluetoothGattService s : gatt.getServices()) {
@@ -2050,7 +2052,9 @@ public class FlutterBluePlusPlugin implements
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, byte[] value)
         {
             // this callback is only for notifications & indications
-            log(LogLevel.DEBUG, "onCharacteristicChanged: " + uuidStr(characteristic.getUuid()));
+            LogLevel level = LogLevel.DEBUG;
+            log(level, "onCharacteristicChanged:");
+            log(level, "  chr: " + uuidStr(characteristic.getUuid()));
             onCharacteristicReceived(gatt, characteristic, value, BluetoothGatt.GATT_SUCCESS);
         }
 
@@ -2059,14 +2063,20 @@ public class FlutterBluePlusPlugin implements
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, byte[] value, int status)
         {
             // this callback is only for explicit characteristic reads
-            log(LogLevel.DEBUG, "onCharacteristicRead: " + uuidStr(characteristic.getUuid()) + " status: " + status);
+            LogLevel level = status == 0 ? LogLevel.DEBUG : LogLevel.ERROR;
+            log(level, "onCharacteristicRead:");
+            log(level, "  chr: " + uuidStr(characteristic.getUuid()));
+            log(level, "  status: " + gattErrorString(status) + " (" + status + ")");
             onCharacteristicReceived(gatt, characteristic, value, BluetoothGatt.GATT_SUCCESS);
         }
 
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status)
         {
-            log(LogLevel.DEBUG, "onCharacteristicWrite: " + uuidStr(characteristic.getUuid()) + " status: " + status);
+            LogLevel level = status == 0 ? LogLevel.DEBUG : LogLevel.ERROR;
+            log(level, "onCharacteristicWrite:");
+            log(level, "  chr: " + uuidStr(characteristic.getUuid()));
+            log(level, "  status: " + gattErrorString(status) + " (" + status + ")");
 
             // For "writeWithResponse", onCharacteristicWrite is called after the remote sends back a write response. 
             // For "writeWithoutResponse", onCharacteristicWrite is called as long as there is still space left 
@@ -2106,7 +2116,11 @@ public class FlutterBluePlusPlugin implements
         @TargetApi(33) // newer function, passes byte[] value
         public void onDescriptorRead(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status, byte[] value)
         {
-            log(LogLevel.DEBUG, "onDescriptorRead: " + uuidStr(descriptor.getUuid()) + " status: " + status);
+            LogLevel level = status == 0 ? LogLevel.DEBUG : LogLevel.ERROR;
+            log(level, "onDescriptorRead:");
+            log(level, "  chr: " + uuidStr(descriptor.getCharacteristic().getUuid()));
+            log(level, "  desc: " + uuidStr(descriptor.getUuid()));
+            log(level, "  status: " + gattErrorString(status) + " (" + status + ")");
 
             ServicePair pair = getServicePair(gatt, descriptor.getCharacteristic());
 
@@ -2130,7 +2144,11 @@ public class FlutterBluePlusPlugin implements
         @Override
         public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status)
         {
-            log(LogLevel.DEBUG, "onDescriptorWrite: " + uuidStr(descriptor.getUuid()) + " status: " + status);
+            LogLevel level = status == 0 ? LogLevel.DEBUG : LogLevel.ERROR;
+            log(level, "onDescriptorWrite:");
+            log(level, "  chr: " + uuidStr(descriptor.getCharacteristic().getUuid()));
+            log(level, "  desc: " + uuidStr(descriptor.getUuid()));
+            log(level, "  status: " + gattErrorString(status) + " (" + status + ")");
 
             ServicePair pair = getServicePair(gatt, descriptor.getCharacteristic());
 
@@ -2166,13 +2184,18 @@ public class FlutterBluePlusPlugin implements
         @Override
         public void onReliableWriteCompleted(BluetoothGatt gatt, int status)
         {
-            log(LogLevel.DEBUG, "onReliableWriteCompleted: status: " + status);
+            LogLevel level = status == 0 ? LogLevel.DEBUG : LogLevel.ERROR;
+            log(level, "onReliableWriteCompleted:");
+            log(level, "  status: " + gattErrorString(status) + " (" + status + ")");
         }
 
         @Override
         public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status)
         {
-            log(LogLevel.DEBUG, "onReadRemoteRssi: rssi: " + rssi + " status: " + status);
+            LogLevel level = status == 0 ? LogLevel.DEBUG : LogLevel.ERROR;
+            log(level, "onReadRemoteRssi:");
+            log(level, "  rssi: " + rssi);
+            log(level, "  status: " + gattErrorString(status) + " (" + status + ")");
 
             // see: BmReadRssiResult
             HashMap<String, Object> response = new HashMap<>();
@@ -2188,7 +2211,10 @@ public class FlutterBluePlusPlugin implements
         @Override
         public void onMtuChanged(BluetoothGatt gatt, int mtu, int status)
         {
-            log(LogLevel.DEBUG, "onMtuChanged: mtu: " + mtu + " status: " + status);
+            LogLevel level = status == 0 ? LogLevel.DEBUG : LogLevel.ERROR;
+            log(level, "onMtuChanged:");
+            log(level, "  mtu: " + mtu );
+            log(level, "  status: " + gattErrorString(status) + " (" + status + ")");
 
             String remoteId = gatt.getDevice().getAddress();
 
@@ -2211,8 +2237,8 @@ public class FlutterBluePlusPlugin implements
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic)
         {
             // getValue() was deprecated in API level 33 because the function makes it look like
-            // you could always call getValue on a characteristic. But in reality, this
-            // only works after a *read* has been made
+            // you could always call getValue on a characteristic. But in reality, getValue()
+            // only works after a *read* has been made, not a *write*.
             this.onCharacteristicChanged(gatt, characteristic, characteristic.getValue());
         }
         
@@ -2221,8 +2247,8 @@ public class FlutterBluePlusPlugin implements
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status)
         {
             // getValue() was deprecated in API level 33 because the function makes it look like
-            // you could always call getValue on a characteristic. But in reality, this
-            // only works after a *read* has been made
+            // you could always call getValue on a characteristic. But in reality, getValue()
+            // only works after a *read* has been made, not a *write*.
             this.onCharacteristicRead(gatt, characteristic, characteristic.getValue(), status);
         }
 
@@ -2231,7 +2257,7 @@ public class FlutterBluePlusPlugin implements
         public void onDescriptorRead(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status)
         {
             // getValue() was deprecated in API level 33 because the api makes it look like
-            // you could always call getValue on a descriptor. But in reality, this
+            // you could always call getValue on a descriptor. But in reality, getValue()
             // only works after a *read* has been made, not a *write*.
             this.onDescriptorRead(gatt, descriptor, status, descriptor.getValue());
         }
