@@ -9,7 +9,7 @@
 
 **Note: this plugin is continuous work from [FlutterBlue](https://github.com/pauldemarco/flutter_blue).**
 
-Migrating from [FlutterBlue](https://github.com/pauldemarco/flutter_blue)? See [Migration Guides](MIGRATION.md)
+Migrating from [FlutterBlue](https://github.com/pauldemarco/flutter_blue)? See [Migration Guide](MIGRATION.md)
 
 ## Contents
 
@@ -278,7 +278,7 @@ import 'dart:math';
 //    1. due to splitting, `characteristic.read()` will return partial data.
 //    2. it can only be used *with* response to avoid data loss
 //    3. The characteristic must be designed to support split data
-extension splitWriteExt on BluetoothCharacteristic {
+extension splitWrite on BluetoothCharacteristic {
   Future<void> splitWrite(List<int> value, {int timeout = 15}) async {
     int chunk = device.mtuNow - 3; // 3 bytes ble overhead
     for (int i = 0; i < value.length; i += chunk) {
