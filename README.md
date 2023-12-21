@@ -893,9 +893,9 @@ You must add access to Bluetooth Hardware in the app's Xcode settings. See See [
 
 These GATT error codes are part of the BLE Specification. 
 
-**These errors *originate from your ble device* because you are sending an invalid request.**
+**These are *responses* from your ble device because you are sending an invalid request.**
 
-FlutterBluePlus cannot fix these errors. You are doing something wrong.
+FlutterBluePlus cannot fix these errors. You are doing something wrong & your device is responding with an error.
 
 **List of GATT Errors as they appear on iOS**:
 ```
