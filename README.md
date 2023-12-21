@@ -153,7 +153,7 @@ var subscription = FlutterBluePlus.onScanResults.listen((results) {
             print('${r.device.remoteId}: "${r.advertisementData.advName}" found!');
         }
     },
-    onError(e) => print(e);
+    onError: (e) => print(e),
 );
 
 // Wait for Bluetooth enabled & permission granted
@@ -278,7 +278,7 @@ import 'dart:math';
 //    1. due to splitting, `characteristic.read()` will return partial data.
 //    2. it can only be used *with* response to avoid data loss
 //    3. The characteristic must be designed to support split data
-extension splitWrite on BluetoothCharacteristic {
+extension splitWriteExt on BluetoothCharacteristic {
   Future<void> splitWrite(List<int> value, {int timeout = 15}) async {
     int chunk = device.mtuNow - 3; // 3 bytes ble overhead
     for (int i = 0; i < value.length; i += chunk) {
