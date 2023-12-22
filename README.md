@@ -47,7 +47,7 @@ If you are new to Bluetooth, you should start by reading BLE tutorials.
 
 FlutterBluePlus supports nearly every feature on all supported platforms: iOS, macOS, Android.
 
-The code is written to be simple, robust, and easy to understand.
+FlutterBluePlus was written to be simple, robust, and easy to understand.
 
 ## No Dependencies
 
