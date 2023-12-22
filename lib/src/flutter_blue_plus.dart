@@ -216,16 +216,17 @@ class FlutterBluePlus {
     assert(removeIfGone == null || !oneByOne, "removeIfGone is not compatible with oneByOne");
     assert(continuousDivisor >= 1, "divisor must be >= 1");
 
-    // Note: `withKeywords` is not compatible with other filters.
-    // Why? `withKeywords` is implemented in custom fbp code. If fbp wanted to support `withKeywords`
-    // & other filters at the same time, fbp would need to re-implement all filtering in custom code.
-    // Fbp would need to skip android os filtering entirely. This would hurt perf.
+    // Note: `withKeywords` is not yet compatible with other filters on android.
+    // Why? `withKeywords` is implemented in custom fbp code. If fbp wanted to support
+    // `withKeywords` & other filters at the same time, fbp would need to re-implement all
+    // filtering in custom code and skip android OS filtering entirely, hurting perf.
     bool other = withServices.isNotEmpty ||
         withRemoteIds.isNotEmpty ||
         withNames.isNotEmpty ||
         withMsd.isNotEmpty ||
         withServiceData.isNotEmpty;
-    assert(!(withKeywords.isNotEmpty && other), "withKeywords is not compatible with other filters");
+    assert(!(Platform.isAndroid && withKeywords.isNotEmpty && other),
+        "withKeywords is not compatible with other filters on Android");
 
     // already scanning?
     if (_isScanning.latestValue == true) {

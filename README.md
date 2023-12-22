@@ -163,7 +163,7 @@ var subscription = FlutterBluePlus.onScanResults.listen((results) {
 await FlutterBluePlus.adapterState.where((val) => val == BluetoothAdapterState.on).first;
 
 // Start scanning
-await FlutterBluePlus.startScan();
+await FlutterBluePlus.startScan(withServices:[Guid("180D")]);
 
 // Stop scanning
 await FlutterBluePlus.stopScan();

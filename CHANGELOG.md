@@ -130,8 +130,8 @@ This release greatly improves `autoconnect` support on Android, and adds iOS sup
 * **[Improve]** guid: more consistent handling of 16, 32, vs 128 bit guids
 
 ## 1.28.1
-* **[Feature]** scanning: add `serviceData` filter
-* **[Feature]** scanning: add `msd` filter
+* **[Feature]** scanning: add `withServiceData` filter
+* **[Feature]** scanning: add `withMsd` filter
 
 ## 1.28.0
 * **[Breaking Change]** `guid.toString()` now returns 16-bit short uuid when possible
