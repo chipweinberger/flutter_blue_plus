@@ -1,3 +1,6 @@
+## 1.31.1
+* **[Fix]**  iOS: scan filters were doing nothing (regression 1.31.0)
+
 ## 1.31.0
 This release adds support for multiple scan filters at the same time.
 * **[Feature]** iOS: support multiple scan filters at the same time
