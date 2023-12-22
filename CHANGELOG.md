@@ -1,3 +1,7 @@
+## 1.31.0
+This release adds support for multiple scan filters at the same time.
+* **[Feature]** iOS: support multiple scan filters at the same time
+
 ## 1.30.9
 * **[Improve]** assert: fbp only supprts a single `scan` filter at a time
 
