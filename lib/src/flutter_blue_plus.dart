@@ -177,7 +177,8 @@ class FlutterBluePlus {
   }
 
   /// Start a scan, and return a stream of results
-  /// Note: scan filters are additive. An advertisment can match *any* filter.
+  /// Note: scan filters use an "or" behavior. i.e. if you set `withServices` & `withNames` we 
+  /// return all the advertisments that match any of the specified services *or* any of the specified names.
   ///   - [withServices] filter by advertised services
   ///   - [withRemoteIds] filter for known remoteIds (iOS: 128-bit guid, android: 48-bit mac address)
   ///   - [withNames] filter by advertised names (exact match)

@@ -1064,37 +1064,37 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         allow = YES;
     }
 
-    // apply filters only if filters are set
+    // apply filters only if at least one filter is set
     // Note: filters are additive. An advertisment can match *any* filter
     if (isAnyFilterSet)
     {
         // filter services
-        if (!allow && [self filterServices:self.scanFilters[@"with_services"] target:advServices]) {
+        if (!allow && [self foundService:self.scanFilters[@"with_services"] target:advServices]) {
             allow = YES;
         }
 
         // filter remoteIds
-        if (!allow && [self filterRemoteIds:self.scanFilters[@"with_remote_ids"] target:remoteId]) {
+        if (!allow && [self foundRemoteId:self.scanFilters[@"with_remote_ids"] target:remoteId]) {
             allow = YES;
         }
 
         // filter names
-        if (!allow && [self filterNames:self.scanFilters[@"with_names"] target:advName]) {
+        if (!allow && [self foundName:self.scanFilters[@"with_names"] target:advName]) {
             allow = YES;
         }
 
         // filter keywords
-        if (!allow && [self filterKeywords:self.scanFilters[@"with_keywords"] target:advName]) {
+        if (!allow && [self foundKeyword:self.scanFilters[@"with_keywords"] target:advName]) {
             allow = YES;
         }
 
         // filter msd
-        if (!allow && [self filterMsd:self.scanFilters[@"with_msd"] msd:advMsd]) {
+        if (!allow && [self foundMsd:self.scanFilters[@"with_msd"] msd:advMsd]) {
             allow = YES;
         }
 
         // filter service data
-        if (!allow && [self filterServiceData:self.scanFilters[@"with_service_data"] sd:advSd]) {
+        if (!allow && [self foundServiceData:self.scanFilters[@"with_service_data"] sd:advSd]) {
             allow = YES;
         }
     }
@@ -1847,7 +1847,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     return (filterArray != nil && [filterArray count] > 0);
 }
 
-- (BOOL)filterServices:(NSArray<NSString *> *)services
+- (BOOL)foundService:(NSArray<NSString *> *)services
                 target:(NSArray<CBUUID *> *)target
 {
     if (target == nil || target.count == 0) {
@@ -1861,7 +1861,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     return NO;
 }
 
-- (BOOL)filterKeywords:(NSArray<NSString *> *)keywords
+- (BOOL)foundKeyword:(NSArray<NSString *> *)keywords
                 target:(NSString *)target
 {
     if (target == nil) {
@@ -1875,7 +1875,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     return NO;
 }
 
-- (BOOL)filterNames:(NSArray<NSString *> *)names
+- (BOOL)foundName:(NSArray<NSString *> *)names
                 target:(NSString *)target
 {
     if (target == nil) {
@@ -1889,7 +1889,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     return NO;
 }
 
-- (BOOL)filterRemoteIds:(NSArray<NSString *> *)remoteIds
+- (BOOL)foundRemoteId:(NSArray<NSString *> *)remoteIds
                 target:(NSString *)target
 {
     if (target == nil) {
@@ -1903,7 +1903,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     return NO;
 }
 
-- (BOOL)filterServiceData:(NSArray<NSDictionary*>*)filters
+- (BOOL)foundServiceData:(NSArray<NSDictionary*>*)filters
                        sd:(NSDictionary *)sd
 {
     if (sd == nil || sd.count == 0) {
@@ -1933,7 +1933,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     return NO;
 }
 
-- (BOOL)filterMsd:(NSArray<NSDictionary*>*)filters
+- (BOOL)foundMsd:(NSArray<NSDictionary*>*)filters
               msd:(NSData *)msd
 {
     if (msd == nil || msd.length == 0) {
