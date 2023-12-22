@@ -1,4 +1,4 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.lib.flutter_blue_plus_example">
     <!-- We can leave mostly empty since everything we need is already in ../main/AndroidManifest.xml-->
     <!-- However, Internet is needed by Flutter for debugging, hot reload, wirless upload, etc -->
     <uses-permission android:name="android.permission.INTERNET"/>
