@@ -216,9 +216,11 @@ class FlutterBluePlus {
     assert(continuousDivisor >= 1, "divisor must be >= 1");
 
     // check filters
-    //   - FBP only supports a single filter type at one time.
+    //   - FBP currently only supports a single filter type at one time.
     //   - some filter types cause other filters to be ignored
     //   - iOS & Android behave differently with multiple filters
+    //   - FBP would need to implement all filtering ourself in order 
+    //     to get consistent behavior on all platforms
     int filters = 0;
     filters += withServices.isEmpty ? 0 : 1;
     filters += withRemoteIds.isEmpty ? 0 : 1;
