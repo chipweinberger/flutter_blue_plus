@@ -1,3 +1,6 @@
+## 1.31.2
+* **[Fix]** Gradle 7 (Flutter 2) would not build (regression 1.7.6)
+
 ## 1.31.1
 * **[Fix]**  iOS: scan filters were doing nothing (regression 1.31.0)
 
