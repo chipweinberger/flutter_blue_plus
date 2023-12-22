@@ -242,11 +242,27 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 [scanOpts setObject:[NSNumber numberWithBool:YES] forKey:CBCentralManagerScanOptionAllowDuplicatesKey];
             }
 
-            // services filter
+            // filters implemented by FBP, not the OS
+            BOOL hasCustomFilters =
+                [self hasFilter:@"with_remote_ids"] ||
+                [self hasFilter:@"with_names"] ||
+                [self hasFilter:@"with_keywords"] ||
+                [self hasFilter:@"with_msd"] ||
+                [self hasFilter:@"with_service_data"];
+
+            // filter services
             NSArray *services = [NSArray array];
             for (int i = 0; i < [withServices count]; i++) {
                 NSString *uuid = withServices[i];
                 services = [services arrayByAddingObject:[CBUUID UUIDWithString:uuid]];
+            }
+
+            // If any custom filter is set then we cannot filter by services.
+            // Why? An advertisement can match either the service filter *or*
+            // the custom filter. It does not have to match both. So we cannot have
+            // iOS & macOS filtering out any advertisements.
+            if (hasCustomFilters) {
+                services = [NSArray array];
             }
 
             // clear counts
@@ -1028,32 +1044,63 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     [self.knownPeripherals setObject:peripheral forKey:remoteId];
 
     // advertising data
+    NSArray *advServices = advertisementData[CBAdvertisementDataServiceUUIDsKey];
     NSString *advName = advertisementData[CBAdvertisementDataLocalNameKey];
     NSData *advMsd = advertisementData[CBAdvertisementDataManufacturerDataKey];
     NSDictionary* advSd = advertisementData[CBAdvertisementDataServiceDataKey];
 
-    // filter remoteIds
-    if (![self filterRemoteIds:self.scanFilters[@"with_remote_ids"] target:remoteId]) {
-        return;
+    BOOL allow = NO;
+
+    // are any filters set?
+    BOOL isAnyFilterSet = [self hasFilter:@"with_services"] ||
+                          [self hasFilter:@"with_remote_ids"] ||
+                          [self hasFilter:@"with_names"] ||
+                          [self hasFilter:@"with_keywords"] ||
+                          [self hasFilter:@"with_msd"] ||
+                          [self hasFilter:@"with_service_data"];
+
+    // no filters set? allow all
+    if (!isAnyFilterSet) {
+        allow = YES;
     }
 
-    // filter names
-    if (![self filterNames:self.scanFilters[@"with_names"] target:advName]) {
-        return;
+    // apply filters only if filters are set
+    // Note: filters are additive. An advertisment can match *any* filter
+    if (isAnyFilterSet)
+    {
+        // filter services
+        if ([self filterServices:self.scanFilters[@"with_services"] target:advServices]) {
+            allow = YES;
+        }
+
+        // filter remoteIds
+        if ([self filterRemoteIds:self.scanFilters[@"with_remote_ids"] target:remoteId]) {
+            allow = YES;
+        }
+
+        // filter names
+        if (!allow && [self filterNames:self.scanFilters[@"with_names"] target:advName]) {
+            allow = YES;
+        }
+
+        // filter keywords
+        if (!allow && [self filterKeywords:self.scanFilters[@"with_keywords"] target:advName]) {
+            allow = YES;
+        }
+
+        // filter msd
+        if (!allow && [self filterMsd:self.scanFilters[@"with_msd"] msd:advMsd]) {
+            allow = YES;
+        }
+
+        // filter service data
+        if (!allow && [self filterServiceData:self.scanFilters[@"with_service_data"] sd:advSd]) {
+            allow = YES;
+        }
     }
 
-    // filter keywords
-    if (![self filterKeywords:self.scanFilters[@"with_keywords"] target:advName]) {
-        return;
-    }
-
-    // filter msd
-    if (![self filterMsd:self.scanFilters[@"with_msd"] msd:advMsd]) {
-        return;
-    }
-
-    // filter service data
-    if (![self filterServiceData:self.scanFilters[@"with_service_data"] sd:advSd]) {
+    // If no filters are satisfied, return
+    if (!allow) {
         return;
     }
 
@@ -1793,6 +1840,28 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     NSInteger count = [self.scanCounts[remoteId] integerValue];
     self.scanCounts[remoteId] = @(count + 1);
     return count;
+}
+
+- (BOOL)hasFilter:(NSString *)key {
+    NSArray *filterArray = self.scanFilters[key];
+    return (filterArray != nil && [filterArray count] > 0);
+}
+
+- (BOOL)filterServices:(NSArray<NSString *> *)services
+                target:(NSArray<CBUUID *> *)target
+{
+    if (services.count == 0) {
+        return YES;
+    }
+    if (target == nil || target.count == 0) {
+        return NO;
+    }
+    for (CBUUID *s in target) {
+        if ([services containsObject:[s uuidStr]]) {
+            return YES;
+        }
+    }
+    return NO;
 }
 
 - (BOOL)filterKeywords:(NSArray<NSString *> *)keywords
