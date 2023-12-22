@@ -177,6 +177,7 @@ class FlutterBluePlus {
   }
 
   /// Start a scan, and return a stream of results
+  /// Note: scan filters are additive. An advertisment can match *any* filter.
   ///   - [withServices] filter by advertised services
   ///   - [withRemoteIds] filter for known remoteIds (iOS: 128-bit guid, android: 48-bit mac address)
   ///   - [withNames] filter by advertised names (exact match)
@@ -215,20 +216,16 @@ class FlutterBluePlus {
     assert(removeIfGone == null || !oneByOne, "removeIfGone is not compatible with oneByOne");
     assert(continuousDivisor >= 1, "divisor must be >= 1");
 
-    // check filters
-    //   - FBP currently only supports a single filter type at one time.
-    //   - some filter types cause other filters to be ignored
-    //   - iOS & Android behave differently with multiple filters
-    //   - FBP would need to implement all filtering ourself in order 
-    //     to get consistent behavior on all platforms
-    int filters = 0;
-    filters += withServices.isEmpty ? 0 : 1;
-    filters += withRemoteIds.isEmpty ? 0 : 1;
-    filters += withNames.isEmpty ? 0 : 1;
-    filters += withKeywords.isEmpty ? 0 : 1;
-    filters += withMsd.isEmpty ? 0 : 1;
-    filters += withServiceData.isEmpty ? 0 : 1;
-    assert(filters <= 1, "using multiple filter types is not supported by FBP");
+    // Note: `withKeywords` is not compatible with other filters.
+    // Why? `withKeywords` is implemented in custom fbp code. If fbp wanted to support `withKeywords`
+    // & other filters at the same time, fbp would need to re-implement all filtering in custom code.
+    // Fbp would need to skip android os filtering entirely. This would hurt perf.
+    bool other = withServices.isNotEmpty ||
+        withRemoteIds.isNotEmpty ||
+        withNames.isNotEmpty ||
+        withMsd.isNotEmpty ||
+        withServiceData.isNotEmpty;
+    assert(!(withKeywords.isNotEmpty && other), "withKeywords is not compatible with other filters");
 
     // already scanning?
     if (_isScanning.latestValue == true) {
