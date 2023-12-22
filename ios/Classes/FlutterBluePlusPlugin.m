@@ -1069,12 +1069,12 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     if (isAnyFilterSet)
     {
         // filter services
-        if ([self filterServices:self.scanFilters[@"with_services"] target:advServices]) {
+        if (!allow && [self filterServices:self.scanFilters[@"with_services"] target:advServices]) {
             allow = YES;
         }
 
         // filter remoteIds
-        if ([self filterRemoteIds:self.scanFilters[@"with_remote_ids"] target:remoteId]) {
+        if (!allow && [self filterRemoteIds:self.scanFilters[@"with_remote_ids"] target:remoteId]) {
             allow = YES;
         }
 
@@ -1850,9 +1850,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 - (BOOL)filterServices:(NSArray<NSString *> *)services
                 target:(NSArray<CBUUID *> *)target
 {
-    if (services.count == 0) {
-        return YES;
-    }
     if (target == nil || target.count == 0) {
         return NO;
     }
@@ -1867,9 +1864,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 - (BOOL)filterKeywords:(NSArray<NSString *> *)keywords
                 target:(NSString *)target
 {
-    if (keywords.count == 0) {
-        return YES;
-    }
     if (target == nil) {
         return NO;
     }
@@ -1884,9 +1878,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 - (BOOL)filterNames:(NSArray<NSString *> *)names
                 target:(NSString *)target
 {
-    if (names.count == 0) {
-        return YES;
-    }
     if (target == nil) {
         return NO;
     }
@@ -1901,9 +1892,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 - (BOOL)filterRemoteIds:(NSArray<NSString *> *)remoteIds
                 target:(NSString *)target
 {
-    if (remoteIds.count == 0) {
-        return YES;
-    }
     if (target == nil) {
         return NO;
     }
@@ -1918,9 +1906,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 - (BOOL)filterServiceData:(NSArray<NSDictionary*>*)filters
                        sd:(NSDictionary *)sd
 {
-    if (filters.count == 0) {
-        return YES;
-    }
     if (sd == nil || sd.count == 0) {
         return NO;
     }
@@ -1951,9 +1936,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 - (BOOL)filterMsd:(NSArray<NSDictionary*>*)filters
               msd:(NSData *)msd
 {
-    if (filters.count == 0) {
-        return YES;
-    }
     if (msd == nil || msd.length == 0) {
         return NO;
     }
