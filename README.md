@@ -80,7 +80,7 @@ flutter run
 
 ### 🔥 Error Handling 🔥
 
-Flutter Blue Plus takes error handling very seriously. 
+Flutter Blue Plus takes error handling seriously. 
 
 Every error returned by the native platform is checked and thrown as an exception where appropriate. See [Reference](#reference) for a list of throwable functions.
 
