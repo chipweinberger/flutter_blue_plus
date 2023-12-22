@@ -141,9 +141,9 @@ if (Platform.isAndroid) {
 
 If your device is not found, see [Common Problems](#common-problems).
 
-Note: It is recommended to set scan filters to reduce main thread & platform channel usage.
+**Note:** It is recommended to set scan filters to reduce main thread & platform channel usage.
 
-Note: scan filters are additive. An advertisment can match *any* filter.
+**Note:** scan filters are additive - an advertisment can match *any* filter.
 
 ```dart
 // listen to scan results
