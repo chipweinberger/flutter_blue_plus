@@ -143,7 +143,7 @@ If your device is not found, see [Common Problems](#common-problems).
 
 **Note:** It is recommended to set scan filters to reduce main thread & platform channel usage.
 
-**Note:** scan filters use an *or* behavior. i.e. if you set `withServices` & `withNames` we return advertisments that match any of the specified services *or* any of the specified names.
+**Note:** scan filters use an ***or*** behavior. i.e. if you set `withServices` & `withNames` we return advertisments that match any of the specified services ***or*** any of the specified names.
 
 ```dart
 // listen to scan results
