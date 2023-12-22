@@ -215,6 +215,19 @@ class FlutterBluePlus {
     assert(removeIfGone == null || !oneByOne, "removeIfGone is not compatible with oneByOne");
     assert(continuousDivisor >= 1, "divisor must be >= 1");
 
+    // check filters
+    //   - FBP only supports a single filter type at one time.
+    //   - some filter types cause other filters to be ignored
+    //   - iOS & Android behave differently with multiple filters
+    int filters = 0;
+    filters += withServices.isEmpty ? 0 : 1;
+    filters += withRemoteIds.isEmpty ? 0 : 1;
+    filters += withNames.isEmpty ? 0 : 1;
+    filters += withKeywords.isEmpty ? 0 : 1;
+    filters += withMsd.isEmpty ? 0 : 1;
+    filters += withServiceData.isEmpty ? 0 : 1;
+    assert(filters <= 1, "using multiple filter types is not supported by FBP");
+
     // already scanning?
     if (_isScanning.latestValue == true) {
       // stop existing scan
