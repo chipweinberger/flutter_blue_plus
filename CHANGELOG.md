@@ -1,10 +1,13 @@
+## 1.30.9
+* **[Improve]** assert: fbp only supprts a single `scan` filter at a time
+
 ## 1.30.8
 * **[Improve]** android: discoverServices: add `subscribeToServicesChanged` option
 
 ## 1.30.7
 * **[Fix]** `autoConnect` not always working (bug in 1.30.0)
+* **[Fix]**  perf: `NewStreamWithInitialValue` was not closing its streams
 * **[Feature]** add `device.isAutoConnectEnabled`
-* **[Improve]**  perf: `NewStreamWithInitialValue` dont use `asBroadcastStream`
 
 ## 1.30.6
 * **[Improve]** ios log more detail
