@@ -687,9 +687,10 @@ Many common problems are easily solved.
 
 **1. try using another ble scanner app**
 
-Search the App Store for a BLE scanner apps and install it on your phone, and ideally other phones as well.
+**iOS**: [nRF Connect](https://apps.apple.com/us/app/nrf-connect-for-mobile/id1054362403)
+**Android**: [BLE Scanner](https://play.google.com/store/apps/details?id=com.macdom.ble.blescanner)
 
-Can any of the phones find your ble device?
+Install a BLE scanner app on your phone. Can it find your device?
 
 **2. your device uses bluetooth classic, not BLE.**
 
