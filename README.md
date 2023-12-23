@@ -687,8 +687,8 @@ Many common problems are easily solved.
 
 **1. try using another ble scanner app**
 
-**iOS**: [nRF Connect](https://apps.apple.com/us/app/nrf-connect-for-mobile/id1054362403)
-**Android**: [BLE Scanner](https://play.google.com/store/apps/details?id=com.macdom.ble.blescanner)
+* **iOS**: [nRF Connect](https://apps.apple.com/us/app/nrf-connect-for-mobile/id1054362403)
+* **Android**: [BLE Scanner](https://play.google.com/store/apps/details?id=com.macdom.ble.blescanner)
 
 Install a BLE scanner app on your phone. Can it find your device?
 
