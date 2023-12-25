@@ -1,3 +1,6 @@
+## 1.31.3
+* **[Fix]**  `adapterState.first` & `connectionState.first` dont work (regression 1.30.7)
+
 ## 1.31.2
 * **[Fix]** Gradle 7 (Flutter 2) would not build (regression 1.7.6)
 
