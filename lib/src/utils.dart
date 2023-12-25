@@ -329,7 +329,6 @@ class _NewStreamWithInitialValueTransformer<T> extends StreamTransformerBase<T, 
       controller = StreamController<T>.broadcast(
         onListen: onListen,
         onCancel: onCancel,
-        sync: true,
       );
     } else {
       controller = StreamController<T>(
@@ -337,7 +336,6 @@ class _NewStreamWithInitialValueTransformer<T> extends StreamTransformerBase<T, 
         onPause: onPause,
         onResume: onResume,
         onCancel: onCancel,
-        sync: true,
       );
     }
 
