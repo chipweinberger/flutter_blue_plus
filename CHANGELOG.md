@@ -1,3 +1,6 @@
+## 1.31.4
+* **[Fix]**  iOS: mtu and auto connect are incompatible
+
 ## 1.31.3
 * **[Fix]**  `adapterState.first` & `connectionState.first` dont work (regression 1.30.7)
 
