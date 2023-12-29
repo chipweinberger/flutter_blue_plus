@@ -162,11 +162,12 @@ var subscription = FlutterBluePlus.onScanResults.listen((results) {
 // In your real app you should use `FlutterBluePlus.adapterState.listen` to handle all states
 await FlutterBluePlus.adapterState.where((val) => val == BluetoothAdapterState.on).first;
 
-// Start scanning
-await FlutterBluePlus.startScan(withServices:[Guid("180D")]);
+// Start scanning w/ timeout
+// optional: use `stopScan()` to stop the scan at anytime
+await FlutterBluePlus.startScan(withServices:[Guid("180D")], timeout: const Duration(seconds:15));
 
-// Stop scanning
-await FlutterBluePlus.stopScan();
+// wait for scanning to stop
+await FlutterBluePlus.isScanning.where((val) => !val).first;
 
 // cancel to prevent duplicate listeners
 subscription.cancel();
