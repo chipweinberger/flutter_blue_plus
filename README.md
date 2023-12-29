@@ -167,7 +167,7 @@ await FlutterBluePlus.adapterState.where((val) => val == BluetoothAdapterState.o
 await FlutterBluePlus.startScan(withServices:[Guid("180D")], timeout: Duration(seconds:15));
 
 // wait for scanning to stop
-await FlutterBluePlus.isScanning.where((val) => !val).first;
+await FlutterBluePlus.isScanning.where((val) => val == false).first;
 
 // cancel to prevent duplicate listeners
 subscription.cancel();
