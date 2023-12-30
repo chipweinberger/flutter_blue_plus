@@ -176,7 +176,7 @@ class _StreamControllerReEmit<T> {
   }
 }
 
-// imediately starts listening to a broadcast stream and
+// immediately starts listening to a broadcast stream and
 // buffering it in a new single-subscription stream
 class _BufferStream<T> {
   final Stream<T> _inputStream;
@@ -411,7 +411,7 @@ class _Mutex {
   }
 }
 
-// Create mutexes in a parrallel-safe way,
+// Create mutexes in a parallel-safe way,
 class _MutexFactory {
   static final Map<String, _Mutex> _all = {};
   static _Mutex getMutexForKey(String key) {
