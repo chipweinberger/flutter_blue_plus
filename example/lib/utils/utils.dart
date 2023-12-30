@@ -26,7 +26,7 @@ class StreamControllerReemit<T> {
   }
 }
 
-// return a new stream that imediately emits an initial value
+// return a new stream that immediately emits an initial value
 extension _StreamNewStreamWithInitialValue<T> on Stream<T> {
   Stream<T> newStreamWithInitialValue(T initialValue) {
     return transform(_NewStreamWithInitialValueTransformer(initialValue));
