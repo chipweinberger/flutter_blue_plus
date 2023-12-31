@@ -75,7 +75,6 @@ class _NewStreamWithInitialValueTransformer<T> extends StreamTransformerBase<T, 
       onCancel: () {
         return subscription?.cancel();
       },
-      sync: true,
     );
 
     return controller.stream;
