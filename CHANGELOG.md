@@ -1,3 +1,6 @@
+## 1.31.4
+* **[Fix]**  iOS: mtu and auto connect are incompatible
+
 ## 1.31.3
 * **[Fix]**  `adapterState.first` & `connectionState.first` dont work (regression 1.30.7)
 
@@ -19,7 +22,7 @@ This release adds support for multiple scan filters at the same time.
 
 ## 1.30.7
 * **[Fix]** `autoConnect` not always working (bug in 1.30.0)
-* **[Fix]**  perf: `NewStreamWithInitialValue` was not closing its streams
+* **[Fix]**  perf: `NewStreamWithInitialValue` was not closing its streams (regression 1.17.2)
 * **[Feature]** add `device.isAutoConnectEnabled`
 
 ## 1.30.6

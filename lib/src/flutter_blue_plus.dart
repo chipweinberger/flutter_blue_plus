@@ -402,7 +402,7 @@ class FlutterBluePlus {
       }
       if (r.adapterState == BmAdapterStateEnum.on) {
         for (DeviceIdentifier d in _autoConnect) {
-          BluetoothDevice(remoteId: d).connect(autoConnect: true);
+          BluetoothDevice(remoteId: d).connect(autoConnect: true, mtu:null);
         }
       }
     }
@@ -428,7 +428,7 @@ class FlutterBluePlus {
         for (DeviceIdentifier d in _autoConnect) {
           if (Platform.isIOS || Platform.isMacOS) {
             if (_adapterStateNow == BmAdapterStateEnum.on) {
-              BluetoothDevice(remoteId: d).connect(autoConnect: true);
+              BluetoothDevice(remoteId: d).connect(autoConnect: true, mtu:null);
             }
           }
         }
