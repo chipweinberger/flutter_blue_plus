@@ -683,9 +683,9 @@ Now you can edit the FlutterBluePlus code yourself.
 Many common problems are easily solved.
 
 Adapter:
-- [adapterState is called multiple times](#adapterstate-is-called-multiple-times)
 - [bluetooth must be turned on](#bluetooth-must-be-turned-on)
-- [BluetoothAdapterState.unavailable on iOS](#ios-bluetoothadapterstateunavailable)
+- [adapterState is called multiple times](#adapterstate-is-called-multiple-times)
+- [adapterState is `unavailable`](#adapterstate-is-unavailable)
 
 Scanning:
 - [Scanning does not find my device](#scanning-does-not-find-my-device)
@@ -694,7 +694,7 @@ Scanning:
 Connecting:
 - [Connection fails](#connection-fails)
 - [connectionState is called multiple times](#connectionstate-is-called-multiple-times)
-- [remoteId is different on Android versus iOS & macOS](#the-remoteid-is-different-on-android-versus-ios--macos)
+- [remoteId is different on Android vs iOS](#the-remoteid-is-different-on-android-versus-ios--macos)
 - [iOS: "[Error] The connection has timed out unexpectedly."](#ios-error-the-connection-has-timed-out-unexpectedly)
 
 Reading & Writing:
@@ -712,6 +712,40 @@ Android Errors:
 
 Flutter Errors:
 - [MissingPluginException(No implementation found for method XXXX ...)](#missingpluginexceptionno-implementation-found-for-method-xxxx-)
+
+---
+
+### "bluetooth must be turned on"
+
+You need to wait for the bluetooth adapter to fully turn on. 
+
+`await FlutterBluePlus.adapterState.where((state) => state == BluetoothAdapterState.on).first;`
+
+You can also use `FlutterBluePlus.adapterState.listen(...)`. See [Usage](#usage).
+
+---
+
+### adapterState is called multiple times
+
+You are forgetting to cancel the original `FlutterBluePlus.adapterState.listen` resulting in multiple listeners.
+
+```dart
+// tip: using ??= makes it easy to only make new listener when currently null
+final subscription ??= FlutterBluePlus.adapterState.listen((value) {
+    // ...
+});
+
+// also, make sure you cancel the subscription when done!
+subscription.cancel()
+```
+
+---
+
+### adapterState is unavailable
+
+**iOS:** You must add access to Bluetooth Hardware in the app's Xcode settings. See [Getting Started](#getting-started).
+
+**Android:** check that your device supports Bluetooth & has permissions
 
 ---
 
@@ -787,6 +821,44 @@ The Huawei P8 Lite is one of the reported phones to have this issue. Try stoppin
 **5. Try restarting your phone**
 
 Bluetooth is a complicated system service, and can enter a bad state.
+
+---
+
+### connectionState is called multiple times
+
+You are forgetting to cancel the original `device.connectionState.listen` resulting in multiple listeners.
+
+```dart
+// tip: using ??= makes it easy to only make new listener when currently null
+final subscription ??= FlutterBluePlus.device.connectionState.listen((value) {
+    // ...
+});
+
+// also, make sure you cancel the subscription when done!
+subscription.cancel()
+```
+
+---
+
+### The remoteId is different on Android versus iOS & macOS
+
+This is expected. There is no way to avoid it.
+
+For privacy, iOS & macOS use a randomly generated uuid. This uuid will periodically change.
+
+e.g. `6920a902-ba0e-4a13-a35f-6bc91161c517`
+
+Android uses the mac address of the bluetooth device. It never changes.
+
+e.g. `05:A4:22:31:F7:ED`
+
+---
+
+### iOS: "[Error] The connection has timed out unexpectedly."
+
+You can google this error. It is a common iOS ble error code.
+
+It means your device stopped working. FlutterBluePlus cannot fix it.
 
 ---
 
@@ -899,36 +971,6 @@ Bluetooth is wireless and will not always work.
 
 ---
 
-### adapterState is called multiple times
-
-You are forgetting to cancel the original `FlutterBluePlus.adapterState.listen` resulting in multiple listeners.
-
-```dart
-// tip: using ??= makes it easy to only make new listener when currently null
-final subscription ??= FlutterBluePlus.adapterState.listen((value) {
-    // ...
-});
-
-// also, make sure you cancel the subscription when done!
-subscription.cancel()
-```
----
-
-### connectionState is called multiple times
-
-You are forgetting to cancel the original `device.connectionState.listen` resulting in multiple listeners.
-
-```dart
-// tip: using ??= makes it easy to only make new listener when currently null
-final subscription ??= FlutterBluePlus.device.connectionState.listen((value) {
-    // ...
-});
-
-// also, make sure you cancel the subscription when done!
-subscription.cancel()
-```
----
-
 ### onValueReceived is never called (or lastValueStream)
 
 **1. you are not calling the right function**
@@ -979,43 +1021,6 @@ device.cancelWhenDisconnected(subscription);
 
 await characteristic.setNotifyValue(true);
 ```
----
-
-### "bluetooth must be turned on"
-
-You need to wait for the bluetooth adapter to fully turn on. 
-
-`await FlutterBluePlus.adapterState.where((state) => state == BluetoothAdapterState.on).first;`
-
-You can also use `FlutterBluePlus.adapterState.listen(...)`. See [Usage](#usage).
-
----
-
-### The remoteId is different on Android versus iOS & macOS
-
-This is expected. There is no way to avoid it.
-
-For privacy, iOS & macOS use a randomly generated uuid. This uuid will periodically change.
-
-e.g. `6920a902-ba0e-4a13-a35f-6bc91161c517`
-
-Android uses the mac address of the bluetooth device. It never changes.
-
-e.g. `05:A4:22:31:F7:ED`
-
----
-
-### iOS: `BluetoothAdapterState.unavailable`
-
-You must add access to Bluetooth Hardware in the app's Xcode settings. See See [Getting Started](#getting-started).
-
----
-
-### iOS: "[Error] The connection has timed out unexpectedly."
-
-You can google this error. It is a common iOS ble error code.
-
-It means your device stopped working. FlutterBluePlus cannot fix it.
 
 ---
 
