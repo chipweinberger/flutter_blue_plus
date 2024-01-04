@@ -682,6 +682,23 @@ Now you can edit the FlutterBluePlus code yourself.
 
 Many common problems are easily solved.
 
+- [Scanning does not find my device](#scanning-does-not-find-my-device)
+- [Connection fails](#connection-fails)
+- [The remoteId is different on Android versus iOS & macOS](#the-remoteid-is-different-on-android-versus-ios--macos)
+- [adapterState is called multiple times](#adapterstate-is-called-multiple-times)
+- [device.connectionState is called multiple times](#deviceconnectionstate-is-called-multiple-times)
+- [onValueReceived is never called (or lastValueStream)](#onvaluereceived-is-never-called-or-lastvaluestream)
+- [onValueReceived data is split up (or lastValueStream)](#onvaluereceived-data-is-split-up-or-lastvaluestream)
+- [onValueReceived is called with duplicate data (or lastValueStream)](#onvaluereceived-is-called-with-duplicate-data-or-lastvaluestream)
+- [Characteristic writes fails](#characteristic-writes-fails)
+- [Characteristic read fails](#characteristic-read-fails)
+- ["bluetooth must be turned on"](#bluetooth-must-be-turned-on)
+- [iOS: `BluetoothAdapterState.unavailable`](#ios-bluetoothadapterstateunavailable)
+- [Bluetooth GATT Errors](#bluetooth-gatt-errors)
+- [iOS: "[Error] The connection has timed out unexpectedly."](#ios-error-the-connection-has-timed-out-unexpectedly)
+- [ANDROID_SPECIFIC_ERROR](#android_specific_error)
+- [MissingPluginException(No implementation found for method XXXX ...)](#missingpluginexceptionno-implementation-found-for-method-xxxx-)
+
 ---
 
 ### Scanning does not find my device
