@@ -699,7 +699,7 @@ Connecting:
 
 Reading & Writing:
 - [List of Bluetooth GATT Errors](#list-of-bluetooth-gatt-errors)
-- [Characteristic writes fails](#characteristic-writes-fails)
+- [Characteristic write fails](#characteristic-write-fails)
 - [Characteristic read fails](#characteristic-read-fails)
 
 Subscriptions:
@@ -935,7 +935,7 @@ android-code: 17 | GATT_INSUFFICIENT_RESOURCES
 
 ---
 
-### characteristic writes fails
+### characteristic write fails
 
 First, check the [List of Bluetooth GATT Errors](#list-of-bluetooth-gatt-errors) for your error.
 
