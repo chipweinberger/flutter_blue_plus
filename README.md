@@ -683,6 +683,7 @@ Now you can edit the FlutterBluePlus code yourself.
 Many common problems are easily solved.
 
 - [Scanning does not find my device](#scanning-does-not-find-my-device)
+- [Scanned device never goes away](#scanned-device-never-goes-away)
 - [Connection fails](#connection-fails)
 - [List of Bluetooth GATT Errors](#list-of-bluetooth-gatt-errors)
 - [Characteristic writes fails](#characteristic-writes-fails)
@@ -742,6 +743,13 @@ for (var d in system) {
 - try removing all scan filters
 - for `withServices` to work, your device must actively advertise the serviceUUIDs it supports
 
+---
+
+### Scanned device never goes away
+
+This is expected.
+
+You must set the `removeIfGone` scan option if you want the device to go away when no longer available.
 
 ---
 
