@@ -694,7 +694,7 @@ Many common problems are easily solved.
 - [Characteristic read fails](#characteristic-read-fails)
 - ["bluetooth must be turned on"](#bluetooth-must-be-turned-on)
 - [iOS: `BluetoothAdapterState.unavailable`](#ios-bluetoothadapterstateunavailable)
-- [Bluetooth GATT Errors](#bluetooth-gatt-errors)
+- [List of Bluetooth GATT Errors](#list-of-bluetooth-gatt-errors)
 - [iOS: "[Error] The connection has timed out unexpectedly."](#ios-error-the-connection-has-timed-out-unexpectedly)
 - [ANDROID_SPECIFIC_ERROR](#android_specific_error)
 - [MissingPluginException(No implementation found for method XXXX ...)](#missingpluginexceptionno-implementation-found-for-method-xxxx-)
@@ -940,7 +940,7 @@ You must add access to Bluetooth Hardware in the app's Xcode settings. See See [
 
 ---
 
-### Bluetooth GATT Errors
+### List of Bluetooth GATT Errors
 
 These GATT error codes are part of the BLE Specification. 
 
@@ -948,7 +948,7 @@ These GATT error codes are part of the BLE Specification.
 
 FlutterBluePlus cannot fix these errors. You are doing something wrong & your device is responding with an error.
 
-**List of GATT Errors as they appear on iOS**:
+**GATT errors as they appear on iOS**:
 ```
 apple-code: 1  | The handle is invalid.
 apple-code: 2  | Reading is not permitted.
@@ -969,7 +969,7 @@ apple-code: 17 | Resources are insufficient.
 apple-code: 18 | Unknown ATT error.
 ```
 
-**List of GATT Errors as they appear on Android**:
+**GATT errors as they appear on Android**:
 ```
 android-code: 1  | GATT_INVALID_HANDLE
 android-code: 2  | GATT_READ_NOT_PERMITTED
