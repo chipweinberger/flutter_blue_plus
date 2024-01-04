@@ -689,13 +689,13 @@ Many common problems are easily solved.
 - [Characteristic writes fails](#characteristic-writes-fails)
 - [Characteristic read fails](#characteristic-read-fails)
 - [adapterState is called multiple times](#adapterstate-is-called-multiple-times)
-- [device.connectionState is called multiple times](#deviceconnectionstate-is-called-multiple-times)
+- [connectionState is called multiple times](#connectionstate-is-called-multiple-times)
 - [onValueReceived is never called (or lastValueStream)](#onvaluereceived-is-never-called-or-lastvaluestream)
 - [onValueReceived data is split up (or lastValueStream)](#onvaluereceived-data-is-split-up-or-lastvaluestream)
 - [onValueReceived is called with duplicate data (or lastValueStream)](#onvaluereceived-is-called-with-duplicate-data-or-lastvaluestream)
-- ["bluetooth must be turned on"](#bluetooth-must-be-turned-on)
+- [bluetooth must be turned on](#bluetooth-must-be-turned-on)
 - [The remoteId is different on Android versus iOS & macOS](#the-remoteid-is-different-on-android-versus-ios--macos)
-- [iOS: `BluetoothAdapterState.unavailable`](#ios-bluetoothadapterstateunavailable)
+- [iOS: BluetoothAdapterState.unavailable](#ios-bluetoothadapterstateunavailable)
 - [iOS: "[Error] The connection has timed out unexpectedly."](#ios-error-the-connection-has-timed-out-unexpectedly)
 - [ANDROID_SPECIFIC_ERROR](#android_specific_error)
 - [MissingPluginException(No implementation found for method XXXX ...)](#missingpluginexceptionno-implementation-found-for-method-xxxx-)
@@ -901,7 +901,7 @@ subscription.cancel()
 ```
 ---
 
-### device.connectionState is called multiple times
+### connectionState is called multiple times
 
 You are forgetting to cancel the original `device.connectionState.listen` resulting in multiple listeners.
 
