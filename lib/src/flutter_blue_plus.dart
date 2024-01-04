@@ -188,7 +188,7 @@ class FlutterBluePlus {
   ///   - [timeout] calls stopScan after a specified duration
   ///   - [removeIfGone] if true, remove devices after they've stopped advertising for X duration
   ///   - [continuousUpdates] If `true`, we continually update 'lastSeen' & 'rssi' by processing
-  ///        duplicate advertisements. This takes more power.
+  ///        duplicate advertisements. This takes more power. You typically should not use this option.
   ///   - [continuousDivisor] Useful to help performance. If divisor is 3, then two-thirds of advertisements are
   ///        ignored, and one-third are processed. This reduces main-thread usage caused by the platform channel.
   ///        The scan counting is per-device so you always get the 1st advertisement from each device.
