@@ -684,17 +684,17 @@ Many common problems are easily solved.
 
 - [Scanning does not find my device](#scanning-does-not-find-my-device)
 - [Connection fails](#connection-fails)
-- [The remoteId is different on Android versus iOS & macOS](#the-remoteid-is-different-on-android-versus-ios--macos)
+- [List of Bluetooth GATT Errors](#list-of-bluetooth-gatt-errors)
+- [Characteristic writes fails](#characteristic-writes-fails)
+- [Characteristic read fails](#characteristic-read-fails)
 - [adapterState is called multiple times](#adapterstate-is-called-multiple-times)
 - [device.connectionState is called multiple times](#deviceconnectionstate-is-called-multiple-times)
 - [onValueReceived is never called (or lastValueStream)](#onvaluereceived-is-never-called-or-lastvaluestream)
 - [onValueReceived data is split up (or lastValueStream)](#onvaluereceived-data-is-split-up-or-lastvaluestream)
 - [onValueReceived is called with duplicate data (or lastValueStream)](#onvaluereceived-is-called-with-duplicate-data-or-lastvaluestream)
-- [Characteristic writes fails](#characteristic-writes-fails)
-- [Characteristic read fails](#characteristic-read-fails)
 - ["bluetooth must be turned on"](#bluetooth-must-be-turned-on)
+- [The remoteId is different on Android versus iOS & macOS](#the-remoteid-is-different-on-android-versus-ios--macos)
 - [iOS: `BluetoothAdapterState.unavailable`](#ios-bluetoothadapterstateunavailable)
-- [List of Bluetooth GATT Errors](#list-of-bluetooth-gatt-errors)
 - [iOS: "[Error] The connection has timed out unexpectedly."](#ios-error-the-connection-has-timed-out-unexpectedly)
 - [ANDROID_SPECIFIC_ERROR](#android_specific_error)
 - [MissingPluginException(No implementation found for method XXXX ...)](#missingpluginexceptionno-implementation-found-for-method-xxxx-)
@@ -769,17 +769,112 @@ Bluetooth is a complicated system service, and can enter a bad state.
 
 ---
 
-### The remoteId is different on Android versus iOS & macOS
+### List of Bluetooth GATT Errors
 
-This is expected. There is no way to avoid it.
+These GATT error codes are part of the BLE Specification. 
 
-For privacy, iOS & macOS use a randomly generated uuid. This uuid will periodically change.
+**These are *responses* from your ble device because you are sending an invalid request.**
 
-e.g. `6920a902-ba0e-4a13-a35f-6bc91161c517`
+FlutterBluePlus cannot fix these errors. You are doing something wrong & your device is responding with an error.
 
-Android uses the mac address of the bluetooth device. It never changes.
+**GATT errors as they appear on iOS**:
+```
+apple-code: 1  | The handle is invalid.
+apple-code: 2  | Reading is not permitted.
+apple-code: 3  | Writing is not permitted.
+apple-code: 4  | The command is invalid.
+apple-code: 6  | The request is not supported.
+apple-code: 7  | The offset is invalid.
+apple-code: 8  | Authorization is insufficient.
+apple-code: 9  | The prepare queue is full.
+apple-code: 10 | The attribute could not be found.
+apple-code: 11 | The attribute is not long.
+apple-code: 12 | The encryption key size is insufficient.
+apple-code: 13 | The value's length is invalid.
+apple-code: 14 | Unlikely error.
+apple-code: 15 | Encryption is insufficient.
+apple-code: 16 | The group type is unsupported.
+apple-code: 17 | Resources are insufficient.
+apple-code: 18 | Unknown ATT error.
+```
 
-e.g. `05:A4:22:31:F7:ED`
+**GATT errors as they appear on Android**:
+```
+android-code: 1  | GATT_INVALID_HANDLE
+android-code: 2  | GATT_READ_NOT_PERMITTED
+android-code: 3  | GATT_WRITE_NOT_PERMITTED
+android-code: 4  | GATT_INVALID_PDU
+android-code: 5  | GATT_INSUFFICIENT_AUTHENTICATION
+android-code: 6  | GATT_REQUEST_NOT_SUPPORTED
+android-code: 7  | GATT_INVALID_OFFSET
+android-code: 8  | GATT_INSUFFICIENT_AUTHORIZATION
+android-code: 9  | GATT_PREPARE_QUEUE_FULL
+android-code: 10 | GATT_ATTR_NOT_FOUND
+android-code: 11 | GATT_ATTR_NOT_LONG
+android-code: 12 | GATT_INSUFFICIENT_KEY_SIZE
+android-code: 13 | GATT_INVALID_ATTRIBUTE_LENGTH
+android-code: 14 | GATT_UNLIKELY
+android-code: 15 | GATT_INSUFFICIENT_ENCRYPTION
+android-code: 16 | GATT_UNSUPPORTED_GROUP
+android-code: 17 | GATT_INSUFFICIENT_RESOURCES
+```
+
+**Descriptions**:
+```
+1   | Invalid Handle                 | The attribute handle given was not valid on this server.
+2   | Read Not Permitted             | The attribute cannot be read.
+3   | Write Not Permitted            | The attribute cannot be written.
+4   | Invalid PDU                    | The attribute PDU was invalid.
+5   | Insufficient Authentication    | The attribute requires authentication before it can be read or written.
+6   | Request Not Supported          | Attribute server does not support the request received from the client.
+7   | Invalid Offset                 | Offset specified was past the end of the attribute.
+8   | Insufficient Authorization     | The attribute requires an authorization before it can be read or written.
+9   | Prepare Queue Full             | Too many prepare writes have been queued.
+10  | Attribute Not Found            | No attribute found within the given attribute handle range.
+11  | Attribute Not Long             | The attribute cannot be read or written using the Read Blob or Write Blob requests.
+12  | Insufficient Key Size          | The Encryption Key Size used for encrypting this link is insufficient.
+13  | Invalid Attribute Value Length | The attribute value length is invalid for the operation.
+14  | Unlikely Error                 | The request has encountered an unlikely error and cannot be completed.
+15  | Insufficient Encryption        | The attribute requires encryption before it can be read or written.
+16  | Unsupported Group Type         | The attribute type is not a supported grouping as defined by a higher layer.
+17  | Insufficient Resources         | Insufficient Resources to complete the request.
+```
+
+---
+
+### characteristic writes fails
+
+First, check the [List of Bluetooth GATT Errors](#list-of-bluetooth-gatt-errors) for your error.
+
+**1. your bluetooth device turned off, or is out of range**
+
+If your device turns off or crashes during a write, it will cause a failure.
+
+**2. Your Bluetooth device has bugs**
+
+Maybe your device crashed, or is not sending a response due to software bugs.
+
+**3. there is radio interference**
+
+Bluetooth is wireless and will not always work.
+
+---
+
+### Characteristic read fails
+
+First, check the [List of Bluetooth GATT Errors](#list-of-bluetooth-gatt-errors) for your error.
+
+**1. your bluetooth device turned off, or is out of range**
+
+If your device turns off or crashes during a read, it will cause a failure.
+
+**2. Your Bluetooth device has bugs**
+
+Maybe your device crashed, or is not sending a response due to software bugs.
+
+**3. there is radio interference**
+
+Bluetooth is wireless and will not always work.
 
 ---
 
@@ -863,65 +958,6 @@ device.cancelWhenDisconnected(subscription);
 
 await characteristic.setNotifyValue(true);
 ```
-
----
-
-### characteristic writes fails
-
-**1. The characteristic is not writeable**
-
-Not all characteristics support `write`.
- 
-Your device must have configured this characteristic to support `write`.
-
-**2. The data length is too long**
-
-Characteristics only support writes up to a certain size. 
-
-`writeWithoutResponse`: you can only write up to (MTU-3) at a time. This is a BLE limitation.
-
-`write (with response)`: look in the [Usage](#usage) section for functions you can use to solve this issue.
-
-**3. The characteristic does not support writeWithoutResponse**
-
-Not all characteristics support `writeWithoutResponse`. 
- 
-Your device must have configured this characteristic to support `writeWithoutResponse`.
-
-**4. your bluetooth device turned off, or is out of range**
-
-If your device turns off mid-write, it will cause a failure.
-
-**5. Your Bluetooth device has bugs**
-
-Maybe your device crashed, or is not sending a response due to software bugs.
-
-**6. there is radio interference**
-
-Bluetooth is wireless and will not always work.
-
----
-
-### Characteristic read fails
-
-**1. the characteristic is not readable**
-
-Not all characteristics support `read`.
- 
-Your device must have configured this characteristic to support `read`.
-
-**2. your bluetooth device turned off, or is out of range**
-
-If your device turns off mid-read, it will cause a failure.
-
-**3. Your Bluetooth device has bugs**
-
-Maybe your device crashed, or is not sending a response due to software bugs.
-
-**4. there is radio interference**
-
-Bluetooth is wireless and will not always work.
-
 ---
 
 ### "bluetooth must be turned on"
@@ -934,82 +970,23 @@ You can also use `FlutterBluePlus.adapterState.listen(...)`. See [Usage](#usage)
 
 ---
 
-### iOS: `BluetoothAdapterState.unavailable`
+### The remoteId is different on Android versus iOS & macOS
 
-You must add access to Bluetooth Hardware in the app's Xcode settings. See See [Getting Started](#getting-started).
+This is expected. There is no way to avoid it.
+
+For privacy, iOS & macOS use a randomly generated uuid. This uuid will periodically change.
+
+e.g. `6920a902-ba0e-4a13-a35f-6bc91161c517`
+
+Android uses the mac address of the bluetooth device. It never changes.
+
+e.g. `05:A4:22:31:F7:ED`
 
 ---
 
-### List of Bluetooth GATT Errors
+### iOS: `BluetoothAdapterState.unavailable`
 
-These GATT error codes are part of the BLE Specification. 
-
-**These are *responses* from your ble device because you are sending an invalid request.**
-
-FlutterBluePlus cannot fix these errors. You are doing something wrong & your device is responding with an error.
-
-**GATT errors as they appear on iOS**:
-```
-apple-code: 1  | The handle is invalid.
-apple-code: 2  | Reading is not permitted.
-apple-code: 3  | Writing is not permitted.
-apple-code: 4  | The command is invalid.
-apple-code: 6  | The request is not supported.
-apple-code: 7  | The offset is invalid.
-apple-code: 8  | Authorization is insufficient.
-apple-code: 9  | The prepare queue is full.
-apple-code: 10 | The attribute could not be found.
-apple-code: 11 | The attribute is not long.
-apple-code: 12 | The encryption key size is insufficient.
-apple-code: 13 | The value's length is invalid.
-apple-code: 14 | Unlikely error.
-apple-code: 15 | Encryption is insufficient.
-apple-code: 16 | The group type is unsupported.
-apple-code: 17 | Resources are insufficient.
-apple-code: 18 | Unknown ATT error.
-```
-
-**GATT errors as they appear on Android**:
-```
-android-code: 1  | GATT_INVALID_HANDLE
-android-code: 2  | GATT_READ_NOT_PERMITTED
-android-code: 3  | GATT_WRITE_NOT_PERMITTED
-android-code: 4  | GATT_INVALID_PDU
-android-code: 5  | GATT_INSUFFICIENT_AUTHENTICATION
-android-code: 6  | GATT_REQUEST_NOT_SUPPORTED
-android-code: 7  | GATT_INVALID_OFFSET
-android-code: 8  | GATT_INSUFFICIENT_AUTHORIZATION
-android-code: 9  | GATT_PREPARE_QUEUE_FULL
-android-code: 10 | GATT_ATTR_NOT_FOUND
-android-code: 11 | GATT_ATTR_NOT_LONG
-android-code: 12 | GATT_INSUFFICIENT_KEY_SIZE
-android-code: 13 | GATT_INVALID_ATTRIBUTE_LENGTH
-android-code: 14 | GATT_UNLIKELY
-android-code: 15 | GATT_INSUFFICIENT_ENCRYPTION
-android-code: 16 | GATT_UNSUPPORTED_GROUP
-android-code: 17 | GATT_INSUFFICIENT_RESOURCES
-```
-
-**Descriptions**:
-```
-1   | Invalid Handle                 | The attribute handle given was not valid on this server.
-2   | Read Not Permitted             | The attribute cannot be read.
-3   | Write Not Permitted            | The attribute cannot be written.
-4   | Invalid PDU                    | The attribute PDU was invalid.
-5   | Insufficient Authentication    | The attribute requires authentication before it can be read or written.
-6   | Request Not Supported          | Attribute server does not support the request received from the client.
-7   | Invalid Offset                 | Offset specified was past the end of the attribute.
-8   | Insufficient Authorization     | The attribute requires an authorization before it can be read or written.
-9   | Prepare Queue Full             | Too many prepare writes have been queued.
-10  | Attribute Not Found            | No attribute found within the given attribute handle range.
-11  | Attribute Not Long             | The attribute cannot be read or written using the Read Blob or Write Blob requests.
-12  | Insufficient Key Size          | The Encryption Key Size used for encrypting this link is insufficient.
-13  | Invalid Attribute Value Length | The attribute value length is invalid for the operation.
-14  | Unlikely Error                 | The request has encountered an unlikely error and cannot be completed.
-15  | Insufficient Encryption        | The attribute requires encryption before it can be read or written.
-16  | Unsupported Group Type         | The attribute type is not a supported grouping as defined by a higher layer.
-17  | Insufficient Resources         | Insufficient Resources to complete the request.
-```
+You must add access to Bluetooth Hardware in the app's Xcode settings. See See [Getting Started](#getting-started).
 
 ---
 
