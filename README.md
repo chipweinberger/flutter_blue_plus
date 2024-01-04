@@ -768,7 +768,7 @@ e.g. `05:A4:22:31:F7:ED`
 
 ### adapterState is called multiple times
 
-You are forgetting to cancel the original `stream.listen` resulting in multiple listeners.
+You are forgetting to cancel the original `FlutterBluePlus.adapterState.listen` resulting in multiple listeners.
 
 ```dart
 // tip: using ??= makes it easy to only make new listener when currently null
@@ -832,12 +832,12 @@ If it still happens, it is a problem with your peripheral device.
 
 ### onValueReceived is called with duplicate data (or lastValueStream)
 
-You are probably forgetting to cancel the original `stream.listen` resulting in multiple listens.
+You are probably forgetting to cancel the original `chr.onValueReceived.listen` resulting in multiple listens.
 
 The easiest solution is to use `device.cancelWhenDisconnected(subscription)` to cancel device subscriptions.
 
 ```dart
-final subscription = characteristic.onValueReceived.listen((value) {
+final subscription = chr.onValueReceived.listen((value) {
     // ...
 });
 
