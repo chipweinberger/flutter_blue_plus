@@ -766,6 +766,36 @@ e.g. `05:A4:22:31:F7:ED`
 
 ---
 
+### adapterState is called multiple times
+
+You are forgetting to cancel the original `stream.listen` resulting in multiple listeners.
+
+```dart
+// tip: using ??= makes it easy to only make new listener when currently null
+final subscription ??= FlutterBluePlus.adapterState.listen((value) {
+    // ...
+});
+
+// also, make sure you cancel the subscription when done!
+subscription.cancel()
+```
+---
+
+### device.connectionState is called multiple times
+
+You are forgetting to cancel the original `device.connectionState.listen` resulting in multiple listeners.
+
+```dart
+// tip: using ??= makes it easy to only make new listener when currently null
+final subscription ??= FlutterBluePlus.device.connectionState.listen((value) {
+    // ...
+});
+
+// also, make sure you cancel the subscription when done!
+subscription.cancel()
+```
+---
+
 ### onValueReceived is never called (or lastValueStream)
 
 **1. you are not calling the right function**
