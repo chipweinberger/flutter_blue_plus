@@ -728,6 +728,42 @@ You can also use `FlutterBluePlus.adapterState.listen(...)`. See [Usage](#usage)
 
 ---
 
+### adapterState is not 'on' but my Bluetooth is on
+
+**For iOS:**
+
+If `adapterState` is `unknown`, you need to wait longer until the state is determined. Use this code:
+
+```
+// wait for actual adapter state, up to 3 seconds
+Set<BluetoothAdapterState> inProgress = {BluetoothAdapterState.unknown, BluetoothAdapterState.turningOn};
+var adapterState = FlutterBluePlus.adapterState.where((v) => !inProgress.contains(v)).first;
+await adapterState.timeout(const Duration(seconds: 3)).onError((error, stackTrace) {
+   throw Exception("Could not determine Bluetooth state. ${FlutterBluePlus.adapterStateNow}");
+});
+
+// check adapter state
+if (FlutterBluePlus.adapterStateNow != BluetoothAdapterState.on) {
+   throw Exception("Bluetooth Is Not On. ${FlutterBluePlus.adapterStateNow}");
+}
+```
+
+If `adapterState` is `unavailable`, you must add access to Bluetooth Hardware in the app's Xcode settings. See [Getting Started](#getting-started).
+
+**For Android:**
+
+Check that permissions are set. 
+
+---
+
+### adapterState is unavailable
+
+**iOS:** 
+
+**Android:** check that your device supports Bluetooth & has permissions
+
+---
+
 ### adapterState is called multiple times
 
 You are forgetting to cancel the original `FlutterBluePlus.adapterState.listen` resulting in multiple listeners.
@@ -741,14 +777,6 @@ final subscription ??= FlutterBluePlus.adapterState.listen((value) {
 // also, make sure you cancel the subscription when done!
 subscription.cancel()
 ```
-
----
-
-### adapterState is unavailable
-
-**iOS:** You must add access to Bluetooth Hardware in the app's Xcode settings. See [Getting Started](#getting-started).
-
-**Android:** check that your device supports Bluetooth & has permissions
 
 ---
 
