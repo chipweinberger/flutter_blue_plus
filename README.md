@@ -687,8 +687,8 @@ Many common problems are easily solved.
 
 Adapter:
 - [bluetooth must be turned on](#bluetooth-must-be-turned-on)
+- [adapterState is not 'on' but my Bluetooth is on](#adapterstate-is-not-on-but-my-bluetooth-is-on)
 - [adapterState is called multiple times](#adapterstate-is-called-multiple-times)
-- [adapterState is `unavailable`](#adapterstate-is-unavailable)
 
 Scanning:
 - [Scanning does not find my device](#scanning-does-not-find-my-device)
@@ -752,15 +752,7 @@ If `adapterState` is `unavailable`, you must add access to Bluetooth Hardware in
 
 **For Android:**
 
-Check that permissions are set. 
-
----
-
-### adapterState is unavailable
-
-**iOS:** 
-
-**Android:** check that your device supports Bluetooth & has permissions
+Check that your device supports Bluetooth & has permissions.
 
 ---
 
