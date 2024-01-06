@@ -121,7 +121,7 @@ if (await FlutterBluePlus.isSupported == false) {
 // handle bluetooth on & off
 // note: for iOS the initial state is typically BluetoothAdapterState.unknown
 // note: if you have permissions issues you will get stuck at BluetoothAdapterState.unauthorized
-FlutterBluePlus.adapterState.listen((BluetoothAdapterState state) {
+var subscription = FlutterBluePlus.adapterState.listen((BluetoothAdapterState state) {
     print(state);
     if (state == BluetoothAdapterState.on) {
         // usually start scanning, connecting, etc
@@ -135,6 +135,9 @@ FlutterBluePlus.adapterState.listen((BluetoothAdapterState state) {
 if (Platform.isAndroid) {
     await FlutterBluePlus.turnOn();
 }
+
+// cancel to prevent duplicate listeners
+subscription.cancel();
 ```
 
 ### Scan for devices
@@ -158,6 +161,9 @@ var subscription = FlutterBluePlus.onScanResults.listen((results) {
     onError: (e) => print(e),
 );
 
+// cleanup: cancel subscription when scanning stops
+FlutterBluePlus.cancelWhenScanComplete(subscription);
+
 // Wait for Bluetooth enabled & permission granted
 // In your real app you should use `FlutterBluePlus.adapterState.listen` to handle all states
 await FlutterBluePlus.adapterState.where((val) => val == BluetoothAdapterState.on).first;
@@ -168,9 +174,6 @@ await FlutterBluePlus.startScan(withServices:[Guid("180D")], timeout: Duration(s
 
 // wait for scanning to stop
 await FlutterBluePlus.isScanning.where((val) => val == false).first;
-
-// cancel to prevent duplicate listeners
-subscription.cancel();
 ```
 
 ### Connect to a device

@@ -1,3 +1,6 @@
+## 1.31.6
+* **[Feature]** add `cancelWhenScanComplete` convenience function
+
 ## 1.31.5
 * **[Improve]** Updated README & Example app
 
