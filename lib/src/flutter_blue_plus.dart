@@ -27,7 +27,8 @@ class FlutterBluePlus {
   static final Map<DeviceIdentifier, String> _advNames = {};
   static final Map<DeviceIdentifier, Map<String, List<int>>> _lastChrs = {};
   static final Map<DeviceIdentifier, Map<String, List<int>>> _lastDescs = {};
-  static final Map<DeviceIdentifier, List<StreamSubscription>> _subscriptions = {};
+  static final Map<DeviceIdentifier, List<StreamSubscription>> _deviceSubscriptions = {};
+  static final List<StreamSubscription> _scanSubscriptions = [];
   static final Set<DeviceIdentifier> _autoConnect = {};
 
   /// stream used for the isScanning public api
@@ -177,7 +178,7 @@ class FlutterBluePlus {
   }
 
   /// Start a scan, and return a stream of results
-  /// Note: scan filters use an "or" behavior. i.e. if you set `withServices` & `withNames` we 
+  /// Note: scan filters use an "or" behavior. i.e. if you set `withServices` & `withNames` we
   /// return all the advertisments that match any of the specified services *or* any of the specified names.
   ///   - [withServices] filter by advertised services
   ///   - [withRemoteIds] filter for known remoteIds (iOS: 128-bit guid, android: 48-bit mac address)
@@ -336,9 +337,20 @@ class FlutterBluePlus {
     if (pushToStream) {
       _isScanning.add(false);
     }
+    for (var subscription in _scanSubscriptions) {
+      subscription.cancel();
+    }
     if (invokePlatform) {
       await _invokeMethod('stopScan');
     }
+  }
+
+  /// Register a subscription to be canceled when scanning is complete.
+  /// This function simplifies cleanup, to prevent creating duplicate stream subscriptions.
+  ///   - this is an optional convenience function
+  ///   - prevents accidentally creating duplicate subscriptions on scan
+  void cancelWhenScanComplete(StreamSubscription subscription) {
+    FlutterBluePlus._scanSubscriptions.add(subscription);
   }
 
   /// Sets the internal FlutterBlue log level
@@ -402,7 +414,7 @@ class FlutterBluePlus {
       }
       if (r.adapterState == BmAdapterStateEnum.on) {
         for (DeviceIdentifier d in _autoConnect) {
-          BluetoothDevice(remoteId: d).connect(autoConnect: true, mtu:null);
+          BluetoothDevice(remoteId: d).connect(autoConnect: true, mtu: null);
         }
       }
     }
@@ -417,8 +429,8 @@ class FlutterBluePlus {
         // otherwise `servicesList` would be annoying to use.
         // We also don't clear the `bondState` cache for faster performance.
 
-        _subscriptions[remoteId]?.forEach((s) => s.cancel()); // cancel subscriptions
-        _subscriptions.remove(remoteId); // delete subscriptions
+        _deviceSubscriptions[remoteId]?.forEach((s) => s.cancel()); // cancel subscriptions
+        _deviceSubscriptions.remove(remoteId); // delete subscriptions
         _mtuValues.remove(remoteId); // reset known mtu
         _lastDescs.remove(remoteId); // clear lastDescs so that 'isNotifying' is reset
         _lastChrs.remove(remoteId); // for api consistency, clear characteristic values
@@ -428,7 +440,7 @@ class FlutterBluePlus {
         for (DeviceIdentifier d in _autoConnect) {
           if (Platform.isIOS || Platform.isMacOS) {
             if (_adapterStateNow == BmAdapterStateEnum.on) {
-              BluetoothDevice(remoteId: d).connect(autoConnect: true, mtu:null);
+              BluetoothDevice(remoteId: d).connect(autoConnect: true, mtu: null);
             }
           }
         }
