@@ -260,7 +260,7 @@ class FlutterBluePlus {
     _scanBuffer = _BufferStream.listen(responseStream);
 
     // invoke platform method
-    await _invokeMethod('startScan', settings.toMap());
+    await _invokeMethod('startScan', settings.toMap()).onError((e,s) => _stopScan(invokePlatform: false));
 
     // check every 250ms for gone devices?
     late Stream<BmScanResponse?> outputStream = removeIfGone != null
@@ -282,8 +282,9 @@ class FlutterBluePlus {
       } else {
         // failure?
         if (response.success == false) {
-          _scanResults
-              .addError(FlutterBluePlusException(_nativeError, "scan", response.errorCode, response.errorString));
+          var e = FlutterBluePlusException(_nativeError, "scan", response.errorCode, response.errorString);
+          _scanResults.addError(e);
+          _stopScan(invokePlatform: false);
         }
 
         // iterate through advertisements
@@ -349,7 +350,7 @@ class FlutterBluePlus {
   /// This function simplifies cleanup, to prevent creating duplicate stream subscriptions.
   ///   - this is an optional convenience function
   ///   - prevents accidentally creating duplicate subscriptions on scan
-  void cancelWhenScanComplete(StreamSubscription subscription) {
+  static void cancelWhenScanComplete(StreamSubscription subscription) {
     FlutterBluePlus._scanSubscriptions.add(subscription);
   }
 
