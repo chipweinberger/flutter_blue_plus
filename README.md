@@ -732,7 +732,7 @@ You can also use `FlutterBluePlus.adapterState.listen(...)`. See [Usage](#usage)
 
 **For iOS:**
 
-If `adapterState` is `unknown`, you need to wait longer until the state is determined. Use this code:
+`adapterState` always starts as `unknown`. You need to wait longer for the service to initialize. Use this code:
 
 ```
 // wait for actual adapter state, up to 3 seconds
