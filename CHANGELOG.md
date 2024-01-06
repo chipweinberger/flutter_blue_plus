@@ -1,3 +1,6 @@
+## 1.31.7
+* **[Fix]** `cancelWhenScanComplete` must handle error cases
+
 ## 1.31.6
 * **[Feature]** add `cancelWhenScanComplete` convenience function
 
