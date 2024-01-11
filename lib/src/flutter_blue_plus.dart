@@ -218,116 +218,127 @@ class FlutterBluePlus {
     assert(removeIfGone == null || !oneByOne, "removeIfGone is not compatible with oneByOne");
     assert(continuousDivisor >= 1, "divisor must be >= 1");
 
-    // Note: `withKeywords` is not yet compatible with other filters on android.
-    // Why? `withKeywords` is implemented in custom fbp code. If fbp wanted to support
-    // `withKeywords` & other filters at the same time, fbp would need to re-implement all
-    // filtering in custom code and skip android OS filtering entirely, hurting perf.
-    bool other = withServices.isNotEmpty ||
+    // check filters
+    bool hasOtherFilter = withServices.isNotEmpty ||
         withRemoteIds.isNotEmpty ||
         withNames.isNotEmpty ||
         withMsd.isNotEmpty ||
         withServiceData.isNotEmpty;
-    assert(!(Platform.isAndroid && withKeywords.isNotEmpty && other),
+
+    // Note: `withKeywords` is not compatible with other filters on android
+    // because it is implemented in custom fbp code, not android code
+    assert(!(Platform.isAndroid && withKeywords.isNotEmpty && hasOtherFilter),
         "withKeywords is not compatible with other filters on Android");
 
-    // already scanning?
-    if (_isScanning.latestValue == true) {
-      // stop existing scan
-      await _stopScan();
-    } else {
-      // push to stream
-      _isScanning.add(true);
-    }
-
-    var settings = BmScanSettings(
-        withServices: withServices,
-        withRemoteIds: withRemoteIds,
-        withNames: withNames,
-        withKeywords: withKeywords,
-        withMsd: withMsd.map((d) => d._bm).toList(),
-        withServiceData: withServiceData.map((d) => d._bm).toList(),
-        continuousUpdates: continuousUpdates,
-        continuousDivisor: continuousDivisor,
-        androidScanMode: androidScanMode.value,
-        androidUsesFineLocation: androidUsesFineLocation);
-
-    Stream<BmScanResponse> responseStream = FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "OnScanResponse")
-        .map((m) => m.arguments)
-        .map((args) => BmScanResponse.fromMap(args));
-
-    // Start listening now, before invokeMethod, so we do not miss any results
-    _scanBuffer = _BufferStream.listen(responseStream);
-
-    // invoke platform method
-    await _invokeMethod('startScan', settings.toMap()).onError((e,s) => _stopScan(invokePlatform: false));
-
-    // check every 250ms for gone devices?
-    late Stream<BmScanResponse?> outputStream = removeIfGone != null
-        ? _mergeStreams([_scanBuffer!.stream, Stream.periodic(Duration(milliseconds: 250))])
-        : _scanBuffer!.stream;
-
-    // start by pushing an empty array
-    _scanResults.add([]);
-
-    List<ScanResult> output = [];
-
-    // listen & push to `scanResults` stream
-    _scanSubscription = outputStream.listen((BmScanResponse? response) {
-      if (response == null) {
-        // if null, this is just a periodic update to remove old results
-        if (output._removeWhere((elm) => DateTime.now().difference(elm.timeStamp) > removeIfGone!)) {
-          _scanResults.add(List.from(output)); // push to stream
-        }
+    // only allow a single task to be callling 
+    // calling startScan or stopScan at one time
+    _Mutex mtx = _MutexFactory.getMutexForKey("scan");
+    await mtx.take();
+    try {
+      // already scanning?
+      if (_isScanning.latestValue == true) {
+        // stop existing scan
+        await _stopScan();
       } else {
-        // failure?
-        if (response.success == false) {
-          var e = FlutterBluePlusException(_nativeError, "scan", response.errorCode, response.errorString);
-          _scanResults.addError(e);
-          _stopScan(invokePlatform: false);
-        }
-
-        // iterate through advertisements
-        for (BmScanAdvertisement bm in response.advertisements) {
-          // cache platform name
-          if (bm.platformName != null) {
-            _platformNames[DeviceIdentifier(bm.remoteId)] = bm.platformName!;
-          }
-
-          // cache advertised name
-          if (bm.advName != null) {
-            _advNames[DeviceIdentifier(bm.remoteId)] = bm.advName!;
-          }
-
-          // convert
-          ScanResult sr = ScanResult.fromProto(bm);
-
-          if (oneByOne) {
-            // push single item
-            _scanResults.add([sr]);
-          } else {
-            // add result to output
-            output.addOrUpdate(sr);
-          }
-        }
-
-        // push entire list
-        if (!oneByOne) {
-          _scanResults.add(List.from(output));
-        }
+        // push to stream
+        _isScanning.add(true);
       }
-    });
 
-    // Start timer *after* stream is being listened to, to make sure the
-    // timeout does not fire before _scanSubscription is set
-    if (timeout != null) {
-      _scanTimeout = Timer(timeout, stopScan);
+      var settings = BmScanSettings(
+          withServices: withServices,
+          withRemoteIds: withRemoteIds,
+          withNames: withNames,
+          withKeywords: withKeywords,
+          withMsd: withMsd.map((d) => d._bm).toList(),
+          withServiceData: withServiceData.map((d) => d._bm).toList(),
+          continuousUpdates: continuousUpdates,
+          continuousDivisor: continuousDivisor,
+          androidScanMode: androidScanMode.value,
+          androidUsesFineLocation: androidUsesFineLocation);
+
+      Stream<BmScanResponse> responseStream = FlutterBluePlus._methodStream.stream
+          .where((m) => m.method == "OnScanResponse")
+          .map((m) => m.arguments)
+          .map((args) => BmScanResponse.fromMap(args));
+
+      // Start listening now, before invokeMethod, so we do not miss any results
+      _scanBuffer = _BufferStream.listen(responseStream);
+
+      // invoke platform method
+      await _invokeMethod('startScan', settings.toMap()).onError((e, s) => _stopScan(invokePlatform: false));
+
+      // check every 250ms for gone devices?
+      late Stream<BmScanResponse?> outputStream = removeIfGone != null
+          ? _mergeStreams([_scanBuffer!.stream, Stream.periodic(Duration(milliseconds: 250))])
+          : _scanBuffer!.stream;
+
+      // start by pushing an empty array
+      _scanResults.add([]);
+
+      List<ScanResult> output = [];
+
+      // listen & push to `scanResults` stream
+      _scanSubscription = outputStream.listen((BmScanResponse? response) {
+        if (response == null) {
+          // if null, this is just a periodic update to remove old results
+          if (output._removeWhere((elm) => DateTime.now().difference(elm.timeStamp) > removeIfGone!)) {
+            _scanResults.add(List.from(output)); // push to stream
+          }
+        } else {
+          // failure?
+          if (response.success == false) {
+            var e = FlutterBluePlusException(_nativeError, "scan", response.errorCode, response.errorString);
+            _scanResults.addError(e);
+            _stopScan(invokePlatform: false);
+          }
+
+          // iterate through advertisements
+          for (BmScanAdvertisement bm in response.advertisements) {
+            // cache platform name
+            if (bm.platformName != null) {
+              _platformNames[DeviceIdentifier(bm.remoteId)] = bm.platformName!;
+            }
+
+            // cache advertised name
+            if (bm.advName != null) {
+              _advNames[DeviceIdentifier(bm.remoteId)] = bm.advName!;
+            }
+
+            // convert
+            ScanResult sr = ScanResult.fromProto(bm);
+
+            if (oneByOne) {
+              // push single item
+              _scanResults.add([sr]);
+            } else {
+              // add result to output
+              output.addOrUpdate(sr);
+            }
+          }
+
+          // push entire list
+          if (!oneByOne) {
+            _scanResults.add(List.from(output));
+          }
+        }
+      });
+
+      // Start timer *after* stream is being listened to, to make sure the
+      // timeout does not fire before _scanSubscription is set
+      if (timeout != null) {
+        _scanTimeout = Timer(timeout, stopScan);
+      }
+    } finally {
+      mtx.give();
     }
   }
 
   /// Stops a scan for Bluetooth Low Energy devices
   static Future<void> stopScan() async {
+    _Mutex mtx = _MutexFactory.getMutexForKey("scan");
+    await mtx.take();
     await _stopScan();
+    mtx.give();
   }
 
   /// for internal use
@@ -335,9 +346,7 @@ class FlutterBluePlus {
     _scanBuffer?.close();
     _scanSubscription?.cancel();
     _scanTimeout?.cancel();
-    if (_isScanning.latestValue == true) {
-      _isScanning.add(false);
-    }
+    _isScanning.add(false);
     for (var subscription in _scanSubscriptions) {
       subscription.cancel();
     }
