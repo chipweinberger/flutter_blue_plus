@@ -233,7 +233,7 @@ class FlutterBluePlus {
     // already scanning?
     if (_isScanning.latestValue == true) {
       // stop existing scan
-      await _stopScan(pushToStream: false);
+      await _stopScan();
     } else {
       // push to stream
       _isScanning.add(true);
@@ -331,11 +331,11 @@ class FlutterBluePlus {
   }
 
   /// for internal use
-  static Future<void> _stopScan({bool invokePlatform = true, bool pushToStream = true}) async {
+  static Future<void> _stopScan({bool invokePlatform = true}) async {
     _scanBuffer?.close();
     _scanSubscription?.cancel();
     _scanTimeout?.cancel();
-    if (pushToStream) {
+    if (_isScanning.latestValue == true) {
       _isScanning.add(false);
     }
     for (var subscription in _scanSubscriptions) {
