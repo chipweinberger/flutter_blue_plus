@@ -712,6 +712,7 @@ Subscriptions:
 
 Android Errors:
 - [ANDROID_SPECIFIC_ERROR](#android_specific_error)
+- [android pairing popup appears twice](#android-pairing-popup-appears-twice)
 
 Flutter Errors:
 - [MissingPluginException(No implementation found for method XXXX ...)](#missingpluginexceptionno-implementation-found-for-method-xxxx-)
@@ -1054,6 +1055,14 @@ There is no 100% solution.
 FBP already has mitigations for this error, but Android will still fail with this code randomly. 
 
 The recommended solution is to `catch` the error, and retry.
+
+---
+
+### android pairing popup appears twice
+
+This is a bug in android itself.
+
+You can call `createBond()` yourself just after connecting and this will resolve the issue.
 
 ---
 
