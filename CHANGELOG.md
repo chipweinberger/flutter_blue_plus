@@ -1,3 +1,6 @@
+## 1.31.8
+* **[Fix]** stream asserts when calling `startScan` twice quickly
+
 ## 1.31.7
 * **[Fix]** `cancelWhenScanComplete` must handle error cases
 
