@@ -550,7 +550,7 @@ And in Xcode, add access to Bluetooth hardware:
 
 ## Using Ble in App Background
 
-**This is an advanced use case**. FlutterBluePlus does not support everything. You may have to fork it.
+**This is an advanced use case**. FlutterBluePlus does not support everything. You may have to fork it. PRs are welcome.
 
 ### iOS
 
@@ -567,11 +567,13 @@ Add the following to your `Info.plist`
 
 When this key-value pair is included in the app’s Info.plist file, the system wakes up your app to process ble `read`, `write`, and `subscription` events.
 
+You may also have to use https://pub.dev/packages/flutter_isolate
+
 **Note**: Upon being woken up, an app has around 10 seconds to complete a task. Apps that spend too much time executing in the background can be throttled back by the system or killed.
 
 ### Android
 
-You can try using https://pub.dev/packages/flutter_foreground_task
+You can try using https://pub.dev/packages/flutter_foreground_task or possibly https://pub.dev/packages/flutter_isolate
 
 ## Reference
 
