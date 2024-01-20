@@ -230,7 +230,7 @@ class FlutterBluePlus {
     assert(!(Platform.isAndroid && withKeywords.isNotEmpty && hasOtherFilter),
         "withKeywords is not compatible with other filters on Android");
 
-    // only allow a single task to be callling 
+    // only allow a single task to be callling
     // calling startScan or stopScan at one time
     _Mutex mtx = _MutexFactory.getMutexForKey("scan");
     await mtx.take();
@@ -439,8 +439,6 @@ class FlutterBluePlus {
         // otherwise `servicesList` would be annoying to use.
         // We also don't clear the `bondState` cache for faster performance.
 
-        _deviceSubscriptions[remoteId]?.forEach((s) => s.cancel()); // cancel subscriptions
-        _deviceSubscriptions.remove(remoteId); // delete subscriptions
         _mtuValues.remove(remoteId); // reset known mtu
         _lastDescs.remove(remoteId); // clear lastDescs so that 'isNotifying' is reset
         _lastChrs.remove(remoteId); // for api consistency, clear characteristic values
@@ -515,6 +513,16 @@ class FlutterBluePlus {
     }
 
     _methodStream.add(call);
+
+    // cancel subscriptions after pushing to the stream
+    if (call.method == "OnConnectionStateChanged") {
+      BmConnectionStateResponse r = BmConnectionStateResponse.fromMap(call.arguments);
+      var remoteId = DeviceIdentifier(r.remoteId);
+      if (r.connectionState == BmConnectionStateEnum.disconnected) {
+        _deviceSubscriptions[remoteId]?.forEach((s) => s.cancel()); // cancel subscriptions
+        _deviceSubscriptions.remove(remoteId); // delete subscriptions
+      }
+    }
   }
 
   /// invoke a platform method
