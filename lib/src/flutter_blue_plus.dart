@@ -12,7 +12,7 @@ class FlutterBluePlus {
   static bool _initialized = false;
 
   /// native platform channel
-  static final MethodChannel _methods = const MethodChannel('flutter_blue_plus/methods');
+  static final MethodChannel _methodChannel = const MethodChannel('flutter_blue_plus/methods');
 
   /// a broadcast stream version of the MethodChannel
   // ignore: close_sinks
@@ -389,12 +389,12 @@ class FlutterBluePlus {
     _initialized = true;
 
     // set platform method handler
-    _methods.setMethodCallHandler(_methodCallHandler);
+    _methodChannel.setMethodCallHandler(_methodCallHandler);
 
     // hot restart
-    if ((await _methods.invokeMethod('flutterHotRestart')) != 0) {
+    if ((await _methodChannel.invokeMethod('flutterHotRestart')) != 0) {
       await Future.delayed(Duration(milliseconds: 50));
-      while ((await _methods.invokeMethod('connectedCount')) != 0) {
+      while ((await _methodChannel.invokeMethod('connectedCount')) != 0) {
         await Future.delayed(Duration(milliseconds: 50));
       }
     }
@@ -540,7 +540,7 @@ class FlutterBluePlus {
       }
 
       // invoke
-      out = await _methods.invokeMethod(method, arguments);
+      out = await _methodChannel.invokeMethod(method, arguments);
 
       // log result
       if (logLevel == LogLevel.verbose) {
