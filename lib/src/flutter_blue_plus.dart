@@ -519,6 +519,7 @@ class FlutterBluePlus {
       BmConnectionStateResponse r = BmConnectionStateResponse.fromMap(call.arguments);
       var remoteId = DeviceIdentifier(r.remoteId);
       if (r.connectionState == BmConnectionStateEnum.disconnected) {
+        await Future.delayed(Duration.zero);
         _deviceSubscriptions[remoteId]?.forEach((s) => s.cancel()); // cancel subscriptions
         _deviceSubscriptions.remove(remoteId); // delete subscriptions
       }
