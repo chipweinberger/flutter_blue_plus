@@ -189,6 +189,9 @@ var subscription = device.connectionState.listen((BluetoothConnectionState state
     }
 });
 
+// Optionally: cancel subscription when state is disconnected and still get the last BluetoothConnectionState.disconnected
+device.cancelWhenDisconnected(subscription, next:true);
+
 // Connect to the device
 await device.connect();
 
