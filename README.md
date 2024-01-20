@@ -447,7 +447,7 @@ To mock `FlutterBluePlus` for development, refer to the [Mocking Guide](MOCKING.
 flutter_blue_plus is compatible only from version 21 of Android SDK so you should change this in **android/app/build.gradle**:
 
 ```dart
-Android {
+android {
   defaultConfig {
      minSdkVersion: 21
 ```
