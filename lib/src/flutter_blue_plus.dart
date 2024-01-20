@@ -130,11 +130,11 @@ class FlutterBluePlus {
   static Stream<BluetoothAdapterState> get adapterState async* {
     // get current state if needed
     if (_adapterStateNow == null) {
-      BmAdapterStateEnum val =
-          await _invokeMethod('getAdapterState').then((args) => BmBluetoothAdapterState.fromMap(args).adapterState);
+      var result = await _invokeMethod('getAdapterState');
+      BmAdapterStateEnum value = BmBluetoothAdapterState.fromMap(result).adapterState;
       // update _adapterStateNow if it is still null after the await
       if (_adapterStateNow == null) {
-        _adapterStateNow = val;
+        _adapterStateNow = value;
       }
     }
 
@@ -148,7 +148,7 @@ class FlutterBluePlus {
 
   /// Retrieve a list of devices currently connected to your app
   static List<BluetoothDevice> get connectedDevices {
-    var copy = Map<DeviceIdentifier, BmConnectionStateResponse>.from(_connectionStates);
+    var copy = Map.from(_connectionStates);
     copy.removeWhere((key, value) => value.connectionState == BmConnectionStateEnum.disconnected);
     return copy.values.map((v) => BluetoothDevice(remoteId: DeviceIdentifier(v.remoteId))).toList();
   }
@@ -157,7 +157,8 @@ class FlutterBluePlus {
   /// - The list includes devices connected to by *any* app
   /// - You must still call device.connect() to connect them to *your app*
   static Future<List<BluetoothDevice>> get systemDevices async {
-    BmDevicesList response = await _invokeMethod('getSystemDevices').then((args) => BmDevicesList.fromMap(args));
+    var result = await _invokeMethod('getSystemDevices');
+    BmDevicesList response = BmDevicesList.fromMap(result);
     for (BmBluetoothDevice device in response.devices) {
       if (device.platformName != null) {
         _platformNames[DeviceIdentifier(device.remoteId)] = device.platformName!;
@@ -168,7 +169,8 @@ class FlutterBluePlus {
 
   /// Retrieve a list of bonded devices (Android only)
   static Future<List<BluetoothDevice>> get bondedDevices async {
-    BmDevicesList response = await _invokeMethod('getBondedDevices').then((args) => BmDevicesList.fromMap(args));
+    var result = await _invokeMethod('getBondedDevices');
+    BmDevicesList response = BmDevicesList.fromMap(result);
     for (BmBluetoothDevice device in response.devices) {
       if (device.platformName != null) {
         _platformNames[DeviceIdentifier(device.remoteId)] = device.platformName!;
@@ -230,8 +232,8 @@ class FlutterBluePlus {
     assert(!(Platform.isAndroid && withKeywords.isNotEmpty && hasOtherFilter),
         "withKeywords is not compatible with other filters on Android");
 
-    // only allow a single task to be callling 
-    // calling startScan or stopScan at one time
+    // only allow a single task to call
+    // startScan or stopScan at a time
     _Mutex mtx = _MutexFactory.getMutexForKey("scan");
     await mtx.take();
     try {
@@ -358,7 +360,7 @@ class FlutterBluePlus {
   /// Register a subscription to be canceled when scanning is complete.
   /// This function simplifies cleanup, to prevent creating duplicate stream subscriptions.
   ///   - this is an optional convenience function
-  ///   - prevents accidentally creating duplicate subscriptions on scan
+  ///   - prevents accidentally creating duplicate subscriptions before each scan
   static void cancelWhenScanComplete(StreamSubscription subscription) {
     FlutterBluePlus._scanSubscriptions.add(subscription);
   }
