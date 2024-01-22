@@ -28,7 +28,7 @@ class BluetoothDevice {
   String get platformName => FlutterBluePlus._platformNames[remoteId] ?? "";
 
   /// Advertised Named
-  ///  - the is the name advertised by the device during scanning
+  ///  - this is the name advertised by the device during scanning
   ///  - it is only available after you scan with FlutterBluePlus
   ///  - it is cleared when the app restarts.
   ///  - not all devices advertise a name
@@ -47,17 +47,18 @@ class BluetoothDevice {
   }
 
   /// Register a subscription to be canceled when the device is disconnected.
-  /// This function simplifies cleanup, to prevent duplicate stream subscriptions.
+  /// This function simplifies cleanup, to prevent creating duplicate stream subscriptions.
   ///   - this is an optional convenience function
   ///   - prevents accidentally creating duplicate subscriptions on each reconnection.
   ///   - [next] if true, the the stream will be canceled only on the *next* disconnection.
-  ///     This is useful if you like to set up your subscriptions before you call connect.
+  ///     This is useful if you like to setup your subscriptions before you call connect.
   void cancelWhenDisconnected(StreamSubscription subscription, {bool next = false}) {
     if (isConnected == false && next == false) {
-      subscription.cancel();
+      // cancel immediately if already disconnected.
+      subscription.cancel(); 
     } else {
-      FlutterBluePlus._subscriptions[remoteId] ??= [];
-      FlutterBluePlus._subscriptions[remoteId]!.add(subscription);
+      FlutterBluePlus._deviceSubscriptions[remoteId] ??= [];
+      FlutterBluePlus._deviceSubscriptions[remoteId]!.add(subscription);
     }
   }
 
@@ -319,7 +320,7 @@ class BluetoothDevice {
 
   /// Services Reset Stream
   ///  - uses the GAP Services Changed characteristic (0x2A05)
-  ///  - you must re-call discoverServices()
+  ///  - you must re-call discoverServices() when services are reset
   Stream<void> get onServicesReset {
     return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnServicesReset")
@@ -395,12 +396,22 @@ class BluetoothDevice {
 
     // predelay
     if (predelay > 0) {
-      // hack: some devices automatically send a new MTU right after connection without
-      // being asked. This can cause `requestMtu` to return too early, i.e. while its operation
-      // is actually still in progress. That mistake can cause subsequent calls to `discoverServices`,
-      // etc, to timeout. By adding delay before we call `requestMtu`, we can hopefully avoid
-      // this race condition. Note: if your device does not send a new MTU right after connection,
-      // you can safely disable this delay (set it to zero). Other people may need to increase it!
+      // hack: By adding delay before we call `requestMtu`, we can avoid
+      // a race condition that can cause `discoverServices` to timeout or fail.
+      //
+      // Note: This hack is only needed for devices that automatically send an
+      // MTU update right after connection. If your device does not do that, 
+      // you can set this delay to zero. Other people may need to increase it!
+      //
+      // The race condition goes like this:
+      //  1. you call `requestMtu` right after connection
+      //  2. some devices automatically send a new MTU right after connection, without being asked
+      //  3. your call to `requestMtu` confuses the results from step 1 and step 2, and returns to early
+      //  4. the user then calls `discoverServices`, thinking that `requestMtu` has finished
+      //  5. in reality, `requestMtu` is still happening, and the call to `discoverServices` will fail/timeout
+      //
+      // Adding delay before we call `requestMtu` helps ensure 
+      // that the automatic mtu update has already happened.
       await Future.delayed(Duration(milliseconds: (predelay * 1000).toInt()));
     }
 
@@ -613,7 +624,7 @@ class BluetoothDevice {
 
     // get current state if needed
     if (FlutterBluePlus._bondStates[remoteId] == null) {
-      var val = await FlutterBluePlus._methods
+      var val = await FlutterBluePlus._methodChannel
           .invokeMethod('getBondState', remoteId.str)
           .then((args) => BmBondStateResponse.fromMap(args));
       // update _bondStates if it is still null after the await

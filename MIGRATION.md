@@ -57,7 +57,7 @@ extension Scan on FlutterBluePlus {
     final controller = StreamController<ScanResult>();
 
     var subscription = FlutterBluePlus.scanResults.listen(
-      (r) => if(r.isNotEmpty) {controller.add(r.first);},
+      (r){if(r.isNotEmpty){controller.add(r.first);}},
       onError: (e, stackTrace) => controller.addError(e, stackTrace),
     );
 

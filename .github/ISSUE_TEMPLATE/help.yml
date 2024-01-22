@@ -25,7 +25,7 @@ body:
     attributes:
       label: "FlutterBluePlus Version"
       description: "run `flutter pub deps` in your project"
-      placeholder: "ex. 1.12.7"
+      placeholder: "ex. 1.31.4"
     validations:
       required: true
   - type: input
@@ -54,7 +54,7 @@ body:
     attributes:
       label: "OS Version"
       description: "What version of iOS/Android/MacOS are you on?"
-      placeholder: "ex. iOS 12.3.1"
+      placeholder: "ex. iOS 17.3.1"
     validations:
       required: true
   - type: input
@@ -81,4 +81,3 @@ body:
       render: shell
     validations:
       required: true
-      minLength: 150

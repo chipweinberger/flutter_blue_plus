@@ -1,3 +1,15 @@
+## 1.31.8
+* **[Fix]** stream asserts when calling `startScan` twice quickly
+
+## 1.31.7
+* **[Fix]** `cancelWhenScanComplete` must handle error cases
+
+## 1.31.6
+* **[Feature]** add `cancelWhenScanComplete` convenience function
+
+## 1.31.5
+* **[Improve]** Updated README & Example app
+
 ## 1.31.4
 * **[Fix]**  iOS: mtu and auto connect are incompatible
 
