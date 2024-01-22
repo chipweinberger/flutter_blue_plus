@@ -2305,7 +2305,7 @@ public class FlutterBluePlusPlugin implements
             Map<Integer, byte[]> advertisingDataMap = adv.getAdvertisingDataMap();
             if (advertisingDataMap.containsKey(ScanRecord.DATA_TYPE_APPEARANCE)) {
                 byte[] appearanceBytes = advertisingDataMap.get(ScanRecord.DATA_TYPE_APPEARANCE);
-                appearance = appearanceBytes[0] * 256 + appearanceBytes[1];
+                appearance = 256 + appearanceBytes[1] + appearanceBytes[0];
             }
         }
 
