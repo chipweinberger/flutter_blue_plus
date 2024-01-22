@@ -265,7 +265,7 @@ public class FlutterBluePlusPlugin implements
     //  ██████  ██   ██  ███████  ███████
 
     @Override
-    @SuppressWarnings({"deprecation", "unchecked"}) // needed for compatability, type safety uses bluetooth_msgs.dart
+    @SuppressWarnings({"deprecation", "unchecked"}) // needed for compatibility, type safety uses bluetooth_msgs.dart
     public void onMethodCall(@NonNull MethodCall call,
                                  @NonNull Result result)
     {
@@ -2299,6 +2299,16 @@ public class FlutterBluePlusPlugin implements
         List<ParcelUuid>        serviceUuids = adv != null ?  adv.getServiceUuids()              : null;
         Map<ParcelUuid, byte[]> serviceData  = adv != null ?  adv.getServiceData()               : null;
 
+        // Appearance Type
+        int appearance = 0;
+        if (adv != null) {
+            Map<Integer, byte[]> advertisingDataMap = adv.getAdvertisingDataMap();
+            if (advertisingDataMap.containsKey(ScanRecord.DATA_TYPE_APPEARANCE)) {
+                byte[] appearanceBytes = advertisingDataMap[ScanRecord.DATA_TYPE_APPEARANCE];
+                appearance = appearanceBytes[0] * 256 + appearanceBytes[1];
+            }
+        }
+
         // Manufacturer Specific Data
         HashMap<Integer, String> manufDataB = new HashMap<Integer, String>();
         if(manufData != null) {
@@ -2335,6 +2345,7 @@ public class FlutterBluePlusPlugin implements
         if (connectable)                 {map.put("connectable", 1);}
         if (advName != null)             {map.put("adv_name", advName);}
         if (txPower != min)              {map.put("tx_power_level", txPower);}
+        if (appearance != 0)             {map.put("appearance", appearance);}
         if (manufData != null)           {map.put("manufacturer_data", manufDataB);}
         if (serviceData != null)         {map.put("service_data", serviceDataB);}
         if (serviceUuids != null)        {map.put("service_uuids", serviceUuidsB);}

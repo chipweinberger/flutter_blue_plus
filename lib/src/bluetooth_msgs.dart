@@ -103,6 +103,7 @@ class BmScanAdvertisement {
   final String? advName;
   final bool connectable;
   final int? txPowerLevel;
+  final int? appearance;
   final Map<int, List<int>> manufacturerData;
   final Map<Guid, List<int>> serviceData;
   final List<Guid> serviceUuids;
@@ -114,6 +115,7 @@ class BmScanAdvertisement {
     required this.advName,
     required this.connectable,
     required this.txPowerLevel,
+    required this.appearance,
     required this.manufacturerData,
     required this.serviceData,
     required this.serviceUuids,
@@ -150,6 +152,7 @@ class BmScanAdvertisement {
       advName: json['adv_name'],
       connectable: json['connectable'] != null ? json['connectable'] != 0 : false,
       txPowerLevel: json['tx_power_level'],
+      appearance: json['appearance'],
       manufacturerData: manufacturerData,
       serviceData: serviceData,
       serviceUuids: serviceUuids,
