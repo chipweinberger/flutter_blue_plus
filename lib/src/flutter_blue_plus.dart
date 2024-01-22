@@ -713,7 +713,7 @@ class ScanResult {
 class AdvertisementData {
   final String advName;
   final int? txPowerLevel;
-  final int? appearance;
+  final int? appearance; // BLE standard, but Android only
   final bool connectable;
   final Map<int, List<int>> manufacturerData; // key: manufacturerId
   final Map<Guid, List<int>> serviceData; // key: service guid
