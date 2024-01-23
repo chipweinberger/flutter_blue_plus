@@ -2302,10 +2302,31 @@ public class FlutterBluePlusPlugin implements
         // Appearance Type
         int appearance = 0;
         if (adv != null) {
-            Map<Integer, byte[]> advertisingDataMap = adv.getAdvertisingDataMap();
-            if (advertisingDataMap.containsKey(ScanRecord.DATA_TYPE_APPEARANCE)) {
-                byte[] appearanceBytes = advertisingDataMap.get(ScanRecord.DATA_TYPE_APPEARANCE);
-                appearance = appearanceBytes[1] * 256 + appearanceBytes[0];
+            if (Build.VERSION.SDK_INT >= 33) { // Android 13
+                Map<Integer, byte[]> advertisingDataMap = adv.getAdvertisingDataMap();
+                if (advertisingDataMap.containsKey(ScanRecord.DATA_TYPE_APPEARANCE)) {
+                    byte[] appearanceBytes = advertisingDataMap.get(ScanRecord.DATA_TYPE_APPEARANCE);
+                    appearance = appearanceBytes[1] * 256 + appearanceBytes[0];
+                }
+            } else {
+                byte[] scanRecordBytes = adv.getBytes(); // From API Level 21
+                int byteIndex = 0;
+                while (byteIndex < scanRecordBytes.length) {
+                    int length = scanRecordBytes[byteIndex++];
+                    // Zero value indicates that we are done with the record now
+                    if (length == 0) break;
+
+                    int dataType = scanRecordBytes[byteIndex + 1];
+                    // If the data type is zero, then we are pass the significant
+                    // section of the data, and we are done
+                    if (dataType == 0) break;
+
+                    if (dataType == 0x00000019) { // ScanRecord.DATA_TYPE_APPEARANCE magic byte
+                        appearance = scanRecordBytes[byteIndex + 2] * 256 + scanRecordBytes[byteIndex + 1];
+                    }
+
+                    byteIndex += length;
+                }
             }
         }
 
