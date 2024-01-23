@@ -2326,7 +2326,7 @@ public class FlutterBluePlusPlugin implements
                     // Zero value indicates that we are done with the record now
                     if (length == 0) break;
 
-                    int dataType = scanRecordBytes[byteIndex + 1];
+                    int dataType = scanRecordBytes[byteIndex];
                     // If the data type is zero, then we are pass the significant
                     // section of the data, and we are done
                     if (dataType == 0) break;
