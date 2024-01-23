@@ -103,7 +103,7 @@ class BmScanAdvertisement {
   final String? advName;
   final bool connectable;
   final int? txPowerLevel;
-  final int? appearance; // BLE standard, but Android only
+  final int? appearance; // not supported on iOS / macOS
   final Map<int, List<int>> manufacturerData;
   final Map<Guid, List<int>> serviceData;
   final List<Guid> serviceUuids;
