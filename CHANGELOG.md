@@ -1,3 +1,7 @@
+## 1.31.9
+* **[Feature]** add `cancelAfterDisconnection` `delayed` option for `connectionState` streams
+* **[Feature]** add `device.isDisconnected`
+
 ## 1.31.8
 * **[Fix]** stream asserts when calling `startScan` twice quickly
 
