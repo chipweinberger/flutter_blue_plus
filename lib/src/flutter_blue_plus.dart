@@ -517,6 +517,7 @@ class FlutterBluePlus {
       }
     }
 
+    // push event to broadcast stream
     _methodStream.add(call);
 
     // cancel delayed subscriptions
@@ -525,8 +526,7 @@ class FlutterBluePlus {
         BmConnectionStateResponse r = BmConnectionStateResponse.fromMap(call.arguments);
         if (r.connectionState == BmConnectionStateEnum.disconnected) {
           var remoteId = DeviceIdentifier(r.remoteId);
-          // Future.delayed allows the streams
-          // to be updated before we cancel them
+          // Future.delayed allows the streams to be updated before we cancel them
           Future.delayed(Duration.zero).then((_) {
             _delayedSubscriptions[remoteId]?.forEach((s) => s.cancel()); // cancel
             _delayedSubscriptions.remove(remoteId); // delete

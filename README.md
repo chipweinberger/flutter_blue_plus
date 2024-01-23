@@ -189,6 +189,10 @@ var subscription = device.connectionState.listen((BluetoothConnectionState state
     }
 });
 
+// cleanup: cancel subscription when device is disconnected
+// note: `delayed:true` lets your listener receive the `disconnected` event.
+await device.cancelWhenDisconnected(delayed: true);
+
 // Connect to the device
 await device.connect();
 
