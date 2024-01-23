@@ -95,7 +95,7 @@ class BluetoothCharacteristic {
   /// read a characteristic
   Future<List<int>> read({int timeout = 15}) async {
     // check connected
-    if (device.isConnected == false) {
+    if (device.isDisconnected) {
       throw FlutterBluePlusException(
           ErrorPlatform.fbp, "readCharacteristic", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
@@ -166,7 +166,7 @@ class BluetoothCharacteristic {
     }
 
     // check connected
-    if (device.isConnected == false) {
+    if (device.isDisconnected) {
       throw FlutterBluePlusException(
           ErrorPlatform.fbp, "writeCharacteristic", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
@@ -227,7 +227,7 @@ class BluetoothCharacteristic {
   ///   - [forceIndications] Android Only. force indications to be used instead of notifications.
   Future<bool> setNotifyValue(bool notify, {int timeout = 15, bool forceIndications = false}) async {
     // check connected
-    if (device.isConnected == false) {
+    if (device.isDisconnected) {
       throw FlutterBluePlusException(
           ErrorPlatform.fbp, "setNotifyValue", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
