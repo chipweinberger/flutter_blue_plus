@@ -265,7 +265,7 @@ public class FlutterBluePlusPlugin implements
     //  ██████  ██   ██  ███████  ███████
 
     @Override
-    @SuppressWarnings({"deprecation", "unchecked"}) // needed for compatability, type safety uses bluetooth_msgs.dart
+    @SuppressWarnings({"deprecation", "unchecked"}) // needed for compatibility, type safety uses bluetooth_msgs.dart
     public void onMethodCall(@NonNull MethodCall call,
                                  @NonNull Result result)
     {
@@ -2277,6 +2277,41 @@ public class FlutterBluePlusPlugin implements
     // ██   ██  ██       ██       ██       ██       ██   ██       ██ 
     // ██   ██  ███████  ███████  ██       ███████  ██   ██  ███████ 
 
+    int getAppearanceFromScanRecord(ScanRecord scanRecord) {
+        if (scanRecord == null) {
+            return 0;
+        }
+
+        if (Build.VERSION.SDK_INT >= 33) { // Android 13
+            Map<Integer, byte[]> advertisingDataMap = scanRecord.getAdvertisingDataMap();
+            if (advertisingDataMap.containsKey(ScanRecord.DATA_TYPE_APPEARANCE)) {
+                byte[] appearanceBytes = advertisingDataMap.get(ScanRecord.DATA_TYPE_APPEARANCE);
+                return appearanceBytes[1] * 256 + appearanceBytes[0];
+            }
+        } else { // For API Level 21+
+            byte[] scanRecordBytes = scanRecord.getBytes();
+            int byteIndex = 0;
+            while (byteIndex < scanRecordBytes.length) {
+                int length = scanRecordBytes[byteIndex++];
+                // Zero value indicates that we are done with the record now
+                if (length == 0) break;
+
+                int dataType = scanRecordBytes[byteIndex];
+                // If the data type is zero, then we are pass the significant
+                // section of the data, and we are done
+                if (dataType == 0) break;
+
+                if (dataType == 0x00000019) { // ScanRecord.DATA_TYPE_APPEARANCE magic byte
+                    return scanRecordBytes[byteIndex + 2] * 256 + scanRecordBytes[byteIndex + 1];
+                }
+
+                byteIndex += length;
+            }
+        }
+
+        return 0;
+    }
+
     HashMap<String, Object> bmScanAdvertisement(BluetoothDevice device, ScanResult result) {
 
         int min = Integer.MIN_VALUE;
@@ -2295,6 +2330,7 @@ public class FlutterBluePlusPlugin implements
 
         String                  advName      = adv != null ?  adv.getDeviceName()                : null;
         int                     txPower      = adv != null ?  adv.getTxPowerLevel()              : min;
+        int                     appearance   = getAppearanceFromScanRecord(adv);
         SparseArray<byte[]>     manufData    = adv != null ?  adv.getManufacturerSpecificData()  : null;
         List<ParcelUuid>        serviceUuids = adv != null ?  adv.getServiceUuids()              : null;
         Map<ParcelUuid, byte[]> serviceData  = adv != null ?  adv.getServiceData()               : null;
@@ -2335,6 +2371,7 @@ public class FlutterBluePlusPlugin implements
         if (connectable)                 {map.put("connectable", 1);}
         if (advName != null)             {map.put("adv_name", advName);}
         if (txPower != min)              {map.put("tx_power_level", txPower);}
+        if (appearance != 0)             {map.put("appearance", appearance);}
         if (manufData != null)           {map.put("manufacturer_data", manufDataB);}
         if (serviceData != null)         {map.put("service_data", serviceDataB);}
         if (serviceUuids != null)        {map.put("service_uuids", serviceUuidsB);}
