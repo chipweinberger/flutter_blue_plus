@@ -711,6 +711,7 @@ class ScanResult {
 class AdvertisementData {
   final String advName;
   final int? txPowerLevel;
+  final int? appearance; // not supported on iOS / macOS
   final bool connectable;
   final Map<int, List<int>> manufacturerData; // key: manufacturerId
   final Map<Guid, List<int>> serviceData; // key: service guid
@@ -719,6 +720,7 @@ class AdvertisementData {
   AdvertisementData({
     required this.advName,
     required this.txPowerLevel,
+    required this.appearance,
     required this.connectable,
     required this.manufacturerData,
     required this.serviceData,
@@ -728,6 +730,7 @@ class AdvertisementData {
   AdvertisementData.fromProto(BmScanAdvertisement p)
       : advName = p.advName ?? "",
         txPowerLevel = p.txPowerLevel,
+        appearance = p.appearance,
         connectable = p.connectable,
         manufacturerData = p.manufacturerData,
         serviceData = p.serviceData,
@@ -738,6 +741,7 @@ class AdvertisementData {
     return 'AdvertisementData{'
         'advName: $advName, '
         'txPowerLevel: $txPowerLevel, '
+        'appearance: $appearance, '
         'connectable: $connectable, '
         'manufacturerData: $manufacturerData, '
         'serviceData: $serviceData, '
