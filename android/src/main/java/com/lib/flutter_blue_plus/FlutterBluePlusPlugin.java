@@ -2277,6 +2277,41 @@ public class FlutterBluePlusPlugin implements
     // ██   ██  ██       ██       ██       ██       ██   ██       ██ 
     // ██   ██  ███████  ███████  ██       ███████  ██   ██  ███████ 
 
+    int getAppearanceFromScanRecord(ScanRecord scanRecord) {
+        if (scanRecord == null) {
+            return 0;
+        }
+
+        if (Build.VERSION.SDK_INT >= 33) { // Android 13
+            Map<Integer, byte[]> advertisingDataMap = scanRecord.getAdvertisingDataMap();
+            if (advertisingDataMap.containsKey(ScanRecord.DATA_TYPE_APPEARANCE)) {
+                byte[] appearanceBytes = advertisingDataMap.get(ScanRecord.DATA_TYPE_APPEARANCE);
+                return appearanceBytes[1] * 256 + appearanceBytes[0];
+            }
+        } else { // For API Level 21+
+            byte[] scanRecordBytes = scanRecord.getBytes();
+            int byteIndex = 0;
+            while (byteIndex < scanRecordBytes.length) {
+                int length = scanRecordBytes[byteIndex++];
+                // Zero value indicates that we are done with the record now
+                if (length == 0) break;
+
+                int dataType = scanRecordBytes[byteIndex];
+                // If the data type is zero, then we are pass the significant
+                // section of the data, and we are done
+                if (dataType == 0) break;
+
+                if (dataType == 0x00000019) { // ScanRecord.DATA_TYPE_APPEARANCE magic byte
+                    return scanRecordBytes[byteIndex + 2] * 256 + scanRecordBytes[byteIndex + 1];
+                }
+
+                byteIndex += length;
+            }
+        }
+
+        return 0;
+    }
+
     HashMap<String, Object> bmScanAdvertisement(BluetoothDevice device, ScanResult result) {
 
         int min = Integer.MIN_VALUE;
@@ -2295,40 +2330,10 @@ public class FlutterBluePlusPlugin implements
 
         String                  advName      = adv != null ?  adv.getDeviceName()                : null;
         int                     txPower      = adv != null ?  adv.getTxPowerLevel()              : min;
+        int                     appearance   = getAppearanceFromScanRecord(adv);
         SparseArray<byte[]>     manufData    = adv != null ?  adv.getManufacturerSpecificData()  : null;
         List<ParcelUuid>        serviceUuids = adv != null ?  adv.getServiceUuids()              : null;
         Map<ParcelUuid, byte[]> serviceData  = adv != null ?  adv.getServiceData()               : null;
-
-        // Appearance Type
-        int appearance = 0;
-        if (adv != null) {
-            if (Build.VERSION.SDK_INT >= 33) { // Android 13
-                Map<Integer, byte[]> advertisingDataMap = adv.getAdvertisingDataMap();
-                if (advertisingDataMap.containsKey(ScanRecord.DATA_TYPE_APPEARANCE)) {
-                    byte[] appearanceBytes = advertisingDataMap.get(ScanRecord.DATA_TYPE_APPEARANCE);
-                    appearance = appearanceBytes[1] * 256 + appearanceBytes[0];
-                }
-            } else {
-                byte[] scanRecordBytes = adv.getBytes(); // From API Level 21
-                int byteIndex = 0;
-                while (byteIndex < scanRecordBytes.length) {
-                    int length = scanRecordBytes[byteIndex++];
-                    // Zero value indicates that we are done with the record now
-                    if (length == 0) break;
-
-                    int dataType = scanRecordBytes[byteIndex];
-                    // If the data type is zero, then we are pass the significant
-                    // section of the data, and we are done
-                    if (dataType == 0) break;
-
-                    if (dataType == 0x00000019) { // ScanRecord.DATA_TYPE_APPEARANCE magic byte
-                        appearance = scanRecordBytes[byteIndex + 2] * 256 + scanRecordBytes[byteIndex + 1];
-                    }
-
-                    byteIndex += length;
-                }
-            }
-        }
 
         // Manufacturer Specific Data
         HashMap<Integer, String> manufDataB = new HashMap<Integer, String>();
