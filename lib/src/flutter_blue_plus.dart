@@ -420,7 +420,7 @@ class FlutterBluePlus {
 
     // keep track of adapter states
     if (call.method == "OnAdapterStateChanged") {
-      BmBluetoothAdapterState r = BmBluetoothAdapterState.fromMap(call.arguments);
+      var r = BmBluetoothAdapterState.fromMap(call.arguments);
       _adapterStateNow = r.adapterState;
       if (isScanningNow && r.adapterState != BmAdapterStateEnum.on) {
         _stopScan(invokePlatform: false);
@@ -434,19 +434,21 @@ class FlutterBluePlus {
 
     // keep track of connection states
     if (call.method == "OnConnectionStateChanged") {
-      BmConnectionStateResponse r = BmConnectionStateResponse.fromMap(call.arguments);
+      var r = BmConnectionStateResponse.fromMap(call.arguments);
       var remoteId = DeviceIdentifier(r.remoteId);
       _connectionStates[remoteId] = r;
       if (r.connectionState == BmConnectionStateEnum.disconnected) {
-        // to make FBP easier to use, we purposely do not clear knownServices,
-        // otherwise `servicesList` would be annoying to use.
-        // We also don't clear the `bondState` cache for faster performance.
+        // reset known mtu
+        _mtuValues.remove(remoteId); 
 
-        _deviceSubscriptions[remoteId]?.forEach((s) => s.cancel()); // cancel subscriptions
-        _deviceSubscriptions.remove(remoteId); // delete subscriptions
-        _mtuValues.remove(remoteId); // reset known mtu
-        _lastDescs.remove(remoteId); // clear lastDescs so that 'isNotifying' is reset
-        _lastChrs.remove(remoteId); // for api consistency, clear characteristic values
+        // clear lastDescs so that 'isNotifying' is reset
+        _lastDescs.remove(remoteId); 
+
+        // clear chr values, for api consistency
+        _lastChrs.remove(remoteId); 
+
+        // Note: to make FBP easier to use, we purposely 
+        // do not clear `knownServices` or `bondState`.
 
         // On apple, autoconnect is just a long running connection attempt
         // so the connection request must be restored after disconnection
@@ -462,7 +464,7 @@ class FlutterBluePlus {
 
     // keep track of device name
     if (call.method == "OnNameChanged") {
-      BmNameChanged device = BmNameChanged.fromMap(call.arguments);
+      var device = BmNameChanged.fromMap(call.arguments);
       if (Platform.isMacOS || Platform.isIOS) {
         // iOS & macOS internally use the name changed callback for the platform name
         _platformNames[DeviceIdentifier(device.remoteId)] = device.name;
@@ -471,19 +473,19 @@ class FlutterBluePlus {
 
     // keep track of services resets
     if (call.method == "OnServicesReset") {
-      BmBluetoothDevice device = BmBluetoothDevice.fromMap(call.arguments);
+      var device = BmBluetoothDevice.fromMap(call.arguments);
       _knownServices.remove(DeviceIdentifier(device.remoteId));
     }
 
     // keep track of bond state
     if (call.method == "OnBondStateChanged") {
-      BmBondStateResponse r = BmBondStateResponse.fromMap(call.arguments);
+      var r = BmBondStateResponse.fromMap(call.arguments);
       _bondStates[DeviceIdentifier(r.remoteId)] = r;
     }
 
     // keep track of services
     if (call.method == "OnDiscoveredServices") {
-      BmDiscoverServicesResult r = BmDiscoverServicesResult.fromMap(call.arguments);
+      var r = BmDiscoverServicesResult.fromMap(call.arguments);
       if (r.success == true) {
         _knownServices[DeviceIdentifier(r.remoteId)] = r;
       }
@@ -491,7 +493,7 @@ class FlutterBluePlus {
 
     // keep track of mtu values
     if (call.method == "OnMtuChanged") {
-      BmMtuChangedResponse r = BmMtuChangedResponse.fromMap(call.arguments);
+      var r = BmMtuChangedResponse.fromMap(call.arguments);
       if (r.success == true) {
         _mtuValues[DeviceIdentifier(r.remoteId)] = r;
       }
@@ -499,7 +501,7 @@ class FlutterBluePlus {
 
     // keep track of characteristic values
     if (call.method == "OnCharacteristicReceived" || call.method == "OnCharacteristicWritten") {
-      BmCharacteristicData r = BmCharacteristicData.fromMap(call.arguments);
+      var r = BmCharacteristicData.fromMap(call.arguments);
       if (r.success == true) {
         DeviceIdentifier d = DeviceIdentifier(r.remoteId);
         _lastChrs[d] ??= {};
@@ -509,7 +511,7 @@ class FlutterBluePlus {
 
     // keep track of descriptor values
     if (call.method == "OnDescriptorRead" || call.method == "OnDescriptorWritten") {
-      BmDescriptorData r = BmDescriptorData.fromMap(call.arguments);
+      var r = BmDescriptorData.fromMap(call.arguments);
       if (r.success == true) {
         DeviceIdentifier d = DeviceIdentifier(r.remoteId);
         _lastDescs[d] ??= {};
@@ -520,18 +522,15 @@ class FlutterBluePlus {
     // push event to broadcast stream
     _methodStream.add(call);
 
-    // cancel delayed subscriptions
-    if (call.method == "OnConnectionStateChanged") {
-      if (_delayedSubscriptions.isNotEmpty) {
-        BmConnectionStateResponse r = BmConnectionStateResponse.fromMap(call.arguments);
-        if (r.connectionState == BmConnectionStateEnum.disconnected) {
-          var remoteId = DeviceIdentifier(r.remoteId);
-          // Future.delayed allows the streams to be updated before we cancel them
-          Future.delayed(Duration.zero).then((_) {
-            _delayedSubscriptions[remoteId]?.forEach((s) => s.cancel()); // cancel
-            _delayedSubscriptions.remove(remoteId); // delete
-          });
-        }
+    // cancel & remove delayed subscriptions
+    if (call.method == "OnConnectionStateChanged" && _delayedSubscriptions.isNotEmpty) {
+      var r = BmConnectionStateResponse.fromMap(call.arguments);
+      if (r.connectionState == BmConnectionStateEnum.disconnected) {
+        var remoteId = DeviceIdentifier(r.remoteId);
+        Future.delayed(Duration.zero).then((_) {
+          _delayedSubscriptions[remoteId]?.forEach((s) => s.cancel());
+          _delayedSubscriptions.remove(remoteId);
+        });
       }
     }
   }
@@ -579,10 +578,10 @@ class FlutterBluePlus {
   /// Turn off Bluetooth (Android only),
   @Deprecated('Deprecated in Android SDK 33 with no replacement')
   static Future<void> turnOff({int timeout = 10}) async {
-    Stream<BluetoothAdapterState> responseStream = adapterState.where((s) => s == BluetoothAdapterState.off);
+    var responseStream = adapterState.where((s) => s == BluetoothAdapterState.off);
 
     // Start listening now, before invokeMethod, to ensure we don't miss the response
-    Future<BluetoothAdapterState> futureResponse = responseStream.first;
+    var futureResponse = responseStream.first;
 
     // invoke
     await _invokeMethod('turnOff');
