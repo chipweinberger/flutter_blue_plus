@@ -20,7 +20,7 @@ class BluetoothCharacteristic {
   });
 
   BluetoothCharacteristic.fromProto(BmBluetoothCharacteristic p)
-      : remoteId = DeviceIdentifier(p.remoteId.toString()),
+      : remoteId = p.remoteId,
         serviceUuid = p.serviceUuid,
         secondaryServiceUuid = p.secondaryServiceUuid != null ? p.secondaryServiceUuid! : null,
         characteristicUuid = p.characteristicUuid;
@@ -60,7 +60,7 @@ class BluetoothCharacteristic {
       .where((m) => m.method == "OnCharacteristicReceived" || m.method == "OnCharacteristicWritten")
       .map((m) => m.arguments)
       .map((args) => BmCharacteristicData.fromMap(args))
-      .where((p) => p.remoteId == remoteId.toString())
+      .where((p) => p.remoteId == remoteId)
       .where((p) => p.serviceUuid == serviceUuid)
       .where((p) => p.characteristicUuid == characteristicUuid)
       .where((p) => p.success == true)
@@ -74,7 +74,7 @@ class BluetoothCharacteristic {
       .where((m) => m.method == "OnCharacteristicReceived")
       .map((m) => m.arguments)
       .map((args) => BmCharacteristicData.fromMap(args))
-      .where((p) => p.remoteId == remoteId.toString())
+      .where((p) => p.remoteId == remoteId)
       .where((p) => p.serviceUuid == serviceUuid)
       .where((p) => p.characteristicUuid == characteristicUuid)
       .where((p) => p.success == true)
@@ -109,7 +109,7 @@ class BluetoothCharacteristic {
 
     try {
       var request = BmReadCharacteristicRequest(
-        remoteId: remoteId.toString(),
+        remoteId: remoteId,
         characteristicUuid: characteristicUuid,
         serviceUuid: serviceUuid,
         secondaryServiceUuid: null,
@@ -179,7 +179,7 @@ class BluetoothCharacteristic {
       final writeType = withoutResponse ? BmWriteType.withoutResponse : BmWriteType.withResponse;
 
       var request = BmWriteCharacteristicRequest(
-        remoteId: remoteId.toString(),
+        remoteId: remoteId,
         characteristicUuid: characteristicUuid,
         serviceUuid: serviceUuid,
         secondaryServiceUuid: null,
@@ -243,7 +243,7 @@ class BluetoothCharacteristic {
 
     try {
       var request = BmSetNotifyValueRequest(
-        remoteId: remoteId.toString(),
+        remoteId: remoteId,
         serviceUuid: serviceUuid,
         secondaryServiceUuid: null,
         characteristicUuid: characteristicUuid,

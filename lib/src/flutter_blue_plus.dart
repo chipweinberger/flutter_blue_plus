@@ -162,7 +162,7 @@ class FlutterBluePlus {
     BmDevicesList response = BmDevicesList.fromMap(result);
     for (BmBluetoothDevice device in response.devices) {
       if (device.platformName != null) {
-        _platformNames[DeviceIdentifier(device.remoteId)] = device.platformName!;
+        _platformNames[device.remoteId] = device.platformName!;
       }
     }
     return response.devices.map((d) => BluetoothDevice.fromProto(d)).toList();
@@ -174,7 +174,7 @@ class FlutterBluePlus {
     BmDevicesList response = BmDevicesList.fromMap(result);
     for (BmBluetoothDevice device in response.devices) {
       if (device.platformName != null) {
-        _platformNames[DeviceIdentifier(device.remoteId)] = device.platformName!;
+        _platformNames[device.remoteId] = device.platformName!;
       }
     }
     return response.devices.map((d) => BluetoothDevice.fromProto(d)).toList();
@@ -299,12 +299,12 @@ class FlutterBluePlus {
           for (BmScanAdvertisement bm in response.advertisements) {
             // cache platform name
             if (bm.platformName != null) {
-              _platformNames[DeviceIdentifier(bm.remoteId)] = bm.platformName!;
+              _platformNames[bm.remoteId] = bm.platformName!;
             }
 
             // cache advertised name
             if (bm.advName != null) {
-              _advNames[DeviceIdentifier(bm.remoteId)] = bm.advName!;
+              _advNames[bm.remoteId] = bm.advName!;
             }
 
             // convert
@@ -435,17 +435,16 @@ class FlutterBluePlus {
     // keep track of connection states
     if (call.method == "OnConnectionStateChanged") {
       var r = BmConnectionStateResponse.fromMap(call.arguments);
-      var remoteId = DeviceIdentifier(r.remoteId);
-      _connectionStates[remoteId] = r;
+      _connectionStates[r.remoteId] = r;
       if (r.connectionState == BmConnectionStateEnum.disconnected) {
         // reset known mtu
-        _mtuValues.remove(remoteId); 
+        _mtuValues.remove(r.remoteId); 
 
         // clear lastDescs so that 'isNotifying' is reset
-        _lastDescs.remove(remoteId); 
+        _lastDescs.remove(r.remoteId); 
 
         // clear chr values, for api consistency
-        _lastChrs.remove(remoteId); 
+        _lastChrs.remove(r.remoteId); 
 
         // Note: to make FBP easier to use, we purposely 
         // do not clear `knownServices` or `bondState`.
@@ -467,27 +466,27 @@ class FlutterBluePlus {
       var device = BmNameChanged.fromMap(call.arguments);
       if (Platform.isMacOS || Platform.isIOS) {
         // iOS & macOS internally use the name changed callback for the platform name
-        _platformNames[DeviceIdentifier(device.remoteId)] = device.name;
+        _platformNames[device.remoteId] = device.name;
       }
     }
 
     // keep track of services resets
     if (call.method == "OnServicesReset") {
       var device = BmBluetoothDevice.fromMap(call.arguments);
-      _knownServices.remove(DeviceIdentifier(device.remoteId));
+      _knownServices.remove(device.remoteId);
     }
 
     // keep track of bond state
     if (call.method == "OnBondStateChanged") {
       var r = BmBondStateResponse.fromMap(call.arguments);
-      _bondStates[DeviceIdentifier(r.remoteId)] = r;
+      _bondStates[r.remoteId] = r;
     }
 
     // keep track of services
     if (call.method == "OnDiscoveredServices") {
       var r = BmDiscoverServicesResult.fromMap(call.arguments);
       if (r.success == true) {
-        _knownServices[DeviceIdentifier(r.remoteId)] = r;
+        _knownServices[r.remoteId] = r;
       }
     }
 
@@ -495,7 +494,7 @@ class FlutterBluePlus {
     if (call.method == "OnMtuChanged") {
       var r = BmMtuChangedResponse.fromMap(call.arguments);
       if (r.success == true) {
-        _mtuValues[DeviceIdentifier(r.remoteId)] = r;
+        _mtuValues[r.remoteId] = r;
       }
     }
 
@@ -503,9 +502,8 @@ class FlutterBluePlus {
     if (call.method == "OnCharacteristicReceived" || call.method == "OnCharacteristicWritten") {
       var r = BmCharacteristicData.fromMap(call.arguments);
       if (r.success == true) {
-        DeviceIdentifier d = DeviceIdentifier(r.remoteId);
-        _lastChrs[d] ??= {};
-        _lastChrs[DeviceIdentifier(r.remoteId)]!["${r.serviceUuid}:${r.characteristicUuid}"] = r.value;
+        _lastChrs[r.remoteId] ??= {};
+        _lastChrs[r.remoteId]!["${r.serviceUuid}:${r.characteristicUuid}"] = r.value;
       }
     }
 
@@ -513,9 +511,8 @@ class FlutterBluePlus {
     if (call.method == "OnDescriptorRead" || call.method == "OnDescriptorWritten") {
       var r = BmDescriptorData.fromMap(call.arguments);
       if (r.success == true) {
-        DeviceIdentifier d = DeviceIdentifier(r.remoteId);
-        _lastDescs[d] ??= {};
-        _lastDescs[d]!["${r.serviceUuid}:${r.characteristicUuid}:${r.descriptorUuid}"] = r.value;
+        _lastDescs[r.remoteId] ??= {};
+        _lastDescs[r.remoteId]!["${r.serviceUuid}:${r.characteristicUuid}:${r.descriptorUuid}"] = r.value;
       }
     }
 
@@ -526,10 +523,9 @@ class FlutterBluePlus {
     if (call.method == "OnConnectionStateChanged" && _delayedSubscriptions.isNotEmpty) {
       var r = BmConnectionStateResponse.fromMap(call.arguments);
       if (r.connectionState == BmConnectionStateEnum.disconnected) {
-        var remoteId = DeviceIdentifier(r.remoteId);
         Future.delayed(Duration.zero).then((_) {
-          _delayedSubscriptions[remoteId]?.forEach((s) => s.cancel());
-          _delayedSubscriptions.remove(remoteId);
+          _delayedSubscriptions[r.remoteId]?.forEach((s) => s.cancel());
+          _delayedSubscriptions.remove(r.remoteId);
         });
       }
     }
@@ -703,7 +699,7 @@ class ScanResult {
   });
 
   ScanResult.fromProto(BmScanAdvertisement p)
-      : device = BluetoothDevice.fromId(p.remoteId),
+      : device = BluetoothDevice(remoteId: p.remoteId),
         advertisementData = AdvertisementData.fromProto(p),
         rssi = p.rssi,
         timeStamp = DateTime.now();

@@ -70,13 +70,13 @@ class _ScanResultTileState extends State<ScanResultTile> {
             overflow: TextOverflow.ellipsis,
           ),
           Text(
-            widget.result.device.remoteId.toString(),
+            widget.result.device.remoteId.str,
             style: Theme.of(context).textTheme.bodySmall,
           )
         ],
       );
     } else {
-      return Text(widget.result.device.remoteId.toString());
+      return Text(widget.result.device.remoteId.str);
     }
   }
 
