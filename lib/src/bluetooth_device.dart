@@ -52,13 +52,12 @@ class BluetoothDevice {
   ///   - prevents accidentally creating duplicate subscriptions on each reconnection.
   ///   - [next] if true, the the stream will be canceled only on the *next* disconnection.
   ///     This is useful if your device like to setup your subscriptions before you connect.
-  ///   - [delayed] This option should only be used for canceling `connectionState` streams. 
-  ///     If true, we delay canceling until after the `connectionState` stream has been updated.
-  ///     This allows your listener to be informed the device was disconnected before we cancel it.
+  ///   - [delayed] Note: This option is only meant for `connectionState` subscriptions.  
+  ///     When `true`, we cancel after a small delay. This ensures the `connectionState` 
+  ///     listener receives the `disconnected` event.
   void cancelWhenDisconnected(StreamSubscription subscription, {bool next = false, bool delayed = false}) {
     if (isConnected == false && next == false) {
-      // cancel immediately if already disconnected.
-      subscription.cancel(); 
+      subscription.cancel(); // cancel immediately if already disconnected.
     } else if (delayed) {
       FlutterBluePlus._delayedSubscriptions[remoteId] ??= [];
       FlutterBluePlus._delayedSubscriptions[remoteId]!.add(subscription);
