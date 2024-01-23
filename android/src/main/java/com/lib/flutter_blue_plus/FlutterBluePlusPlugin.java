@@ -2264,15 +2264,6 @@ public class FlutterBluePlusPlugin implements
 
     }; // BluetoothGattCallback
 
-    public static String byteArrayToString(byte[] ba)
-    {
-        StringBuilder hex = new StringBuilder(ba.length * 2);
-        for (byte b : ba)
-            hex.append(b + " ");
-
-        return hex.toString();
-    }
-
     //////////////////////////////////////////////////////////////////////
     // ███    ███  ███████   ██████      
     // ████  ████  ██       ██           
@@ -2319,7 +2310,6 @@ public class FlutterBluePlusPlugin implements
                 }
             } else {
                 byte[] scanRecordBytes = adv.getBytes(); // From API Level 21
-                log(LogLevel.DEBUG, byteArrayToString(scanRecordBytes));
                 int byteIndex = 0;
                 while (byteIndex < scanRecordBytes.length) {
                     int length = scanRecordBytes[byteIndex++];
