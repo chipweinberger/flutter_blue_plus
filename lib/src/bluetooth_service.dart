@@ -15,7 +15,7 @@ class BluetoothService {
   Guid get uuid => serviceUuid;
 
   BluetoothService.fromProto(BmBluetoothService p)
-      : remoteId = DeviceIdentifier(p.remoteId),
+      : remoteId = p.remoteId,
         serviceUuid = p.serviceUuid,
         isPrimary = p.isPrimary,
         characteristics = p.characteristics

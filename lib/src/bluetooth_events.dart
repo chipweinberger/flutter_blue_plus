@@ -108,7 +108,7 @@ class OnConnectionStateChangedEvent {
   OnConnectionStateChangedEvent(this._response);
 
   /// the relevant device
-  BluetoothDevice get device => BluetoothDevice.fromId(_response.remoteId);
+  BluetoothDevice get device => BluetoothDevice(remoteId: _response.remoteId);
 
   /// the new connection state
   BluetoothConnectionState get connectionState => _bmToConnectionState(_response.connectionState);
@@ -121,7 +121,7 @@ class OnMtuChangedEvent {
   OnMtuChangedEvent(this._response);
 
   /// the relevant device
-  BluetoothDevice get device => BluetoothDevice.fromId(_response.remoteId);
+  BluetoothDevice get device => BluetoothDevice(remoteId: _response.remoteId);
 
   /// the new mtu
   int get mtu => _response.mtu;
@@ -137,7 +137,7 @@ class OnReadRssiEvent {
   OnReadRssiEvent(this._response);
 
   /// the relevant device
-  BluetoothDevice get device => BluetoothDevice.fromId(_response.remoteId);
+  BluetoothDevice get device => BluetoothDevice(remoteId: _response.remoteId);
 
   /// rssi
   int get rssi => _response.rssi;
@@ -153,7 +153,7 @@ class OnServicesResetEvent {
   OnServicesResetEvent(this._response);
 
   /// the relevant device
-  BluetoothDevice get device => BluetoothDevice.fromId(_response.remoteId);
+  BluetoothDevice get device => BluetoothDevice(remoteId: _response.remoteId);
 }
 
 // On Discovered Services
@@ -163,7 +163,7 @@ class OnDiscoveredServicesEvent {
   OnDiscoveredServicesEvent(this._response);
 
   /// the relevant device
-  BluetoothDevice get device => BluetoothDevice.fromId(_response.remoteId);
+  BluetoothDevice get device => BluetoothDevice(remoteId: _response.remoteId);
 
   /// the discovered services
   List<BluetoothService> get services => _response.services.map((p) => BluetoothService.fromProto(p)).toList();
@@ -179,11 +179,11 @@ class OnCharacteristicReceivedEvent {
   OnCharacteristicReceivedEvent(this._response);
 
   /// the relevant device
-  BluetoothDevice get device => BluetoothDevice.fromId(_response.remoteId);
+  BluetoothDevice get device => BluetoothDevice(remoteId: _response.remoteId);
 
   /// the relevant characteristic
   BluetoothCharacteristic get characteristic => BluetoothCharacteristic(
-      remoteId: DeviceIdentifier(_response.remoteId),
+      remoteId: _response.remoteId,
       characteristicUuid: _response.characteristicUuid,
       serviceUuid: _response.serviceUuid,
       secondaryServiceUuid: _response.secondaryServiceUuid);
@@ -202,11 +202,11 @@ class OnCharacteristicWrittenEvent {
   OnCharacteristicWrittenEvent(this._response);
 
   /// the relevant device
-  BluetoothDevice get device => BluetoothDevice.fromId(_response.remoteId);
+  BluetoothDevice get device => BluetoothDevice(remoteId: _response.remoteId);
 
   /// the relevant characteristic
   BluetoothCharacteristic get characteristic => BluetoothCharacteristic(
-      remoteId: DeviceIdentifier(_response.remoteId),
+      remoteId: _response.remoteId,
       characteristicUuid: _response.characteristicUuid,
       serviceUuid: _response.serviceUuid,
       secondaryServiceUuid: _response.secondaryServiceUuid);
@@ -225,11 +225,11 @@ class OnDescriptorReadEvent {
   OnDescriptorReadEvent(this._response);
 
   /// the relevant device
-  BluetoothDevice get device => BluetoothDevice.fromId(_response.remoteId);
+  BluetoothDevice get device => BluetoothDevice(remoteId: _response.remoteId);
 
   /// the relevant descriptor
   BluetoothDescriptor get descriptor => BluetoothDescriptor(
-      remoteId: DeviceIdentifier(_response.remoteId),
+      remoteId: _response.remoteId,
       serviceUuid: _response.serviceUuid,
       characteristicUuid: _response.characteristicUuid,
       descriptorUuid: _response.descriptorUuid);
@@ -248,11 +248,11 @@ class OnDescriptorWrittenEvent {
   OnDescriptorWrittenEvent(this._response);
 
   /// the relevant device
-  BluetoothDevice get device => BluetoothDevice.fromId(_response.remoteId);
+  BluetoothDevice get device => BluetoothDevice(remoteId: _response.remoteId);
 
   /// the relevant descriptor
   BluetoothDescriptor get descriptor => BluetoothDescriptor(
-      remoteId: DeviceIdentifier(_response.remoteId),
+      remoteId: _response.remoteId,
       serviceUuid: _response.serviceUuid,
       characteristicUuid: _response.characteristicUuid,
       descriptorUuid: _response.descriptorUuid);
@@ -271,7 +271,7 @@ class OnNameChangedEvent {
   OnNameChangedEvent(this._response);
 
   /// the relevant device
-  BluetoothDevice get device => BluetoothDevice.fromId(_response.remoteId);
+  BluetoothDevice get device => BluetoothDevice(remoteId: _response.remoteId);
 
   /// the new name
   String? get name => _response.platformName;
@@ -284,7 +284,7 @@ class OnBondStateChangedEvent {
   OnBondStateChangedEvent(this._response);
 
   /// the relevant device
-  BluetoothDevice get device => BluetoothDevice.fromId(_response.remoteId);
+  BluetoothDevice get device => BluetoothDevice(remoteId: _response.remoteId);
 
   /// the new bond state
   BluetoothBondState get bondState => _bmToBondState(_response.bondState);
