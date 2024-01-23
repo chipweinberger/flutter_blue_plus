@@ -28,6 +28,7 @@ class FlutterBluePlus {
   static final Map<DeviceIdentifier, Map<String, List<int>>> _lastChrs = {};
   static final Map<DeviceIdentifier, Map<String, List<int>>> _lastDescs = {};
   static final Map<DeviceIdentifier, List<StreamSubscription>> _deviceSubscriptions = {};
+  static final Map<DeviceIdentifier, List<StreamSubscription>> _delayedSubscriptions = {};
   static final List<StreamSubscription> _scanSubscriptions = [];
   static final Set<DeviceIdentifier> _autoConnect = {};
 
@@ -517,6 +518,22 @@ class FlutterBluePlus {
     }
 
     _methodStream.add(call);
+
+    // cancel delayed subscriptions
+    if (call.method == "OnConnectionStateChanged") {
+      if (_delayedSubscriptions.isNotEmpty) {
+        BmConnectionStateResponse r = BmConnectionStateResponse.fromMap(call.arguments);
+        if (r.connectionState == BmConnectionStateEnum.disconnected) {
+          var remoteId = DeviceIdentifier(r.remoteId);
+          // Future.delayed allows the streams
+          // to be updated before we cancel them
+          Future.delayed(Duration.zero).then((_) {
+            _delayedSubscriptions[remoteId]?.forEach((s) => s.cancel()); // cancel
+            _delayedSubscriptions.remove(remoteId); // delete
+          });
+        }
+      }
+    }
   }
 
   /// invoke a platform method
