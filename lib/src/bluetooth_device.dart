@@ -51,7 +51,7 @@ class BluetoothDevice {
   ///   - this is an optional convenience function
   ///   - prevents accidentally creating duplicate subscriptions on each reconnection.
   ///   - [next] if true, the the stream will be canceled only on the *next* disconnection.
-  ///     This is useful if your device like to setup your subscriptions before you connect.
+  ///     This is useful if you setup your subscriptions before you connect.
   ///   - [delayed] Note: This option is only meant for `connectionState` subscriptions.  
   ///     When `true`, we cancel after a small delay. This ensures the `connectionState` 
   ///     listener receives the `disconnected` event.

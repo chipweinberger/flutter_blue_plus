@@ -146,8 +146,6 @@ If your device is not found, see [Common Problems](#common-problems).
 
 **Note:** It is recommended to set scan filters to reduce main thread & platform channel usage.
 
-**Note:** scan filters use an ***"or"*** behavior. i.e. if you set `withServices` & `withNames` we return  all the advertisments that match any of the specified services ***or*** any of the specified names.
-
 ```dart
 // listen to scan results
 // Note: `onScanResults` only returns live scan results, i.e. during scanning
@@ -169,8 +167,14 @@ FlutterBluePlus.cancelWhenScanComplete(subscription);
 await FlutterBluePlus.adapterState.where((val) => val == BluetoothAdapterState.on).first;
 
 // Start scanning w/ timeout
-// optional: use `stopScan()` to stop the scan at anytime
-await FlutterBluePlus.startScan(withServices:[Guid("180D")], timeout: Duration(seconds:15));
+// Optional: you can use `stopScan()` as an alternative to using a timeout
+// Note: scan filters use an *or* behavior. i.e. if you set `withServices` & `withNames`
+//   we return all the advertisments that match any of the specified services *or* any
+//   of the specified names.
+await FlutterBluePlus.startScan(
+  withServices:[Guid("180D")],
+  withNames:["Bluno"],
+  timeout: Duration(seconds:15));
 
 // wait for scanning to stop
 await FlutterBluePlus.isScanning.where((val) => val == false).first;
@@ -190,8 +194,10 @@ var subscription = device.connectionState.listen((BluetoothConnectionState state
 });
 
 // cleanup: cancel subscription when disconnected
-// Note: `delayed:true` lets us receive the `disconnected` event
-device.cancelWhenDisconnected(subscription, delayed:true);
+// Note: `delayed:true` lets us receive the `disconnected` event in our handler
+// Note: `next:true` means cancel on *next* disconnection. Without this, it
+//   would cancel immediately because we're already disconnected right now.
+device.cancelWhenDisconnected(subscription, delayed:true, next:true);
 
 // Connect to the device
 await device.connect();
@@ -481,7 +487,7 @@ https://developer.android.com/about/versions/12/features/bluetooth-permissions -
 
 ### Add permissions for Android (With Fine Location)
 
-If you want to use Bluetooth to determine location.
+If you want to use Bluetooth to determine location, or support iBeacons.
 
 In the **android/app/src/main/AndroidManifest.xml** add:
 
@@ -504,7 +510,7 @@ https://developer.android.com/about/versions/12/features/bluetooth-permissions -
 <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" android:maxSdkVersion="28" />
 ```
 
-And set androidUsesFineLocation when scanning:
+And set **androidUsesFineLocation** when scanning:
 ```dart
 // Start scanning
 flutterBlue.startScan(timeout: Duration(seconds: 4), androidUsesFineLocation: true);
@@ -700,6 +706,7 @@ Adapter:
 Scanning:
 - [Scanning does not find my device](#scanning-does-not-find-my-device)
 - [Scanned device never goes away](#scanned-device-never-goes-away)
+- [iBeacons not showing](#ibeacons-not-showing)
 
 Connecting:
 - [Connection fails](#connection-fails)
@@ -828,6 +835,19 @@ for (var d in system) {
 This is expected.
 
 You must set the `removeIfGone` scan option if you want the device to go away when no longer available.
+
+---
+
+### iBeacons Not Showing
+
+**iOS:**
+
+iOS does not support iBeacons using CoreBluetooth. You must find a plugin meant for CoreLocation.
+
+**Android:**
+
+1. you need to enable location permissions, see [Getting Started](#getting-started)
+2. you must pass `androidUsesFineLocation:true` to the `startScan` method.
 
 ---
 
