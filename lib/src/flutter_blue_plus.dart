@@ -151,7 +151,7 @@ class FlutterBluePlus {
   static List<BluetoothDevice> get connectedDevices {
     var copy = Map.from(_connectionStates);
     copy.removeWhere((key, value) => value.connectionState == BmConnectionStateEnum.disconnected);
-    return copy.values.map((v) => BluetoothDevice(remoteId: DeviceIdentifier(v.remoteId))).toList();
+    return copy.values.map((v) => BluetoothDevice(remoteId: v.remoteId)).toList();
   }
 
   /// Retrieve a list of devices currently connected to the system
