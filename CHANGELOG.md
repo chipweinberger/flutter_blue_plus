@@ -1,3 +1,6 @@
+## 1.31.10
+* **[Fix]** type 'DeviceIdentifier' is not a subtype of type 'String' (regression 1.31.9)
+
 ## 1.31.9
 * **[Feature]** add `cancelAfterDisconnection` `delayed` option for `connectionState` streams
 * **[Feature]** add `device.isDisconnected`
