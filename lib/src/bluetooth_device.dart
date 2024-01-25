@@ -86,10 +86,14 @@ class BluetoothDevice {
   ///      - auto connect is turned off by calling `disconnect`
   ///      - auto connect results in a slower connection process compared to a direct connection
   ///        because it relies on the internal scheduling of background scans.
+  ///   [clearCacheAfterDisconnect] (Android only) if true, attempts to clear the GATT cache
+  ///      after the device has been disconnected. This may solve issues that can occur due
+  ///      to Android's aggressive caching of the GATT.
   Future<void> connect({
     Duration timeout = const Duration(seconds: 35),
     int? mtu = 512,
     bool autoConnect = false,
+    bool clearCacheOnDisconnect = false,
   }) async {
     // If you hit this assert, you must set `mtu:null`, i.e `device.connect(mtu:null, autoConnect:true)`
     // and you'll have to call `requestMtu` yourself. `autoConnect` is not compatibile with `mtu`.
@@ -107,6 +111,7 @@ class BluetoothDevice {
       var request = BmConnectRequest(
         remoteId: remoteId.str,
         autoConnect: autoConnect,
+        clearCacheOnDisconnect: clearCacheOnDisconnect,
       );
 
       var responseStream = FlutterBluePlus._methodStream.stream

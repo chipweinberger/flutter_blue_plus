@@ -108,6 +108,7 @@ public class FlutterBluePlusPlugin implements
     private final Map<String, String> mWriteDesc = new ConcurrentHashMap<>();
     private final Map<String, String> mAdvSeen = new ConcurrentHashMap<>();
     private final Map<String, Integer> mScanCounts = new ConcurrentHashMap<>();
+    private final Map<String, Boolean> mClearCacheOnDisconnect = new ConcurrentHashMap<>();
     private HashMap<String, Object> mScanFilters = new HashMap<String, Object>();
     
     private final Map<Integer, OperationOnPermission> operationsOnPermission = new HashMap<>();
@@ -645,6 +646,7 @@ public class FlutterBluePlusPlugin implements
                     HashMap<String, Object> args = call.arguments();
                     String remoteId =    (String) args.get("remote_id");
                     boolean autoConnect = ((int) args.get("auto_connect")) != 0;
+                    boolean clearCache = ((int) args.get("clear_cache_on_disconnect")) != 0;
 
                     ArrayList<String> permissions = new ArrayList<>();
 
@@ -708,6 +710,13 @@ public class FlutterBluePlusPlugin implements
                             mAutoConnected.remove(remoteId);
                         }
 
+                        // remember clearCache
+                        if (clearCache) {
+                            mClearCacheOnDisconnect.put(remoteId, clearCache);
+                        } else {
+                            mClearCacheOnDisconnect.remove(remoteId);
+                        }
+
                         result.success(true);
                     });
                     break;
@@ -746,6 +755,8 @@ public class FlutterBluePlusPlugin implements
 
                         // remove
                         mCurrentlyConnectingDevices.remove(remoteId);
+
+                        clearGattCacheIfNeeded(remoteId, gatt);
 
                         // cleanup
                         gatt.close();
@@ -1561,6 +1572,31 @@ public class FlutterBluePlusPlugin implements
         }
     }
 
+    private void clearGattCacheIfNeeded(String remoteId, BluetoothGatt gatt) {
+        boolean clearCache = (mClearCacheOnDisconnect.get(remoteId) != null) && mClearCacheOnDisconnect.get(remoteId);
+        mClearCacheOnDisconnect.remove(remoteId);
+
+        if (clearCache == false) { return; }
+
+        try {
+            final Method refreshMethod = gatt.getClass().getMethod("refresh");
+            if (refreshMethod == null) {
+                log(LogLevel.ERROR, "clearGattCacheIfNeeded failed - unsupported on this android version");
+                return;
+            }
+            refreshMethod.invoke(gatt);
+        } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+        }
+
+        log(LogLevel.DEBUG, "cleared GATT cache after disconnect");
+
+        // add 300ms delay before returning to allow gatt refresh to complete before it is closed
+        try { Thread.sleep(300); } catch(Exception e) {}
+    }
+
     class ChrFound {
         public BluetoothGattCharacteristic characteristic;
         public String error;
@@ -1698,6 +1734,8 @@ public class FlutterBluePlusPlugin implements
                 log(LogLevel.DEBUG, "calling disconnect: " + remoteId);
                 gatt.disconnect();
 
+                clearGattCacheIfNeeded(remoteId, gatt);
+
                 // it is important to close after disconnection, otherwise we will 
                 // quickly run out of bluetooth resources, preventing new connections
                 log(LogLevel.DEBUG, "calling close: " + remoteId);
@@ -1712,6 +1750,7 @@ public class FlutterBluePlusPlugin implements
         mWriteChr.clear();
         mWriteDesc.clear();
         mAutoConnected.clear();
+        mClearCacheOnDisconnect.clear();
     }
 
     /////////////////////////////////////////////////////////////////////////////////////
@@ -1976,6 +2015,8 @@ public class FlutterBluePlusPlugin implements
                 if (mAutoConnected.containsKey(remoteId)) {
                     log(LogLevel.DEBUG, "autoconnect is true. skipping gatt.close()");
                 } else {
+                    clearGattCacheIfNeeded(remoteId, gatt);
+
                     // it is important to close after disconnection, otherwise we will 
                     // quickly run out of bluetooth resources, preventing new connections
                     gatt.close();
