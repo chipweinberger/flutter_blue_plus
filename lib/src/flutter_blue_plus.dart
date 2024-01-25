@@ -28,6 +28,7 @@ class FlutterBluePlus {
   static final Map<DeviceIdentifier, Map<String, List<int>>> _lastChrs = {};
   static final Map<DeviceIdentifier, Map<String, List<int>>> _lastDescs = {};
   static final Map<DeviceIdentifier, List<StreamSubscription>> _deviceSubscriptions = {};
+  static final Map<DeviceIdentifier, List<StreamSubscription>> _delayedSubscriptions = {};
   static final List<StreamSubscription> _scanSubscriptions = [];
   static final Set<DeviceIdentifier> _autoConnect = {};
 
@@ -131,7 +132,7 @@ class FlutterBluePlus {
     // get current state if needed
     if (_adapterStateNow == null) {
       var result = await _invokeMethod('getAdapterState');
-      BmAdapterStateEnum value = BmBluetoothAdapterState.fromMap(result).adapterState;
+      var value = BmBluetoothAdapterState.fromMap(result).adapterState;
       // update _adapterStateNow if it is still null after the await
       if (_adapterStateNow == null) {
         _adapterStateNow = value;
@@ -150,7 +151,7 @@ class FlutterBluePlus {
   static List<BluetoothDevice> get connectedDevices {
     var copy = Map.from(_connectionStates);
     copy.removeWhere((key, value) => value.connectionState == BmConnectionStateEnum.disconnected);
-    return copy.values.map((v) => BluetoothDevice(remoteId: DeviceIdentifier(v.remoteId))).toList();
+    return copy.values.map((v) => BluetoothDevice(remoteId: v.remoteId)).toList();
   }
 
   /// Retrieve a list of devices currently connected to the system
@@ -158,25 +159,25 @@ class FlutterBluePlus {
   /// - You must still call device.connect() to connect them to *your app*
   static Future<List<BluetoothDevice>> get systemDevices async {
     var result = await _invokeMethod('getSystemDevices');
-    BmDevicesList response = BmDevicesList.fromMap(result);
-    for (BmBluetoothDevice device in response.devices) {
+    var r = BmDevicesList.fromMap(result);
+    for (BmBluetoothDevice device in r.devices) {
       if (device.platformName != null) {
-        _platformNames[DeviceIdentifier(device.remoteId)] = device.platformName!;
+        _platformNames[device.remoteId] = device.platformName!;
       }
     }
-    return response.devices.map((d) => BluetoothDevice.fromProto(d)).toList();
+    return r.devices.map((d) => BluetoothDevice.fromProto(d)).toList();
   }
 
   /// Retrieve a list of bonded devices (Android only)
   static Future<List<BluetoothDevice>> get bondedDevices async {
     var result = await _invokeMethod('getBondedDevices');
-    BmDevicesList response = BmDevicesList.fromMap(result);
-    for (BmBluetoothDevice device in response.devices) {
+    var r = BmDevicesList.fromMap(result);
+    for (BmBluetoothDevice device in r.devices) {
       if (device.platformName != null) {
-        _platformNames[DeviceIdentifier(device.remoteId)] = device.platformName!;
+        _platformNames[device.remoteId] = device.platformName!;
       }
     }
-    return response.devices.map((d) => BluetoothDevice.fromProto(d)).toList();
+    return r.devices.map((d) => BluetoothDevice.fromProto(d)).toList();
   }
 
   /// Start a scan, and return a stream of results
@@ -298,12 +299,12 @@ class FlutterBluePlus {
           for (BmScanAdvertisement bm in response.advertisements) {
             // cache platform name
             if (bm.platformName != null) {
-              _platformNames[DeviceIdentifier(bm.remoteId)] = bm.platformName!;
+              _platformNames[bm.remoteId] = bm.platformName!;
             }
 
             // cache advertised name
             if (bm.advName != null) {
-              _advNames[DeviceIdentifier(bm.remoteId)] = bm.advName!;
+              _advNames[bm.remoteId] = bm.advName!;
             }
 
             // convert
@@ -433,19 +434,29 @@ class FlutterBluePlus {
 
     // keep track of connection states
     if (call.method == "OnConnectionStateChanged") {
-      BmConnectionStateResponse r = BmConnectionStateResponse.fromMap(call.arguments);
-      var remoteId = DeviceIdentifier(r.remoteId);
-      _connectionStates[remoteId] = r;
+      var r = BmConnectionStateResponse.fromMap(call.arguments);
+      _connectionStates[r.remoteId] = r;
       if (r.connectionState == BmConnectionStateEnum.disconnected) {
+        // reset known mtu
+        _mtuValues.remove(r.remoteId); 
+
+        // clear lastDescs so that 'isNotifying' is reset
+        _lastDescs.remove(r.remoteId); 
+
+        // clear chr values, for api consistency
+        _lastChrs.remove(r.remoteId); 
+
+        // Note: to make FBP easier to use, we purposely 
+        // do not clear `knownServices` or `bondState`.
         // to make FBP easier to use, we purposely do not clear knownServices,
         // otherwise `servicesList` would be annoying to use.
         // We also don't clear the `bondState` cache for faster performance.
 
-        _deviceSubscriptions[remoteId]?.forEach((s) => s.cancel()); // cancel subscriptions
-        _deviceSubscriptions.remove(remoteId); // delete subscriptions
-        _mtuValues.remove(remoteId); // reset known mtu
-        _lastDescs.remove(remoteId); // clear lastDescs so that 'isNotifying' is reset
-        _lastChrs.remove(remoteId); // for api consistency, clear characteristic values
+        _deviceSubscriptions[r.remoteId]?.forEach((s) => s.cancel()); // cancel subscriptions
+        _deviceSubscriptions.remove(r.remoteId); // delete subscriptions
+        _mtuValues.remove(r.remoteId); // reset known mtu
+        _lastDescs.remove(r.remoteId); // clear lastDescs so that 'isNotifying' is reset
+        _lastChrs.remove(r.remoteId); // for api consistency, clear characteristic values
 
         // On apple, autoconnect is just a long running connection attempt
         // so the connection request must be restored after disconnection
@@ -461,62 +472,75 @@ class FlutterBluePlus {
 
     // keep track of device name
     if (call.method == "OnNameChanged") {
-      BmNameChanged device = BmNameChanged.fromMap(call.arguments);
+      var device = BmNameChanged.fromMap(call.arguments);
       if (Platform.isMacOS || Platform.isIOS) {
         // iOS & macOS internally use the name changed callback for the platform name
-        _platformNames[DeviceIdentifier(device.remoteId)] = device.name;
+        _platformNames[device.remoteId] = device.name;
       }
     }
 
     // keep track of services resets
     if (call.method == "OnServicesReset") {
-      BmBluetoothDevice device = BmBluetoothDevice.fromMap(call.arguments);
-      _knownServices.remove(DeviceIdentifier(device.remoteId));
+      var r = BmBluetoothDevice.fromMap(call.arguments);
+      _knownServices.remove(r.remoteId);
     }
 
     // keep track of bond state
     if (call.method == "OnBondStateChanged") {
-      BmBondStateResponse r = BmBondStateResponse.fromMap(call.arguments);
-      _bondStates[DeviceIdentifier(r.remoteId)] = r;
+      var r = BmBondStateResponse.fromMap(call.arguments);
+      _bondStates[r.remoteId] = r;
     }
 
     // keep track of services
     if (call.method == "OnDiscoveredServices") {
-      BmDiscoverServicesResult r = BmDiscoverServicesResult.fromMap(call.arguments);
+      var r = BmDiscoverServicesResult.fromMap(call.arguments);
       if (r.success == true) {
-        _knownServices[DeviceIdentifier(r.remoteId)] = r;
+        _knownServices[r.remoteId] = r;
       }
     }
 
     // keep track of mtu values
     if (call.method == "OnMtuChanged") {
-      BmMtuChangedResponse r = BmMtuChangedResponse.fromMap(call.arguments);
+      var r = BmMtuChangedResponse.fromMap(call.arguments);
       if (r.success == true) {
-        _mtuValues[DeviceIdentifier(r.remoteId)] = r;
+        _mtuValues[r.remoteId] = r;
       }
     }
 
     // keep track of characteristic values
     if (call.method == "OnCharacteristicReceived" || call.method == "OnCharacteristicWritten") {
-      BmCharacteristicData r = BmCharacteristicData.fromMap(call.arguments);
+      var r = BmCharacteristicData.fromMap(call.arguments);
       if (r.success == true) {
-        DeviceIdentifier d = DeviceIdentifier(r.remoteId);
-        _lastChrs[d] ??= {};
-        _lastChrs[DeviceIdentifier(r.remoteId)]!["${r.serviceUuid}:${r.characteristicUuid}"] = r.value;
+        _lastChrs[r.remoteId] ??= {};
+        _lastChrs[r.remoteId]!["${r.serviceUuid}:${r.characteristicUuid}"] = r.value;
       }
     }
 
     // keep track of descriptor values
     if (call.method == "OnDescriptorRead" || call.method == "OnDescriptorWritten") {
-      BmDescriptorData r = BmDescriptorData.fromMap(call.arguments);
+      var r = BmDescriptorData.fromMap(call.arguments);
       if (r.success == true) {
-        DeviceIdentifier d = DeviceIdentifier(r.remoteId);
-        _lastDescs[d] ??= {};
-        _lastDescs[d]!["${r.serviceUuid}:${r.characteristicUuid}:${r.descriptorUuid}"] = r.value;
+        _lastDescs[r.remoteId] ??= {};
+        _lastDescs[r.remoteId]!["${r.serviceUuid}:${r.characteristicUuid}:${r.descriptorUuid}"] = r.value;
       }
     }
 
     _methodStream.add(call);
+
+    // cancel delayed subscriptions
+    if (call.method == "OnConnectionStateChanged") {
+      if (_delayedSubscriptions.isNotEmpty) {
+        var r = BmConnectionStateResponse.fromMap(call.arguments);
+        if (r.connectionState == BmConnectionStateEnum.disconnected) {
+          var remoteId = r.remoteId;
+          // use delayed to update the stream before we cancel it
+          Future.delayed(Duration.zero).then((_) {
+            _delayedSubscriptions[remoteId]?.forEach((s) => s.cancel()); // cancel
+            _delayedSubscriptions.remove(remoteId); // delete
+          });
+        }
+      }
+    }
   }
 
   /// invoke a platform method
@@ -687,7 +711,7 @@ class ScanResult {
   });
 
   ScanResult.fromProto(BmScanAdvertisement p)
-      : device = BluetoothDevice.fromId(p.remoteId),
+      : device = BluetoothDevice(remoteId: p.remoteId),
         advertisementData = AdvertisementData.fromProto(p),
         rssi = p.rssi,
         timeStamp = DateTime.now();

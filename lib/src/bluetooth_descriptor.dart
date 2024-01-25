@@ -18,7 +18,7 @@ class BluetoothDescriptor {
   });
 
   BluetoothDescriptor.fromProto(BmBluetoothDescriptor p)
-      : remoteId = DeviceIdentifier(p.remoteId),
+      : remoteId = p.remoteId,
         serviceUuid = p.serviceUuid,
         characteristicUuid = p.characteristicUuid,
         descriptorUuid = p.descriptorUuid;
@@ -46,7 +46,7 @@ class BluetoothDescriptor {
       .where((m) => m.method == "OnDescriptorRead" || m.method == "OnDescriptorWritten")
       .map((m) => m.arguments)
       .map((args) => BmDescriptorData.fromMap(args))
-      .where((p) => p.remoteId == remoteId.toString())
+      .where((p) => p.remoteId == remoteId)
       .where((p) => p.characteristicUuid == characteristicUuid)
       .where((p) => p.serviceUuid == serviceUuid)
       .where((p) => p.descriptorUuid == descriptorUuid)
@@ -60,7 +60,7 @@ class BluetoothDescriptor {
       .where((m) => m.method == "OnDescriptorRead")
       .map((m) => m.arguments)
       .map((args) => BmDescriptorData.fromMap(args))
-      .where((p) => p.remoteId == remoteId.toString())
+      .where((p) => p.remoteId == remoteId)
       .where((p) => p.characteristicUuid == characteristicUuid)
       .where((p) => p.serviceUuid == serviceUuid)
       .where((p) => p.descriptorUuid == descriptorUuid)
@@ -70,7 +70,7 @@ class BluetoothDescriptor {
   /// Retrieves the value of a specified descriptor
   Future<List<int>> read({int timeout = 15}) async {
     // check connected
-    if (device.isConnected == false) {
+    if (device.isDisconnected) {
       throw FlutterBluePlusException(
           ErrorPlatform.fbp, "readDescriptor", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
@@ -84,7 +84,7 @@ class BluetoothDescriptor {
 
     try {
       var request = BmReadDescriptorRequest(
-        remoteId: remoteId.toString(),
+        remoteId: remoteId,
         serviceUuid: serviceUuid,
         secondaryServiceUuid: null,
         characteristicUuid: characteristicUuid,
@@ -128,7 +128,7 @@ class BluetoothDescriptor {
   /// Writes the value of a descriptor
   Future<void> write(List<int> value, {int timeout = 15}) async {
     // check connected
-    if (device.isConnected == false) {
+    if (device.isDisconnected) {
       throw FlutterBluePlusException(
           ErrorPlatform.fbp, "writeDescriptor", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
@@ -139,7 +139,7 @@ class BluetoothDescriptor {
 
     try {
       var request = BmWriteDescriptorRequest(
-        remoteId: remoteId.toString(),
+        remoteId: remoteId,
         serviceUuid: serviceUuid,
         secondaryServiceUuid: null,
         characteristicUuid: characteristicUuid,

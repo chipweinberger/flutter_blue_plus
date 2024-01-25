@@ -11,7 +11,7 @@ class BluetoothDevice {
     required this.remoteId,
   });
 
-  BluetoothDevice.fromProto(BmBluetoothDevice p) : remoteId = DeviceIdentifier(p.remoteId);
+  BluetoothDevice.fromProto(BmBluetoothDevice p) : remoteId = p.remoteId;
 
   /// Create a device from an id
   ///   - to connect, this device must have been discovered by your app in a previous scan
@@ -51,14 +51,19 @@ class BluetoothDevice {
   ///   - this is an optional convenience function
   ///   - prevents accidentally creating duplicate subscriptions on each reconnection.
   ///   - [next] if true, the the stream will be canceled only on the *next* disconnection.
-  ///     This is useful if you like to setup your subscriptions before you call connect.
-  void cancelWhenDisconnected(StreamSubscription subscription, {bool next = false}) {
+  ///     This is useful if you setup your subscriptions before you connect.
+  ///   - [delayed] Note: This option is only meant for `connectionState` subscriptions.  
+  ///     When `true`, we cancel after a small delay. This ensures the `connectionState` 
+  ///     listener receives the `disconnected` event.
+  void cancelWhenDisconnected(StreamSubscription subscription, {bool next = false, bool delayed = false}) {
     if (isConnected == false && next == false) {
-      // cancel immediately if already disconnected.
-      subscription.cancel(); 
+      subscription.cancel(); // cancel immediately if already disconnected.
+    } else if (delayed) {
+      FlutterBluePlus._delayedSubscriptions[remoteId] ??= [];
+      FlutterBluePlus._delayedSubscriptions[remoteId]!.add(subscription);
     } else {
       FlutterBluePlus._deviceSubscriptions[remoteId] ??= [];
-      FlutterBluePlus._deviceSubscriptions[remoteId]!.add(subscription);
+      FlutterBluePlus._deviceSubscriptions[remoteId]!.add(subscription);      
     }
   }
 
@@ -67,7 +72,7 @@ class BluetoothDevice {
     return FlutterBluePlus._autoConnect.contains(remoteId);
   }
 
-  /// Returns true if this device currently connected to your app
+  /// Returns true if this device is currently connected to your app
   bool get isConnected {
     if (FlutterBluePlus._connectionStates[remoteId] == null) {
       return false;
@@ -76,6 +81,9 @@ class BluetoothDevice {
       return state == BmConnectionStateEnum.connected;
     }
   }
+
+  /// Returns true if this device is currently disconnected from your app
+  bool get isDisconnected => isConnected == false;
 
   /// Establishes a connection to the Bluetooth Device.
   ///   [timeout] if timeout occurs, cancel the connection request and throw exception
@@ -109,7 +117,7 @@ class BluetoothDevice {
 
     try {
       var request = BmConnectRequest(
-        remoteId: remoteId.str,
+        remoteId: remoteId,
         autoConnect: autoConnect,
         clearCacheOnDisconnect: clearCacheOnDisconnect,
       );
@@ -118,7 +126,7 @@ class BluetoothDevice {
           .where((m) => m.method == "OnConnectionStateChanged")
           .map((m) => m.arguments)
           .map((args) => BmConnectionStateResponse.fromMap(args))
-          .where((p) => p.remoteId == remoteId.str);
+          .where((p) => p.remoteId == remoteId);
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmConnectionStateResponse> futureState = responseStream.first;
@@ -194,7 +202,7 @@ class BluetoothDevice {
           .where((m) => m.method == "OnConnectionStateChanged")
           .map((m) => m.arguments)
           .map((args) => BmConnectionStateResponse.fromMap(args))
-          .where((p) => p.remoteId == remoteId.str)
+          .where((p) => p.remoteId == remoteId)
           .where((p) => p.connectionState == BmConnectionStateEnum.disconnected);
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
@@ -221,7 +229,7 @@ class BluetoothDevice {
   ///     Note: this behavior happens automatically on iOS and cannot be disabled
   Future<List<BluetoothService>> discoverServices({bool subscribeToServicesChanged = true, int timeout = 15}) async {
     // check connected
-    if (isConnected == false) {
+    if (isDisconnected) {
       throw FlutterBluePlusException(
           ErrorPlatform.fbp, "discoverServices", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
@@ -237,7 +245,7 @@ class BluetoothDevice {
           .where((m) => m.method == "OnDiscoveredServices")
           .map((m) => m.arguments)
           .map((args) => BmDiscoverServicesResult.fromMap(args))
-          .where((p) => p.remoteId == remoteId.str);
+          .where((p) => p.remoteId == remoteId);
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmDiscoverServicesResult> futureResponse = responseStream.first;
@@ -297,7 +305,7 @@ class BluetoothDevice {
         .where((m) => m.method == "OnConnectionStateChanged")
         .map((m) => m.arguments)
         .map((args) => BmConnectionStateResponse.fromMap(args))
-        .where((p) => p.remoteId == remoteId.str)
+        .where((p) => p.remoteId == remoteId)
         .map((p) => _bmToConnectionState(p.connectionState))
         .newStreamWithInitialValue(initialValue);
   }
@@ -318,7 +326,7 @@ class BluetoothDevice {
         .where((m) => m.method == "OnMtuChanged")
         .map((m) => m.arguments)
         .map((args) => BmMtuChangedResponse.fromMap(args))
-        .where((p) => p.remoteId == remoteId.str)
+        .where((p) => p.remoteId == remoteId)
         .map((p) => p.mtu)
         .newStreamWithInitialValue(initialValue);
   }
@@ -331,14 +339,14 @@ class BluetoothDevice {
         .where((m) => m.method == "OnServicesReset")
         .map((m) => m.arguments)
         .map((args) => BmBluetoothDevice.fromMap(args))
-        .where((p) => p.remoteId == remoteId.str)
+        .where((p) => p.remoteId == remoteId)
         .map((m) => null);
   }
 
   /// Read the RSSI of connected remote device
   Future<int> readRssi({int timeout = 15}) async {
     // check connected
-    if (isConnected == false) {
+    if (isDisconnected) {
       throw FlutterBluePlusException(
           ErrorPlatform.fbp, "readRssi", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
@@ -354,7 +362,7 @@ class BluetoothDevice {
           .where((m) => m.method == "OnReadRssi")
           .map((m) => m.arguments)
           .map((args) => BmReadRssiResult.fromMap(args))
-          .where((p) => (p.remoteId == remoteId.str));
+          .where((p) => (p.remoteId == remoteId));
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmReadRssiResult> futureResponse = responseStream.first;
@@ -390,7 +398,7 @@ class BluetoothDevice {
     }
 
     // check connected
-    if (isConnected == false) {
+    if (isDisconnected) {
       throw FlutterBluePlusException(
           ErrorPlatform.fbp, "requestMtu", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
@@ -424,7 +432,7 @@ class BluetoothDevice {
 
     try {
       var request = BmMtuChangeRequest(
-        remoteId: remoteId.str,
+        remoteId: remoteId,
         mtu: desiredMtu,
       );
 
@@ -432,7 +440,7 @@ class BluetoothDevice {
           .where((m) => m.method == "OnMtuChanged")
           .map((m) => m.arguments)
           .map((args) => BmMtuChangedResponse.fromMap(args))
-          .where((p) => p.remoteId == remoteId.str)
+          .where((p) => p.remoteId == remoteId)
           .map((p) => p.mtu);
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
@@ -462,13 +470,13 @@ class BluetoothDevice {
     }
 
     // check connected
-    if (isConnected == false) {
+    if (isDisconnected) {
       throw FlutterBluePlusException(ErrorPlatform.fbp, "requestConnectionPriority",
           FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
     var request = BmConnectionPriorityRequest(
-      remoteId: remoteId.str,
+      remoteId: remoteId,
       connectionPriority: _bmFromConnectionPriority(connectionPriorityRequest),
     );
 
@@ -493,13 +501,13 @@ class BluetoothDevice {
     }
 
     // check connected
-    if (isConnected == false) {
+    if (isDisconnected) {
       throw FlutterBluePlusException(
           ErrorPlatform.fbp, "setPreferredPhy", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
     var request = BmPreferredPhy(
-      remoteId: remoteId.str,
+      remoteId: remoteId,
       txPhy: txPhy,
       rxPhy: rxPhy,
       phyOptions: option.index,
@@ -518,7 +526,7 @@ class BluetoothDevice {
     }
 
     // check connected
-    if (isConnected == false) {
+    if (isDisconnected) {
       throw FlutterBluePlusException(
           ErrorPlatform.fbp, "createBond", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
@@ -532,7 +540,7 @@ class BluetoothDevice {
           .where((m) => m.method == "OnBondStateChanged")
           .map((m) => m.arguments)
           .map((args) => BmBondStateResponse.fromMap(args))
-          .where((p) => p.remoteId == remoteId.str)
+          .where((p) => p.remoteId == remoteId)
           .where((p) => p.bondState != BmBondStateEnum.bonding);
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
@@ -575,7 +583,7 @@ class BluetoothDevice {
           .where((m) => m.method == "OnBondStateChanged")
           .map((m) => m.arguments)
           .map((args) => BmBondStateResponse.fromMap(args))
-          .where((p) => p.remoteId == remoteId.str)
+          .where((p) => p.remoteId == remoteId)
           .where((p) => p.bondState != BmBondStateEnum.bonding);
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
@@ -611,7 +619,7 @@ class BluetoothDevice {
     }
 
     // check connected
-    if (isConnected == false) {
+    if (isDisconnected) {
       throw FlutterBluePlusException(
           ErrorPlatform.fbp, "clearGattCache", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
@@ -642,7 +650,7 @@ class BluetoothDevice {
         .where((m) => m.method == "OnBondStateChanged")
         .map((m) => m.arguments)
         .map((args) => BmBondStateResponse.fromMap(args))
-        .where((p) => p.remoteId == remoteId.str)
+        .where((p) => p.remoteId == remoteId)
         .map((p) => _bmToBondState(p.bondState))
         .newStreamWithInitialValue(_bmToBondState(FlutterBluePlus._bondStates[remoteId]!.bondState));
   }
