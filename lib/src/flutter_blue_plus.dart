@@ -458,13 +458,10 @@ class FlutterBluePlus {
         _lastDescs.remove(r.remoteId); // clear lastDescs so that 'isNotifying' is reset
         _lastChrs.remove(r.remoteId); // for api consistency, clear characteristic values
 
-        // On apple, autoconnect is just a long running connection attempt
-        // so the connection request must be restored after disconnection
+        // autoconnect
         for (DeviceIdentifier d in _autoConnect) {
-          if (Platform.isIOS || Platform.isMacOS) {
-            if (_adapterStateNow == BmAdapterStateEnum.on) {
-              BluetoothDevice(remoteId: d).connect(autoConnect: true, mtu: null);
-            }
+          if (_adapterStateNow == BmAdapterStateEnum.on) {
+            BluetoothDevice(remoteId: d).connect(autoConnect: true, mtu: null);
           }
         }
       }

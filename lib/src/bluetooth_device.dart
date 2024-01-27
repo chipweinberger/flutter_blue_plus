@@ -112,6 +112,11 @@ class BluetoothDevice {
     await mtx.take();
 
     try {
+      // remember auto connect value
+      if (autoConnect) {
+        FlutterBluePlus._autoConnect.add(remoteId);
+      }
+
       var request = BmConnectRequest(
         remoteId: remoteId,
         autoConnect: autoConnect,
@@ -128,11 +133,6 @@ class BluetoothDevice {
 
       // invoke
       bool changed = await FlutterBluePlus._invokeMethod('connect', request.toMap());
-
-      // remember auto connect value
-      if (autoConnect) {
-        FlutterBluePlus._autoConnect.add(remoteId);
-      }
 
       // we return the disconnect mutex now so that this
       // connection attempt can be canceled by calling disconnect
