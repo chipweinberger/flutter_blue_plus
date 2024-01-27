@@ -1,3 +1,6 @@
+## 1.31.11
+* **[Feature]** add convenience function to get raw `msd` data in advertisement
+
 ## 1.31.10
 * **[Fix]** type 'DeviceIdentifier' is not a subtype of type 'String' (regression 1.31.9)
 
