@@ -1670,9 +1670,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     NSDictionary* manufDataB = nil;
     if (manufData != nil && manufData.length >= 2) {
         
-        // first 2 bytes are manufacturerId
-        unsigned short manufId = 0;
-        [manufData getBytes:&manufId length:2];
+        // first 2 bytes are manufacturerId (little endian)
+        uint8_t bytes[2];
+        [manufData getBytes:bytes length:2];
+        unsigned short manufId = (unsigned short) (bytes[0] | bytes[1] << 8);
 
         // trim off first 2 bytes
         NSData* trimmed = [manufData subdataWithRange:NSMakeRange(2, manufData.length - 2)];
