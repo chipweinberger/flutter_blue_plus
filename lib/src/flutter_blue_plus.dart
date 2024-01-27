@@ -742,6 +742,15 @@ class AdvertisementData {
   final Map<Guid, List<int>> serviceData; // key: service guid
   final List<Guid> serviceUuids;
 
+  // raw manufacturer specific data
+  List<List<int>> get msd {
+    List<List<int>> out = [];
+    manufacturerData.forEach((key, value) {
+      out.add([key & 0xFF, (key >> 8) & 0xFF] + value);
+    });
+    return out;
+  }
+
   AdvertisementData({
     required this.advName,
     required this.txPowerLevel,
