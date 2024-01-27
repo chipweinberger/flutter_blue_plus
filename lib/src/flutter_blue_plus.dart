@@ -643,12 +643,12 @@ class AndroidScanMode {
 class MsdFilter {
   int manufacturerId;
 
-  // filter for this data
+  /// filter for this data
   List<int> data;
 
-  // For any bit in the mask, set it the 1 if it needs to match
-  // the one in manufacturer data, otherwise set it to 0.
-  // The 'mask' must have the same length as 'data'.
+  /// For any bit in the mask, set it the 1 if it needs to match
+  /// the one in manufacturer data, otherwise set it to 0.
+  /// The 'mask' must have the same length as 'data'.
   List<int> mask;
 
   MsdFilter(this.manufacturerId, {this.data = const [], this.mask = const []});
@@ -742,7 +742,7 @@ class AdvertisementData {
   final Map<Guid, List<int>> serviceData; // key: service guid
   final List<Guid> serviceUuids;
 
-  // raw manufacturer specific data
+  /// raw manufacturer specific data
   List<List<int>> get msd {
     List<List<int>> out = [];
     manufacturerData.forEach((key, value) {
