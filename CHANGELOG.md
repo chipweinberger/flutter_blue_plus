@@ -1,3 +1,6 @@
+## 1.31.12
+* **[Improve]** improve reliability of autoconnect on android
+
 ## 1.31.11
 * **[Feature]** add convenience function to get raw `msd` data in advertisement
 
