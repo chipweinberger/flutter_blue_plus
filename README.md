@@ -552,7 +552,9 @@ In the **ios/Runner/Info.plist** let’s add:
 
 For location permissions on iOS see more at: [https://developer.apple.com/documentation/corelocation/requesting_authorization_for_location_services](https://developer.apple.com/documentation/corelocation/requesting_authorization_for_location_services)
 
-And in Xcode, add access to Bluetooth hardware: 
+### Add permissions for macOS 
+
+Make sure you have granted access to the Bluetooth hardware:
 
 `Xcode -> Runners -> Targets -> Runner-> Signing & Capabilities -> App Sandbox -> Hardware -> Enable Bluetooth`
 
