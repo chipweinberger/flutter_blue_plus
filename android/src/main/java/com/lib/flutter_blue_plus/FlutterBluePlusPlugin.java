@@ -2670,7 +2670,7 @@ public class FlutterBluePlusPlugin implements
             case 0x05: return "AUTHENTICATION_FAILURE"; // Pairing or authentication failed. This could be due to an incorrect PIN or Link Key.
             case 0x06: return "PIN_OR_KEY_MISSING"; // Pairing failed because of a missing PIN
             case 0x07: return "MEMORY_FULL"; // The Controller has run out of memory to store new parameters.
-            case 0x08: return "CONNECTION_TIMEOUT"; // The link supervision timeout has expired for a given connection.
+            case 0x08: return "LINK_SUPERVISION_TIMEOUT"; // The link supervision timeout has expired for a given connection.
             case 0x09: return "CONNECTION_LIMIT_EXCEEDED"; // The Controller is already at its limit of the number of connections it can support.
             case 0x0A: return "MAX_NUM_OF_CONNECTIONS_EXCEEDED"; // The Controller has reached the limit of connections
             case 0x0B: return "CONNECTION_ALREADY_EXISTS"; // A connection to this device already exists 
