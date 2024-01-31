@@ -1,3 +1,6 @@
+## 1.31.13
+* **[Improve]**  android: use name `LINK_SUPERVISION_TIMEOUT` instead of `CONNECTION_TIMEOUT`
+
 ## 1.31.12
 * **[Improve]** improve reliability of autoconnect on android
 
