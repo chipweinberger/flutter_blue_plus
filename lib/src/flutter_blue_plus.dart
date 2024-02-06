@@ -699,19 +699,22 @@ class ScanResult {
   final AdvertisementData advertisementData;
   final int rssi;
   final DateTime timeStamp;
+  final List<int> rawData;
 
   ScanResult({
     required this.device,
     required this.advertisementData,
     required this.rssi,
     required this.timeStamp,
+    required this.rawData,
   });
 
   ScanResult.fromProto(BmScanAdvertisement p)
       : device = BluetoothDevice(remoteId: p.remoteId),
         advertisementData = AdvertisementData.fromProto(p),
         rssi = p.rssi,
-        timeStamp = DateTime.now();
+        timeStamp = DateTime.now(),
+        rawData = p.rawData;
 
   @override
   bool operator ==(Object other) =>
@@ -726,7 +729,8 @@ class ScanResult {
         'device: $device, '
         'advertisementData: $advertisementData, '
         'rssi: $rssi, '
-        'timeStamp: $timeStamp'
+        'timeStamp: $timeStamp,'
+        'rawData: $rawData'
         '}';
   }
 }

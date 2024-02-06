@@ -107,6 +107,7 @@ class BmScanAdvertisement {
   final Map<Guid, List<int>> serviceData;
   final List<Guid> serviceUuids;
   final int rssi;
+  final List<int> rawData;
 
   BmScanAdvertisement({
     required this.remoteId,
@@ -118,6 +119,7 @@ class BmScanAdvertisement {
     required this.serviceData,
     required this.serviceUuids,
     required this.rssi,
+    required this.rawData,
   });
 
   factory BmScanAdvertisement.fromMap(Map<dynamic, dynamic> json) {
@@ -154,6 +156,7 @@ class BmScanAdvertisement {
       serviceData: serviceData,
       serviceUuids: serviceUuids,
       rssi: json['rssi'] != null ? json['rssi'] : 0,
+      rawData: json['raw_data'],
     );
   }
 }

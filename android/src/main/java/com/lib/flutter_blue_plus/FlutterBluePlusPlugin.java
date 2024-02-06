@@ -2339,6 +2339,7 @@ public class FlutterBluePlusPlugin implements
         if (serviceData != null)         {map.put("service_data", serviceDataB);}
         if (serviceUuids != null)        {map.put("service_uuids", serviceUuidsB);}
         if (result.getRssi() != 0)       {map.put("rssi", result.getRssi());};
+        if (result.getScanRecord().getBytes() != null) {map.put("raw_data", result.getScanRecord().getBytes());}
         return map;
     }
 
