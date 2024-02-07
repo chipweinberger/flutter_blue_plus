@@ -215,10 +215,13 @@ Connects whenever your device is found.
 
 ```dart
 // enable auto connect
-//  - this function always returns immediately
-//  - you must listen to `device.connectionState` to know when connection occurs 
-//  - autoConnect is incompatible with mtu argument, so you must call requestMtu yourself
+//  - note: autoConnect is incompatible with mtu argument, so you must call requestMtu yourself
 await device.connect(mtu:null, autoConnect:true)
+
+// wait until connection
+//  - when using autoConnect, connect() always returns immediately, so we must
+//    explicity listen to `device.connectionState` to know when connection occurs 
+await device.connectionState.where((val) => val == BluetoothConnectionState.connected).first;
 
 // disable auto connect
 await device.disconnect()
@@ -236,8 +239,8 @@ final subscription = device.mtu.listen((int mtu) {
     print("mtu $mtu");
 });
 
-// cleanup: cancel subscription when disconnected
-device.cancelWhenDisconnected(subscription);
+// cleanup: cancel subscription when dis
+device.cancelWhenDis(subscription);
 
 // You can also manually change the mtu yourself.
 if (Platform.isAndroid) {
@@ -316,8 +319,8 @@ final subscription = characteristic.onValueReceived.listen((value) {
     //   - anytime a notification arrives (if subscribed)
 });
 
-// cleanup: cancel subscription when disconnected
-device.cancelWhenDisconnected(subscription);
+// cleanup: cancel subscription when dis
+device.cancelWhenDis(subscription);
 
 // subscribe
 // Note: If a characteristic supports both **notifications** and **indications**,
@@ -340,7 +343,7 @@ final subscription = characteristic.lastValueStream.listen((value) {
     //   - also when first listened to, it re-emits the last value for convenience.
 });
 
-// cleanup: cancel subscription when disconnected
+// cleanup: cancel subscription when dis
 device.cancelWhenDisconnected(subscription);
 
 // enable notifications
