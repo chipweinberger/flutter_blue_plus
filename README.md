@@ -216,7 +216,7 @@ Connects whenever your device is found.
 ```dart
 // enable auto connect
 //  - note: autoConnect is incompatible with mtu argument, so you must call requestMtu yourself
-await device.connect(mtu:null, autoConnect:true)
+await device.connect(autoConnect:true, mtu:null)
 
 // wait until connection
 //  - when using autoConnect, connect() always returns immediately, so we must
