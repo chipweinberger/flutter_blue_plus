@@ -239,8 +239,8 @@ final subscription = device.mtu.listen((int mtu) {
     print("mtu $mtu");
 });
 
-// cleanup: cancel subscription when dis
-device.cancelWhenDis(subscription);
+// cleanup: cancel subscription when disconnected
+device.cancelWhenDisconnected(subscription);
 
 // You can also manually change the mtu yourself.
 if (Platform.isAndroid) {
@@ -319,8 +319,8 @@ final subscription = characteristic.onValueReceived.listen((value) {
     //   - anytime a notification arrives (if subscribed)
 });
 
-// cleanup: cancel subscription when dis
-device.cancelWhenDis(subscription);
+// cleanup: cancel subscription when disconnected
+device.cancelWhenDisconnected(subscription);
 
 // subscribe
 // Note: If a characteristic supports both **notifications** and **indications**,
@@ -343,7 +343,7 @@ final subscription = characteristic.lastValueStream.listen((value) {
     //   - also when first listened to, it re-emits the last value for convenience.
 });
 
-// cleanup: cancel subscription when dis
+// cleanup: cancel subscription when disconnected
 device.cancelWhenDisconnected(subscription);
 
 // enable notifications
