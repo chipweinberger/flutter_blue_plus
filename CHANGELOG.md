@@ -1,3 +1,6 @@
+## 1.31.14
+* **[Fix]** autoconnect could not disconnect if there are multiple devices
+
 ## 1.31.13
 * **[Improve]**  android: use name `LINK_SUPERVISION_TIMEOUT` instead of `CONNECTION_TIMEOUT`
 
