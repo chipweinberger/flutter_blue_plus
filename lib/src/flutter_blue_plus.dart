@@ -438,15 +438,15 @@ class FlutterBluePlus {
       _connectionStates[r.remoteId] = r;
       if (r.connectionState == BmConnectionStateEnum.disconnected) {
         // reset known mtu
-        _mtuValues.remove(r.remoteId); 
+        _mtuValues.remove(r.remoteId);
 
         // clear lastDescs so that 'isNotifying' is reset
-        _lastDescs.remove(r.remoteId); 
+        _lastDescs.remove(r.remoteId);
 
         // clear chr values, for api consistency
-        _lastChrs.remove(r.remoteId); 
+        _lastChrs.remove(r.remoteId);
 
-        // Note: to make FBP easier to use, we purposely 
+        // Note: to make FBP easier to use, we purposely
         // do not clear `knownServices` or `bondState`.
         // to make FBP easier to use, we purposely do not clear knownServices,
         // otherwise `servicesList` would be annoying to use.
@@ -459,9 +459,10 @@ class FlutterBluePlus {
         _lastChrs.remove(r.remoteId); // for api consistency, clear characteristic values
 
         // autoconnect
-        for (DeviceIdentifier d in _autoConnect) {
-          if (_adapterStateNow == BmAdapterStateEnum.on) {
-            BluetoothDevice(remoteId: d).connect(autoConnect: true, mtu: null);
+        if (_adapterStateNow == BmAdapterStateEnum.on) {
+          var device = BluetoothDevice(remoteId: r.remoteId);
+          if (_autoConnect.contains(device)) {
+            device.connect(autoConnect: true, mtu: null);
           }
         }
       }
