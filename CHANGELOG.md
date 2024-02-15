@@ -1,3 +1,6 @@
+## 1.31.15
+* **[Feature]** support advertising `appearance` on Android
+
 ## 1.31.14
 * **[Fix]** autoconnect could not disconnect if there are multiple devices
 

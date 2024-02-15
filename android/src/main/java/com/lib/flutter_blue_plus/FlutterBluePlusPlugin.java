@@ -1715,19 +1715,17 @@ public class FlutterBluePlusPlugin implements
     }
 
     int getAppearanceFromScanRecord(ScanRecord adv) {
-        if (Build.VERSION.SDK_INT >= 33) { // Android 13
 
+        if (Build.VERSION.SDK_INT >= 33) { // Android 13 (August 2022)
             Map<Integer, byte[]> map = adv.getAdvertisingDataMap();
             if (map.containsKey(ScanRecord.DATA_TYPE_APPEARANCE)) {
                 byte[] bytes = map.get(ScanRecord.DATA_TYPE_APPEARANCE);
                 if (bytes.length == 2) {
-                    // The conversion from byte to int is crucial!
                     int loByte = bytes[0] & 0xFF;
                     int hiByte = bytes[1] & 0xFF;
                     return hiByte * 256 + loByte;
                 }
             }
-
             return 0;
         }
 
@@ -1759,7 +1757,6 @@ public class FlutterBluePlusPlugin implements
 
             // appearance type byte
             if (dataType == 0x19 && fieldLen == 3) {
-                // The conversion from byte to int is crucial!
                 int loByte = bytes[n + 2] & 0xFF;
                 int hiByte = bytes[n + 3] & 0xFF;
                 return hiByte * 256 + loByte;
