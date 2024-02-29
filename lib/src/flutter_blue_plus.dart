@@ -197,6 +197,8 @@ class FlutterBluePlus {
   ///        ignored, and one-third are processed. This reduces main-thread usage caused by the platform channel.
   ///        The scan counting is per-device so you always get the 1st advertisement from each device.
   ///        If divisor is 1, all advertisements are returned. This argument only matters for `continuousUpdates` mode.
+  ///   - [nearestDevice] If `true`, we continually update 'lastSeen' & 'rssi' by processing
+  ///        duplicate advertisements. This takes more power. You typically should not use this option.
   ///   - [oneByOne] if `true`, we will stream every advertistment one by one, possibly including duplicates.
   ///        If `false`, we deduplicate the advertisements, and return a list of devices.
   ///   - [androidScanMode] choose the android scan mode to use when scanning
@@ -212,6 +214,7 @@ class FlutterBluePlus {
     Duration? removeIfGone,
     bool continuousUpdates = false,
     int continuousDivisor = 1,
+    bool nearestDevice = false,
     bool oneByOne = false,
     AndroidScanMode androidScanMode = AndroidScanMode.lowLatency,
     bool androidUsesFineLocation = false,
@@ -256,6 +259,7 @@ class FlutterBluePlus {
           withServiceData: withServiceData.map((d) => d._bm).toList(),
           continuousUpdates: continuousUpdates,
           continuousDivisor: continuousDivisor,
+          nearestDevice: nearestDevice,
           androidScanMode: androidScanMode.value,
           androidUsesFineLocation: androidUsesFineLocation);
 

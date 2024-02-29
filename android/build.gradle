@@ -2,13 +2,20 @@ group 'com.lib.flutter_blue_plus'
 version '1.0'
 
 apply plugin: 'com.android.library'
+apply plugin: 'org.jetbrains.kotlin.android'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion 33
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
     }
 
     lintOptions {
@@ -16,7 +23,7 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 21
+        minSdkVersion 26
     }
 
     gradle.projectsEvaluated {
@@ -30,4 +37,8 @@ android {
     if (project.android.hasProperty("namespace")) {
         namespace 'com.lib.flutter_blue_plus'
     }
+}
+
+dependencies {
+    implementation 'androidx.core:core-ktx:1.12.0'
 }
