@@ -1,3 +1,6 @@
+## 1.31.16
+* **[Fix]** forgot to push to mtu stream after disconnection
+
 ## 1.31.15
 * **[Feature]** support advertising `appearance` on Android
 
