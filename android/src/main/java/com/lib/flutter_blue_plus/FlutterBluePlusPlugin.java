@@ -730,17 +730,14 @@ public class FlutterBluePlusPlugin implements
                     }
                     if (gatt == null) {
                         gatt = mAutoConnected.get(remoteId);
-                        log(LogLevel.DEBUG, "already disconnected, but autoconnect deactivation is required");
-                        
-                        // calling disconnect explicitly turns off autoconnect.
-                        // this allows gatt resources to be reclaimed
-                        mAutoConnected.remove(remoteId);
-
-                        // cleanup
-                        gatt.close();
-                        
-                        result.success(false);  // no work to do
-                        return;
+                        if (gatt != null) {
+                            log(LogLevel.DEBUG, "already disconnected. disabling autoconnect");
+                            mAutoConnected.remove(remoteId);
+                            gatt.disconnect();
+                            gatt.close();
+                            result.success(false);  // no work to do
+                            return;
+                        }
                     }
                     if (gatt == null) {
                         log(LogLevel.DEBUG, "already disconnected");
