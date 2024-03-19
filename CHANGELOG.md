@@ -1,3 +1,7 @@
+## 1.31.17
+* **[Fix]** android: autoconnect could enter disconnect / connection loop
+* **[Fix]** android: calling `disconnect` should always disable autoconnect, even if already disconnected
+
 ## 1.31.16
 * **[Fix]** forgot to push to mtu stream after disconnection
 
