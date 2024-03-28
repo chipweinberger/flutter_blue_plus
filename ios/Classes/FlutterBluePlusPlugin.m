@@ -53,6 +53,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 @property(nonatomic) NSDictionary *scanFilters;
 @property(nonatomic) NSTimer *checkForMtuChangesTimer;
 @property(nonatomic) LogLevel logLevel;
+@property(nonatomic) bool showPowerAlert;
 @end
 
 @implementation FlutterBluePlusPlugin
@@ -73,6 +74,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     instance.writeDescs = [NSMutableDictionary new];
     instance.scanCounts = [NSMutableDictionary new];
     instance.logLevel = LDEBUG;
+    instance.showPowerAlert = @(YES);
 
     [registrar addMethodCallDelegate:instance channel:methodChannel];
 }
@@ -102,14 +104,27 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     {
         Log(LDEBUG, @"handleMethodCall: %@", call.method);
 
+        if ([@"setOptions" isEqualToString:call.method])
+        {
+            NSDictionary *args = (NSDictionary*) call.arguments;
+            NSNumber *showPowerAlert = args[@"show_power_alert"];
+
+            self.showPowerAlert = (bool)[showPowerAlert boolValue];
+
+            result(@YES);
+            return;
+        }
+
         // initialize adapter
         if (self.centralManager == nil)
         {
             Log(LDEBUG, @"initializing CBCentralManager");
 
             NSDictionary *options = @{
-                CBCentralManagerOptionShowPowerAlertKey: @(YES)
+                CBCentralManagerOptionShowPowerAlertKey: self.showPowerAlert ? @(YES) : @(NO)
             };
+
+            Log(LDEBUG, @"show power alert: %@", self.showPowerAlert ? @"yes" : @"no");
 
             self.centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil options:options];
         }

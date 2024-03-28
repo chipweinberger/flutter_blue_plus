@@ -317,6 +317,14 @@ public class FlutterBluePlusPlugin implements
                     break;
                 }
 
+                case "setOptions":
+                {
+                    //Not supported on Android
+                    log(LogLevel.DEBUG, "setting options on Android is not supported");
+                    result.success(false);
+                    break;
+                }
+
                 case "connectedCount":
                 {
                     log(LogLevel.DEBUG, "connectedPeripherals: " + mConnectedDevices.size());
