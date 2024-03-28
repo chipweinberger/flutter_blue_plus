@@ -319,9 +319,8 @@ public class FlutterBluePlusPlugin implements
 
                 case "setOptions":
                 {
-                    //Not supported on Android
-                    log(LogLevel.DEBUG, "setting options on Android is not supported");
-                    result.success(false);
+                    // Currently ignored on Android
+                    result.success(true);
                     break;
                 }
 

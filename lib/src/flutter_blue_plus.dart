@@ -99,6 +99,17 @@ class FlutterBluePlus {
   /// Get access to all device event streams
   static final BluetoothEvents events = BluetoothEvents();
 
+  /// Set configurable options
+  ///   - [showPowerAlert] Whether to show the power alert (iOS & MacOS only). i.e. CBCentralManagerOptionShowPowerAlertKey
+  ///       To set this option you must call this method before any other method in this package.
+  ///       See: https://developer.apple.com/documentation/corebluetooth/cbcentralmanageroptionshowpoweralertkey
+  ///       This option has no effect on Android.
+  static Future<void> setOptions({
+    bool showPowerAlert = true,
+  }) async {
+    await _invokeMethod('setOptions', {"show_power_alert": showPowerAlert});
+  }
+
   /// Turn on Bluetooth (Android only),
   static Future<void> turnOn({int timeout = 60}) async {
     var responseStream = FlutterBluePlus._methodStream.stream
@@ -125,17 +136,6 @@ class FlutterBluePlus {
       // wait for adapter to turn on
       await adapterState.where((s) => s == BluetoothAdapterState.on).first.fbpTimeout(timeout, "turnOn");
     }
-  }
-
-  /// Set configurable options
-  ///   - [showPowerAlert] Whether to show the power alert on iOS. Setting this option is only effective
-  ///       if you call this method before any other message in this package.
-  ///       This setting has no effect on Android.
-  ///       See https://developer.apple.com/documentation/corebluetooth/cbcentralmanageroptionshowpoweralertkey
-  static Future<void> setOptions({
-    bool showPowerAlert = true,
-  }) async {
-    await _invokeMethod('setOptions', {"show_power_alert": showPowerAlert}, true);
   }
 
   /// Gets the current state of the Bluetooth module
@@ -560,7 +560,6 @@ class FlutterBluePlus {
   static Future<dynamic> _invokeMethod(
     String method, [
     dynamic arguments,
-    skipFlutterBluePlusInit = false,
   ]) async {
     // return value
     dynamic out;
@@ -571,7 +570,7 @@ class FlutterBluePlus {
 
     try {
       // initialize
-      if (!skipFlutterBluePlusInit) {
+      if (method != "setOptions") {
         _initFlutterBluePlus();
       }
 
