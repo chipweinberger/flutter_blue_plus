@@ -1,3 +1,6 @@
+## 1.31.18
+* **[Feature]** add `setOptions` function. Used to configure power alert on iOS
+
 ## 1.31.17
 * **[Fix]** android: autoconnect could enter disconnect / connection loop
 * **[Fix]** android: calling `disconnect` should always disable autoconnect, even if already disconnected
