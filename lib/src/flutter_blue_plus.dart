@@ -127,6 +127,17 @@ class FlutterBluePlus {
     }
   }
 
+  /// Set configurable options
+  ///   - [showPowerAlert] Whether to show the power alert on iOS. Setting this option is only effective
+  ///       if you call this method before any other message in this package.
+  ///       This setting has no effect on Android.
+  ///       See https://developer.apple.com/documentation/corebluetooth/cbcentralmanageroptionshowpoweralertkey
+  static Future<void> setOptions({
+    bool showPowerAlert = true,
+  }) async {
+    await _invokeMethod('setOptions', {"show_power_alert": showPowerAlert}, true);
+  }
+
   /// Gets the current state of the Bluetooth module
   static Stream<BluetoothAdapterState> get adapterState async* {
     // get current state if needed
@@ -546,17 +557,23 @@ class FlutterBluePlus {
   }
 
   /// invoke a platform method
-  static Future<dynamic> _invokeMethod(String method, [dynamic arguments]) async {
+  static Future<dynamic> _invokeMethod(
+    String method, [
+    dynamic arguments,
+    skipFlutterBluePlusInit = false,
+  ]) async {
     // return value
     dynamic out;
 
-    // only allow 1 invocation at a time (guarentees that hot restart finishes)
+    // only allow 1 invocation at a time (guarantees that hot restart finishes)
     _Mutex mtx = _MutexFactory.getMutexForKey("invokeMethod");
     await mtx.take();
 
     try {
       // initialize
-      _initFlutterBluePlus();
+      if (!skipFlutterBluePlusInit) {
+        _initFlutterBluePlus();
+      }
 
       // log args
       if (logLevel == LogLevel.verbose) {
