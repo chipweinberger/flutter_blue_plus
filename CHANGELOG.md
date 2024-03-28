@@ -455,12 +455,12 @@ This release simplifies BluetoothDevice construction.
 * **[Feature]** add `removeIfGone` option to `startScan`
 
 **Breaking Changes & Improvements:**
-- **(simplify)** removed `FlutterBluePlus.scan`. Use `FlutterBluePlus.scartScan(oneByOne: true)` instead.
-- **(simplify)** removed `allowDuplicates` option for `scartScan`. It is not supported on android. We always filter duplicates anyway.
-- **(simplify)** removed `macAddresses` option for `scartScan`. It was not supported on iOS, and is overall not very useful.
-- **(simplify)** `startScan` now returns `Future<void>` instead of `Future<List<ScanResult>>`. It was redundant and confusing.
-- **(improvement)** if you `await startScan` it will complete once the scan starts, instead of when it ends
-- **(improvement)** if you call `startScan` twice, it will cancel the previous scan, instead of throwing an exception
+* **[Simplify]** removed `FlutterBluePlus.scan`. Use `FlutterBluePlus.scartScan(oneByOne: true)` instead.
+* **[Simplify]** removed `allowDuplicates` option for `scartScan`. It is not supported on android. We always filter duplicates anyway.
+* **[Simplify]** removed `macAddresses` option for `scartScan`. It was not supported on iOS, and is overall not very useful.
+* **[Simplify]** `startScan` now returns `Future<void>` instead of `Future<List<ScanResult>>`. It was redundant and confusing.
+* **[Improve]** if you `await startScan` it will complete once the scan starts, instead of when it ends
+* **[Improve]** if you call `startScan` twice, it will cancel the previous scan, instead of throwing an exception
 
 ## 1.14.24
 * **[Fix]** Android: `setNotifyValue`: "(code: 5) notifications were not updated" (regression in 1.14.23)
