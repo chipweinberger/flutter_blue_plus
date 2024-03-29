@@ -1,3 +1,6 @@
+## 1.31.19
+* **[Improve]** autoconnect: catch & print errors when autoconnect fails
+
 ## 1.31.18
 * **[Feature]** add `setOptions` function. Used to configure power alert on iOS
 
