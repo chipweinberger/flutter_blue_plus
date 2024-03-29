@@ -1,3 +1,6 @@
+## 1.32.0
+* **[Improve]** update `adapterState` stream before `connectionState` streams, to improve autoconnect.
+
 ## 1.31.19
 * **[Improve]** autoconnect: catch & print errors when autoconnect fails
 
