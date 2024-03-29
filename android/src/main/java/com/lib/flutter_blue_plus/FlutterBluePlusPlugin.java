@@ -1814,18 +1814,18 @@ public class FlutterBluePlusPlugin implements
             final int adapterState = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
 
             log(LogLevel.DEBUG, "OnAdapterStateChanged: " + adapterStateString(adapterState));
+            
+            // see: BmBluetoothAdapterState
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("adapter_state", bmAdapterStateEnum(adapterState));
+            
+            invokeMethodUIThread("OnAdapterStateChanged", map);
 
             // disconnect all devices
             if (adapterState == BluetoothAdapter.STATE_TURNING_OFF || 
                 adapterState == BluetoothAdapter.STATE_OFF) {
                 disconnectAllDevices("adapterTurnOff");
             }
-            
-            // see: BmBluetoothAdapterState
-            HashMap<String, Object> map = new HashMap<>();
-            map.put("adapter_state", bmAdapterStateEnum(adapterState));
-
-            invokeMethodUIThread("OnAdapterStateChanged", map);
         }
     };   
 

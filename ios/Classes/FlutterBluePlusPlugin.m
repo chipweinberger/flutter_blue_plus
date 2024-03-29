@@ -1031,11 +1031,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 {
     Log(LDEBUG, @"centralManagerDidUpdateState %@", [self cbManagerStateString:self.centralManager.state]);
 
-    // was the adapter turned off?
-    if (self.centralManager.state != CBManagerStatePoweredOn) {
-        [self disconnectAllDevices:@"adapterTurnOff"];
-    }
-
     int adapterState = [self bmAdapterStateEnum:self.centralManager.state];
 
     // See BmBluetoothAdapterState
@@ -1044,6 +1039,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     };
 
     [self.methodChannel invokeMethod:@"OnAdapterStateChanged" arguments:response];
+
+    // disconnect all devices
+    if (self.centralManager.state != CBManagerStatePoweredOn) {
+        [self disconnectAllDevices:@"adapterTurnOff"];
+    }
 }
 
 - (void)centralManager:(CBCentralManager *)central
