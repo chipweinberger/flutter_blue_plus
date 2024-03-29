@@ -1818,7 +1818,7 @@ public class FlutterBluePlusPlugin implements
             // see: BmBluetoothAdapterState
             HashMap<String, Object> map = new HashMap<>();
             map.put("adapter_state", bmAdapterStateEnum(adapterState));
-            
+
             invokeMethodUIThread("OnAdapterStateChanged", map);
 
             // disconnect all devices
@@ -2011,7 +2011,7 @@ public class FlutterBluePlusPlugin implements
 
             // android never uses this callback with enums values of CONNECTING or DISCONNECTING,
             // (theyre only used for gatt.getConnectionState()), but just to be
-            // future proof, explicitly ignore anything else. CoreBluetooth is the same way.
+            // future proof, explicitly ignore anything else. iOS & macOS is the same way.
             if(newState != BluetoothProfile.STATE_CONNECTED &&
                newState != BluetoothProfile.STATE_DISCONNECTED) {
                 return;
