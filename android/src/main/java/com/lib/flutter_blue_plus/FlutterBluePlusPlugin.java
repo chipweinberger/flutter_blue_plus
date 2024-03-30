@@ -267,12 +267,11 @@ public class FlutterBluePlusPlugin implements
 
     @Override
     @SuppressWarnings({"deprecation", "unchecked"}) // needed for compatibility, type safety uses bluetooth_msgs.dart
-    public void onMethodCall(@NonNull MethodCall call,
-                                 @NonNull Result result)
+    public void onMethodCall(@NonNull MethodCall call, @NonNull Result result)
     {
         try {
             // handle setOptions before anything modifies state or generates logs
-            if (call.method == "setOptions") {
+            if (call.method.equals("setOptions")) {
                 HashMap<String, Object> options = call.arguments();
                 // only used on iOS and macOS:
                 // boolean showPowerAlert = (boolean) options.get("showPowerAlert");
@@ -307,7 +306,6 @@ public class FlutterBluePlusPlugin implements
             }
 
             switch (call.method) {
-
                 case "flutterHotRestart":
                 {
                     // no adapter?
