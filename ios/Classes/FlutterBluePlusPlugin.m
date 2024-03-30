@@ -4,7 +4,7 @@
 
 #import "FlutterBluePlusPlugin.h"
 
-#define Log(LEVEL, FORMAT, ...) [self log:LEVEL format:@"[FBP-iOS] " FORMAT, ##__VA_ARGS__]
+#define Log(LEVEL, FORMAT, ...) [self log:LEVEL format:FORMAT, ##__VA_ARGS__]
 
 NSString * const CCCD = @"2902";
 
@@ -2074,8 +2074,13 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         va_list args;
         va_start(args, format);
         NSString* msg = [[NSString alloc] initWithFormat:format arguments:args];
+        #if TARGET_OS_IPHONE
+            NSString* platform = @"iOS";
+        #else
+            NSString* platform = @"macOS";
+        #endif
         if (self.sendLogsToDart) {
-            NSArray* domain = @[@"FBP", @"macOS"];
+            NSArray* domain = @[@"FBP", platform];
             NSDictionary* response = @{
                 @"level": @(level),
                 @"message": msg,
@@ -2083,7 +2088,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             };
             [self.methodChannel invokeMethod:@"OnLog" arguments:response];
         } else {
-            NSLog(@"%@", msg);
+            NSLog(@"[FBP] [%@] %@", platform, msg);
         }
         va_end(args);
     }
