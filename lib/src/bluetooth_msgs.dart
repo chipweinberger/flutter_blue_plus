@@ -10,6 +10,26 @@ enum BmAdapterStateEnum {
   off, // 6
 }
 
+class BmLogMessage {
+  final String message;
+  final LogLevel level;
+  final List<String> domain;
+
+  BmLogMessage({
+    required this.message,
+    required this.level,
+    required this.domain,
+  });
+
+  factory BmLogMessage.fromMap(Map<dynamic, dynamic> json) {
+    return BmLogMessage(
+      message: json['message'],
+      level: LogLevel.values[json['level'] as int],
+      domain: json['domain'].cast<String>(),
+    );
+  }
+}
+
 class BmBluetoothAdapterState {
   BmAdapterStateEnum adapterState;
 

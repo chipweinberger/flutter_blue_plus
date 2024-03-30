@@ -397,6 +397,7 @@ class FlutterBluePlus {
 
   static Future<void> setLogger(Logger logger) async {
     _logger = logger;
+    await _invokeMethod('setSendLogsToDart', true);
   }
 
   /// Request Bluetooth PHY support
@@ -431,7 +432,7 @@ class FlutterBluePlus {
 
   static Future<dynamic> _methodCallHandler(MethodCall call) async {
     // log result
-    if (logLevel == LogLevel.verbose) {
+    if (logLevel == LogLevel.verbose && call.method != "OnLog") {
       String func = '[[ ${call.method} ]]';
       String result = call.arguments.toString();
       func = _logColor ? _black(func) : func;
@@ -442,6 +443,11 @@ class FlutterBluePlus {
     // android only
     if (call.method == "OnDetachedFromEngine") {
       _stopScan(invokePlatform: false);
+    }
+
+    if (call.method == "OnLog") {
+      final r = BmLogMessage.fromMap(call.arguments);
+      _logger(r.message, level: r.level, domain: r.domain);
     }
 
     // keep track of adapter states

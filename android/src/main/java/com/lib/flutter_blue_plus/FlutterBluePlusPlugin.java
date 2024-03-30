@@ -85,6 +85,7 @@ public class FlutterBluePlusPlugin implements
     private static final String TAG = "[FBP-Android]";
 
     private LogLevel logLevel = LogLevel.DEBUG;
+    private boolean sendLogsToDart = false;
 
     private Context context;
     private MethodChannel methodChannel;
@@ -340,6 +341,14 @@ public class FlutterBluePlusPlugin implements
 
                     // set global var
                     logLevel = LogLevel.values()[idx];
+
+                    result.success(true);
+                    break;
+                }
+
+                case "setSendLogsToDart":
+                {
+                    sendLogsToDart = (boolean)call.arguments;
 
                     result.success(true);
                     break;
@@ -2581,19 +2590,29 @@ public class FlutterBluePlusPlugin implements
         if(level.ordinal() > logLevel.ordinal()) {
             return;
         }
-        switch(level) {
-            case DEBUG:
-                Log.d(TAG, "[FBP] " + message);
-                break;
-            case WARNING:
-                Log.w(TAG, "[FBP] " + message);
-                break;
-            case ERROR:
-                Log.e(TAG, "[FBP] " + message);
-                break;
-            default:
-                Log.d(TAG, "[FBP] " + message);
-                break;
+        if (sendLogsToDart) {
+            HashMap<String, Object> response = new HashMap<>();
+            response.put("message", message);
+            response.put("level", level.ordinal());
+            List<String> domain = new ArrayList<>();
+            domain.add("FBP");
+            response.put("domain", domain);
+            invokeMethodUIThread("OnLog", response);
+        } else {
+            switch(level) {
+                case DEBUG:
+                    Log.d(TAG, "[FBP] " + message);
+                    break;
+                case WARNING:
+                    Log.w(TAG, "[FBP] " + message);
+                    break;
+                case ERROR:
+                    Log.e(TAG, "[FBP] " + message);
+                    break;
+                default:
+                    Log.d(TAG, "[FBP] " + message);
+                    break;
+            }
         }
     }
 
