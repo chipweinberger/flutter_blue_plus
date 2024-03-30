@@ -2596,6 +2596,7 @@ public class FlutterBluePlusPlugin implements
             response.put("level", level.ordinal());
             List<String> domain = new ArrayList<>();
             domain.add("FBP");
+            domain.add("Android");
             response.put("domain", domain);
             invokeMethodUIThread("OnLog", response);
         } else {

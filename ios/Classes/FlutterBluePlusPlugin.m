@@ -53,6 +53,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 @property(nonatomic) NSDictionary *scanFilters;
 @property(nonatomic) NSTimer *checkForMtuChangesTimer;
 @property(nonatomic) LogLevel logLevel;
+@property(nonatomic) bool sendLogsToDart;
 @property(nonatomic) bool showPowerAlert;
 @end
 
@@ -74,6 +75,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     instance.writeDescs = [NSMutableDictionary new];
     instance.scanCounts = [NSMutableDictionary new];
     instance.logLevel = LDEBUG;
+    instance.sendLogsToDart = @(NO);
     instance.showPowerAlert = @(YES);
 
     [registrar addMethodCallDelegate:instance channel:methodChannel];
@@ -190,6 +192,12 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         {
             NSNumber *idx = [call arguments];
             self.logLevel = (LogLevel)[idx integerValue];
+            result(@YES);
+            return;
+        }
+        else if ([@"setSendLogsToDart" isEqualToString:call.method])
+        {
+            self.sendLogsToDart = [call arguments];
             result(@YES);
             return;
         }
@@ -2059,7 +2067,17 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         va_list args;
         va_start(args, format);
         NSString* msg = [[NSString alloc] initWithFormat:format arguments:args];
-        NSLog(@"%@", msg);
+        if (self.sendLogsToDart) {
+            NSArray* domain = @[@"FBP", @"macOS"];
+            NSDictionary* response = @{
+                @"level": @(level),
+                @"message": msg,
+                @"domain": domain,
+            };
+            [self.methodChannel invokeMethod:@"OnLog" arguments:response];
+        } else {
+            NSLog(@"%@", msg);
+        }
         va_end(args);
     }
 }
