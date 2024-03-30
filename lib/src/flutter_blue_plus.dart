@@ -53,6 +53,13 @@ class FlutterBluePlus {
   /// FlutterBluePlus log level
   static LogLevel _logLevel = LogLevel.debug;
   static bool _logColor = true;
+  static Logger _logger = (
+    message, {
+    required level,
+    required domain,
+  }) {
+    print("${domain.map((domain) => "[$domain]").join(" ")} $message");
+  };
 
   ////////////////////
   //  Public
@@ -354,7 +361,7 @@ class FlutterBluePlus {
     if (isScanningNow) {
       await _stopScan();
     } else if (_logLevel.index >= LogLevel.info.index) {
-      print("[FBP] stopScan: already stopped");
+      _logger("stopScan: not scanning", level: LogLevel.info, domain: ["FBP"]);
     }
     mtx.give();
   }
@@ -386,6 +393,10 @@ class FlutterBluePlus {
     _logLevel = level;
     _logColor = color;
     await _invokeMethod('setLogLevel', level.index);
+  }
+
+  static Future<void> setLogger(Logger logger) async {
+    _logger = logger;
   }
 
   /// Request Bluetooth PHY support
@@ -425,7 +436,7 @@ class FlutterBluePlus {
       String result = call.arguments.toString();
       func = _logColor ? _black(func) : func;
       result = _logColor ? _brown(result) : result;
-      print("[FBP] $func result: $result");
+      _logger("$func result: $result", level: LogLevel.verbose, domain: ["FBP"]);
     }
 
     // android only
@@ -444,7 +455,7 @@ class FlutterBluePlus {
         for (DeviceIdentifier d in _autoConnect) {
           BluetoothDevice(remoteId: d).connect(autoConnect: true, mtu: null).onError((e, s) {
             if (logLevel != LogLevel.none) {
-              print("[FBP] [AutoConnect] connection failed: $e");
+              _logger("connection failed: $e", level: LogLevel.error, domain: ["FBP", "AutoConnect"]);
             }
           });
         }
@@ -486,7 +497,7 @@ class FlutterBluePlus {
               var d = BluetoothDevice(remoteId: r.remoteId);
               d.connect(autoConnect: true, mtu: null).onError((e, s) {
                 if (logLevel != LogLevel.none) {
-                  print("[FBP] [AutoConnect] connection failed: $e");
+                  _logger("connection failed: $e", level: LogLevel.error, domain: ["FBP", "AutoConnect"]);
                 }
               });
             }
@@ -592,7 +603,7 @@ class FlutterBluePlus {
         String args = arguments.toString();
         func = _logColor ? _black(func) : func;
         args = _logColor ? _magenta(args) : args;
-        print("[FBP] $func args: $args");
+        _logger("$func args: $args", level: LogLevel.verbose, domain: ["FBP"]);
       }
 
       // invoke
@@ -604,7 +615,7 @@ class FlutterBluePlus {
         String result = out.toString();
         func = _logColor ? _black(func) : func;
         result = _logColor ? _brown(result) : result;
-        print("[FBP] $func result: $result");
+        _logger("$func result: $result", level: LogLevel.verbose, domain: ["FBP"]);
       }
     } finally {
       mtx.give();
@@ -660,6 +671,13 @@ enum LogLevel {
   debug, // 4
   verbose, //5
 }
+
+/// Callback to be run when a log message is generated
+typedef Logger = void Function(
+  String message, {
+  required List<String> domain,
+  required LogLevel level,
+});
 
 class AndroidScanMode {
   const AndroidScanMode(this.value);
