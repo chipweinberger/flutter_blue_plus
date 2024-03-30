@@ -88,6 +88,26 @@ Every error returned by the native platform is checked and thrown as an exceptio
 
 ---
 
+### Initialize with custom behavior
+
+```dart
+FlutterBluePlus.setOptions(
+    showPowerAlert: true, // only on iOS and macOS
+    logLevel: LogLevel.none,
+)
+```
+
+Initialize the plugin with custom options.
+This has to be the first call on `FlutterBluePlus` you do, otherwise the plugin will have been initialized with default options.
+
+Some settings like `showPowerAlert` are only available on iOS and macOS.
+
+Some settings like `logger` and `logLevel` can be changed later too, through their own setter methods.
+The benefit of setting them here is that their values are being respected from the get-go;
+
+For example, if you set `logLevel` to `LogLevel.none` via `FlutterBluePlus.setLogLevel(LogLevel.none)`, the plugin is initialized first, so you will still see logs from the plugin initialization.
+However if you set it via `FlutterBluePlus.setOptions(logLevel: LogLevel.none)`, your terminal will stay squeaky clean.
+
 ### Set Log Level
 
 ```dart
@@ -105,6 +125,22 @@ Setting `LogLevel.verbose` shows *all* data in and out.
 
 <img width="600" alt="Screenshot 2023-07-27 at 4 53 08 AM" src="https://github.com/boskokg/flutter_blue_plus/assets/1863934/ee37d702-2752-4402-bf26-fc661728c1c3">
 
+### Use a custom Logger
+
+```dart
+FlutterBluePlus.setLogger((message, {required domain, required level}) {
+    debugPrint('[${domain.join(".")}]@${level.name} - $message');
+});
+```
+
+Per default, FlutterBluePlus writes logs directly to stdout.
+You can provide a custom method that will be called instead to customize that behavior.
+
+If you chose to use a custom logger, FlutterBluePlus will send logs generated in native code to the logger you provide using the MethodChannel.
+Otherwise (i.e. per default) FlutterBluePlus uses the platform native logging calls (Log on Android, NSLog on iOS and macOS)
+in addition to the print calls in the Dart part of the package.
+
+Even with a custom logger, FlutterBluePlus will still use the `LogLevel` to determine which logs to create.
 
 ### Bluetooth On & Off
 
@@ -599,8 +635,9 @@ You can try using https://pub.dev/packages/flutter_foreground_task or possibly h
 
 |                        |      Android       |        iOS         | Throws | Description                                                |
 | :--------------------- | :----------------: | :----------------: | :----: | :----------------------------------------------------------|
+| setOptions             | :white_check_mark: | :white_check_mark: |        | Initialize the plugin with custom options                  |
 | setLogLevel            | :white_check_mark: | :white_check_mark: |        | Configure plugin log level                                 |
-| setOptions             | :white_check_mark: | :white_check_mark: |        | Set configurable bluetooth options                         |
+| setLogger              | :white_check_mark: | :white_check_mark: |        | Provide a custom function to handle logs                   |
 | isSupported            | :white_check_mark: | :white_check_mark: |        | Checks whether the device supports Bluetooth               |
 | turnOn                 | :white_check_mark: |                    | :fire: | Turns on the bluetooth adapter                             |
 | adapterStateNow     ⚡  | :white_check_mark: | :white_check_mark: |        | Current state of the bluetooth adapter                     |
