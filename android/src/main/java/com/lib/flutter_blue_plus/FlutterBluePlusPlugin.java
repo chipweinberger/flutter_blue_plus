@@ -271,6 +271,18 @@ public class FlutterBluePlusPlugin implements
                                  @NonNull Result result)
     {
         try {
+            // handle setOptions before anything modifies state or generates logs
+            if (call.method == "setOptions") {
+                HashMap<String, Object> options = call.arguments();
+                // only used on iOS and macOS:
+                // boolean showPowerAlert = (boolean) options.get("showPowerAlert");
+                sendLogsToDart = (boolean) options.get("sendLogsToDart");
+                logLevel = LogLevel.values()[(int) options.get("logLevel")];
+
+                result.success(true);
+                return;
+            }
+
             log(LogLevel.DEBUG, "onMethodCall: " + call.method);
 
             // initialize adapter
@@ -286,6 +298,7 @@ public class FlutterBluePlusPlugin implements
                 "flutterHotRestart".equals(call.method) == false &&
                 "connectedCount".equals(call.method) == false &&
                 "setLogLevel".equals(call.method) == false &&
+                "setSendLogsToDart".equals(call.method) == false &&
                 "isSupported".equals(call.method) == false &&
                 "getAdapterName".equals(call.method) == false &&
                 "getAdapterState".equals(call.method) == false) {
@@ -315,13 +328,6 @@ public class FlutterBluePlusPlugin implements
                     log(LogLevel.DEBUG, "connectedPeripherals: " + mConnectedDevices.size());
 
                     result.success(mConnectedDevices.size());
-                    break;
-                }
-
-                case "setOptions":
-                {
-                    // Currently ignored on Android
-                    result.success(true);
                     break;
                 }
 

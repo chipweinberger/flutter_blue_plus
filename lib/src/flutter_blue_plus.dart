@@ -53,13 +53,7 @@ class FlutterBluePlus {
   /// FlutterBluePlus log level
   static LogLevel _logLevel = LogLevel.debug;
   static bool _logColor = true;
-  static Logger _logger = (
-    message, {
-    required level,
-    required domain,
-  }) {
-    print("${domain.map((domain) => "[$domain]").join(" ")} $message");
-  };
+  static Logger _logger = _stdoutLogger;
 
   ////////////////////
   //  Public
@@ -111,10 +105,23 @@ class FlutterBluePlus {
   ///       To set this option you must call this method before any other method in this package.
   ///       See: https://developer.apple.com/documentation/corebluetooth/cbcentralmanageroptionshowpoweralertkey
   ///       This option has no effect on Android.
+  ///   - [logLevel] The [LogLevel] for FlutterBluePlus.
+  ///       You can set this at a later date via [setLogLevel].
+  ///   - [logger] A custom [Logger] function. If you set this, logs will be sent to your function instead of being printed to stdout.
+  ///       If you set this, logs in native code will be sent to Dart, for you to handle. This can have a performance overhead.
+  ///       You can set this at a later date via [setLogger].
   static Future<void> setOptions({
     bool showPowerAlert = true,
+    LogLevel logLevel = LogLevel.debug,
+    Logger? logger,
   }) async {
-    await _invokeMethod('setOptions', {"show_power_alert": showPowerAlert});
+    if (logger != null) _logger = logger;
+
+    await _invokeMethod('setOptions', {
+      "showPowerAlert": showPowerAlert,
+      "logLevel": logLevel.index,
+      "sendLogsToDart": logger != null,
+    });
   }
 
   /// Turn on Bluetooth (Android only),
@@ -389,12 +396,23 @@ class FlutterBluePlus {
   }
 
   /// Sets the internal FlutterBlue log level
-  static void setLogLevel(LogLevel level, {color = true}) async {
+  ///
+  /// To ensure that this is applied immediately, you can set the [LogLevel] via [setOptions].
+  /// Otherwise there may be some prints from native platform code before this method is able to set the log level.
+  static Future<void> setLogLevel(LogLevel level, {color = true}) async {
     _logLevel = level;
     _logColor = color;
     await _invokeMethod('setLogLevel', level.index);
   }
 
+  /// Set a custom logger function
+  ///
+  /// The default logger [_stdoutLogger] prints in the following format: "[FBP] $message".
+  /// Your custom logger will only be called for logs with a [LogLevel] equal to or higher than the current log level.
+  /// So if you want to filter yourself, you need to [setLogLevel] to the lowest level [LogLeve.verbose] and discard messages in your [logger].
+  ///
+  /// To ensure that this is applied immediately, you can set the [Logger] via [setOptions].
+  /// Otherwise there may be some prints from native platform code before this method is able to set the logger.
   static Future<void> setLogger(Logger logger) async {
     _logger = logger;
     await _invokeMethod('setSendLogsToDart', true);
@@ -679,11 +697,21 @@ enum LogLevel {
 }
 
 /// Callback to be run when a log message is generated
+/// - [message] the log message
+/// - [domain] the domain (hierarchy of modules) of the log message
+///   - e.g. ["FBP", "AutoConnect"] or ["FBP", "Android"]
+/// - [level] the log level
 typedef Logger = void Function(
   String message, {
   required List<String> domain,
   required LogLevel level,
 });
+
+/// Default logger implementation
+void _stdoutLogger(String message, {required LogLevel level, required List<String> domain}) {
+  assert(level != LogLevel.none, "LogLevel.none should not be used");
+  print("${domain.map((domain) => "[$domain]").join(" ")} $message");
+}
 
 class AndroidScanMode {
   const AndroidScanMode(this.value);

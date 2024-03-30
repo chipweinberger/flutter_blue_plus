@@ -75,8 +75,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     instance.writeDescs = [NSMutableDictionary new];
     instance.scanCounts = [NSMutableDictionary new];
     instance.logLevel = LDEBUG;
-    instance.sendLogsToDart = @(NO);
-    instance.showPowerAlert = @(YES);
+    instance.sendLogsToDart = false;
+    instance.showPowerAlert = true;
 
     [registrar addMethodCallDelegate:instance channel:methodChannel];
 }
@@ -104,18 +104,24 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 {
     @try
     {
-        Log(LDEBUG, @"handleMethodCall: %@", call.method);
-
         if ([@"setOptions" isEqualToString:call.method])
         {
             NSDictionary *args = (NSDictionary*) call.arguments;
-            NSNumber *showPowerAlert = args[@"show_power_alert"];
+            NSNumber *showPowerAlert = args[@"showPowerAlert"];
 
             self.showPowerAlert = (bool)[showPowerAlert boolValue];
+
+            NSNumber *idx = args[@"logLevel"];
+            self.logLevel = (LogLevel)[idx integerValue];
+
+            NSNumber *sendLogsToDart = args[@"sendLogsToDart"];
+            self.sendLogsToDart = (bool)[sendLogsToDart boolValue];
 
             result(@YES);
             return;
         }
+
+        Log(LDEBUG, @"handleMethodCall: %@", call.method);
 
         // initialize adapter
         if (self.centralManager == nil)
@@ -147,6 +153,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             [@"flutterHotRestart" isEqualToString:call.method] == false &&
             [@"connectedCount" isEqualToString:call.method] == false &&
             [@"setLogLevel" isEqualToString:call.method] == false &&
+            [@"setSendLogsToDart" isEqualToString:call.method] == false &&
             [@"isSupported" isEqualToString:call.method] == false &&
             [@"getAdapterName" isEqualToString:call.method] == false &&
             [@"getAdapterState" isEqualToString:call.method] == false) {
