@@ -275,12 +275,6 @@ public class FlutterBluePlusPlugin implements
 
                 case "setOptions":
                 {
-                    HashMap<String, Object> options = call.arguments();
-                    // only used on iOS and macOS:
-                    // boolean showPowerAlert = (boolean) options.get("showPowerAlert");
-                    sendLogsToDart = (boolean) options.get("sendLogsToDart");
-                    logLevel = LogLevel.values()[(int) options.get("logLevel")];
-
                     result.success(true);
                     return;
                 }
