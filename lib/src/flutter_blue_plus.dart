@@ -353,7 +353,7 @@ class FlutterBluePlus {
     if (isScanningNow) {
       await _stopScan();
     } else if (_logLevel.index >= LogLevel.info.index) {
-      _logger("stopScan: not scanning", level: LogLevel.info, domain: ["FBP"]);
+      _logger("stopScan: already stopped", level: LogLevel.info, domain: ["FBP"]);
     }
     mtx.give();
   }
