@@ -11,9 +11,9 @@ import 'screens/bluetooth_off_screen.dart';
 import 'screens/scan_screen.dart';
 
 void main() {
-  FlutterBluePlus.setOptions(
-    logLevel: LogLevel.verbose,
-    logger: (message, {required domain, required level}) {
+  FlutterBluePlus.setLogLevel(LogLevel.verbose);
+  FlutterBluePlus.setLogger(
+    (message, {required domain, required level}) {
       debugPrint('[${domain.join(".")}]@${level.name} - $message');
     },
   );

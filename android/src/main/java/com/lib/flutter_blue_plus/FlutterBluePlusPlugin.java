@@ -270,16 +270,39 @@ public class FlutterBluePlusPlugin implements
     public void onMethodCall(@NonNull MethodCall call, @NonNull Result result)
     {
         try {
-            // handle setOptions before anything modifies state or generates logs
-            if (call.method.equals("setOptions")) {
-                HashMap<String, Object> options = call.arguments();
-                // only used on iOS and macOS:
-                // boolean showPowerAlert = (boolean) options.get("showPowerAlert");
-                sendLogsToDart = (boolean) options.get("sendLogsToDart");
-                logLevel = LogLevel.values()[(int) options.get("logLevel")];
+            // handle configuration before anything modifies state or generates logs
+            switch (call.method) {
 
-                result.success(true);
-                return;
+                case "setOptions":
+                {
+                    HashMap<String, Object> options = call.arguments();
+                    // only used on iOS and macOS:
+                    // boolean showPowerAlert = (boolean) options.get("showPowerAlert");
+                    sendLogsToDart = (boolean) options.get("sendLogsToDart");
+                    logLevel = LogLevel.values()[(int) options.get("logLevel")];
+
+                    result.success(true);
+                    return;
+                }
+                
+                case "setLogLevel":
+                {
+                    int idx = (int)call.arguments;
+
+                    // set global var
+                    logLevel = LogLevel.values()[idx];
+
+                    result.success(true);
+                    return;
+                }
+
+                case "setSendLogsToDart":
+                {
+                    sendLogsToDart = (boolean)call.arguments;
+
+                    result.success(true);
+                    return;
+                }
             }
 
             log(LogLevel.DEBUG, "onMethodCall: " + call.method);
@@ -306,6 +329,7 @@ public class FlutterBluePlusPlugin implements
             }
 
             switch (call.method) {
+
                 case "flutterHotRestart":
                 {
                     // no adapter?
@@ -339,32 +363,13 @@ public class FlutterBluePlusPlugin implements
                     break;
                 }
 
-                case "setLogLevel":
-                {
-                    int idx = (int)call.arguments;
-
-                    // set global var
-                    logLevel = LogLevel.values()[idx];
-
-                    result.success(true);
-                    break;
-                }
-
-                case "setSendLogsToDart":
-                {
-                    sendLogsToDart = (boolean)call.arguments;
-
-                    result.success(true);
-                    break;
-                }
-
                 case "isSupported":
                 {
                     result.success(mBluetoothAdapter != null);
                     break;
                 }
 
-               case "getAdapterName":
+                case "getAdapterName":
                 {
                     ArrayList<String> permissions = new ArrayList<>();
 

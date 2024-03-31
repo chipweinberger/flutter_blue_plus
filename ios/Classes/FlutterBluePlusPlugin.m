@@ -104,6 +104,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 {
     @try
     {
+        // handle configuration before anything modifies state or generates logs
         if ([@"setOptions" isEqualToString:call.method])
         {
             NSDictionary *args = (NSDictionary*) call.arguments;
@@ -111,12 +112,19 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             self.showPowerAlert = (bool)[showPowerAlert boolValue];
 
-            NSNumber *idx = args[@"logLevel"];
+            result(@YES);
+            return;
+        }
+        else if ([@"setLogLevel" isEqualToString:call.method])
+        {
+            NSNumber *idx = [call arguments];
             self.logLevel = (LogLevel)[idx integerValue];
-
-            NSNumber *sendLogsToDart = args[@"sendLogsToDart"];
-            self.sendLogsToDart = (bool)[sendLogsToDart boolValue];
-
+            result(@YES);
+            return;
+        }
+        else if ([@"setSendLogsToDart" isEqualToString:call.method])
+        {
+            self.sendLogsToDart = [call arguments];
             result(@YES);
             return;
         }
@@ -193,19 +201,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 [self.knownPeripherals removeAllObjects];
             }
             result(@(self.connectedPeripherals.count));
-            return;
-        }
-        else if ([@"setLogLevel" isEqualToString:call.method])
-        {
-            NSNumber *idx = [call arguments];
-            self.logLevel = (LogLevel)[idx integerValue];
-            result(@YES);
-            return;
-        }
-        else if ([@"setSendLogsToDart" isEqualToString:call.method])
-        {
-            self.sendLogsToDart = [call arguments];
-            result(@YES);
             return;
         }
         else if ([@"isSupported" isEqualToString:call.method])

@@ -93,7 +93,6 @@ Every error returned by the native platform is checked and thrown as an exceptio
 ```dart
 FlutterBluePlus.setOptions(
     showPowerAlert: true, // only on iOS and macOS
-    logLevel: LogLevel.none,
 )
 ```
 
@@ -103,10 +102,6 @@ This has to be the first call on `FlutterBluePlus` you do, otherwise the plugin 
 Some settings like `showPowerAlert` are only available on iOS and macOS.
 
 Some settings like `logger` and `logLevel` can be changed later too, through their own setter methods.
-The benefit of setting them here is that their values are being respected from the get-go;
-
-For example, if you set `logLevel` to `LogLevel.none` via `FlutterBluePlus.setLogLevel(LogLevel.none)`, the plugin is initialized first, so you will still see logs from the plugin initialization.
-However if you set it via `FlutterBluePlus.setOptions(logLevel: LogLevel.none)`, your terminal will stay squeaky clean.
 
 ### Set Log Level
 
@@ -635,7 +630,7 @@ You can try using https://pub.dev/packages/flutter_foreground_task or possibly h
 
 |                        |      Android       |        iOS         | Throws | Description                                                |
 | :--------------------- | :----------------: | :----------------: | :----: | :----------------------------------------------------------|
-| setOptions             | :white_check_mark: | :white_check_mark: |        | Initialize the plugin with custom options                  |
+| setOptions             | :white_check_mark: | :white_check_mark: |        | Set Bluetooth options                                      |
 | setLogLevel            | :white_check_mark: | :white_check_mark: |        | Configure plugin log level                                 |
 | setLogger              | :white_check_mark: | :white_check_mark: |        | Provide a custom function to handle logs                   |
 | isSupported            | :white_check_mark: | :white_check_mark: |        | Checks whether the device supports Bluetooth               |

@@ -59,16 +59,8 @@ class FlutterBluePlusMockable {
     return FlutterBluePlus.stopScan();
   }
 
-  Future<void> setOptions({
-    bool showPowerAlert = true,
-    LogLevel logLevel = LogLevel.debug,
-    Logger? logger,
-  }) {
-    return FlutterBluePlus.setOptions(
-      showPowerAlert: showPowerAlert,
-      logLevel: logLevel,
-      logger: logger,
-    );
+  Future<void> setOptions({bool showPowerAlert = true}) {
+    return FlutterBluePlus.setOptions(showPowerAlert: showPowerAlert);
   }
 
   Future<void> setLogLevel(LogLevel level, {color = true}) {

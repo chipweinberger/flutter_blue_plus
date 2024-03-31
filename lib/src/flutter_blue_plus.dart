@@ -105,23 +105,8 @@ class FlutterBluePlus {
   ///       To set this option you must call this method before any other method in this package.
   ///       See: https://developer.apple.com/documentation/corebluetooth/cbcentralmanageroptionshowpoweralertkey
   ///       This option has no effect on Android.
-  ///   - [logLevel] The [LogLevel] for FlutterBluePlus.
-  ///       You can set this at a later date via [setLogLevel].
-  ///   - [logger] A custom [Logger] function. If you set this, logs will be sent to your function instead of being printed to stdout.
-  ///       If you set this, logs in native code will be sent to Dart, for you to handle. This can have a performance overhead.
-  ///       You can set this at a later date via [setLogger].
-  static Future<void> setOptions({
-    bool showPowerAlert = true,
-    LogLevel logLevel = LogLevel.debug,
-    Logger? logger,
-  }) async {
-    if (logger != null) _logger = logger;
-
-    await _invokeMethod('setOptions', {
-      "showPowerAlert": showPowerAlert,
-      "logLevel": logLevel.index,
-      "sendLogsToDart": logger != null,
-    });
+  static Future<void> setOptions({bool showPowerAlert = true}) async {
+    await _invokeMethod('setOptions', {"showPowerAlert": showPowerAlert});
   }
 
   /// Turn on Bluetooth (Android only),
@@ -396,9 +381,6 @@ class FlutterBluePlus {
   }
 
   /// Sets the internal FlutterBlue log level
-  ///
-  /// To ensure that this is applied immediately, you can set the [LogLevel] via [setOptions].
-  /// Otherwise there may be some prints from native platform code before this method is able to set the log level.
   static Future<void> setLogLevel(LogLevel level, {color = true}) async {
     _logLevel = level;
     _logColor = color;
@@ -410,9 +392,6 @@ class FlutterBluePlus {
   /// The default logger [_stdoutLogger] prints in the following format: "[FBP] $message".
   /// Your custom logger will only be called for logs with a [LogLevel] equal to or higher than the current log level.
   /// So if you want to filter yourself, you need to [setLogLevel] to the lowest level [LogLeve.verbose] and discard messages in your [logger].
-  ///
-  /// To ensure that this is applied immediately, you can set the [Logger] via [setOptions].
-  /// Otherwise there may be some prints from native platform code before this method is able to set the logger.
   static Future<void> setLogger(Logger logger) async {
     _logger = logger;
     await _invokeMethod('setSendLogsToDart', true);
@@ -616,30 +595,33 @@ class FlutterBluePlus {
     await mtx.take();
 
     try {
-      // initialize
-      if (method != "setOptions") {
+      // allow configuration before the plugin is initialized & starts logging
+      if (method == "setOptions" || method == "setLogLevel" || method == "setSendLogsToDart") {
+        out = await _methodChannel.invokeMethod(method, arguments);
+      } else {
+        // initialize
         _initFlutterBluePlus();
-      }
 
-      // log args
-      if (logLevel == LogLevel.verbose) {
-        String func = '<$method>';
-        String args = arguments.toString();
-        func = _logColor ? _black(func) : func;
-        args = _logColor ? _magenta(args) : args;
-        _logger("$func args: $args", level: LogLevel.verbose, domain: ["FBP"]);
-      }
+        // log args
+        if (logLevel == LogLevel.verbose) {
+          String func = '<$method>';
+          String args = arguments.toString();
+          func = _logColor ? _black(func) : func;
+          args = _logColor ? _magenta(args) : args;
+          _logger("$func args: $args", level: LogLevel.verbose, domain: ["FBP"]);
+        }
 
-      // invoke
-      out = await _methodChannel.invokeMethod(method, arguments);
+        // invoke
+        out = await _methodChannel.invokeMethod(method, arguments);
 
-      // log result
-      if (logLevel == LogLevel.verbose) {
-        String func = '<$method>';
-        String result = out.toString();
-        func = _logColor ? _black(func) : func;
-        result = _logColor ? _brown(result) : result;
-        _logger("$func result: $result", level: LogLevel.verbose, domain: ["FBP"]);
+        // log result
+        if (logLevel == LogLevel.verbose) {
+          String func = '<$method>';
+          String result = out.toString();
+          func = _logColor ? _black(func) : func;
+          result = _logColor ? _brown(result) : result;
+          _logger("$func result: $result", level: LogLevel.verbose, domain: ["FBP"]);
+        }
       }
     } finally {
       mtx.give();
