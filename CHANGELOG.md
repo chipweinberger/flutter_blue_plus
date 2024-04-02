@@ -1,5 +1,10 @@
+## 1.32.1
+* **[Fix]** Android: scan failure were not being pushed to onError
+* **[Improve]** only `stopScan` if currently scanning. prevents 'could not find callback wrapper' log on Android 
+
 ## 1.32.0
-* **[Improve]** update `adapterState` stream before `connectionState` streams, to improve autoconnect.
+This realease has a very slight behavior change for `adapterState` & `connectionState`
+* **[Improve]** update `adapterState` stream before `connectionState` streams. Simplifies internal autoconnect code.
 
 ## 1.31.19
 * **[Improve]** autoconnect: catch & print errors when autoconnect fails
