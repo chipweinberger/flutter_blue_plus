@@ -2,6 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:flutter_blue_plus_example/extension.dart';
+import 'package:flutter_blue_plus_example/widgets/l2cap_button.dart';
+import 'package:flutter_blue_plus_example/widgets/send_data_dialog.dart';
 
 import 'device_screen.dart';
 import '../utils/snackbar.dart';
@@ -134,6 +137,58 @@ class _ScanScreenState extends State<ScanScreen> {
         .toList();
   }
 
+  Widget _buildL2CapChannelConnectedDevice(BuildContext context) {
+    return StreamBuilder<L2CapChannelConnected>(
+      stream: FlutterBluePlus.l2CapChannelConnected,
+      initialData: null,
+      builder: (context, snapshot) {
+        final data = snapshot.data;
+        return data == null
+            ? const SizedBox()
+            : ExpansionTile(
+          title: const Text('Current L2Cap Connection'),
+          subtitle: Text(
+            data.device.remoteId.toString(),
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  showDialog(
+                      context: context,
+                      builder: (_) =>
+                          SendDataDialog(connection: data));
+                  SendDataDialog(connection: data);
+                },
+                child: const Text('Send'),
+              ),
+              const SizedBox(
+                width: 8,
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  final dataBytes = await data.device
+                      .readL2CapChannel(psm: data.psm);
+                  final dataString =
+                  dataBytes.bytesToHexString();
+                  final snackBar = SnackBar(
+                    content: Text(
+                        'Data with value $dataString was returned from stream!'),
+                  );
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  });
+                },
+                child: const Text('Read'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ScaffoldMessenger(
@@ -141,6 +196,9 @@ class _ScanScreenState extends State<ScanScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Find Devices'),
+          actions: [
+            const L2CapButton(),
+          ],
         ),
         body: RefreshIndicator(
           onRefresh: onRefresh,
@@ -148,6 +206,7 @@ class _ScanScreenState extends State<ScanScreen> {
             children: <Widget>[
               ..._buildSystemDeviceTiles(context),
               ..._buildScanResultTiles(context),
+              _buildL2CapChannelConnectedDevice(context),
             ],
           ),
         ),
