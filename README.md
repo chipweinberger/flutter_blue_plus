@@ -191,9 +191,10 @@ var subscription = device.connectionState.listen((BluetoothConnectionState state
 });
 
 // cleanup: cancel subscription when disconnected
-// Note: `delayed:true` lets us receive the `disconnected` event in our handler
-// Note: `next:true` means cancel on *next* disconnection. Without this, it
-//   would cancel immediately because we're already disconnected right now.
+// Note: `delayed:true` lets the `connectionState` listener receive
+//        the `disconnected` event before it is canceled
+// Note: `next:true` means cancel on *next* disconnection. Without this
+//        if we're already disconnected it would cancel immediately
 device.cancelWhenDisconnected(subscription, delayed:true, next:true);
 
 // Connect to the device
