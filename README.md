@@ -148,8 +148,8 @@ If your device is not found, see [Common Problems](#common-problems).
 
 ```dart
 // listen to scan results
-// Note: `onScanResults` only returns live scan results, i.e. during scanning
-// Use: `scanResults` if you want live scan results *or* the results from a previous scan
+// Note: `onScanResults` only returns live scan results, i.e. during scanning. Use
+//  `scanResults` if you want live scan results *or* the results from a previous scan.
 var subscription = FlutterBluePlus.onScanResults.listen((results) {
         if (results.isNotEmpty) {
             ScanResult r = results.last; // the most recently found device
@@ -167,13 +167,10 @@ FlutterBluePlus.cancelWhenScanComplete(subscription);
 await FlutterBluePlus.adapterState.where((val) => val == BluetoothAdapterState.on).first;
 
 // Start scanning w/ timeout
-// Optional: you can use `stopScan()` as an alternative to using a timeout
-// Note: scan filters use an *or* behavior. i.e. if you set `withServices` & `withNames`
-//   we return all the advertisments that match any of the specified services *or* any
-//   of the specified names.
+// Optional: use `stopScan()` as an alternative to timeout
 await FlutterBluePlus.startScan(
-  withServices:[Guid("180D")],
-  withNames:["Bluno"],
+  withServices:[Guid("180D")], // match any of the specified services
+  withNames:["Bluno"], // *or* any of the specified names
   timeout: Duration(seconds:15));
 
 // wait for scanning to stop
