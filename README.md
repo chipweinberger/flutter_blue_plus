@@ -51,7 +51,7 @@ FlutterBluePlus was written to be simple, robust, and easy to understand.
 
 ## No Dependencies
 
-FlutterBluePlus has zero dependencies besides Flutter, Android, and iOS themselves.
+FlutterBluePlus has zero dependencies besides Flutter, Android, iOS, and macOS themselves.
 
 This makes FlutterBluePlus very stable, and easy to maintain.
 
