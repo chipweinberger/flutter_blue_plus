@@ -53,7 +53,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 @property(nonatomic) NSDictionary *scanFilters;
 @property(nonatomic) NSTimer *checkForMtuChangesTimer;
 @property(nonatomic) LogLevel logLevel;
-@property(nonatomic) bool showPowerAlert;
+@property(nonatomic) NSNumber *showPowerAlert;
 @end
 
 @implementation FlutterBluePlusPlugin
@@ -107,10 +107,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         if ([@"setOptions" isEqualToString:call.method])
         {
             NSDictionary *args = (NSDictionary*) call.arguments;
-            NSNumber *showPowerAlert = args[@"show_power_alert"];
-
-            self.showPowerAlert = (bool)[showPowerAlert boolValue];
-
+            self.showPowerAlert = args[@"show_power_alert"];
             result(@YES);
             return;
         }
@@ -121,10 +118,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             Log(LDEBUG, @"initializing CBCentralManager");
 
             NSDictionary *options = @{
-                CBCentralManagerOptionShowPowerAlertKey: self.showPowerAlert ? @(YES) : @(NO)
+                CBCentralManagerOptionShowPowerAlertKey: self.showPowerAlert
             };
 
-            Log(LDEBUG, @"show power alert: %@", self.showPowerAlert ? @"yes" : @"no");
+            Log(LDEBUG, @"show power alert: %@", [self.showPowerAlert boolValue] ? @"yes" : @"no");
 
             self.centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil options:options];
         }
