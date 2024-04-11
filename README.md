@@ -540,15 +540,7 @@ In the **ios/Runner/Info.plist** let’s add:
 ```dart
 <dict>
     <key>NSBluetoothAlwaysUsageDescription</key>
-    <string>This app always needs Bluetooth to function</string>
-    <key>NSBluetoothPeripheralUsageDescription</key>
-    <string>This app needs Bluetooth Peripheral to function</string>
-    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-    <string>This app always needs location and when in use to function</string>
-    <key>NSLocationAlwaysUsageDescription</key>
-    <string>This app always needs location to function</string>
-    <key>NSLocationWhenInUseUsageDescription</key>
-    <string>This app needs location when in use to function</string>
+    <string>This app needs Bluetooth to function</string>
 ```
 
 For location permissions on iOS see more at: [https://developer.apple.com/documentation/corelocation/requesting_authorization_for_location_services](https://developer.apple.com/documentation/corelocation/requesting_authorization_for_location_services)
