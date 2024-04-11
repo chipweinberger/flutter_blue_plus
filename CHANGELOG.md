@@ -1,3 +1,6 @@
+## 1.32.2
+* **[Improve]**iOS: fix warning about implicit conversion for showPowerAlert
+
 ## 1.32.1
 * **[Fix]** Android: scan failure were not being pushed to onError
 * **[Improve]** only `stopScan` if currently scanning. prevents 'could not find callback wrapper' log on Android 
