@@ -35,14 +35,14 @@ class BluetoothDescriptor {
   ///   - when the device is disconnected it is cleared
   List<int> get lastValue {
     String key = "$serviceUuid:$characteristicUuid:$descriptorUuid";
-    return FlutterBluePlus._lastDescs[remoteId]?[key] ?? [];
+    return FlutterBluePlusFactory._lastDescs[remoteId]?[key] ?? [];
   }
 
   /// this stream emits values:
   ///   - anytime `read()` is called
   ///   - anytime `write()` is called
   ///   - and when first listened to, it re-emits the last value for convenience
-  Stream<List<int>> get lastValueStream => FlutterBluePlus._methodStream.stream
+  Stream<List<int>> get lastValueStream => FlutterBluePlusFactory._methodStream.stream
       .where((m) => m.method == "OnDescriptorRead" || m.method == "OnDescriptorWritten")
       .map((m) => m.arguments)
       .map((args) => BmDescriptorData.fromMap(args))
@@ -56,7 +56,7 @@ class BluetoothDescriptor {
 
   /// this stream emits values:
   ///   - anytime `read()` is called
-  Stream<List<int>> get onValueReceived => FlutterBluePlus._methodStream.stream
+  Stream<List<int>> get onValueReceived => FlutterBluePlusFactory._methodStream.stream
       .where((m) => m.method == "OnDescriptorRead")
       .map((m) => m.arguments)
       .map((args) => BmDescriptorData.fromMap(args))
@@ -91,7 +91,7 @@ class BluetoothDescriptor {
         descriptorUuid: descriptorUuid,
       );
 
-      Stream<BmDescriptorData> responseStream = FlutterBluePlus._methodStream.stream
+      Stream<BmDescriptorData> responseStream = FlutterBluePlusFactory._methodStream.stream
           .where((m) => m.method == "OnDescriptorRead")
           .map((m) => m.arguments)
           .map((args) => BmDescriptorData.fromMap(args))
@@ -104,7 +104,7 @@ class BluetoothDescriptor {
       Future<BmDescriptorData> futureResponse = responseStream.first;
 
       // invoke
-      await FlutterBluePlus._invokeMethod('readDescriptor', request.toMap());
+      await FlutterBluePlusFactory._invokeMethod('readDescriptor', request.toMap());
 
       // wait for response
       BmDescriptorData response = await futureResponse
@@ -147,7 +147,7 @@ class BluetoothDescriptor {
         value: value,
       );
 
-      Stream<BmDescriptorData> responseStream = FlutterBluePlus._methodStream.stream
+      Stream<BmDescriptorData> responseStream = FlutterBluePlusFactory._methodStream.stream
           .where((m) => m.method == "OnDescriptorWritten")
           .map((m) => m.arguments)
           .map((args) => BmDescriptorData.fromMap(args))
@@ -160,7 +160,7 @@ class BluetoothDescriptor {
       Future<BmDescriptorData> futureResponse = responseStream.first;
 
       // invoke
-      await FlutterBluePlus._invokeMethod('writeDescriptor', request.toMap());
+      await FlutterBluePlusFactory._invokeMethod('writeDescriptor', request.toMap());
 
       // wait for response
       BmDescriptorData response = await futureResponse

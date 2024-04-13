@@ -48,7 +48,7 @@ class BluetoothCharacteristic {
   ///   - when the device is disconnected it is cleared
   List<int> get lastValue {
     String key = "$serviceUuid:$characteristicUuid";
-    return FlutterBluePlus._lastChrs[remoteId]?[key] ?? [];
+    return FlutterBluePlusFactory._lastChrs[remoteId]?[key] ?? [];
   }
 
   /// this stream emits values:
@@ -56,7 +56,7 @@ class BluetoothCharacteristic {
   ///   - anytime `write()` is called
   ///   - anytime a notification arrives (if subscribed)
   ///   - and when first listened to, it re-emits the last value for convenience
-  Stream<List<int>> get lastValueStream => FlutterBluePlus._methodStream.stream
+  Stream<List<int>> get lastValueStream => FlutterBluePlusFactory._methodStream.stream
       .where((m) => m.method == "OnCharacteristicReceived" || m.method == "OnCharacteristicWritten")
       .map((m) => m.arguments)
       .map((args) => BmCharacteristicData.fromMap(args))
@@ -70,7 +70,7 @@ class BluetoothCharacteristic {
   /// this stream emits values:
   ///   - anytime `read()` is called
   ///   - anytime a notification arrives (if subscribed)
-  Stream<List<int>> get onValueReceived => FlutterBluePlus._methodStream.stream
+  Stream<List<int>> get onValueReceived => FlutterBluePlusFactory._methodStream.stream
       .where((m) => m.method == "OnCharacteristicReceived")
       .map((m) => m.arguments)
       .map((args) => BmCharacteristicData.fromMap(args))
@@ -115,7 +115,7 @@ class BluetoothCharacteristic {
         secondaryServiceUuid: null,
       );
 
-      var responseStream = FlutterBluePlus._methodStream.stream
+      var responseStream = FlutterBluePlusFactory._methodStream.stream
           .where((m) => m.method == "OnCharacteristicReceived")
           .map((m) => m.arguments)
           .map((args) => BmCharacteristicData.fromMap(args))
@@ -127,7 +127,7 @@ class BluetoothCharacteristic {
       Future<BmCharacteristicData> futureResponse = responseStream.first;
 
       // invoke
-      await FlutterBluePlus._invokeMethod('readCharacteristic', request.toMap());
+      await FlutterBluePlusFactory._invokeMethod('readCharacteristic', request.toMap());
 
       // wait for response
       BmCharacteristicData response = await futureResponse
@@ -189,7 +189,7 @@ class BluetoothCharacteristic {
         value: value,
       );
 
-      var responseStream = FlutterBluePlus._methodStream.stream
+      var responseStream = FlutterBluePlusFactory._methodStream.stream
           .where((m) => m.method == "OnCharacteristicWritten")
           .map((m) => m.arguments)
           .map((args) => BmCharacteristicData.fromMap(args))
@@ -201,7 +201,7 @@ class BluetoothCharacteristic {
       Future<BmCharacteristicData> futureResponse = responseStream.first;
 
       // invoke
-      await FlutterBluePlus._invokeMethod('writeCharacteristic', request.toMap());
+      await FlutterBluePlusFactory._invokeMethod('writeCharacteristic', request.toMap());
 
       // wait for response so that we can:
       //  1. check for success (writeWithResponse)
@@ -254,7 +254,7 @@ class BluetoothCharacteristic {
 
       // Notifications & Indications are configured by writing to the
       // Client Characteristic Configuration Descriptor (CCCD)
-      Stream<BmDescriptorData> responseStream = FlutterBluePlus._methodStream.stream
+      Stream<BmDescriptorData> responseStream = FlutterBluePlusFactory._methodStream.stream
           .where((m) => m.method == "OnDescriptorWritten")
           .map((m) => m.arguments)
           .map((args) => BmDescriptorData.fromMap(args))
@@ -267,7 +267,7 @@ class BluetoothCharacteristic {
       Future<BmDescriptorData> futureResponse = responseStream.first;
 
       // invoke
-      bool hasCCCD = await FlutterBluePlus._invokeMethod('setNotifyValue', request.toMap());
+      bool hasCCCD = await FlutterBluePlusFactory._invokeMethod('setNotifyValue', request.toMap());
 
       // wait for CCCD descriptor to be written?
       if (hasCCCD) {
@@ -290,8 +290,8 @@ class BluetoothCharacteristic {
 
   /// look through known services
   BmBluetoothCharacteristic? get _bmchr {
-    if (FlutterBluePlus._knownServices[remoteId] != null) {
-      for (var s in FlutterBluePlus._knownServices[remoteId]!.services) {
+    if (FlutterBluePlusFactory._knownServices[remoteId] != null) {
+      for (var s in FlutterBluePlusFactory._knownServices[remoteId]!.services) {
         if (s.serviceUuid == serviceUuid) {
           for (var c in s.characteristics) {
             if (c.characteristicUuid == uuid) {

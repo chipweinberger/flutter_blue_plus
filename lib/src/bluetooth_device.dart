@@ -25,20 +25,20 @@ class BluetoothDevice {
   /// - iOS: after you connect, iOS uses the GAP name characteristic (0x2A00)
   ///        if it exists. Otherwise iOS use the advertised name.
   /// - Android: always uses the advertised name
-  String get platformName => FlutterBluePlus._platformNames[remoteId] ?? "";
+  String get platformName => FlutterBluePlusFactory._platformNames[remoteId] ?? "";
 
   /// Advertised Named
   ///  - this is the name advertised by the device during scanning
   ///  - it is only available after you scan with FlutterBluePlus
   ///  - it is cleared when the app restarts.
   ///  - not all devices advertise a name
-  String get advName => FlutterBluePlus._advNames[remoteId] ?? "";
+  String get advName => FlutterBluePlusFactory._advNames[remoteId] ?? "";
 
   /// Get services
   ///  - returns empty if discoverServices() has not been called
   ///    or if your device does not have any services (rare)
   List<BluetoothService> get servicesList {
-    BmDiscoverServicesResult? result = FlutterBluePlus._knownServices[remoteId];
+    BmDiscoverServicesResult? result = FlutterBluePlusFactory._knownServices[remoteId];
     if (result == null) {
       return [];
     } else {
@@ -59,25 +59,25 @@ class BluetoothDevice {
     if (isConnected == false && next == false) {
       subscription.cancel(); // cancel immediately if already disconnected.
     } else if (delayed) {
-      FlutterBluePlus._delayedSubscriptions[remoteId] ??= [];
-      FlutterBluePlus._delayedSubscriptions[remoteId]!.add(subscription);
+      FlutterBluePlusFactory._delayedSubscriptions[remoteId] ??= [];
+      FlutterBluePlusFactory._delayedSubscriptions[remoteId]!.add(subscription);
     } else {
-      FlutterBluePlus._deviceSubscriptions[remoteId] ??= [];
-      FlutterBluePlus._deviceSubscriptions[remoteId]!.add(subscription);      
+      FlutterBluePlusFactory._deviceSubscriptions[remoteId] ??= [];
+      FlutterBluePlusFactory._deviceSubscriptions[remoteId]!.add(subscription);
     }
   }
 
   /// Returns true if autoConnect is currently enabled for this device
   bool get isAutoConnectEnabled {
-    return FlutterBluePlus._autoConnect.contains(remoteId);
+    return FlutterBluePlusFactory._autoConnect.contains(remoteId);
   }
 
   /// Returns true if this device is currently connected to your app
   bool get isConnected {
-    if (FlutterBluePlus._connectionStates[remoteId] == null) {
+    if (FlutterBluePlusFactory._connectionStates[remoteId] == null) {
       return false;
     } else {
-      var state = FlutterBluePlus._connectionStates[remoteId]!.connectionState;
+      var state = FlutterBluePlusFactory._connectionStates[remoteId]!.connectionState;
       return state == BmConnectionStateEnum.connected;
     }
   }
@@ -114,7 +114,7 @@ class BluetoothDevice {
     try {
       // remember auto connect value
       if (autoConnect) {
-        FlutterBluePlus._autoConnect.add(remoteId);
+        FlutterBluePlusFactory._autoConnect.add(remoteId);
       }
 
       var request = BmConnectRequest(
@@ -122,7 +122,7 @@ class BluetoothDevice {
         autoConnect: autoConnect,
       );
 
-      var responseStream = FlutterBluePlus._methodStream.stream
+      var responseStream = FlutterBluePlusFactory._methodStream.stream
           .where((m) => m.method == "OnConnectionStateChanged")
           .map((m) => m.arguments)
           .map((args) => BmConnectionStateResponse.fromMap(args))
@@ -132,7 +132,7 @@ class BluetoothDevice {
       Future<BmConnectionStateResponse> futureState = responseStream.first;
 
       // invoke
-      bool changed = await FlutterBluePlus._invokeMethod('connect', request.toMap());
+      bool changed = await FlutterBluePlusFactory._invokeMethod('connect', request.toMap());
 
       // we return the disconnect mutex now so that this
       // connection attempt can be canceled by calling disconnect
@@ -145,7 +145,7 @@ class BluetoothDevice {
             .fbpTimeout(timeout.inSeconds, "connect")
             .catchError((e) async {
           if (e is FlutterBluePlusException && e.code == FbpErrorCode.timeout.index) {
-            await FlutterBluePlus._invokeMethod('disconnect', remoteId.str); // cancel connection attempt
+            await FlutterBluePlusFactory._invokeMethod('disconnect', remoteId.str); // cancel connection attempt
           }
           throw e;
         });
@@ -191,9 +191,9 @@ class BluetoothDevice {
 
     try {
       // remove from auto connect list if there
-      FlutterBluePlus._autoConnect.remove(remoteId);
+      FlutterBluePlusFactory._autoConnect.remove(remoteId);
 
-      var responseStream = FlutterBluePlus._methodStream.stream
+      var responseStream = FlutterBluePlusFactory._methodStream.stream
           .where((m) => m.method == "OnConnectionStateChanged")
           .map((m) => m.arguments)
           .map((args) => BmConnectionStateResponse.fromMap(args))
@@ -204,7 +204,7 @@ class BluetoothDevice {
       Future<BmConnectionStateResponse> futureState = responseStream.first;
 
       // invoke
-      bool changed = await FlutterBluePlus._invokeMethod('disconnect', remoteId.str);
+      bool changed = await FlutterBluePlusFactory._invokeMethod('disconnect', remoteId.str);
 
       // only wait for disconnection if weren't already disconnected
       if (changed) {
@@ -236,7 +236,7 @@ class BluetoothDevice {
     List<BluetoothService> result = [];
 
     try {
-      var responseStream = FlutterBluePlus._methodStream.stream
+      var responseStream = FlutterBluePlusFactory._methodStream.stream
           .where((m) => m.method == "OnDiscoveredServices")
           .map((m) => m.arguments)
           .map((args) => BmDiscoverServicesResult.fromMap(args))
@@ -246,7 +246,7 @@ class BluetoothDevice {
       Future<BmDiscoverServicesResult> futureResponse = responseStream.first;
 
       // invoke
-      await FlutterBluePlus._invokeMethod('discoverServices', remoteId.str);
+      await FlutterBluePlusFactory._invokeMethod('discoverServices', remoteId.str);
 
       // wait for response
       BmDiscoverServicesResult response = await futureResponse
@@ -280,11 +280,11 @@ class BluetoothDevice {
 
   /// The most recent disconnection reason
   DisconnectReason? get disconnectReason {
-    if (FlutterBluePlus._connectionStates[remoteId] == null) {
+    if (FlutterBluePlusFactory._connectionStates[remoteId] == null) {
       return null;
     }
-    int? code = FlutterBluePlus._connectionStates[remoteId]!.disconnectReasonCode;
-    String? description = FlutterBluePlus._connectionStates[remoteId]!.disconnectReasonString;
+    int? code = FlutterBluePlusFactory._connectionStates[remoteId]!.disconnectReasonCode;
+    String? description = FlutterBluePlusFactory._connectionStates[remoteId]!.disconnectReasonString;
     return DisconnectReason(_nativeError, code, description);
   }
 
@@ -293,10 +293,10 @@ class BluetoothDevice {
     // initial value - Note: we only care about the current connection state of
     // *our* app, which is why we can use our cached value, or assume disconnected
     BluetoothConnectionState initialValue = BluetoothConnectionState.disconnected;
-    if (FlutterBluePlus._connectionStates[remoteId] != null) {
-      initialValue = _bmToConnectionState(FlutterBluePlus._connectionStates[remoteId]!.connectionState);
+    if (FlutterBluePlusFactory._connectionStates[remoteId] != null) {
+      initialValue = _bmToConnectionState(FlutterBluePlusFactory._connectionStates[remoteId]!.connectionState);
     }
-    return FlutterBluePlus._methodStream.stream
+    return FlutterBluePlusFactory._methodStream.stream
         .where((m) => m.method == "OnConnectionStateChanged")
         .map((m) => m.arguments)
         .map((args) => BmConnectionStateResponse.fromMap(args))
@@ -308,7 +308,7 @@ class BluetoothDevice {
   /// The current MTU size in bytes
   int get mtuNow {
     // get initial value from our cache
-    return FlutterBluePlus._mtuValues[remoteId]?.mtu ?? 23;
+    return FlutterBluePlusFactory._mtuValues[remoteId]?.mtu ?? 23;
   }
 
   /// Stream emits a value:
@@ -316,8 +316,8 @@ class BluetoothDevice {
   ///   - whenever the mtu changes
   Stream<int> get mtu {
     // get initial value from our cache
-    int initialValue = FlutterBluePlus._mtuValues[remoteId]?.mtu ?? 23;
-    return FlutterBluePlus._methodStream.stream
+    int initialValue = FlutterBluePlusFactory._mtuValues[remoteId]?.mtu ?? 23;
+    return FlutterBluePlusFactory._methodStream.stream
         .where((m) => m.method == "OnMtuChanged")
         .map((m) => m.arguments)
         .map((args) => BmMtuChangedResponse.fromMap(args))
@@ -330,7 +330,7 @@ class BluetoothDevice {
   ///  - uses the GAP Services Changed characteristic (0x2A05)
   ///  - you must re-call discoverServices() when services are reset
   Stream<void> get onServicesReset {
-    return FlutterBluePlus._methodStream.stream
+    return FlutterBluePlusFactory._methodStream.stream
         .where((m) => m.method == "OnServicesReset")
         .map((m) => m.arguments)
         .map((args) => BmBluetoothDevice.fromMap(args))
@@ -353,7 +353,7 @@ class BluetoothDevice {
     int rssi = 0;
 
     try {
-      var responseStream = FlutterBluePlus._methodStream.stream
+      var responseStream = FlutterBluePlusFactory._methodStream.stream
           .where((m) => m.method == "OnReadRssi")
           .map((m) => m.arguments)
           .map((args) => BmReadRssiResult.fromMap(args))
@@ -363,7 +363,7 @@ class BluetoothDevice {
       Future<BmReadRssiResult> futureResponse = responseStream.first;
 
       // invoke
-      await FlutterBluePlus._invokeMethod('readRssi', remoteId.str);
+      await FlutterBluePlusFactory._invokeMethod('readRssi', remoteId.str);
 
       // wait for response
       BmReadRssiResult response = await futureResponse
@@ -431,7 +431,7 @@ class BluetoothDevice {
         mtu: desiredMtu,
       );
 
-      var responseStream = FlutterBluePlus._methodStream.stream
+      var responseStream = FlutterBluePlusFactory._methodStream.stream
           .where((m) => m.method == "OnMtuChanged")
           .map((m) => m.arguments)
           .map((args) => BmMtuChangedResponse.fromMap(args))
@@ -442,7 +442,7 @@ class BluetoothDevice {
       Future<int> futureResponse = responseStream.first;
 
       // invoke
-      await FlutterBluePlus._invokeMethod('requestMtu', request.toMap());
+      await FlutterBluePlusFactory._invokeMethod('requestMtu', request.toMap());
 
       // wait for response
       mtu = await futureResponse
@@ -476,7 +476,7 @@ class BluetoothDevice {
     );
 
     // invoke
-    await FlutterBluePlus._invokeMethod('requestConnectionPriority', request.toMap());
+    await FlutterBluePlusFactory._invokeMethod('requestConnectionPriority', request.toMap());
   }
 
   /// Set the preferred connection (Android Only)
@@ -509,7 +509,7 @@ class BluetoothDevice {
     );
 
     // invoke
-    await FlutterBluePlus._invokeMethod('setPreferredPhy', request.toMap());
+    await FlutterBluePlusFactory._invokeMethod('setPreferredPhy', request.toMap());
   }
 
   /// Force the bonding popup to show now (Android Only)
@@ -531,7 +531,7 @@ class BluetoothDevice {
     await mtx.take();
 
     try {
-      var responseStream = FlutterBluePlus._methodStream.stream
+      var responseStream = FlutterBluePlusFactory._methodStream.stream
           .where((m) => m.method == "OnBondStateChanged")
           .map((m) => m.arguments)
           .map((args) => BmBondStateResponse.fromMap(args))
@@ -542,7 +542,7 @@ class BluetoothDevice {
       Future<BmBondStateResponse> futureResponse = responseStream.first;
 
       // invoke
-      bool changed = await FlutterBluePlus._invokeMethod('createBond', remoteId.str);
+      bool changed = await FlutterBluePlusFactory._invokeMethod('createBond', remoteId.str);
 
       // only wait for 'bonded' if we weren't already bonded
       if (changed) {
@@ -574,7 +574,7 @@ class BluetoothDevice {
     await mtx.take();
 
     try {
-      var responseStream = FlutterBluePlus._methodStream.stream
+      var responseStream = FlutterBluePlusFactory._methodStream.stream
           .where((m) => m.method == "OnBondStateChanged")
           .map((m) => m.arguments)
           .map((args) => BmBondStateResponse.fromMap(args))
@@ -585,7 +585,7 @@ class BluetoothDevice {
       Future<BmBondStateResponse> futureResponse = responseStream.first;
 
       // invoke
-      bool changed = await FlutterBluePlus._invokeMethod('removeBond', remoteId.str);
+      bool changed = await FlutterBluePlusFactory._invokeMethod('removeBond', remoteId.str);
 
       // only wait for 'unbonded' state if we weren't already unbonded
       if (changed) {
@@ -620,7 +620,7 @@ class BluetoothDevice {
     }
 
     // invoke
-    await FlutterBluePlus._invokeMethod('clearGattCache', remoteId.str);
+    await FlutterBluePlusFactory._invokeMethod('clearGattCache', remoteId.str);
   }
 
   /// Get the current bondState of the device (Android Only)
@@ -631,28 +631,28 @@ class BluetoothDevice {
     }
 
     // get current state if needed
-    if (FlutterBluePlus._bondStates[remoteId] == null) {
-      var val = await FlutterBluePlus._methodChannel
+    if (FlutterBluePlusFactory._bondStates[remoteId] == null) {
+      var val = await FlutterBluePlusFactory._methodChannel
           .invokeMethod('getBondState', remoteId.str)
           .then((args) => BmBondStateResponse.fromMap(args));
       // update _bondStates if it is still null after the await
-      if (FlutterBluePlus._bondStates[remoteId] == null) {
-        FlutterBluePlus._bondStates[remoteId] = val;
+      if (FlutterBluePlusFactory._bondStates[remoteId] == null) {
+        FlutterBluePlusFactory._bondStates[remoteId] = val;
       }
     }
 
-    yield* FlutterBluePlus._methodStream.stream
+    yield* FlutterBluePlusFactory._methodStream.stream
         .where((m) => m.method == "OnBondStateChanged")
         .map((m) => m.arguments)
         .map((args) => BmBondStateResponse.fromMap(args))
         .where((p) => p.remoteId == remoteId)
         .map((p) => _bmToBondState(p.bondState))
-        .newStreamWithInitialValue(_bmToBondState(FlutterBluePlus._bondStates[remoteId]!.bondState));
+        .newStreamWithInitialValue(_bmToBondState(FlutterBluePlusFactory._bondStates[remoteId]!.bondState));
   }
 
   /// Get the previous bondState of the device (Android Only)
   BluetoothBondState? get prevBondState {
-    var b = FlutterBluePlus._bondStates[remoteId]?.prevState;
+    var b = FlutterBluePlusFactory._bondStates[remoteId]?.prevState;
     return b != null ? _bmToBondState(b) : null;
   }
 
@@ -677,7 +677,7 @@ class BluetoothDevice {
     return 'BluetoothDevice{'
         'remoteId: $remoteId, '
         'platformName: $platformName, '
-        'services: ${FlutterBluePlus._knownServices[remoteId]}'
+        'services: ${FlutterBluePlusFactory._knownServices[remoteId]}'
         '}';
   }
 

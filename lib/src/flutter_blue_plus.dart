@@ -4,7 +4,11 @@
 
 part of flutter_blue_plus;
 
-class FlutterBluePlus {
+final FlutterBluePlus = FlutterBluePlusFactory();
+
+class FlutterBluePlusFactory {
+  // const FlutterBluePlusFactory() => _instance;
+
   ///////////////////
   //  Internal
   //
@@ -112,7 +116,7 @@ class FlutterBluePlus {
 
   /// Turn on Bluetooth (Android only),
   static Future<void> turnOn({int timeout = 60}) async {
-    var responseStream = FlutterBluePlus._methodStream.stream
+    var responseStream = FlutterBluePlusFactory._methodStream.stream
         .where((m) => m.method == "OnTurnOnResponse")
         .map((m) => m.arguments)
         .map((args) => BmTurnOnResponse.fromMap(args));
@@ -150,7 +154,7 @@ class FlutterBluePlus {
       }
     }
 
-    yield* FlutterBluePlus._methodStream.stream
+    yield* FlutterBluePlusFactory._methodStream.stream
         .where((m) => m.method == "OnAdapterStateChanged")
         .map((m) => m.arguments)
         .map((args) => BmBluetoothAdapterState.fromMap(args))
@@ -270,7 +274,7 @@ class FlutterBluePlus {
           androidScanMode: androidScanMode.value,
           androidUsesFineLocation: androidUsesFineLocation);
 
-      Stream<BmScanResponse> responseStream = FlutterBluePlus._methodStream.stream
+      Stream<BmScanResponse> responseStream = FlutterBluePlusFactory._methodStream.stream
           .where((m) => m.method == "OnScanResponse")
           .map((m) => m.arguments)
           .map((args) => BmScanResponse.fromMap(args));
@@ -378,7 +382,7 @@ class FlutterBluePlus {
   ///   - this is an optional convenience function
   ///   - prevents accidentally creating duplicate subscriptions before each scan
   static void cancelWhenScanComplete(StreamSubscription subscription) {
-    FlutterBluePlus._scanSubscriptions.add(subscription);
+    FlutterBluePlusFactory._scanSubscriptions.add(subscription);
   }
 
   /// Sets the internal FlutterBlue log level
