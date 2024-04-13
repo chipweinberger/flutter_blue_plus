@@ -109,7 +109,7 @@ extension FutureTimeout<T> on Future<T> {
     var completer = Completer<T>();
 
     // disconnection listener.
-    var subscription = FlutterBluePlusFactory.adapterState.listen((event) {
+    var subscription = FlutterBluePlus.adapterState.listen((event) {
       if (event == BluetoothAdapterState.off || event == BluetoothAdapterState.turningOff) {
         if (!completer.isCompleted) {
           completer.completeError(FlutterBluePlusException(

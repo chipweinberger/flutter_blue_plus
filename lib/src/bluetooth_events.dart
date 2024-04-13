@@ -2,7 +2,7 @@ part of flutter_blue_plus;
 
 class BluetoothEvents {
   Stream<OnConnectionStateChangedEvent> get onConnectionStateChanged {
-    return FlutterBluePlusFactory._methodStream.stream
+    return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnConnectionStateChanged")
         .map((m) => m.arguments)
         .map((args) => BmConnectionStateResponse.fromMap(args))
@@ -10,7 +10,7 @@ class BluetoothEvents {
   }
 
   Stream<OnMtuChangedEvent> get onMtuChanged {
-    return FlutterBluePlusFactory._methodStream.stream
+    return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnMtuChanged")
         .map((m) => m.arguments)
         .map((args) => BmMtuChangedResponse.fromMap(args))
@@ -18,7 +18,7 @@ class BluetoothEvents {
   }
 
   Stream<OnReadRssiEvent> get onReadRssi {
-    return FlutterBluePlusFactory._methodStream.stream
+    return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnReadRssi")
         .map((m) => m.arguments)
         .map((args) => BmReadRssiResult.fromMap(args))
@@ -26,7 +26,7 @@ class BluetoothEvents {
   }
 
   Stream<OnServicesResetEvent> get onServicesReset {
-    return FlutterBluePlusFactory._methodStream.stream
+    return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnServicesReset")
         .map((m) => m.arguments)
         .map((args) => BmBluetoothDevice.fromMap(args))
@@ -34,7 +34,7 @@ class BluetoothEvents {
   }
 
   Stream<OnDiscoveredServicesEvent> get onDiscoveredServices {
-    return FlutterBluePlusFactory._methodStream.stream
+    return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnDiscoveredServices")
         .map((m) => m.arguments)
         .map((args) => BmDiscoverServicesResult.fromMap(args))
@@ -42,7 +42,7 @@ class BluetoothEvents {
   }
 
   Stream<OnCharacteristicReceivedEvent> get onCharacteristicReceived {
-    return FlutterBluePlusFactory._methodStream.stream
+    return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnCharacteristicReceived")
         .map((m) => m.arguments)
         .map((args) => BmCharacteristicData.fromMap(args))
@@ -50,7 +50,7 @@ class BluetoothEvents {
   }
 
   Stream<OnCharacteristicWrittenEvent> get onCharacteristicWritten {
-    return FlutterBluePlusFactory._methodStream.stream
+    return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnCharacteristicWritten")
         .map((m) => m.arguments)
         .map((args) => BmCharacteristicData.fromMap(args))
@@ -58,7 +58,7 @@ class BluetoothEvents {
   }
 
   Stream<OnDescriptorReadEvent> get onDescriptorRead {
-    return FlutterBluePlusFactory._methodStream.stream
+    return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnDescriptorRead")
         .map((m) => m.arguments)
         .map((args) => BmDescriptorData.fromMap(args))
@@ -66,7 +66,7 @@ class BluetoothEvents {
   }
 
   Stream<OnDescriptorWrittenEvent> get onDescriptorWritten {
-    return FlutterBluePlusFactory._methodStream.stream
+    return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnDescriptorWritten")
         .map((m) => m.arguments)
         .map((args) => BmDescriptorData.fromMap(args))
@@ -74,7 +74,7 @@ class BluetoothEvents {
   }
 
   Stream<OnNameChangedEvent> get onNameChanged {
-    return FlutterBluePlusFactory._methodStream.stream
+    return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnNameChanged")
         .map((m) => m.arguments)
         .map((args) => BmBluetoothDevice.fromMap(args))
@@ -82,7 +82,7 @@ class BluetoothEvents {
   }
 
   Stream<OnBondStateChangedEvent> get onBondStateChanged {
-    return FlutterBluePlusFactory._methodStream.stream
+    return FlutterBluePlus._methodStream.stream
         .where((m) => m.method == "OnBondStateChanged")
         .map((m) => m.arguments)
         .map((args) => BmBondStateResponse.fromMap(args))
