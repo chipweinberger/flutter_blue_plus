@@ -51,7 +51,7 @@ FlutterBluePlus was written to be simple, robust, and easy to understand.
 
 ## No Dependencies
 
-FlutterBluePlus has zero dependencies besides Flutter, Android, and iOS themselves.
+FlutterBluePlus has zero dependencies besides Flutter, Android, iOS, and macOS themselves.
 
 This makes FlutterBluePlus very stable, and easy to maintain.
 
@@ -148,8 +148,8 @@ If your device is not found, see [Common Problems](#common-problems).
 
 ```dart
 // listen to scan results
-// Note: `onScanResults` only returns live scan results, i.e. during scanning
-// Use: `scanResults` if you want live scan results *or* the results from a previous scan
+// Note: `onScanResults` only returns live scan results, i.e. during scanning. Use
+//  `scanResults` if you want live scan results *or* the results from a previous scan.
 var subscription = FlutterBluePlus.onScanResults.listen((results) {
         if (results.isNotEmpty) {
             ScanResult r = results.last; // the most recently found device
@@ -167,13 +167,10 @@ FlutterBluePlus.cancelWhenScanComplete(subscription);
 await FlutterBluePlus.adapterState.where((val) => val == BluetoothAdapterState.on).first;
 
 // Start scanning w/ timeout
-// Optional: you can use `stopScan()` as an alternative to using a timeout
-// Note: scan filters use an *or* behavior. i.e. if you set `withServices` & `withNames`
-//   we return all the advertisments that match any of the specified services *or* any
-//   of the specified names.
+// Optional: use `stopScan()` as an alternative to timeout
 await FlutterBluePlus.startScan(
-  withServices:[Guid("180D")],
-  withNames:["Bluno"],
+  withServices:[Guid("180D")], // match any of the specified services
+  withNames:["Bluno"], // *or* any of the specified names
   timeout: Duration(seconds:15));
 
 // wait for scanning to stop
@@ -194,9 +191,10 @@ var subscription = device.connectionState.listen((BluetoothConnectionState state
 });
 
 // cleanup: cancel subscription when disconnected
-// Note: `delayed:true` lets us receive the `disconnected` event in our handler
-// Note: `next:true` means cancel on *next* disconnection. Without this, it
-//   would cancel immediately because we're already disconnected right now.
+// Note: `delayed:true` lets the `connectionState` listener receive
+//        the `disconnected` event before it is canceled
+// Note: `next:true` means cancel on *next* disconnection. Without this
+//        if we're already disconnected it would cancel immediately
 device.cancelWhenDisconnected(subscription, delayed:true, next:true);
 
 // Connect to the device
@@ -542,15 +540,7 @@ In the **ios/Runner/Info.plist** let’s add:
 ```dart
 <dict>
     <key>NSBluetoothAlwaysUsageDescription</key>
-    <string>This app always needs Bluetooth to function</string>
-    <key>NSBluetoothPeripheralUsageDescription</key>
-    <string>This app needs Bluetooth Peripheral to function</string>
-    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-    <string>This app always needs location and when in use to function</string>
-    <key>NSLocationAlwaysUsageDescription</key>
-    <string>This app always needs location to function</string>
-    <key>NSLocationWhenInUseUsageDescription</key>
-    <string>This app needs location when in use to function</string>
+    <string>This app needs Bluetooth to function</string>
 ```
 
 For location permissions on iOS see more at: [https://developer.apple.com/documentation/corelocation/requesting_authorization_for_location_services](https://developer.apple.com/documentation/corelocation/requesting_authorization_for_location_services)

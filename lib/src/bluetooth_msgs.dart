@@ -180,7 +180,7 @@ class BmScanResponse {
       advertisements.add(BmScanAdvertisement.fromMap(item));
     }
 
-    bool success = json['success'] == null || json['success'] == 0;
+    bool success = json['success'] == null || json['success'] != 0;
 
     return BmScanResponse(
       advertisements: advertisements,
