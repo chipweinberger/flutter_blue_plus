@@ -4,7 +4,7 @@
 
 #import "FlutterBluePlusPlugin.h"
 
-#define Log(LEVEL, FORMAT, ...) [self log:LEVEL format:@"[FBP-iOS] " FORMAT, ##__VA_ARGS__]
+#define Log(LEVEL, FORMAT, ...) [self log:LEVEL format:FORMAT, ##__VA_ARGS__]
 
 NSString * const CCCD = @"2902";
 
@@ -53,6 +53,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 @property(nonatomic) NSDictionary *scanFilters;
 @property(nonatomic) NSTimer *checkForMtuChangesTimer;
 @property(nonatomic) LogLevel logLevel;
+@property(nonatomic) bool sendLogsToDart;
 @property(nonatomic) NSNumber *showPowerAlert;
 @end
 
@@ -74,6 +75,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     instance.writeDescs = [NSMutableDictionary new];
     instance.scanCounts = [NSMutableDictionary new];
     instance.logLevel = LDEBUG;
+    instance.sendLogsToDart = false;
     instance.showPowerAlert = @(YES);
 
     [registrar addMethodCallDelegate:instance channel:methodChannel];
@@ -142,6 +144,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             [@"flutterHotRestart" isEqualToString:call.method] == false &&
             [@"connectedCount" isEqualToString:call.method] == false &&
             [@"setLogLevel" isEqualToString:call.method] == false &&
+            [@"setSendLogsToDart" isEqualToString:call.method] == false &&
             [@"isSupported" isEqualToString:call.method] == false &&
             [@"getAdapterName" isEqualToString:call.method] == false &&
             [@"getAdapterState" isEqualToString:call.method] == false) {
@@ -150,7 +153,20 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             return;
         }
 
-        if ([@"flutterHotRestart" isEqualToString:call.method])
+        if ([@"setLogLevel" isEqualToString:call.method])
+        {
+            NSNumber *idx = [call arguments];
+            self.logLevel = (LogLevel)[idx integerValue];
+            result(@YES);
+            return;
+        }
+        else if ([@"setSendLogsToDart" isEqualToString:call.method])
+        {
+            self.sendLogsToDart = [call arguments];
+            result(@YES);
+            return;
+        }
+        else if ([@"flutterHotRestart" isEqualToString:call.method])
         {
             // no adapter?
             if (self.centralManager == nil) {
@@ -181,13 +197,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 [self.knownPeripherals removeAllObjects];
             }
             result(@(self.connectedPeripherals.count));
-            return;
-        }
-        else if ([@"setLogLevel" isEqualToString:call.method])
-        {
-            NSNumber *idx = [call arguments];
-            self.logLevel = (LogLevel)[idx integerValue];
-            result(@YES);
             return;
         }
         else if ([@"isSupported" isEqualToString:call.method])
@@ -2056,7 +2065,21 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         va_list args;
         va_start(args, format);
         NSString* msg = [[NSString alloc] initWithFormat:format arguments:args];
-        NSLog(@"%@", msg);
+        #if TARGET_OS_IPHONE
+            NSString* platform = @"iOS";
+        #else
+            NSString* platform = @"macOS";
+        #endif
+        if (self.sendLogsToDart) {
+            NSString* message = [NSString stringWithFormat:@"[FBP] [%@] %@", platform, msg];
+            NSDictionary* response = @{
+                @"level": @(level),
+                @"message": message
+            };
+            [self.methodChannel invokeMethod:@"OnLog" arguments:response];
+        } else {
+            NSLog(@"[FBP] [%@] %@", platform, msg);
+        }
         va_end(args);
     }
 }

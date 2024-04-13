@@ -53,6 +53,7 @@ class FlutterBluePlus {
   /// FlutterBluePlus log level
   static LogLevel _logLevel = LogLevel.debug;
   static bool _logColor = true;
+  static Logger _logger = _stdoutLogger;
 
   ////////////////////
   //  Public
@@ -354,7 +355,7 @@ class FlutterBluePlus {
     if (isScanningNow) {
       await _stopScan();
     } else if (_logLevel.index >= LogLevel.info.index) {
-      print("[FBP] stopScan: already stopped");
+      _logger("[FBP] stopScan: already stopped", level: LogLevel.info);
     }
     mtx.give();
   }
@@ -386,6 +387,16 @@ class FlutterBluePlus {
     _logLevel = level;
     _logColor = color;
     await _invokeMethod('setLogLevel', level.index);
+  }
+
+  /// Set a custom logger function
+  ///
+  /// The default logger [_stdoutLogger] prints in the following format: "[FBP] $message".
+  /// Your custom logger will only be called for logs with a [LogLevel] equal to or higher than the current log level.
+  /// So if you want to filter yourself, you need to [setLogLevel] to the lowest level [LogLeve.verbose] and discard messages in your [logger].
+  static Future<void> setLogger(Logger logger) async {
+    _logger = logger;
+    await _invokeMethod('setSendLogsToDart', true);
   }
 
   /// Request Bluetooth PHY support
@@ -420,17 +431,22 @@ class FlutterBluePlus {
 
   static Future<dynamic> _methodCallHandler(MethodCall call) async {
     // log result
-    if (logLevel == LogLevel.verbose) {
+    if (logLevel == LogLevel.verbose && call.method != "OnLog") {
       String func = '[[ ${call.method} ]]';
       String result = call.arguments.toString();
       func = _logColor ? _black(func) : func;
       result = _logColor ? _brown(result) : result;
-      print("[FBP] $func result: $result");
+      _logger("[FBP] $func result: $result", level: LogLevel.verbose);
     }
 
     // android only
     if (call.method == "OnDetachedFromEngine") {
       _stopScan(invokePlatform: false);
+    }
+
+    if (call.method == "OnLog") {
+      final r = BmLogMessage.fromMap(call.arguments);
+      _logger(r.message, level: r.level);
     }
 
     // keep track of adapter states
@@ -444,7 +460,7 @@ class FlutterBluePlus {
         for (DeviceIdentifier d in _autoConnect) {
           BluetoothDevice(remoteId: d).connect(autoConnect: true, mtu: null).onError((e, s) {
             if (logLevel != LogLevel.none) {
-              print("[FBP] [AutoConnect] connection failed: $e");
+              _logger("[FBP] [AutoConnect] connection failed: $e", level: LogLevel.error);
             }
           });
         }
@@ -486,7 +502,7 @@ class FlutterBluePlus {
               var d = BluetoothDevice(remoteId: r.remoteId);
               d.connect(autoConnect: true, mtu: null).onError((e, s) {
                 if (logLevel != LogLevel.none) {
-                  print("[FBP] [AutoConnect] connection failed: $e");
+                  _logger("[FBP] [AutoConnect] connection failed: $e", level: LogLevel.error);
                 }
               });
             }
@@ -581,30 +597,33 @@ class FlutterBluePlus {
     await mtx.take();
 
     try {
-      // initialize
-      if (method != "setOptions") {
+      // allow configuration before the plugin is initialized & starts logging
+      if (method == "setOptions" || method == "setLogLevel" || method == "setSendLogsToDart") {
+        out = await _methodChannel.invokeMethod(method, arguments);
+      } else {
+        // initialize
         _initFlutterBluePlus();
-      }
 
-      // log args
-      if (logLevel == LogLevel.verbose) {
-        String func = '<$method>';
-        String args = arguments.toString();
-        func = _logColor ? _black(func) : func;
-        args = _logColor ? _magenta(args) : args;
-        print("[FBP] $func args: $args");
-      }
+        // log args
+        if (logLevel == LogLevel.verbose) {
+          String func = '<$method>';
+          String args = arguments.toString();
+          func = _logColor ? _black(func) : func;
+          args = _logColor ? _magenta(args) : args;
+          _logger("[FBP] $func args: $args", level: LogLevel.verbose);
+        }
 
-      // invoke
-      out = await _methodChannel.invokeMethod(method, arguments);
+        // invoke
+        out = await _methodChannel.invokeMethod(method, arguments);
 
-      // log result
-      if (logLevel == LogLevel.verbose) {
-        String func = '<$method>';
-        String result = out.toString();
-        func = _logColor ? _black(func) : func;
-        result = _logColor ? _brown(result) : result;
-        print("[FBP] $func result: $result");
+        // log result
+        if (logLevel == LogLevel.verbose) {
+          String func = '<$method>';
+          String result = out.toString();
+          func = _logColor ? _black(func) : func;
+          result = _logColor ? _brown(result) : result;
+          _logger("[FBP] $func result: $result", level: LogLevel.verbose);
+        }
       }
     } finally {
       mtx.give();
@@ -659,6 +678,22 @@ enum LogLevel {
   info, // 3
   debug, // 4
   verbose, //5
+}
+
+/// Callback to be run when a log message is generated
+/// - [message] the log message
+/// - [domain] the domain (hierarchy of modules) of the log message
+///   - e.g. ["FBP", "AutoConnect"] or ["FBP", "Android"]
+/// - [level] the log level
+typedef Logger = void Function(
+  String message, {
+  required LogLevel level,
+});
+
+/// Default logger implementation
+void _stdoutLogger(String message, {required LogLevel level}) {
+  assert(level != LogLevel.none, "LogLevel.none should not be used");
+  print(message);
 }
 
 class AndroidScanMode {

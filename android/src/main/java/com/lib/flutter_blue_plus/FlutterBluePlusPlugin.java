@@ -85,6 +85,7 @@ public class FlutterBluePlusPlugin implements
     private static final String TAG = "[FBP-Android]";
 
     private LogLevel logLevel = LogLevel.DEBUG;
+    private boolean sendLogsToDart = false;
 
     private Context context;
     private MethodChannel methodChannel;
@@ -266,8 +267,7 @@ public class FlutterBluePlusPlugin implements
 
     @Override
     @SuppressWarnings({"deprecation", "unchecked"}) // needed for compatibility, type safety uses bluetooth_msgs.dart
-    public void onMethodCall(@NonNull MethodCall call,
-                                 @NonNull Result result)
+    public void onMethodCall(@NonNull MethodCall call, @NonNull Result result)
     {
         try {
             log(LogLevel.DEBUG, "onMethodCall: " + call.method);
@@ -285,6 +285,7 @@ public class FlutterBluePlusPlugin implements
                 "flutterHotRestart".equals(call.method) == false &&
                 "connectedCount".equals(call.method) == false &&
                 "setLogLevel".equals(call.method) == false &&
+                "setSendLogsToDart".equals(call.method) == false &&
                 "isSupported".equals(call.method) == false &&
                 "getAdapterName".equals(call.method) == false &&
                 "getAdapterState".equals(call.method) == false) {
@@ -293,6 +294,31 @@ public class FlutterBluePlusPlugin implements
             }
 
             switch (call.method) {
+
+                case "setOptions":
+                {
+                    result.success(true);
+                    return;
+                }
+                
+                case "setLogLevel":
+                {
+                    int idx = (int)call.arguments;
+
+                    // set global var
+                    logLevel = LogLevel.values()[idx];
+
+                    result.success(true);
+                    return;
+                }
+
+                case "setSendLogsToDart":
+                {
+                    sendLogsToDart = (boolean)call.arguments;
+
+                    result.success(true);
+                    return;
+                }
 
                 case "flutterHotRestart":
                 {
@@ -317,13 +343,6 @@ public class FlutterBluePlusPlugin implements
                     break;
                 }
 
-                case "setOptions":
-                {
-                    // Currently ignored on Android
-                    result.success(true);
-                    break;
-                }
-
                 case "connectedCount":
                 {
                     log(LogLevel.DEBUG, "connectedPeripherals: " + mConnectedDevices.size());
@@ -334,24 +353,13 @@ public class FlutterBluePlusPlugin implements
                     break;
                 }
 
-                case "setLogLevel":
-                {
-                    int idx = (int)call.arguments;
-
-                    // set global var
-                    logLevel = LogLevel.values()[idx];
-
-                    result.success(true);
-                    break;
-                }
-
                 case "isSupported":
                 {
                     result.success(mBluetoothAdapter != null);
                     break;
                 }
 
-               case "getAdapterName":
+                case "getAdapterName":
                 {
                     ArrayList<String> permissions = new ArrayList<>();
 
@@ -1569,13 +1577,13 @@ public class FlutterBluePlusPlugin implements
         int counter = 0;
         if (mBondingDevices.isEmpty() == false) {
             if (counter == 0) {
-                log(LogLevel.DEBUG, "[FBP] waiting for bonding to complete...");
+                log(LogLevel.DEBUG, "waiting for bonding to complete...");
             }
             try{Thread.sleep(50);}catch(Exception e){}
             counter++;
         }
         if (counter > 0) {
-            log(LogLevel.DEBUG, "[FBP] bonding completed");
+            log(LogLevel.DEBUG, "bonding completed");
         }
     }
 
@@ -2581,19 +2589,26 @@ public class FlutterBluePlusPlugin implements
         if(level.ordinal() > logLevel.ordinal()) {
             return;
         }
-        switch(level) {
-            case DEBUG:
-                Log.d(TAG, "[FBP] " + message);
-                break;
-            case WARNING:
-                Log.w(TAG, "[FBP] " + message);
-                break;
-            case ERROR:
-                Log.e(TAG, "[FBP] " + message);
-                break;
-            default:
-                Log.d(TAG, "[FBP] " + message);
-                break;
+        if (sendLogsToDart) {
+            HashMap<String, Object> response = new HashMap<>();
+            response.put("message", String.format("[FBP] [Android] %s", message));
+            response.put("level", level.ordinal());
+            invokeMethodUIThread("OnLog", response);
+        } else {
+            switch(level) {
+                case DEBUG:
+                    Log.d(TAG, "[FBP] " + message);
+                    break;
+                case WARNING:
+                    Log.w(TAG, "[FBP] " + message);
+                    break;
+                case ERROR:
+                    Log.e(TAG, "[FBP] " + message);
+                    break;
+                default:
+                    Log.d(TAG, "[FBP] " + message);
+                    break;
+            }
         }
     }
 
