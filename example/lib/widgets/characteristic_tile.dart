@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -21,6 +22,8 @@ class CharacteristicTile extends StatefulWidget {
 class _CharacteristicTileState extends State<CharacteristicTile> {
   List<int> _value = [];
 
+  int _x = 1;
+  List<double> floatList = [];
   late StreamSubscription<List<int>> _lastValueSubscription;
 
   @override
@@ -44,7 +47,7 @@ class _CharacteristicTileState extends State<CharacteristicTile> {
 
   List<int> _getRandomBytes() {
     final math = Random();
-    return [math.nextInt(255), math.nextInt(255), math.nextInt(255), math.nextInt(255)];
+    return [_x, math.nextInt(255), math.nextInt(255), math.nextInt(255)];
   }
 
   Future onReadPressed() async {
@@ -60,6 +63,13 @@ class _CharacteristicTileState extends State<CharacteristicTile> {
     try {
       await c.write(_getRandomBytes(), withoutResponse: c.properties.writeWithoutResponse);
       Snackbar.show(ABC.c, "Write: Success", success: true);
+      setState(() {
+        if (_x == 1) {
+          _x++;
+        } else {
+          _x--;
+        }
+      });
       if (c.properties.read) {
         await c.read();
       }
@@ -86,10 +96,24 @@ class _CharacteristicTileState extends State<CharacteristicTile> {
 
   Widget buildUuid(BuildContext context) {
     String uuid = '0x${widget.characteristic.uuid.str.toUpperCase()}';
+    if (uuid == '0x2A19') {
+      return Text('${uuid} -> Voltage', style: TextStyle(fontSize: 13));
+    } else if (uuid == '0x2A20') {
+      return Text('${uuid} -> Current', style: TextStyle(fontSize: 13));
+    } else if (uuid == '0x2A57') {
+      return Text('${uuid} -> sending value', style: TextStyle(fontSize: 13));
+    }
     return Text(uuid, style: TextStyle(fontSize: 13));
   }
 
   Widget buildValue(BuildContext context) {
+    //String data = _value.toString();
+    String uuid = '0x${widget.characteristic.uuid.str.toUpperCase()}';
+    if (uuid == '0x2A20' || uuid == '0x2A19') {
+      Uint8List intBytes = Uint8List.fromList(_value.toList());
+      List<double> data = intBytes.buffer.asFloat32List();
+      return Text(data.toString(), style: TextStyle(fontSize: 13, color: Colors.grey));
+    }
     String data = _value.toString();
     return Text(data, style: TextStyle(fontSize: 13, color: Colors.grey));
   }

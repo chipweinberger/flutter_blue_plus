@@ -41,7 +41,8 @@ class _DescriptorTileState extends State<DescriptorTile> {
 
   List<int> _getRandomBytes() {
     final math = Random();
-    return [math.nextInt(255), math.nextInt(255), math.nextInt(255), math.nextInt(255)];
+    int x = 1;
+    return [x, x, x, x];
   }
 
   Future onReadPressed() async {
