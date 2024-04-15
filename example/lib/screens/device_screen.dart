@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -11,7 +12,6 @@ import '../utils/extra.dart';
 
 class DeviceScreen extends StatefulWidget {
   final BluetoothDevice device;
-
   const DeviceScreen({Key? key, required this.device}) : super(key: key);
 
   @override
@@ -21,6 +21,8 @@ class DeviceScreen extends StatefulWidget {
 class _DeviceScreenState extends State<DeviceScreen> {
   int? _rssi;
   int? _mtuSize;
+  String _voltage = "12.34";
+  double _current = 100.21;
   BluetoothConnectionState _connectionState = BluetoothConnectionState.disconnected;
   List<BluetoothService> _services = [];
   bool _isDiscoveringServices = false;
@@ -235,6 +237,20 @@ class _DeviceScreenState extends State<DeviceScreen> {
     ]);
   }
 
+  Widget buildVoltageTile(BuildContext context) {
+    return ListTile(
+      title: const Text('Voltage'),
+      subtitle: Text('$_voltage v'),
+    );
+  }
+
+  Widget buildCurrentTile(BuildContext context) {
+    return ListTile(
+      title: const Text('Current'),
+      subtitle: Text('$_current uA'),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ScaffoldMessenger(
@@ -255,6 +271,8 @@ class _DeviceScreenState extends State<DeviceScreen> {
               ),
               buildMtuTile(context),
               ..._buildServiceTiles(context, widget.device),
+              buildVoltageTile(context),
+              buildCurrentTile(context),
             ],
           ),
         ),
@@ -262,3 +280,45 @@ class _DeviceScreenState extends State<DeviceScreen> {
     );
   }
 }
+
+// class PendingName extends StatelessWidget {
+//   final BluetoothCharacteristic characteristic;
+//   final List<DescriptorTile> descriptorTiles;
+//   final VoidCallback? onReadPressed;
+//   final VoidCallback? onWritePressed;
+//   final VoidCallback? onNotificationPressed;
+
+//   const PendingName(
+//       {Key? key,
+//       required this.characteristic,
+//       required this.descriptorTiles,
+//       this.onNotificationPressed,
+//       this.onWritePressed,
+//       this.onReadPressed})
+//       : super(key: key);
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return StreamBuilder<List<int>>(
+//         stream: characteristic.lastValueStream,
+//         initialData: characteristic.lastValue,
+//         builder: (c, snapshot) {
+//           final value = snapshot.data;
+
+//           Uint8List intBytes = Uint8List.fromList(value!.toList());
+//           List<double> floatList = intBytes.buffer.asFloat32List();
+
+//           return ExpansionTile(
+//             title: ListTile(
+//               title: Column(
+//                 children: <Widget>[
+//                   Text((characteristic.uuid.toString().substring(4, 8) == "2a19") ? "Voltage" : "Current"),
+//                   Text((floatList.length == 0) ? "Refresh Please" : "${floatList[0].toStringAsFixed(2)}"),
+//                 ],
+//               ),
+//             ),
+//             children: descriptorTiles,
+//           );
+//         });
+//   }
+// }
