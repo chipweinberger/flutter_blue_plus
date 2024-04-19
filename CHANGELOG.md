@@ -1,3 +1,6 @@
+## 1.32.3
+* **[Improve]** allow calling `stopScan` even if not currently scanning. (revert 1.32.1)
+
 ## 1.32.2
 * **[Improve]** iOS: fix warning about implicit conversion for showPowerAlert
 
