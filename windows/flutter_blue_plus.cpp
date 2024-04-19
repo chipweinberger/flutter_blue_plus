@@ -697,7 +697,7 @@ void FlutterBluePlusPlugin::GattCharacteristic_ValueChanged(GattCharacteristic s
 
 }  // namespace
 
-void FlutterBluePlusPluginRegisterWithRegistrar(
+void FlutterBluePlusRegisterWithRegistrar(
     FlutterDesktopPluginRegistrarRef registrar) {
   FlutterBluePlusPlugin::RegisterWithRegistrar(
       flutter::PluginRegistrarManager::GetInstance()

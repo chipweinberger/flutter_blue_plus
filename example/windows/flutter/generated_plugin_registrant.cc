@@ -9,6 +9,6 @@
 #include <flutter_blue_plus/flutter_blue_plus.h>
 
 void RegisterPlugins(flutter::PluginRegistry* registry) {
-  FlutterBluePluginRegisterWithRegistrar(
+  FlutterBluePlusRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("FlutterBluePlusPlugin"));
 }
