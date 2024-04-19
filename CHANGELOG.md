@@ -1,3 +1,7 @@
+## 1.32.4
+* **[Improve]** revert 1.32.3 (i.e. go back to 1.32.1 behavior)
+* **[Fix]** fix `SCAN_FAILED_ALREADY_STARTED` on android after adapter is turned `off` then `on`
+
 ## 1.32.3
 * **[Improve]** allow calling `stopScan` even if not currently scanning. (revert 1.32.1)
 
