@@ -1030,6 +1030,13 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     int adapterState = [self bmAdapterStateEnum:self.centralManager.state];
 
+    // stop scanning when adapter is turned off. 
+    // Otherwise, scanning automatically resumes when the adapter is
+    // turned back on. I don't think most users expect that.
+    if (self.centralManager.state != CBManagerStatePoweredOn) {
+        [self.centralManager stopScan];
+    }
+
     // See BmBluetoothAdapterState
     NSDictionary* response = @{
         @"adapter_state" : @(adapterState),
