@@ -1818,11 +1818,13 @@ public class FlutterBluePlusPlugin implements
             // stop scanning when adapter is turned off. 
             // Otherwise, scanning automatically resumes when the adapter is
             // turned back on. I don't think most users expect that.
-            if (mBluetoothAdapter != null && mIsScanning) {
-                BluetoothLeScanner scanner = mBluetoothAdapter.getBluetoothLeScanner();
-                if (scanner != null) {
-                    scanner.stopScan(getScanCallback());
-                    mIsScanning = false;
+            if (adapterState != BluetoothAdapter.STATE_ON) {
+                if (mBluetoothAdapter != null && mIsScanning) {
+                    BluetoothLeScanner scanner = mBluetoothAdapter.getBluetoothLeScanner();
+                    if (scanner != null) {
+                        scanner.stopScan(getScanCallback());
+                        mIsScanning = false;
+                    }
                 }
             }
             
