@@ -9,6 +9,7 @@ import '../widgets/characteristic_tile.dart';
 import '../widgets/descriptor_tile.dart';
 import '../utils/snackbar.dart';
 import '../utils/extra.dart';
+import '../screens/scatter_chart_screen.dart';
 
 class DeviceScreen extends StatefulWidget {
   final BluetoothDevice device;
@@ -21,8 +22,8 @@ class DeviceScreen extends StatefulWidget {
 class _DeviceScreenState extends State<DeviceScreen> {
   int? _rssi;
   int? _mtuSize;
-  String _voltage = "12.34";
-  double _current = 100.21;
+  // String _voltage = "12.34";
+  // double _current = 100.21;
   BluetoothConnectionState _connectionState = BluetoothConnectionState.disconnected;
   List<BluetoothService> _services = [];
   bool _isDiscoveringServices = false;
@@ -229,7 +230,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
     return Row(children: [
       if (_isConnecting || _isDisconnecting) buildSpinner(context),
       TextButton(
-          onPressed: _isConnecting ? onCancelPressed : (isConnected ? onDisconnectPressed : onConnectPressed),
+          onPressed: isConnected ? onCancelPressed : (isConnected ? onDisconnectPressed : onConnectPressed),
           child: Text(
             _isConnecting ? "CANCEL" : (isConnected ? "DISCONNECT" : "CONNECT"),
             style: Theme.of(context).primaryTextTheme.labelLarge?.copyWith(color: Colors.white),
@@ -237,17 +238,16 @@ class _DeviceScreenState extends State<DeviceScreen> {
     ]);
   }
 
-  Widget buildVoltageTile(BuildContext context) {
-    return ListTile(
-      title: const Text('Voltage'),
-      subtitle: Text('$_voltage v'),
-    );
+  void onChartPressed() {
+    MaterialPageRoute route = MaterialPageRoute(builder: (context) => ChartScreen());
+    Navigator.of(context).push(route);
   }
 
-  Widget buildCurrentTile(BuildContext context) {
-    return ListTile(
-      title: const Text('Current'),
-      subtitle: Text('$_current uA'),
+/*IMPORTANT TEST IT OUT LATER TODAY WITH RANDOM NUMBERS*/
+  Widget buildChartButton(BuildContext context) {
+    return FloatingActionButton(
+      child: const Text("GRAPH"),
+      onPressed: onChartPressed,
     );
   }
 
@@ -271,8 +271,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
               ),
               buildMtuTile(context),
               ..._buildServiceTiles(context, widget.device),
-              buildVoltageTile(context),
-              buildCurrentTile(context),
+              buildChartButton(context),
             ],
           ),
         ),
