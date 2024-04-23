@@ -435,7 +435,7 @@ This release simplifies BluetoothDevice construction.
 
 ## 1.15.10
 * **[Fix]** iOS: `localName` does not match Android (bug in original `flutter_blue`)
-* **[Fix]** flutterHotRestart: error was thrown if device did not have bluetooth adapter (regression in 1.14.19)
+* **[Fix]** flutterRestart: error was thrown if device did not have bluetooth adapter (regression in 1.14.19)
 
 ## 1.15.9
 * **[Fix]** iOS: adapter turnOff: edge case when adapter is turned off while scanning (bug in original `flutter_blue`)

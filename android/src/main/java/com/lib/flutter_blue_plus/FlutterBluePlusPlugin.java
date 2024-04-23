@@ -282,7 +282,7 @@ public class FlutterBluePlusPlugin implements
             // check that we have an adapter, except for 
             // the functions that do not need it
             if(mBluetoothAdapter == null && 
-                "flutterHotRestart".equals(call.method) == false &&
+                "flutterRestart".equals(call.method) == false &&
                 "connectedCount".equals(call.method) == false &&
                 "setLogLevel".equals(call.method) == false &&
                 "isSupported".equals(call.method) == false &&
@@ -294,7 +294,7 @@ public class FlutterBluePlusPlugin implements
 
             switch (call.method) {
 
-                case "flutterHotRestart":
+                case "flutterRestart":
                 {
                     // no adapter?
                     if (mBluetoothAdapter == null) {
@@ -309,7 +309,9 @@ public class FlutterBluePlusPlugin implements
                         mIsScanning = false;
                     }
 
-                    disconnectAllDevices("flutterHotRestart");
+                    // all dart state is reset after flutter restart
+                    // (i.e. Hot Restart) so also reset native state
+                    disconnectAllDevices("flutterRestart");
 
                     log(LogLevel.DEBUG, "connectedPeripherals: " + mConnectedDevices.size());
 

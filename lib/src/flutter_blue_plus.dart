@@ -377,7 +377,7 @@ class FlutterBluePlus {
   }
 
   /// Register a subscription to be canceled when scanning is complete.
-  /// This function simplifies cleanup, to prevent creating duplicate stream subscriptions.
+  /// This function simplifies cleanup, so you can prevent creating duplicate stream subscriptions.
   ///   - this is an optional convenience function
   ///   - prevents accidentally creating duplicate subscriptions before each scan
   static void cancelWhenScanComplete(StreamSubscription subscription) {
@@ -412,8 +412,8 @@ class FlutterBluePlus {
     // set platform method handler
     _methodChannel.setMethodCallHandler(_methodCallHandler);
 
-    // hot restart
-    if ((await _methodChannel.invokeMethod('flutterHotRestart')) != 0) {
+    // flutter restart - wait for all devices to disconnect
+    if ((await _methodChannel.invokeMethod('flutterRestart')) != 0) {
       await Future.delayed(Duration(milliseconds: 50));
       while ((await _methodChannel.invokeMethod('connectedCount')) != 0) {
         await Future.delayed(Duration(milliseconds: 50));
