@@ -770,11 +770,14 @@ public class FlutterBluePlusPlugin implements
                         // cleanup
                         gatt.close();
 
+                        // random number defined by flutter blue plus.
+                        int bmUserCanceledErrorCode = 23789258;
+
                         // see: BmConnectionStateResponse
                         HashMap<String, Object> response = new HashMap<>();
                         response.put("remote_id", remoteId);
                         response.put("connection_state", bmConnectionStateEnum(BluetoothProfile.STATE_DISCONNECTED));
-                        response.put("disconnect_reason_code", 23789258); // random value
+                        response.put("disconnect_reason_code", bmUserCanceledErrorCode);
                         response.put("disconnect_reason_string", "connection canceled");
 
                         invokeMethodUIThread("OnConnectionStateChanged", response);

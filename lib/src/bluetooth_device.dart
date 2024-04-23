@@ -152,7 +152,7 @@ class BluetoothDevice {
 
         // failure?
         if (response.connectionState == BmConnectionStateEnum.disconnected) {
-          if (response.disconnectReasonCode == 23789258) {
+          if (response.disconnectReasonCode == bmUserCanceledErrorCode) {
             throw FlutterBluePlusException(
                 ErrorPlatform.fbp, "connect", FbpErrorCode.connectionCanceled.index, "connection canceled");
           } else {

@@ -1195,11 +1195,14 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // Unregister self as delegate for peripheral, not working #42
     peripheral.delegate = nil;
 
+    // random number defined by flutter blue plus
+    int bmUserCanceledErrorCode = 23789258;
+
     // See BmConnectionStateResponse
     NSDictionary *result = @{
         @"remote_id":                remoteId,
         @"connection_state":         @([self bmConnectionStateEnum:peripheral.state]),
-        @"disconnect_reason_code":   error ? @(error.code) : @(23789258),
+        @"disconnect_reason_code":   error ? @(error.code) : @(bmUserCanceledErrorCode),
         @"disconnect_reason_string": error ? [error localizedDescription] : @("connection canceled"),
     };
 
