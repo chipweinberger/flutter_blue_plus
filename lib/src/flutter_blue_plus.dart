@@ -410,7 +410,11 @@ class FlutterBluePlus {
     _initialized = true;
 
     // set platform method handler
-    _methodChannel.setMethodCallHandler(_methodCallHandler);
+    if (kIsWeb) {
+        FlutterBluePlusWeb.setMethodCallHandler(_methodCallHandler);
+    } else {
+        _methodChannel.setMethodCallHandler(_methodCallHandler);
+    }
 
     // flutter restart - wait for all devices to disconnect
     if ((await _methodChannel.invokeMethod('flutterRestart')) != 0) {
@@ -599,7 +603,11 @@ class FlutterBluePlus {
       }
 
       // invoke
-      out = await _methodChannel.invokeMethod(method, arguments);
+      if (kIsWeb) {
+          out = await FlutterBluePlusWeb.invokeMethod(method, arguments);
+      } else {
+          out = await _methodChannel.invokeMethod(method, arguments);
+      }
 
       // log result
       if (logLevel == LogLevel.verbose) {
@@ -842,6 +850,7 @@ enum ErrorPlatform {
   fbp,
   android,
   apple,
+  web,
 }
 
 final ErrorPlatform _nativeError = (() {

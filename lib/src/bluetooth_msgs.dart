@@ -95,6 +95,21 @@ class BmScanSettings {
     data['android_uses_fine_location'] = androidUsesFineLocation;
     return data;
   }
+
+  factory BmScanSettings.fromMap(Map<dynamic, dynamic> json) {
+    return BmScanSettings(
+      withServices: json['with_services'],
+      withRemoteIds: json['with_remote_ids'],
+      withNames: json['with_names'],
+      withKeywords: json['with_keywords'],
+      withMsd: json['with_msd'],
+      withServiceData: json['with_service_data'],
+      continuousUpdates: json['continuous_updates'],
+      continuousDivisor: json['continuous_divisor'],
+      androidScanMode: json['android_scan_mode'],
+      androidUsesFineLocation: json['android_uses_fine_location'],
+    );
+  }
 }
 
 class BmScanAdvertisement {
@@ -158,6 +173,21 @@ class BmScanAdvertisement {
       serviceUuids: serviceUuids,
       rssi: json['rssi'] != null ? json['rssi'] : 0,
     );
+  }
+  
+  Map<dynamic, dynamic> toMap() {
+    final Map<dynamic, dynamic> data = {};
+    data['remote_id'] = remoteId;
+    data['platform_name'] = platformName;
+    data['adv_name'] = advName;
+    data['connectable'] = connectable;
+    data['tx_power_level'] = txPowerLevel;
+    data['appearance'] = appearance;
+    data['manufacturer_data'] = manufacturerData;
+    data['service_data'] = serviceData;
+    data['service_uuids'] = serviceUuids;
+    data['rssi'] = rssi;
+    return data;
   }
 }
 
