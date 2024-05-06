@@ -1758,20 +1758,19 @@ public class FlutterBluePlusPlugin implements
         int n = 0;
 
         while (n < bytes.length) {
-
-            int fieldLen = bytes[n];
+            int fieldLen = bytes[n] & 0xFF;
 
             // no more or malformed data
             if (fieldLen <= 0) {
                 break;
             }
 
-            // end of packet
-            if (fieldLen + n > bytes.length - 1) {
+            // Ensuring we don't go past the bytes array
+            if (n + fieldLen >= bytes.length) {
                 break;
             }
 
-            int dataType = bytes[n + 1];
+            int dataType = bytes[n + 1] & 0xFF;
 
             // no more data
             if (dataType == 0) {
@@ -1780,15 +1779,67 @@ public class FlutterBluePlusPlugin implements
 
             // appearance type byte
             if (dataType == 0x19 && fieldLen == 3) {
-                int loByte = bytes[n + 2] & 0xFF;
-                int hiByte = bytes[n + 3] & 0xFF;
-                return hiByte * 256 + loByte;
+                int high = (bytes[n + 3] & 0xFF) << 8;
+                int low = (bytes[n + 2] & 0xFF);
+                return high | low;
             }
 
             n += fieldLen + 1;
         }
 
         return 0;
+    }
+
+    Map<Integer, byte[]> getManufacturerSpecificData(ScanRecord adv) {
+        byte[] bytes = adv.getBytes();
+        Map<Integer, byte[]> manufacturerDataMap = new HashMap<>();
+        int n = 0;
+        while (n < bytes.length) {
+            int fieldLen = bytes[n] & 0xFF;
+
+            // no more or malformed data
+            if (fieldLen <= 0) {
+                break;
+            }
+
+            // Ensuring we don't go past the bytes array
+            if (n + fieldLen >= bytes.length) {
+                break;
+            }
+
+            int dataType = bytes[n + 1] & 0xFF;
+
+            // Manufacturer Specific Data magic number
+            // At least 3 bytes: 2 for manufacturer ID & 1 for dataType
+            if (dataType == 0xFF && fieldLen >= 3) {
+
+                // Manufacturer Id
+                int high = (bytes[n + 3] & 0xFF) << 8;
+                int low = (bytes[n + 2] & 0xFF);
+                int manufacturerId = high | low;
+
+                // add to map
+                if (manufacturerDataMap.containsKey(manufacturerId)) {
+                    // If the manufacturer ID already exists, append the new data to the existing list
+                    byte[] existingData = manufacturerDataMap.get(manufacturerId);
+                    byte[] mergedData = new byte[existingData.length + fieldLen - 3];
+                    // Merge arrays
+                    System.arraycopy(existingData, 0, mergedData, 0, existingData.length);
+                    System.arraycopy(bytes, n + 4, mergedData, existingData.length, fieldLen - 4);
+                    manufacturerDataMap.put(manufacturerId, mergedData);
+                } else {
+                    // Otherwise, put the new manufacturer ID and its data into the map
+                    byte[] data = new byte[fieldLen - 3];
+                    // Starting from n+4 because manufacturerId occupies n+2 and n+3
+                    System.arraycopy(bytes, n + 4, data, 0, data.length);
+                    manufacturerDataMap.put(manufacturerId, data);
+                }
+            }
+
+            n += fieldLen + 1;
+        }
+
+        return manufacturerDataMap;
     }
 
     /////////////////////////////////////////////////////////////////////////////////////
@@ -2374,7 +2425,7 @@ public class FlutterBluePlusPlugin implements
         ScanRecord adv = result.getScanRecord();
 
         boolean connectable;
-        if(Build.VERSION.SDK_INT >= 26) { // Android 8.0, August 2017
+        if (Build.VERSION.SDK_INT >= 26) { // Android 8.0, August 2017
             connectable = result.isConnectable();
         } else {
             // Prior to Android 8.0, it is not possible to get if connectable.
@@ -2386,23 +2437,21 @@ public class FlutterBluePlusPlugin implements
         String                  advName      = adv != null ?  adv.getDeviceName()                : null;
         int                     txPower      = adv != null ?  adv.getTxPowerLevel()              : min;
         int                     appearance   = adv != null ?  getAppearanceFromScanRecord(adv)   : 0;
-        SparseArray<byte[]>     manufData    = adv != null ?  adv.getManufacturerSpecificData()  : null;
+        Map<Integer, byte[]>    manufData    = adv != null ?  getManufacturerSpecificData(adv)   : null;
         List<ParcelUuid>        serviceUuids = adv != null ?  adv.getServiceUuids()              : null;
         Map<ParcelUuid, byte[]> serviceData  = adv != null ?  adv.getServiceData()               : null;
 
         // Manufacturer Specific Data
-        HashMap<Integer, String> manufDataB = new HashMap<Integer, String>();
-        if(manufData != null) {
-            for (int i = 0; i < manufData.size(); i++) {
-                int key = manufData.keyAt(i);
-                byte[] value = manufData.valueAt(i);
-                manufDataB.put(key, bytesToHex(value));
+        HashMap<Integer, String> manufDataB = new HashMap<>();
+        if (manufData != null) {
+            for (Map.Entry<Integer, byte[]> entry : manufData.entrySet()) {
+                manufDataB.put(entry.getKey(), bytesToHex(entry.getValue()));
             }
         }
 
         // Service Data
         HashMap<String, Object> serviceDataB = new HashMap<>();
-        if(serviceData != null) {
+        if (serviceData != null) {
             for (Map.Entry<ParcelUuid, byte[]> entry : serviceData.entrySet()) {
                 ParcelUuid key = entry.getKey();
                 byte[] value = entry.getValue();
@@ -2411,8 +2460,8 @@ public class FlutterBluePlusPlugin implements
         }
 
         // Service UUIDs
-        List<String> serviceUuidsB = new ArrayList<String>();
-        if(serviceUuids != null) {
+        List<String> serviceUuidsB = new ArrayList<>();
+        if (serviceUuids != null) {
             for (ParcelUuid s : serviceUuids) {
                 serviceUuidsB.add(uuidStr(s.getUuid()));
             }
