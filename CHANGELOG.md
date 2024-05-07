@@ -1,3 +1,6 @@
+## 1.32.5
+* **[Fix]** android: support multiple MSD with the same manufacturer ID
+
 ## 1.32.4
 * **[Improve]** revert 1.32.3 (i.e. go back to 1.32.1 behavior)
 * **[Fix]** fix `SCAN_FAILED_ALREADY_STARTED` on android after adapter is turned `off` then `on`
