@@ -240,7 +240,8 @@ class FlutterBluePlus {
         withServiceData.isNotEmpty;
 
     // Note: `withKeywords` is not compatible with other filters on android
-    // because it is implemented in custom fbp code, not android code
+    // because it is implemented in custom fbp code, not android code, and the
+    // android 'name' filter is only available as of android sdk 33 (August 2022)
     assert(!(Platform.isAndroid && withKeywords.isNotEmpty && hasOtherFilter),
         "withKeywords is not compatible with other filters on Android");
 
