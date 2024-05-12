@@ -1,3 +1,6 @@
+## 1.32.6
+* **[Fix]** calling `startScan` multiple times in a row would fail
+
 ## 1.32.5
 * **[Fix]** android: support multiple MSD with the same manufacturer ID
 
