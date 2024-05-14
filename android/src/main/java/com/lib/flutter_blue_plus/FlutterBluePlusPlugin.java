@@ -1795,6 +1795,13 @@ public class FlutterBluePlusPlugin implements
         Map<Integer, byte[]> manufacturerDataMap = new HashMap<>();
         int n = 0;
         while (n < bytes.length) {
+
+            // layout:
+            // n[0] = fieldlen
+            // n[1] = datatype (MSD)
+            // n[2] = manufacturerId (low)
+            // n[3] = manufacturerId (high)
+            // n[4] = data...
             int fieldLen = bytes[n] & 0xFF;
 
             // no more or malformed data
@@ -1818,20 +1825,28 @@ public class FlutterBluePlusPlugin implements
                 int low = (bytes[n + 2] & 0xFF);
                 int manufacturerId = high | low;
 
+                // the length of the msd data,
+                // excluding manufacturerId & dataType
+                int msdLen = fieldLen - 3;
+
+                // ptr to msd data
+                // excluding manufacturerId & dataType
+                int msdPtr = n + 4;
+
                 // add to map
                 if (manufacturerDataMap.containsKey(manufacturerId)) {
                     // If the manufacturer ID already exists, append the new data to the existing list
                     byte[] existingData = manufacturerDataMap.get(manufacturerId);
-                    byte[] mergedData = new byte[existingData.length + fieldLen - 3];
+                    byte[] mergedData = new byte[existingData.length + msdLen];
                     // Merge arrays
                     System.arraycopy(existingData, 0, mergedData, 0, existingData.length);
-                    System.arraycopy(bytes, n + 4, mergedData, existingData.length, fieldLen - 4);
+                    System.arraycopy(bytes, msdPtr, mergedData, existingData.length, msdLen);
                     manufacturerDataMap.put(manufacturerId, mergedData);
                 } else {
                     // Otherwise, put the new manufacturer ID and its data into the map
-                    byte[] data = new byte[fieldLen - 3];
+                    byte[] data = new byte[msdLen];
                     // Starting from n+4 because manufacturerId occupies n+2 and n+3
-                    System.arraycopy(bytes, n + 4, data, 0, data.length);
+                    System.arraycopy(bytes, msdPtr, data, 0, data.length);
                     manufacturerDataMap.put(manufacturerId, data);
                 }
             }
