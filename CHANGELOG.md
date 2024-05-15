@@ -1,3 +1,6 @@
+## 1.32.7
+* **[Fix]** android: last byte was cutoff for msd of same manufactuerId
+
 ## 1.32.6
 * **[Fix]** calling `startScan` multiple times in a row would fail
 
