@@ -832,7 +832,7 @@ for (var d in system) {
 
 **6. Android: you're calling startScan too often**
 
-On Adroid you can only call `startScan` 6 times per minute. This is a platform limitation.
+On Adroid you can only call `startScan` 5 times per 30 second period. This is a platform restriction.
 
 ---
 
