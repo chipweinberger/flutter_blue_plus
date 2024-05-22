@@ -830,6 +830,10 @@ for (var d in system) {
 - try removing all scan filters
 - for `withServices` to work, your device must actively advertise the serviceUUIDs it supports
 
+**6. Android: you're calling startScan too often**
+
+On Adroid you can only call `startScan` 6 times per minute. This is a platform limitation.
+
 ---
 
 ### Scanned device never goes away
