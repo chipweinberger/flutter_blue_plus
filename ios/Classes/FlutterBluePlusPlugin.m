@@ -1621,6 +1621,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     NSString  *characteristicUuid   = request[@"characteristic_uuid"];
     NSString  *serviceUuid          = request[@"service_uuid"];
     NSString  *secondaryServiceUuid = request[@"secondary_service_uuid"];
+    NSString  *value                = request[@"value"];
 
     // Find characteristic
     NSError *error = nil;
@@ -1642,7 +1643,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"service_uuid":            [pair.primary.UUID uuidStr],
         @"secondary_service_uuid":  pair.secondary ? [pair.secondary.UUID uuidStr] : [NSNull null],
         @"characteristic_uuid":     [characteristic.UUID uuidStr],
-        @"value":                   [self convertDataToHex:characteristic.value],
+        @"value":                   value,
         @"success":                 @(error == nil),
         @"error_string":            error ? [error localizedDescription] : @"success",
         @"error_code":              error ? @(error.code) : @(0),
