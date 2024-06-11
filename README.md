@@ -379,6 +379,21 @@ device.onServicesReset.listen(() async {
 });
 ```
 
+### Save Device
+
+Connect without scanning, even if app is relaunched.
+
+```dart
+// save
+final File file = File('/remoteId.txt');
+await file.writeAsString(device.remoteId.str);
+
+// load
+final File file = File('/remoteId.txt');
+var device = BluetoothDevice.fromId(await file.readAsString());
+await device.connect();
+```
+
 ### Get Connected Devices
 
 Get devices currently connected to your app.
