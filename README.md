@@ -381,14 +381,10 @@ device.onServicesReset.listen(() async {
 
 ### Save Device
 
-Connect without scanning, even if app is relaunched.
+To save a device, just write the remoteId somewhere.
 
 ```dart
-// save
-final File file = File('/remoteId.txt');
-await file.writeAsString(device.remoteId.str);
-
-// load
+// connect without scanning
 final File file = File('/remoteId.txt');
 var device = BluetoothDevice.fromId(await file.readAsString());
 await device.connect();
