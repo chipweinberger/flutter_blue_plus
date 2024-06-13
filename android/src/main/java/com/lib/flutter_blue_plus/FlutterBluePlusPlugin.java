@@ -735,7 +735,7 @@ public class FlutterBluePlusPlugin implements
                         }
                     }
                     if (gatt == null) {
-                        gatt = mConnectedDevices.get(remoteId);;
+                        gatt = mConnectedDevices.get(remoteId);
                     }
                     if (gatt == null) {
                         gatt = mAutoConnected.get(remoteId);
