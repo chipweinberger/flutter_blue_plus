@@ -1,3 +1,6 @@
+## 1.32.8
+* **[Fix]** iOS: was not updating `lastValueStream` if `withoutResponse:true`
+
 ## 1.32.7
 * **[Fix]** android: last byte was cutoff for msd of same manufactuerId (regression 1.32.5)
 
