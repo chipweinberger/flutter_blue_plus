@@ -852,3 +852,7 @@ class BmTurnOnResponse {
     );
   }
 }
+
+// random number defined by flutter blue plus.
+// Ideally it should not conflict with iOS or Android error codes.
+int bmUserCanceledErrorCode = 23789258;

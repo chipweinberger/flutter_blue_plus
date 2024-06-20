@@ -265,7 +265,8 @@ class FlutterBluePlusFactory {
         withServiceData.isNotEmpty;
 
     // Note: `withKeywords` is not compatible with other filters on android
-    // because it is implemented in custom fbp code, not android code
+    // because it is implemented in custom fbp code, not android code, and the
+    // android 'name' filter is only available as of android sdk 33 (August 2022)
     assert(!(Platform.isAndroid && withKeywords.isNotEmpty && hasOtherFilter),
         "withKeywords is not compatible with other filters on Android");
 
@@ -278,10 +279,10 @@ class FlutterBluePlusFactory {
       if (_isScanning.latestValue == true) {
         // stop existing scan
         await _stopScan();
-      } else {
-        // push to stream
-        _isScanning.add(true);
       }
+
+      // push to stream
+      _isScanning.add(true);
 
       var settings = BmScanSettings(
           withServices: withServices,
@@ -378,16 +379,19 @@ class FlutterBluePlusFactory {
     }
   }
 
-  /// Stops a scan for Bluetooth Low Energy devices
-  Future<void> stopScan() async {
+  /// Stops a scan for Bluetooth Low Energy devices 
+  static Future<void> stopScan() async {
     _Mutex mtx = _MutexFactory.getMutexForKey("scan");
     await mtx.take();
-    if (isScanningNow) {
-      await _stopScan();
-    } else if (_logLevel.index >= LogLevel.info.index) {
-      print("[FBP] stopScan: already stopped");
+    try {
+      if(isScanningNow) {
+        await _stopScan();
+      } else if (_logLevel.index >= LogLevel.info.index) {
+        print("[FBP] stopScan: already stopped");
+      }
+    } finally {
+      mtx.give();
     }
-    mtx.give();
   }
 
   /// for internal use
@@ -405,7 +409,7 @@ class FlutterBluePlusFactory {
   }
 
   /// Register a subscription to be canceled when scanning is complete.
-  /// This function simplifies cleanup, to prevent creating duplicate stream subscriptions.
+  /// This function simplifies cleanup, so you can prevent creating duplicate stream subscriptions.
   ///   - this is an optional convenience function
   ///   - prevents accidentally creating duplicate subscriptions before each scan
   void cancelWhenScanComplete(StreamSubscription subscription) {
@@ -413,7 +417,7 @@ class FlutterBluePlusFactory {
   }
 
   /// Sets the internal FlutterBlue log level
-  void setLogLevel(LogLevel level, {color = true}) async {
+  static Future<void> setLogLevel(LogLevel level, {color = true}) async {
     _logLevel = level;
     _logColor = color;
     await _invokeMethod('setLogLevel', level.index);
@@ -441,8 +445,8 @@ class FlutterBluePlusFactory {
     // set platform method handler
     _methodChannel.setMethodCallHandler(_methodCallHandler);
 
-    // hot restart
-    if ((await _methodChannel.invokeMethod('flutterHotRestart')) != 0) {
+    // flutter restart - wait for all devices to disconnect
+    if ((await _methodChannel.invokeMethod('flutterRestart')) != 0) {
       await Future.delayed(Duration(milliseconds: 50));
       while ((await _methodChannel.invokeMethod('connectedCount')) != 0) {
         await Future.delayed(Duration(milliseconds: 50));

@@ -1,3 +1,22 @@
+## 1.32.8
+* **[Fix]** iOS: was not updating `lastValueStream` if `withoutResponse:true`
+
+## 1.32.7
+* **[Fix]** android: last byte was cutoff for msd of same manufactuerId (regression 1.32.5)
+
+## 1.32.6
+* **[Fix]** calling `startScan` multiple times in a row would fail
+
+## 1.32.5
+* **[Fix]** android: support multiple MSD with the same manufacturer ID
+
+## 1.32.4
+* **[Improve]** revert 1.32.3 (i.e. go back to 1.32.1 behavior)
+* **[Fix]** fix `SCAN_FAILED_ALREADY_STARTED` on android after adapter is turned `off` then `on`
+
+## 1.32.3
+* **[Improve]** allow calling `stopScan` even if not currently scanning. (revert 1.32.1)
+
 ## 1.32.2
 * **[Improve]** iOS: fix warning about implicit conversion for showPowerAlert
 
@@ -428,7 +447,7 @@ This release simplifies BluetoothDevice construction.
 
 ## 1.15.10
 * **[Fix]** iOS: `localName` does not match Android (bug in original `flutter_blue`)
-* **[Fix]** flutterHotRestart: error was thrown if device did not have bluetooth adapter (regression in 1.14.19)
+* **[Fix]** flutterRestart: error was thrown if device did not have bluetooth adapter (regression in 1.14.19)
 
 ## 1.15.9
 * **[Fix]** iOS: adapter turnOff: edge case when adapter is turned off while scanning (bug in original `flutter_blue`)

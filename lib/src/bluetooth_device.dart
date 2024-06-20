@@ -47,7 +47,7 @@ class BluetoothDevice {
   }
 
   /// Register a subscription to be canceled when the device is disconnected.
-  /// This function simplifies cleanup, to prevent creating duplicate stream subscriptions.
+  /// This function simplifies cleanup, so you can prevent creating duplicate stream subscriptions.
   ///   - this is an optional convenience function
   ///   - prevents accidentally creating duplicate subscriptions on each reconnection.
   ///   - [next] if true, the the stream will be canceled only on the *next* disconnection.
@@ -152,7 +152,7 @@ class BluetoothDevice {
 
         // failure?
         if (response.connectionState == BmConnectionStateEnum.disconnected) {
-          if (response.disconnectReasonCode == 23789258) {
+          if (response.disconnectReasonCode == bmUserCanceledErrorCode) {
             throw FlutterBluePlusException(
                 ErrorPlatform.fbp, "connect", FbpErrorCode.connectionCanceled.index, "connection canceled");
           } else {

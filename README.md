@@ -191,10 +191,12 @@ var subscription = device.connectionState.listen((BluetoothConnectionState state
 });
 
 // cleanup: cancel subscription when disconnected
-// Note: `delayed:true` lets the `connectionState` listener receive
-//        the `disconnected` event before it is canceled
-// Note: `next:true` means cancel on *next* disconnection. Without this
-//        if we're already disconnected it would cancel immediately
+//   - [delayed] This option is only meant for `connectionState` subscriptions.  
+//     When `true`, we cancel after a small delay. This ensures the `connectionState` 
+//     listener receives the `disconnected` event.
+//   - [next] if true, the the stream will be canceled only on the *next* disconnection,
+//     not the current disconnection. This is useful if you setup your subscriptions
+//     before you connect.
 device.cancelWhenDisconnected(subscription, delayed:true, next:true);
 
 // Connect to the device
@@ -375,6 +377,17 @@ device.onServicesReset.listen(() async {
     print("Services Reset");
     await device.discoverServices();
 });
+```
+
+### Save Device
+
+To save a device, just write the remoteId somewhere.
+
+```dart
+// connect without scanning
+final File file = File('/remoteId.txt');
+var device = BluetoothDevice.fromId(await file.readAsString());
+await device.connect();
 ```
 
 ### Get Connected Devices
@@ -785,20 +798,24 @@ subscription.cancel()
 
 ### Scanning does not find my device
 
-**1. try using another ble scanner app**
+**1. you're using an emulator**
+
+Use a physical device.
+
+**2. try using another ble scanner app**
 
 * **iOS**: [nRF Connect](https://apps.apple.com/us/app/nrf-connect-for-mobile/id1054362403)
 * **Android**: [BLE Scanner](https://play.google.com/store/apps/details?id=com.macdom.ble.blescanner)
 
 Install a BLE scanner app on your phone. Can it find your device?
 
-**2. your device uses bluetooth classic, not BLE.**
+**3. your device uses bluetooth classic, not BLE.**
 
 Headphones, speakers, keyboards, mice, gamepads, & printers all use Bluetooth Classic. 
 
 These devices may be found in System Settings, but they cannot be connected to by FlutterBluePlus. FlutterBluePlus only supports Bluetooth Low Energy.
 
-**3. your device stopped advertising.**
+**4. your device stopped advertising.**
 
 - you might need to reboot your device
 - you might need to put your device in "discovery mode"
@@ -819,10 +836,14 @@ for (var d in system) {
 }
 ```
 
-**4. your scan filters are wrong.**
+**5. your scan filters are wrong.**
 
 - try removing all scan filters
 - for `withServices` to work, your device must actively advertise the serviceUUIDs it supports
+
+**6. Android: you're calling startScan too often**
+
+On Adroid you can only call `startScan` 5 times per 30 second period. This is a platform restriction.
 
 ---
 

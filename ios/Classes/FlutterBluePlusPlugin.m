@@ -139,7 +139,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         // check that we have an adapter, except for the 
         // functions that don't need it
         if (self.centralManager == nil && 
-            [@"flutterHotRestart" isEqualToString:call.method] == false &&
+            [@"flutterRestart" isEqualToString:call.method] == false &&
             [@"connectedCount" isEqualToString:call.method] == false &&
             [@"setLogLevel" isEqualToString:call.method] == false &&
             [@"isSupported" isEqualToString:call.method] == false &&
@@ -150,7 +150,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             return;
         }
 
-        if ([@"flutterHotRestart" isEqualToString:call.method])
+        if ([@"flutterRestart" isEqualToString:call.method])
         {
             // no adapter?
             if (self.centralManager == nil) {
@@ -162,7 +162,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 [self.centralManager stopScan];
             }
 
-            [self disconnectAllDevices:@"flutterHotRestart"];
+            // all dart state is reset after flutter restart
+            // (i.e. Hot Restart) so also reset native state
+            [self disconnectAllDevices:@"flutterRestart"];
 
             Log(LDEBUG, @"connectedPeripherals: %lu", self.connectedPeripherals.count);
 
@@ -936,7 +938,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             [self.methodChannel invokeMethod:@"OnConnectionStateChanged" arguments:result];
         } 
         
-        if ([func isEqualToString:@"flutterHotRestart"] && [self isAdapterOn]) {
+        if ([func isEqualToString:@"flutterRestart"] && [self isAdapterOn]) {
             // request disconnection
             [self.centralManager cancelPeripheralConnection:peripheral];
         }
@@ -1029,6 +1031,13 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     Log(LDEBUG, @"centralManagerDidUpdateState %@", [self cbManagerStateString:self.centralManager.state]);
 
     int adapterState = [self bmAdapterStateEnum:self.centralManager.state];
+
+    // stop scanning when adapter is turned off. 
+    // Otherwise, scanning automatically resumes when the adapter is
+    // turned back on. I don't think most users expect that.
+    if (self.centralManager.state != CBManagerStatePoweredOn) {
+        [self.centralManager stopScan];
+    }
 
     // See BmBluetoothAdapterState
     NSDictionary* response = @{
@@ -1186,11 +1195,14 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // Unregister self as delegate for peripheral, not working #42
     peripheral.delegate = nil;
 
+    // random number defined by flutter blue plus
+    int bmUserCanceledErrorCode = 23789258;
+
     // See BmConnectionStateResponse
     NSDictionary *result = @{
         @"remote_id":                remoteId,
         @"connection_state":         @([self bmConnectionStateEnum:peripheral.state]),
-        @"disconnect_reason_code":   error ? @(error.code) : @(23789258),
+        @"disconnect_reason_code":   error ? @(error.code) : @(bmUserCanceledErrorCode),
         @"disconnect_reason_string": error ? [error localizedDescription] : @("connection canceled"),
     };
 
@@ -1609,6 +1621,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     NSString  *characteristicUuid   = request[@"characteristic_uuid"];
     NSString  *serviceUuid          = request[@"service_uuid"];
     NSString  *secondaryServiceUuid = request[@"secondary_service_uuid"];
+    NSString  *value                = request[@"value"];
 
     // Find characteristic
     NSError *error = nil;
@@ -1630,7 +1643,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"service_uuid":            [pair.primary.UUID uuidStr],
         @"secondary_service_uuid":  pair.secondary ? [pair.secondary.UUID uuidStr] : [NSNull null],
         @"characteristic_uuid":     [characteristic.UUID uuidStr],
-        @"value":                   [self convertDataToHex:characteristic.value],
+        @"value":                   value,
         @"success":                 @(error == nil),
         @"error_string":            error ? [error localizedDescription] : @"success",
         @"error_code":              error ? @(error.code) : @(0),
