@@ -379,7 +379,7 @@ device.onServicesReset.listen(() async {
 });
 ```
 
-### Save Device
+### Save Device (Connect Without Scanning)
 
 To save a device, just write the remoteId somewhere.
 
@@ -388,7 +388,10 @@ Now next time, you can connect without scanning, like so:
 ```dart
 final String remoteId = await File('/remoteId.txt').readAsString();
 var device = BluetoothDevice.fromId(remoteId);
-await device.connect();
+// AutoConnect is convenient because it does not "time out"
+// and will connect as soon as the device becomes available.
+await device.connect(autoConnect: true);
+
 ```
 
 ### Get Connected Devices
