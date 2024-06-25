@@ -229,7 +229,7 @@ await device.disconnect()
 
 ### Save Device
 
-To save a device between app restarts, just write the remoteId to a file.
+To save a device between app restarts, just write the `remoteId` to a file.
 
 Now you can connect without needing to scan again, like so:
 
