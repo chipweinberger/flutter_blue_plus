@@ -227,6 +227,22 @@ await device.connectionState.where((val) => val == BluetoothConnectionState.conn
 await device.disconnect()
 ```
 
+### Save Device
+
+To save a device between app restarts, just write the remoteId to a file.
+
+Now you can connect without needing to scan again, like so:
+
+```dart
+final String remoteId = await File('/remoteId.txt').readAsString();
+var device = BluetoothDevice.fromId(remoteId);
+// AutoConnect is convenient because it does not "time out"
+// even if the device is not available / turned off.
+await device.connect(autoConnect: true);
+
+```
+
+
 ### MTU
 
 On Android, we request an mtu of 512 by default during connection (see: `connect` function arguments).
@@ -377,21 +393,6 @@ device.onServicesReset.listen(() async {
     print("Services Reset");
     await device.discoverServices();
 });
-```
-
-### Save Device (Connect Without Scanning)
-
-To save a device, just write the remoteId somewhere.
-
-Now next time, you can connect without scanning, like so:
-
-```dart
-final String remoteId = await File('/remoteId.txt').readAsString();
-var device = BluetoothDevice.fromId(remoteId);
-// AutoConnect is convenient because it does not "time out"
-// and will connect as soon as the device becomes available.
-await device.connect(autoConnect: true);
-
 ```
 
 ### Get Connected Devices
