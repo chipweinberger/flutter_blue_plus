@@ -591,6 +591,13 @@ Add the following to your `Info.plist`
 When this key-value pair is included in the app’s Info.plist file, the system wakes up your app to process ble `read`, `write`, and `subscription` events.
 
 You may also have to use https://pub.dev/packages/workmanager
+To enable use of State Preservation and Restoration, set the `restoreIosState` option to true before starting work:
+```
+FlutterBluePlus.setOptions(restoreIosState: true);
+```
+This will wake up your app even when the app is killed by the OS.
+
+You may also have to use https://pub.dev/packages/flutter_isolate
 
 **Note**: Upon being woken up, an app has around 10 seconds to complete a task. Apps that spend too much time executing in the background can be throttled back by the system or killed.
 
