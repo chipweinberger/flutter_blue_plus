@@ -106,8 +106,10 @@ class FlutterBluePlus {
   ///       This option has no effect on Android.
   static Future<void> setOptions({
     bool showPowerAlert = true,
+    bool restoreIosState = false
   }) async {
-    await _invokeMethod('setOptions', {"show_power_alert": showPowerAlert});
+    await _invokeMethod('setOptions', {"show_power_alert": showPowerAlert,
+      "restore_ios_state": restoreIosState});
   }
 
   /// Turn on Bluetooth (Android only),

@@ -54,6 +54,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 @property(nonatomic) NSTimer *checkForMtuChangesTimer;
 @property(nonatomic) LogLevel logLevel;
 @property(nonatomic) NSNumber *showPowerAlert;
+@property(nonatomic) BOOL restoreState;
 @end
 
 @implementation FlutterBluePlusPlugin
@@ -75,8 +76,21 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     instance.scanCounts = [NSMutableDictionary new];
     instance.logLevel = LDEBUG;
     instance.showPowerAlert = @(YES);
+    instance.restoreState = @(NO);
 
     [registrar addMethodCallDelegate:instance channel:methodChannel];
+}
+
+- (void)centralManager:(CBCentralManager *)central
+      willRestoreState:(NSDictionary *)state {
+
+    NSArray *peripherals = state[CBCentralManagerRestoredStatePeripheralsKey];
+    if (peripherals) {
+        for (CBPeripheral *peripheral in peripherals) {
+            [self.centralManager connectPeripheral:peripheral options:nil];
+            [self centralManager:self.centralManager didConnectPeripheral:peripheral];
+        }
+    }
 }
 
 ////////////////////////////////////////////////////////////
@@ -108,6 +122,15 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         {
             NSDictionary *args = (NSDictionary*) call.arguments;
             self.showPowerAlert = args[@"show_power_alert"];
+            id restoreStateValue = args[@"restore_ios_state"];
+
+            if ([restoreStateValue isKindOfClass:[NSNumber class]]) {
+                self.restoreState = [restoreStateValue boolValue];
+            } else if ([restoreStateValue isKindOfClass:[NSString class]]) {
+                self.restoreState = [[restoreStateValue lowercaseString] isEqualToString:@"true"];
+            } else {
+                Log(LDEBUG,@"Unexpected data type for restore_ios_state :%@", restoreStateValue);
+            }
             result(@YES);
             return;
         }
@@ -117,11 +140,20 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         {
             Log(LDEBUG, @"initializing CBCentralManager");
 
-            NSDictionary *options = @{
-                CBCentralManagerOptionShowPowerAlertKey: self.showPowerAlert
-            };
+            NSDictionary *options;
+
+            if (self.restoreState) {
+                options = @{
+                        CBCentralManagerOptionShowPowerAlertKey: self.showPowerAlert,
+                        CBCentralManagerOptionRestoreIdentifierKey: @"myCentralManagerIdentifier"
+                };
+            } else {
+                // Don't include the restore key in options
+                options = @{ CBCentralManagerOptionShowPowerAlertKey: self.showPowerAlert };
+            }
 
             Log(LDEBUG, @"show power alert: %@", [self.showPowerAlert boolValue] ? @"yes" : @"no");
+            Log(LDEBUG, @"restore state: %@", self.restoreState ? @"yes" : @"no");
 
             self.centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil options:options];
         }
