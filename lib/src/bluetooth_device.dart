@@ -131,6 +131,13 @@ class BluetoothDevice {
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmConnectionStateResponse> futureState = responseStream.first;
 
+      if (Platform.isAndroid) {
+        // Workaround race condition between connect and disconnect leaving connection stranded.
+        // https://issuetracker.google.com/issues/37121040
+        // Record when we initiate connect call so we can enforce a delay between connect and disconnect call.
+        FlutterBluePlus._connectTimestamp[remoteId] = DateTime.now();
+      }
+
       // invoke
       bool changed = await FlutterBluePlus._invokeMethod('connect', request.toMap());
 
@@ -203,12 +210,33 @@ class BluetoothDevice {
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmConnectionStateResponse> futureState = responseStream.first;
 
+      if (Platform.isAndroid) {
+        // Workaround race condition between connect and disconnect leaving connection stranded.
+        // https://issuetracker.google.com/issues/37121040
+        // Enforce a delay between connect and disconnect call.
+        // From testing, 2 second delay appears to be enough.
+        if (FlutterBluePlus._connectTimestamp.containsKey(remoteId)) {
+          const Duration minGap = Duration(milliseconds: 2000);
+          Duration elapsed = DateTime.now().difference(FlutterBluePlus._connectTimestamp[remoteId]!);
+          if (elapsed.compareTo(minGap) < 0) {
+            Duration timeLeft = minGap - elapsed;
+            print("[FBP] disconnect: enforcing ${minGap.inMilliseconds}ms disconnect gap, delaying ${timeLeft.inMilliseconds}ms");
+            await Future<void>.delayed(timeLeft);
+          }
+        }
+      }
+
       // invoke
       bool changed = await FlutterBluePlus._invokeMethod('disconnect', remoteId.str);
 
       // only wait for disconnection if weren't already disconnected
       if (changed) {
         await futureState.fbpEnsureAdapterIsOn("disconnect").fbpTimeout(timeout, "disconnect");
+      }
+
+      if (Platform.isAndroid) {
+        // Disconnected, remove connect timestamp
+        FlutterBluePlus._connectTimestamp.remove(remoteId);
       }
     } finally {
       dtx.give();
