@@ -65,6 +65,7 @@ class BmScanSettings {
   final List<BmServiceDataFilter> withServiceData;
   final bool continuousUpdates;
   final int continuousDivisor;
+  final bool legacyOnly;
   final int androidScanMode;
   final bool androidUsesFineLocation;
 
@@ -77,6 +78,7 @@ class BmScanSettings {
     required this.withServiceData,
     required this.continuousUpdates,
     required this.continuousDivisor,
+    required this.legacyOnly,
     required this.androidScanMode,
     required this.androidUsesFineLocation,
   });
@@ -91,6 +93,7 @@ class BmScanSettings {
     data['with_service_data'] = withServiceData.map((d) => d.toMap()).toList();
     data['continuous_updates'] = continuousUpdates;
     data['continuous_divisor'] = continuousDivisor;
+    data['legacy_only'] = legacyOnly;
     data['android_scan_mode'] = androidScanMode;
     data['android_uses_fine_location'] = androidUsesFineLocation;
     return data;
