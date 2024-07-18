@@ -210,21 +210,8 @@ class BluetoothDevice {
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmConnectionStateResponse> futureState = responseStream.first;
 
-      if (Platform.isAndroid) {
-        // Workaround race condition between connect and disconnect leaving connection stranded.
-        // https://issuetracker.google.com/issues/37121040
-        // Enforce a delay between connect and disconnect call.
-        // From testing, 2 second delay appears to be enough.
-        if (FlutterBluePlus._connectTimestamp.containsKey(remoteId)) {
-          const Duration minGap = Duration(milliseconds: 2000);
-          Duration elapsed = DateTime.now().difference(FlutterBluePlus._connectTimestamp[remoteId]!);
-          if (elapsed.compareTo(minGap) < 0) {
-            Duration timeLeft = minGap - elapsed;
-            print("[FBP] disconnect: enforcing ${minGap.inMilliseconds}ms disconnect gap, delaying ${timeLeft.inMilliseconds}ms");
-            await Future<void>.delayed(timeLeft);
-          }
-        }
-      }
+      // Workaround Android race condition: ensure minimum connect disconnect gap is met
+      await _ensureMinimumAndroidDelay();
 
       // invoke
       bool changed = await FlutterBluePlus._invokeMethod('disconnect', remoteId.str);
@@ -690,6 +677,24 @@ class BluetoothDevice {
     final Guid servicesChangedUuid = Guid("2A05");
     BluetoothService? gatt = servicesList._firstWhereOrNull((svc) => svc.uuid == gattUuid);
     return gatt?.characteristics._firstWhereOrNull((chr) => chr.uuid == servicesChangedUuid);
+  }
+
+  /// Workaround race condition between connect and disconnect leaving connection stranded by enforcing a small delay
+  /// between connect and disconnect call.
+  /// https://issuetracker.google.com/issues/37121040
+  Future<void> _ensureMinimumAndroidDelay() async {
+    if (Platform.isAndroid) {
+      if (FlutterBluePlus._connectTimestamp.containsKey(remoteId)) {
+        Duration minGap = Duration(milliseconds: FlutterBluePlus._androidDisconnectMinGapMs);
+        Duration elapsed = DateTime.now().difference(FlutterBluePlus._connectTimestamp[remoteId]!);
+        if (elapsed.compareTo(minGap) < 0) {
+          Duration timeLeft = minGap - elapsed;
+          print("[FBP] disconnect: enforcing ${minGap.inMilliseconds}ms disconnect gap, delaying "
+              "${timeLeft.inMilliseconds}ms");
+          await Future<void>.delayed(timeLeft);
+        }
+      }
+    }
   }
 
   @override
