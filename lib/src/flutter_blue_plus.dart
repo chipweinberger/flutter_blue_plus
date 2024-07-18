@@ -109,7 +109,7 @@ class FlutterBluePlus {
   ///       To set this option you must call this method before any other method in this package.
   ///       See: https://developer.apple.com/documentation/corebluetooth/cbcentralmanageroptionshowpoweralertkey
   ///       This option has no effect on Android.
-  ///   - [androidDisconnectMinGapMs] Minimum gap between connect and disconnect calls (Android only).
+  ///   - [androidDisconnectMinGapMs] Minimum gap between connect and disconnect calls in milliseconds (Android only).
   static Future<void> setOptions({
     bool showPowerAlert = true,
     int? androidDisconnectMinGapMs,
