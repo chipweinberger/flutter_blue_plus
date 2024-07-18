@@ -210,6 +210,9 @@ class FlutterBluePlus {
   ///        If divisor is 1, all advertisements are returned. This argument only matters for `continuousUpdates` mode.
   ///   - [oneByOne] if `true`, we will stream every advertistment one by one, possibly including duplicates.
   ///        If `false`, we deduplicate the advertisements, and return a list of devices.
+  ///   - [legacyOnly] Android only. If `true`, scan on 1M phy only.
+  ///        If `false`, scan on all supported phys. How the radio cycles through all the supported phys is purely
+  ///        dependent on the your Bluetooth stack implementation.
   ///   - [androidScanMode] choose the android scan mode to use when scanning
   ///   - [androidUsesFineLocation] request `ACCESS_FINE_LOCATION` permission at runtime
   static Future<void> startScan({
@@ -224,6 +227,7 @@ class FlutterBluePlus {
     bool continuousUpdates = false,
     int continuousDivisor = 1,
     bool oneByOne = false,
+    bool legacyOnly = false,
     AndroidScanMode androidScanMode = AndroidScanMode.lowLatency,
     bool androidUsesFineLocation = false,
   }) async {
@@ -268,6 +272,7 @@ class FlutterBluePlus {
           withServiceData: withServiceData.map((d) => d._bm).toList(),
           continuousUpdates: continuousUpdates,
           continuousDivisor: continuousDivisor,
+          legacyOnly: legacyOnly,
           androidScanMode: androidScanMode.value,
           androidUsesFineLocation: androidUsesFineLocation);
 
