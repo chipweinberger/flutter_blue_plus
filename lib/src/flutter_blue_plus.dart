@@ -55,10 +55,6 @@ class FlutterBluePlus {
   static LogLevel _logLevel = LogLevel.debug;
   static bool _logColor = true;
 
-  /// Android: minimum gap between connect and disconnect to workaround a race condition
-  /// From testing, 2 second delay appears to be enough.
-  static int _androidDisconnectMinGapMs = 2000;
-
   ////////////////////
   //  Public
   //
@@ -109,14 +105,9 @@ class FlutterBluePlus {
   ///       To set this option you must call this method before any other method in this package.
   ///       See: https://developer.apple.com/documentation/corebluetooth/cbcentralmanageroptionshowpoweralertkey
   ///       This option has no effect on Android.
-  ///   - [androidDisconnectMinGapMs] Minimum gap between connect and disconnect calls in milliseconds (Android only).
   static Future<void> setOptions({
     bool showPowerAlert = true,
-    int? androidDisconnectMinGapMs,
   }) async {
-    if (androidDisconnectMinGapMs != null) {
-      _androidDisconnectMinGapMs = androidDisconnectMinGapMs;
-    }
     await _invokeMethod('setOptions', {"show_power_alert": showPowerAlert});
   }
 

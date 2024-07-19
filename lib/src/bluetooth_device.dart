@@ -185,7 +185,15 @@ class BluetoothDevice {
   ///   - [queue] If true, this disconnect request will be executed after all other operations complete.
   ///     If false, this disconnect request will be executed right now, i.e. skipping to the front
   ///     of the fbp operation queue, which is useful to cancel an in-progress connection attempt.
-  Future<void> disconnect({int timeout = 35, bool queue = true}) async {
+  ///   - [androidDelay] Android only. Minimum gap in milliseconds between connect and disconnect to
+  ///     workaround a race condition that leaves connection stranded.
+  ///     https://issuetracker.google.com/issues/37121040
+  ///     From testing, 2 second delay appears to be enough.
+  Future<void> disconnect({
+    int timeout = 35,
+    bool queue = true,
+    int androidDelay = 2000,
+  }) async {
     // Only allow a single disconnect operation at a time
     _Mutex dtx = _MutexFactory.getMutexForKey("disconnect");
     await dtx.take();
@@ -211,7 +219,7 @@ class BluetoothDevice {
       Future<BmConnectionStateResponse> futureState = responseStream.first;
 
       // Workaround Android race condition: ensure minimum connect disconnect gap is met
-      await _ensureMinimumAndroidDelay();
+      await _ensureMinimumAndroidDelay(androidDelay);
 
       // invoke
       bool changed = await FlutterBluePlus._invokeMethod('disconnect', remoteId.str);
@@ -682,10 +690,10 @@ class BluetoothDevice {
   /// Workaround race condition between connect and disconnect leaving connection stranded by enforcing a small delay
   /// between connect and disconnect call.
   /// https://issuetracker.google.com/issues/37121040
-  Future<void> _ensureMinimumAndroidDelay() async {
+  Future<void> _ensureMinimumAndroidDelay(int androidDelay) async {
     if (Platform.isAndroid) {
       if (FlutterBluePlus._connectTimestamp.containsKey(remoteId)) {
-        Duration minGap = Duration(milliseconds: FlutterBluePlus._androidDisconnectMinGapMs);
+        Duration minGap = Duration(milliseconds: androidDelay);
         Duration elapsed = DateTime.now().difference(FlutterBluePlus._connectTimestamp[remoteId]!);
         if (elapsed.compareTo(minGap) < 0) {
           Duration timeLeft = minGap - elapsed;
