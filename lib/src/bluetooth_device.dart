@@ -184,7 +184,9 @@ class BluetoothDevice {
   ///     If false, this disconnect request will be executed right now, i.e. skipping to the front
   ///     of the fbp operation queue, which is useful to cancel an in-progress connection attempt.
   ///   - [androidDelay] Android only. Minimum gap in milliseconds between connect and disconnect to
-  ///     workaround a race condition that leaves connection stranded.
+  ///     workaround a race condition that leaves connection stranded. A stranded connection in this case
+  ///     refers to a connection that FBP and Android Bluetooth stack are not aware of and thus cannot be
+  ///     disconnected because there is no gatt handle.
   ///     https://issuetracker.google.com/issues/37121040
   ///     From testing, 2 second delay appears to be enough.
   Future<void> disconnect({
