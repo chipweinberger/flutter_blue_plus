@@ -219,7 +219,7 @@ class BluetoothDevice {
       Future<BmConnectionStateResponse> futureState = responseStream.first;
 
       // Workaround Android race condition: ensure minimum connect disconnect gap is met
-      await _ensureMinimumAndroidDelay(androidDelay);
+      await _ensureAndroidDisconnectionDelay(androidDelay);
 
       // invoke
       bool changed = await FlutterBluePlus._invokeMethod('disconnect', remoteId.str);
@@ -690,7 +690,7 @@ class BluetoothDevice {
   /// Workaround race condition between connect and disconnect leaving connection stranded by enforcing a small delay
   /// between connect and disconnect call.
   /// https://issuetracker.google.com/issues/37121040
-  Future<void> _ensureMinimumAndroidDelay(int androidDelay) async {
+  Future<void> _ensureAndroidDisconnectionDelay(int androidDelay) async {
     if (Platform.isAndroid) {
       if (FlutterBluePlus._connectTimestamp.containsKey(remoteId)) {
         Duration minGap = Duration(milliseconds: androidDelay);
