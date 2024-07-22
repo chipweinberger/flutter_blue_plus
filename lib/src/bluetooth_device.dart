@@ -131,10 +131,8 @@ class BluetoothDevice {
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmConnectionStateResponse> futureState = responseStream.first;
 
+      // record connection time
       if (Platform.isAndroid) {
-        // Workaround race condition between connect and disconnect leaving connection stranded.
-        // https://issuetracker.google.com/issues/37121040
-        // Record when we initiate connect call so we can enforce a delay between connect and disconnect call.
         FlutterBluePlus._connectTimestamp[remoteId] = DateTime.now();
       }
 
