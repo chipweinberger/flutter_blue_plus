@@ -3,6 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 #import "FlutterBluePlusPlugin.h"
+#import <flutter_blue_plus/flutter_blue_plus-Swift.h>
 
 #define Log(LEVEL, FORMAT, ...) [self log:LEVEL format:@"[FBP-iOS] " FORMAT, ##__VA_ARGS__]
 
@@ -40,6 +41,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 @property(nonatomic, retain) NSObject<FlutterPluginRegistrar> *registrar;
 @property(nonatomic, retain) FlutterMethodChannel *methodChannel;
 @property(nonatomic, retain) CBCentralManager *centralManager;
+@property(nonatomic, retain) L2CapChannelManager *l2capManager;
 @property(nonatomic) NSMutableDictionary *knownPeripherals;
 @property(nonatomic) NSMutableDictionary *connectedPeripherals;
 @property(nonatomic) NSMutableDictionary *currentlyConnectingPeripherals;
@@ -103,6 +105,13 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     @try
     {
         Log(LDEBUG, @"handleMethodCall: %@", call.method);
+
+        // initialize l2cap channel manager
+        if (@available(iOS 13.0, *)) {
+            if (self.l2capManager == nil) {
+                  self.l2capManager = [[L2CapChannelManager alloc] initWithDeviceConnectedMethodChannel:_methodChannel ];
+            }
+        }
 
         if ([@"setOptions" isEqualToString:call.method])
         {
@@ -781,6 +790,28 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                                     message:@"android only"
                                     details:NULL]);
         }
+        else if([L2CapMethodNames.listenL2CapChannel isEqualToString:call.method]) {
+            NSDictionary *data = (NSDictionary*)call.arguments;
+            ListenL2CapChannelRequest *request = [[ListenL2CapChannelRequest alloc] initWithData:data];
+            [_l2capManager listenUsingL2capChannelWithRequest:request
+                                               resultCallback:result];
+        } else if([L2CapMethodNames.closeL2CapServer isEqualToString:call.method]) {
+            NSDictionary *data = (NSDictionary*)call.arguments;
+            CloseL2CapServer *request = [[CloseL2CapServer alloc] initWithData:data];
+            [_l2capManager closeServerSocketWithRequest:request resultCallback:result];
+        } else if([L2CapMethodNames.closeL2CapChannel isEqualToString:call.method]) {
+            NSDictionary *data = (NSDictionary*)call.arguments;
+            CloseL2CapChannelRequest *request = [[CloseL2CapChannelRequest alloc] initWithData:data];
+            [_l2capManager closeChannelWithRequest:request resultCallback:result];
+        } else if([L2CapMethodNames.readL2CapChannel isEqualToString:call.method]) {
+            NSDictionary *data = (NSDictionary*)call.arguments;
+            ReadL2CapChannelRequest *request = [[ReadL2CapChannelRequest alloc] initWithData:data];
+            [_l2capManager readWithRequest:request resultCallback:result];
+        }  else if([L2CapMethodNames.writeL2CapChannel isEqualToString:call.method]) {
+            NSDictionary *data = (NSDictionary*)call.arguments;
+            WriteL2CapChannelRequest *request = [[WriteL2CapChannelRequest alloc] initWithData:data];
+            [_l2capManager writeWithRequest:request resultCallback:result];
+        }
         else
         {
             result(FlutterMethodNotImplemented);
@@ -1032,7 +1063,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     int adapterState = [self bmAdapterStateEnum:self.centralManager.state];
 
-    // stop scanning when adapter is turned off. 
+    // stop scanning when adapter is turned off.
     // Otherwise, scanning automatically resumes when the adapter is
     // turned back on. I don't think most users expect that.
     if (self.centralManager.state != CBManagerStatePoweredOn) {

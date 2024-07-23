@@ -5,6 +5,7 @@
 package com.lib.flutter_blue_plus;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Application;
@@ -21,8 +22,8 @@ import android.bluetooth.BluetoothProfile;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
-import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanRecord;
+import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -36,6 +37,26 @@ import android.os.ParcelUuid;
 import android.util.Log;
 import android.util.SparseArray;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
+import com.lib.flutter_blue_plus.l2cap.L2CapChannelManager;
+import com.lib.flutter_blue_plus.l2cap.L2CapMethodNames;
+import com.lib.flutter_blue_plus.l2cap.messages.CloseL2CapChannelRequest;
+import com.lib.flutter_blue_plus.l2cap.messages.CloseL2CapServer;
+import com.lib.flutter_blue_plus.l2cap.messages.DeviceConnectedToL2CapChannel;
+import com.lib.flutter_blue_plus.l2cap.messages.ListenL2CapChannelRequest;
+import com.lib.flutter_blue_plus.l2cap.messages.OpenL2CapChannelRequest;
+import com.lib.flutter_blue_plus.l2cap.messages.ReadL2CapChannelRequest;
+import com.lib.flutter_blue_plus.l2cap.messages.WriteL2CapChannelRequest;
+import com.lib.flutter_blue_plus.log.LogLevel;
+import com.lib.flutter_blue_plus.permission.PermissionUtil;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -74,7 +95,9 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry.RequestPermissionsResultListener;
 import io.flutter.plugin.common.PluginRegistry.ActivityResultListener;
+import io.flutter.plugin.common.PluginRegistry.RequestPermissionsResultListener;
 
+@SuppressLint("MissingPermission")
 public class FlutterBluePlusPlugin implements
     FlutterPlugin,
     MethodCallHandler,
@@ -108,12 +131,18 @@ public class FlutterBluePlusPlugin implements
     private final Map<String, String> mWriteDesc = new ConcurrentHashMap<>();
     private final Map<String, String> mAdvSeen = new ConcurrentHashMap<>();
     private final Map<String, Integer> mScanCounts = new ConcurrentHashMap<>();
-    private HashMap<String, Object> mScanFilters = new HashMap<String, Object>();
+    private HashMap<String, Object> mScanFilters = new HashMap<>();
     
     private final Map<Integer, OperationOnPermission> operationsOnPermission = new HashMap<>();
     private int lastEventId = 1452;
 
     private final int enableBluetoothRequestCode = 1879842617;
+
+    private L2CapChannelManager l2CapChannelManager;
+    private final L2CapChannelManager.DeviceConnected deviceConnectedCallback = (remoteDevice, psm) -> {
+        final DeviceConnectedToL2CapChannel newConnectedDeviceState = new DeviceConnectedToL2CapChannel(remoteDevice, psm);
+        invokeMethodUIThread(L2CapMethodNames.DEVICE_CONNECTED, newConnectedDeviceState.marshal());
+    };
 
     private interface OperationOnPermission {
         void op(boolean granted, String permission);
@@ -218,6 +247,7 @@ public class FlutterBluePlusPlugin implements
 
         mBluetoothAdapter = null;
         mBluetoothManager = null;
+        l2CapChannelManager = null;
     }
 
     @Override
@@ -264,6 +294,7 @@ public class FlutterBluePlusPlugin implements
     // ██       ██   ██  ██       ██
     //  ██████  ██   ██  ███████  ███████
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     @SuppressWarnings({"deprecation", "unchecked"}) // needed for compatibility, type safety uses bluetooth_msgs.dart
     public void onMethodCall(@NonNull MethodCall call,
@@ -290,6 +321,9 @@ public class FlutterBluePlusPlugin implements
                 "getAdapterState".equals(call.method) == false) {
                 result.error("bluetoothUnavailable", "the device does not support bluetooth", null);
                 return;
+            }
+            if (l2CapChannelManager == null) {
+                l2CapChannelManager = new L2CapChannelManager(mBluetoothAdapter, deviceConnectedCallback);
             }
 
             switch (call.method) {
@@ -1441,7 +1475,94 @@ public class FlutterBluePlusPlugin implements
                     result.success(true);
                     break;
                 }
-
+                case L2CapMethodNames.CONNECT_TO_L2CAP_CHANNEL: {
+                    ensurePermissions(PermissionUtil.permissionForBleConnection(), (granted, permission) -> {
+                        if (!granted) {
+                            result.error(
+                                    "no_permissions", String.format("flutter_blue plugin requires %s for new connection", permission), null);
+                            return;
+                        }
+                        final Map<String, Object> data = call.arguments();
+                        if (data == null) {
+                            result.error(ErrorCodes.MESSAGE_ARGUMENTS_NOT_PROVIDED, "Call arguments are not provided.", null);
+                            return;
+                        }
+                        final OpenL2CapChannelRequest options = OpenL2CapChannelRequest.unmarshal(data);
+                        l2CapChannelManager.connectToL2CapChannel(options, result);
+                    });
+                    break;
+                }
+                case L2CapMethodNames.CLOSE_L2CAP_CHANNEL: {
+                    ensurePermissions(PermissionUtil.permissionForBleConnection(), (granted, permission) -> {
+                        if (!granted) {
+                            result.error(
+                                    "no_permissions", String.format("flutter_blue plugin requires %s for new connection", permission), null);
+                            return;
+                        }
+                        final Map<String, Object> data = call.arguments();
+                        if (data == null) {
+                            result.error(ErrorCodes.MESSAGE_ARGUMENTS_NOT_PROVIDED, "Call arguments are not provided.", null);
+                            return;
+                        }
+                        CloseL2CapChannelRequest options = CloseL2CapChannelRequest.unmarshal(data);
+                        l2CapChannelManager.closeChannel(options, result);
+                    });
+                    break;
+                }
+                case L2CapMethodNames.LISTEN_L2CAP_CHANNEL: {
+                    ensurePermissions(PermissionUtil.permissionForBleConnection(), (granted, permission) -> {
+                        if (!granted) {
+                            result.error(
+                                    "no_permissions", String.format("flutter_blue plugin requires %s for listening to l2cap channel", permission), null);
+                            return;
+                        }
+                        final Map<String, Object> data = call.arguments();
+                        if (data == null) {
+                            result.error(ErrorCodes.MESSAGE_ARGUMENTS_NOT_PROVIDED, "Call arguments are not provided.", null);
+                            return;
+                        }
+                        final ListenL2CapChannelRequest options = ListenL2CapChannelRequest.unmarshal(data);
+                        l2CapChannelManager.listenUsingL2capChannel(options, result);
+                    });
+                    break;
+                }
+                case L2CapMethodNames.CLOSE_L2CAP_SERVER: {
+                    ensurePermissions(PermissionUtil.permissionForBleConnection(), (granted, permission) -> {
+                        if (!granted) {
+                            result.error(
+                                    "no_permissions", String.format("flutter_blue plugin requires %s for listening to l2cap channel", permission), null);
+                            return;
+                        }
+                        final Map<String, Object> data = call.arguments();
+                        if (data == null) {
+                            result.error(ErrorCodes.MESSAGE_ARGUMENTS_NOT_PROVIDED, "Call arguments are not provided.", null);
+                            return;
+                        }
+                        CloseL2CapServer options = CloseL2CapServer.unmarshal(data);
+                        l2CapChannelManager.closeServerSocket(options, result);
+                    });
+                    break;
+                }
+                case L2CapMethodNames.READ_L2CAP_CHANNEL: {
+                    final Map<String, Object> data = call.arguments();
+                    if (data == null) {
+                        result.error(ErrorCodes.MESSAGE_ARGUMENTS_NOT_PROVIDED, "Call arguments are not provided.", null);
+                        return;
+                    }
+                    final ReadL2CapChannelRequest options = ReadL2CapChannelRequest.unmarshal(data);
+                    l2CapChannelManager.read(options, result);
+                    break;
+                }
+                case L2CapMethodNames.WRITE_L2CAP_CHANNEL: {
+                    final Map<String, Object> data = call.arguments();
+                    if (data == null) {
+                        result.error(ErrorCodes.MESSAGE_ARGUMENTS_NOT_PROVIDED, "Call arguments are not provided.", null);
+                        return;
+                    }
+                    final WriteL2CapChannelRequest options = WriteL2CapChannelRequest.unmarshal(data);
+                    l2CapChannelManager.write(options, result);
+                    break;
+                }
                 default:
                 {
                     result.notImplemented();
@@ -1675,11 +1796,11 @@ public class FlutterBluePlusPlugin implements
 
     private int getMaxPayload(String remoteId, int writeType, boolean allowLongWrite)
     {
-        // 512 this comes from the BLE spec. Characteritics should not 
+        // 512 this comes from the BLE spec. Characteritics should not
         // be longer than 512. Android also enforces this as the maximum in internal code.
-        int maxAttrLen = 512; 
+        int maxAttrLen = 512;
 
-        // if no response, we can only write up to MTU-3. 
+        // if no response, we can only write up to MTU-3.
         // This is the same limitation as iOS, and ensures transfer reliability.
         if (writeType == BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE || allowLongWrite == false) {
 
@@ -1887,7 +2008,7 @@ public class FlutterBluePlusPlugin implements
 
             log(LogLevel.DEBUG, "OnAdapterStateChanged: " + adapterStateString(adapterState));
 
-            // stop scanning when adapter is turned off. 
+            // stop scanning when adapter is turned off.
             // Otherwise, scanning automatically resumes when the adapter is
             // turned back on. I don't think most users expect that.
             if (adapterState != BluetoothAdapter.STATE_ON) {
@@ -1899,7 +2020,7 @@ public class FlutterBluePlusPlugin implements
                     }
                 }
             }
-            
+
             // see: BmBluetoothAdapterState
             HashMap<String, Object> map = new HashMap<>();
             map.put("adapter_state", bmAdapterStateEnum(adapterState));
@@ -2235,10 +2356,10 @@ public class FlutterBluePlusPlugin implements
             log(level, "  chr: " + uuidStr(characteristic.getUuid()));
             log(level, "  status: " + gattErrorString(status) + " (" + status + ")");
 
-            // For "writeWithResponse", onCharacteristicWrite is called after the remote sends back a write response. 
-            // For "writeWithoutResponse", onCharacteristicWrite is called as long as there is still space left 
-            // in android's internal buffer. When the buffer is full, it delays calling onCharacteristicWrite 
-            // until there is at least ~50% free space again. 
+            // For "writeWithResponse", onCharacteristicWrite is called after the remote sends back a write response.
+            // For "writeWithoutResponse", onCharacteristicWrite is called as long as there is still space left
+            // in android's internal buffer. When the buffer is full, it delays calling onCharacteristicWrite
+            // until there is at least ~50% free space again.
 
             ServicePair pair = getServicePair(gatt, characteristic);
 
@@ -2680,7 +2801,7 @@ public class FlutterBluePlusPlugin implements
         }
     }
 
-    private void invokeMethodUIThread(final String method, HashMap<String, Object> data)
+    private void invokeMethodUIThread(final String method, Map<String, Object> data)
     {
         new Handler(Looper.getMainLooper()).post(() -> {
             //Could already be teared down at this moment

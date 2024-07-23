@@ -30,3 +30,5 @@
 .packages
 build/
 .pub/
+local.properties
+example/local.properties
