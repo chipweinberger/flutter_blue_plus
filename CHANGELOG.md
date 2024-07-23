@@ -1,3 +1,6 @@
+## 1.32.9
+* **[Feature]** Android: add legacy scan option
+
 ## 1.32.8
 * **[Fix]** iOS: was not updating `lastValueStream` if `withoutResponse:true`
 
