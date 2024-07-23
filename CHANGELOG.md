@@ -1,3 +1,6 @@
+## 1.32.11
+* **[Improve]** Android: perf: speed up `bytesToHex`
+
 ## 1.32.10
 * **[Fix]** Android: calling `disconnect(queue:false)` may sometimes silently fail
 
