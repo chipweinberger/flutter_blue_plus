@@ -218,7 +218,7 @@ class BluetoothDevice {
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmConnectionStateResponse> futureState = responseStream.first;
 
-      // Workaround Android race condition: ensure minimum connect disconnect gap is met
+      // Workaround Android race condition
       await _ensureAndroidDisconnectionDelay(androidDelay);
 
       // invoke
@@ -687,8 +687,10 @@ class BluetoothDevice {
     return gatt?.characteristics._firstWhereOrNull((chr) => chr.uuid == servicesChangedUuid);
   }
 
-  /// Workaround race condition between connect and disconnect leaving connection stranded by enforcing a small delay
-  /// between connect and disconnect call.
+  /// Workaround race condition between connect and disconnect.
+  /// The bug: If you call disconnect right as android is establishing a connection 
+  /// android may still connect to the device. Worse, "onConnectionStateChange" will not be called
+  /// so FBP will have no idea this connection is active. Adding a delay fixes this issue.
   /// https://issuetracker.google.com/issues/37121040
   Future<void> _ensureAndroidDisconnectionDelay(int androidDelay) async {
     if (Platform.isAndroid) {
