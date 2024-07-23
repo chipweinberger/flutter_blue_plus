@@ -1,3 +1,6 @@
+## 1.32.10
+* **[Fix]** Android: calling `disconnect(queue:false)` may sometimes silently fail
+
 ## 1.32.9
 * **[Feature]** Android: add legacy scan option
 
