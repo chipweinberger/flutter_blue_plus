@@ -29,6 +29,7 @@ class FlutterBluePlus {
   static final Map<DeviceIdentifier, Map<String, List<int>>> _lastDescs = {};
   static final Map<DeviceIdentifier, List<StreamSubscription>> _deviceSubscriptions = {};
   static final Map<DeviceIdentifier, List<StreamSubscription>> _delayedSubscriptions = {};
+  static final Map<DeviceIdentifier, DateTime> _connectTimestamp = {};
   static final List<StreamSubscription> _scanSubscriptions = [];
   static final Set<DeviceIdentifier> _autoConnect = {};
 
