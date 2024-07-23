@@ -3,7 +3,13 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import Foundation
+
+#if os(macOS)
+import FlutterMacOS
+#else
 import Flutter
+#endif
+
 
 @objc
 private enum LogLevel: Int {
