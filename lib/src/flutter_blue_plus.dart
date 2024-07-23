@@ -55,6 +55,8 @@ class FlutterBluePlus {
   static LogLevel _logLevel = LogLevel.debug;
   static bool _logColor = true;
 
+  static Stream<L2CapChannelConnected>? _l2CapChannelConnected;
+
   ////////////////////
   //  Public
   //
@@ -178,6 +180,19 @@ class FlutterBluePlus {
       }
     }
     return r.devices.map((d) => BluetoothDevice.fromProto(d)).toList();
+  }
+
+  ///
+  /// Emits a new item every time, when a Device is connecting to an offered
+  /// L2Cap channel.
+  static Stream<L2CapChannelConnected> get l2CapChannelConnected {
+    _l2CapChannelConnected ??= FlutterBluePlus._methodStream.stream
+        .where((m) => m.method == deviceConnectedCallback)
+        .map((m) => m.arguments)
+        .map((sourceMap) {
+      return L2CapChannelConnected.fromMap(sourceMap);
+    });
+    return _l2CapChannelConnected!;
   }
 
   /// Retrieve a list of bonded devices (Android only)
@@ -426,6 +441,26 @@ class FlutterBluePlus {
         await Future.delayed(Duration(milliseconds: 50));
       }
     }
+  }
+
+  /// Opens a Server Socket and returns the PSM, which is needed by
+  /// clients which want to connect to this channel.
+  static Future<int> listenL2CapChannel({
+    bool secure = true,
+  }) async {
+    var request = ListenL2CapChannelRequest(secure: secure);
+
+    return await _invokeMethod(methodListenL2CapChannel, request.toMap())
+        .then((buffer) => ListenL2CapChannelResponse.fromMap(buffer))
+        .then((p) => p.psm);
+  }
+
+  /// Closes the server socket with the provided [psm].
+  /// This closes all open input/output streams to this L2Cap server.
+  static Future<void> closeL2CapServer({required final int psm}) async {
+    var request = CloseL2CapServer(psm: psm);
+
+    return await _invokeMethod(methodCloseL2CapServer, request.toMap());
   }
 
   static Future<dynamic> _methodCallHandler(MethodCall call) async {

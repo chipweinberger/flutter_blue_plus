@@ -349,6 +349,7 @@ class BluetoothDevice {
         .newStreamWithInitialValue(initialValue);
   }
 
+
   /// Services Reset Stream
   ///  - uses the GAP Services Changed characteristic (0x2A05)
   ///  - you must re-call discoverServices() when services are reset
@@ -359,6 +360,63 @@ class BluetoothDevice {
         .map((args) => BmBluetoothDevice.fromMap(args))
         .where((p) => p.remoteId == remoteId)
         .map((m) => null);
+  }
+
+  /// Open a L2CAP channel to the Bluetooth Device.
+  Future<void> openL2CapChannel({
+    required final int psm,
+    bool secure = true,
+  }) async {
+    var request = OpenL2CapChannelRequest(
+      remoteId: remoteId.toString(),
+      psm: psm,
+      secure: secure,
+    );
+
+    await FlutterBluePlus._invokeMethod(
+        methodConnectToL2CapChannel, request.toMap());
+  }
+
+  /// Close a L2CAP channel to the Bluetooth Device.
+  Future<void> closeL2CapChannel({required final int psm}) async {
+    var request = CloseL2CapChannelRequest(
+      remoteId: remoteId.toString(),
+      psm: psm,
+    );
+
+    await FlutterBluePlus._invokeMethod(
+        methodCloseL2CapChannel, request.toMap());
+  }
+
+  /// Read from a L2CAP channel
+  Future<List<int>> readL2CapChannel({
+    required final int psm,
+  }) async {
+    final request = ReadL2CapChannelRequest(
+      remoteId: remoteId.toString(),
+      psm: psm,
+    );
+
+    return await FlutterBluePlus._invokeMethod(
+            methodReadL2CapChannel, request.toMap())
+        .then((buffer) => ReadL2CapChannelResponse.fromMap(buffer))
+        .then((readChannelResponse) {
+      return readChannelResponse.value
+          .sublist(0, readChannelResponse.bytesRead);
+    });
+  }
+
+  /// Write some [bytesToSend] using the L2CAP channel with the PSM: [psm]
+  Future<void> writeL2CapChannel(
+      {required final int psm, required final List<int> bytesToSend}) async {
+    var request = WriteL2CapChannelRequest(
+      remoteId: remoteId.toString(),
+      psm: psm,
+      value: bytesToSend,
+    );
+
+    return await FlutterBluePlus._invokeMethod(
+        methodWriteL2CapChannel, request.toMap());
   }
 
   /// Read the RSSI of connected remote device
