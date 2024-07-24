@@ -47,6 +47,7 @@ import java.util.UUID;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
 import java.io.StringWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -99,6 +100,7 @@ public class FlutterBluePlusPlugin implements
 
     static final private String CCCD = "2902";
 
+    private final Semaphore mMethodCallMutex = new Semaphore(1);
     private final Map<String, BluetoothGatt> mConnectedDevices = new ConcurrentHashMap<>();
     private final Map<String, BluetoothGatt> mCurrentlyConnectingDevices = new ConcurrentHashMap<>();
     private final Map<String, BluetoothDevice> mBondingDevices = new ConcurrentHashMap<>();
@@ -168,6 +170,19 @@ public class FlutterBluePlusPlugin implements
             // 128-bit
             return s;
         }    
+    }
+
+    private void acquireMutex(@NonNull Semaphore mutex)
+    {
+        boolean mutexAcquired = false;
+        while (mutexAcquired == false) {
+            try {
+                mutex.acquire();
+                mutexAcquired = true;
+            } catch (InterruptedException e) {
+                log(LogLevel.ERROR, "failed to acquire mutex, retrying");
+            }
+        }
     }
 
     @Override
@@ -270,6 +285,8 @@ public class FlutterBluePlusPlugin implements
                                  @NonNull Result result)
     {
         try {
+            acquireMutex(mMethodCallMutex);
+
             log(LogLevel.DEBUG, "onMethodCall: " + call.method);
 
             // initialize adapter
@@ -1455,6 +1472,8 @@ public class FlutterBluePlusPlugin implements
             String stackTrace = sw.toString();
             result.error("androidException", e.toString(), stackTrace);
             return;
+        } finally {
+            mMethodCallMutex.release();
         }
     }
 
@@ -2091,62 +2110,70 @@ public class FlutterBluePlusPlugin implements
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState)
         {
-            log(LogLevel.DEBUG, "onConnectionStateChange:" + connectionStateString(newState));
-            log(LogLevel.DEBUG, "  status: " + hciStatusString(status));
+            try {
+                // Prevent both gatt callback and method call handler threads from operating on the
+                // same gatt device or shared memory concurrently.
+                acquireMutex(mMethodCallMutex);
 
-            // android never uses this callback with enums values of CONNECTING or DISCONNECTING,
-            // (theyre only used for gatt.getConnectionState()), but just to be
-            // future proof, explicitly ignore anything else. iOS & macOS is the same way.
-            if(newState != BluetoothProfile.STATE_CONNECTED &&
-               newState != BluetoothProfile.STATE_DISCONNECTED) {
-                return;
-            }
+                log(LogLevel.DEBUG, "onConnectionStateChange:" + connectionStateString(newState));
+                log(LogLevel.DEBUG, "  status: " + hciStatusString(status));
 
-            String remoteId = gatt.getDevice().getAddress();
-
-            // connected?
-            if(newState == BluetoothProfile.STATE_CONNECTED) {
-                // add to connected devices
-                mConnectedDevices.put(remoteId, gatt);
-
-                // remove from currently connecting devices
-                mCurrentlyConnectingDevices.remove(remoteId);
-
-                // default minimum mtu
-                mMtu.put(remoteId, 23);
-            }
-
-            // disconnected?
-            if(newState == BluetoothProfile.STATE_DISCONNECTED) {
-
-                // remove from connected devices
-                mConnectedDevices.remove(remoteId);
-
-                // remove from currently connecting devices
-                mCurrentlyConnectingDevices.remove(remoteId);
-
-                // remove from currently bonding devices
-                mBondingDevices.remove(remoteId);
-
-                // we cannot call 'close' for autoconnected devices
-                // because it prevents autoconnect from working
-                if (mAutoConnected.containsKey(remoteId)) {
-                    log(LogLevel.DEBUG, "autoconnect is true. skipping gatt.close()");
-                } else {
-                    // it is important to close after disconnection, otherwise we will 
-                    // quickly run out of bluetooth resources, preventing new connections
-                    gatt.close();
+                // android never uses this callback with enums values of CONNECTING or DISCONNECTING,
+                // (theyre only used for gatt.getConnectionState()), but just to be
+                // future proof, explicitly ignore anything else. iOS & macOS is the same way.
+                if(newState != BluetoothProfile.STATE_CONNECTED &&
+                   newState != BluetoothProfile.STATE_DISCONNECTED) {
+                    return;
                 }
+
+                String remoteId = gatt.getDevice().getAddress();
+
+                // connected?
+                if(newState == BluetoothProfile.STATE_CONNECTED) {
+                    // add to connected devices
+                    mConnectedDevices.put(remoteId, gatt);
+
+                    // remove from currently connecting devices
+                    mCurrentlyConnectingDevices.remove(remoteId);
+
+                    // default minimum mtu
+                    mMtu.put(remoteId, 23);
+                }
+
+                // disconnected?
+                if(newState == BluetoothProfile.STATE_DISCONNECTED) {
+
+                    // remove from connected devices
+                    mConnectedDevices.remove(remoteId);
+
+                    // remove from currently connecting devices
+                    mCurrentlyConnectingDevices.remove(remoteId);
+
+                    // remove from currently bonding devices
+                    mBondingDevices.remove(remoteId);
+
+                    // we cannot call 'close' for autoconnected devices
+                    // because it prevents autoconnect from working
+                    if (mAutoConnected.containsKey(remoteId)) {
+                        log(LogLevel.DEBUG, "autoconnect is true. skipping gatt.close()");
+                    } else {
+                        // it is important to close after disconnection, otherwise we will 
+                        // quickly run out of bluetooth resources, preventing new connections
+                        gatt.close();
+                    }
+                }
+
+                // see: BmConnectionStateResponse
+                HashMap<String, Object> response = new HashMap<>();
+                response.put("remote_id", remoteId);
+                response.put("connection_state", bmConnectionStateEnum(newState));
+                response.put("disconnect_reason_code", status);
+                response.put("disconnect_reason_string", hciStatusString(status));
+
+                invokeMethodUIThread("OnConnectionStateChanged", response);
+            } finally {
+                mMethodCallMutex.release();
             }
-
-            // see: BmConnectionStateResponse
-            HashMap<String, Object> response = new HashMap<>();
-            response.put("remote_id", remoteId);
-            response.put("connection_state", bmConnectionStateEnum(newState));
-            response.put("disconnect_reason_code", status);
-            response.put("disconnect_reason_string", hciStatusString(status));
-
-            invokeMethodUIThread("OnConnectionStateChanged", response);
         }
 
         @Override
