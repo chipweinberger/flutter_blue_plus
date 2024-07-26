@@ -2128,20 +2128,53 @@ public class FlutterBluePlusPlugin implements
 
                 String remoteId = gatt.getDevice().getAddress();
 
+                boolean invokeConnectionStateChanged = true;
+
                 // connected?
                 if(newState == BluetoothProfile.STATE_CONNECTED) {
-                    // add to connected devices
-                    mConnectedDevices.put(remoteId, gatt);
 
-                    // remove from currently connecting devices
-                    mCurrentlyConnectingDevices.remove(remoteId);
+                    // Android has an annoying edge case. If disconnect is called right when the connection is being
+                    // established, Android sometimes ignores the request to disconnect and completes the connection
+                    // anyway. To handle this case, we make sure the device is still in our currently connecting
+                    // devices, otherwise kill the connection since the user was not expecting it to connect.
+                    if (mCurrentlyConnectingDevices.get(remoteId) == null && mAutoConnected.get(remoteId) == null) {
+                        log(LogLevel.DEBUG, "keeping device disconnected, disconnecting now");
 
-                    // default minimum mtu
-                    mMtu.put(remoteId, 23);
+                        // we have cancelled the connection previously, hide this connect event
+                        invokeConnectionStateChanged = false;
+
+                        // remove from connected devices
+                        mConnectedDevices.remove(remoteId);
+
+                        // remove from currently bonding devices
+                        mBondingDevices.remove(remoteId);
+
+                        // disconnect and close the connection straight away
+                        gatt.disconnect();
+                        gatt.close();
+
+                    } else {
+
+                        // add to connected devices
+                        mConnectedDevices.put(remoteId, gatt);
+
+                        // remove from currently connecting devices
+                        mCurrentlyConnectingDevices.remove(remoteId);
+
+                        // default minimum mtu
+                        mMtu.put(remoteId, 23);
+                    }
                 }
 
                 // disconnected?
                 if(newState == BluetoothProfile.STATE_DISCONNECTED) {
+
+                    if (mCurrentlyConnectingDevices.get(remoteId) == null &&
+                        mConnectedDevices.get(remoteId) == null &&
+                        mAutoConnected.get(remoteId) == null) {
+                        // we disconnected an unwanted connection, hide this disconnect event
+                        invokeConnectionStateChanged = false;
+                    }
 
                     // remove from connected devices
                     mConnectedDevices.remove(remoteId);
@@ -2163,14 +2196,16 @@ public class FlutterBluePlusPlugin implements
                     }
                 }
 
-                // see: BmConnectionStateResponse
-                HashMap<String, Object> response = new HashMap<>();
-                response.put("remote_id", remoteId);
-                response.put("connection_state", bmConnectionStateEnum(newState));
-                response.put("disconnect_reason_code", status);
-                response.put("disconnect_reason_string", hciStatusString(status));
+                if (invokeConnectionStateChanged == true) {
+                    // see: BmConnectionStateResponse
+                    HashMap<String, Object> response = new HashMap<>();
+                    response.put("remote_id", remoteId);
+                    response.put("connection_state", bmConnectionStateEnum(newState));
+                    response.put("disconnect_reason_code", status);
+                    response.put("disconnect_reason_string", hciStatusString(status));
 
-                invokeMethodUIThread("OnConnectionStateChanged", response);
+                    invokeMethodUIThread("OnConnectionStateChanged", response);
+                }
             } finally {
                 mMethodCallMutex.release();
             }
