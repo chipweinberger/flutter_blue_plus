@@ -2128,33 +2128,14 @@ public class FlutterBluePlusPlugin implements
 
                 String remoteId = gatt.getDevice().getAddress();
 
-                boolean invokeConnectionStateChanged = true;
+                boolean unexpectedEvent = handleUnexpectedConnectionEvents(gatt, newState, remoteId);
 
                 // connected?
                 if(newState == BluetoothProfile.STATE_CONNECTED) {
-
-                    // Android has an annoying edge case. If disconnect is called right when the connection is being
-                    // established, Android sometimes ignores the request to disconnect and completes the connection
-                    // anyway. To handle this case, we make sure the device is still in our currently connecting
-                    // devices, otherwise kill the connection since the user was not expecting it to connect.
-                    if (mCurrentlyConnectingDevices.get(remoteId) == null && mAutoConnected.get(remoteId) == null) {
-                        log(LogLevel.DEBUG, "keeping device disconnected, disconnecting now");
-
-                        // we have cancelled the connection previously, hide this connect event
-                        invokeConnectionStateChanged = false;
-
-                        // remove from connected devices
-                        mConnectedDevices.remove(remoteId);
-
-                        // remove from currently bonding devices
-                        mBondingDevices.remove(remoteId);
-
-                        // disconnect and close the connection straight away
-                        gatt.disconnect();
-                        gatt.close();
-
-                    } else {
-
+                    // Only legitimate connections are accepted.
+                    // Unexpected connections have been dealt with before we get to this point,
+                    // so nothing more to do here.
+                    if (unexpectedEvent == false) {
                         // add to connected devices
                         mConnectedDevices.put(remoteId, gatt);
 
@@ -2168,13 +2149,6 @@ public class FlutterBluePlusPlugin implements
 
                 // disconnected?
                 if(newState == BluetoothProfile.STATE_DISCONNECTED) {
-
-                    if (mCurrentlyConnectingDevices.get(remoteId) == null &&
-                        mConnectedDevices.get(remoteId) == null &&
-                        mAutoConnected.get(remoteId) == null) {
-                        // we disconnected an unwanted connection, hide this disconnect event
-                        invokeConnectionStateChanged = false;
-                    }
 
                     // remove from connected devices
                     mConnectedDevices.remove(remoteId);
@@ -2196,7 +2170,8 @@ public class FlutterBluePlusPlugin implements
                     }
                 }
 
-                if (invokeConnectionStateChanged == true) {
+                // only notify OnConnectionStateChanged if this is a legitimate event
+                if (unexpectedEvent == false) {
                     // see: BmConnectionStateResponse
                     HashMap<String, Object> response = new HashMap<>();
                     response.put("remote_id", remoteId);
@@ -2209,6 +2184,44 @@ public class FlutterBluePlusPlugin implements
             } finally {
                 mMethodCallMutex.release();
             }
+        }
+
+        private boolean handleUnexpectedConnectionEvents(BluetoothGatt gatt, int newState, String remoteId)
+        {
+            boolean unexpectedEvent = false;
+            if (newState == BluetoothProfile.STATE_CONNECTED) {
+
+                // Android has an annoying edge case. If disconnect is called right when the connection is being
+                // established, Android sometimes ignores the request to disconnect and completes the connection
+                // anyway. To handle this case, we make sure the device is still in our currently connecting
+                // devices, otherwise kill the connection since the user was not expecting it to connect.
+                if (mCurrentlyConnectingDevices.get(remoteId) == null && mAutoConnected.get(remoteId) == null) {
+                    log(LogLevel.DEBUG, "keeping device disconnected, disconnecting now");
+
+                    // this is an unexpected connection
+                    unexpectedEvent = true;
+
+                    // remove from connected devices
+                    mConnectedDevices.remove(remoteId);
+
+                    // remove from currently bonding devices
+                    mBondingDevices.remove(remoteId);
+
+                    // disconnect and close the connection straight away
+                    gatt.disconnect();
+                    gatt.close();
+                }
+
+            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+
+                if (mCurrentlyConnectingDevices.get(remoteId) == null &&
+                    mConnectedDevices.get(remoteId) == null &&
+                    mAutoConnected.get(remoteId) == null) {
+                    // we have no record of this device, mark this is an unexpected disconnect event
+                    unexpectedEvent = true;
+                }
+            }
+            return unexpectedEvent;
         }
 
         @Override
