@@ -2129,22 +2129,22 @@ public class FlutterBluePlusPlugin implements
                 String remoteId = gatt.getDevice().getAddress();
 
                 boolean unexpectedEvent = handleUnexpectedConnectionEvents(gatt, newState, remoteId);
+                if (unexpectedEvent == true) {
+                    // This is an unexpected connection disconnection event, do not accept it.
+                    // Also do not notify OnConnectionStateChanged.
+                    return;
+                }
 
                 // connected?
                 if(newState == BluetoothProfile.STATE_CONNECTED) {
-                    // Only legitimate connections are accepted.
-                    // Unexpected connections have been dealt with before we get to this point,
-                    // so nothing more to do here.
-                    if (unexpectedEvent == false) {
-                        // add to connected devices
-                        mConnectedDevices.put(remoteId, gatt);
+                    // add to connected devices
+                    mConnectedDevices.put(remoteId, gatt);
 
-                        // remove from currently connecting devices
-                        mCurrentlyConnectingDevices.remove(remoteId);
+                    // remove from currently connecting devices
+                    mCurrentlyConnectingDevices.remove(remoteId);
 
-                        // default minimum mtu
-                        mMtu.put(remoteId, 23);
-                    }
+                    // default minimum mtu
+                    mMtu.put(remoteId, 23);
                 }
 
                 // disconnected?
@@ -2170,17 +2170,14 @@ public class FlutterBluePlusPlugin implements
                     }
                 }
 
-                // only notify OnConnectionStateChanged if this is a legitimate event
-                if (unexpectedEvent == false) {
-                    // see: BmConnectionStateResponse
-                    HashMap<String, Object> response = new HashMap<>();
-                    response.put("remote_id", remoteId);
-                    response.put("connection_state", bmConnectionStateEnum(newState));
-                    response.put("disconnect_reason_code", status);
-                    response.put("disconnect_reason_string", hciStatusString(status));
+                // see: BmConnectionStateResponse
+                HashMap<String, Object> response = new HashMap<>();
+                response.put("remote_id", remoteId);
+                response.put("connection_state", bmConnectionStateEnum(newState));
+                response.put("disconnect_reason_code", status);
+                response.put("disconnect_reason_string", hciStatusString(status));
 
-                    invokeMethodUIThread("OnConnectionStateChanged", response);
-                }
+                invokeMethodUIThread("OnConnectionStateChanged", response);
             } finally {
                 mMethodCallMutex.release();
             }
@@ -2219,6 +2216,12 @@ public class FlutterBluePlusPlugin implements
                     mAutoConnected.get(remoteId) == null) {
                     // we have no record of this device, mark this is an unexpected disconnect event
                     unexpectedEvent = true;
+
+                    // remove from currently bonding devices
+                    mBondingDevices.remove(remoteId);
+
+                    // close the connection
+                    gatt.close();
                 }
             }
             return unexpectedEvent;
