@@ -42,6 +42,7 @@ public class L2CapChannelManager : NSObject, CBPeripheralManagerDelegate {
     private var peripheralManager: CBPeripheralManager?
     private var openL2CapChannelInfos: [L2CapServerInfo] = []
     
+    private var openL2CapChannelCallback: FlutterResult?
     private var listenL2CapChannelCallback: FlutterResult?
     private var closeL2CapChannelCallback: FlutterResult?
     
@@ -80,13 +81,15 @@ public class L2CapChannelManager : NSObject, CBPeripheralManagerDelegate {
     }
     
     @objc
-    public func connectToL2CapChannel(device: CBPeripheral, request: OpenL2CapChannelRequest, resultCallback: FlutterResult) {
-        let peripheralManager = requirePeripheralManager()
-        if peripheralManager.state != CBManagerState.poweredOn {
-            resultCallback(FlutterError(code: ErrorCodes.bluetoothTurnedOff, message: "peripheralManager is not in poweredOn state.", details: nil))
-            return
+    public func connectToL2CapChannel(device: CBPeripheral, request: OpenL2CapChannelRequest, resultCallback: @escaping FlutterResult) {
+        guard let remoteUUID = UUID(uuidString: request.remoteId) else {
+          LogUtil.log(logLevel: LogLevel.debug, message: String(format: "Provided device identifier is no UUID: %s", request.remoteId))
+          resultCallback(FlutterError(code: ErrorCodes.openL2CapChannelFailed, message: "Provided device identifier is not a valid UUID", details: nil))
+          return
         }
-        LogUtil.log(logLevel: LogLevel.debug, message: "The function connectToL2CapChannel is not implemented yet.")
+        
+        openL2CapChannelCallback = resultCallback
+        device.openL2CAPChannel(CBL2CAPPSM(request.psm))
     }
     
     @objc
@@ -134,6 +137,7 @@ public class L2CapChannelManager : NSObject, CBPeripheralManagerDelegate {
             return
         }
         openChannel.close(deviceIdentifier: deviceUUID)
+        resultCallback(nil)
     }
     
     @objc
@@ -208,7 +212,26 @@ public class L2CapChannelManager : NSObject, CBPeripheralManagerDelegate {
         }
     }
     
+    @objc
+    public func didOpenChannel(peripheral: CBPeripheral, channel: CBL2CAPChannel?, error: (any Error)?) {
+        if let error = error {
+            LogUtil.log(logLevel: LogLevel.error, message: String(format: "didOpenL2CapChannel returns error: %s", error.localizedDescription))
+        } else {
+            guard let channel = channel else {
+                LogUtil.log(logLevel: LogLevel.error, message: "No L2Cap channel provided. This should not happen.")
+                return
+            }
+            LogUtil.log(logLevel: LogLevel.debug, message: String(format: "L2Cap Channel %d opened.", Int(channel.psm)))
+            handleNewConnection(channel: channel)
+            openL2CapChannelCallback?(["psm": Int(channel.psm)])
+        }
+    }
+    
     private func handleNewConnection(channel : CBL2CAPChannel) {
+        if (!openL2CapChannelInfos.contains(where:  { $0.getPSM() == channel.psm})){
+            let newChannelInfo = L2CapServerInfo(psm: channel.psm)
+            openL2CapChannelInfos.append(newChannelInfo)
+        }
         guard let channelInfo = openL2CapChannelInfos.first(where: { $0.getPSM() == channel.psm}) else {
             return
         }

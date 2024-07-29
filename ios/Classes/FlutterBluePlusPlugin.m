@@ -790,6 +790,21 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                                     message:@"android only"
                                     details:NULL]);
         }
+        else if([L2CapMethodNames.connectToL2CapChannel isEqualToString:call.method]) {
+            NSDictionary *data = (NSDictionary*)call.arguments;
+            OpenL2CapChannelRequest *request = [[OpenL2CapChannelRequest alloc] initWithData:data];
+            
+            NSString *remoteId = request.remoteId;
+            CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
+            if (peripheral == nil) {
+                NSString* s = @"device is disconnected";
+                result([FlutterError errorWithCode:@"setNotifyValue" message:s details:remoteId]);
+                return;
+            }
+            [_l2capManager connectToL2CapChannelWithDevice:peripheral
+                                                   request:request
+                                            resultCallback:result];
+        }
         else if([L2CapMethodNames.listenL2CapChannel isEqualToString:call.method]) {
             NSDictionary *data = (NSDictionary*)call.arguments;
             ListenL2CapChannelRequest *request = [[ListenL2CapChannelRequest alloc] initWithData:data];
@@ -1631,6 +1646,29 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     };
 
     [self.methodChannel invokeMethod:@"OnReadRssi" arguments:result];
+}
+
+- (void)peripheral:(CBPeripheral *)peripheral
+    didOpenL2CAPChannel:(CBL2CAPChannel *)channel error:(NSError *)error
+{
+    if (error) {
+        Log(LERROR, @"didOpenL2CAPChannel:");
+        Log(LERROR, @"  error: %@", [error localizedDescription]);
+    } else {
+        Log(LDEBUG, @"didOpenL2CAPChannel: %@", channel);
+    }
+
+    // See BmReadRssiResult
+    NSDictionary* result = @{
+        @"remote_id":       [peripheral.identifier UUIDString],
+        @"success":         @(error == nil),
+        @"error_string":    error ? [error localizedDescription] : @"success",
+        @"error_code":      error ? @(error.code) : @(0),
+    };
+
+    [_l2capManager didOpenChannelWithPeripheral:peripheral channel:channel error:error];
+    
+    [self.methodChannel invokeMethod:@"OnL2CAPChannelOpened" arguments:result];
 }
 
 - (void)peripheralIsReadyToSendWriteWithoutResponse:(CBPeripheral *)peripheral

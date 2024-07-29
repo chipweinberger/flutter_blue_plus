@@ -362,6 +362,15 @@ class BluetoothDevice {
         .map((m) => null);
   }
 
+  /// Listen to a L2CAP channel to the Bluetooth Device.
+  Future<void> listenL2CapChannel({
+    bool secure = true,
+  }) async {
+    var request = ListenL2CapChannelRequest(secure: secure);
+
+    await FlutterBluePlus._invokeMethod(methodListenL2CapChannel, request.toMap());
+  }
+
   /// Open a L2CAP channel to the Bluetooth Device.
   Future<void> openL2CapChannel({
     required final int psm,
