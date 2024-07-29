@@ -112,7 +112,7 @@ class BluetoothCharacteristic {
         remoteId: remoteId,
         characteristicUuid: characteristicUuid,
         serviceUuid: serviceUuid,
-        secondaryServiceUuid: null,
+        secondaryServiceUuid: secondaryServiceUuid,
       );
 
       var responseStream = FlutterBluePlus._methodStream.stream
@@ -150,7 +150,7 @@ class BluetoothCharacteristic {
   }
 
   /// Writes a characteristic.
-  ///  - [withoutResponse]: 
+  ///  - [withoutResponse]:
   ///       If `true`, the write is not guaranteed and always returns immediately with success.
   ///       If `false`, the write returns error on failure.
   ///  - [allowLongWrite]: if set, larger writes > MTU are allowed (up to 512 bytes).
@@ -183,7 +183,7 @@ class BluetoothCharacteristic {
         remoteId: remoteId,
         characteristicUuid: characteristicUuid,
         serviceUuid: serviceUuid,
-        secondaryServiceUuid: null,
+        secondaryServiceUuid: secondaryServiceUuid,
         writeType: writeType,
         allowLongWrite: allowLongWrite,
         value: value,
@@ -246,7 +246,7 @@ class BluetoothCharacteristic {
       var request = BmSetNotifyValueRequest(
         remoteId: remoteId,
         serviceUuid: serviceUuid,
-        secondaryServiceUuid: null,
+        secondaryServiceUuid: secondaryServiceUuid,
         characteristicUuid: characteristicUuid,
         forceIndications: forceIndications,
         enable: notify,
@@ -292,7 +292,7 @@ class BluetoothCharacteristic {
   BmBluetoothCharacteristic? get _bmchr {
     if (FlutterBluePlus._knownServices[remoteId] != null) {
       for (var s in FlutterBluePlus._knownServices[remoteId]!.services) {
-        if (s.serviceUuid == serviceUuid) {
+        if (s.serviceUuid == (secondaryServiceUuid ?? serviceUuid)) {
           for (var c in s.characteristics) {
             if (c.characteristicUuid == uuid) {
               return c;

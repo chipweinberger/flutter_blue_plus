@@ -1628,7 +1628,7 @@ public class FlutterBluePlusPlugin implements
         // secondary
         BluetoothGattService secondaryService = null;
         if(secondaryServiceId != null && secondaryServiceId.length() > 0) {
-            secondaryService = getServiceFromArray(serviceId, primaryService.getIncludedServices());
+            secondaryService = getServiceFromArray(secondaryServiceId, primaryService.getIncludedServices());
             if(secondaryService == null) {
                 return new ChrFound(null, "secondaryService not found '" + secondaryServiceId + "'");
             }
