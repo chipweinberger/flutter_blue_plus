@@ -911,19 +911,19 @@ public class FlutterBluePlusPlugin implements
                     BluetoothGattCharacteristic characteristic = found.characteristic;
 
                     // check writeable
-                    if(writeType == BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE) {
-                        if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE) == 0) {
-                            result.error("writeCharacteristic",
-                                "The WRITE_NO_RESPONSE property is not supported by this BLE characteristic", null);
-                            break;
-                        }
-                    } else {
-                         if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_WRITE) == 0) {
-                            result.error("writeCharacteristic",
-                                "The WRITE property is not supported by this BLE characteristic", null);
-                            break;
-                        }
-                    }
+                    // if(writeType == BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE) {
+                    //     if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE) == 0) {
+                    //         result.error("writeCharacteristic",
+                    //             "The WRITE_NO_RESPONSE property is not supported by this BLE characteristic", null);
+                    //         break;
+                    //     }
+                    // } else {
+                    //      if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_WRITE) == 0) {
+                    //         result.error("writeCharacteristic",
+                    //             "The WRITE property is not supported by this BLE characteristic", null);
+                    //         break;
+                    //     }
+                    // }
 
                     // check maximum payload
                     int maxLen = getMaxPayload(remoteId, writeType, allowLongWrite);
