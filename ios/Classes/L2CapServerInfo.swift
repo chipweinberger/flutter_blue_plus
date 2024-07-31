@@ -56,6 +56,13 @@ class L2CapServerInfo {
             result(FlutterError(code: ErrorCodes.noOpenL2CapChannelFound, message: "No open channel found for device and psm", details: nil))
             return
         }
+        
+        if !channelToRead.inputStream.hasBytesAvailable {
+            let response = ReadL2CapChannelResponse(remoteId: deviceIdentifier.uuidString, psm: Int(psm), bytesRead: 0, value: Data())
+            result(response.marshal())
+            return
+        }
+        
         let readBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: readBufferSize)
         let bytesRead = channelToRead.inputStream.read(readBuffer, maxLength: readBufferSize)
         

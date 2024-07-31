@@ -28,6 +28,8 @@ NSString * const CCCD = @"2902";
 }
 @end
 
+typedef uint16_t CBL2CAPPSM;
+
 typedef NS_ENUM(NSUInteger, LogLevel) {
     LNONE = 0,
     LERROR = 1,
@@ -1662,6 +1664,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     NSDictionary* result = @{
         @"remote_id":       [peripheral.identifier UUIDString],
         @"success":         @(error == nil),
+        @"channel":         @(channel.PSM),
         @"error_string":    error ? [error localizedDescription] : @"success",
         @"error_code":      error ? @(error.code) : @(0),
     };

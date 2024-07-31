@@ -39,6 +39,12 @@ public abstract class L2CapChannel {
             return;
         }
         try {
+            if (inputStream.available() == 0) {
+                final ReadL2CapChannelResponse emptyResponse = new ReadL2CapChannelResponse(request.remoteId, request.psm, 0, new byte[0]);
+                resultCallback.success(emptyResponse.marshal());
+                return;
+            }
+
             final int bytesRead = inputStream.read(readBuffer);
             final ReadL2CapChannelResponse response = new ReadL2CapChannelResponse(request.remoteId, request.psm, bytesRead, readBuffer);
             resultCallback.success(response.marshal());
