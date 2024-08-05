@@ -1,0 +1,1 @@
+../../ios/Classes/L2CapChannelManager.swift
