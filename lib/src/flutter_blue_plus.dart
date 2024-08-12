@@ -247,7 +247,7 @@ class FlutterBluePlus {
     // Note: `withKeywords` is not compatible with other filters on android
     // because it is implemented in custom fbp code, not android code, and the
     // android 'name' filter is only available as of android sdk 33 (August 2022)
-    assert(!(Platform.isAndroid && withKeywords.isNotEmpty && hasOtherFilter),
+    assert(kIsWeb || !(Platform.isAndroid && withKeywords.isNotEmpty && hasOtherFilter),
         "withKeywords is not compatible with other filters on Android");
 
     // only allow a single task to call
@@ -401,7 +401,7 @@ class FlutterBluePlus {
   /// Request Bluetooth PHY support
   static Future<PhySupport> getPhySupport() async {
     // check android
-    if (Platform.isAndroid == false) {
+    if (kIsWeb || Platform.isAndroid == false) {
       throw FlutterBluePlusException(
           ErrorPlatform.fbp, "getPhySupport", FbpErrorCode.androidOnly.index, "android-only");
     }
@@ -417,7 +417,11 @@ class FlutterBluePlus {
     _initialized = true;
 
     // set platform method handler
-    _methodChannel.setMethodCallHandler(_methodCallHandler);
+    if (kIsWeb) {
+      FlutterBluePlusWeb.setMethodCallHandler(_methodCallHandler);
+    } else {
+      _methodChannel.setMethodCallHandler(_methodCallHandler);
+    }
 
     // flutter restart - wait for all devices to disconnect
     if ((await _methodChannel.invokeMethod('flutterRestart')) != 0) {
@@ -490,7 +494,7 @@ class FlutterBluePlus {
         // do not clear `bondState`, for faster performance.
 
         // autoconnect
-        if (Platform.isAndroid == false) {
+        if (kIsWeb || Platform.isAndroid == false) {
           if (_autoConnect.contains(r.remoteId)) {
             if (_adapterStateNow == BmAdapterStateEnum.on) {
               var d = BluetoothDevice(remoteId: r.remoteId);
@@ -508,7 +512,7 @@ class FlutterBluePlus {
     // keep track of device name
     if (call.method == "OnNameChanged") {
       var device = BmNameChanged.fromMap(call.arguments);
-      if (Platform.isMacOS || Platform.isIOS) {
+      if (!kIsWeb && (Platform.isMacOS || Platform.isIOS)) {
         // iOS & macOS internally use the name changed callback for the platform name
         _platformNames[device.remoteId] = device.name;
       }
@@ -606,7 +610,11 @@ class FlutterBluePlus {
       }
 
       // invoke
-      out = await _methodChannel.invokeMethod(method, arguments);
+      if (kIsWeb) {
+        out = await FlutterBluePlusWeb.invokeMethod(method, arguments);
+      } else {
+        out = await _methodChannel.invokeMethod(method, arguments);
+      }
 
       // log result
       if (logLevel == LogLevel.verbose) {
@@ -849,10 +857,13 @@ enum ErrorPlatform {
   fbp,
   android,
   apple,
+  web,
 }
 
 final ErrorPlatform _nativeError = (() {
-  if (Platform.isAndroid) {
+  if (kIsWeb) {
+    return ErrorPlatform.web;
+  } else if (Platform.isAndroid) {
     return ErrorPlatform.android;
   } else {
     return ErrorPlatform.apple;
