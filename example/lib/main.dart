@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
@@ -34,12 +35,14 @@ class _FlutterBlueAppState extends State<FlutterBlueApp> {
   @override
   void initState() {
     super.initState();
-    _adapterStateStateSubscription = FlutterBluePlus.adapterState.listen((state) {
-      _adapterState = state;
-      if (mounted) {
-        setState(() {});
-      }
-    });
+    if (!kIsWeb) {
+      _adapterStateStateSubscription = FlutterBluePlus.adapterState.listen((state) {
+        _adapterState = state;
+        if (mounted) {
+          setState(() {});
+        }
+      });
+    }
   }
 
   @override
@@ -50,7 +53,7 @@ class _FlutterBlueAppState extends State<FlutterBlueApp> {
 
   @override
   Widget build(BuildContext context) {
-    Widget screen = _adapterState == BluetoothAdapterState.on
+    Widget screen = kIsWeb || _adapterState == BluetoothAdapterState.on
         ? const ScanScreen()
         : BluetoothOffScreen(adapterState: _adapterState);
 
