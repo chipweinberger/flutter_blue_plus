@@ -424,13 +424,13 @@ class FlutterBluePlus {
       FlutterBluePlusWeb.setMethodCallHandler(_methodCallHandler);
     } else {
       _methodChannel.setMethodCallHandler(_methodCallHandler);
-    }
 
-    // flutter restart - wait for all devices to disconnect
-    if ((await _methodChannel.invokeMethod('flutterRestart')) != 0) {
-      await Future.delayed(Duration(milliseconds: 50));
-      while ((await _methodChannel.invokeMethod('connectedCount')) != 0) {
+      // flutter restart - wait for all devices to disconnect
+      if ((await _methodChannel.invokeMethod('flutterRestart')) != 0) {
         await Future.delayed(Duration(milliseconds: 50));
+        while ((await _methodChannel.invokeMethod('connectedCount')) != 0) {
+          await Future.delayed(Duration(milliseconds: 50));
+        }
       }
     }
   }
