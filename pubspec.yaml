@@ -4,7 +4,7 @@ version: 1.32.11
 homepage: https://github.com/boskokg/flutter_blue_plus
 
 environment:
-  sdk: "^3.4.0"
+  sdk: "^3.3.1"
   flutter: ">=2.5.0"
 
 dependencies:
