@@ -212,12 +212,6 @@ class FlutterBluePlusWeb {
       );
     } else if (method == 'stopScan') {
       // unsupported
-      throw FlutterBluePlusException(
-        ErrorPlatform.web,
-        'stopScan',
-        -1,
-        'not supported on web',
-      );
     } else if (method == 'getSystemDevices') {
       final JSArray<BluetoothDevice> devices;
       try {
