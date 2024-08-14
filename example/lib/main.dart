@@ -35,14 +35,12 @@ class _FlutterBlueAppState extends State<FlutterBlueApp> {
   @override
   void initState() {
     super.initState();
-    if (!kIsWeb) {
-      _adapterStateStateSubscription = FlutterBluePlus.adapterState.listen((state) {
-        _adapterState = state;
-        if (mounted) {
-          setState(() {});
-        }
-      });
-    }
+    _adapterStateStateSubscription = FlutterBluePlus.adapterState.listen((state) {
+      _adapterState = state;
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 
   @override
@@ -53,7 +51,7 @@ class _FlutterBlueAppState extends State<FlutterBlueApp> {
 
   @override
   Widget build(BuildContext context) {
-    Widget screen = kIsWeb || _adapterState == BluetoothAdapterState.on
+    Widget screen = _adapterState == BluetoothAdapterState.on
         ? const ScanScreen()
         : BluetoothOffScreen(adapterState: _adapterState);
 
