@@ -45,13 +45,13 @@ If you are new to Bluetooth, you should start by reading BLE tutorials.
 
 ## Cross-Platform Bluetooth Low Energy
 
-FlutterBluePlus supports nearly every feature on all supported platforms: iOS, macOS, Android and web.
+FlutterBluePlus supports nearly every feature on all supported platforms: iOS, macOS, Android and Web.
 
 FlutterBluePlus was written to be simple, robust, and easy to understand.
 
 ## No Dependencies
 
-FlutterBluePlus has zero dependencies besides Flutter, Android, iOS, macOS and web themselves.
+FlutterBluePlus has zero dependencies besides Flutter, Android, iOS, macOS and Web themselves.
 
 This makes FlutterBluePlus very stable, and easy to maintain.
 
@@ -571,7 +571,7 @@ Make sure you have granted access to the Bluetooth hardware:
 
 <img width="528" alt="Screenshot 2023-12-11 at 10 32 04 AM" src="https://github.com/boskokg/flutter_blue_plus/assets/1863934/554079ef-4627-4dfc-97e3-1f07f84a0f3c">
 
-### Enable the Bluetooth API
+### Enable the Bluetooth API for Web
 
 [chrome://flags/#enable-web-bluetooth](chrome://flags/#enable-web-bluetooth)
 
