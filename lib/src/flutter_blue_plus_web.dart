@@ -87,13 +87,18 @@ class FlutterBluePlusWeb {
         );
       }
     } else if (method == 'getAdapterState') {
-      // unsupported
-      throw FlutterBluePlusException(
-        ErrorPlatform.web,
-        'getAdapterState',
-        -1,
-        'not supported on web',
-      );
+      try {
+        return BmBluetoothAdapterState(
+          adapterState: BmAdapterStateEnum.on,
+        ).toMap();
+      } catch (e) {
+        throw FlutterBluePlusException(
+          ErrorPlatform.web,
+          'getAdapterState',
+          -1,
+          e.toString(),
+        );
+      }
     } else if (method == 'turnOn') {
       // unsupported
       throw FlutterBluePlusException(
