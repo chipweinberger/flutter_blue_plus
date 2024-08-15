@@ -177,7 +177,7 @@ class FlutterBluePlus {
         _platformNames[device.remoteId] = device.platformName!;
       }
     }
-    return r.devices.map((d) => BluetoothDevice.fromProto(d)).toList();
+    return r.devices.map((d) => BluetoothDevice.fromId(d.remoteId.str)).toList();
   }
 
   /// Retrieve a list of bonded devices (Android only)
@@ -189,7 +189,7 @@ class FlutterBluePlus {
         _platformNames[device.remoteId] = device.platformName!;
       }
     }
-    return r.devices.map((d) => BluetoothDevice.fromProto(d)).toList();
+    return r.devices.map((d) => BluetoothDevice.fromId(d.remoteId.str)).toList();
   }
 
   /// Start a scan, and return a stream of results

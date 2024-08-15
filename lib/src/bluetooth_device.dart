@@ -11,8 +11,6 @@ class BluetoothDevice {
     required this.remoteId,
   });
 
-  BluetoothDevice.fromProto(BmBluetoothDevice p) : remoteId = p.remoteId;
-
   /// Create a device from an id
   ///   - to connect, this device must have been discovered by your app in a previous scan
   ///   - iOS uses 128-bit uuids the remoteId, e.g. e006b3a7-ef7b-4980-a668-1f8005f84383
@@ -753,4 +751,7 @@ class BluetoothDevice {
   Stream<List<BluetoothService>> get services async* {
     yield [];
   }
+
+  @Deprecated('Use fromId instead')
+  BluetoothDevice.fromProto(BmBluetoothDevice p) : remoteId = p.remoteId;
 }
