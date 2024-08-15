@@ -417,12 +417,16 @@ class FlutterBluePlus {
     _initialized = true;
 
     // set platform method handler
-    _methodChannel.setMethodCallHandler(_methodCallHandler);
+    if (Platform.isLinux) {
+      FlutterBluePlusLinux.setMethodCallHandler(_methodCallHandler);
+    } else {
+      _methodChannel.setMethodCallHandler(_methodCallHandler);
+    }
 
     // flutter restart - wait for all devices to disconnect
-    if ((await _methodChannel.invokeMethod('flutterRestart')) != 0) {
+    if ((await _invokeMethod('flutterRestart')) != 0) {
       await Future.delayed(Duration(milliseconds: 50));
-      while ((await _methodChannel.invokeMethod('connectedCount')) != 0) {
+      while ((await _invokeMethod('connectedCount')) != 0) {
         await Future.delayed(Duration(milliseconds: 50));
       }
     }
@@ -606,7 +610,11 @@ class FlutterBluePlus {
       }
 
       // invoke
-      out = await _methodChannel.invokeMethod(method, arguments);
+      if (Platform.isLinux) {
+        out = await FlutterBluePlusLinux.invokeMethod(method, arguments);
+      } else {
+        out = await _methodChannel.invokeMethod(method, arguments);
+      }
 
       // log result
       if (logLevel == LogLevel.verbose) {
@@ -849,11 +857,14 @@ enum ErrorPlatform {
   fbp,
   android,
   apple,
+  linux,
 }
 
 final ErrorPlatform _nativeError = (() {
   if (Platform.isAndroid) {
     return ErrorPlatform.android;
+  } else if (Platform.isLinux) {
+    return ErrorPlatform.linux;
   } else {
     return ErrorPlatform.apple;
   }
