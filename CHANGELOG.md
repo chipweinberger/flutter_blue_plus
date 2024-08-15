@@ -1,3 +1,8 @@
+
+## 1.32.12
+* **[Fix]** Android: further improve `disconnect(queue:false)` reliability
+* **[Deprecate]** deprecate BluetoothDevice.fromProto(...)
+
 ## 1.32.11
 * **[Improve]** Android: perf: speed up `bytesToHex`
 
