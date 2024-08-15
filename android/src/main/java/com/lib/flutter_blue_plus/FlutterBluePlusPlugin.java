@@ -2111,8 +2111,8 @@ public class FlutterBluePlusPlugin implements
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState)
         {
             try {
-                // Prevent both gatt callback and method call handler threads from operating on the
-                // same gatt device or shared memory concurrently.
+                // Prevent callback thread & method call thread from writing to
+                // mConnectedDevices & mCurrentlyConnectingDevices concurrently.
                 acquireMutex(mMethodCallMutex);
 
                 log(LogLevel.DEBUG, "onConnectionStateChange:" + connectionStateString(newState));
@@ -2128,10 +2128,8 @@ public class FlutterBluePlusPlugin implements
 
                 String remoteId = gatt.getDevice().getAddress();
 
-                boolean unexpectedEvent = handleUnexpectedConnectionEvents(gatt, newState, remoteId);
-                if (unexpectedEvent == true) {
-                    // This is an unexpected connection disconnection event, do not accept it.
-                    // Also do not notify OnConnectionStateChanged.
+                // edge case. see function for details
+                if (handleUnexpectedConnectionEvents(gatt, newState, remoteId)) {
                     return;
                 }
 
@@ -2183,17 +2181,16 @@ public class FlutterBluePlusPlugin implements
             }
         }
 
+        // Android has an annoying edge case. If disconnect is called right as the connection is being
+        // established, Android sometimes ignores the request to disconnect and completes the connection
+        // anyway. To handle this case, we make sure the device is still in our currently connecting
+        // devices map, otherwise kill the connection since the user was not expecting it to connect.
         private boolean handleUnexpectedConnectionEvents(BluetoothGatt gatt, int newState, String remoteId)
         {
             boolean unexpectedEvent = false;
             if (newState == BluetoothProfile.STATE_CONNECTED) {
-
-                // Android has an annoying edge case. If disconnect is called right when the connection is being
-                // established, Android sometimes ignores the request to disconnect and completes the connection
-                // anyway. To handle this case, we make sure the device is still in our currently connecting
-                // devices, otherwise kill the connection since the user was not expecting it to connect.
                 if (mCurrentlyConnectingDevices.get(remoteId) == null && mAutoConnected.get(remoteId) == null) {
-                    log(LogLevel.DEBUG, "keeping device disconnected, disconnecting now");
+                    log(LogLevel.DEBUG, "[unexpected connection] disconnecting now");
 
                     // this is an unexpected connection
                     unexpectedEvent = true;
@@ -2214,7 +2211,10 @@ public class FlutterBluePlusPlugin implements
                 if (mCurrentlyConnectingDevices.get(remoteId) == null &&
                     mConnectedDevices.get(remoteId) == null &&
                     mAutoConnected.get(remoteId) == null) {
-                    // we have no record of this device, mark this is an unexpected disconnect event
+
+                    log(LogLevel.DEBUG, "[unexpected connection] disconnect complete");
+
+                    // we have no record of this device, mark this is an unexpected event
                     unexpectedEvent = true;
 
                     // remove from currently bonding devices
