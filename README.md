@@ -55,6 +55,14 @@ FlutterBluePlus has zero dependencies besides Flutter, Android, iOS, and macOS t
 
 This makes FlutterBluePlus very stable, and easy to maintain.
 
+## Other BLE Libraries
+
+These other libraries are worth considering. They support all platforms, but fewer features.
+
+[bluetooth_low_energy](https://pub.dev/packages/bluetooth_low_energy)
+[universal_ble](https://pub.dev/packages/universal_ble)
+[quick_blue](https://pub.dev/packages/quick_blue)
+
 ## ⭐ Stars ⭐
 
 Please star this repo & on [pub.dev](https://pub.dev/packages/flutter_blue_plus). We all benefit from having a larger community.
