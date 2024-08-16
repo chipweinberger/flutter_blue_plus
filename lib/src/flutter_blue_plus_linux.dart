@@ -309,17 +309,18 @@ class FlutterBluePlusLinux {
 
       await _scan?.cancel();
     } else if (method == 'getSystemDevices') {
+      final devices = <BmBluetoothDevice>[];
       try {
-        return BmDevicesList(
-          devices: _client.devices.map(
-            (device) {
-              return BmBluetoothDevice(
-                remoteId: DeviceIdentifier(device.address),
-                platformName: device.name,
-              );
-            },
-          ).toList(),
-        ).toMap();
+        for (final device in _client.devices) {
+          _devices[DeviceIdentifier(device.address)] = device;
+
+          devices.add(
+            BmBluetoothDevice(
+              remoteId: DeviceIdentifier(device.address),
+              platformName: device.name,
+            ),
+          );
+        }
       } catch (e) {
         throw FlutterBluePlusException(
           ErrorPlatform.linux,
@@ -328,6 +329,17 @@ class FlutterBluePlusLinux {
           e.toString(),
         );
       }
+
+      return BmDevicesList(
+        devices: _client.devices.map(
+          (device) {
+            return BmBluetoothDevice(
+              remoteId: DeviceIdentifier(device.address),
+              platformName: device.name,
+            );
+          },
+        ).toList(),
+      ).toMap();
     } else if (method == 'connect') {
       final request = BmConnectRequest.fromMap(arguments);
 
