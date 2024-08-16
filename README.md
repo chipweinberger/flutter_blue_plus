@@ -59,9 +59,9 @@ This makes FlutterBluePlus very stable, and easy to maintain.
 
 These other libraries are worth considering. They support all platforms, but fewer features.
 
-[bluetooth_low_energy](https://pub.dev/packages/bluetooth_low_energy)
-[universal_ble](https://pub.dev/packages/universal_ble)
-[quick_blue](https://pub.dev/packages/quick_blue)
+- [bluetooth_low_energy](https://pub.dev/packages/bluetooth_low_energy)
+- [universal_ble](https://pub.dev/packages/universal_ble)
+- [quick_blue](https://pub.dev/packages/quick_blue)
 
 ## ⭐ Stars ⭐
 
