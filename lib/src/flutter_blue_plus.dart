@@ -395,7 +395,10 @@ class FlutterBluePlus {
   static Future<void> setLogLevel(LogLevel level, {color = true}) async {
     _logLevel = level;
     _logColor = color;
-    await _invokeMethod('setLogLevel', level.index);
+
+    if (!Platform.isLinux) {
+      await _invokeMethod('setLogLevel', level.index);
+    }
   }
 
   /// Request Bluetooth PHY support
