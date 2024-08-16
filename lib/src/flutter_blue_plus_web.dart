@@ -256,6 +256,8 @@ class FlutterBluePlusWeb {
           ).toMap(),
         ),
       );
+
+      return true;
     } else if (method == 'disconnect') {
       final remoteId = DeviceIdentifier(arguments as String);
 
@@ -272,6 +274,8 @@ class FlutterBluePlusWeb {
           ).toMap(),
         ),
       );
+
+      return true;
     } else if (method == 'discoverServices') {
       final remoteId = DeviceIdentifier(arguments as String);
 
