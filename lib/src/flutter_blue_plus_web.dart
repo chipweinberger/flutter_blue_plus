@@ -231,14 +231,16 @@ class FlutterBluePlusWeb {
       }
 
       return BmDevicesList(
-        devices: devices.toDart
-            .map(
-              (device) => BmBluetoothDevice(
-                remoteId: DeviceIdentifier(device.id.toDart),
-                platformName: device.name?.toDart,
-              ),
-            )
-            .toList(),
+        devices: devices.toDart.map(
+          (device) {
+            _devices[DeviceIdentifier(device.id.toDart)] = device;
+
+            return BmBluetoothDevice(
+              remoteId: DeviceIdentifier(device.id.toDart),
+              platformName: device.name?.toDart,
+            );
+          },
+        ).toList(),
       ).toMap();
     } else if (method == 'connect') {
       final request = BmConnectRequest.fromMap(arguments);
