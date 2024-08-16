@@ -353,6 +353,8 @@ class FlutterBluePlusLinux {
           ).toMap(),
         ),
       );
+
+      return true;
     } else if (method == 'disconnect') {
       final remoteId = DeviceIdentifier(arguments as String);
 
@@ -378,6 +380,8 @@ class FlutterBluePlusLinux {
           ).toMap(),
         ),
       );
+
+      return true;
     } else if (method == 'discoverServices') {
       final remoteId = DeviceIdentifier(arguments as String);
 
