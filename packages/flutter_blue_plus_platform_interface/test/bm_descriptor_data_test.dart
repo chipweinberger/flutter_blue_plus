@@ -12,11 +12,12 @@ void main() {
             'deserializes the secondary service uuid property as [0x01,0x02] if it is 0102',
             () {
               expect(
-                BmCharacteristicData.fromMap({
+                BmDescriptorData.fromMap({
                   'remote_id': '',
                   'service_uuid': '0102',
                   'secondary_service_uuid': '0102',
                   'characteristic_uuid': '0102',
+                  'descriptor_uuid': '0102',
                   'value': '',
                   'success': 1,
                   'error_code': 0,
@@ -34,11 +35,12 @@ void main() {
             'deserializes the secondary service uuid property as null if it is null',
             () {
               expect(
-                BmCharacteristicData.fromMap({
+                BmDescriptorData.fromMap({
                   'remote_id': '',
                   'service_uuid': '0102',
                   'secondary_service_uuid': null,
                   'characteristic_uuid': '0102',
+                  'descriptor_uuid': '0102',
                   'value': '',
                   'success': 1,
                   'error_code': 0,
@@ -53,11 +55,12 @@ void main() {
             'deserializes the success property as false if it is 0',
             () {
               expect(
-                BmCharacteristicData.fromMap({
+                BmDescriptorData.fromMap({
                   'remote_id': '',
                   'service_uuid': '0102',
                   'secondary_service_uuid': null,
                   'characteristic_uuid': '0102',
+                  'descriptor_uuid': '0102',
                   'value': '',
                   'success': 0,
                   'error_code': 0,
@@ -72,11 +75,12 @@ void main() {
             'deserializes the success property as true if it is null',
             () {
               expect(
-                BmCharacteristicData.fromMap({
+                BmDescriptorData.fromMap({
                   'remote_id': '',
                   'service_uuid': '0102',
                   'secondary_service_uuid': null,
                   'characteristic_uuid': '0102',
+                  'descriptor_uuid': '0102',
                   'value': '',
                   'success': null,
                   'error_code': 0,
@@ -91,11 +95,12 @@ void main() {
             'deserializes the success property as true if it is not 0',
             () {
               expect(
-                BmCharacteristicData.fromMap({
+                BmDescriptorData.fromMap({
                   'remote_id': '',
                   'service_uuid': '0102',
                   'secondary_service_uuid': null,
                   'characteristic_uuid': '0102',
+                  'descriptor_uuid': '0102',
                   'value': '',
                   'success': 1,
                   'error_code': 0,
@@ -110,11 +115,12 @@ void main() {
             'deserializes the value property as [0x01,0x02] if it is 0102',
             () {
               expect(
-                BmCharacteristicData.fromMap({
+                BmDescriptorData.fromMap({
                   'remote_id': '',
                   'service_uuid': '0102',
                   'secondary_service_uuid': '0102',
                   'characteristic_uuid': '0102',
+                  'descriptor_uuid': '0102',
                   'value': '0102',
                   'success': 1,
                   'error_code': 0,
@@ -132,11 +138,12 @@ void main() {
             'deserializes the value property as [] if it is null',
             () {
               expect(
-                BmCharacteristicData.fromMap({
+                BmDescriptorData.fromMap({
                   'remote_id': '',
                   'service_uuid': '0102',
                   'secondary_service_uuid': null,
                   'characteristic_uuid': '0102',
+                  'descriptor_uuid': '0102',
                   'value': null,
                   'success': 1,
                   'error_code': 0,
