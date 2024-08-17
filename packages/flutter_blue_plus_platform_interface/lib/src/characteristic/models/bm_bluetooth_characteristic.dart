@@ -14,7 +14,7 @@ class BmBluetoothCharacteristic {
   BmBluetoothCharacteristic({
     required this.remoteId,
     required this.serviceUuid,
-    required this.secondaryServiceUuid,
+    this.secondaryServiceUuid,
     required this.characteristicUuid,
     required this.descriptors,
     required this.properties,

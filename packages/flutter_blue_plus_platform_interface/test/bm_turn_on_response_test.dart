@@ -9,13 +9,25 @@ void main() {
         'fromMap',
         () {
           test(
-            'initializes the user accepted property as false if the user accepted property is null',
+            'deserializes the user accepted property as false if the user accepted property is null',
             () {
               expect(
                 BmTurnOnResponse.fromMap({
                   'user_accepted': null,
                 }).userAccepted,
                 isFalse,
+              );
+            },
+          );
+
+          test(
+            'deserializes the user accepted property as true if the user accepted property is true',
+            () {
+              expect(
+                BmTurnOnResponse.fromMap({
+                  'user_accepted': true,
+                }).userAccepted,
+                isTrue,
               );
             },
           );
