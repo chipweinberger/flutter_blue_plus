@@ -24,8 +24,8 @@ class BmDiscoverServicesResult {
     return BmDiscoverServicesResult(
       remoteId: DeviceIdentifier(json['remote_id']),
       services: (json['services'] as List<dynamic>?)
-              ?.map(
-                  (e) => BmBluetoothService.fromMap(e as Map<dynamic, dynamic>))
+              ?.map((service) =>
+                  BmBluetoothService.fromMap(service as Map<dynamic, dynamic>))
               .toList() ??
           [],
       success: success,

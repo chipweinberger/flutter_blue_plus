@@ -37,9 +37,11 @@ class BmScanSettings {
               ?.map((str) => Guid(str))
               .toList() ??
           [],
-      withRemoteIds: json['with_remote_ids'],
-      withNames: json['with_names'],
-      withKeywords: json['with_keywords'],
+      withRemoteIds:
+          (json['with_remote_ids'] as List<dynamic>?)?.cast<String>() ?? [],
+      withNames: (json['with_names'] as List<dynamic>?)?.cast<String>() ?? [],
+      withKeywords:
+          (json['with_keywords'] as List<dynamic>?)?.cast<String>() ?? [],
       withMsd: (json['with_msd'] as List<dynamic>?)
               ?.map((manufacturerData) => BmMsdFilter.fromMap(manufacturerData))
               .toList() ??

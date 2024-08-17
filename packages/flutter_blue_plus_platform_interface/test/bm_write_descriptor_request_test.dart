@@ -46,7 +46,7 @@ void main() {
           );
 
           test(
-            'deserializes the value property as [0x01,0x02] if it is 0102',
+            'deserializes the value property as [0x01,0x02,0x03] if it is 010203',
             () {
               expect(
                 BmWriteDescriptorRequest.fromMap({
@@ -55,11 +55,12 @@ void main() {
                   'secondary_service_uuid': '0102',
                   'characteristic_uuid': '0102',
                   'descriptor_uuid': '0102',
-                  'value': '0102',
+                  'value': '010203',
                 }).value,
                 orderedEquals([
                   0x01,
                   0x02,
+                  0x03,
                 ]),
               );
             },
@@ -77,7 +78,7 @@ void main() {
                   'descriptor_uuid': '0102',
                   'value': null,
                 }).value,
-                orderedEquals([]),
+                isEmpty,
               );
             },
           );

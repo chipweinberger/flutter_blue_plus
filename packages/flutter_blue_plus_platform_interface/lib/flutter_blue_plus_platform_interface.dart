@@ -15,3 +15,8 @@ export 'src/descriptor/models/bm_descriptor_data.dart';
 export 'src/descriptor/models/bm_read_descriptor_request.dart';
 export 'src/descriptor/models/bm_write_descriptor_request.dart';
 export 'src/flutter_blue_plus_platform.dart';
+export 'src/scan/models/bm_msd_filter.dart';
+export 'src/scan/models/bm_scan_advertisement.dart';
+export 'src/scan/models/bm_scan_response.dart';
+export 'src/scan/models/bm_scan_settings.dart';
+export 'src/scan/models/bm_service_data_filter.dart';
