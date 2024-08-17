@@ -21,8 +21,8 @@ class BmBluetoothService {
     Map<dynamic, dynamic> json,
   ) {
     return BmBluetoothService(
-      serviceUuid: Guid(json['service_uuid']),
       remoteId: DeviceIdentifier(json['remote_id']),
+      serviceUuid: Guid(json['service_uuid']),
       isPrimary: json['is_primary'] == 1,
       characteristics: (json['characteristics'] as List<dynamic>?)
               ?.map((characteristic) =>

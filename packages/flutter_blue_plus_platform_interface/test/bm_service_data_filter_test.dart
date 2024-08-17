@@ -23,7 +23,7 @@ void main() {
           );
 
           test(
-            'deserializes the data property as [0x01,0x02,0x03] if it is 010203',
+            'deserializes the data property',
             () {
               expect(
                 BmServiceDataFilter.fromMap({
@@ -55,7 +55,7 @@ void main() {
           );
 
           test(
-            'deserializes the mask property as [0x01,0x02,0x03] if it is 010203',
+            'deserializes the mask property',
             () {
               expect(
                 BmServiceDataFilter.fromMap({

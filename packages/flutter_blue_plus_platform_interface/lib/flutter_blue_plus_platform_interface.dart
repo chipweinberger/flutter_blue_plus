@@ -20,3 +20,5 @@ export 'src/scan/models/bm_scan_advertisement.dart';
 export 'src/scan/models/bm_scan_response.dart';
 export 'src/scan/models/bm_scan_settings.dart';
 export 'src/scan/models/bm_service_data_filter.dart';
+export 'src/service/models/bm_bluetooth_service.dart';
+export 'src/service/models/bm_discover_services_result.dart';

@@ -107,7 +107,7 @@ void main() {
           );
 
           test(
-            'deserializes the value property as [0x01,0x02,0x03] if it is 010203',
+            'deserializes the value property',
             () {
               expect(
                 BmCharacteristicData.fromMap({
