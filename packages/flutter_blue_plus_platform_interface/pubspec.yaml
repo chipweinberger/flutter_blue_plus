@@ -1,0 +1,17 @@
+name: flutter_blue_plus_platform_interface
+description: A common platform interface for the flutter_blue_plus plugin.
+version: 0.0.0
+homepage: https://github.com/boskokg/flutter_blue_plus
+
+environment:
+  sdk: ">=2.12.0 <4.0.0"
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  plugin_platform_interface: ^2.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
