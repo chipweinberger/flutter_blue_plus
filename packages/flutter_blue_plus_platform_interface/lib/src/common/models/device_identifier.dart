@@ -13,13 +13,13 @@ class DeviceIdentifier {
     return str.toLowerCase().hashCode;
   }
 
-  @override
-  bool operator ==(other) {
-    return other is DeviceIdentifier && hashCode == other.hashCode;
-  }
-
   @Deprecated('Use str instead')
   String get id {
     return str;
+  }
+
+  @override
+  bool operator ==(other) {
+    return other is DeviceIdentifier && hashCode == other.hashCode;
   }
 }
