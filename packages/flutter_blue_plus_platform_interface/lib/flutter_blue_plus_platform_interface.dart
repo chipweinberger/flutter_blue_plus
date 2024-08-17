@@ -10,6 +10,7 @@ export 'src/characteristic/models/bm_set_notify_value_request.dart';
 export 'src/characteristic/models/bm_write_characteristic_request.dart';
 export 'src/common/models/device_identifier.dart';
 export 'src/common/models/guid.dart';
+export 'src/common/models/phy_support.dart';
 export 'src/descriptor/models/bm_bluetooth_descriptor.dart';
 export 'src/descriptor/models/bm_descriptor_data.dart';
 export 'src/descriptor/models/bm_read_descriptor_request.dart';
