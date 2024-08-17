@@ -4,6 +4,9 @@ import 'adapter/models/bm_bluetooth_adapter_state.dart';
 import 'characteristic/models/bm_read_characteristic_request.dart';
 import 'characteristic/models/bm_set_notify_value_request.dart';
 import 'characteristic/models/bm_write_characteristic_request.dart';
+import 'common/enums/log_level.dart';
+import 'common/models/device_identifier.dart';
+import 'common/models/options.dart';
 import 'common/models/phy_support.dart';
 import 'descriptor/models/bm_read_descriptor_request.dart';
 import 'descriptor/models/bm_write_descriptor_request.dart';
@@ -36,9 +39,9 @@ abstract class FlutterBluePlusPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  /// Clears the GATT cache for a [remoteId].
+  /// Clears the GATT cache for a [device].
   Future<void> clearGattCache(
-    String remoteId,
+    DeviceIdentifier device,
   ) {
     throw UnimplementedError();
   }
@@ -59,33 +62,33 @@ abstract class FlutterBluePlusPlatform extends PlatformInterface {
     throw UnimplementedError();
   }
 
-  /// Creates a bond to a [remoteId].
+  /// Creates a bond to a [device].
   ///
   /// Returns [true] if the bond state is changed.
   ///
   /// Implementations should call [OnBondStateChanged] with the changed bond state.
   Future<bool> createBond(
-    String remoteId,
+    DeviceIdentifier device,
   ) {
     throw UnimplementedError();
   }
 
-  /// Disconnects from a [remoteId].
+  /// Disconnects from a [device].
   ///
   /// Returns [true] if the connection state is changed.
   ///
   /// Implementations should call [OnConnectionStateChanged] with the changed connection state.
   Future<bool> disconnect(
-    String remoteId,
+    DeviceIdentifier device,
   ) {
     throw UnimplementedError();
   }
 
-  /// Discovers the services for a [remoteId].
+  /// Discovers the services for a [device].
   ///
   /// Implementations should call [OnDiscoveredServices] with the discovered services.
   Future<void> discoverServices(
-    String remoteId,
+    DeviceIdentifier device,
   ) {
     throw UnimplementedError();
   }
@@ -105,9 +108,9 @@ abstract class FlutterBluePlusPlatform extends PlatformInterface {
     throw UnimplementedError();
   }
 
-  /// Returns the bond state for a [remoteId].
+  /// Returns the bond state for a [device].
   Future<BmBondStateResponse> getBondState(
-    String remoteId,
+    DeviceIdentifier device,
   ) {
     throw UnimplementedError();
   }
@@ -150,22 +153,22 @@ abstract class FlutterBluePlusPlatform extends PlatformInterface {
     throw UnimplementedError();
   }
 
-  /// Reads the Received Signal Strength Indicator (RSSI) for a [remoteId].
+  /// Reads the Received Signal Strength Indicator (RSSI) for a [device].
   ///
   /// Implementations should call [OnReadRssi] with the read RSSI.
   Future<void> readRssi(
-    String remoteId,
+    DeviceIdentifier device,
   ) {
     throw UnimplementedError();
   }
 
-  /// Removes the bond to a [remoteId].
+  /// Removes the bond to a [device].
   ///
   /// Returns [true] if the bond state is changed.
   ///
   /// Implementations should call [OnBondStateChanged] with the changed bond state.
   Future<bool> removeBond(
-    String remoteId,
+    DeviceIdentifier device,
   ) {
     throw UnimplementedError();
   }
@@ -188,7 +191,7 @@ abstract class FlutterBluePlusPlatform extends PlatformInterface {
 
   /// Sets the log level.
   Future<void> setLogLevel(
-    int level,
+    LogLevel level,
   ) {
     throw UnimplementedError();
   }
@@ -206,7 +209,7 @@ abstract class FlutterBluePlusPlatform extends PlatformInterface {
 
   /// Sets the options.
   Future<void> setOptions(
-    Map<dynamic, dynamic> options,
+    Options options,
   ) {
     throw UnimplementedError();
   }
