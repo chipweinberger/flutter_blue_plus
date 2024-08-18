@@ -1,6 +1,8 @@
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'adapter/models/bm_bluetooth_adapter_state.dart';
+import 'adapter/models/bm_turn_on_response.dart';
+import 'characteristic/models/bm_characteristic_data.dart';
 import 'characteristic/models/bm_read_characteristic_request.dart';
 import 'characteristic/models/bm_set_notify_value_request.dart';
 import 'characteristic/models/bm_write_characteristic_request.dart';
@@ -8,38 +10,124 @@ import 'common/enums/log_level.dart';
 import 'common/models/device_identifier.dart';
 import 'common/models/options.dart';
 import 'common/models/phy_support.dart';
+import 'descriptor/models/bm_descriptor_data.dart';
 import 'descriptor/models/bm_read_descriptor_request.dart';
 import 'descriptor/models/bm_write_descriptor_request.dart';
+import 'device/models/bm_bluetooth_device.dart';
 import 'device/models/bm_bond_state_response.dart';
 import 'device/models/bm_connect_request.dart';
 import 'device/models/bm_connection_priority_request.dart';
+import 'device/models/bm_connection_state_response.dart';
 import 'device/models/bm_devices_list.dart';
 import 'device/models/bm_mtu_change_request.dart';
+import 'device/models/bm_mtu_changed_response.dart';
+import 'device/models/bm_name_changed.dart';
 import 'device/models/bm_preferred_phy.dart';
+import 'device/models/bm_read_rssi_result.dart';
 import 'method_channel_flutter_blue_plus.dart';
+import 'scan/models/bm_scan_response.dart';
 import 'scan/models/bm_scan_settings.dart';
+import 'service/models/bm_discover_services_result.dart';
 
 /// The interface that implementations of flutter_blue_plus must implement.
 abstract class FlutterBluePlusPlatform extends PlatformInterface {
-  FlutterBluePlusPlatform() : super(token: _token);
-
   static final _token = Object();
 
   static FlutterBluePlusPlatform _instance = MethodChannelFlutterBluePlus();
 
+  FlutterBluePlusPlatform() : super(token: _token);
+
   /// The default instance of [FlutterBluePlusPlatform] to use.
   ///
   /// Defaults to [MethodChannelFlutterBluePlus].
-  static FlutterBluePlusPlatform get instance => _instance;
+  static FlutterBluePlusPlatform get instance {
+    return _instance;
+  }
 
-  /// Platform-specific plugins should set this with their own platform-specific
-  /// class that extends [FlutterBluePlusPlatform] when they register themselves.
-  static set instance(FlutterBluePlusPlatform instance) {
+  /// Platform-specific plugins should set this with their own platform-specific class that extends [FlutterBluePlusPlatform] when they register themselves.
+  static set instance(
+    FlutterBluePlusPlatform instance,
+  ) {
     PlatformInterface.verify(instance, _token);
     _instance = instance;
   }
 
-  /// Clears the GATT cache for a [remoteId].
+  /// Returns a stream of adapter state changed events.
+  Stream<BmBluetoothAdapterState> get onAdapterStateChanged {
+    throw UnimplementedError();
+  }
+
+  /// Returns a stream of bond state changed events.
+  Stream<BmBondStateResponse> get onBondStateChanged {
+    throw UnimplementedError();
+  }
+
+  /// Returns a stream of characteristic received (notified or read) events.
+  Stream<BmCharacteristicData> get onCharacteristicReceived {
+    throw UnimplementedError();
+  }
+
+  /// Returns a stream of characteristic written events.
+  Stream<BmCharacteristicData> get onCharacteristicWritten {
+    throw UnimplementedError();
+  }
+
+  /// Returns a stream of connection state changed events.
+  Stream<BmConnectionStateResponse> get onConnectionStateChanged {
+    throw UnimplementedError();
+  }
+
+  /// Returns a stream of descriptor read events.
+  Stream<BmDescriptorData> get onDescriptorRead {
+    throw UnimplementedError();
+  }
+
+  /// Returns a stream of descriptor written events.
+  Stream<BmDescriptorData> get onDescriptorWritten {
+    throw UnimplementedError();
+  }
+
+  /// Returns a stream of detached from engine events.
+  Stream<void> get onDetachedFromEngine {
+    throw UnimplementedError();
+  }
+
+  /// Returns a stream of discovered services events.
+  Stream<BmDiscoverServicesResult> get onDiscoveredServices {
+    throw UnimplementedError();
+  }
+
+  /// Returns a stream of Maximum Transmission Unit (MTU) changed events.
+  Stream<BmMtuChangedResponse> get onMtuChanged {
+    throw UnimplementedError();
+  }
+
+  /// Returns a stream of name changed events.
+  Stream<BmNameChanged> get onNameChanged {
+    throw UnimplementedError();
+  }
+
+  /// Returns a stream of Received Signal Strength Indicator (RSSI) read events.
+  Stream<BmReadRssiResult> get onReadRssi {
+    throw UnimplementedError();
+  }
+
+  /// Returns a stream of scan response events.
+  Stream<BmScanResponse> get onScanResponse {
+    throw UnimplementedError();
+  }
+
+  /// Returns a stream of services reset events.
+  Stream<BmBluetoothDevice> get onServicesReset {
+    throw UnimplementedError();
+  }
+
+  /// Returns a stream of turn on response events.
+  Stream<BmTurnOnResponse> get onTurnOnResponse {
+    throw UnimplementedError();
+  }
+
+  /// Clears the Generic Attribute Profile (GATT) cache for a [remoteId].
   Future<void> clearGattCache(
     DeviceIdentifier remoteId,
   ) {
@@ -50,7 +138,7 @@ abstract class FlutterBluePlusPlatform extends PlatformInterface {
   ///
   /// Returns [true] if the connection state is changed.
   ///
-  /// Implementations should call [OnConnectionStateChanged] with the changed connection state.
+  /// Implementations should add an event to the [onConnectionStateChanged] stream with the changed connection state.
   Future<bool> connect(
     BmConnectRequest request,
   ) {
@@ -66,7 +154,7 @@ abstract class FlutterBluePlusPlatform extends PlatformInterface {
   ///
   /// Returns [true] if the bond state is changed.
   ///
-  /// Implementations should call [OnBondStateChanged] with the changed bond state.
+  /// Implementations should add an event to the [onBondStateChanged] stream with the changed bond state.
   Future<bool> createBond(
     DeviceIdentifier remoteId,
   ) {
@@ -77,7 +165,7 @@ abstract class FlutterBluePlusPlatform extends PlatformInterface {
   ///
   /// Returns [true] if the connection state is changed.
   ///
-  /// Implementations should call [OnConnectionStateChanged] with the changed connection state.
+  /// Implementations should add an event to the [onConnectionStateChanged] stream with the changed connection state.
   Future<bool> disconnect(
     DeviceIdentifier remoteId,
   ) {
@@ -86,7 +174,7 @@ abstract class FlutterBluePlusPlatform extends PlatformInterface {
 
   /// Discovers the services for a [remoteId].
   ///
-  /// Implementations should call [OnDiscoveredServices] with the discovered services.
+  /// Implementations should add an event to the [onDiscoveredServices] stream with the discovered services.
   Future<void> discoverServices(
     DeviceIdentifier remoteId,
   ) {
@@ -137,7 +225,7 @@ abstract class FlutterBluePlusPlatform extends PlatformInterface {
 
   /// Reads the characteristic for a [request].
   ///
-  /// Implementations should call [OnCharacteristicReceived] with the read characteristic.
+  /// Implementations should add an event to the [onCharacteristicReceived] stream with the read characteristic.
   Future<void> readCharacteristic(
     BmReadCharacteristicRequest request,
   ) {
@@ -146,7 +234,7 @@ abstract class FlutterBluePlusPlatform extends PlatformInterface {
 
   /// Reads the descriptor for a [request].
   ///
-  /// Implementations should call [OnDescriptorRead] with the read descriptor.
+  /// Implementations should add an event to the [onDescriptorRead] stream with the read descriptor.
   Future<void> readDescriptor(
     BmReadDescriptorRequest request,
   ) {
@@ -155,7 +243,7 @@ abstract class FlutterBluePlusPlatform extends PlatformInterface {
 
   /// Reads the Received Signal Strength Indicator (RSSI) for a [remoteId].
   ///
-  /// Implementations should call [OnReadRssi] with the read RSSI.
+  /// Implementations should add an event to the [onReadRssi] stream with the read RSSI.
   Future<void> readRssi(
     DeviceIdentifier remoteId,
   ) {
@@ -166,7 +254,7 @@ abstract class FlutterBluePlusPlatform extends PlatformInterface {
   ///
   /// Returns [true] if the bond state is changed.
   ///
-  /// Implementations should call [OnBondStateChanged] with the changed bond state.
+  /// Implementations should add an event to the [onBondStateChanged] stream with the changed bond state.
   Future<bool> removeBond(
     DeviceIdentifier remoteId,
   ) {
@@ -182,7 +270,7 @@ abstract class FlutterBluePlusPlatform extends PlatformInterface {
 
   /// Requests a change to the Maximum Transmission Unit (MTU) for a [request].
   ///
-  /// Implementations should call [OnMtuChanged] with the changed MTU.
+  /// Implementations should add an event to the [onMtuChanged] stream with the changed MTU.
   Future<void> requestMtu(
     BmMtuChangeRequest request,
   ) {
@@ -200,7 +288,7 @@ abstract class FlutterBluePlusPlatform extends PlatformInterface {
   ///
   /// Returns [true] if the characteristic has a Client Characteristic Configuration Descriptor (CCCD).
   ///
-  /// Implementations should call [OnDescriptorWritten] with the written CCCD.
+  /// Implementations should add an event to the [onDescriptorWritten] stream with the written CCCD.
   Future<bool> setNotifyValue(
     BmSetNotifyValueRequest request,
   ) {
@@ -223,7 +311,7 @@ abstract class FlutterBluePlusPlatform extends PlatformInterface {
 
   /// Starts scanning for devices.
   ///
-  /// Implementations should call [OnScanResponse] for each scanned device.
+  /// Implementations should add an event to the [onScanResponse] stream for each scanned device.
   Future<void> startScan(
     BmScanSettings settings,
   ) {
@@ -244,14 +332,14 @@ abstract class FlutterBluePlusPlatform extends PlatformInterface {
   ///
   /// Returns [true] if the power state is changed.
   ///
-  /// Implementations should call [OnTurnOnResponse] with the power state.
+  /// Implementations should add an event to the [onTurnOnResponse] stream with the power state.
   Future<bool> turnOn() {
     throw UnimplementedError();
   }
 
   /// Writes the characteristic for a [request].
   ///
-  /// Implementations should call [OnCharacteristicWritten] with the written characteristic.
+  /// Implementations should add an event to the [onCharacteristicWritten] stream with the written characteristic.
   Future<void> writeCharacteristic(
     BmWriteCharacteristicRequest request,
   ) {
@@ -260,7 +348,7 @@ abstract class FlutterBluePlusPlatform extends PlatformInterface {
 
   /// Writes the descriptor for a [request].
   ///
-  /// Implementations should call [OnDescriptorWritten] with the written descriptor.
+  /// Implementations should add an event to the [onDescriptorWritten] stream with the written descriptor.
   Future<void> writeDescriptor(
     BmWriteDescriptorRequest request,
   ) {
