@@ -1,91 +1,63 @@
+// Copyright 2017-2024, Charles Weinberger, Paul DeMarco, Thomas Clark.
+// All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+
 part of flutter_blue_plus;
 
 class BluetoothEvents {
   Stream<OnConnectionStateChangedEvent> get onConnectionStateChanged {
-    return FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "OnConnectionStateChanged")
-        .map((m) => m.arguments)
-        .map((args) => BmConnectionStateResponse.fromMap(args))
+    return FlutterBluePlusPlatform.instance.onConnectionStateChanged
         .map((p) => OnConnectionStateChangedEvent(p));
   }
 
   Stream<OnMtuChangedEvent> get onMtuChanged {
-    return FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "OnMtuChanged")
-        .map((m) => m.arguments)
-        .map((args) => BmMtuChangedResponse.fromMap(args))
+    return FlutterBluePlus._onMtuChanged
         .map((p) => OnMtuChangedEvent(p));
   }
 
   Stream<OnReadRssiEvent> get onReadRssi {
-    return FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "OnReadRssi")
-        .map((m) => m.arguments)
-        .map((args) => BmReadRssiResult.fromMap(args))
+    return FlutterBluePlusPlatform.instance.onReadRssi
         .map((p) => OnReadRssiEvent(p));
   }
 
   Stream<OnServicesResetEvent> get onServicesReset {
-    return FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "OnServicesReset")
-        .map((m) => m.arguments)
-        .map((args) => BmBluetoothDevice.fromMap(args))
+    return FlutterBluePlusPlatform.instance.onServicesReset
         .map((p) => OnServicesResetEvent(p));
   }
 
   Stream<OnDiscoveredServicesEvent> get onDiscoveredServices {
-    return FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "OnDiscoveredServices")
-        .map((m) => m.arguments)
-        .map((args) => BmDiscoverServicesResult.fromMap(args))
+    return FlutterBluePlusPlatform.instance.onDiscoveredServices
         .map((p) => OnDiscoveredServicesEvent(p));
   }
 
   Stream<OnCharacteristicReceivedEvent> get onCharacteristicReceived {
-    return FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "OnCharacteristicReceived")
-        .map((m) => m.arguments)
-        .map((args) => BmCharacteristicData.fromMap(args))
+    return FlutterBluePlusPlatform.instance.onCharacteristicReceived
         .map((p) => OnCharacteristicReceivedEvent(p));
   }
 
   Stream<OnCharacteristicWrittenEvent> get onCharacteristicWritten {
-    return FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "OnCharacteristicWritten")
-        .map((m) => m.arguments)
-        .map((args) => BmCharacteristicData.fromMap(args))
+    return FlutterBluePlusPlatform.instance.onCharacteristicWritten
         .map((p) => OnCharacteristicWrittenEvent(p));
   }
 
   Stream<OnDescriptorReadEvent> get onDescriptorRead {
-    return FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "OnDescriptorRead")
-        .map((m) => m.arguments)
-        .map((args) => BmDescriptorData.fromMap(args))
+    return FlutterBluePlusPlatform.instance.onDescriptorRead
         .map((p) => OnDescriptorReadEvent(p));
   }
 
   Stream<OnDescriptorWrittenEvent> get onDescriptorWritten {
-    return FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "OnDescriptorWritten")
-        .map((m) => m.arguments)
-        .map((args) => BmDescriptorData.fromMap(args))
+    return FlutterBluePlusPlatform.instance.onDescriptorWritten
         .map((p) => OnDescriptorWrittenEvent(p));
   }
 
   Stream<OnNameChangedEvent> get onNameChanged {
-    return FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "OnNameChanged")
-        .map((m) => m.arguments)
-        .map((args) => BmBluetoothDevice.fromMap(args))
+    return FlutterBluePlusPlatform.instance.onNameChanged
+        .map((p) => BmBluetoothDevice(remoteId: p.remoteId, platformName: p.name))
         .map((p) => OnNameChangedEvent(p));
   }
 
   Stream<OnBondStateChangedEvent> get onBondStateChanged {
-    return FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == "OnBondStateChanged")
-        .map((m) => m.arguments)
-        .map((args) => BmBondStateResponse.fromMap(args))
+    return FlutterBluePlusPlatform.instance.onBondStateChanged
         .map((p) => OnBondStateChangedEvent(p));
   }
 }

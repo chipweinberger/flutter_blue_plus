@@ -280,7 +280,7 @@ public class FlutterBluePlusPlugin implements
     //  ██████  ██   ██  ███████  ███████
 
     @Override
-    @SuppressWarnings({"deprecation", "unchecked"}) // needed for compatibility, type safety uses bluetooth_msgs.dart
+    @SuppressWarnings({"deprecation", "unchecked"}) // needed for compatibility, type safety uses flutter_blue_plus_platform_interface
     public void onMethodCall(@NonNull MethodCall call,
                                  @NonNull Result result)
     {
@@ -2021,7 +2021,7 @@ public class FlutterBluePlusPlugin implements
             scanCallback = new ScanCallback()
             {
                 @Override
-                @SuppressWarnings("unchecked") // type safety uses bluetooth_msgs.dart
+                @SuppressWarnings("unchecked") // type safety uses flutter_blue_plus_platform_interface
                 public void onScanResult(int callbackType, ScanResult result)
                 {
                     log(LogLevel.VERBOSE, "onScanResult");

@@ -1,4 +1,4 @@
-// Copyright 2017-2023, Charles Weinberger & Paul DeMarco.
+// Copyright 2017-2024, Charles Weinberger, Paul DeMarco, Thomas Clark.
 // All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
@@ -42,10 +42,7 @@ class BluetoothDescriptor {
   ///   - anytime `read()` is called
   ///   - anytime `write()` is called
   ///   - and when first listened to, it re-emits the last value for convenience
-  Stream<List<int>> get lastValueStream => FlutterBluePlus._methodStream.stream
-      .where((m) => m.method == "OnDescriptorRead" || m.method == "OnDescriptorWritten")
-      .map((m) => m.arguments)
-      .map((args) => BmDescriptorData.fromMap(args))
+  Stream<List<int>> get lastValueStream => _mergeStreams([FlutterBluePlusPlatform.instance.onDescriptorRead, FlutterBluePlusPlatform.instance.onDescriptorWritten])
       .where((p) => p.remoteId == remoteId)
       .where((p) => p.characteristicUuid == characteristicUuid)
       .where((p) => p.serviceUuid == serviceUuid)
@@ -56,10 +53,7 @@ class BluetoothDescriptor {
 
   /// this stream emits values:
   ///   - anytime `read()` is called
-  Stream<List<int>> get onValueReceived => FlutterBluePlus._methodStream.stream
-      .where((m) => m.method == "OnDescriptorRead")
-      .map((m) => m.arguments)
-      .map((args) => BmDescriptorData.fromMap(args))
+  Stream<List<int>> get onValueReceived => FlutterBluePlusPlatform.instance.onDescriptorRead
       .where((p) => p.remoteId == remoteId)
       .where((p) => p.characteristicUuid == characteristicUuid)
       .where((p) => p.serviceUuid == serviceUuid)
@@ -91,10 +85,7 @@ class BluetoothDescriptor {
         descriptorUuid: descriptorUuid,
       );
 
-      Stream<BmDescriptorData> responseStream = FlutterBluePlus._methodStream.stream
-          .where((m) => m.method == "OnDescriptorRead")
-          .map((m) => m.arguments)
-          .map((args) => BmDescriptorData.fromMap(args))
+      Stream<BmDescriptorData> responseStream = FlutterBluePlusPlatform.instance.onDescriptorRead
           .where((p) => p.remoteId == request.remoteId)
           .where((p) => p.serviceUuid == request.serviceUuid)
           .where((p) => p.characteristicUuid == request.characteristicUuid)
@@ -104,7 +95,7 @@ class BluetoothDescriptor {
       Future<BmDescriptorData> futureResponse = responseStream.first;
 
       // invoke
-      await FlutterBluePlus._invokeMethod('readDescriptor', request.toMap());
+      await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance.readDescriptor(request), 'readDescriptor', request.toMap());
 
       // wait for response
       BmDescriptorData response = await futureResponse
@@ -147,10 +138,7 @@ class BluetoothDescriptor {
         value: value,
       );
 
-      Stream<BmDescriptorData> responseStream = FlutterBluePlus._methodStream.stream
-          .where((m) => m.method == "OnDescriptorWritten")
-          .map((m) => m.arguments)
-          .map((args) => BmDescriptorData.fromMap(args))
+      Stream<BmDescriptorData> responseStream = FlutterBluePlusPlatform.instance.onDescriptorWritten
           .where((p) => p.remoteId == request.remoteId)
           .where((p) => p.serviceUuid == request.serviceUuid)
           .where((p) => p.characteristicUuid == request.characteristicUuid)
@@ -160,7 +148,7 @@ class BluetoothDescriptor {
       Future<BmDescriptorData> futureResponse = responseStream.first;
 
       // invoke
-      await FlutterBluePlus._invokeMethod('writeDescriptor', request.toMap());
+      await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance.writeDescriptor(request), 'writeDescriptor', request.toMap());
 
       // wait for response
       BmDescriptorData response = await futureResponse
