@@ -12,7 +12,830 @@ void main() {
       final flutterBluePlus = MethodChannelFlutterBluePlus();
       final log = <MethodCall>[];
 
-      Future<Object?>? Function(MethodCall methodCall)? handler;
+      Future<Object?>? Function(MethodCall call)? methodCallHandler;
+
+      group(
+        'onAdapterStateChanged',
+        () {
+          test(
+            'deserializes the event',
+            () async {
+              final arguments = BmBluetoothAdapterState(
+                adapterState: BmAdapterStateEnum.unknown,
+              ).toMap();
+
+              expectLater(
+                flutterBluePlus.onAdapterStateChanged.map(
+                  (event) {
+                    return event.toMap();
+                  },
+                ),
+                emits(equals(arguments)),
+              );
+
+              await flutterBluePlus.handleMethodCall(
+                MethodCall(
+                  'OnAdapterStateChanged',
+                  arguments,
+                ),
+              );
+            },
+          );
+
+          test(
+            'handles the method call',
+            () async {
+              final arguments = BmBluetoothAdapterState(
+                adapterState: BmAdapterStateEnum.unknown,
+              ).toMap();
+
+              expectLater(
+                flutterBluePlus.onAdapterStateChanged,
+                emits(anything),
+              );
+
+              await flutterBluePlus.handleMethodCall(
+                MethodCall(
+                  'OnAdapterStateChanged',
+                  arguments,
+                ),
+              );
+            },
+          );
+        },
+      );
+
+      group(
+        'onBondStateChanged',
+        () {
+          test(
+            'deserializes the event',
+            () async {
+              final arguments = BmBondStateResponse(
+                remoteId: DeviceIdentifier(''),
+                bondState: BmBondStateEnum.none,
+              ).toMap();
+
+              expectLater(
+                flutterBluePlus.onBondStateChanged.map(
+                  (event) {
+                    return event.toMap();
+                  },
+                ),
+                emits(equals(arguments)),
+              );
+
+              await flutterBluePlus.handleMethodCall(
+                MethodCall(
+                  'OnBondStateChanged',
+                  arguments,
+                ),
+              );
+            },
+          );
+
+          test(
+            'handles the method call',
+            () async {
+              final arguments = BmBondStateResponse(
+                remoteId: DeviceIdentifier(''),
+                bondState: BmBondStateEnum.none,
+              ).toMap();
+
+              expectLater(
+                flutterBluePlus.onBondStateChanged,
+                emits(anything),
+              );
+
+              await flutterBluePlus.handleMethodCall(
+                MethodCall(
+                  'OnBondStateChanged',
+                  arguments,
+                ),
+              );
+            },
+          );
+        },
+      );
+
+      group(
+        'onCharacteristicReceived',
+        () {
+          test(
+            'deserializes the event',
+            () async {
+              final arguments = BmCharacteristicData(
+                remoteId: DeviceIdentifier(''),
+                serviceUuid: Guid('0102'),
+                characteristicUuid: Guid('0102'),
+                value: [],
+                success: true,
+                errorCode: 0,
+                errorString: '',
+              ).toMap();
+
+              expectLater(
+                flutterBluePlus.onCharacteristicReceived.map(
+                  (event) {
+                    return event.toMap();
+                  },
+                ),
+                emits(equals(arguments)),
+              );
+
+              await flutterBluePlus.handleMethodCall(
+                MethodCall(
+                  'OnCharacteristicReceived',
+                  arguments,
+                ),
+              );
+            },
+          );
+
+          test(
+            'handles the method call',
+            () async {
+              final arguments = BmCharacteristicData(
+                remoteId: DeviceIdentifier(''),
+                serviceUuid: Guid('0102'),
+                characteristicUuid: Guid('0102'),
+                value: [],
+                success: true,
+                errorCode: 0,
+                errorString: '',
+              ).toMap();
+
+              expectLater(
+                flutterBluePlus.onCharacteristicReceived,
+                emits(anything),
+              );
+
+              await flutterBluePlus.handleMethodCall(
+                MethodCall(
+                  'OnCharacteristicReceived',
+                  arguments,
+                ),
+              );
+            },
+          );
+        },
+      );
+
+      group(
+        'onCharacteristicWritten',
+        () {
+          test(
+            'deserializes the event',
+            () async {
+              final arguments = BmCharacteristicData(
+                remoteId: DeviceIdentifier(''),
+                serviceUuid: Guid('0102'),
+                characteristicUuid: Guid('0102'),
+                value: [],
+                success: true,
+                errorCode: 0,
+                errorString: '',
+              ).toMap();
+
+              expectLater(
+                flutterBluePlus.onCharacteristicWritten.map(
+                  (event) {
+                    return event.toMap();
+                  },
+                ),
+                emits(equals(arguments)),
+              );
+
+              await flutterBluePlus.handleMethodCall(
+                MethodCall(
+                  'OnCharacteristicWritten',
+                  arguments,
+                ),
+              );
+            },
+          );
+
+          test(
+            'handles the method call',
+            () async {
+              final arguments = BmCharacteristicData(
+                remoteId: DeviceIdentifier(''),
+                serviceUuid: Guid('0102'),
+                characteristicUuid: Guid('0102'),
+                value: [],
+                success: true,
+                errorCode: 0,
+                errorString: '',
+              ).toMap();
+
+              expectLater(
+                flutterBluePlus.onCharacteristicWritten,
+                emits(anything),
+              );
+
+              await flutterBluePlus.handleMethodCall(
+                MethodCall(
+                  'OnCharacteristicWritten',
+                  arguments,
+                ),
+              );
+            },
+          );
+        },
+      );
+
+      group(
+        'onConnectionStateChanged',
+        () {
+          test(
+            'deserializes the event',
+            () async {
+              final arguments = BmConnectionStateResponse(
+                remoteId: DeviceIdentifier(''),
+                connectionState: BmConnectionStateEnum.disconnected,
+              ).toMap();
+
+              expectLater(
+                flutterBluePlus.onConnectionStateChanged.map(
+                  (event) {
+                    return event.toMap();
+                  },
+                ),
+                emits(equals(arguments)),
+              );
+
+              await flutterBluePlus.handleMethodCall(
+                MethodCall(
+                  'OnConnectionStateChanged',
+                  arguments,
+                ),
+              );
+            },
+          );
+
+          test(
+            'handles the method call',
+            () async {
+              final arguments = BmConnectionStateResponse(
+                remoteId: DeviceIdentifier(''),
+                connectionState: BmConnectionStateEnum.disconnected,
+              ).toMap();
+
+              expectLater(
+                flutterBluePlus.onConnectionStateChanged,
+                emits(anything),
+              );
+
+              await flutterBluePlus.handleMethodCall(
+                MethodCall(
+                  'OnConnectionStateChanged',
+                  arguments,
+                ),
+              );
+            },
+          );
+        },
+      );
+
+      group(
+        'onDescriptorRead',
+        () {
+          test(
+            'deserializes the event',
+            () async {
+              final arguments = BmDescriptorData(
+                remoteId: DeviceIdentifier(''),
+                serviceUuid: Guid('0102'),
+                characteristicUuid: Guid('0102'),
+                descriptorUuid: Guid('0102'),
+                value: [],
+                success: true,
+                errorCode: 0,
+                errorString: '',
+              ).toMap();
+
+              expectLater(
+                flutterBluePlus.onDescriptorRead.map(
+                  (event) {
+                    return event.toMap();
+                  },
+                ),
+                emits(equals(arguments)),
+              );
+
+              await flutterBluePlus.handleMethodCall(
+                MethodCall(
+                  'OnDescriptorRead',
+                  arguments,
+                ),
+              );
+            },
+          );
+
+          test(
+            'handles the method call',
+            () async {
+              final arguments = BmDescriptorData(
+                remoteId: DeviceIdentifier(''),
+                serviceUuid: Guid('0102'),
+                characteristicUuid: Guid('0102'),
+                descriptorUuid: Guid('0102'),
+                value: [],
+                success: true,
+                errorCode: 0,
+                errorString: '',
+              ).toMap();
+
+              expectLater(
+                flutterBluePlus.onDescriptorRead,
+                emits(anything),
+              );
+
+              await flutterBluePlus.handleMethodCall(
+                MethodCall(
+                  'OnDescriptorRead',
+                  arguments,
+                ),
+              );
+            },
+          );
+        },
+      );
+
+      group(
+        'onDescriptorWritten',
+        () {
+          test(
+            'deserializes the event',
+            () async {
+              final arguments = BmDescriptorData(
+                remoteId: DeviceIdentifier(''),
+                serviceUuid: Guid('0102'),
+                characteristicUuid: Guid('0102'),
+                descriptorUuid: Guid('0102'),
+                value: [],
+                success: true,
+                errorCode: 0,
+                errorString: '',
+              ).toMap();
+
+              expectLater(
+                flutterBluePlus.onDescriptorWritten.map(
+                  (event) {
+                    return event.toMap();
+                  },
+                ),
+                emits(equals(arguments)),
+              );
+
+              await flutterBluePlus.handleMethodCall(
+                MethodCall(
+                  'OnDescriptorWritten',
+                  arguments,
+                ),
+              );
+            },
+          );
+
+          test(
+            'handles the method call',
+            () async {
+              final arguments = BmDescriptorData(
+                remoteId: DeviceIdentifier(''),
+                serviceUuid: Guid('0102'),
+                characteristicUuid: Guid('0102'),
+                descriptorUuid: Guid('0102'),
+                value: [],
+                success: true,
+                errorCode: 0,
+                errorString: '',
+              ).toMap();
+
+              expectLater(
+                flutterBluePlus.onDescriptorWritten,
+                emits(anything),
+              );
+
+              await flutterBluePlus.handleMethodCall(
+                MethodCall(
+                  'OnDescriptorWritten',
+                  arguments,
+                ),
+              );
+            },
+          );
+        },
+      );
+
+      group(
+        'onDetachedFromEngine',
+        () {
+          test(
+            'handles the method call',
+            () async {
+              expectLater(
+                flutterBluePlus.onDetachedFromEngine,
+                emits(anything),
+              );
+
+              await flutterBluePlus.handleMethodCall(
+                MethodCall(
+                  'OnDetachedFromEngine',
+                ),
+              );
+            },
+          );
+        },
+      );
+
+      group(
+        'onDiscoveredServices',
+        () {
+          test(
+            'deserializes the event',
+            () async {
+              final arguments = BmDiscoverServicesResult(
+                remoteId: DeviceIdentifier(''),
+                services: [],
+                success: true,
+                errorCode: 0,
+                errorString: '',
+              ).toMap();
+
+              expectLater(
+                flutterBluePlus.onDiscoveredServices.map(
+                  (event) {
+                    return event.toMap();
+                  },
+                ),
+                emits(equals(arguments)),
+              );
+
+              await flutterBluePlus.handleMethodCall(
+                MethodCall(
+                  'OnDiscoveredServices',
+                  arguments,
+                ),
+              );
+            },
+          );
+
+          test(
+            'handles the method call',
+            () async {
+              final arguments = BmDiscoverServicesResult(
+                remoteId: DeviceIdentifier(''),
+                services: [],
+                success: true,
+                errorCode: 0,
+                errorString: '',
+              ).toMap();
+
+              expectLater(
+                flutterBluePlus.onDiscoveredServices,
+                emits(anything),
+              );
+
+              await flutterBluePlus.handleMethodCall(
+                MethodCall(
+                  'OnDiscoveredServices',
+                  arguments,
+                ),
+              );
+            },
+          );
+        },
+      );
+
+      group(
+        'onMtuChanged',
+        () {
+          test(
+            'deserializes the event',
+            () async {
+              final arguments = BmMtuChangedResponse(
+                remoteId: DeviceIdentifier(''),
+                mtu: 0,
+                success: true,
+                errorCode: 0,
+                errorString: '',
+              ).toMap();
+
+              expectLater(
+                flutterBluePlus.onMtuChanged.map(
+                  (event) {
+                    return event.toMap();
+                  },
+                ),
+                emits(equals(arguments)),
+              );
+
+              await flutterBluePlus.handleMethodCall(
+                MethodCall(
+                  'OnMtuChanged',
+                  arguments,
+                ),
+              );
+            },
+          );
+
+          test(
+            'handles the method call',
+            () async {
+              final arguments = BmMtuChangedResponse(
+                remoteId: DeviceIdentifier(''),
+                mtu: 0,
+                success: true,
+                errorCode: 0,
+                errorString: '',
+              ).toMap();
+
+              expectLater(
+                flutterBluePlus.onMtuChanged,
+                emits(anything),
+              );
+
+              await flutterBluePlus.handleMethodCall(
+                MethodCall(
+                  'OnMtuChanged',
+                  arguments,
+                ),
+              );
+            },
+          );
+        },
+      );
+
+      group(
+        'onNameChanged',
+        () {
+          test(
+            'deserializes the event',
+            () async {
+              final arguments = BmNameChanged(
+                remoteId: DeviceIdentifier(''),
+                name: '',
+              ).toMap();
+
+              expectLater(
+                flutterBluePlus.onNameChanged.map(
+                  (event) {
+                    return event.toMap();
+                  },
+                ),
+                emits(equals(arguments)),
+              );
+
+              await flutterBluePlus.handleMethodCall(
+                MethodCall(
+                  'OnNameChanged',
+                  arguments,
+                ),
+              );
+            },
+          );
+
+          test(
+            'handles the method call',
+            () async {
+              final arguments = BmNameChanged(
+                remoteId: DeviceIdentifier(''),
+                name: '',
+              ).toMap();
+
+              expectLater(
+                flutterBluePlus.onNameChanged,
+                emits(anything),
+              );
+
+              await flutterBluePlus.handleMethodCall(
+                MethodCall(
+                  'OnNameChanged',
+                  arguments,
+                ),
+              );
+            },
+          );
+        },
+      );
+
+      group(
+        'onReadRssi',
+        () {
+          test(
+            'deserializes the event',
+            () async {
+              final arguments = BmReadRssiResult(
+                remoteId: DeviceIdentifier(''),
+                rssi: 0,
+                success: true,
+                errorCode: 0,
+                errorString: '',
+              ).toMap();
+
+              expectLater(
+                flutterBluePlus.onReadRssi.map(
+                  (event) {
+                    return event.toMap();
+                  },
+                ),
+                emits(equals(arguments)),
+              );
+
+              await flutterBluePlus.handleMethodCall(
+                MethodCall(
+                  'OnReadRssi',
+                  arguments,
+                ),
+              );
+            },
+          );
+
+          test(
+            'handles the method call',
+            () async {
+              final arguments = BmReadRssiResult(
+                remoteId: DeviceIdentifier(''),
+                rssi: 0,
+                success: true,
+                errorCode: 0,
+                errorString: '',
+              ).toMap();
+
+              expectLater(
+                flutterBluePlus.onReadRssi,
+                emits(anything),
+              );
+
+              await flutterBluePlus.handleMethodCall(
+                MethodCall(
+                  'OnReadRssi',
+                  arguments,
+                ),
+              );
+            },
+          );
+        },
+      );
+
+      group(
+        'onScanResponse',
+        () {
+          test(
+            'deserializes the event',
+            () async {
+              final arguments = BmScanResponse(
+                advertisements: [],
+                success: true,
+                errorCode: 0,
+                errorString: '',
+              ).toMap();
+
+              expectLater(
+                flutterBluePlus.onScanResponse.map(
+                  (event) {
+                    return event.toMap();
+                  },
+                ),
+                emits(equals(arguments)),
+              );
+
+              await flutterBluePlus.handleMethodCall(
+                MethodCall(
+                  'OnScanResponse',
+                  arguments,
+                ),
+              );
+            },
+          );
+
+          test(
+            'handles the method call',
+            () async {
+              final arguments = BmScanResponse(
+                advertisements: [],
+                success: true,
+                errorCode: 0,
+                errorString: '',
+              ).toMap();
+
+              expectLater(
+                flutterBluePlus.onScanResponse,
+                emits(anything),
+              );
+
+              await flutterBluePlus.handleMethodCall(
+                MethodCall(
+                  'OnScanResponse',
+                  arguments,
+                ),
+              );
+            },
+          );
+        },
+      );
+
+      group(
+        'onServicesReset',
+        () {
+          test(
+            'deserializes the event',
+            () async {
+              final arguments = BmBluetoothDevice(
+                remoteId: DeviceIdentifier(''),
+              ).toMap();
+
+              expectLater(
+                flutterBluePlus.onServicesReset.map(
+                  (event) {
+                    return event.toMap();
+                  },
+                ),
+                emits(equals(arguments)),
+              );
+
+              await flutterBluePlus.handleMethodCall(
+                MethodCall(
+                  'OnServicesReset',
+                  arguments,
+                ),
+              );
+            },
+          );
+
+          test(
+            'handles the method call',
+            () async {
+              final arguments = BmBluetoothDevice(
+                remoteId: DeviceIdentifier(''),
+              ).toMap();
+
+              expectLater(
+                flutterBluePlus.onServicesReset,
+                emits(anything),
+              );
+
+              await flutterBluePlus.handleMethodCall(
+                MethodCall(
+                  'OnServicesReset',
+                  arguments,
+                ),
+              );
+            },
+          );
+        },
+      );
+
+      group(
+        'onServicesReset',
+        () {
+          test(
+            'deserializes the event',
+            () async {
+              final arguments = BmTurnOnResponse(
+                userAccepted: true,
+              ).toMap();
+
+              expectLater(
+                flutterBluePlus.onTurnOnResponse.map(
+                  (event) {
+                    return event.toMap();
+                  },
+                ),
+                emits(equals(arguments)),
+              );
+
+              await flutterBluePlus.handleMethodCall(
+                MethodCall(
+                  'OnTurnOnResponse',
+                  arguments,
+                ),
+              );
+            },
+          );
+
+          test(
+            'handles the method call',
+            () async {
+              final arguments = BmTurnOnResponse(
+                userAccepted: true,
+              ).toMap();
+
+              expectLater(
+                flutterBluePlus.onTurnOnResponse,
+                emits(anything),
+              );
+
+              await flutterBluePlus.handleMethodCall(
+                MethodCall(
+                  'OnTurnOnResponse',
+                  arguments,
+                ),
+              );
+            },
+          );
+        },
+      );
 
       group(
         'clearGattCache',
@@ -45,7 +868,7 @@ void main() {
 
           setUp(
             () {
-              handler = (call) {
+              methodCallHandler = (call) {
                 return Future.value(result);
               };
             },
@@ -53,7 +876,7 @@ void main() {
 
           tearDown(
             () {
-              handler = null;
+              methodCallHandler = null;
             },
           );
 
@@ -103,7 +926,7 @@ void main() {
 
           setUp(
             () {
-              handler = (call) {
+              methodCallHandler = (call) {
                 return Future.value(result);
               };
             },
@@ -111,7 +934,7 @@ void main() {
 
           tearDown(
             () {
-              handler = null;
+              methodCallHandler = null;
             },
           );
 
@@ -151,7 +974,7 @@ void main() {
 
           setUp(
             () {
-              handler = (call) {
+              methodCallHandler = (call) {
                 return Future.value(result);
               };
             },
@@ -159,7 +982,7 @@ void main() {
 
           tearDown(
             () {
-              handler = null;
+              methodCallHandler = null;
             },
           );
 
@@ -203,7 +1026,7 @@ void main() {
 
           setUp(
             () {
-              handler = (call) {
+              methodCallHandler = (call) {
                 return Future.value(result);
               };
             },
@@ -211,7 +1034,7 @@ void main() {
 
           tearDown(
             () {
-              handler = null;
+              methodCallHandler = null;
             },
           );
 
@@ -279,7 +1102,7 @@ void main() {
 
           setUp(
             () {
-              handler = (call) {
+              methodCallHandler = (call) {
                 return Future.value(result);
               };
             },
@@ -287,7 +1110,7 @@ void main() {
 
           tearDown(
             () {
-              handler = null;
+              methodCallHandler = null;
             },
           );
 
@@ -327,7 +1150,7 @@ void main() {
 
           setUp(
             () {
-              handler = (call) {
+              methodCallHandler = (call) {
                 return Future.value(result);
               };
             },
@@ -335,7 +1158,7 @@ void main() {
 
           tearDown(
             () {
-              handler = null;
+              methodCallHandler = null;
             },
           );
 
@@ -377,7 +1200,7 @@ void main() {
 
           setUp(
             () {
-              handler = (call) {
+              methodCallHandler = (call) {
                 return Future.value(result.toMap());
               };
             },
@@ -385,7 +1208,7 @@ void main() {
 
           tearDown(
             () {
-              handler = null;
+              methodCallHandler = null;
             },
           );
 
@@ -428,7 +1251,7 @@ void main() {
 
           setUp(
             () {
-              handler = (call) {
+              methodCallHandler = (call) {
                 return Future.value(result.toMap());
               };
             },
@@ -436,7 +1259,7 @@ void main() {
 
           tearDown(
             () {
-              handler = null;
+              methodCallHandler = null;
             },
           );
 
@@ -482,7 +1305,7 @@ void main() {
 
           setUp(
             () {
-              handler = (call) {
+              methodCallHandler = (call) {
                 return Future.value(result.toMap());
               };
             },
@@ -490,7 +1313,7 @@ void main() {
 
           tearDown(
             () {
-              handler = null;
+              methodCallHandler = null;
             },
           );
 
@@ -533,7 +1356,7 @@ void main() {
 
           setUp(
             () {
-              handler = (call) {
+              methodCallHandler = (call) {
                 return Future.value(result.toMap());
               };
             },
@@ -541,7 +1364,7 @@ void main() {
 
           tearDown(
             () {
-              handler = null;
+              methodCallHandler = null;
             },
           );
 
@@ -583,7 +1406,7 @@ void main() {
 
           setUp(
             () {
-              handler = (call) {
+              methodCallHandler = (call) {
                 return Future.value(result.toMap());
               };
             },
@@ -591,7 +1414,7 @@ void main() {
 
           tearDown(
             () {
-              handler = null;
+              methodCallHandler = null;
             },
           );
 
@@ -631,7 +1454,7 @@ void main() {
 
           setUp(
             () {
-              handler = (call) {
+              methodCallHandler = (call) {
                 return Future.value(result);
               };
             },
@@ -639,7 +1462,7 @@ void main() {
 
           tearDown(
             () {
-              handler = null;
+              methodCallHandler = null;
             },
           );
 
@@ -760,7 +1583,7 @@ void main() {
 
           setUp(
             () {
-              handler = (call) {
+              methodCallHandler = (call) {
                 return Future.value(result);
               };
             },
@@ -768,7 +1591,7 @@ void main() {
 
           tearDown(
             () {
-              handler = null;
+              methodCallHandler = null;
             },
           );
 
@@ -890,7 +1713,7 @@ void main() {
 
           setUp(
             () {
-              handler = (call) {
+              methodCallHandler = (call) {
                 return Future.value(result);
               };
             },
@@ -898,7 +1721,7 @@ void main() {
 
           tearDown(
             () {
-              handler = null;
+              methodCallHandler = null;
             },
           );
 
@@ -1089,7 +1912,7 @@ void main() {
 
           setUp(
             () {
-              handler = (call) {
+              methodCallHandler = (call) {
                 return Future.value(result);
               };
             },
@@ -1097,7 +1920,7 @@ void main() {
 
           tearDown(
             () {
-              handler = null;
+              methodCallHandler = null;
             },
           );
 
@@ -1199,7 +2022,7 @@ void main() {
             (call) {
               log.add(call);
 
-              return handler?.call(call);
+              return methodCallHandler?.call(call);
             },
           );
         },

@@ -33,8 +33,8 @@ class BmScanResponse {
   Map<dynamic, dynamic> toMap() {
     return {
       'advertisements':
-          advertisements.map((advertisement) => advertisement.toMap()),
-      'success': success,
+          advertisements.map((advertisement) => advertisement.toMap()).toList(),
+      'success': success ? 1 : 0,
       'error_code': errorCode,
       'error_string': errorString,
     };

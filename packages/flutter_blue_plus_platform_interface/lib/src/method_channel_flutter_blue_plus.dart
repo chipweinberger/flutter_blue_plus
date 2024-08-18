@@ -40,146 +40,140 @@ class MethodChannelFlutterBluePlus extends FlutterBluePlusPlatform {
   final _calls = StreamController<MethodCall>.broadcast();
 
   MethodChannelFlutterBluePlus() {
-    channel.setMethodCallHandler(
-      (call) async {
-        _calls.add(call);
-      },
-    );
+    channel.setMethodCallHandler(handleMethodCall);
   }
 
   @override
-  Stream<BmBluetoothAdapterState> get onAdapterStateChanged async* {
-    await for (final call in _calls.stream) {
-      if (call.method == 'OnAdapterStateChanged') {
-        yield BmBluetoothAdapterState.fromMap(call.arguments);
-      }
-    }
+  Stream<BmBluetoothAdapterState> get onAdapterStateChanged {
+    return _calls.stream.where((call) {
+      return call.method == 'OnAdapterStateChanged';
+    }).map((call) {
+      return BmBluetoothAdapterState.fromMap(call.arguments);
+    });
   }
 
   @override
-  Stream<BmBondStateResponse> get onBondStateChanged async* {
-    await for (final call in _calls.stream) {
-      if (call.method == 'OnBondStateChanged') {
-        yield BmBondStateResponse.fromMap(call.arguments);
-      }
-    }
+  Stream<BmBondStateResponse> get onBondStateChanged {
+    return _calls.stream.where((call) {
+      return call.method == 'OnBondStateChanged';
+    }).map((call) {
+      return BmBondStateResponse.fromMap(call.arguments);
+    });
   }
 
   @override
-  Stream<BmCharacteristicData> get onCharacteristicReceived async* {
-    await for (final call in _calls.stream) {
-      if (call.method == 'OnCharacteristicReceived') {
-        yield BmCharacteristicData.fromMap(call.arguments);
-      }
-    }
+  Stream<BmCharacteristicData> get onCharacteristicReceived {
+    return _calls.stream.where((call) {
+      return call.method == 'OnCharacteristicReceived';
+    }).map((call) {
+      return BmCharacteristicData.fromMap(call.arguments);
+    });
   }
 
   @override
-  Stream<BmCharacteristicData> get onCharacteristicWritten async* {
-    await for (final call in _calls.stream) {
-      if (call.method == 'OnCharacteristicWritten') {
-        yield BmCharacteristicData.fromMap(call.arguments);
-      }
-    }
+  Stream<BmCharacteristicData> get onCharacteristicWritten {
+    return _calls.stream.where((call) {
+      return call.method == 'OnCharacteristicWritten';
+    }).map((call) {
+      return BmCharacteristicData.fromMap(call.arguments);
+    });
   }
 
   @override
-  Stream<BmConnectionStateResponse> get onConnectionStateChanged async* {
-    await for (final call in _calls.stream) {
-      if (call.method == 'OnConnectionStateChanged') {
-        yield BmConnectionStateResponse.fromMap(call.arguments);
-      }
-    }
+  Stream<BmConnectionStateResponse> get onConnectionStateChanged {
+    return _calls.stream.where((call) {
+      return call.method == 'OnConnectionStateChanged';
+    }).map((call) {
+      return BmConnectionStateResponse.fromMap(call.arguments);
+    });
   }
 
   @override
-  Stream<BmDescriptorData> get onDescriptorRead async* {
-    await for (final call in _calls.stream) {
-      if (call.method == 'OnDescriptorRead') {
-        yield BmDescriptorData.fromMap(call.arguments);
-      }
-    }
+  Stream<BmDescriptorData> get onDescriptorRead {
+    return _calls.stream.where((call) {
+      return call.method == 'OnDescriptorRead';
+    }).map((call) {
+      return BmDescriptorData.fromMap(call.arguments);
+    });
   }
 
   @override
-  Stream<BmDescriptorData> get onDescriptorWritten async* {
-    await for (final call in _calls.stream) {
-      if (call.method == 'OnDescriptorWritten') {
-        yield BmDescriptorData.fromMap(call.arguments);
-      }
-    }
+  Stream<BmDescriptorData> get onDescriptorWritten {
+    return _calls.stream.where((call) {
+      return call.method == 'OnDescriptorWritten';
+    }).map((call) {
+      return BmDescriptorData.fromMap(call.arguments);
+    });
   }
 
   @override
-  Stream<void> get onDetachedFromEngine async* {
-    await for (final call in _calls.stream) {
-      if (call.method == 'OnDetachedFromEngine') {
-        yield null;
-      }
-    }
+  Stream<void> get onDetachedFromEngine {
+    return _calls.stream.where((call) {
+      return call.method == 'OnDetachedFromEngine';
+    });
   }
 
   @override
-  Stream<BmDiscoverServicesResult> get onDiscoveredServices async* {
-    await for (final call in _calls.stream) {
-      if (call.method == 'OnDiscoveredServices') {
-        yield BmDiscoverServicesResult.fromMap(call.arguments);
-      }
-    }
+  Stream<BmDiscoverServicesResult> get onDiscoveredServices {
+    return _calls.stream.where((call) {
+      return call.method == 'OnDiscoveredServices';
+    }).map((call) {
+      return BmDiscoverServicesResult.fromMap(call.arguments);
+    });
   }
 
   @override
-  Stream<BmMtuChangedResponse> get onMtuChanged async* {
-    await for (final call in _calls.stream) {
-      if (call.method == 'OnMtuChanged') {
-        yield BmMtuChangedResponse.fromMap(call.arguments);
-      }
-    }
+  Stream<BmMtuChangedResponse> get onMtuChanged {
+    return _calls.stream.where((call) {
+      return call.method == 'OnMtuChanged';
+    }).map((call) {
+      return BmMtuChangedResponse.fromMap(call.arguments);
+    });
   }
 
   @override
-  Stream<BmNameChanged> get onNameChanged async* {
-    await for (final call in _calls.stream) {
-      if (call.method == 'OnNameChanged') {
-        yield BmNameChanged.fromMap(call.arguments);
-      }
-    }
+  Stream<BmNameChanged> get onNameChanged {
+    return _calls.stream.where((call) {
+      return call.method == 'OnNameChanged';
+    }).map((call) {
+      return BmNameChanged.fromMap(call.arguments);
+    });
   }
 
   @override
-  Stream<BmReadRssiResult> get onReadRssi async* {
-    await for (final call in _calls.stream) {
-      if (call.method == 'OnReadRssi') {
-        yield BmReadRssiResult.fromMap(call.arguments);
-      }
-    }
+  Stream<BmReadRssiResult> get onReadRssi {
+    return _calls.stream.where((call) {
+      return call.method == 'OnReadRssi';
+    }).map((call) {
+      return BmReadRssiResult.fromMap(call.arguments);
+    });
   }
 
   @override
-  Stream<BmScanResponse> get onScanResponse async* {
-    await for (final call in _calls.stream) {
-      if (call.method == 'OnScanResponse') {
-        yield BmScanResponse.fromMap(call.arguments);
-      }
-    }
+  Stream<BmScanResponse> get onScanResponse {
+    return _calls.stream.where((call) {
+      return call.method == 'OnScanResponse';
+    }).map((call) {
+      return BmScanResponse.fromMap(call.arguments);
+    });
   }
 
   @override
-  Stream<BmBluetoothDevice> get onServicesReset async* {
-    await for (final call in _calls.stream) {
-      if (call.method == 'OnServicesReset') {
-        yield BmBluetoothDevice.fromMap(call.arguments);
-      }
-    }
+  Stream<BmBluetoothDevice> get onServicesReset {
+    return _calls.stream.where((call) {
+      return call.method == 'OnServicesReset';
+    }).map((call) {
+      return BmBluetoothDevice.fromMap(call.arguments);
+    });
   }
 
   @override
-  Stream<BmTurnOnResponse> get onTurnOnResponse async* {
-    await for (final call in _calls.stream) {
-      if (call.method == 'OnTurnOnResponse') {
-        yield BmTurnOnResponse.fromMap(call.arguments);
-      }
-    }
+  Stream<BmTurnOnResponse> get onTurnOnResponse {
+    return _calls.stream.where((call) {
+      return call.method == 'OnTurnOnResponse';
+    }).map((call) {
+      return BmTurnOnResponse.fromMap(call.arguments);
+    });
   }
 
   @override
@@ -311,6 +305,13 @@ class MethodChannelFlutterBluePlus extends FlutterBluePlusPlatform {
     );
 
     return BmDevicesList.fromMap(result!);
+  }
+
+  @visibleForTesting
+  Future<void> handleMethodCall(
+    MethodCall call,
+  ) async {
+    _calls.add(call);
   }
 
   @override
