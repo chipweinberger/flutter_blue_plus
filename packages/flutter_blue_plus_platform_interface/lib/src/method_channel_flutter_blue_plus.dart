@@ -110,6 +110,8 @@ class MethodChannelFlutterBluePlus extends FlutterBluePlusPlatform {
   Stream<void> get onDetachedFromEngine {
     return _calls.stream.where((call) {
       return call.method == 'OnDetachedFromEngine';
+    }).map((_) {
+      return null;
     });
   }
 
