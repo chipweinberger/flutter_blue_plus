@@ -9,7 +9,19 @@ void main() {
         'fromMap',
         () {
           test(
-            'deserializes the user accepted property as false if the user accepted property is null',
+            'deserializes the user accepted property',
+            () {
+              expect(
+                BmTurnOnResponse.fromMap({
+                  'user_accepted': true,
+                }).userAccepted,
+                isTrue,
+              );
+            },
+          );
+
+          test(
+            'deserializes the user accepted property as false if it is null',
             () {
               expect(
                 BmTurnOnResponse.fromMap({
@@ -19,15 +31,77 @@ void main() {
               );
             },
           );
+        },
+      );
 
+      group(
+        'hashCode',
+        () {
           test(
-            'deserializes the user accepted property as true if the user accepted property is true',
+            'returns the hash code',
+            () {
+              final userAccepted = true;
+
+              expect(
+                BmTurnOnResponse(
+                  userAccepted: userAccepted,
+                ).hashCode,
+                equals(userAccepted.hashCode),
+              );
+            },
+          );
+        },
+      );
+
+      group(
+        '==',
+        () {
+          test(
+            'returns false if they are not equal',
             () {
               expect(
-                BmTurnOnResponse.fromMap({
-                  'user_accepted': true,
-                }).userAccepted,
+                BmTurnOnResponse(
+                      userAccepted: true,
+                    ) ==
+                    BmTurnOnResponse(
+                      userAccepted: false,
+                    ),
+                isFalse,
+              );
+            },
+          );
+
+          test(
+            'returns true if they are equal',
+            () {
+              expect(
+                BmTurnOnResponse(
+                      userAccepted: true,
+                    ) ==
+                    BmTurnOnResponse(
+                      userAccepted: true,
+                    ),
                 isTrue,
+              );
+            },
+          );
+        },
+      );
+
+      group(
+        'toMap',
+        () {
+          test(
+            'serializes the user accepted property',
+            () {
+              expect(
+                BmTurnOnResponse(
+                  userAccepted: true,
+                ).toMap(),
+                containsPair(
+                  'user_accepted',
+                  isTrue,
+                ),
               );
             },
           );
