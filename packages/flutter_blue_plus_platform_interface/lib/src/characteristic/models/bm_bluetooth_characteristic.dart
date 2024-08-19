@@ -1,3 +1,5 @@
+import 'package:collection/collection.dart';
+
 import '../../common/models/device_identifier.dart';
 import '../../common/models/guid.dart';
 import '../../descriptor/models/bm_bluetooth_descriptor.dart';
@@ -49,6 +51,22 @@ class BmBluetoothCharacteristic {
               indicateEncryptionRequired: false,
             ),
     );
+  }
+
+  @override
+  int get hashCode {
+    return remoteId.hashCode ^
+        serviceUuid.hashCode ^
+        secondaryServiceUuid.hashCode ^
+        characteristicUuid.hashCode ^
+        const ListEquality<BmBluetoothDescriptor>().hash(descriptors) ^
+        properties.hashCode;
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is BmBluetoothCharacteristic && hashCode == other.hashCode;
   }
 
   Map<dynamic, dynamic> toMap() {

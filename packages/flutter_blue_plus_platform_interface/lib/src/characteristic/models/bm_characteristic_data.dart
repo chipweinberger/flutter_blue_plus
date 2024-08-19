@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:convert/convert.dart';
 
 import '../../common/models/device_identifier.dart';
@@ -41,6 +42,24 @@ class BmCharacteristicData {
       errorCode: !success ? json['error_code'] : 0,
       errorString: !success ? json['error_string'] : '',
     );
+  }
+
+  @override
+  int get hashCode {
+    return remoteId.hashCode ^
+        serviceUuid.hashCode ^
+        secondaryServiceUuid.hashCode ^
+        characteristicUuid.hashCode ^
+        const ListEquality<int>().hash(value) ^
+        success.hashCode ^
+        errorCode.hashCode ^
+        errorString.hashCode;
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is BmCharacteristicData && hashCode == other.hashCode;
   }
 
   Map<dynamic, dynamic> toMap() {
