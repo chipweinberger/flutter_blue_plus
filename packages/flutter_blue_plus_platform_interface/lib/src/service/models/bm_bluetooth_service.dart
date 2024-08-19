@@ -1,3 +1,5 @@
+import 'package:collection/collection.dart';
+
 import '../../characteristic/models/bm_bluetooth_characteristic.dart';
 import '../../common/models/device_identifier.dart';
 import '../../common/models/guid.dart';
@@ -10,8 +12,8 @@ class BmBluetoothService {
   List<BmBluetoothService> includedServices;
 
   BmBluetoothService({
-    required this.serviceUuid,
     required this.remoteId,
+    required this.serviceUuid,
     required this.isPrimary,
     required this.characteristics,
     required this.includedServices,
@@ -35,6 +37,21 @@ class BmBluetoothService {
               .toList() ??
           [],
     );
+  }
+
+  @override
+  int get hashCode {
+    return remoteId.hashCode ^
+        serviceUuid.hashCode ^
+        isPrimary.hashCode ^
+        const ListEquality<BmBluetoothCharacteristic>().hash(characteristics) ^
+        const ListEquality<BmBluetoothService>().hash(includedServices);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is BmBluetoothService && hashCode == other.hashCode;
   }
 
   Map<dynamic, dynamic> toMap() {

@@ -1,3 +1,5 @@
+import 'package:collection/collection.dart';
+
 import '../../common/models/device_identifier.dart';
 import 'bm_bluetooth_service.dart';
 
@@ -32,6 +34,21 @@ class BmDiscoverServicesResult {
       errorCode: !success ? json['error_code'] : 0,
       errorString: !success ? json['error_string'] : '',
     );
+  }
+
+  @override
+  int get hashCode {
+    return remoteId.hashCode ^
+        const ListEquality<BmBluetoothService>().hash(services) ^
+        success.hashCode ^
+        errorCode.hashCode ^
+        errorString.hashCode;
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is BmDiscoverServicesResult && hashCode == other.hashCode;
   }
 
   Map<dynamic, dynamic> toMap() {
