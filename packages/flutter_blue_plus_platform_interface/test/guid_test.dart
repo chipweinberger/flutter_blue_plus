@@ -6,6 +6,38 @@ void main() {
     'Guid',
     () {
       group(
+        'empty',
+        () {
+          test(
+            'constructs an instance',
+            () {
+              expect(
+                Guid.empty().bytes,
+                equals([
+                  0x00,
+                  0x00,
+                  0x00,
+                  0x00,
+                  0x00,
+                  0x00,
+                  0x00,
+                  0x00,
+                  0x00,
+                  0x00,
+                  0x00,
+                  0x00,
+                  0x00,
+                  0x00,
+                  0x00,
+                  0x00,
+                ]),
+              );
+            },
+          );
+        },
+      );
+
+      group(
         'fromBytes',
         () {
           test(
@@ -16,7 +48,7 @@ void main() {
                   0x01,
                   0x02,
                 ]).bytes,
-                orderedEquals([
+                equals([
                   0x01,
                   0x02,
                 ]),
@@ -34,7 +66,7 @@ void main() {
                   0x03,
                   0x04,
                 ]).bytes,
-                orderedEquals([
+                equals([
                   0x01,
                   0x02,
                   0x03,
@@ -66,7 +98,7 @@ void main() {
                   0x34,
                   0xFB,
                 ]).bytes,
-                orderedEquals([
+                equals([
                   0x01,
                   0x02,
                   0x03,
@@ -114,7 +146,7 @@ void main() {
             () {
               expect(
                 Guid.fromString('0102').bytes,
-                orderedEquals([
+                equals([
                   0x01,
                   0x02,
                 ]),
@@ -127,7 +159,7 @@ void main() {
             () {
               expect(
                 Guid.fromString('01020304').bytes,
-                orderedEquals([
+                equals([
                   0x01,
                   0x02,
                   0x03,
@@ -142,7 +174,7 @@ void main() {
             () {
               expect(
                 Guid.fromString('0102030400001000800000805f9b34fb').bytes,
-                orderedEquals([
+                equals([
                   0x01,
                   0x02,
                   0x03,
@@ -169,7 +201,7 @@ void main() {
             () {
               expect(
                 Guid.fromString('01020304-0000-1000-8000-00805f9b34fb').bytes,
-                orderedEquals([
+                equals([
                   0x01,
                   0x02,
                   0x03,
@@ -281,6 +313,51 @@ void main() {
           expect(
             Guid('01020304-0000-1000-8000-00805f9b34fb').str128,
             equals('01020304-0000-1000-8000-00805f9b34fb'),
+          );
+        },
+      );
+    },
+  );
+
+  group(
+    'uuid',
+    () {
+      test(
+        'returns the str property',
+        () {
+          expect(
+            Guid('0102').uuid,
+            equals('0102'),
+          );
+        },
+      );
+    },
+  );
+
+  group(
+    'uuid128',
+    () {
+      test(
+        'returns the str128 property',
+        () {
+          expect(
+            Guid('0102').uuid128,
+            equals('00000102-0000-1000-8000-00805f9b34fb'),
+          );
+        },
+      );
+    },
+  );
+
+  group(
+    'toString',
+    () {
+      test(
+        'returns the str property',
+        () {
+          expect(
+            Guid('0102').toString(),
+            equals('0102'),
           );
         },
       );

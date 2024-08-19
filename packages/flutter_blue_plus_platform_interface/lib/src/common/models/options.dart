@@ -14,6 +14,17 @@ class Options {
     );
   }
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is Options && hashCode == other.hashCode;
+  }
+
+  @override
+  int get hashCode {
+    return showPowerAlert.hashCode;
+  }
+
   Map<dynamic, dynamic> toMap() {
     return {
       'show_power_alert': showPowerAlert,

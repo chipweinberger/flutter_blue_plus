@@ -19,7 +19,7 @@ class DeviceIdentifier {
   }
 
   @override
-  bool operator ==(other) {
+  bool operator ==(Object other) {
     return other is DeviceIdentifier && hashCode == other.hashCode;
   }
 }
