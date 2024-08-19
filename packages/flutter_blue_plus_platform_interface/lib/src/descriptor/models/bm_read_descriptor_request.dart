@@ -30,6 +30,21 @@ class BmReadDescriptorRequest {
     );
   }
 
+  @override
+  int get hashCode {
+    return remoteId.hashCode ^
+        serviceUuid.hashCode ^
+        secondaryServiceUuid.hashCode ^
+        characteristicUuid.hashCode ^
+        descriptorUuid.hashCode;
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is BmReadDescriptorRequest && hashCode == other.hashCode;
+  }
+
   Map<dynamic, dynamic> toMap() {
     return {
       'remote_id': remoteId.str,

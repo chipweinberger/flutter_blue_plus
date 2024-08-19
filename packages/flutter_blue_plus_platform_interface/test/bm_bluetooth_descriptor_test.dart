@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group(
-    'BmReadDescriptorRequest',
+    'BmBluetoothDescriptor',
     () {
       group(
         'fromMap',
@@ -14,7 +14,7 @@ void main() {
               final characteristicUuid = '0102';
 
               expect(
-                BmReadDescriptorRequest.fromMap({
+                BmBluetoothDescriptor.fromMap({
                   'remote_id': 'str',
                   'service_uuid': '0102',
                   'characteristic_uuid': characteristicUuid,
@@ -31,7 +31,7 @@ void main() {
               final descriptorUuid = '0102';
 
               expect(
-                BmReadDescriptorRequest.fromMap({
+                BmBluetoothDescriptor.fromMap({
                   'remote_id': 'str',
                   'service_uuid': '0102',
                   'characteristic_uuid': '0102',
@@ -43,35 +43,18 @@ void main() {
           );
 
           test(
-            'deserializes the secondary service uuid property',
+            'deserializes the remote id property',
             () {
-              final secondaryServiceUuid = '0102';
+              final remoteId = 'str';
 
               expect(
-                BmReadDescriptorRequest.fromMap({
-                  'remote_id': 'str',
+                BmBluetoothDescriptor.fromMap({
+                  'remote_id': remoteId,
                   'service_uuid': '0102',
-                  'secondary_service_uuid': secondaryServiceUuid,
                   'characteristic_uuid': '0102',
                   'descriptor_uuid': '0102',
-                }).secondaryServiceUuid,
-                equals(Guid(secondaryServiceUuid)),
-              );
-            },
-          );
-
-          test(
-            'deserializes the secondary service uuid property as null if it is null',
-            () {
-              expect(
-                BmReadDescriptorRequest.fromMap({
-                  'remote_id': 'str',
-                  'service_uuid': '0102',
-                  'secondary_service_uuid': null,
-                  'characteristic_uuid': '0102',
-                  'descriptor_uuid': '0102',
-                }).secondaryServiceUuid,
-                isNull,
+                }).remoteId,
+                equals(DeviceIdentifier(remoteId)),
               );
             },
           );
@@ -82,7 +65,7 @@ void main() {
               final serviceUuid = '0102';
 
               expect(
-                BmReadDescriptorRequest.fromMap({
+                BmBluetoothDescriptor.fromMap({
                   'remote_id': 'str',
                   'service_uuid': serviceUuid,
                   'characteristic_uuid': '0102',
@@ -103,22 +86,19 @@ void main() {
             () {
               final remoteId = DeviceIdentifier('str');
               final serviceUuid = Guid('0102');
-              final secondaryServiceUuid = null;
               final characteristicUuid = Guid('0102');
               final descriptorUuid = Guid('0102');
 
               expect(
-                BmReadDescriptorRequest(
+                BmBluetoothDescriptor(
                   remoteId: remoteId,
                   serviceUuid: serviceUuid,
-                  secondaryServiceUuid: secondaryServiceUuid,
                   characteristicUuid: characteristicUuid,
                   descriptorUuid: descriptorUuid,
                 ).hashCode,
                 equals(
                   remoteId.hashCode ^
                       serviceUuid.hashCode ^
-                      secondaryServiceUuid.hashCode ^
                       characteristicUuid.hashCode ^
                       descriptorUuid.hashCode,
                 ),
@@ -135,16 +115,15 @@ void main() {
             'returns false if they are not equal',
             () {
               expect(
-                BmReadDescriptorRequest(
-                      remoteId: DeviceIdentifier('str'),
+                BmBluetoothDescriptor(
+                      remoteId: DeviceIdentifier('str1'),
                       serviceUuid: Guid('0102'),
                       characteristicUuid: Guid('0102'),
                       descriptorUuid: Guid('0102'),
                     ) ==
-                    BmReadDescriptorRequest(
-                      remoteId: DeviceIdentifier('str'),
+                    BmBluetoothDescriptor(
+                      remoteId: DeviceIdentifier('str2'),
                       serviceUuid: Guid('0102'),
-                      secondaryServiceUuid: Guid('0102'),
                       characteristicUuid: Guid('0102'),
                       descriptorUuid: Guid('0102'),
                     ),
@@ -157,13 +136,13 @@ void main() {
             'returns true if they are equal',
             () {
               expect(
-                BmReadDescriptorRequest(
+                BmBluetoothDescriptor(
                       remoteId: DeviceIdentifier('str'),
                       serviceUuid: Guid('0102'),
                       characteristicUuid: Guid('0102'),
                       descriptorUuid: Guid('0102'),
                     ) ==
-                    BmReadDescriptorRequest(
+                    BmBluetoothDescriptor(
                       remoteId: DeviceIdentifier('str'),
                       serviceUuid: Guid('0102'),
                       characteristicUuid: Guid('0102'),
@@ -185,7 +164,7 @@ void main() {
               final characteristicUuid = Guid('0102');
 
               expect(
-                BmReadDescriptorRequest(
+                BmBluetoothDescriptor(
                   remoteId: DeviceIdentifier('str'),
                   serviceUuid: Guid('0102'),
                   characteristicUuid: characteristicUuid,
@@ -200,12 +179,12 @@ void main() {
           );
 
           test(
-            'serializes the characteristic uuid property',
+            'serializes the descriptor uuid property',
             () {
               final descriptorUuid = Guid('0102');
 
               expect(
-                BmReadDescriptorRequest(
+                BmBluetoothDescriptor(
                   remoteId: DeviceIdentifier('str'),
                   serviceUuid: Guid('0102'),
                   characteristicUuid: Guid('0102'),
@@ -225,7 +204,7 @@ void main() {
               final remoteId = DeviceIdentifier('str');
 
               expect(
-                BmReadDescriptorRequest(
+                BmBluetoothDescriptor(
                   remoteId: remoteId,
                   serviceUuid: Guid('0102'),
                   characteristicUuid: Guid('0102'),
@@ -240,52 +219,12 @@ void main() {
           );
 
           test(
-            'serializes the secondary service uuid property',
-            () {
-              final secondaryServiceUuid = Guid('0102');
-
-              expect(
-                BmReadDescriptorRequest(
-                  remoteId: DeviceIdentifier('str'),
-                  serviceUuid: Guid('0102'),
-                  secondaryServiceUuid: secondaryServiceUuid,
-                  characteristicUuid: Guid('0102'),
-                  descriptorUuid: Guid('0102'),
-                ).toMap(),
-                containsPair(
-                  'secondary_service_uuid',
-                  equals(secondaryServiceUuid.str),
-                ),
-              );
-            },
-          );
-
-          test(
-            'serializes the secondary service uuid property as null if it is null',
-            () {
-              expect(
-                BmReadDescriptorRequest(
-                  remoteId: DeviceIdentifier('str'),
-                  serviceUuid: Guid('0102'),
-                  secondaryServiceUuid: null,
-                  characteristicUuid: Guid('0102'),
-                  descriptorUuid: Guid('0102'),
-                ).toMap(),
-                containsPair(
-                  'secondary_service_uuid',
-                  isNull,
-                ),
-              );
-            },
-          );
-
-          test(
             'serializes the service uuid property',
             () {
               final serviceUuid = Guid('0102');
 
               expect(
-                BmReadDescriptorRequest(
+                BmBluetoothDescriptor(
                   remoteId: DeviceIdentifier('str'),
                   serviceUuid: serviceUuid,
                   characteristicUuid: Guid('0102'),

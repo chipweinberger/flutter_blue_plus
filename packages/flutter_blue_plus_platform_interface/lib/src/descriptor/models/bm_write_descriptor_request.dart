@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:convert/convert.dart';
 
 import '../../common/models/device_identifier.dart';
@@ -33,6 +34,22 @@ class BmWriteDescriptorRequest {
       descriptorUuid: Guid(json['descriptor_uuid']),
       value: json['value'] != null ? hex.decode(json['value']) : [],
     );
+  }
+
+  @override
+  int get hashCode {
+    return remoteId.hashCode ^
+        serviceUuid.hashCode ^
+        secondaryServiceUuid.hashCode ^
+        characteristicUuid.hashCode ^
+        descriptorUuid.hashCode ^
+        const ListEquality<int>().hash(value);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is BmWriteDescriptorRequest && hashCode == other.hashCode;
   }
 
   Map<dynamic, dynamic> toMap() {
