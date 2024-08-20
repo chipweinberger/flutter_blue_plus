@@ -7,7 +7,7 @@ import '../platform_interface/flutter_blue_plus_platform.dart';
 import '../types/types.dart';
 
 /// An implementation of [FlutterBluePlusPlatform] that uses method channels.
-class MethodChannelFlutterBluePlus extends FlutterBluePlusPlatform {
+final class MethodChannelFlutterBluePlus extends FlutterBluePlusPlatform {
   @visibleForTesting
   final channel = const MethodChannel('flutter_blue_plus/methods');
 

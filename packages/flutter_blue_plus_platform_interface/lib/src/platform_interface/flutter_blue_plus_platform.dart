@@ -1,17 +1,11 @@
 // coverage:ignore-file
 
-import 'package:plugin_platform_interface/plugin_platform_interface.dart';
-
 import '../method_channel/method_channel_flutter_blue_plus.dart';
 import '../types/types.dart';
 
 /// The interface that implementations of flutter_blue_plus must implement.
-abstract class FlutterBluePlusPlatform extends PlatformInterface {
-  static final _token = Object();
-
+abstract base class FlutterBluePlusPlatform {
   static FlutterBluePlusPlatform _instance = MethodChannelFlutterBluePlus();
-
-  FlutterBluePlusPlatform() : super(token: _token);
 
   /// The default instance of [FlutterBluePlusPlatform] to use.
   ///
@@ -24,7 +18,6 @@ abstract class FlutterBluePlusPlatform extends PlatformInterface {
   static set instance(
     FlutterBluePlusPlatform instance,
   ) {
-    PlatformInterface.verify(instance, _token);
     _instance = instance;
   }
 
