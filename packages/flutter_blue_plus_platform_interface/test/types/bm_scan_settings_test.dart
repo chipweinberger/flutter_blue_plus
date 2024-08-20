@@ -1,5 +1,5 @@
-import 'package:collection/collection.dart';
 import 'package:flutter_blue_plus_platform_interface/flutter_blue_plus_platform_interface.dart';
+import 'package:flutter_blue_plus_platform_interface/src/utils/utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

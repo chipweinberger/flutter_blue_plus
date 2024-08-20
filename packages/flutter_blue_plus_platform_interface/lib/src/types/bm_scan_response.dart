@@ -1,5 +1,4 @@
-import 'package:collection/collection.dart';
-
+import '../utils/utils.dart';
 import 'bm_scan_advertisement.dart';
 
 class BmScanResponse {

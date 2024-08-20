@@ -1,6 +1,4 @@
-import 'package:collection/collection.dart';
-import 'package:convert/convert.dart';
-
+import '../utils/utils.dart';
 import 'bm_write_type.dart';
 import 'device_identifier.dart';
 import 'guid.dart';

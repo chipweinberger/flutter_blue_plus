@@ -1,5 +1,4 @@
-import 'package:collection/collection.dart';
-
+import '../utils/utils.dart';
 import 'bm_bluetooth_service.dart';
 import 'device_identifier.dart';
 
