@@ -17,11 +17,11 @@ class BmScanAdvertisement {
 
   BmScanAdvertisement({
     required this.remoteId,
-    this.platformName,
-    this.advName,
+    required this.platformName,
+    required this.advName,
     required this.connectable,
-    this.txPowerLevel,
-    this.appearance,
+    required this.txPowerLevel,
+    required this.appearance,
     required this.manufacturerData,
     required this.serviceData,
     required this.serviceUuids,

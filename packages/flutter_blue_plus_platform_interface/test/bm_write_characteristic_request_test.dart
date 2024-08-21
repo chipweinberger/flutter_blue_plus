@@ -46,7 +46,7 @@ void main() {
           );
 
           test(
-            'deserializes the value property as [0x01,0x02,0x03] if it is 010203',
+            'deserializes the value property as [0x01,0x02] if it is 0102',
             () {
               expect(
                 BmWriteCharacteristicRequest.fromMap({
@@ -55,12 +55,11 @@ void main() {
                   'secondary_service_uuid': '0102',
                   'characteristic_uuid': '0102',
                   'write_type': 0,
-                  'value': '010203',
+                  'value': '0102',
                 }).value,
                 orderedEquals([
                   0x01,
                   0x02,
-                  0x03,
                 ]),
               );
             },
@@ -78,7 +77,7 @@ void main() {
                   'write_type': 0,
                   'value': null,
                 }).value,
-                isEmpty,
+                orderedEquals([]),
               );
             },
           );
