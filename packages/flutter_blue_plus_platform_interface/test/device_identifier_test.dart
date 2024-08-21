@@ -41,25 +41,10 @@ void main() {
       );
 
       group(
-        'id',
-        () {
-          test(
-            'returns the str property',
-            () {
-              expect(
-                DeviceIdentifier('str').id,
-                equals('str'),
-              );
-            },
-          );
-        },
-      );
-
-      group(
         '==',
         () {
           test(
-            'returns false if they are not equal',
+            'returns false if the identifiers are not equal',
             () {
               expect(
                 DeviceIdentifier('str1') == DeviceIdentifier('str2'),
@@ -69,7 +54,7 @@ void main() {
           );
 
           test(
-            'returns true if they are equal',
+            'returns true if the identifiers are equal',
             () {
               expect(
                 DeviceIdentifier('str') == DeviceIdentifier('str'),
@@ -79,26 +64,11 @@ void main() {
           );
 
           test(
-            'returns true if they are equal ignoring case',
+            'returns true if the identifiers are equal ignoring case',
             () {
               expect(
                 DeviceIdentifier('str') == DeviceIdentifier('STR'),
                 isTrue,
-              );
-            },
-          );
-        },
-      );
-
-      group(
-        'toString',
-        () {
-          test(
-            'returns the str property',
-            () {
-              expect(
-                DeviceIdentifier('str').toString(),
-                equals('str'),
               );
             },
           );

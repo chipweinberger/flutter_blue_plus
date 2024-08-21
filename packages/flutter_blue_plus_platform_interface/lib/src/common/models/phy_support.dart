@@ -19,17 +19,6 @@ class PhySupport {
     );
   }
 
-  @override
-  int get hashCode {
-    return le2M.hashCode ^ leCoded.hashCode;
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        other is PhySupport && hashCode == other.hashCode;
-  }
-
   Map<dynamic, dynamic> toMap() {
     return {
       'le_2M': le2M,
