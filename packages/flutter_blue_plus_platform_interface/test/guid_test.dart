@@ -89,7 +89,7 @@ void main() {
           );
 
           test(
-            'throws a format exception if the list is not 2 nor 4 nor 16 bytes in length',
+            'throws an exception if the list is not 2 nor 4 nor 16 bytes in length',
             () {
               expect(
                 () {
@@ -192,7 +192,7 @@ void main() {
           );
 
           test(
-            'throws a format exception if the string is not 2 nor 4 nor 16 bytes in length',
+            'throws an exception if the string is not 2 nor 4 nor 16 bytes in length',
             () {
               expect(
                 () {
