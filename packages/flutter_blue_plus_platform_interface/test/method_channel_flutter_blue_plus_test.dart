@@ -45,7 +45,7 @@ void main() {
 
           setUp(
             () {
-              handler = (call) {
+              handler = (methodCall) {
                 return Future.value(result);
               };
             },
@@ -103,7 +103,7 @@ void main() {
 
           setUp(
             () {
-              handler = (call) {
+              handler = (methodCall) {
                 return Future.value(result);
               };
             },
@@ -151,7 +151,7 @@ void main() {
 
           setUp(
             () {
-              handler = (call) {
+              handler = (methodCall) {
                 return Future.value(result);
               };
             },
@@ -203,7 +203,7 @@ void main() {
 
           setUp(
             () {
-              handler = (call) {
+              handler = (methodCall) {
                 return Future.value(result);
               };
             },
@@ -279,7 +279,7 @@ void main() {
 
           setUp(
             () {
-              handler = (call) {
+              handler = (methodCall) {
                 return Future.value(result);
               };
             },
@@ -327,7 +327,7 @@ void main() {
 
           setUp(
             () {
-              handler = (call) {
+              handler = (methodCall) {
                 return Future.value(result);
               };
             },
@@ -377,7 +377,7 @@ void main() {
 
           setUp(
             () {
-              handler = (call) {
+              handler = (methodCall) {
                 return Future.value(result.toMap());
               };
             },
@@ -428,7 +428,7 @@ void main() {
 
           setUp(
             () {
-              handler = (call) {
+              handler = (methodCall) {
                 return Future.value(result.toMap());
               };
             },
@@ -482,7 +482,7 @@ void main() {
 
           setUp(
             () {
-              handler = (call) {
+              handler = (methodCall) {
                 return Future.value(result.toMap());
               };
             },
@@ -533,7 +533,7 @@ void main() {
 
           setUp(
             () {
-              handler = (call) {
+              handler = (methodCall) {
                 return Future.value(result.toMap());
               };
             },
@@ -583,7 +583,7 @@ void main() {
 
           setUp(
             () {
-              handler = (call) {
+              handler = (methodCall) {
                 return Future.value(result.toMap());
               };
             },
@@ -631,7 +631,7 @@ void main() {
 
           setUp(
             () {
-              handler = (call) {
+              handler = (methodCall) {
                 return Future.value(result);
               };
             },
@@ -760,7 +760,7 @@ void main() {
 
           setUp(
             () {
-              handler = (call) {
+              handler = (methodCall) {
                 return Future.value(result);
               };
             },
@@ -890,7 +890,7 @@ void main() {
 
           setUp(
             () {
-              handler = (call) {
+              handler = (methodCall) {
                 return Future.value(result);
               };
             },
@@ -1089,7 +1089,7 @@ void main() {
 
           setUp(
             () {
-              handler = (call) {
+              handler = (methodCall) {
                 return Future.value(result);
               };
             },
@@ -1195,11 +1195,11 @@ void main() {
         () {
           TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
               .setMockMethodCallHandler(
-            flutterBluePlus.channel,
-            (call) {
-              log.add(call);
+            MethodChannel('flutter_blue_plus/methods'),
+            (methodCall) {
+              log.add(methodCall);
 
-              return handler?.call(call);
+              return handler?.call(methodCall);
             },
           );
         },
