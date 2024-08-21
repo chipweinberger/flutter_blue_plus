@@ -1,5 +1,3 @@
-## 1.33.0
-* **[Improve]** move Android, iOS, macOS implementations to federated packages
 
 ## 1.32.12
 * **[Fix]** Android: further improve `disconnect(queue:false)` reliability

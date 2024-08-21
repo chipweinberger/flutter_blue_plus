@@ -1,4 +1,4 @@
-// Copyright 2017-2024, Charles Weinberger, Paul DeMarco, Thomas Clark.
+// Copyright 2017-2023, Charles Weinberger & Paul DeMarco.
 // All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
@@ -56,7 +56,10 @@ class BluetoothCharacteristic {
   ///   - anytime `write()` is called
   ///   - anytime a notification arrives (if subscribed)
   ///   - and when first listened to, it re-emits the last value for convenience
-  Stream<List<int>> get lastValueStream => _mergeStreams([FlutterBluePlusPlatform.instance.onCharacteristicReceived, FlutterBluePlusPlatform.instance.onCharacteristicWritten])
+  Stream<List<int>> get lastValueStream => FlutterBluePlus._methodStream.stream
+      .where((m) => m.method == "OnCharacteristicReceived" || m.method == "OnCharacteristicWritten")
+      .map((m) => m.arguments)
+      .map((args) => BmCharacteristicData.fromMap(args))
       .where((p) => p.remoteId == remoteId)
       .where((p) => p.serviceUuid == serviceUuid)
       .where((p) => p.characteristicUuid == characteristicUuid)
@@ -67,7 +70,10 @@ class BluetoothCharacteristic {
   /// this stream emits values:
   ///   - anytime `read()` is called
   ///   - anytime a notification arrives (if subscribed)
-  Stream<List<int>> get onValueReceived => FlutterBluePlusPlatform.instance.onCharacteristicReceived
+  Stream<List<int>> get onValueReceived => FlutterBluePlus._methodStream.stream
+      .where((m) => m.method == "OnCharacteristicReceived")
+      .map((m) => m.arguments)
+      .map((args) => BmCharacteristicData.fromMap(args))
       .where((p) => p.remoteId == remoteId)
       .where((p) => p.serviceUuid == serviceUuid)
       .where((p) => p.characteristicUuid == characteristicUuid)
@@ -109,7 +115,10 @@ class BluetoothCharacteristic {
         secondaryServiceUuid: null,
       );
 
-      var responseStream = FlutterBluePlusPlatform.instance.onCharacteristicReceived
+      var responseStream = FlutterBluePlus._methodStream.stream
+          .where((m) => m.method == "OnCharacteristicReceived")
+          .map((m) => m.arguments)
+          .map((args) => BmCharacteristicData.fromMap(args))
           .where((p) => p.remoteId == request.remoteId)
           .where((p) => p.serviceUuid == request.serviceUuid)
           .where((p) => p.characteristicUuid == request.characteristicUuid);
@@ -118,7 +127,7 @@ class BluetoothCharacteristic {
       Future<BmCharacteristicData> futureResponse = responseStream.first;
 
       // invoke
-      await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance.readCharacteristic(request), 'readCharacteristic', request.toMap());
+      await FlutterBluePlus._invokeMethod('readCharacteristic', request.toMap());
 
       // wait for response
       BmCharacteristicData response = await futureResponse
@@ -141,7 +150,7 @@ class BluetoothCharacteristic {
   }
 
   /// Writes a characteristic.
-  ///  - [withoutResponse]:
+  ///  - [withoutResponse]: 
   ///       If `true`, the write is not guaranteed and always returns immediately with success.
   ///       If `false`, the write returns error on failure.
   ///  - [allowLongWrite]: if set, larger writes > MTU are allowed (up to 512 bytes).
@@ -180,7 +189,10 @@ class BluetoothCharacteristic {
         value: value,
       );
 
-      var responseStream = FlutterBluePlusPlatform.instance.onCharacteristicWritten
+      var responseStream = FlutterBluePlus._methodStream.stream
+          .where((m) => m.method == "OnCharacteristicWritten")
+          .map((m) => m.arguments)
+          .map((args) => BmCharacteristicData.fromMap(args))
           .where((p) => p.remoteId == request.remoteId)
           .where((p) => p.serviceUuid == request.serviceUuid)
           .where((p) => p.characteristicUuid == request.characteristicUuid);
@@ -189,7 +201,7 @@ class BluetoothCharacteristic {
       Future<BmCharacteristicData> futureResponse = responseStream.first;
 
       // invoke
-      await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance.writeCharacteristic(request), 'writeCharacteristic', request.toMap());
+      await FlutterBluePlus._invokeMethod('writeCharacteristic', request.toMap());
 
       // wait for response so that we can:
       //  1. check for success (writeWithResponse)
@@ -242,7 +254,10 @@ class BluetoothCharacteristic {
 
       // Notifications & Indications are configured by writing to the
       // Client Characteristic Configuration Descriptor (CCCD)
-      Stream<BmDescriptorData> responseStream = FlutterBluePlusPlatform.instance.onDescriptorWritten
+      Stream<BmDescriptorData> responseStream = FlutterBluePlus._methodStream.stream
+          .where((m) => m.method == "OnDescriptorWritten")
+          .map((m) => m.arguments)
+          .map((args) => BmDescriptorData.fromMap(args))
           .where((p) => p.remoteId == request.remoteId)
           .where((p) => p.serviceUuid == request.serviceUuid)
           .where((p) => p.characteristicUuid == request.characteristicUuid)
@@ -252,7 +267,7 @@ class BluetoothCharacteristic {
       Future<BmDescriptorData> futureResponse = responseStream.first;
 
       // invoke
-      bool hasCCCD = await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance.setNotifyValue(request), 'setNotifyValue', request.toMap());
+      bool hasCCCD = await FlutterBluePlus._invokeMethod('setNotifyValue', request.toMap());
 
       // wait for CCCD descriptor to be written?
       if (hasCCCD) {

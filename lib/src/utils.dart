@@ -1,8 +1,57 @@
-// Copyright 2017-2024, Charles Weinberger, Paul DeMarco, Thomas Clark.
-// All rights reserved. Use of this source code is governed by a
-// BSD-style license that can be found in the LICENSE file.
-
 part of flutter_blue_plus;
+
+String _hexEncode(List<int> numbers) {
+  return numbers.map((n) => (n & 0xFF).toRadixString(16).padLeft(2, '0')).join();
+}
+
+List<int>? _tryHexDecode(String hex) {
+  List<int> numbers = [];
+  for (int i = 0; i < hex.length; i += 2) {
+    String hexPart = hex.substring(i, i + 2);
+    int? num = int.tryParse(hexPart, radix: 16);
+    if (num == null) {
+      return null;
+    }
+    numbers.add(num);
+  }
+  return numbers;
+}
+
+List<int> _hexDecode(String hex) {
+  List<int> numbers = [];
+  for (int i = 0; i < hex.length; i += 2) {
+    String hexPart = hex.substring(i, i + 2);
+    int num = int.parse(hexPart, radix: 16);
+    numbers.add(num);
+  }
+  return numbers;
+}
+
+int _compareAsciiLowerCase(String a, String b) {
+  const int upperCaseA = 0x41;
+  const int upperCaseZ = 0x5a;
+  const int asciiCaseBit = 0x20;
+  var defaultResult = 0;
+  for (var i = 0; i < a.length; i++) {
+    if (i >= b.length) return 1;
+    var aChar = a.codeUnitAt(i);
+    var bChar = b.codeUnitAt(i);
+    if (aChar == bChar) continue;
+    var aLowerCase = aChar;
+    var bLowerCase = bChar;
+    // Upper case if ASCII letters.
+    if (upperCaseA <= bChar && bChar <= upperCaseZ) {
+      bLowerCase += asciiCaseBit;
+    }
+    if (upperCaseA <= aChar && aChar <= upperCaseZ) {
+      aLowerCase += asciiCaseBit;
+    }
+    if (aLowerCase != bLowerCase) return (aLowerCase - bLowerCase).sign;
+    if (defaultResult == 0) defaultResult = aChar - bChar;
+  }
+  if (b.length > a.length) return -1;
+  return defaultResult.sign;
+}
 
 extension AddOrUpdate<T> on List<T> {
   /// add an item to a list, or update item if it already exists
@@ -297,26 +346,6 @@ class _NewStreamWithInitialValueTransformer<T> extends StreamTransformerBase<T, 
 extension _StreamNewStreamWithInitialValue<T> on Stream<T> {
   Stream<T> newStreamWithInitialValue(T initialValue) {
     return transform(_NewStreamWithInitialValueTransformer(initialValue));
-  }
-}
-
-extension _StreamLog<T> on Stream<T> {
-  Stream<T> log(String method, [dynamic Function(T event)? arguments]) {
-    return transform(
-      StreamTransformer.fromHandlers(
-        handleData: (data, sink) {
-          if (FlutterBluePlus._logLevel == LogLevel.verbose) {
-            String func = '[[ ${method} ]]';
-            String? result = arguments?.call(data)?.toString();
-            func = FlutterBluePlus._logColor ? _black(func) : func;
-            result = result != null && FlutterBluePlus._logColor ? _brown(result) : result;
-            print("[FBP] $func result: $result");
-          }
-
-          sink.add(data);
-        },
-      ),
-    );
   }
 }
 
