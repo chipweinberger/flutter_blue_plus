@@ -33,22 +33,6 @@ class BmSetNotifyValueRequest {
     );
   }
 
-  @override
-  int get hashCode {
-    return remoteId.hashCode ^
-        serviceUuid.hashCode ^
-        secondaryServiceUuid.hashCode ^
-        characteristicUuid.hashCode ^
-        forceIndications.hashCode ^
-        enable.hashCode;
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        other is BmSetNotifyValueRequest && hashCode == other.hashCode;
-  }
-
   Map<dynamic, dynamic> toMap() {
     return {
       'remote_id': remoteId.str,

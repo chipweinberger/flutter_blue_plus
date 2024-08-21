@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:convert/convert.dart';
 
 import '../../common/models/device_identifier.dart';
@@ -38,23 +37,6 @@ class BmWriteCharacteristicRequest {
       allowLongWrite: json['allow_long_write'] != 0,
       value: json['value'] != null ? hex.decode(json['value']) : [],
     );
-  }
-
-  @override
-  int get hashCode {
-    return remoteId.hashCode ^
-        serviceUuid.hashCode ^
-        secondaryServiceUuid.hashCode ^
-        characteristicUuid.hashCode ^
-        writeType.hashCode ^
-        allowLongWrite.hashCode ^
-        const ListEquality<int>().hash(value);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        other is BmWriteCharacteristicRequest && hashCode == other.hashCode;
   }
 
   Map<dynamic, dynamic> toMap() {

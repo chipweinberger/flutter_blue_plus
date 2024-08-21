@@ -40,26 +40,6 @@ class BmCharacteristicProperties {
     );
   }
 
-  @override
-  int get hashCode {
-    return broadcast.hashCode ^
-        read.hashCode ^
-        writeWithoutResponse.hashCode ^
-        write.hashCode ^
-        notify.hashCode ^
-        indicate.hashCode ^
-        authenticatedSignedWrites.hashCode ^
-        extendedProperties.hashCode ^
-        notifyEncryptionRequired.hashCode ^
-        indicateEncryptionRequired.hashCode;
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        other is BmCharacteristicProperties && hashCode == other.hashCode;
-  }
-
   Map<dynamic, dynamic> toMap() {
     return {
       'broadcast': broadcast ? 1 : 0,

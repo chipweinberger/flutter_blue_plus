@@ -8,7 +8,6 @@ environment:
   flutter: ">=2.0.0"
 
 dependencies:
-  collection: ^1.15.0
   convert: ^3.0.0
   flutter:
     sdk: flutter
