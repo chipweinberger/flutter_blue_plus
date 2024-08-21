@@ -11,13 +11,11 @@ void main() {
           test(
             'deserializes the adapter state property',
             () {
-              final adapterState = BmAdapterStateEnum.unknown;
-
               expect(
                 BmBluetoothAdapterState.fromMap({
-                  'adapter_state': adapterState.index,
+                  'adapter_state': 0,
                 }).adapterState,
-                equals(adapterState),
+                equals(BmAdapterStateEnum.unknown),
               );
             },
           );
@@ -39,75 +37,16 @@ void main() {
       );
 
       group(
-        'hashCode',
-        () {
-          test(
-            'returns the hash code',
-            () {
-              final adapterState = BmAdapterStateEnum.unknown;
-
-              expect(
-                BmBluetoothAdapterState(
-                  adapterState: adapterState,
-                ).hashCode,
-                equals(adapterState.hashCode),
-              );
-            },
-          );
-        },
-      );
-
-      group(
-        '==',
-        () {
-          test(
-            'returns false if they are not equal',
-            () {
-              expect(
-                BmBluetoothAdapterState(
-                      adapterState: BmAdapterStateEnum.unknown,
-                    ) ==
-                    BmBluetoothAdapterState(
-                      adapterState: BmAdapterStateEnum.unavailable,
-                    ),
-                isFalse,
-              );
-            },
-          );
-
-          test(
-            'returns true if they are equal',
-            () {
-              expect(
-                BmBluetoothAdapterState(
-                      adapterState: BmAdapterStateEnum.unknown,
-                    ) ==
-                    BmBluetoothAdapterState(
-                      adapterState: BmAdapterStateEnum.unknown,
-                    ),
-                isTrue,
-              );
-            },
-          );
-        },
-      );
-
-      group(
         'toMap',
         () {
           test(
             'serializes the adapter state property',
             () {
-              final adapterState = BmAdapterStateEnum.unknown;
-
               expect(
                 BmBluetoothAdapterState(
-                  adapterState: adapterState,
+                  adapterState: BmAdapterStateEnum.unknown,
                 ).toMap(),
-                containsPair(
-                  'adapter_state',
-                  equals(adapterState.index),
-                ),
+                containsPair('adapter_state', 0),
               );
             },
           );

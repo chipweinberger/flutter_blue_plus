@@ -15,17 +15,6 @@ class BmBluetoothAdapterState {
     );
   }
 
-  @override
-  int get hashCode {
-    return adapterState.hashCode;
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        other is BmBluetoothAdapterState && hashCode == other.hashCode;
-  }
-
   Map<dynamic, dynamic> toMap() {
     return {
       'adapter_state': adapterState.index,

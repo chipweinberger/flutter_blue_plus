@@ -13,17 +13,6 @@ class BmTurnOnResponse {
     );
   }
 
-  @override
-  int get hashCode {
-    return userAccepted.hashCode;
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        other is BmTurnOnResponse && hashCode == other.hashCode;
-  }
-
   Map<dynamic, dynamic> toMap() {
     return {
       'user_accepted': userAccepted,
