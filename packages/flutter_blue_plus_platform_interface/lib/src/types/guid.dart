@@ -1,4 +1,4 @@
-import '../utils/utils.dart';
+import 'package:convert/convert.dart';
 
 class Guid {
   static const _suffix = '-0000-1000-8000-00805f9b34fb';

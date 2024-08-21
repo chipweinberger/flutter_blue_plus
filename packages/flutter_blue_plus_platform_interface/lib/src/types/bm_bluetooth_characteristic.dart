@@ -1,8 +1,9 @@
-import '../utils/utils.dart';
+import 'package:collection/collection.dart';
+
+import 'guid.dart';
 import 'bm_bluetooth_descriptor.dart';
 import 'bm_characteristic_properties.dart';
 import 'device_identifier.dart';
-import 'guid.dart';
 
 class BmBluetoothCharacteristic {
   final DeviceIdentifier remoteId;

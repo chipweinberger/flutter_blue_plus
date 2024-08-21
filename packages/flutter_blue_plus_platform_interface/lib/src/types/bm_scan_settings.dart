@@ -1,4 +1,5 @@
-import '../utils/utils.dart';
+import 'package:collection/collection.dart';
+
 import 'bm_msd_filter.dart';
 import 'bm_service_data_filter.dart';
 import 'guid.dart';

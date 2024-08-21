@@ -1,6 +1,8 @@
-import '../utils/utils.dart';
-import 'device_identifier.dart';
+import 'package:collection/collection.dart';
+import 'package:convert/convert.dart';
+
 import 'guid.dart';
+import 'device_identifier.dart';
 
 class BmScanAdvertisement {
   final DeviceIdentifier remoteId;

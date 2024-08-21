@@ -1,4 +1,5 @@
-import '../utils/utils.dart';
+import 'package:collection/collection.dart';
+import 'package:convert/convert.dart';
 
 class BmMsdFilter {
   int manufacturerId;
