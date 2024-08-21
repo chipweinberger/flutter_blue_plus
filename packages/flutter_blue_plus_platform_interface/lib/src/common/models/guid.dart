@@ -13,19 +13,9 @@ class Guid {
           'GUID must be 16, 32, or 128 bit.',
         );
 
-  Guid.fromString(String input)
-      : bytes = _fromString(input),
-        assert(
-          _checkLen(hex.decode(input.replaceAll('-', '')).length),
-          'GUID must be 16, 32, or 128 bit.',
-        );
+  Guid.fromString(String input) : bytes = _fromString(input);
 
-  Guid(String input)
-      : bytes = _fromString(input),
-        assert(
-          _checkLen(hex.decode(input.replaceAll('-', '')).length),
-          'GUID must be 16, 32, or 128 bit.',
-        );
+  Guid(String input) : bytes = _fromString(input);
 
   static List<int> _fromString(String input) {
     if (input.isEmpty) {
@@ -91,27 +81,17 @@ class Guid {
   }
 
   @override
-  int get hashCode {
-    return str128.hashCode;
-  }
+  String toString() => str;
 
-  @Deprecated('use str instead')
-  String get uuid {
-    return str;
-  }
+  @override
+  operator ==(other) => other is Guid && hashCode == other.hashCode;
+
+  @override
+  int get hashCode => str128.hashCode;
 
   @Deprecated('use str128 instead')
-  String get uuid128 {
-    return str128;
-  }
+  String get uuid128 => str128;
 
-  @override
-  operator ==(other) {
-    return other is Guid && hashCode == other.hashCode;
-  }
-
-  @override
-  String toString() {
-    return str;
-  }
+  @Deprecated('use str instead')
+  String get uuid => str;
 }
