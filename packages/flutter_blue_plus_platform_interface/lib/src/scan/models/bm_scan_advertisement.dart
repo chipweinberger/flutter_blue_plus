@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:convert/convert.dart';
 
 import '../../common/models/device_identifier.dart';
@@ -51,26 +50,6 @@ class BmScanAdvertisement {
           [],
       rssi: json['rssi'] ?? 0,
     );
-  }
-
-  @override
-  int get hashCode {
-    return remoteId.hashCode ^
-        platformName.hashCode ^
-        advName.hashCode ^
-        connectable.hashCode ^
-        txPowerLevel.hashCode ^
-        appearance.hashCode ^
-        const MapEquality<int, List<int>>().hash(manufacturerData) ^
-        const MapEquality<Guid, List<int>>().hash(serviceData) ^
-        const ListEquality<Guid>().hash(serviceUuids) ^
-        rssi.hashCode;
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        other is BmScanAdvertisement && hashCode == other.hashCode;
   }
 
   Map<dynamic, dynamic> toMap() {

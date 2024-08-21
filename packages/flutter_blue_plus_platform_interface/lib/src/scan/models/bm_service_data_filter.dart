@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:convert/convert.dart';
 
 import '../../common/models/guid.dart';
@@ -22,19 +21,6 @@ class BmServiceDataFilter {
       json['data'] != null ? hex.decode(json['data']) : [],
       json['mask'] != null ? hex.decode(json['mask']) : [],
     );
-  }
-
-  @override
-  int get hashCode {
-    return service.hashCode ^
-        const ListEquality<int>().hash(data) ^
-        const ListEquality<int>().hash(mask);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        other is BmServiceDataFilter && hashCode == other.hashCode;
   }
 
   Map<dynamic, dynamic> toMap() {

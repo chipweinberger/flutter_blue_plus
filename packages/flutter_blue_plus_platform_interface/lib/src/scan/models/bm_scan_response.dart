@@ -1,5 +1,3 @@
-import 'package:collection/collection.dart';
-
 import 'bm_scan_advertisement.dart';
 
 class BmScanResponse {
@@ -30,20 +28,6 @@ class BmScanResponse {
       errorCode: !success ? json['error_code'] : 0,
       errorString: !success ? json['error_string'] : '',
     );
-  }
-
-  @override
-  int get hashCode {
-    return const ListEquality<BmScanAdvertisement>().hash(advertisements) ^
-        success.hashCode ^
-        errorCode.hashCode ^
-        errorString.hashCode;
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        other is BmScanResponse && hashCode == other.hashCode;
   }
 
   Map<dynamic, dynamic> toMap() {

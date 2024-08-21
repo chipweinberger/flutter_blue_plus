@@ -1,5 +1,3 @@
-import 'package:collection/collection.dart';
-
 import '../../common/models/guid.dart';
 import 'bm_msd_filter.dart';
 import 'bm_service_data_filter.dart';
@@ -58,27 +56,6 @@ class BmScanSettings {
       androidScanMode: json['android_scan_mode'],
       androidUsesFineLocation: json['android_uses_fine_location'],
     );
-  }
-
-  @override
-  int get hashCode {
-    return const ListEquality<Guid>().hash(withServices) ^
-        const ListEquality<String>().hash(withRemoteIds) ^
-        const ListEquality<String>().hash(withNames) ^
-        const ListEquality<String>().hash(withKeywords) ^
-        const ListEquality<BmMsdFilter>().hash(withMsd) ^
-        const ListEquality<BmServiceDataFilter>().hash(withServiceData) ^
-        continuousUpdates.hashCode ^
-        continuousDivisor.hashCode ^
-        androidLegacy.hashCode ^
-        androidScanMode.hashCode ^
-        androidUsesFineLocation.hashCode;
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        other is BmScanSettings && hashCode == other.hashCode;
   }
 
   Map<dynamic, dynamic> toMap() {

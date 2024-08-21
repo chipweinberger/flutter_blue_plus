@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:convert/convert.dart';
 
 class BmMsdFilter {
@@ -20,19 +19,6 @@ class BmMsdFilter {
       json['data'] != null ? hex.decode(json['data']) : null,
       json['mask'] != null ? hex.decode(json['mask']) : null,
     );
-  }
-
-  @override
-  int get hashCode {
-    return manufacturerId.hashCode ^
-        const ListEquality<int>().hash(data) ^
-        const ListEquality<int>().hash(mask);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        other is BmMsdFilter && hashCode == other.hashCode;
   }
 
   Map<dynamic, dynamic> toMap() {
