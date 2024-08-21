@@ -39,9 +39,9 @@ abstract class FlutterBluePlusPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  /// Clears the GATT cache for a [remoteId].
+  /// Clears the GATT cache for a [device].
   Future<void> clearGattCache(
-    DeviceIdentifier remoteId,
+    DeviceIdentifier device,
   ) {
     throw UnimplementedError();
   }
@@ -62,33 +62,33 @@ abstract class FlutterBluePlusPlatform extends PlatformInterface {
     throw UnimplementedError();
   }
 
-  /// Creates a bond to a [remoteId].
+  /// Creates a bond to a [device].
   ///
   /// Returns [true] if the bond state is changed.
   ///
   /// Implementations should call [OnBondStateChanged] with the changed bond state.
   Future<bool> createBond(
-    DeviceIdentifier remoteId,
+    DeviceIdentifier device,
   ) {
     throw UnimplementedError();
   }
 
-  /// Disconnects from a [remoteId].
+  /// Disconnects from a [device].
   ///
   /// Returns [true] if the connection state is changed.
   ///
   /// Implementations should call [OnConnectionStateChanged] with the changed connection state.
   Future<bool> disconnect(
-    DeviceIdentifier remoteId,
+    DeviceIdentifier device,
   ) {
     throw UnimplementedError();
   }
 
-  /// Discovers the services for a [remoteId].
+  /// Discovers the services for a [device].
   ///
   /// Implementations should call [OnDiscoveredServices] with the discovered services.
   Future<void> discoverServices(
-    DeviceIdentifier remoteId,
+    DeviceIdentifier device,
   ) {
     throw UnimplementedError();
   }
@@ -108,9 +108,9 @@ abstract class FlutterBluePlusPlatform extends PlatformInterface {
     throw UnimplementedError();
   }
 
-  /// Returns the bond state for a [remoteId].
+  /// Returns the bond state for a [device].
   Future<BmBondStateResponse> getBondState(
-    DeviceIdentifier remoteId,
+    DeviceIdentifier device,
   ) {
     throw UnimplementedError();
   }
@@ -153,22 +153,22 @@ abstract class FlutterBluePlusPlatform extends PlatformInterface {
     throw UnimplementedError();
   }
 
-  /// Reads the Received Signal Strength Indicator (RSSI) for a [remoteId].
+  /// Reads the Received Signal Strength Indicator (RSSI) for a [device].
   ///
   /// Implementations should call [OnReadRssi] with the read RSSI.
   Future<void> readRssi(
-    DeviceIdentifier remoteId,
+    DeviceIdentifier device,
   ) {
     throw UnimplementedError();
   }
 
-  /// Removes the bond to a [remoteId].
+  /// Removes the bond to a [device].
   ///
   /// Returns [true] if the bond state is changed.
   ///
   /// Implementations should call [OnBondStateChanged] with the changed bond state.
   Future<bool> removeBond(
-    DeviceIdentifier remoteId,
+    DeviceIdentifier device,
   ) {
     throw UnimplementedError();
   }

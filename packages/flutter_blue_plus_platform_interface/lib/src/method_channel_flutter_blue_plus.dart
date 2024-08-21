@@ -25,11 +25,11 @@ const _channel = MethodChannel('flutter_blue_plus/methods');
 class MethodChannelFlutterBluePlus extends FlutterBluePlusPlatform {
   @override
   Future<void> clearGattCache(
-    DeviceIdentifier remoteId,
+    DeviceIdentifier device,
   ) async {
     await _channel.invokeMethod<void>(
       'clearGattCache',
-      remoteId.str,
+      device.str,
     );
   }
 
@@ -56,11 +56,11 @@ class MethodChannelFlutterBluePlus extends FlutterBluePlusPlatform {
 
   @override
   Future<bool> createBond(
-    DeviceIdentifier remoteId,
+    DeviceIdentifier device,
   ) async {
     final result = await _channel.invokeMethod<bool>(
       'createBond',
-      remoteId.str,
+      device.str,
     );
 
     return result!;
@@ -68,11 +68,11 @@ class MethodChannelFlutterBluePlus extends FlutterBluePlusPlatform {
 
   @override
   Future<bool> disconnect(
-    DeviceIdentifier remoteId,
+    DeviceIdentifier device,
   ) async {
     final result = await _channel.invokeMethod<bool>(
       'disconnect',
-      remoteId.str,
+      device.str,
     );
 
     return result!;
@@ -80,11 +80,11 @@ class MethodChannelFlutterBluePlus extends FlutterBluePlusPlatform {
 
   @override
   Future<void> discoverServices(
-    DeviceIdentifier remoteId,
+    DeviceIdentifier device,
   ) async {
     await _channel.invokeMethod<void>(
       'discoverServices',
-      remoteId.str,
+      device.str,
     );
   }
 
@@ -117,11 +117,11 @@ class MethodChannelFlutterBluePlus extends FlutterBluePlusPlatform {
 
   @override
   Future<BmBondStateResponse> getBondState(
-    DeviceIdentifier remoteId,
+    DeviceIdentifier device,
   ) async {
     final result = await _channel.invokeMethod<Map<dynamic, dynamic>>(
       'getBondState',
-      remoteId.str,
+      device.str,
     );
 
     return BmBondStateResponse.fromMap(result!);
@@ -185,21 +185,21 @@ class MethodChannelFlutterBluePlus extends FlutterBluePlusPlatform {
 
   @override
   Future<void> readRssi(
-    DeviceIdentifier remoteId,
+    DeviceIdentifier device,
   ) async {
     await _channel.invokeMethod<void>(
       'readRssi',
-      remoteId.str,
+      device.str,
     );
   }
 
   @override
   Future<bool> removeBond(
-    DeviceIdentifier remoteId,
+    DeviceIdentifier device,
   ) async {
     final result = await _channel.invokeMethod<bool>(
       'removeBond',
-      remoteId.str,
+      device.str,
     );
 
     return result!;
