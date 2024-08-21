@@ -6,7 +6,7 @@ class BmBluetoothDevice {
 
   BmBluetoothDevice({
     required this.remoteId,
-    this.platformName,
+    required this.platformName,
   });
 
   factory BmBluetoothDevice.fromMap(
