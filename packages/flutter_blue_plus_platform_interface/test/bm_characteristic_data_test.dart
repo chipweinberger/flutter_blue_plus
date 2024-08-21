@@ -116,9 +116,6 @@ void main() {
                   'secondary_service_uuid': '0102',
                   'characteristic_uuid': '0102',
                   'value': '0102',
-                  'success': 1,
-                  'error_code': 0,
-                  'error_string': '',
                 }).value,
                 orderedEquals([
                   0x01,
@@ -138,9 +135,6 @@ void main() {
                   'secondary_service_uuid': null,
                   'characteristic_uuid': '0102',
                   'value': null,
-                  'success': 1,
-                  'error_code': 0,
-                  'error_string': '',
                 }).value,
                 orderedEquals([]),
               );
