@@ -1,5 +1,3 @@
-package packages.flutter_blue_plus_android.android
-
 group 'com.lib.flutter_blue_plus'
 version '1.0'
 
