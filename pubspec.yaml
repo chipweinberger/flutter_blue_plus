@@ -1,0 +1,23 @@
+name: flutter_blue_plus
+description: Flutter plugin for connecting and communicationg with Bluetooth Low Energy devices, on Android, iOS, and MacOS.
+version: 1.32.12
+homepage: https://github.com/boskokg/flutter_blue_plus
+
+environment:
+  sdk: ">=2.15.1 <4.0.0"
+  flutter: ">=2.5.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.lib.flutter_blue_plus
+        pluginClass: FlutterBluePlusPlugin
+      ios:
+        pluginClass: FlutterBluePlusPlugin
+      macos:
+        pluginClass: FlutterBluePlusPlugin
