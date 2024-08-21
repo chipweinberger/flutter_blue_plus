@@ -1,13 +1,6 @@
 export 'src/adapter/enums/bm_adapter_state_enum.dart';
 export 'src/adapter/models/bm_bluetooth_adapter_state.dart';
 export 'src/adapter/models/bm_turn_on_response.dart';
-export 'src/characteristic/enums/bm_write_type.dart';
-export 'src/characteristic/models/bm_bluetooth_characteristic.dart';
-export 'src/characteristic/models/bm_characteristic_data.dart';
-export 'src/characteristic/models/bm_characteristic_properties.dart';
-export 'src/characteristic/models/bm_read_characteristic_request.dart';
-export 'src/characteristic/models/bm_set_notify_value_request.dart';
-export 'src/characteristic/models/bm_write_characteristic_request.dart';
 export 'src/common/models/device_identifier.dart';
 export 'src/common/models/guid.dart';
 export 'src/flutter_blue_plus_platform.dart';

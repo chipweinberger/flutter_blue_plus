@@ -27,8 +27,6 @@ class BmCharacteristicData {
   factory BmCharacteristicData.fromMap(
     Map<dynamic, dynamic> json,
   ) {
-    final success = json['success'] == null || json['success'] != 0;
-
     return BmCharacteristicData(
       remoteId: DeviceIdentifier(json['remote_id']),
       serviceUuid: Guid(json['service_uuid']),
@@ -37,9 +35,9 @@ class BmCharacteristicData {
           : null,
       characteristicUuid: Guid(json['characteristic_uuid']),
       value: json['value'] != null ? hex.decode(json['value']) : [],
-      success: success,
-      errorCode: !success ? json['error_code'] : 0,
-      errorString: !success ? json['error_string'] : '',
+      success: json['success'] != 0,
+      errorCode: json['error_code'],
+      errorString: json['error_string'],
     );
   }
 
