@@ -1557,21 +1557,31 @@ public class FlutterBluePlusPlugin implements
             return;
         }
 
-        String nextPermission = permissionsNeeded.remove(0);
+        // String nextPermission = permissionsNeeded.remove(0);
 
-        operationsOnPermission.put(lastEventId, (granted, perm) -> {
-            operationsOnPermission.remove(lastEventId);
-            if (!granted) {
-                operation.op(false, perm);
-                return;
-            }
-            // recursively ask for next permission
-            askPermission(permissionsNeeded, operation);
-        });
+        // operationsOnPermission.put(lastEventId, (granted, perm) -> {
+        //     operationsOnPermission.remove(lastEventId);
+        //     if (!granted) {
+        //         operation.op(false, perm);
+        //         return;
+        //     }
+        //     // recursively ask for next permission
+        //     askPermission(permissionsNeeded, operation);
+        // });
 
+        // ActivityCompat.requestPermissions(
+        //         activityBinding.getActivity(),
+        //         new String[]{nextPermission},
+        //         lastEventId);
+
+        //Fix issue: ANDROID scan permission popup appears twice
+        // Store the operation for later use in onRequestPermissionsResult
+        operationsOnPermission.put(lastEventId, operation);
+
+        // Request all needed permissions at once
         ActivityCompat.requestPermissions(
                 activityBinding.getActivity(),
-                new String[]{nextPermission},
+                permissionsNeeded.toArray(new String[0]),
                 lastEventId);
 
         lastEventId++;
