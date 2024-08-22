@@ -20,73 +20,78 @@ abstract base class FlutterBluePlusPlatform {
     _instance = instance;
   }
 
-  /// Returns a stream of adapter state change events.
-  Stream<BluetoothAdapterState> get adapterStateChanges {
+  /// Returns a stream of adapter state changed events.
+  Stream<OnAdapterStateChangedEvent> get onAdapterStateChanged {
     throw UnimplementedError();
   }
 
-  /// Returns a stream of bond state change events.
-  Stream<OnBondStateChangedEvent> get bondStateChanges {
+  /// Returns a stream of bond state changed events.
+  Stream<OnBondStateChangedEvent> get onBondStateChanged {
     throw UnimplementedError();
   }
 
-  /// Returns a stream of characteristic receive events.
-  Stream<OnCharacteristicReceivedEvent> get characteristicReceives {
+  /// Returns a stream of characteristic received events.
+  Stream<OnCharacteristicReceivedEvent> get onCharacteristicReceived {
     throw UnimplementedError();
   }
 
-  /// Returns a stream of characteristic write events.
-  Stream<OnCharacteristicWrittenEvent> get characteristicWrites {
+  /// Returns a stream of characteristic written events.
+  Stream<OnCharacteristicWrittenEvent> get onCharacteristicWritten {
     throw UnimplementedError();
   }
 
-  /// Returns a stream of connection state change events.
-  Stream<OnConnectionStateChangedEvent> get connectionStateChanges {
+  /// Returns a stream of connection state changed events.
+  Stream<OnConnectionStateChangedEvent> get onConnectionStateChanged {
     throw UnimplementedError();
   }
 
   /// Returns a stream of descriptor read events.
-  Stream<OnDescriptorReadEvent> get descriptorReads {
+  Stream<OnDescriptorReadEvent> get onDescriptorRead {
     throw UnimplementedError();
   }
 
-  /// Returns a stream of descriptor write events.
-  Stream<OnDescriptorWrittenEvent> get descriptorWrites {
+  /// Returns a stream of descriptor written events.
+  Stream<OnDescriptorWrittenEvent> get onDescriptorWritten {
     throw UnimplementedError();
   }
 
-  /// Returns a stream of Maximum Transmission Unit (MTU) change events.
-  Stream<OnMtuChangedEvent> get mtuChanges {
+  /// Returns a stream of device scanned events.
+  Stream<OnDeviceScannedEvent> get onDeviceScanned {
     throw UnimplementedError();
   }
 
-  /// Returns a stream of name change events.
-  Stream<OnNameChangedEvent> get nameChanges {
+  /// Returns a stream of Maximum Transmission Unit (MTU) changed events.
+  Stream<OnMtuChangedEvent> get onMtuChanged {
     throw UnimplementedError();
   }
 
-  /// Returns a stream of Physical Layer (PHY) change events.
-  Stream<OnPhyChangedEvent> get phyChanges {
+  /// Returns a stream of name changed events.
+  Stream<OnNameChangedEvent> get onNameChanged {
+    throw UnimplementedError();
+  }
+
+  /// Returns a stream of Physical Layer (PHY) changed events.
+  Stream<OnPhyChangedEvent> get onPhyChanged {
+    throw UnimplementedError();
+  }
+
+  /// Returns a stream of Physical Layer (PHY) read events.
+  Stream<OnPhyReadEvent> get onPhyRead {
     throw UnimplementedError();
   }
 
   /// Returns a stream of Received Signal Strength Indicator (RSSI) read events.
-  Stream<OnReadRssiEvent> get rssiReads {
+  Stream<OnRssiReadEvent> get onRssiRead {
     throw UnimplementedError();
   }
 
-  /// Returns a stream of scan result events.
-  Stream<ScanResult> get scanResults {
+  /// Returns a stream of services changed events.
+  Stream<OnServicesChangedEvent> get onServicesChanged {
     throw UnimplementedError();
   }
 
-  /// Returns a stream of services change events.
-  Stream<OnServicesResetEvent> get servicesChanges {
-    throw UnimplementedError();
-  }
-
-  /// Returns a stream of services discover events.
-  Stream<OnDiscoveredServicesEvent> get servicesDiscovers {
+  /// Returns a stream of services discovered events.
+  Stream<OnServicesDiscoveredEvent> get onServicesDiscovered {
     throw UnimplementedError();
   }
 
@@ -136,11 +141,6 @@ abstract base class FlutterBluePlusPlatform {
     throw UnimplementedError();
   }
 
-  /// Returns the Physical Layer (PHY) support.
-  Future<PhySupport> getPhySupport() {
-    throw UnimplementedError();
-  }
-
   /// Returns the system devices.
   Future<List<BluetoothDevice>> getSystemDevices() {
     throw UnimplementedError();
@@ -157,8 +157,9 @@ abstract base class FlutterBluePlusPlatform {
   Future<List<int>> readCharacteristic(
     DeviceIdentifier remoteId,
     Guid serviceUuid,
-    Guid characteristicUuid,
-  ) {
+    Guid characteristicUuid, {
+    Guid? secondaryServiceUuid,
+  }) {
     throw UnimplementedError();
   }
 
@@ -169,8 +170,14 @@ abstract base class FlutterBluePlusPlatform {
     DeviceIdentifier remoteId,
     Guid serviceUuid,
     Guid characteristicUuid,
-    Guid descriptorUuid,
-  ) {
+    Guid descriptorUuid, {
+    Guid? secondaryServiceUuid,
+  }) {
+    throw UnimplementedError();
+  }
+
+  /// Reads the transmitter and receiver Physical Layer (PHY).
+  Future<Phy> readPhy() {
     throw UnimplementedError();
   }
 
@@ -197,7 +204,7 @@ abstract base class FlutterBluePlusPlatform {
   }
 
   /// Requests a change to the Maximum Transmission Unit (MTU) for a [remoteId].
-  Future<int> requestMtu(
+  Future<void> requestMtu(
     DeviceIdentifier remoteId,
     int mtu,
   ) {
@@ -218,6 +225,7 @@ abstract base class FlutterBluePlusPlatform {
     Guid characteristicUuid,
     bool enable, {
     bool androidForceIndications = false,
+    Guid? secondaryServiceUuid,
   }) {
     throw UnimplementedError();
   }
@@ -229,11 +237,10 @@ abstract base class FlutterBluePlusPlatform {
     throw UnimplementedError();
   }
 
-  /// Sets the preferred Physical Layer (PHY).
+  /// Sets the preferred transmitter and receiver Physical Layer (PHY).
   Future<void> setPreferredPhy(
-    int txPhy,
-    int rxPhy,
-    PhyCoding phyOptions,
+    Phy phy,
+    PhyOptions phyOptions,
   ) {
     throw UnimplementedError();
   }
@@ -280,6 +287,7 @@ abstract base class FlutterBluePlusPlatform {
     List<int> value,
     WriteType writeType, {
     bool allowLongWrite = false,
+    Guid? secondaryServiceUuid,
   }) {
     throw UnimplementedError();
   }
@@ -292,8 +300,9 @@ abstract base class FlutterBluePlusPlatform {
     Guid serviceUuid,
     Guid characteristicUuid,
     Guid descriptorUuid,
-    List<int> value,
-  ) {
+    List<int> value, {
+    Guid? secondaryServiceUuid,
+  }) {
     throw UnimplementedError();
   }
 }
