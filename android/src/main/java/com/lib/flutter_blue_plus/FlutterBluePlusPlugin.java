@@ -638,6 +638,7 @@ public class FlutterBluePlusPlugin implements
                     ArrayList<String> permissions = new ArrayList<>();
 
                     if (Build.VERSION.SDK_INT >= 31) { // Android 12 (October 2021)
+                        permissions.add(Manifest.permission.BLUETOOTH_SCAN);
                         permissions.add(Manifest.permission.BLUETOOTH_CONNECT);
                     }
 
@@ -1556,34 +1557,14 @@ public class FlutterBluePlusPlugin implements
             operation.op(true, null);
             return;
         }
-
-        // String nextPermission = permissionsNeeded.remove(0);
-
-        // operationsOnPermission.put(lastEventId, (granted, perm) -> {
-        //     operationsOnPermission.remove(lastEventId);
-        //     if (!granted) {
-        //         operation.op(false, perm);
-        //         return;
-        //     }
-        //     // recursively ask for next permission
-        //     askPermission(permissionsNeeded, operation);
-        // });
-
-        // ActivityCompat.requestPermissions(
-        //         activityBinding.getActivity(),
-        //         new String[]{nextPermission},
-        //         lastEventId);
-
         //Fix issue: ANDROID scan permission popup appears twice
         // Store the operation for later use in onRequestPermissionsResult
         operationsOnPermission.put(lastEventId, operation);
-
         // Request all needed permissions at once
         ActivityCompat.requestPermissions(
                 activityBinding.getActivity(),
                 permissionsNeeded.toArray(new String[0]),
                 lastEventId);
-
         lastEventId++;
     }
 
