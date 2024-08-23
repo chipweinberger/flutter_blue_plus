@@ -1557,7 +1557,6 @@ public class FlutterBluePlusPlugin implements
             operation.op(true, null);
             return;
         }
-        //Fix issue: ANDROID scan permission popup appears twice
         // Store the operation for later use in onRequestPermissionsResult
         operationsOnPermission.put(lastEventId, operation);
         // Request all needed permissions at once
