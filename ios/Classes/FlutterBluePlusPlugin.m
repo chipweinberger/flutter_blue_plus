@@ -54,6 +54,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 @property(nonatomic) NSTimer *checkForMtuChangesTimer;
 @property(nonatomic) LogLevel logLevel;
 @property(nonatomic) NSNumber *showPowerAlert;
+@property(nonatomic) NSNumber *restoreState;
 @end
 
 @implementation FlutterBluePlusPlugin
@@ -75,6 +76,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     instance.scanCounts = [NSMutableDictionary new];
     instance.logLevel = LDEBUG;
     instance.showPowerAlert = @(YES);
+    instance.restoreState = @(NO);
 
     [registrar addMethodCallDelegate:instance channel:methodChannel];
 }
@@ -104,10 +106,19 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     {
         Log(LDEBUG, @"handleMethodCall: %@", call.method);
 
+        if ([@"setLogLevel" isEqualToString:call.method])
+        {
+            NSNumber *idx = [call arguments];
+            self.logLevel = (LogLevel)[idx integerValue];
+            result(@YES);
+            return;
+        }
+
         if ([@"setOptions" isEqualToString:call.method])
         {
             NSDictionary *args = (NSDictionary*) call.arguments;
             self.showPowerAlert = args[@"show_power_alert"];
+            self.restoreState = args[@"restore_state"];
             result(@YES);
             return;
         }
@@ -117,11 +128,18 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         {
             Log(LDEBUG, @"initializing CBCentralManager");
 
-            NSDictionary *options = @{
-                CBCentralManagerOptionShowPowerAlertKey: self.showPowerAlert
-            };
+            NSMutableDictionary *options = [NSMutableDictionary dictionary];
 
-            Log(LDEBUG, @"show power alert: %@", [self.showPowerAlert boolValue] ? @"yes" : @"no");
+            if ([self.showPowerAlert boolValue]) {
+                options[CBCentralManagerOptionShowPowerAlertKey] = self.showPowerAlert;
+            }
+
+            if ([self.restoreState boolValue]) {
+                options[CBCentralManagerOptionRestoreIdentifierKey] = @"flutterBluePlusRestoreIdentifier";
+            }
+
+            Log(LDEBUG, @"showPowerAlert: %@", [self.showPowerAlert boolValue] ? @"yes" : @"no");
+            Log(LDEBUG, @"restoreState: %@", [self.restoreState boolValue] ? @"yes" : @"no");
 
             self.centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil options:options];
         }
@@ -183,13 +201,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 [self.knownPeripherals removeAllObjects];
             }
             result(@(self.connectedPeripherals.count));
-            return;
-        }
-        else if ([@"setLogLevel" isEqualToString:call.method])
-        {
-            NSNumber *idx = [call arguments];
-            self.logLevel = (LogLevel)[idx integerValue];
-            result(@YES);
             return;
         }
         else if ([@"isSupported" isEqualToString:call.method])
@@ -1025,6 +1036,46 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 // ██   ██  █████    ██       █████    ██   ███  ███████     ██     █████            
 // ██   ██  ██       ██       ██       ██    ██  ██   ██     ██     ██               
 // ██████   ███████  ███████  ███████   ██████   ██   ██     ██     ███████ 
+
+- (void)centralManager:(CBCentralManager *)central
+      willRestoreState:(NSDictionary *)state {
+
+    // restore adapter state
+    [self centralManagerDidUpdateState:central];
+
+    NSArray *peripherals = state[CBCentralManagerRestoredStatePeripheralsKey];
+    
+    for (CBPeripheral *peripheral in peripherals) {
+        
+        // Set the delegate to self to receive the peripheral callbacks
+        peripheral.delegate = self;
+
+        // skip if not connected
+        if (peripheral.state != CBPeripheralStateConnected) {
+            continue;
+        }
+
+        // update connection state
+        [self centralManager:central didConnectPeripheral:peripheral];
+        
+        for (CBService *service in peripheral.services) {
+
+            // restore services
+            [self peripheral:peripheral didDiscoverServices:nil];
+            
+            for (CBCharacteristic *characteristic in service.characteristics) {
+
+                // restore characteristics
+                [self peripheral:peripheral didDiscoverCharacteristicsForService:service error:nil];
+
+                // restore notidications
+                if (characteristic.isNotifying) {
+                    [self peripheral:peripheral didUpdateNotificationStateForCharacteristic:characteristic error:nil];
+                }
+            }
+        }
+    }
+}
 
 - (void)centralManagerDidUpdateState:(nonnull CBCentralManager *)central
 {

@@ -105,10 +105,14 @@ class FlutterBluePlus {
   ///       To set this option you must call this method before any other method in this package.
   ///       See: https://developer.apple.com/documentation/corebluetooth/cbcentralmanageroptionshowpoweralertkey
   ///       This option has no effect on Android.
+  ///   - [restoreState] Whether to opt into state restoration (iOS & MacOS only). i.e. CBCentralManagerOptionRestoreIdentifierKey
+  ///       To set this option you must call this method before any other method in this package.
+  ///       See Apple Documentation for more details. This option has no effect on Android.    
   static Future<void> setOptions({
     bool showPowerAlert = true,
+    bool restoreState = false,
   }) async {
-    await _invokeMethod('setOptions', {"show_power_alert": showPowerAlert});
+    await _invokeMethod('setOptions', {"show_power_alert": showPowerAlert, "restore_state": restoreState});
   }
 
   /// Turn on Bluetooth (Android only),
@@ -592,7 +596,7 @@ class FlutterBluePlus {
 
     try {
       // initialize
-      if (method != "setOptions") {
+      if (method != "setOptions" && method != "setLogLevel") {
         _initFlutterBluePlus();
       }
 
