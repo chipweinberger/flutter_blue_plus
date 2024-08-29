@@ -599,10 +599,10 @@ Add the following to your `Info.plist`
 
 When this key-value pair is included in the app’s Info.plist file, the system wakes up your app to process ble `read`, `write`, and `subscription` events.
 
-To wake up your app even after it is killed by the OS, set the `restoreIosState` option to true **before** starting any FBP work**:
+To wake up your app even after it is killed by the OS, set the `restoreState` option to true **before** starting any FBP work**:
 
 ```
-FlutterBluePlus.setOptions(restoreIosState: true);
+FlutterBluePlus.setOptions(restoreState: true);
 ```
 
 **Note**: Upon being woken up, an app has around 10 seconds to complete a task. Apps that spend too much time executing in the background can be throttled back by the system or killed.
