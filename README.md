@@ -28,7 +28,7 @@ FlutterBluePlus is a Bluetooth Low Energy plugin for [Flutter](https://flutter.d
 
 It supports BLE Central Role only (most common). 
 
-If you need BLE Peripheral Role, you should check out [FlutterBlePeripheral](https://pub.dev/packages/flutter_ble_peripheral).
+If you need BLE Peripheral Role, you should check out [FlutterBlePeripheral](https://pub.dev/packages/flutter_ble_peripheral), or [bluetooth_low_energy](https://pub.dev/packages/bluetooth_low_energy).
 
 ## Tutorial
 
@@ -59,8 +59,8 @@ This makes FlutterBluePlus very stable, and easy to maintain.
 
 These other libraries are worth considering. They support more platforms, but fewer features.
 
-- [flutter_blue_plus_windows](https://pub.dev/packages/flutter_blue_plus_windows)
-- [bluetooth_low_energy](https://pub.dev/packages/bluetooth_low_energy)
+- [flutter_blue_plus_windows](https://pub.dev/packages/flutter_blue_plus_windows) (adds Windows support to FBP)
+- [bluetooth_low_energy](https://pub.dev/packages/bluetooth_low_energy) 
 - [universal_ble](https://pub.dev/packages/universal_ble)
 - [quick_blue](https://pub.dev/packages/quick_blue)
 
