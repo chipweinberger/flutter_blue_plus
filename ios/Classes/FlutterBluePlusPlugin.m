@@ -1040,6 +1040,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 - (void)centralManager:(CBCentralManager *)central
       willRestoreState:(NSDictionary *)state {
 
+    Log(LDEBUG, @"centralManagerWillRestoreState");
+
     // restore adapter state
     [self centralManagerDidUpdateState:central];
 
@@ -1050,32 +1052,35 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         // Set the delegate to self to receive the peripheral callbacks
         peripheral.delegate = self;
 
-        // skip if not connected
         if (peripheral.state != CBPeripheralStateConnected) {
-            continue;
-        }
-
-        // update connection state
-        [self centralManager:central didConnectPeripheral:peripheral];
-        
-        for (CBService *service in peripheral.services) {
-
-            // restore services
-            [self peripheral:peripheral didDiscoverServices:nil];
+            // connect
+            Log(LDEBUG, @"Restore: reconnecting to %@", peripheral.identifier.UUIDString);
+            [self.centralManager connectPeripheral:peripheral options:nil];
+        } else {
+            // update connection state
+            Log(LDEBUG, @"Restore: already connected to %@", peripheral.identifier.UUIDString);
+            [self centralManager:central didConnectPeripheral:peripheral];
             
-            for (CBCharacteristic *characteristic in service.characteristics) {
+            for (CBService *service in peripheral.services) {
 
-                // restore characteristics
-                [self peripheral:peripheral didDiscoverCharacteristicsForService:service error:nil];
+                // restore services
+                [self peripheral:peripheral didDiscoverServices:nil];
+                
+                for (CBCharacteristic *characteristic in service.characteristics) {
 
-                // restore notidications
-                if (characteristic.isNotifying) {
-                    [self peripheral:peripheral didUpdateNotificationStateForCharacteristic:characteristic error:nil];
+                    // restore characteristics
+                    [self peripheral:peripheral didDiscoverCharacteristicsForService:service error:nil];
+
+                    // restore notifications
+                    if (characteristic.isNotifying) {
+                        [self peripheral:peripheral didUpdateNotificationStateForCharacteristic:characteristic error:nil];
+                    }
                 }
             }
         }
     }
 }
+
 
 - (void)centralManagerDidUpdateState:(nonnull CBCentralManager *)central
 {
