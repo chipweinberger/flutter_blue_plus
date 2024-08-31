@@ -1,3 +1,6 @@
+## 1.32.13
+* **[Feature]** iOS: add support for State Preservation
+* **[Improve]** Android: ask for both scan permissions at the same time
 
 ## 1.32.12
 * **[Fix]** Android: further improve `disconnect(queue:false)` reliability
