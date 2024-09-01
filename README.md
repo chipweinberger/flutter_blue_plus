@@ -324,7 +324,7 @@ import 'dart:math';
 //    3. The characteristic must be designed to support split data
 extension splitWrite on BluetoothCharacteristic {
   Future<void> splitWrite(List<int> value, {int timeout = 15}) async {
-    int chunk = device.mtuNow - 3; // 3 bytes ble overhead
+    int chunk = min(device.mtuNow - 3, 512); // 3 bytes BLE overhead, 512 bytes max
     for (int i = 0; i < value.length; i += chunk) {
       List<int> subvalue = value.sublist(i, min(i + chunk, value.length));
       await write(subvalue, withoutResponse:false, timeout: timeout);
