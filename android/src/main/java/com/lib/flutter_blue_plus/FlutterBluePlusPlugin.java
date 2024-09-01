@@ -1686,7 +1686,7 @@ public class FlutterBluePlusPlugin implements
         // be longer than 512. Android also enforces this as the maximum in internal code.
         int maxAttrLen = 512; 
 
-        // if no response, we can only write up to MTU-3. 
+        // if no response, or allowLongWrite is not allowed, we can only write up to MTU-3. 
         // This is the same limitation as iOS, and ensures transfer reliability.
         if (writeType == BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE || allowLongWrite == false) {
 
@@ -1699,7 +1699,8 @@ public class FlutterBluePlusPlugin implements
             return Math.min(mtu - 3, maxAttrLen);
 
         } else {
-            // if using withResponse, android will auto split up to the maxAttrLen.
+            // if withResponse and allowLongWrite is allowed, 
+            // android will auto split up to the maxAttrLen.
             return maxAttrLen;
         }
     }
