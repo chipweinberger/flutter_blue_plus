@@ -148,6 +148,7 @@ class BluetoothDevice {
             .fbpTimeout(timeout.inSeconds, "connect")
             .catchError((e) async {
           if (e is FlutterBluePlusException && e.code == FbpErrorCode.timeout.index) {
+            print("[FBP] connection timeout");
             await FlutterBluePlus._invokeMethod('disconnect', remoteId.str); // cancel connection attempt
           }
           throw e;
