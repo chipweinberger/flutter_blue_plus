@@ -47,17 +47,17 @@ If you are new to Bluetooth, you should start by reading BLE tutorials.
 
 FlutterBluePlus supports nearly every feature on all supported platforms: iOS, macOS, Android.
 
-## No Dependencies
-
-FlutterBluePlus has zero dependencies besides Flutter, Android, iOS, and macOS themselves.
-
-This makes FlutterBluePlus very stable, and easy to maintain.
-
 ## Windows Support
 
 Use [flutter_blue_plus_windows](https://pub.dev/packages/flutter_blue_plus_windows) if you need Windows support.
 
 It is maintained by @chan150. 
+
+## No Dependencies
+
+FlutterBluePlus has zero dependencies besides Flutter, Android, iOS, and macOS themselves.
+
+This makes FlutterBluePlus very stable, and easy to maintain.
 
 ## Other BLE Libraries
 
