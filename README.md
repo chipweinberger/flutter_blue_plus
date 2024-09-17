@@ -61,7 +61,7 @@ It is maintained by @chan150.
 
 ## Other BLE Libraries
 
-These other libraries are worth considering. They support more platforms than FBP, but are harder to use & less polished.
+These other libraries are worth considering. They support more platforms than FBP, but not to the same quality as FBP.
 
 - [bluetooth_low_energy](https://pub.dev/packages/bluetooth_low_energy) 
 - [universal_ble](https://pub.dev/packages/universal_ble)
