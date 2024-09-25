@@ -1,3 +1,78 @@
+## 1.32.13
+* **[Feature]** iOS: add support for State Preservation
+* **[Improve]** Android: ask for both scan permissions at the same time
+
+## 1.32.12
+* **[Fix]** Android: further improve `disconnect(queue:false)` reliability
+* **[Deprecate]** deprecate BluetoothDevice.fromProto(...)
+
+## 1.32.11
+* **[Improve]** Android: perf: speed up `bytesToHex`
+
+## 1.32.10
+* **[Fix]** Android: calling `disconnect(queue:false)` may sometimes silently fail
+
+## 1.32.9
+* **[Feature]** Android: add legacy scan option
+
+## 1.32.8
+* **[Fix]** iOS: was not updating `lastValueStream` if `withoutResponse:true`
+
+## 1.32.7
+* **[Fix]** android: last byte was cutoff for msd of same manufactuerId (regression 1.32.5)
+
+## 1.32.6
+* **[Fix]** calling `startScan` multiple times in a row would fail
+
+## 1.32.5
+* **[Fix]** android: support multiple MSD with the same manufacturer ID
+
+## 1.32.4
+* **[Improve]** revert 1.32.3 (i.e. go back to 1.32.1 behavior)
+* **[Fix]** fix `SCAN_FAILED_ALREADY_STARTED` on android after adapter is turned `off` then `on`
+
+## 1.32.3
+* **[Improve]** allow calling `stopScan` even if not currently scanning. (revert 1.32.1)
+
+## 1.32.2
+* **[Improve]** iOS: fix warning about implicit conversion for showPowerAlert
+
+## 1.32.1
+* **[Fix]** Android: scan failure were not being pushed to onError
+* **[Improve]** only `stopScan` if currently scanning. prevents 'could not find callback wrapper' log on Android 
+
+## 1.32.0
+This realease has a very slight behavior change for `adapterState` & `connectionState`
+* **[Improve]** update `adapterState` stream before `connectionState` streams. Simplifies internal autoconnect code.
+
+## 1.31.19
+* **[Improve]** autoconnect: catch & print errors when autoconnect fails
+
+## 1.31.18
+* **[Feature]** add `setOptions` function. Used to configure power alert on iOS
+
+## 1.31.17
+* **[Fix]** android: autoconnect could enter disconnect / connection loop
+* **[Fix]** android: calling `disconnect` should always disable autoconnect, even if already disconnected
+
+## 1.31.16
+* **[Fix]** forgot to push to mtu stream after disconnection
+
+## 1.31.15
+* **[Feature]** support advertising `appearance` on Android
+
+## 1.31.14
+* **[Fix]** autoconnect could not disconnect if there are multiple devices
+
+## 1.31.13
+* **[Improve]**  android: use name `LINK_SUPERVISION_TIMEOUT` instead of `CONNECTION_TIMEOUT`
+
+## 1.31.12
+* **[Improve]** improve reliability of autoconnect on android
+
+## 1.31.11
+* **[Feature]** add convenience function to get raw `msd` data in advertisement
+
 ## 1.31.10
 * **[Fix]** type 'DeviceIdentifier' is not a subtype of type 'String' (regression 1.31.9)
 
@@ -389,7 +464,7 @@ This release simplifies BluetoothDevice construction.
 
 ## 1.15.10
 * **[Fix]** iOS: `localName` does not match Android (bug in original `flutter_blue`)
-* **[Fix]** flutterHotRestart: error was thrown if device did not have bluetooth adapter (regression in 1.14.19)
+* **[Fix]** flutterRestart: error was thrown if device did not have bluetooth adapter (regression in 1.14.19)
 
 ## 1.15.9
 * **[Fix]** iOS: adapter turnOff: edge case when adapter is turned off while scanning (bug in original `flutter_blue`)
@@ -430,12 +505,12 @@ This release simplifies BluetoothDevice construction.
 * **[Feature]** add `removeIfGone` option to `startScan`
 
 **Breaking Changes & Improvements:**
-- **(simplify)** removed `FlutterBluePlus.scan`. Use `FlutterBluePlus.scartScan(oneByOne: true)` instead.
-- **(simplify)** removed `allowDuplicates` option for `scartScan`. It is not supported on android. We always filter duplicates anyway.
-- **(simplify)** removed `macAddresses` option for `scartScan`. It was not supported on iOS, and is overall not very useful.
-- **(simplify)** `startScan` now returns `Future<void>` instead of `Future<List<ScanResult>>`. It was redundant and confusing.
-- **(improvement)** if you `await startScan` it will complete once the scan starts, instead of when it ends
-- **(improvement)** if you call `startScan` twice, it will cancel the previous scan, instead of throwing an exception
+* **[Simplify]** removed `FlutterBluePlus.scan`. Use `FlutterBluePlus.scartScan(oneByOne: true)` instead.
+* **[Simplify]** removed `allowDuplicates` option for `scartScan`. It is not supported on android. We always filter duplicates anyway.
+* **[Simplify]** removed `macAddresses` option for `scartScan`. It was not supported on iOS, and is overall not very useful.
+* **[Simplify]** `startScan` now returns `Future<void>` instead of `Future<List<ScanResult>>`. It was redundant and confusing.
+* **[Improve]** if you `await startScan` it will complete once the scan starts, instead of when it ends
+* **[Improve]** if you call `startScan` twice, it will cancel the previous scan, instead of throwing an exception
 
 ## 1.14.24
 * **[Fix]** Android: `setNotifyValue`: "(code: 5) notifications were not updated" (regression in 1.14.23)

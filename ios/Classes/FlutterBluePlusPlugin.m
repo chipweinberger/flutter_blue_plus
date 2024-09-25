@@ -53,6 +53,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 @property(nonatomic) NSDictionary *scanFilters;
 @property(nonatomic) NSTimer *checkForMtuChangesTimer;
 @property(nonatomic) LogLevel logLevel;
+@property(nonatomic) NSNumber *showPowerAlert;
+@property(nonatomic) NSNumber *restoreState;
 @end
 
 @implementation FlutterBluePlusPlugin
@@ -73,6 +75,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     instance.writeDescs = [NSMutableDictionary new];
     instance.scanCounts = [NSMutableDictionary new];
     instance.logLevel = LDEBUG;
+    instance.showPowerAlert = @(YES);
+    instance.restoreState = @(NO);
 
     [registrar addMethodCallDelegate:instance channel:methodChannel];
 }
@@ -102,14 +106,40 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     {
         Log(LDEBUG, @"handleMethodCall: %@", call.method);
 
+        if ([@"setLogLevel" isEqualToString:call.method])
+        {
+            NSNumber *idx = [call arguments];
+            self.logLevel = (LogLevel)[idx integerValue];
+            result(@YES);
+            return;
+        }
+
+        if ([@"setOptions" isEqualToString:call.method])
+        {
+            NSDictionary *args = (NSDictionary*) call.arguments;
+            self.showPowerAlert = args[@"show_power_alert"];
+            self.restoreState = args[@"restore_state"];
+            result(@YES);
+            return;
+        }
+
         // initialize adapter
         if (self.centralManager == nil)
         {
             Log(LDEBUG, @"initializing CBCentralManager");
 
-            NSDictionary *options = @{
-                CBCentralManagerOptionShowPowerAlertKey: @(YES)
-            };
+            NSMutableDictionary *options = [NSMutableDictionary dictionary];
+
+            if ([self.showPowerAlert boolValue]) {
+                options[CBCentralManagerOptionShowPowerAlertKey] = self.showPowerAlert;
+            }
+
+            if ([self.restoreState boolValue]) {
+                options[CBCentralManagerOptionRestoreIdentifierKey] = @"flutterBluePlusRestoreIdentifier";
+            }
+
+            Log(LDEBUG, @"showPowerAlert: %@", [self.showPowerAlert boolValue] ? @"yes" : @"no");
+            Log(LDEBUG, @"restoreState: %@", [self.restoreState boolValue] ? @"yes" : @"no");
 
             self.centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil options:options];
         }
@@ -127,7 +157,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         // check that we have an adapter, except for the 
         // functions that don't need it
         if (self.centralManager == nil && 
-            [@"flutterHotRestart" isEqualToString:call.method] == false &&
+            [@"flutterRestart" isEqualToString:call.method] == false &&
             [@"connectedCount" isEqualToString:call.method] == false &&
             [@"setLogLevel" isEqualToString:call.method] == false &&
             [@"isSupported" isEqualToString:call.method] == false &&
@@ -138,7 +168,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             return;
         }
 
-        if ([@"flutterHotRestart" isEqualToString:call.method])
+        if ([@"flutterRestart" isEqualToString:call.method])
         {
             // no adapter?
             if (self.centralManager == nil) {
@@ -150,7 +180,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 [self.centralManager stopScan];
             }
 
-            [self disconnectAllDevices:@"flutterHotRestart"];
+            // all dart state is reset after flutter restart
+            // (i.e. Hot Restart) so also reset native state
+            [self disconnectAllDevices:@"flutterRestart"];
 
             Log(LDEBUG, @"connectedPeripherals: %lu", self.connectedPeripherals.count);
 
@@ -169,13 +201,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 [self.knownPeripherals removeAllObjects];
             }
             result(@(self.connectedPeripherals.count));
-            return;
-        }
-        else if ([@"setLogLevel" isEqualToString:call.method])
-        {
-            NSNumber *idx = [call arguments];
-            self.logLevel = (LogLevel)[idx integerValue];
-            result(@YES);
             return;
         }
         else if ([@"isSupported" isEqualToString:call.method])
@@ -924,7 +949,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             [self.methodChannel invokeMethod:@"OnConnectionStateChanged" arguments:result];
         } 
         
-        if ([func isEqualToString:@"flutterHotRestart"] && [self isAdapterOn]) {
+        if ([func isEqualToString:@"flutterRestart"] && [self isAdapterOn]) {
             // request disconnection
             [self.centralManager cancelPeripheralConnection:peripheral];
         }
@@ -1012,16 +1037,63 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 // ██   ██  ██       ██       ██       ██    ██  ██   ██     ██     ██               
 // ██████   ███████  ███████  ███████   ██████   ██   ██     ██     ███████ 
 
+- (void)centralManager:(CBCentralManager *)central
+      willRestoreState:(NSDictionary *)state {
+
+    Log(LDEBUG, @"centralManagerWillRestoreState");
+
+    // restore adapter state
+    [self centralManagerDidUpdateState:central];
+
+    NSArray *peripherals = state[CBCentralManagerRestoredStatePeripheralsKey];
+    
+    for (CBPeripheral *peripheral in peripherals) {
+        
+        // Set the delegate to self to receive the peripheral callbacks
+        peripheral.delegate = self;
+
+        if (peripheral.state != CBPeripheralStateConnected) {
+            // connect
+            Log(LDEBUG, @"Restore: reconnecting to %@", peripheral.identifier.UUIDString);
+            [self.centralManager connectPeripheral:peripheral options:nil];
+        } else {
+            // update connection state
+            Log(LDEBUG, @"Restore: already connected to %@", peripheral.identifier.UUIDString);
+            [self centralManager:central didConnectPeripheral:peripheral];
+            
+            for (CBService *service in peripheral.services) {
+
+                // restore services
+                [self peripheral:peripheral didDiscoverServices:nil];
+                
+                for (CBCharacteristic *characteristic in service.characteristics) {
+
+                    // restore characteristics
+                    [self peripheral:peripheral didDiscoverCharacteristicsForService:service error:nil];
+
+                    // restore notifications
+                    if (characteristic.isNotifying) {
+                        [self peripheral:peripheral didUpdateNotificationStateForCharacteristic:characteristic error:nil];
+                    }
+                }
+            }
+        }
+    }
+}
+
+
 - (void)centralManagerDidUpdateState:(nonnull CBCentralManager *)central
 {
     Log(LDEBUG, @"centralManagerDidUpdateState %@", [self cbManagerStateString:self.centralManager.state]);
 
-    // was the adapter turned off?
-    if (self.centralManager.state != CBManagerStatePoweredOn) {
-        [self disconnectAllDevices:@"adapterTurnOff"];
-    }
-
     int adapterState = [self bmAdapterStateEnum:self.centralManager.state];
+
+    // stop scanning when adapter is turned off. 
+    // Otherwise, scanning automatically resumes when the adapter is
+    // turned back on. I don't think most users expect that.
+    if (self.centralManager.state != CBManagerStatePoweredOn) {
+        [self.centralManager stopScan];
+    }
 
     // See BmBluetoothAdapterState
     NSDictionary* response = @{
@@ -1029,6 +1101,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     };
 
     [self.methodChannel invokeMethod:@"OnAdapterStateChanged" arguments:response];
+
+    // disconnect all devices
+    if (self.centralManager.state != CBManagerStatePoweredOn) {
+        [self disconnectAllDevices:@"adapterTurnOff"];
+    }
 }
 
 - (void)centralManager:(CBCentralManager *)central
@@ -1174,11 +1251,14 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // Unregister self as delegate for peripheral, not working #42
     peripheral.delegate = nil;
 
+    // random number defined by flutter blue plus
+    int bmUserCanceledErrorCode = 23789258;
+
     // See BmConnectionStateResponse
     NSDictionary *result = @{
         @"remote_id":                remoteId,
         @"connection_state":         @([self bmConnectionStateEnum:peripheral.state]),
-        @"disconnect_reason_code":   error ? @(error.code) : @(23789258),
+        @"disconnect_reason_code":   error ? @(error.code) : @(bmUserCanceledErrorCode),
         @"disconnect_reason_string": error ? [error localizedDescription] : @("connection canceled"),
     };
 
@@ -1597,6 +1677,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     NSString  *characteristicUuid   = request[@"characteristic_uuid"];
     NSString  *serviceUuid          = request[@"service_uuid"];
     NSString  *secondaryServiceUuid = request[@"secondary_service_uuid"];
+    NSString  *value                = request[@"value"];
 
     // Find characteristic
     NSError *error = nil;
@@ -1618,7 +1699,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"service_uuid":            [pair.primary.UUID uuidStr],
         @"secondary_service_uuid":  pair.secondary ? [pair.secondary.UUID uuidStr] : [NSNull null],
         @"characteristic_uuid":     [characteristic.UUID uuidStr],
-        @"value":                   [self convertDataToHex:characteristic.value],
+        @"value":                   value,
         @"success":                 @(error == nil),
         @"error_string":            error ? [error localizedDescription] : @"success",
         @"error_code":              error ? @(error.code) : @(0),
@@ -1670,9 +1751,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     NSDictionary* manufDataB = nil;
     if (manufData != nil && manufData.length >= 2) {
         
-        // first 2 bytes are manufacturerId
-        unsigned short manufId = 0;
-        [manufData getBytes:&manufId length:2];
+        // first 2 bytes are manufacturerId (little endian)
+        uint8_t bytes[2];
+        [manufData getBytes:bytes length:2];
+        unsigned short manufId = (unsigned short) (bytes[0] | bytes[1] << 8);
 
         // trim off first 2 bytes
         NSData* trimmed = [manufData subdataWithRange:NSMakeRange(2, manufData.length - 2)];

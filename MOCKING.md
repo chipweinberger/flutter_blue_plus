@@ -133,7 +133,7 @@ class MyApp extends StatelessWidget {
 
 ## Use mock instead of FlutterBluePlus
 
-Within your code, replace all calls to `FutterBluePlus` with the mockable instance, e.g.:  
+Within your code, replace all calls to `FlutterBluePlus` with the mockable instance, e.g.:  
 `FlutterBluePlus.isScanning` --> `bluePlusMockable.isScanning`  
 `FlutterBluePlus.startScan` --> `bluePlusMockable.startScan`  
 `FlutterBluePlus.scanResults` --> `bluePlusMockable.scanResults`  

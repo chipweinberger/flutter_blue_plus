@@ -11,8 +11,6 @@ class BluetoothDevice {
     required this.remoteId,
   });
 
-  BluetoothDevice.fromProto(BmBluetoothDevice p) : remoteId = p.remoteId;
-
   /// Create a device from an id
   ///   - to connect, this device must have been discovered by your app in a previous scan
   ///   - iOS uses 128-bit uuids the remoteId, e.g. e006b3a7-ef7b-4980-a668-1f8005f84383
@@ -47,7 +45,7 @@ class BluetoothDevice {
   }
 
   /// Register a subscription to be canceled when the device is disconnected.
-  /// This function simplifies cleanup, to prevent creating duplicate stream subscriptions.
+  /// This function simplifies cleanup, so you can prevent creating duplicate stream subscriptions.
   ///   - this is an optional convenience function
   ///   - prevents accidentally creating duplicate subscriptions on each reconnection.
   ///   - [next] if true, the the stream will be canceled only on the *next* disconnection.
@@ -116,6 +114,11 @@ class BluetoothDevice {
     await mtx.take();
 
     try {
+      // remember auto connect value
+      if (autoConnect) {
+        FlutterBluePlus._autoConnect.add(remoteId);
+      }
+
       var request = BmConnectRequest(
         remoteId: remoteId,
         autoConnect: autoConnect,
@@ -131,13 +134,13 @@ class BluetoothDevice {
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmConnectionStateResponse> futureState = responseStream.first;
 
+      // record connection time
+      if (Platform.isAndroid) {
+        FlutterBluePlus._connectTimestamp[remoteId] = DateTime.now();
+      }
+
       // invoke
       bool changed = await FlutterBluePlus._invokeMethod('connect', request.toMap());
-
-      // remember auto connect value
-      if (autoConnect) {
-        FlutterBluePlus._autoConnect.add(remoteId);
-      }
 
       // we return the disconnect mutex now so that this
       // connection attempt can be canceled by calling disconnect
@@ -150,6 +153,7 @@ class BluetoothDevice {
             .fbpTimeout(timeout.inSeconds, "connect")
             .catchError((e) async {
           if (e is FlutterBluePlusException && e.code == FbpErrorCode.timeout.index) {
+            print("[FBP] connection timeout");
             await FlutterBluePlus._invokeMethod('disconnect', remoteId.str); // cancel connection attempt
           }
           throw e;
@@ -157,7 +161,7 @@ class BluetoothDevice {
 
         // failure?
         if (response.connectionState == BmConnectionStateEnum.disconnected) {
-          if (response.disconnectReasonCode == 23789258) {
+          if (response.disconnectReasonCode == bmUserCanceledErrorCode) {
             throw FlutterBluePlusException(
                 ErrorPlatform.fbp, "connect", FbpErrorCode.connectionCanceled.index, "connection canceled");
           } else {
@@ -183,7 +187,17 @@ class BluetoothDevice {
   ///   - [queue] If true, this disconnect request will be executed after all other operations complete.
   ///     If false, this disconnect request will be executed right now, i.e. skipping to the front
   ///     of the fbp operation queue, which is useful to cancel an in-progress connection attempt.
-  Future<void> disconnect({int timeout = 35, bool queue = true}) async {
+  ///   - [androidDelay] Android only. Minimum gap in milliseconds between connect and disconnect to
+  ///     workaround a race condition that leaves connection stranded. A stranded connection in this case
+  ///     refers to a connection that FBP and Android Bluetooth stack are not aware of and thus cannot be
+  ///     disconnected because there is no gatt handle.
+  ///     https://issuetracker.google.com/issues/37121040
+  ///     From testing, 2 second delay appears to be enough.
+  Future<void> disconnect({
+    int timeout = 35,
+    bool queue = true,
+    int androidDelay = 2000,
+  }) async {
     // Only allow a single disconnect operation at a time
     _Mutex dtx = _MutexFactory.getMutexForKey("disconnect");
     await dtx.take();
@@ -208,12 +222,20 @@ class BluetoothDevice {
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmConnectionStateResponse> futureState = responseStream.first;
 
+      // Workaround Android race condition
+      await _ensureAndroidDisconnectionDelay(androidDelay);
+
       // invoke
       bool changed = await FlutterBluePlus._invokeMethod('disconnect', remoteId.str);
 
       // only wait for disconnection if weren't already disconnected
       if (changed) {
         await futureState.fbpEnsureAdapterIsOn("disconnect").fbpTimeout(timeout, "disconnect");
+      }
+
+      if (Platform.isAndroid) {
+        // Disconnected, remove connect timestamp
+        FlutterBluePlus._connectTimestamp.remove(remoteId);
       }
     } finally {
       dtx.give();
@@ -669,6 +691,26 @@ class BluetoothDevice {
     return gatt?.characteristics._firstWhereOrNull((chr) => chr.uuid == servicesChangedUuid);
   }
 
+  /// Workaround race condition between connect and disconnect.
+  /// The bug: If you call disconnect right as android is establishing a connection 
+  /// android may still connect to the device. Worse, "onConnectionStateChange" will not be called
+  /// so FBP will have no idea this connection is active. Adding a delay fixes this issue.
+  /// https://issuetracker.google.com/issues/37121040
+  Future<void> _ensureAndroidDisconnectionDelay(int androidDelay) async {
+    if (Platform.isAndroid) {
+      if (FlutterBluePlus._connectTimestamp.containsKey(remoteId)) {
+        Duration minGap = Duration(milliseconds: androidDelay);
+        Duration elapsed = DateTime.now().difference(FlutterBluePlus._connectTimestamp[remoteId]!);
+        if (elapsed.compareTo(minGap) < 0) {
+          Duration timeLeft = minGap - elapsed;
+          print("[FBP] disconnect: enforcing ${minGap.inMilliseconds}ms disconnect gap, delaying "
+              "${timeLeft.inMilliseconds}ms");
+          await Future<void>.delayed(timeLeft);
+        }
+      }
+    }
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -715,4 +757,7 @@ class BluetoothDevice {
   Stream<List<BluetoothService>> get services async* {
     yield [];
   }
+
+  @Deprecated('Use fromId instead')
+  BluetoothDevice.fromProto(BmBluetoothDevice p) : remoteId = p.remoteId;
 }
