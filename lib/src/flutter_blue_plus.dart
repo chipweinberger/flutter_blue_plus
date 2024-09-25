@@ -29,6 +29,7 @@ class FlutterBluePlus {
   static final Map<DeviceIdentifier, Map<String, List<int>>> _lastDescs = {};
   static final Map<DeviceIdentifier, List<StreamSubscription>> _deviceSubscriptions = {};
   static final Map<DeviceIdentifier, List<StreamSubscription>> _delayedSubscriptions = {};
+  static final Map<DeviceIdentifier, DateTime> _connectTimestamp = {};
   static final List<StreamSubscription> _scanSubscriptions = [];
   static final Set<DeviceIdentifier> _autoConnect = {};
 
@@ -99,6 +100,21 @@ class FlutterBluePlus {
   /// Get access to all device event streams
   static final BluetoothEvents events = BluetoothEvents();
 
+  /// Set configurable options
+  ///   - [showPowerAlert] Whether to show the power alert (iOS & MacOS only). i.e. CBCentralManagerOptionShowPowerAlertKey
+  ///       To set this option you must call this method before any other method in this package.
+  ///       See: https://developer.apple.com/documentation/corebluetooth/cbcentralmanageroptionshowpoweralertkey
+  ///       This option has no effect on Android.
+  ///   - [restoreState] Whether to opt into state restoration (iOS & MacOS only). i.e. CBCentralManagerOptionRestoreIdentifierKey
+  ///       To set this option you must call this method before any other method in this package.
+  ///       See Apple Documentation for more details. This option has no effect on Android.    
+  static Future<void> setOptions({
+    bool showPowerAlert = true,
+    bool restoreState = false,
+  }) async {
+    await _invokeMethod('setOptions', {"show_power_alert": showPowerAlert, "restore_state": restoreState});
+  }
+
   /// Turn on Bluetooth (Android only),
   static Future<void> turnOn({int timeout = 60}) async {
     var responseStream = FlutterBluePlus._methodStream.stream
@@ -165,7 +181,7 @@ class FlutterBluePlus {
         _platformNames[device.remoteId] = device.platformName!;
       }
     }
-    return r.devices.map((d) => BluetoothDevice.fromProto(d)).toList();
+    return r.devices.map((d) => BluetoothDevice.fromId(d.remoteId.str)).toList();
   }
 
   /// Retrieve a list of bonded devices (Android only)
@@ -177,7 +193,7 @@ class FlutterBluePlus {
         _platformNames[device.remoteId] = device.platformName!;
       }
     }
-    return r.devices.map((d) => BluetoothDevice.fromProto(d)).toList();
+    return r.devices.map((d) => BluetoothDevice.fromId(d.remoteId.str)).toList();
   }
 
   /// Start a scan, and return a stream of results
@@ -199,6 +215,9 @@ class FlutterBluePlus {
   ///        If divisor is 1, all advertisements are returned. This argument only matters for `continuousUpdates` mode.
   ///   - [oneByOne] if `true`, we will stream every advertistment one by one, possibly including duplicates.
   ///        If `false`, we deduplicate the advertisements, and return a list of devices.
+  ///   - [androidLegacy] Android only. If `true`, scan on 1M phy only.
+  ///        If `false`, scan on all supported phys. How the radio cycles through all the supported phys is purely
+  ///        dependent on the your Bluetooth stack implementation.
   ///   - [androidScanMode] choose the android scan mode to use when scanning
   ///   - [androidUsesFineLocation] request `ACCESS_FINE_LOCATION` permission at runtime
   static Future<void> startScan({
@@ -213,6 +232,7 @@ class FlutterBluePlus {
     bool continuousUpdates = false,
     int continuousDivisor = 1,
     bool oneByOne = false,
+    bool androidLegacy = false,
     AndroidScanMode androidScanMode = AndroidScanMode.lowLatency,
     bool androidUsesFineLocation = false,
   }) async {
@@ -229,7 +249,8 @@ class FlutterBluePlus {
         withServiceData.isNotEmpty;
 
     // Note: `withKeywords` is not compatible with other filters on android
-    // because it is implemented in custom fbp code, not android code
+    // because it is implemented in custom fbp code, not android code, and the
+    // android 'name' filter is only available as of android sdk 33 (August 2022)
     assert(!(Platform.isAndroid && withKeywords.isNotEmpty && hasOtherFilter),
         "withKeywords is not compatible with other filters on Android");
 
@@ -242,10 +263,10 @@ class FlutterBluePlus {
       if (_isScanning.latestValue == true) {
         // stop existing scan
         await _stopScan();
-      } else {
-        // push to stream
-        _isScanning.add(true);
       }
+
+      // push to stream
+      _isScanning.add(true);
 
       var settings = BmScanSettings(
           withServices: withServices,
@@ -256,6 +277,7 @@ class FlutterBluePlus {
           withServiceData: withServiceData.map((d) => d._bm).toList(),
           continuousUpdates: continuousUpdates,
           continuousDivisor: continuousDivisor,
+          androidLegacy: androidLegacy,
           androidScanMode: androidScanMode.value,
           androidUsesFineLocation: androidUsesFineLocation);
 
@@ -336,12 +358,19 @@ class FlutterBluePlus {
     }
   }
 
-  /// Stops a scan for Bluetooth Low Energy devices
+  /// Stops a scan for Bluetooth Low Energy devices 
   static Future<void> stopScan() async {
     _Mutex mtx = _MutexFactory.getMutexForKey("scan");
     await mtx.take();
-    await _stopScan();
-    mtx.give();
+    try {
+      if(isScanningNow) {
+        await _stopScan();
+      } else if (_logLevel.index >= LogLevel.info.index) {
+        print("[FBP] stopScan: already stopped");
+      }
+    } finally {
+      mtx.give();
+    }
   }
 
   /// for internal use
@@ -359,7 +388,7 @@ class FlutterBluePlus {
   }
 
   /// Register a subscription to be canceled when scanning is complete.
-  /// This function simplifies cleanup, to prevent creating duplicate stream subscriptions.
+  /// This function simplifies cleanup, so you can prevent creating duplicate stream subscriptions.
   ///   - this is an optional convenience function
   ///   - prevents accidentally creating duplicate subscriptions before each scan
   static void cancelWhenScanComplete(StreamSubscription subscription) {
@@ -367,7 +396,7 @@ class FlutterBluePlus {
   }
 
   /// Sets the internal FlutterBlue log level
-  static void setLogLevel(LogLevel level, {color = true}) async {
+  static Future<void> setLogLevel(LogLevel level, {color = true}) async {
     _logLevel = level;
     _logColor = color;
     await _invokeMethod('setLogLevel', level.index);
@@ -394,8 +423,8 @@ class FlutterBluePlus {
     // set platform method handler
     _methodChannel.setMethodCallHandler(_methodCallHandler);
 
-    // hot restart
-    if ((await _methodChannel.invokeMethod('flutterHotRestart')) != 0) {
+    // flutter restart - wait for all devices to disconnect
+    if ((await _methodChannel.invokeMethod('flutterRestart')) != 0) {
       await Future.delayed(Duration(milliseconds: 50));
       while ((await _methodChannel.invokeMethod('connectedCount')) != 0) {
         await Future.delayed(Duration(milliseconds: 50));
@@ -427,7 +456,11 @@ class FlutterBluePlus {
       }
       if (r.adapterState == BmAdapterStateEnum.on) {
         for (DeviceIdentifier d in _autoConnect) {
-          BluetoothDevice(remoteId: d).connect(autoConnect: true, mtu: null);
+          BluetoothDevice(remoteId: d).connect(autoConnect: true, mtu: null).onError((e, s) {
+            if (logLevel != LogLevel.none) {
+              print("[FBP] [AutoConnect] connection failed: $e");
+            }
+          });
         }
       }
     }
@@ -437,33 +470,39 @@ class FlutterBluePlus {
       var r = BmConnectionStateResponse.fromMap(call.arguments);
       _connectionStates[r.remoteId] = r;
       if (r.connectionState == BmConnectionStateEnum.disconnected) {
-        // reset known mtu
-        _mtuValues.remove(r.remoteId); 
+        // push to mtu stream, if needed
+        if (_mtuValues.containsKey(r.remoteId)) {
+          var resp = BmMtuChangedResponse(remoteId: r.remoteId, mtu: 23);
+          _methodStream.add(MethodCall("OnMtuChanged", resp.toMap()));
+        }
 
-        // clear lastDescs so that 'isNotifying' is reset
-        _lastDescs.remove(r.remoteId); 
+        // clear mtu
+        _mtuValues.remove(r.remoteId);
 
-        // clear chr values, for api consistency
-        _lastChrs.remove(r.remoteId); 
+        // clear lastDescs (resets 'isNotifying')
+        _lastDescs.remove(r.remoteId);
 
-        // Note: to make FBP easier to use, we purposely 
-        // do not clear `knownServices` or `bondState`.
-        // to make FBP easier to use, we purposely do not clear knownServices,
-        // otherwise `servicesList` would be annoying to use.
-        // We also don't clear the `bondState` cache for faster performance.
+        // clear lastChrs (api consistency)
+        _lastChrs.remove(r.remoteId);
 
-        _deviceSubscriptions[r.remoteId]?.forEach((s) => s.cancel()); // cancel subscriptions
-        _deviceSubscriptions.remove(r.remoteId); // delete subscriptions
-        _mtuValues.remove(r.remoteId); // reset known mtu
-        _lastDescs.remove(r.remoteId); // clear lastDescs so that 'isNotifying' is reset
-        _lastChrs.remove(r.remoteId); // for api consistency, clear characteristic values
+        // cancel & delete subscriptions
+        _deviceSubscriptions[r.remoteId]?.forEach((s) => s.cancel());
+        _deviceSubscriptions.remove(r.remoteId);
 
-        // On apple, autoconnect is just a long running connection attempt
-        // so the connection request must be restored after disconnection
-        for (DeviceIdentifier d in _autoConnect) {
-          if (Platform.isIOS || Platform.isMacOS) {
+        // Note: to make FBP easier to use, we do not clear `knownServices`,
+        // otherwise `servicesList` would be more annoying to use. We also
+        // do not clear `bondState`, for faster performance.
+
+        // autoconnect
+        if (Platform.isAndroid == false) {
+          if (_autoConnect.contains(r.remoteId)) {
             if (_adapterStateNow == BmAdapterStateEnum.on) {
-              BluetoothDevice(remoteId: d).connect(autoConnect: true, mtu: null);
+              var d = BluetoothDevice(remoteId: r.remoteId);
+              d.connect(autoConnect: true, mtu: null).onError((e, s) {
+                if (logLevel != LogLevel.none) {
+                  print("[FBP] [AutoConnect] connection failed: $e");
+                }
+              });
             }
           }
         }
@@ -544,17 +583,22 @@ class FlutterBluePlus {
   }
 
   /// invoke a platform method
-  static Future<dynamic> _invokeMethod(String method, [dynamic arguments]) async {
+  static Future<dynamic> _invokeMethod(
+    String method, [
+    dynamic arguments,
+  ]) async {
     // return value
     dynamic out;
 
-    // only allow 1 invocation at a time (guarentees that hot restart finishes)
+    // only allow 1 invocation at a time (guarantees that hot restart finishes)
     _Mutex mtx = _MutexFactory.getMutexForKey("invokeMethod");
     await mtx.take();
 
     try {
       // initialize
-      _initFlutterBluePlus();
+      if (method != "setOptions" && method != "setLogLevel") {
+        _initFlutterBluePlus();
+      }
 
       // log args
       if (logLevel == LogLevel.verbose) {
@@ -643,12 +687,12 @@ class AndroidScanMode {
 class MsdFilter {
   int manufacturerId;
 
-  // filter for this data
+  /// filter for this data
   List<int> data;
 
-  // For any bit in the mask, set it the 1 if it needs to match
-  // the one in manufacturer data, otherwise set it to 0.
-  // The 'mask' must have the same length as 'data'.
+  /// For any bit in the mask, set it the 1 if it needs to match
+  /// the one in manufacturer data, otherwise set it to 0.
+  /// The 'mask' must have the same length as 'data'.
   List<int> mask;
 
   MsdFilter(this.manufacturerId, {this.data = const [], this.mask = const []});
@@ -737,14 +781,25 @@ class ScanResult {
 class AdvertisementData {
   final String advName;
   final int? txPowerLevel;
+  final int? appearance; // not supported on iOS / macOS
   final bool connectable;
   final Map<int, List<int>> manufacturerData; // key: manufacturerId
   final Map<Guid, List<int>> serviceData; // key: service guid
   final List<Guid> serviceUuids;
 
+  /// raw manufacturer specific data
+  List<List<int>> get msd {
+    List<List<int>> out = [];
+    manufacturerData.forEach((key, value) {
+      out.add([key & 0xFF, (key >> 8) & 0xFF] + value);
+    });
+    return out;
+  }
+
   AdvertisementData({
     required this.advName,
     required this.txPowerLevel,
+    required this.appearance,
     required this.connectable,
     required this.manufacturerData,
     required this.serviceData,
@@ -754,6 +809,7 @@ class AdvertisementData {
   AdvertisementData.fromProto(BmScanAdvertisement p)
       : advName = p.advName ?? "",
         txPowerLevel = p.txPowerLevel,
+        appearance = p.appearance,
         connectable = p.connectable,
         manufacturerData = p.manufacturerData,
         serviceData = p.serviceData,
@@ -764,6 +820,7 @@ class AdvertisementData {
     return 'AdvertisementData{'
         'advName: $advName, '
         'txPowerLevel: $txPowerLevel, '
+        'appearance: $appearance, '
         'connectable: $connectable, '
         'manufacturerData: $manufacturerData, '
         'serviceData: $serviceData, '

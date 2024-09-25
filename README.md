@@ -28,7 +28,7 @@ FlutterBluePlus is a Bluetooth Low Energy plugin for [Flutter](https://flutter.d
 
 It supports BLE Central Role only (most common). 
 
-If you need BLE Peripheral Role, you should check out [FlutterBlePeripheral](https://pub.dev/packages/flutter_ble_peripheral).
+If you need BLE Peripheral Role, you should check out [FlutterBlePeripheral](https://pub.dev/packages/flutter_ble_peripheral), or [bluetooth_low_energy](https://pub.dev/packages/bluetooth_low_energy).
 
 ## Tutorial
 
@@ -47,13 +47,25 @@ If you are new to Bluetooth, you should start by reading BLE tutorials.
 
 FlutterBluePlus supports nearly every feature on all supported platforms: iOS, macOS, Android.
 
-FlutterBluePlus was written to be simple, robust, and easy to understand.
+## Windows Support
+
+Use [flutter_blue_plus_windows](https://pub.dev/packages/flutter_blue_plus_windows) if you need Windows support.
+
+It is maintained by @chan150. 
 
 ## No Dependencies
 
-FlutterBluePlus has zero dependencies besides Flutter, Android, and iOS themselves.
+FlutterBluePlus has zero dependencies besides Flutter, Android, iOS, and macOS themselves.
 
 This makes FlutterBluePlus very stable, and easy to maintain.
+
+## Other BLE Libraries
+
+These other libraries are worth considering. They support more platforms than FBP, but not to the same quality as FBP.
+
+- [bluetooth_low_energy](https://pub.dev/packages/bluetooth_low_energy) 
+- [universal_ble](https://pub.dev/packages/universal_ble)
+- [quick_blue](https://pub.dev/packages/quick_blue)
 
 ## ⭐ Stars ⭐
 
@@ -148,8 +160,8 @@ If your device is not found, see [Common Problems](#common-problems).
 
 ```dart
 // listen to scan results
-// Note: `onScanResults` only returns live scan results, i.e. during scanning
-// Use: `scanResults` if you want live scan results *or* the results from a previous scan
+// Note: `onScanResults` clears the results between scans. You should use
+//  `scanResults` if you want the current scan results *or* the results from a previous scan.
 var subscription = FlutterBluePlus.onScanResults.listen((results) {
         if (results.isNotEmpty) {
             ScanResult r = results.last; // the most recently found device
@@ -167,13 +179,10 @@ FlutterBluePlus.cancelWhenScanComplete(subscription);
 await FlutterBluePlus.adapterState.where((val) => val == BluetoothAdapterState.on).first;
 
 // Start scanning w/ timeout
-// Optional: you can use `stopScan()` as an alternative to using a timeout
-// Note: scan filters use an *or* behavior. i.e. if you set `withServices` & `withNames`
-//   we return all the advertisments that match any of the specified services *or* any
-//   of the specified names.
+// Optional: use `stopScan()` as an alternative to timeout
 await FlutterBluePlus.startScan(
-  withServices:[Guid("180D")],
-  withNames:["Bluno"],
+  withServices:[Guid("180D")], // match any of the specified services
+  withNames:["Bluno"], // *or* any of the specified names
   timeout: Duration(seconds:15));
 
 // wait for scanning to stop
@@ -189,14 +198,17 @@ var subscription = device.connectionState.listen((BluetoothConnectionState state
         // 1. typically, start a periodic timer that tries to 
         //    reconnect, or just call connect() again right now
         // 2. you must always re-discover services after disconnection!
-        print("${device.disconnectReasonCode} ${device.disconnectReasonDescription}");
+        print("${device.disconnectReason?.code} ${device.disconnectReason?.description}");
     }
 });
 
 // cleanup: cancel subscription when disconnected
-// Note: `delayed:true` lets us receive the `disconnected` event in our handler
-// Note: `next:true` means cancel on *next* disconnection. Without this, it
-//   would cancel immediately because we're already disconnected right now.
+//   - [delayed] This option is only meant for `connectionState` subscriptions.  
+//     When `true`, we cancel after a small delay. This ensures the `connectionState` 
+//     listener receives the `disconnected` event.
+//   - [next] if true, the the stream will be canceled only on the *next* disconnection,
+//     not the current disconnection. This is useful if you setup your subscriptions
+//     before you connect.
 device.cancelWhenDisconnected(subscription, delayed:true, next:true);
 
 // Connect to the device
@@ -215,14 +227,33 @@ Connects whenever your device is found.
 
 ```dart
 // enable auto connect
-//  - this function always returns immediately
-//  - you must listen to `device.connectionState` to know when connection occurs 
-//  - autoConnect is incompatible with mtu argument, so you must call requestMtu yourself
-await device.connect(mtu:null, autoConnect:true)
+//  - note: autoConnect is incompatible with mtu argument, so you must call requestMtu yourself
+await device.connect(autoConnect:true, mtu:null)
+
+// wait until connection
+//  - when using autoConnect, connect() always returns immediately, so we must
+//    explicity listen to `device.connectionState` to know when connection occurs 
+await device.connectionState.where((val) => val == BluetoothConnectionState.connected).first;
 
 // disable auto connect
 await device.disconnect()
 ```
+
+### Save Device
+
+To save a device between app restarts, just write the `remoteId` to a file.
+
+Now you can connect without needing to scan again, like so:
+
+```dart
+final String remoteId = await File('/remoteId.txt').readAsString();
+var device = BluetoothDevice.fromId(remoteId);
+// AutoConnect is convenient because it does not "time out"
+// even if the device is not available / turned off.
+await device.connect(autoConnect: true);
+
+```
+
 
 ### MTU
 
@@ -296,7 +327,7 @@ import 'dart:math';
 //    3. The characteristic must be designed to support split data
 extension splitWrite on BluetoothCharacteristic {
   Future<void> splitWrite(List<int> value, {int timeout = 15}) async {
-    int chunk = device.mtuNow - 3; // 3 bytes ble overhead
+    int chunk = min(device.mtuNow - 3, 512); // 3 bytes BLE overhead, 512 bytes max
     for (int i = 0; i < value.length; i += chunk) {
       List<int> subvalue = value.sublist(i, min(i + chunk, value.length));
       await write(subvalue, withoutResponse:false, timeout: timeout);
@@ -539,20 +570,14 @@ In the **ios/Runner/Info.plist** let’s add:
 ```dart
 <dict>
     <key>NSBluetoothAlwaysUsageDescription</key>
-    <string>This app always needs Bluetooth to function</string>
-    <key>NSBluetoothPeripheralUsageDescription</key>
-    <string>This app needs Bluetooth Peripheral to function</string>
-    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-    <string>This app always needs location and when in use to function</string>
-    <key>NSLocationAlwaysUsageDescription</key>
-    <string>This app always needs location to function</string>
-    <key>NSLocationWhenInUseUsageDescription</key>
-    <string>This app needs location when in use to function</string>
+    <string>This app needs Bluetooth to function</string>
 ```
 
 For location permissions on iOS see more at: [https://developer.apple.com/documentation/corelocation/requesting_authorization_for_location_services](https://developer.apple.com/documentation/corelocation/requesting_authorization_for_location_services)
 
-And in Xcode, add access to Bluetooth hardware: 
+### Add permissions for macOS 
+
+Make sure you have granted access to the Bluetooth hardware:
 
 `Xcode -> Runners -> Targets -> Runner-> Signing & Capabilities -> App Sandbox -> Hardware -> Enable Bluetooth`
 
@@ -577,13 +602,17 @@ Add the following to your `Info.plist`
 
 When this key-value pair is included in the app’s Info.plist file, the system wakes up your app to process ble `read`, `write`, and `subscription` events.
 
-You may also have to use https://pub.dev/packages/flutter_isolate
+To wake up your app even after it is killed by the OS, set the `restoreState` option to true **before** starting any FBP work**:
+
+```
+FlutterBluePlus.setOptions(restoreState: true);
+```
 
 **Note**: Upon being woken up, an app has around 10 seconds to complete a task. Apps that spend too much time executing in the background can be throttled back by the system or killed.
 
 ### Android
 
-You can try using https://pub.dev/packages/flutter_foreground_task or possibly https://pub.dev/packages/flutter_isolate
+You can try using https://pub.dev/packages/flutter_foreground_task or possibly https://pub.dev/packages/workmanager
 
 ## Reference
 
@@ -595,6 +624,7 @@ You can try using https://pub.dev/packages/flutter_foreground_task or possibly h
 |                        |      Android       |        iOS         | Throws | Description                                                |
 | :--------------------- | :----------------: | :----------------: | :----: | :----------------------------------------------------------|
 | setLogLevel            | :white_check_mark: | :white_check_mark: |        | Configure plugin log level                                 |
+| setOptions             | :white_check_mark: | :white_check_mark: |        | Set configurable bluetooth options                         |
 | isSupported            | :white_check_mark: | :white_check_mark: |        | Checks whether the device supports Bluetooth               |
 | turnOn                 | :white_check_mark: |                    | :fire: | Turns on the bluetooth adapter                             |
 | adapterStateNow     ⚡  | :white_check_mark: | :white_check_mark: |        | Current state of the bluetooth adapter                     |
@@ -789,20 +819,24 @@ subscription.cancel()
 
 ### Scanning does not find my device
 
-**1. try using another ble scanner app**
+**1. you're using an emulator**
+
+Use a physical device.
+
+**2. try using another ble scanner app**
 
 * **iOS**: [nRF Connect](https://apps.apple.com/us/app/nrf-connect-for-mobile/id1054362403)
 * **Android**: [BLE Scanner](https://play.google.com/store/apps/details?id=com.macdom.ble.blescanner)
 
 Install a BLE scanner app on your phone. Can it find your device?
 
-**2. your device uses bluetooth classic, not BLE.**
+**3. your device uses bluetooth classic, not BLE.**
 
 Headphones, speakers, keyboards, mice, gamepads, & printers all use Bluetooth Classic. 
 
 These devices may be found in System Settings, but they cannot be connected to by FlutterBluePlus. FlutterBluePlus only supports Bluetooth Low Energy.
 
-**3. your device stopped advertising.**
+**4. your device stopped advertising.**
 
 - you might need to reboot your device
 - you might need to put your device in "discovery mode"
@@ -823,10 +857,14 @@ for (var d in system) {
 }
 ```
 
-**4. your scan filters are wrong.**
+**5. your scan filters are wrong.**
 
 - try removing all scan filters
 - for `withServices` to work, your device must actively advertise the serviceUUIDs it supports
+
+**6. Android: you're calling startScan too often**
+
+On Adroid you can only call `startScan` 5 times per 30 second period. This is a platform restriction.
 
 ---
 

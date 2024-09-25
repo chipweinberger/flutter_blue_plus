@@ -65,6 +65,7 @@ class BmScanSettings {
   final List<BmServiceDataFilter> withServiceData;
   final bool continuousUpdates;
   final int continuousDivisor;
+  final bool androidLegacy;
   final int androidScanMode;
   final bool androidUsesFineLocation;
 
@@ -77,6 +78,7 @@ class BmScanSettings {
     required this.withServiceData,
     required this.continuousUpdates,
     required this.continuousDivisor,
+    required this.androidLegacy,
     required this.androidScanMode,
     required this.androidUsesFineLocation,
   });
@@ -91,6 +93,7 @@ class BmScanSettings {
     data['with_service_data'] = withServiceData.map((d) => d.toMap()).toList();
     data['continuous_updates'] = continuousUpdates;
     data['continuous_divisor'] = continuousDivisor;
+    data['android_legacy'] = androidLegacy;
     data['android_scan_mode'] = androidScanMode;
     data['android_uses_fine_location'] = androidUsesFineLocation;
     return data;
@@ -103,6 +106,7 @@ class BmScanAdvertisement {
   final String? advName;
   final bool connectable;
   final int? txPowerLevel;
+  final int? appearance; // not supported on iOS / macOS
   final Map<int, List<int>> manufacturerData;
   final Map<Guid, List<int>> serviceData;
   final List<Guid> serviceUuids;
@@ -114,6 +118,7 @@ class BmScanAdvertisement {
     required this.advName,
     required this.connectable,
     required this.txPowerLevel,
+    required this.appearance,
     required this.manufacturerData,
     required this.serviceData,
     required this.serviceUuids,
@@ -150,6 +155,7 @@ class BmScanAdvertisement {
       advName: json['adv_name'],
       connectable: json['connectable'] != null ? json['connectable'] != 0 : false,
       txPowerLevel: json['tx_power_level'],
+      appearance: json['appearance'],
       manufacturerData: manufacturerData,
       serviceData: serviceData,
       serviceUuids: serviceUuids,
@@ -177,7 +183,7 @@ class BmScanResponse {
       advertisements.add(BmScanAdvertisement.fromMap(item));
     }
 
-    bool success = json['success'] == null || json['success'] == 0;
+    bool success = json['success'] == null || json['success'] != 0;
 
     return BmScanResponse(
       advertisements: advertisements,
@@ -705,9 +711,9 @@ class BmMtuChangedResponse {
   BmMtuChangedResponse({
     required this.remoteId,
     required this.mtu,
-    required this.success,
-    required this.errorCode,
-    required this.errorString,
+    this.success = true,
+    this.errorCode = 0,
+    this.errorString = "",
   });
 
   factory BmMtuChangedResponse.fromMap(Map<dynamic, dynamic> json) {
@@ -718,6 +724,16 @@ class BmMtuChangedResponse {
       errorCode: json['error_code'],
       errorString: json['error_string'],
     );
+  }
+
+  Map<dynamic, dynamic> toMap() {
+    final Map<dynamic, dynamic> data = {};
+    data['remote_id'] = remoteId.str;
+    data['mtu'] = mtu;
+    data['success'] = success ? 1 : 0;
+    data['error_code'] = errorCode;
+    data['error_string'] = errorString;
+    return data;
   }
 }
 
@@ -842,3 +858,7 @@ class BmTurnOnResponse {
     );
   }
 }
+
+// random number defined by flutter blue plus.
+// Ideally it should not conflict with iOS or Android error codes.
+int bmUserCanceledErrorCode = 23789258;
