@@ -1918,6 +1918,8 @@ public class FlutterBluePlusPlugin implements
             if (adapterState == BluetoothAdapter.STATE_TURNING_OFF || 
                 adapterState == BluetoothAdapter.STATE_OFF) {
                 disconnectAllDevices("adapterTurnOff");
+                 // fixs "Android: SCAN_FAILED_ALREADY_STARTED after turning Bluetooth Off then On #849"
+                scanCallback = null; 
             }
         }
     };   
