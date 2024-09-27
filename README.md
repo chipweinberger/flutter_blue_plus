@@ -422,10 +422,12 @@ for (var d in devs) {
 
 Get devices connected to the system by *any* app.
 
-**Note:** you must connect *your app* to them before you can communicate with them.
+**Note:** before you can communicate, you must connect *your app* to these devices 
 
 ```dart
-List<BluetoothDevice> devs = await FlutterBluePlus.systemDevices;
+// `withServices` required on iOS, ignored on android
+List<Guid> withServices = [Guid("180F")]; 
+List<BluetoothDevice> devs = await FlutterBluePlus.systemDevices(withServices);
 for (var d in devs) {
     await d.connect(); // Must connect *our* app to the device
     await d.discoverServices();

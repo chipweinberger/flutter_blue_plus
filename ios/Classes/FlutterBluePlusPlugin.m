@@ -305,12 +305,14 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         }
         else if ([@"getSystemDevices" isEqualToString:call.method])
         {
-            // Cannot pass blank UUID list for security reasons.
-            // Assume all devices have the Generic Access service 0x1800
-            CBUUID* gasUuid = [CBUUID UUIDWithString:@"1800"];
+            NSDictionary *args = (NSDictionary*) call.arguments;
+            NSMutableArray *withServices = [NSMutableArray new];
+            for (NSString *uuid in args[@"with_services"]) {
+                [withServices addObject:[CBUUID UUIDWithString:uuid]];
+            }
 
             // this returns devices connected by *any* app
-            NSArray *periphs = [self.centralManager retrieveConnectedPeripheralsWithServices:@[gasUuid]];
+            NSArray *periphs = [self.centralManager retrieveConnectedPeripheralsWithServices:withServices];
 
             // Devices
             NSMutableArray *deviceProtos = [NSMutableArray new];

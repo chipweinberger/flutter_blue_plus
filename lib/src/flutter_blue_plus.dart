@@ -107,7 +107,7 @@ class FlutterBluePlus {
   ///       This option has no effect on Android.
   ///   - [restoreState] Whether to opt into state restoration (iOS & MacOS only). i.e. CBCentralManagerOptionRestoreIdentifierKey
   ///       To set this option you must call this method before any other method in this package.
-  ///       See Apple Documentation for more details. This option has no effect on Android.    
+  ///       See Apple Documentation for more details. This option has no effect on Android.
   static Future<void> setOptions({
     bool showPowerAlert = true,
     bool restoreState = false,
@@ -173,8 +173,9 @@ class FlutterBluePlus {
   /// Retrieve a list of devices currently connected to the system
   /// - The list includes devices connected to by *any* app
   /// - You must still call device.connect() to connect them to *your app*
-  static Future<List<BluetoothDevice>> get systemDevices async {
-    var result = await _invokeMethod('getSystemDevices');
+  /// - [withServices] required on iOS (for privacy purposes). ignored on android.
+  static Future<List<BluetoothDevice>> systemDevices(List<Guid> withServices) async {
+    var result = await _invokeMethod('getSystemDevices', {"with_services": withServices.map((s) => s.str).toList()});
     var r = BmDevicesList.fromMap(result);
     for (BmBluetoothDevice device in r.devices) {
       if (device.platformName != null) {
@@ -358,12 +359,12 @@ class FlutterBluePlus {
     }
   }
 
-  /// Stops a scan for Bluetooth Low Energy devices 
+  /// Stops a scan for Bluetooth Low Energy devices
   static Future<void> stopScan() async {
     _Mutex mtx = _MutexFactory.getMutexForKey("scan");
     await mtx.take();
     try {
-      if(isScanningNow) {
+      if (isScanningNow) {
         await _stopScan();
       } else if (_logLevel.index >= LogLevel.info.index) {
         print("[FBP] stopScan: already stopped");
@@ -653,7 +654,7 @@ class FlutterBluePlus {
   static Stream<BluetoothAdapterState> get state => adapterState;
 
   @Deprecated('Use systemDevices instead')
-  static Future<List<BluetoothDevice>> get connectedSystemDevices => systemDevices;
+  static Future<List<BluetoothDevice>> get connectedSystemDevices => systemDevices([Guid("1800")]);
 
   @Deprecated('No longer needed, remove this from your code')
   static void get instance => null;
