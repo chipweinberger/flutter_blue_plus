@@ -184,6 +184,18 @@ class FlutterBluePlus {
     return r.devices.map((d) => BluetoothDevice.fromId(d.remoteId.str)).toList();
   }
 
+  //ios18 1800 lose efficacy，Add a method for matching based on service ID
+  static Future<List<BluetoothDevice>>  filterSystemDevices(List<String> serviceUUIDs) async {
+    var result = await _invokeMethod('getSystemDevices',{"serviceUUIDs":serviceUUIDs});
+    var r = BmDevicesList.fromMap(result);
+    for (BmBluetoothDevice device in r.devices) {
+      if (device.platformName != null) {
+        _platformNames[device.remoteId] = device.platformName!;
+      }
+    }
+    return r.devices.map((d) => BluetoothDevice.fromId(d.remoteId.str)).toList();
+  }
+
   /// Retrieve a list of bonded devices (Android only)
   static Future<List<BluetoothDevice>> get bondedDevices async {
     var result = await _invokeMethod('getBondedDevices');
