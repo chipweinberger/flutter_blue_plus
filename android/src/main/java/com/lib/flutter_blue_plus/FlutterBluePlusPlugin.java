@@ -110,7 +110,6 @@ public class FlutterBluePlusPlugin implements
     private final Map<String, String> mWriteDesc = new ConcurrentHashMap<>();
     private final Map<String, String> mAdvSeen = new ConcurrentHashMap<>();
     private final Map<String, Integer> mScanCounts = new ConcurrentHashMap<>();
-    private final Map<String, Boolean> mClearCacheOnDisconnect = new ConcurrentHashMap<>();
     private HashMap<String, Object> mScanFilters = new HashMap<String, Object>();
     
     private final Map<Integer, OperationOnPermission> operationsOnPermission = new HashMap<>();
@@ -673,7 +672,6 @@ public class FlutterBluePlusPlugin implements
                     HashMap<String, Object> args = call.arguments();
                     String remoteId =    (String) args.get("remote_id");
                     boolean autoConnect = ((int) args.get("auto_connect")) != 0;
-                    boolean clearCache = ((int) args.get("clear_cache_on_disconnect")) != 0;
 
                     ArrayList<String> permissions = new ArrayList<>();
 
@@ -737,13 +735,6 @@ public class FlutterBluePlusPlugin implements
                             mAutoConnected.remove(remoteId);
                         }
 
-                        // remember clearCache
-                        if (clearCache) {
-                            mClearCacheOnDisconnect.put(remoteId, clearCache);
-                        } else {
-                            mClearCacheOnDisconnect.remove(remoteId);
-                        }
-
                         result.success(true);
                     });
                     break;
@@ -770,6 +761,7 @@ public class FlutterBluePlusPlugin implements
                             log(LogLevel.DEBUG, "already disconnected. disabling autoconnect");
                             mAutoConnected.remove(remoteId);
                             gatt.disconnect();
+                            clearGattCacheIfNeeded(gatt);
                             gatt.close();
                             result.success(false);  // no work to do
                             return;
@@ -787,14 +779,13 @@ public class FlutterBluePlusPlugin implements
                 
                     // disconnect
                     gatt.disconnect();
+                    clearGattCacheIfNeeded(gatt);
 
                     // was connecting?
                     if (mCurrentlyConnectingDevices.get(remoteId) != null) {
 
                         // remove
                         mCurrentlyConnectingDevices.remove(remoteId);
-
-                        clearGattCacheIfNeeded(remoteId, gatt);
 
                         // cleanup
                         gatt.close();
@@ -1603,11 +1594,11 @@ public class FlutterBluePlusPlugin implements
         }
     }
 
-    private void clearGattCacheIfNeeded(String remoteId, BluetoothGatt gatt) {
-        boolean clearCache = (mClearCacheOnDisconnect.get(remoteId) != null) && mClearCacheOnDisconnect.get(remoteId);
-        mClearCacheOnDisconnect.remove(remoteId);
-
-        if (clearCache == false) { return; }
+    private void clearGattCacheIfNeeded(BluetoothGatt gatt) {
+        //  Clearing gatt cache on devices with Android 11 or lower has an adverse effect where the dynamic services can't be discovered anymore.
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            return;
+        }
 
         try {
             final Method refreshMethod = gatt.getClass().getMethod("refresh");
@@ -1765,8 +1756,7 @@ public class FlutterBluePlusPlugin implements
                 // disconnect
                 log(LogLevel.DEBUG, "calling disconnect: " + remoteId);
                 gatt.disconnect();
-
-                clearGattCacheIfNeeded(remoteId, gatt);
+                clearGattCacheIfNeeded(gatt);
 
                 // it is important to close after disconnection, otherwise we will 
                 // quickly run out of bluetooth resources, preventing new connections
@@ -1782,7 +1772,6 @@ public class FlutterBluePlusPlugin implements
         mWriteChr.clear();
         mWriteDesc.clear();
         mAutoConnected.clear();
-        mClearCacheOnDisconnect.clear();
     }
 
     int getAppearanceFromScanRecord(ScanRecord adv) {
@@ -2185,6 +2174,9 @@ public class FlutterBluePlusPlugin implements
                     // remove from currently bonding devices
                     mBondingDevices.remove(remoteId);
 
+                    // Clear gatt cache
+                    clearGattCacheIfNeeded(gatt);
+
                     // we cannot call 'close' for autoconnected devices
                     // because it prevents autoconnect from working
                     if (mAutoConnected.containsKey(remoteId)) {
@@ -2231,6 +2223,7 @@ public class FlutterBluePlusPlugin implements
 
                     // disconnect and close the connection straight away
                     gatt.disconnect();
+                    clearGattCacheIfNeeded(gatt);
                     gatt.close();
                 }
 
@@ -2248,7 +2241,7 @@ public class FlutterBluePlusPlugin implements
                     // remove from currently bonding devices
                     mBondingDevices.remove(remoteId);
 
-                    clearGattCacheIfNeeded(remoteId, gatt);
+                    clearGattCacheIfNeeded(gatt);
 
                     // close the connection
                     gatt.close();
