@@ -1,3 +1,8 @@
+
+## 1.33.0
+* **[BREAKING CHANGE]** iOS 18 compatibility: `systemDevices` now requires UUID argument
+* **[Fix]** Android: characteristic READ error was not being passed to dart
+
 ## 1.32.13
 * **[Feature]** iOS: add support for State Preservation
 * **[Improve]** Android: ask for both scan permissions at the same time
