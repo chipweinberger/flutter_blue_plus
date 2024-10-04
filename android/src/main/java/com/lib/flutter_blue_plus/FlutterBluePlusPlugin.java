@@ -2279,7 +2279,7 @@ public class FlutterBluePlusPlugin implements
             LogLevel level = LogLevel.DEBUG;
             log(level, "onCharacteristicChanged:");
             log(level, "  chr: " + uuidStr(characteristic.getUuid()));
-            onCharacteristicReceived(gatt, characteristic, value, BluetoothGatt.GATT_SUCCESS);
+            onCharacteristicReceived(gatt, characteristic, value, status);
         }
 
         @Override
@@ -2287,7 +2287,7 @@ public class FlutterBluePlusPlugin implements
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, byte[] value, int status)
         {
             // this callback is only for explicit characteristic reads
-            LogLevel level = status == 0 ? LogLevel.DEBUG : LogLevel.ERROR;
+            LogLevel level = status == BluetoothGatt.GATT_SUCCESS ? LogLevel.DEBUG : LogLevel.ERROR;
             log(level, "onCharacteristicRead:");
             log(level, "  chr: " + uuidStr(characteristic.getUuid()));
             log(level, "  status: " + gattErrorString(status) + " (" + status + ")");
@@ -2297,7 +2297,7 @@ public class FlutterBluePlusPlugin implements
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status)
         {
-            LogLevel level = status == 0 ? LogLevel.DEBUG : LogLevel.ERROR;
+            LogLevel level = status == BluetoothGatt.GATT_SUCCESS ? LogLevel.DEBUG : LogLevel.ERROR;
             log(level, "onCharacteristicWrite:");
             log(level, "  chr: " + uuidStr(characteristic.getUuid()));
             log(level, "  status: " + gattErrorString(status) + " (" + status + ")");
@@ -2846,6 +2846,21 @@ public class FlutterBluePlusPlugin implements
             case BluetoothGatt.GATT_INSUFFICIENT_ENCRYPTION     : return "GATT_INSUFFICIENT_ENCRYPTION";     // 15
             case 0x10                                           : return "GATT_UNSUPPORTED_GROUP";           // 16
             case 0x11                                           : return "GATT_INSUFFICIENT_RESOURCES";      // 17
+            case 0x80                                           : return "GATT_NO_RESOURCES";                // 128
+            case 0x81                                           : return "GATT_INTERNAL_ERROR";              // 129
+            case 0x82                                           : return "GATT_WRONG_STATE";                 // 130
+            case 0x83                                           : return "GATT_DB_FULL";                     // 131
+            case 0x84                                           : return "GATT_BUSY";                        // 132
+            case 0x85                                           : return "GATT_ERROR";                       // 133
+            case 0x86                                           : return "GATT_CMD_STARTED";                 // 134
+            case 0x87                                           : return "GATT_ILLEGAL_PARAMETER";           // 135
+            case 0x88                                           : return "GATT_PENDING";                     // 136
+            case 0x89                                           : return "GATT_AUTH_FAIL";                   // 137
+            case 0x8a                                           : return "GATT_MORE";                        // 138
+            case 0x8b                                           : return "GATT_INVALID_CFG";                 // 139
+            case 0x8c                                           : return "GATT_SERVICE_STARTED";             // 140
+            case 0x8d                                           : return "GATT_ENCRYPTED_NO_MITM";           // 141
+            case 0x8e                                           : return "GATT_NOT_ENCRYPTED";               // 142
             case BluetoothGatt.GATT_CONNECTION_CONGESTED        : return "GATT_CONNECTION_CONGESTED";        // 143
             case BluetoothGatt.GATT_FAILURE                     : return "GATT_FAILURE";                     // 257
             default: return "UNKNOWN_GATT_ERROR (" + value + ")";
