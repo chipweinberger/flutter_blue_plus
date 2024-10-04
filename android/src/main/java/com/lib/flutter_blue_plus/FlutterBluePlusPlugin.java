@@ -2291,7 +2291,7 @@ public class FlutterBluePlusPlugin implements
             log(level, "onCharacteristicRead:");
             log(level, "  chr: " + uuidStr(characteristic.getUuid()));
             log(level, "  status: " + gattErrorString(status) + " (" + status + ")");
-            onCharacteristicReceived(gatt, characteristic, value, BluetoothGatt.GATT_SUCCESS);
+            onCharacteristicReceived(gatt, characteristic, value, status);
         }
 
         @Override
