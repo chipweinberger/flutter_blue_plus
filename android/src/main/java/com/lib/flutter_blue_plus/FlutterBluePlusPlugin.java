@@ -2279,7 +2279,7 @@ public class FlutterBluePlusPlugin implements
             LogLevel level = LogLevel.DEBUG;
             log(level, "onCharacteristicChanged:");
             log(level, "  chr: " + uuidStr(characteristic.getUuid()));
-            onCharacteristicReceived(gatt, characteristic, value, status);
+            onCharacteristicReceived(gatt, characteristic, value, BluetoothGatt.GATT_SUCCESS);
         }
 
         @Override
@@ -2317,7 +2317,7 @@ public class FlutterBluePlusPlugin implements
 
             // what data did we write?
             String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid;
-            []byte value = mWriteChr.get(key) != null ? mWriteChr.get(key) : new byte[0];
+            byte[] value = mWriteChr.get(key) != null ? mWriteChr.get(key) : new byte[0];
             mWriteChr.remove(key);
 
             // see: BmCharacteristicData
