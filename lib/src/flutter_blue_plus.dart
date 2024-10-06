@@ -598,7 +598,7 @@ class FlutterBluePlus {
     try {
       // initialize
       if (method != "setOptions" && method != "setLogLevel") {
-        _initFlutterBluePlus();
+        await _initFlutterBluePlus();
       }
 
       // log args
