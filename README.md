@@ -307,7 +307,7 @@ services.forEach((service) {
 var characteristics = service.characteristics;
 for(BluetoothCharacteristic c in characteristics) {
     if (c.properties.read) {
-        List<int> value = await c.read();
+        Uint8List value = await c.read();
         print(value);
     }
 }
@@ -340,10 +340,10 @@ import 'dart:math';
 //    2. it can only be used *with* response to avoid data loss
 //    3. The characteristic must be designed to support split data
 extension splitWrite on BluetoothCharacteristic {
-  Future<void> splitWrite(List<int> value, {int timeout = 15}) async {
+  Future<void> splitWrite(Uint8List value, {int timeout = 15}) async {
     int chunk = min(device.mtuNow - 3, 512); // 3 bytes BLE overhead, 512 bytes max
     for (int i = 0; i < value.length; i += chunk) {
-      List<int> subvalue = value.sublist(i, min(i + chunk, value.length));
+      Uint8List subvalue = value.sublist(i, min(i + chunk, value.length));
       await write(subvalue, withoutResponse:false, timeout: timeout);
     }
   }
@@ -398,7 +398,7 @@ await characteristic.setNotifyValue(true);
 // Reads all descriptors
 var descriptors = characteristic.descriptors;
 for(BluetoothDescriptor d in descriptors) {
-    List<int> value = await d.read();
+    Uint8List value = await d.read();
     print(value);
 }
 

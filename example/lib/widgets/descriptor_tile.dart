@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -16,9 +17,9 @@ class DescriptorTile extends StatefulWidget {
 }
 
 class _DescriptorTileState extends State<DescriptorTile> {
-  List<int> _value = [];
+  Uint8List _value = Uint8List(0);
 
-  late StreamSubscription<List<int>> _lastValueSubscription;
+  late StreamSubscription<Uint8List> _lastValueSubscription;
 
   @override
   void initState() {
@@ -39,9 +40,9 @@ class _DescriptorTileState extends State<DescriptorTile> {
 
   BluetoothDescriptor get d => widget.descriptor;
 
-  List<int> _getRandomBytes() {
+  Uint8List _getRandomBytes() {
     final math = Random();
-    return [math.nextInt(255), math.nextInt(255), math.nextInt(255), math.nextInt(255)];
+    return Uint8List.fromList([math.nextInt(255), math.nextInt(255), math.nextInt(255), math.nextInt(255)]);
   }
 
   Future onReadPressed() async {

@@ -36,16 +36,16 @@ class BluetoothDescriptor {
   ///   - anytime `read()` is called
   ///   - anytime `write()` is called
   ///   - when the device is disconnected it is cleared
-  List<int> get lastValue {
+  Uint8List get lastValue {
     String key = "$serviceUuid:$characteristicUuid:$descriptorUuid";
-    return FlutterBluePlus._lastDescs[remoteId]?[key] ?? [];
+    return FlutterBluePlus._lastDescs[remoteId]?[key] ?? Uint8List(0);
   }
 
   /// this stream emits values:
   ///   - anytime `read()` is called
   ///   - anytime `write()` is called
   ///   - and when first listened to, it re-emits the last value for convenience
-  Stream<List<int>> get lastValueStream => FlutterBluePlus._methodStream.stream
+  Stream<Uint8List> get lastValueStream => FlutterBluePlus._methodStream.stream
       .where((m) => m.method == "OnDescriptorRead" || m.method == "OnDescriptorWritten")
       .map((m) => m.arguments)
       .map((args) => BmDescriptorData.fromMap(args))
@@ -60,7 +60,7 @@ class BluetoothDescriptor {
 
   /// this stream emits values:
   ///   - anytime `read()` is called
-  Stream<List<int>> get onValueReceived => FlutterBluePlus._methodStream.stream
+  Stream<Uint8List> get onValueReceived => FlutterBluePlus._methodStream.stream
       .where((m) => m.method == "OnDescriptorRead")
       .map((m) => m.arguments)
       .map((args) => BmDescriptorData.fromMap(args))
@@ -73,7 +73,7 @@ class BluetoothDescriptor {
       .map((p) => p.value);
 
   /// Retrieves the value of a specified descriptor
-  Future<List<int>> read({int timeout = 15}) async {
+  Future<Uint8List> read({int timeout = 15}) async {
     // check connected
     if (device.isDisconnected) {
       throw FlutterBluePlusException(
@@ -85,7 +85,7 @@ class BluetoothDescriptor {
     await mtx.take();
 
     // return value
-    List<int> readValue = [];
+    Uint8List readValue = Uint8List(0);
 
     try {
       var request = BmReadDescriptorRequest(
@@ -132,7 +132,7 @@ class BluetoothDescriptor {
   }
 
   /// Writes the value of a descriptor
-  Future<void> write(List<int> value, {int timeout = 15}) async {
+  Future<void> write(Uint8List value, {int timeout = 15}) async {
     // check connected
     if (device.isDisconnected) {
       throw FlutterBluePlusException(
@@ -199,7 +199,7 @@ class BluetoothDescriptor {
   }
 
   @Deprecated('Use onValueReceived instead')
-  Stream<List<int>> get value => onValueReceived;
+  Stream<Uint8List> get value => onValueReceived;
 
   @Deprecated('Use remoteId instead')
   DeviceIdentifier get deviceId => remoteId;

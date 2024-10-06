@@ -6,9 +6,9 @@ part of flutter_blue_plus;
 
 // Supports 16-bit, 32-bit, or 128-bit UUIDs
 class Guid {
-  final List<int> bytes;
+  final Uint8List bytes;
 
-  Guid.empty() : bytes = List.filled(16, 0);
+  Guid.empty() : bytes = Uint8List(16);
 
   Guid.fromBytes(this.bytes) : assert(_checkLen(bytes.length), 'GUID must be 16, 32, or 128 bit.');
 
@@ -24,14 +24,14 @@ class Guid {
     }
   }
 
-  static List<int> _toBytes(String input) {
+  static Uint8List _toBytes(String input) {
     if (input.isEmpty) {
-      return List.filled(16, 0);
+      return Guid.empty().bytes;
     }
 
     input = input.replaceAll('-', '');
 
-    List<int>? bytes = _tryHexDecode(input);
+    Uint8List? bytes = _tryHexDecode(input);
     if (bytes == null) {
       throw FormatException("GUID not hex format: $input");
     }
