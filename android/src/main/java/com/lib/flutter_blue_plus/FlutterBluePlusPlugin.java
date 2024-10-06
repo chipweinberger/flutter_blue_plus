@@ -2458,7 +2458,7 @@ public class FlutterBluePlusPlugin implements
 
         @Override
         @SuppressWarnings("deprecation") // needed for android 12 & lower compatability
-        public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic)
+        public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic)
         {
             // getValue() was deprecated in API level 33 because the function makes it look like
             // you could always call getValue on a characteristic. But in reality, getValue()
