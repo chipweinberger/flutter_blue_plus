@@ -25,8 +25,8 @@ class FlutterBluePlus {
   static final Map<DeviceIdentifier, BmMtuChangedResponse> _mtuValues = {};
   static final Map<DeviceIdentifier, String> _platformNames = {};
   static final Map<DeviceIdentifier, String> _advNames = {};
-  static final Map<DeviceIdentifier, Map<String, List<int>>> _lastChrs = {};
-  static final Map<DeviceIdentifier, Map<String, List<int>>> _lastDescs = {};
+  static final Map<DeviceIdentifier, Map<String, Uint8List>> _lastChrs = {};
+  static final Map<DeviceIdentifier, Map<String, Uint8List>> _lastDescs = {};
   static final Map<DeviceIdentifier, List<StreamSubscription>> _deviceSubscriptions = {};
   static final Map<DeviceIdentifier, List<StreamSubscription>> _delayedSubscriptions = {};
   static final Map<DeviceIdentifier, DateTime> _connectTimestamp = {};
@@ -689,14 +689,14 @@ class MsdFilter {
   int manufacturerId;
 
   /// filter for this data
-  List<int> data;
+  Uint8List data;
 
   /// For any bit in the mask, set it the 1 if it needs to match
   /// the one in manufacturer data, otherwise set it to 0.
   /// The 'mask' must have the same length as 'data'.
-  List<int> mask;
+  Uint8List mask;
 
-  MsdFilter(this.manufacturerId, {this.data = const [], this.mask = const []});
+  MsdFilter(this.manufacturerId, {required this.data, required this.mask});
 
   // convert to bmMsg
   BmMsdFilter get _bm {
@@ -709,14 +709,14 @@ class ServiceDataFilter {
   Guid service;
 
   // filter for this data
-  List<int> data;
+  Uint8List data;
 
   // For any bit in the mask, set it the 1 if it needs to match
   // the one in service data, otherwise set it to 0.
   // The 'mask' must have the same length as 'data'.
-  List<int> mask;
+  Uint8List mask;
 
-  ServiceDataFilter(this.service, {this.data = const [], this.mask = const []});
+  ServiceDataFilter(this.service, {required this.data, required this.mask});
 
   // convert to bmMsg
   BmServiceDataFilter get _bm {
@@ -784,15 +784,15 @@ class AdvertisementData {
   final int? txPowerLevel;
   final int? appearance; // not supported on iOS / macOS
   final bool connectable;
-  final Map<int, List<int>> manufacturerData; // key: manufacturerId
-  final Map<Guid, List<int>> serviceData; // key: service guid
+  final Map<int, Uint8List> manufacturerData; // key: manufacturerId
+  final Map<Guid, Uint8List> serviceData; // key: service guid
   final List<Guid> serviceUuids;
 
   /// raw manufacturer specific data
-  List<List<int>> get msd {
-    List<List<int>> out = [];
+  List<Uint8List> get msd {
+    List<Uint8List> out = [];
     manufacturerData.forEach((key, value) {
-      out.add([key & 0xFF, (key >> 8) & 0xFF] + value);
+      out.add(Uint8List.fromList([key & 0xFF, (key >> 8) & 0xFF] + value));
     });
     return out;
   }

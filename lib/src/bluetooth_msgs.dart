@@ -30,28 +30,28 @@ class BmBluetoothAdapterState {
 
 class BmMsdFilter {
   int manufacturerId;
-  List<int>? data;
-  List<int>? mask;
+  Uint8List? data;
+  Uint8List? mask;
   BmMsdFilter(this.manufacturerId, this.data, this.mask);
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> map = {};
     map['manufacturer_id'] = manufacturerId;
-    map['data'] = _hexEncode(data ?? []);
-    map['mask'] = _hexEncode(mask ?? []);
+    map['data'] = data ?? [];
+    map['mask'] = mask ?? [];
     return map;
   }
 }
 
 class BmServiceDataFilter {
   Guid service;
-  List<int> data;
-  List<int> mask;
+  Uint8List data;
+  Uint8List mask;
   BmServiceDataFilter(this.service, this.data, this.mask);
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> map = {};
     map['service'] = service.str;
-    map['data'] = _hexEncode(data);
-    map['mask'] = _hexEncode(mask);
+    map['data'] = data;
+    map['mask'] = mask;
     return map;
   }
 }
@@ -107,8 +107,8 @@ class BmScanAdvertisement {
   final bool connectable;
   final int? txPowerLevel;
   final int? appearance; // not supported on iOS / macOS
-  final Map<int, List<int>> manufacturerData;
-  final Map<Guid, List<int>> serviceData;
+  final Map<int, Uint8List> manufacturerData;
+  final Map<Guid, Uint8List> serviceData;
   final List<Guid> serviceUuids;
   final int rssi;
 
@@ -127,27 +127,18 @@ class BmScanAdvertisement {
 
   factory BmScanAdvertisement.fromMap(Map<dynamic, dynamic> json) {
     // Get raw data
-    var rawManufacturerData = json['manufacturer_data'] ?? {};
-    var rawServiceData = json['service_data'] ?? {};
-    var rawServiceUuids = json['service_uuids'] ?? [];
+    var rawManufacturerData = json['manufacturer_data'] ?? <int, Uint8List>{};
+    var rawServiceData = json['service_data'] ?? <int, Uint8List>{};
+    var rawServiceUuids = json['service_uuids'] ?? <String>[];
 
     // Cast the data to the right type
-    Map<int, List<int>> manufacturerData = {};
-    for (var key in rawManufacturerData.keys) {
-      manufacturerData[key] = _hexDecode(rawManufacturerData[key]);
-    }
+    Map<int, Uint8List> manufacturerData = rawManufacturerData.cast<int, Uint8List>();
 
     // Cast the data to the right type
-    Map<Guid, List<int>> serviceData = {};
-    for (var key in rawServiceData.keys) {
-      serviceData[Guid(key)] = _hexDecode(rawServiceData[key]);
-    }
+    Map<Guid, Uint8List> serviceData = rawServiceData.cast<Guid, Uint8List>();
 
     // Cast the data to the right type
-    List<Guid> serviceUuids = [];
-    for (var val in rawServiceUuids) {
-      serviceUuids.add(Guid(val));
-    }
+    List<Guid> serviceUuids = rawServiceUuids.map((e) => Guid(e)).toList();
 
     return BmScanAdvertisement(
       remoteId: DeviceIdentifier(json['remote_id']),
@@ -452,7 +443,7 @@ class BmCharacteristicData {
   final Guid serviceUuid;
   final Guid? secondaryServiceUuid;
   final Guid characteristicUuid;
-  final List<int> value;
+  final Uint8List value;
   final bool success;
   final int errorCode;
   final String errorString;
@@ -474,7 +465,7 @@ class BmCharacteristicData {
       serviceUuid: Guid(json['service_uuid']),
       secondaryServiceUuid: json['secondary_service_uuid'] != null ? Guid(json['secondary_service_uuid']) : null,
       characteristicUuid: Guid(json['characteristic_uuid']),
-      value: _hexDecode(json['value']),
+      value: json['value'],
       success: json['success'] != 0,
       errorCode: json['error_code'],
       errorString: json['error_string'],
@@ -520,7 +511,7 @@ class BmWriteCharacteristicRequest {
   final Guid characteristicUuid;
   final BmWriteType writeType;
   final bool allowLongWrite;
-  final List<int> value;
+  final Uint8List value;
 
   BmWriteCharacteristicRequest({
     required this.remoteId,
@@ -540,7 +531,7 @@ class BmWriteCharacteristicRequest {
     data['characteristic_uuid'] = characteristicUuid.str;
     data['write_type'] = writeType.index;
     data['allow_long_write'] = allowLongWrite ? 1 : 0;
-    data['value'] = _hexEncode(value);
+    data['value'] = value;
     return data;
   }
 }
@@ -551,7 +542,7 @@ class BmWriteDescriptorRequest {
   final Guid? secondaryServiceUuid;
   final Guid characteristicUuid;
   final Guid descriptorUuid;
-  final List<int> value;
+  final Uint8List value;
 
   BmWriteDescriptorRequest({
     required this.remoteId,
@@ -569,7 +560,7 @@ class BmWriteDescriptorRequest {
     data['secondary_service_uuid'] = secondaryServiceUuid?.str;
     data['characteristic_uuid'] = characteristicUuid.str;
     data['descriptor_uuid'] = descriptorUuid.str;
-    data['value'] = _hexEncode(value);
+    data['value'] = value;
     return data;
   }
 }
@@ -580,7 +571,7 @@ class BmDescriptorData {
   final Guid? secondaryServiceUuid;
   final Guid characteristicUuid;
   final Guid descriptorUuid;
-  final List<int> value;
+  final Uint8List value;
   final bool success;
   final int errorCode;
   final String errorString;
@@ -604,7 +595,7 @@ class BmDescriptorData {
       secondaryServiceUuid: json['secondary_service_uuid'] != null ? Guid(json['secondary_service_uuid']) : null,
       characteristicUuid: Guid(json['characteristic_uuid']),
       descriptorUuid: Guid(json['descriptor_uuid']),
-      value: _hexDecode(json['value']),
+      value: json['value'],
       success: json['success'] != 0,
       errorCode: json['error_code'],
       errorString: json['error_string'],

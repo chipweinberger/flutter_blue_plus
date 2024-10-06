@@ -189,7 +189,7 @@ class OnCharacteristicReceivedEvent {
       secondaryServiceUuid: _response.secondaryServiceUuid);
 
   /// the new data
-  List<int> get value => _response.value;
+  Uint8List get value => _response.value;
 
   /// failed?
   FbpError? get error => _response.success ? null : FbpError(_response.errorCode, _response.errorString);
@@ -212,7 +212,7 @@ class OnCharacteristicWrittenEvent {
       secondaryServiceUuid: _response.secondaryServiceUuid);
 
   /// the new data
-  List<int> get value => _response.value;
+  Uint8List get value => _response.value;
 
   /// failed?
   FbpError? get error => _response.success ? null : FbpError(_response.errorCode, _response.errorString);
@@ -235,7 +235,7 @@ class OnDescriptorReadEvent {
       descriptorUuid: _response.descriptorUuid);
 
   /// the new data
-  List<int> get value => _response.value;
+  Uint8List get value => _response.value;
 
   /// failed?
   FbpError? get error => _response.success ? null : FbpError(_response.errorCode, _response.errorString);
@@ -258,7 +258,7 @@ class OnDescriptorWrittenEvent {
       descriptorUuid: _response.descriptorUuid);
 
   /// the new data
-  List<int> get value => _response.value;
+  Uint8List get value => _response.value;
 
   /// failed?
   FbpError? get error => _response.success ? null : FbpError(_response.errorCode, _response.errorString);

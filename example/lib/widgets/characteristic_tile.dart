@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import "../utils/snackbar.dart";
-
 import "descriptor_tile.dart";
 
 class CharacteristicTile extends StatefulWidget {
@@ -19,9 +19,9 @@ class CharacteristicTile extends StatefulWidget {
 }
 
 class _CharacteristicTileState extends State<CharacteristicTile> {
-  List<int> _value = [];
+  Uint8List _value = Uint8List(0);
 
-  late StreamSubscription<List<int>> _lastValueSubscription;
+  late StreamSubscription<Uint8List> _lastValueSubscription;
 
   @override
   void initState() {
@@ -42,9 +42,9 @@ class _CharacteristicTileState extends State<CharacteristicTile> {
 
   BluetoothCharacteristic get c => widget.characteristic;
 
-  List<int> _getRandomBytes() {
+  Uint8List _getRandomBytes() {
     final math = Random();
-    return [math.nextInt(255), math.nextInt(255), math.nextInt(255), math.nextInt(255)];
+    return Uint8List.fromList([math.nextInt(255), math.nextInt(255), math.nextInt(255), math.nextInt(255)]);
   }
 
   Future onReadPressed() async {
@@ -131,7 +131,7 @@ class _CharacteristicTileState extends State<CharacteristicTile> {
 
   Widget buildButtonRow(BuildContext context) {
     bool read = widget.characteristic.properties.read;
-    bool write = widget.characteristic.properties.write;
+    bool write = widget.characteristic.properties.write || widget.characteristic.properties.writeWithoutResponse;
     bool notify = widget.characteristic.properties.notify;
     bool indicate = widget.characteristic.properties.indicate;
     return Row(

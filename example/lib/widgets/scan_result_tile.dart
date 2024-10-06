@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -36,15 +37,15 @@ class _ScanResultTileState extends State<ScanResultTile> {
     super.dispose();
   }
 
-  String getNiceHexArray(List<int> bytes) {
+  String getNiceHexArray(Uint8List bytes) {
     return '[${bytes.map((i) => i.toRadixString(16).padLeft(2, '0')).join(', ')}]';
   }
 
-  String getNiceManufacturerData(List<List<int>> data) {
+  String getNiceManufacturerData(List<Uint8List> data) {
     return data.map((val) => '${getNiceHexArray(val)}').join(', ').toUpperCase();
   }
 
-  String getNiceServiceData(Map<Guid, List<int>> data) {
+  String getNiceServiceData(Map<Guid, Uint8List> data) {
     return data.entries.map((v) => '${v.key}: ${getNiceHexArray(v.value)}').join(', ').toUpperCase();
   }
 
