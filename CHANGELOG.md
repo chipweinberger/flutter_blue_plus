@@ -1,3 +1,6 @@
+## 1.33.2
+* **[Fix]** Android: compile bug in 1.33.1
+
 ## 1.33.1
 * **[Fix]** Android: compile bug in 1.33.0
 
