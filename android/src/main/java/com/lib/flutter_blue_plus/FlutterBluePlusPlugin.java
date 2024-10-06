@@ -2357,7 +2357,7 @@ public class FlutterBluePlusPlugin implements
 
             // what data did we write?
             String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + primaryServiceUuid;
-            []byte value = mWriteChr.get(key) != null ? mWriteChr.get(key) : new byte[0];
+            byte[] value = mWriteChr.get(key) != null ? mWriteChr.get(key) : new byte[0];
             mWriteChr.remove(key);
 
             // see: BmCharacteristicData
