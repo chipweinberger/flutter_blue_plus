@@ -1521,9 +1521,8 @@ public class FlutterBluePlusPlugin implements
         return true;
     }
 
-    private void ensurePermissions(List<String> permissions, OperationOnPermission operation)
-    {
-        // only request permission we don't already have
+    private void ensurePermissions(List<String> permissions, OperationOnPermission operation) {
+        // Filter out permissions that are already granted
         List<String> permissionsNeeded = new ArrayList<>();
         for (String permission : permissions) {
             if (permission != null && ContextCompat.checkSelfPermission(context, permission)
@@ -1533,7 +1532,7 @@ public class FlutterBluePlusPlugin implements
             }
         }
 
-        // no work to do?
+        // If all permissions are granted, proceed with the operation
         if (permissionsNeeded.isEmpty()) {
             operation.op(true);
             return;
@@ -1543,6 +1542,7 @@ public class FlutterBluePlusPlugin implements
     }
 
     private void askPermission(List<String> permissionsNeeded, OperationOnPermission operation) {
+        // Store the operation with the current request code
         operationsOnPermission.put(lastEventId, operation);
 
         ActivityCompat.requestPermissions(
@@ -1552,6 +1552,7 @@ public class FlutterBluePlusPlugin implements
 
         lastEventId++;
     }
+
 
     //////////////////////////////////////////////
     // ██████   ██       ███████
