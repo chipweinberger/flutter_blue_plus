@@ -1,3 +1,6 @@
+## 1.33.3
+* **[Fix]** Android: asking permission would not work until app restart (regression 1.32.13)
+
 ## 1.33.2
 * **[Fix]** Android: compile bug in 1.33.1
 
