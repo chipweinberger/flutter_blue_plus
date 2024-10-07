@@ -1478,6 +1478,7 @@ public class FlutterBluePlusPlugin implements
         for (String permission : permissions) {
             if (permission != null && ContextCompat.checkSelfPermission(context, permission)
                     != PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG,"Permission is required: " + permission);
                 permissionsNeeded.add(permission);
             }
         }
