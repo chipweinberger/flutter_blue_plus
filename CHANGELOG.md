@@ -1,3 +1,8 @@
+## 1.33.2
+* **[Fix]** Android: compile bug in 1.33.1
+
+## 1.33.1
+* **[Fix]** Android: compile bug in 1.33.0
 
 ## 1.33.0
 * **[BREAKING CHANGE]** iOS 18 compatibility: `systemDevices` now requires UUID argument
