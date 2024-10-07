@@ -151,7 +151,7 @@ public class FlutterBluePlusPlugin implements
         else if (ends)
         {
             // 32-bit
-            return s.substring(0,8);
+                return s.substring(0,8);
         }
         else
         {
@@ -287,12 +287,12 @@ public class FlutterBluePlusPlugin implements
             // check that we have an adapter, except for
             // the functions that do not need it
             if(mBluetoothAdapter == null &&
-                    "flutterRestart".equals(call.method) == false &&
-                    "connectedCount".equals(call.method) == false &&
-                    "setLogLevel".equals(call.method) == false &&
-                    "isSupported".equals(call.method) == false &&
-                    "getAdapterName".equals(call.method) == false &&
-                    "getAdapterState".equals(call.method) == false) {
+                "flutterRestart".equals(call.method) == false &&
+                "connectedCount".equals(call.method) == false &&
+                "setLogLevel".equals(call.method) == false &&
+                "isSupported".equals(call.method) == false &&
+                "getAdapterName".equals(call.method) == false &&
+                "getAdapterState".equals(call.method) == false) {
                 result.error("bluetoothUnavailable", "the device does not support bluetooth", null);
                 return;
             }
@@ -499,7 +499,7 @@ public class FlutterBluePlusPlugin implements
 
                         if (granted == false) {
                             result.error("startScan",
-                                    String.format("FlutterBluePlus requires  bluetooth permissions"), null);
+                                String.format("FlutterBluePlus requires %s permission", perm), null);
                             return;
                         }
 
@@ -1464,19 +1464,19 @@ public class FlutterBluePlusPlugin implements
             mMethodCallMutex.release();
         }
     }
-
-    //////////////////////////////////////////////////////////////////////
-    //  █████    ██████  ████████  ██  ██    ██  ██  ████████  ██    ██
-    // ██   ██  ██          ██     ██  ██    ██  ██     ██      ██  ██
-    // ███████  ██          ██     ██  ██    ██  ██     ██       ████
-    // ██   ██  ██          ██     ██   ██  ██   ██     ██        ██
-    // ██   ██   ██████     ██     ██    ████    ██     ██        ██
-    //
-    // ██████   ███████  ███████  ██    ██  ██       ████████
-    // ██   ██  ██       ██       ██    ██  ██          ██
-    // ██████   █████    ███████  ██    ██  ██          ██
-    // ██   ██  ██            ██  ██    ██  ██          ██
-    // ██   ██  ███████  ███████   ██████   ███████     ██
+    
+   //////////////////////////////////////////////////////////////////////
+   //  █████    ██████  ████████  ██  ██    ██  ██  ████████  ██    ██
+   // ██   ██  ██          ██     ██  ██    ██  ██     ██      ██  ██
+   // ███████  ██          ██     ██  ██    ██  ██     ██       ████
+   // ██   ██  ██          ██     ██   ██  ██   ██     ██        ██
+   // ██   ██   ██████     ██     ██    ████    ██     ██        ██
+   //
+   // ██████   ███████  ███████  ██    ██  ██       ████████
+   // ██   ██  ██       ██       ██    ██  ██          ██
+   // ██████   █████    ███████  ██    ██  ██          ██
+   // ██   ██  ██            ██  ██    ██  ██          ██
+   // ██   ██  ███████  ███████   ██████   ███████     ██
 
     @Override
     public boolean onActivityResult(int requestCode, int resultCode, Intent data)
@@ -1516,7 +1516,11 @@ public class FlutterBluePlusPlugin implements
                     break;
                 }
             }
-            operation.op(allPermissionsGranted);
+            operation.op(allGranted, deniedPermission);
+            return true; // permission result was handled
+        } else {
+            operation.op(false, null);
+            return false;
         }
         return true;
     }
@@ -1618,7 +1622,7 @@ public class FlutterBluePlusPlugin implements
         BluetoothGattCharacteristic characteristic = getCharacteristicFromArray(characteristicId, service.getCharacteristics());
         if(characteristic == null) {
             return new ChrFound(null, "characteristic not found in service " +
-                    "(chr: '" + characteristicId + "' svc: '" + serviceId + "')");
+                "(chr: '" + characteristicId + "' svc: '" + serviceId + "')");
         }
 
         return new ChrFound(characteristic, null);
@@ -1905,7 +1909,7 @@ public class FlutterBluePlusPlugin implements
 
             // disconnect all devices
             if (adapterState == BluetoothAdapter.STATE_TURNING_OFF ||
-                    adapterState == BluetoothAdapter.STATE_OFF) {
+                adapterState == BluetoothAdapter.STATE_OFF) {
                 disconnectAllDevices("adapterTurnOff");
             }
         }
