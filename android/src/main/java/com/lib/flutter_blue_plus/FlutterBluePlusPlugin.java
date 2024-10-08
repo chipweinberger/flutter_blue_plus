@@ -1522,19 +1522,15 @@ public class FlutterBluePlusPlugin implements
         operationsOnPermission.remove(requestCode); // Clean up to prevent memory leaks
 
         if (operation != null && grantResults.length > 0) {
-            boolean allGranted = true;
-            String deniedPermission = null;
             for (int i = 0; i < grantResults.length; i++) {
                 if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
-                    allGranted = false;
-                    deniedPermission = permissions[i];
-                    break;
+                    operation.op(false, permissions[i]); // permission denied
+                    return true;
                 }
             }
-            operation.op(allGranted, deniedPermission);
-            return true; // permission result was handled
+            operation.op(true, null); // permission granted
+            return true;
         } else {
-            operation.op(false, null);
             return false;
         }
     }
