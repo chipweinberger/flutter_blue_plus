@@ -1,3 +1,6 @@
+## 1.33.4
+* **[Fix]** Android: null deref when getting permissions (regression 1.33.3)
+
 ## 1.33.3
 * **[Fix]** Android: asking permission would not work until app restart (regression 1.32.13)
 
