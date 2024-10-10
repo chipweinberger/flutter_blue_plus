@@ -775,13 +775,13 @@ You can also use `FlutterBluePlus.adapterState.listen(...)`. See [Usage](#usage)
 
 ---
 
-### adapterStateNow is not 'on' but my Bluetooth is on
+### adapterState is not 'on' but my Bluetooth is on
 
 **For iOS:**
 
-`adapterStateNow` always starts as `unknown`. You need to wait longer for the service to initialize. 
+`adapterState` always starts as `unknown`. You need to wait longer for the service to initialize. 
 
-If `adapterStateNow` is `unavailable`, you must add access to Bluetooth Hardware in the app's Xcode settings. See [Getting Started](#getting-started).
+If `adapterState` is `unavailable`, you must add access to Bluetooth Hardware in the app's Xcode settings. See [Getting Started](#getting-started).
 
 **For Android:**
 
