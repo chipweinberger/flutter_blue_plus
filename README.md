@@ -779,7 +779,13 @@ You can also use `FlutterBluePlus.adapterState.listen(...)`. See [Usage](#usage)
 
 **For iOS:**
 
-`adapterState` always starts as `unknown`. You need to wait longer for the service to initialize. 
+`adapterState` always starts as `unknown`. You need to wait longer for the service to initialize. As simple as:
+
+```
+if (FlutterBluePlus.adapterStateNow == AdapterState.unknown) {
+    await Future.delayed(const Duration(seconds: 1));
+}
+```
 
 If `adapterState` is `unavailable`, you must add access to Bluetooth Hardware in the app's Xcode settings. See [Getting Started](#getting-started).
 
