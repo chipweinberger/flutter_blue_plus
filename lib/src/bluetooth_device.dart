@@ -407,7 +407,7 @@ class BluetoothDevice {
 
   /// Request to change MTU (Android Only)
   ///  - returns new MTU
-  ///  - [predelay] adds delay to avoid race conditions on some devices. see comments below.
+  ///  - [predelay] adds delay to avoid race conditions on some peripherals. see comments below.
   Future<int> requestMtu(int desiredMtu, {double predelay = 0.35, int timeout = 15}) async {
     // check android
     if (Platform.isAndroid == false) {
@@ -429,13 +429,13 @@ class BluetoothDevice {
       // hack: By adding delay before we call `requestMtu`, we can avoid
       // a race condition that can cause `discoverServices` to timeout or fail.
       //
-      // Note: This hack is only needed for devices that automatically send an
-      // MTU update right after connection. If your device does not do that, 
-      // you can set this delay to zero. Other people may need to increase it!
+      // Note: This hack is only needed for peripherals that automatically send an
+      // MTU update right after connection. If your peripherals does not do that, 
+      // you can set this delay to zero. Other people may need to increase it.
       //
       // The race condition goes like this:
       //  1. you call `requestMtu` right after connection
-      //  2. some devices automatically send a new MTU right after connection, without being asked
+      //  2. some peripherals automatically send a new MTU right after connection, without being asked
       //  3. your call to `requestMtu` confuses the results from step 1 and step 2, and returns to early
       //  4. the user then calls `discoverServices`, thinking that `requestMtu` has finished
       //  5. in reality, `requestMtu` is still happening, and the call to `discoverServices` will fail/timeout
