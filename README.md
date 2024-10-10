@@ -775,31 +775,13 @@ You can also use `FlutterBluePlus.adapterState.listen(...)`. See [Usage](#usage)
 
 ---
 
-### adapterState is not 'on' but my Bluetooth is on
+### adapterStateNow is not 'on' but my Bluetooth is on
 
 **For iOS:**
 
-`adapterState` always starts as `unknown`. You need to wait longer for the service to initialize. Use this code:
+`adapterStateNow` always starts as `unknown`. You need to wait longer for the service to initialize. 
 
-```
-// 'unknown' & 'turningOn' are temporary states
-Set<BluetoothAdapterState> inProgress = {BluetoothAdapterState.unknown, BluetoothAdapterState.turningOn};
-
-// stream of "real" adapterStates, ignoring 'unknown' and 'turningOn'
-var adapterState = FlutterBluePlus.adapterState.where((v) => !inProgress.contains(v)).first;
-
-// wait for "real" adapterState, with timeout
-await adapterState.timeout(const Duration(seconds: 3)).onError((error, stackTrace) {
-   throw Exception("Could not determine Bluetooth state. ${FlutterBluePlus.adapterStateNow}");
-});
-
-// check adapter state
-if (FlutterBluePlus.adapterStateNow != BluetoothAdapterState.on) {
-   throw Exception("Bluetooth Is Not On. ${FlutterBluePlus.adapterStateNow}");
-}
-```
-
-If `adapterState` is `unavailable`, you must add access to Bluetooth Hardware in the app's Xcode settings. See [Getting Started](#getting-started).
+If `adapterStateNow` is `unavailable`, you must add access to Bluetooth Hardware in the app's Xcode settings. See [Getting Started](#getting-started).
 
 **For Android:**
 
