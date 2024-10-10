@@ -782,9 +782,13 @@ You can also use `FlutterBluePlus.adapterState.listen(...)`. See [Usage](#usage)
 `adapterState` always starts as `unknown`. You need to wait longer for the service to initialize. Use this code:
 
 ```
-// wait for actual adapter state, up to 3 seconds
+// 'unknown' & 'turningOn' are temporary states
 Set<BluetoothAdapterState> inProgress = {BluetoothAdapterState.unknown, BluetoothAdapterState.turningOn};
+
+// stream of "real" adapterStates, ignoring 'unknown' and 'turningOn'
 var adapterState = FlutterBluePlus.adapterState.where((v) => !inProgress.contains(v)).first;
+
+// wait for "real" adapterState, with timeout
 await adapterState.timeout(const Duration(seconds: 3)).onError((error, stackTrace) {
    throw Exception("Could not determine Bluetooth state. ${FlutterBluePlus.adapterStateNow}");
 });
