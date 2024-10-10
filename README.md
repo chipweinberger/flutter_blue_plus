@@ -1058,13 +1058,13 @@ Bluetooth is wireless and will not always work.
 
 **1. you are not calling the right function**
 
-`lastValueStream` is called for `await chr.read()` & `await chr.write()` & `await chr.setNotifyValue(true)` 
+`lastValueStream` is called for `chr.read()` & `chr.write()` & `chr.setNotifyValue(true)` 
 
-`onValueReceived` is only called for `await chr.read()` & `await chr.setNotifyValue(true)` 
+`onValueReceived` is only called for `chr.read()` & `chr.setNotifyValue(true)` 
 
 **2. your device has nothing to send**
 
-If you are using `await chr.setNotifyValue(true)`, your _device_ chooses when to send data.
+If you are using `chr.setNotifyValue(true)`, your _device_ chooses when to send data.
 
 Try interacting with your device to get it to send new data.
 
