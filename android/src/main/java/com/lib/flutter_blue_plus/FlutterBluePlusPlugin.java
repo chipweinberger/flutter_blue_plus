@@ -1913,6 +1913,8 @@ public class FlutterBluePlusPlugin implements
                         mIsScanning = false;
                     }
                 }
+                 // fixs "Android: SCAN_FAILED_ALREADY_STARTED after turning Bluetooth Off then On #849"
+                scanCallback = null;
             }
 
             // see: BmBluetoothAdapterState
