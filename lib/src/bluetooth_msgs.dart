@@ -127,9 +127,9 @@ class BmScanAdvertisement {
 
   factory BmScanAdvertisement.fromMap(Map<dynamic, dynamic> json) {
     // Get raw data
-    var rawManufacturerData = json['manufacturer_data'] ?? <int, Uint8List>{};
-    var rawServiceData = json['service_data'] ?? <int, Uint8List>{};
-    var rawServiceUuids = json['service_uuids'] ?? <String>[];
+    Map<Object?, Object?> rawManufacturerData = json['manufacturer_data'] ?? <int, Uint8List>{};
+    Map<Object?, Object?> rawServiceData = json['service_data'] ?? <int, Uint8List>{};
+    List<Object?> rawServiceUuids = json['service_uuids'] ?? <String>[];
 
     // Cast the data to the right type
     Map<int, Uint8List> manufacturerData = rawManufacturerData.cast<int, Uint8List>();
@@ -138,7 +138,7 @@ class BmScanAdvertisement {
     Map<Guid, Uint8List> serviceData = rawServiceData.cast<Guid, Uint8List>();
 
     // Cast the data to the right type
-    List<Guid> serviceUuids = rawServiceUuids.map((e) => Guid(e)).toList();
+    List<Guid> serviceUuids = rawServiceUuids.cast<String>().map((e) => Guid(e)).toList();
 
     return BmScanAdvertisement(
       remoteId: DeviceIdentifier(json['remote_id']),
