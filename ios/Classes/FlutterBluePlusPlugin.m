@@ -2020,7 +2020,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 - (BOOL)foundMsd:(NSArray<NSDictionary*>*)filters
               msd:(NSData *)msd
 {
-    if (msd == nil || msd.length == 0) {
+    if (msd == nil || msd.length < 2) {
         return NO;
     }
     for (NSDictionary *f in filters) {
