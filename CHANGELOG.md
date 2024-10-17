@@ -1,3 +1,6 @@
+## 1.33.5
+* **[Fix]** iOS: crash caused by 1-byte advertisements (#1022)
+
 ## 1.33.4
 * **[Fix]** Android: null deref when getting permissions (regression 1.33.3)
 
