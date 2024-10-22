@@ -58,6 +58,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 @property(nonatomic) NSTimer *checkForMtuChangesTimer;
 @property(nonatomic) LogLevel logLevel;
 @property(nonatomic) NSNumber *showPowerAlert;
+@property(nonatomic) NSNumber *restoreState;
 @end
 
 @implementation FlutterBluePlusPlugin
@@ -79,6 +80,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     instance.scanCounts = [NSMutableDictionary new];
     instance.logLevel = LDEBUG;
     instance.showPowerAlert = @(YES);
+    instance.restoreState = @(NO);
 
     [registrar addMethodCallDelegate:instance channel:methodChannel];
 }
@@ -115,10 +117,19 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             }
         }
 
+        if ([@"setLogLevel" isEqualToString:call.method])
+        {
+            NSNumber *idx = [call arguments];
+            self.logLevel = (LogLevel)[idx integerValue];
+            result(@YES);
+            return;
+        }
+
         if ([@"setOptions" isEqualToString:call.method])
         {
             NSDictionary *args = (NSDictionary*) call.arguments;
             self.showPowerAlert = args[@"show_power_alert"];
+            self.restoreState = args[@"restore_state"];
             result(@YES);
             return;
         }
@@ -128,11 +139,18 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         {
             Log(LDEBUG, @"initializing CBCentralManager");
 
-            NSDictionary *options = @{
-                CBCentralManagerOptionShowPowerAlertKey: self.showPowerAlert
-            };
+            NSMutableDictionary *options = [NSMutableDictionary dictionary];
 
-            Log(LDEBUG, @"show power alert: %@", [self.showPowerAlert boolValue] ? @"yes" : @"no");
+            if ([self.showPowerAlert boolValue]) {
+                options[CBCentralManagerOptionShowPowerAlertKey] = self.showPowerAlert;
+            }
+
+            if ([self.restoreState boolValue]) {
+                options[CBCentralManagerOptionRestoreIdentifierKey] = @"flutterBluePlusRestoreIdentifier";
+            }
+
+            Log(LDEBUG, @"showPowerAlert: %@", [self.showPowerAlert boolValue] ? @"yes" : @"no");
+            Log(LDEBUG, @"restoreState: %@", [self.restoreState boolValue] ? @"yes" : @"no");
 
             self.centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil options:options];
         }
@@ -194,13 +212,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 [self.knownPeripherals removeAllObjects];
             }
             result(@(self.connectedPeripherals.count));
-            return;
-        }
-        else if ([@"setLogLevel" isEqualToString:call.method])
-        {
-            NSNumber *idx = [call arguments];
-            self.logLevel = (LogLevel)[idx integerValue];
-            result(@YES);
             return;
         }
         else if ([@"isSupported" isEqualToString:call.method])
@@ -305,12 +316,14 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         }
         else if ([@"getSystemDevices" isEqualToString:call.method])
         {
-            // Cannot pass blank UUID list for security reasons.
-            // Assume all devices have the Generic Access service 0x1800
-            CBUUID* gasUuid = [CBUUID UUIDWithString:@"1800"];
+            NSDictionary *args = (NSDictionary*) call.arguments;
+            NSMutableArray *withServices = [NSMutableArray new];
+            for (NSString *uuid in args[@"with_services"]) {
+                [withServices addObject:[CBUUID UUIDWithString:uuid]];
+            }
 
             // this returns devices connected by *any* app
-            NSArray *periphs = [self.centralManager retrieveConnectedPeripheralsWithServices:@[gasUuid]];
+            NSArray *periphs = [self.centralManager retrieveConnectedPeripheralsWithServices:withServices];
 
             // Devices
             NSMutableArray *deviceProtos = [NSMutableArray new];
@@ -795,7 +808,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         else if([L2CapMethodNames.connectToL2CapChannel isEqualToString:call.method]) {
             NSDictionary *data = (NSDictionary*)call.arguments;
             OpenL2CapChannelRequest *request = [[OpenL2CapChannelRequest alloc] initWithData:data];
-            
+
             NSString *remoteId = request.remoteId;
             CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
             if (peripheral == nil) {
@@ -1073,6 +1086,51 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 // ██   ██  █████    ██       █████    ██   ███  ███████     ██     █████            
 // ██   ██  ██       ██       ██       ██    ██  ██   ██     ██     ██               
 // ██████   ███████  ███████  ███████   ██████   ██   ██     ██     ███████ 
+
+- (void)centralManager:(CBCentralManager *)central
+      willRestoreState:(NSDictionary *)state {
+
+    Log(LDEBUG, @"centralManagerWillRestoreState");
+
+    // restore adapter state
+    [self centralManagerDidUpdateState:central];
+
+    NSArray *peripherals = state[CBCentralManagerRestoredStatePeripheralsKey];
+
+    for (CBPeripheral *peripheral in peripherals) {
+
+        // Set the delegate to self to receive the peripheral callbacks
+        peripheral.delegate = self;
+
+        if (peripheral.state != CBPeripheralStateConnected) {
+            // connect
+            Log(LDEBUG, @"Restore: reconnecting to %@", peripheral.identifier.UUIDString);
+            [self.centralManager connectPeripheral:peripheral options:nil];
+        } else {
+            // update connection state
+            Log(LDEBUG, @"Restore: already connected to %@", peripheral.identifier.UUIDString);
+            [self centralManager:central didConnectPeripheral:peripheral];
+
+            for (CBService *service in peripheral.services) {
+
+                // restore services
+                [self peripheral:peripheral didDiscoverServices:nil];
+
+                for (CBCharacteristic *characteristic in service.characteristics) {
+
+                    // restore characteristics
+                    [self peripheral:peripheral didDiscoverCharacteristicsForService:service error:nil];
+
+                    // restore notifications
+                    if (characteristic.isNotifying) {
+                        [self peripheral:peripheral didUpdateNotificationStateForCharacteristic:characteristic error:nil];
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 - (void)centralManagerDidUpdateState:(nonnull CBCentralManager *)central
 {
@@ -1670,7 +1728,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     };
 
     [_l2capManager didOpenChannelWithPeripheral:peripheral channel:channel error:error];
-    
+
     [self.methodChannel invokeMethod:@"OnL2CAPChannelOpened" arguments:result];
 }
 
@@ -2034,7 +2092,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 - (BOOL)foundMsd:(NSArray<NSDictionary*>*)filters
               msd:(NSData *)msd
 {
-    if (msd == nil || msd.length == 0) {
+    if (msd == nil || msd.length < 2) {
         return NO;
     }
     for (NSDictionary *f in filters) {

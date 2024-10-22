@@ -28,7 +28,7 @@ FlutterBluePlus is a Bluetooth Low Energy plugin for [Flutter](https://flutter.d
 
 It supports BLE Central Role only (most common). 
 
-If you need BLE Peripheral Role, you should check out [FlutterBlePeripheral](https://pub.dev/packages/flutter_ble_peripheral).
+If you need BLE Peripheral Role, you should check out [FlutterBlePeripheral](https://pub.dev/packages/flutter_ble_peripheral), or [bluetooth_low_energy](https://pub.dev/packages/bluetooth_low_energy).
 
 ## Tutorial
 
@@ -47,13 +47,25 @@ If you are new to Bluetooth, you should start by reading BLE tutorials.
 
 FlutterBluePlus supports nearly every feature on all supported platforms: iOS, macOS, Android.
 
-FlutterBluePlus was written to be simple, robust, and easy to understand.
+## Windows Support
+
+Use [flutter_blue_plus_windows](https://pub.dev/packages/flutter_blue_plus_windows) if you need Windows support.
+
+It is maintained by @chan150. 
 
 ## No Dependencies
 
 FlutterBluePlus has zero dependencies besides Flutter, Android, iOS, and macOS themselves.
 
 This makes FlutterBluePlus very stable, and easy to maintain.
+
+## Other BLE Libraries
+
+These other libraries are worth considering. They support more platforms than FBP, but not to the same quality as FBP.
+
+- [bluetooth_low_energy](https://pub.dev/packages/bluetooth_low_energy) 
+- [universal_ble](https://pub.dev/packages/universal_ble)
+- [quick_blue](https://pub.dev/packages/quick_blue)
 
 ## ⭐ Stars ⭐
 
@@ -148,8 +160,8 @@ If your device is not found, see [Common Problems](#common-problems).
 
 ```dart
 // listen to scan results
-// Note: `onScanResults` only returns live scan results, i.e. during scanning. Use
-//  `scanResults` if you want live scan results *or* the results from a previous scan.
+// Note: `onScanResults` clears the results between scans. You should use
+//  `scanResults` if you want the current scan results *or* the results from a previous scan.
 var subscription = FlutterBluePlus.onScanResults.listen((results) {
         if (results.isNotEmpty) {
             ScanResult r = results.last; // the most recently found device
@@ -315,7 +327,7 @@ import 'dart:math';
 //    3. The characteristic must be designed to support split data
 extension splitWrite on BluetoothCharacteristic {
   Future<void> splitWrite(List<int> value, {int timeout = 15}) async {
-    int chunk = device.mtuNow - 3; // 3 bytes ble overhead
+    int chunk = min(device.mtuNow - 3, 512); // 3 bytes BLE overhead, 512 bytes max
     for (int i = 0; i < value.length; i += chunk) {
       List<int> subvalue = value.sublist(i, min(i + chunk, value.length));
       await write(subvalue, withoutResponse:false, timeout: timeout);
@@ -410,10 +422,12 @@ for (var d in devs) {
 
 Get devices connected to the system by *any* app.
 
-**Note:** you must connect *your app* to them before you can communicate with them.
+**Note:** before you can communicate, you must connect *your app* to these devices 
 
 ```dart
-List<BluetoothDevice> devs = await FlutterBluePlus.systemDevices;
+// `withServices` required on iOS, ignored on android
+List<Guid> withServices = [Guid("180F")]; 
+List<BluetoothDevice> devs = await FlutterBluePlus.systemDevices(withServices);
 for (var d in devs) {
     await d.connect(); // Must connect *our* app to the device
     await d.discoverServices();
@@ -590,7 +604,11 @@ Add the following to your `Info.plist`
 
 When this key-value pair is included in the app’s Info.plist file, the system wakes up your app to process ble `read`, `write`, and `subscription` events.
 
-You may also have to use https://pub.dev/packages/workmanager
+To wake up your app even after it is killed by the OS, set the `restoreState` option to true **before** starting any FBP work**:
+
+```
+FlutterBluePlus.setOptions(restoreState: true);
+```
 
 **Note**: Upon being woken up, an app has around 10 seconds to complete a task. Apps that spend too much time executing in the background can be throttled back by the system or killed.
 
@@ -770,19 +788,11 @@ You can also use `FlutterBluePlus.adapterState.listen(...)`. See [Usage](#usage)
 
 **For iOS:**
 
-`adapterState` always starts as `unknown`. You need to wait longer for the service to initialize. Use this code:
+`adapterState` always starts as `unknown`. You need to wait longer for the service to initialize. As simple as:
 
 ```
-// wait for actual adapter state, up to 3 seconds
-Set<BluetoothAdapterState> inProgress = {BluetoothAdapterState.unknown, BluetoothAdapterState.turningOn};
-var adapterState = FlutterBluePlus.adapterState.where((v) => !inProgress.contains(v)).first;
-await adapterState.timeout(const Duration(seconds: 3)).onError((error, stackTrace) {
-   throw Exception("Could not determine Bluetooth state. ${FlutterBluePlus.adapterStateNow}");
-});
-
-// check adapter state
-if (FlutterBluePlus.adapterStateNow != BluetoothAdapterState.on) {
-   throw Exception("Bluetooth Is Not On. ${FlutterBluePlus.adapterStateNow}");
+if (FlutterBluePlus.adapterStateNow == BluetoothAdapterState.unknown) {
+    await Future.delayed(const Duration(seconds: 1));
 }
 ```
 
@@ -1057,13 +1067,13 @@ Bluetooth is wireless and will not always work.
 
 **1. you are not calling the right function**
 
-`lastValueStream` is called for `await chr.read()` & `await chr.write()` & `await chr.setNotifyValue(true)` 
+`lastValueStream` is called for `chr.read()` & `chr.write()` & `chr.setNotifyValue(true)` 
 
-`onValueReceived` is only called for `await chr.read()` & `await chr.setNotifyValue(true)` 
+`onValueReceived` is only called for `chr.read()` & `chr.setNotifyValue(true)` 
 
 **2. your device has nothing to send**
 
-If you are using `await chr.setNotifyValue(true)`, your _device_ chooses when to send data.
+If you are using `chr.setNotifyValue(true)`, your _device_ chooses when to send data.
 
 Try interacting with your device to get it to send new data.
 
