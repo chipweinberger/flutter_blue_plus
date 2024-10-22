@@ -82,7 +82,7 @@ public class L2CapChannelManager : NSObject, CBPeripheralManagerDelegate {
     
     @objc
     public func connectToL2CapChannel(device: CBPeripheral, request: OpenL2CapChannelRequest, resultCallback: @escaping FlutterResult) {
-        guard let remoteUUID = UUID(uuidString: request.remoteId) else {
+        guard UUID(uuidString: request.remoteId) != nil else {
           LogUtil.log(logLevel: LogLevel.debug, message: String(format: "Provided device identifier is no UUID: %s", request.remoteId))
           resultCallback(FlutterError(code: ErrorCodes.openL2CapChannelFailed, message: "Provided device identifier is not a valid UUID", details: nil))
           return
