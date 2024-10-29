@@ -1058,9 +1058,9 @@ Bluetooth is wireless and will not always work.
 
 **1. you are not calling the right function**
 
-`lastValueStream` is called for `chr.read()` & `chr.write()` & `chr.setNotifyValue(true)` 
+`lastValueStream` will receive data for `chr.read()` & `chr.write()` & `chr.setNotifyValue(true)` 
 
-`onValueReceived` is only called for `chr.read()` & `chr.setNotifyValue(true)` 
+`onValueReceived` will receive data for `chr.read()` & `chr.setNotifyValue(true)` 
 
 **2. your device has nothing to send**
 
