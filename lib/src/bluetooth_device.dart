@@ -11,8 +11,6 @@ class BluetoothDevice {
     required this.remoteId,
   });
 
-  BluetoothDevice.fromProto(BmBluetoothDevice p) : remoteId = p.remoteId;
-
   /// Create a device from an id
   ///   - to connect, this device must have been discovered by your app in a previous scan
   ///   - iOS uses 128-bit uuids the remoteId, e.g. e006b3a7-ef7b-4980-a668-1f8005f84383
@@ -150,6 +148,7 @@ class BluetoothDevice {
             .fbpTimeout(timeout.inSeconds, "connect")
             .catchError((e) async {
           if (e is FlutterBluePlusException && e.code == FbpErrorCode.timeout.index) {
+            print("[FBP] connection timeout");
             await FlutterBluePlus._invokeMethod('disconnect', remoteId.str); // cancel connection attempt
           }
           throw e;
@@ -475,7 +474,7 @@ class BluetoothDevice {
 
   /// Request to change MTU (Android Only)
   ///  - returns new MTU
-  ///  - [predelay] adds delay to avoid race conditions on some devices. see comments below.
+  ///  - [predelay] adds delay to avoid race conditions on some peripherals. see comments below.
   Future<int> requestMtu(int desiredMtu, {double predelay = 0.35, int timeout = 15}) async {
     // check android
     if (Platform.isAndroid == false) {
@@ -497,13 +496,13 @@ class BluetoothDevice {
       // hack: By adding delay before we call `requestMtu`, we can avoid
       // a race condition that can cause `discoverServices` to timeout or fail.
       //
-      // Note: This hack is only needed for devices that automatically send an
-      // MTU update right after connection. If your device does not do that, 
-      // you can set this delay to zero. Other people may need to increase it!
+      // Note: This hack is only needed for peripherals that automatically send an
+      // MTU update right after connection. If your peripherals does not do that, 
+      // you can set this delay to zero. Other people may need to increase it.
       //
       // The race condition goes like this:
       //  1. you call `requestMtu` right after connection
-      //  2. some devices automatically send a new MTU right after connection, without being asked
+      //  2. some peripherals automatically send a new MTU right after connection, without being asked
       //  3. your call to `requestMtu` confuses the results from step 1 and step 2, and returns to early
       //  4. the user then calls `discoverServices`, thinking that `requestMtu` has finished
       //  5. in reality, `requestMtu` is still happening, and the call to `discoverServices` will fail/timeout
@@ -820,4 +819,7 @@ class BluetoothDevice {
   Stream<List<BluetoothService>> get services async* {
     yield [];
   }
+
+  @Deprecated('Use fromId instead')
+  BluetoothDevice.fromProto(BmBluetoothDevice p) : remoteId = p.remoteId;
 }

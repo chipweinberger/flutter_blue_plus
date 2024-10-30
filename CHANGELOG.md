@@ -1,3 +1,30 @@
+## 1.33.5
+* **[Fix]** iOS: crash caused by 1-byte advertisements (#1022)
+
+## 1.33.4
+* **[Fix]** Android: null deref when getting permissions (regression 1.33.3)
+
+## 1.33.3
+* **[Fix]** Android: asking permission would not work until app restart (regression 1.32.13)
+
+## 1.33.2
+* **[Fix]** Android: compile bug in 1.33.1
+
+## 1.33.1
+* **[Fix]** Android: compile bug in 1.33.0
+
+## 1.33.0
+* **[BREAKING CHANGE]** iOS 18 compatibility: `systemDevices` now requires UUID argument
+* **[Fix]** Android: characteristic READ error was not being passed to dart
+
+## 1.32.13
+* **[Feature]** iOS: add support for State Preservation
+* **[Improve]** Android: ask for both scan permissions at the same time
+
+## 1.32.12
+* **[Fix]** Android: further improve `disconnect(queue:false)` reliability
+* **[Deprecate]** deprecate BluetoothDevice.fromProto(...)
+
 ## 1.32.11
 * **[Improve]** Android: perf: speed up `bytesToHex`
 
