@@ -1,3 +1,6 @@
+## 1.33.6
+* **[Feature]** verbose logs: make function results easier to see
+
 ## 1.33.5
 * **[Fix]** iOS: crash caused by 1-byte advertisements (#1022)
 
