@@ -615,7 +615,7 @@ class FlutterBluePlus {
 
       // log result
       if (logLevel == LogLevel.verbose) {
-        String func = '<$method>';
+        String func = '($method)';
         String result = out.toString();
         func = _logColor ? _black(func) : func;
         result = _logColor ? _brown(result) : result;
