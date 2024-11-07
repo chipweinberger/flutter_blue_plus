@@ -40,7 +40,7 @@ class BluetoothDevice {
     if (result == null) {
       return [];
     } else {
-      return result.services.map((p) => BluetoothService.fromProto(p)).toList();
+      return result.services.map((p) => BluetoothService.fromProto(p)).where((p) => p.isPrimary).toList();
     }
   }
 
@@ -50,8 +50,8 @@ class BluetoothDevice {
   ///   - prevents accidentally creating duplicate subscriptions on each reconnection.
   ///   - [next] if true, the the stream will be canceled only on the *next* disconnection.
   ///     This is useful if you setup your subscriptions before you connect.
-  ///   - [delayed] Note: This option is only meant for `connectionState` subscriptions.  
-  ///     When `true`, we cancel after a small delay. This ensures the `connectionState` 
+  ///   - [delayed] Note: This option is only meant for `connectionState` subscriptions.
+  ///     When `true`, we cancel after a small delay. This ensures the `connectionState`
   ///     listener receives the `disconnected` event.
   void cancelWhenDisconnected(StreamSubscription subscription, {bool next = false, bool delayed = false}) {
     if (isConnected == false && next == false) {
@@ -61,7 +61,7 @@ class BluetoothDevice {
       FlutterBluePlus._delayedSubscriptions[remoteId]!.add(subscription);
     } else {
       FlutterBluePlus._deviceSubscriptions[remoteId] ??= [];
-      FlutterBluePlus._deviceSubscriptions[remoteId]!.add(subscription);      
+      FlutterBluePlus._deviceSubscriptions[remoteId]!.add(subscription);
     }
   }
 
@@ -281,7 +281,10 @@ class BluetoothDevice {
         throw FlutterBluePlusException(_nativeError, "discoverServices", response.errorCode, response.errorString);
       }
 
-      result = response.services.map((p) => BluetoothService.fromProto(p)).toList();
+      // return primary services
+      result = response.services.map((p) => BluetoothService.fromProto(p)).where((p) => p.isPrimary).toList();
+
+      result = result;
     } finally {
       mtx.give();
     }
@@ -430,7 +433,7 @@ class BluetoothDevice {
       // a race condition that can cause `discoverServices` to timeout or fail.
       //
       // Note: This hack is only needed for peripherals that automatically send an
-      // MTU update right after connection. If your peripherals does not do that, 
+      // MTU update right after connection. If your peripherals does not do that,
       // you can set this delay to zero. Other people may need to increase it.
       //
       // The race condition goes like this:
@@ -440,7 +443,7 @@ class BluetoothDevice {
       //  4. the user then calls `discoverServices`, thinking that `requestMtu` has finished
       //  5. in reality, `requestMtu` is still happening, and the call to `discoverServices` will fail/timeout
       //
-      // Adding delay before we call `requestMtu` helps ensure 
+      // Adding delay before we call `requestMtu` helps ensure
       // that the automatic mtu update has already happened.
       await Future.delayed(Duration(milliseconds: (predelay * 1000).toInt()));
     }
@@ -687,7 +690,7 @@ class BluetoothDevice {
   }
 
   /// Workaround race condition between connect and disconnect.
-  /// The bug: If you call disconnect right as android is establishing a connection 
+  /// The bug: If you call disconnect right as android is establishing a connection
   /// android may still connect to the device. Worse, "onConnectionStateChange" will not be called
   /// so FBP will have no idea this connection is active. Adding a delay fixes this issue.
   /// https://issuetracker.google.com/issues/37121040
