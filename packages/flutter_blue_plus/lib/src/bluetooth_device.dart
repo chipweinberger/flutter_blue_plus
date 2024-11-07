@@ -40,7 +40,7 @@ class BluetoothDevice {
     if (result == null) {
       return [];
     } else {
-      return result.services.map((p) => BluetoothService.fromProto(p)).toList();
+      return result.services.map((p) => BluetoothService.fromProto(p)).where((p) => p.isPrimary).toList();
     }
   }
 
@@ -274,7 +274,10 @@ class BluetoothDevice {
         throw FlutterBluePlusException(_nativeError, "discoverServices", response.errorCode, response.errorString);
       }
 
-      result = response.services.map((p) => BluetoothService.fromProto(p)).toList();
+      // return primary services
+      result = response.services.map((p) => BluetoothService.fromProto(p)).where((p) => p.isPrimary).toList();
+
+      result = result;
     } finally {
       mtx.give();
     }
