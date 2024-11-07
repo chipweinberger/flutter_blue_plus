@@ -32,9 +32,8 @@ If you need BLE Peripheral Role, you should check out [FlutterBlePeripheral](htt
 
 ## Sponsored
 
-<br>
 <p align="center">
-<img alt="FlutterBlue" src="https://github.com/boskokg/flutter_blue_plus/blob/master/site/jamcorder.png?raw=true" />
+<img width="40%" alt="FlutterBlue" src="https://github.com/boskokg/flutter_blue_plus/blob/master/site/jamcorder.png?raw=true" />
 </p>
 <br>
 
