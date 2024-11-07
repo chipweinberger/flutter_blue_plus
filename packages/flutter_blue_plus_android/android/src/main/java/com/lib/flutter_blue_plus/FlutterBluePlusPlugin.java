@@ -2602,7 +2602,7 @@ public class FlutterBluePlusPlugin implements
     HashMap<String, Object> bmBluetoothService(
         BluetoothDevice device, 
         BluetoothGattService service,
-        BluetoothGattService primaryService
+        BluetoothGattService primaryService,
         BluetoothGatt gatt)
     {
 
