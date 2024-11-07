@@ -2244,9 +2244,9 @@ public class FlutterBluePlusPlugin implements
 
             List<Object> services = new ArrayList<Object>();
             for(BluetoothGattService s : gatt.getServices()) {
-                services.add(bmBluetoothService(gatt.getDevice(), s, gatt, null));
+                services.add(bmBluetoothService(gatt.getDevice(), s, null, gatt));
                 for(BluetoothGattService s2 : s.getIncludedServices()) {
-                    services.add(bmBluetoothService(gatt.getDevice(), s2, gatt, s));
+                    services.add(bmBluetoothService(gatt.getDevice(), s2, s, gatt));
                 }
             }
 
@@ -2602,8 +2602,8 @@ public class FlutterBluePlusPlugin implements
     HashMap<String, Object> bmBluetoothService(
         BluetoothDevice device, 
         BluetoothGattService service,
-        BluetoothGatt gatt,
-        BluetoothGattService primaryService)
+        BluetoothGattService primaryService
+        BluetoothGatt gatt)
     {
 
         List<Object> characteristics = new ArrayList<Object>();
