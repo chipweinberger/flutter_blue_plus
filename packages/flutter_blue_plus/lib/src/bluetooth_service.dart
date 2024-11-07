@@ -7,9 +7,14 @@ part of flutter_blue_plus;
 class BluetoothService {
   final DeviceIdentifier remoteId;
   final Guid serviceUuid;
-  final bool isPrimary;
+  final Guid? primaryServiceUuid;
   final List<BluetoothCharacteristic> characteristics;
-  final List<BluetoothService> includedServices;
+
+  // for convenience
+  bool get isPrimary => primaryServiceUuid == null;
+
+  // for convenience
+  bool get isSecondary => primaryServiceUuid != null;
 
   /// convenience accessor
   Guid get uuid => serviceUuid;
@@ -17,22 +22,16 @@ class BluetoothService {
   BluetoothService.fromProto(BmBluetoothService p)
       : remoteId = p.remoteId,
         serviceUuid = p.serviceUuid,
-        isPrimary = p.isPrimary,
-        characteristics = p.characteristics
-            .map((c) => BluetoothCharacteristic.fromProto(c))
-            .toList(),
-        includedServices = p.includedServices
-            .map((s) => BluetoothService.fromProto(s))
-            .toList();
+        primaryServiceUuid = p.primaryServiceUuid,
+        characteristics = p.characteristics.map((c) => BluetoothCharacteristic.fromProto(c)).toList();
 
   @override
   String toString() {
     return 'BluetoothService{'
         'remoteId: $remoteId, '
         'serviceUuid: $serviceUuid, '
-        'isPrimary: $isPrimary, '
+        'primaryService: $primaryServiceUuid, '
         'characteristics: $characteristics, '
-        'includedServices: $includedServices'
         '}';
   }
 

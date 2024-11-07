@@ -93,10 +93,10 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
                         serviceUuid: Guid.fromBytes(
                           service.uuid.value,
                         ),
-                        secondaryServiceUuid: null,
                         characteristicUuid: Guid.fromBytes(
                           characteristic.uuid.value,
                         ),
+                        primaryServiceUuid: null,
                         value: characteristic.value,
                         success: true,
                         errorCode: 0,
@@ -334,7 +334,6 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
                   service.uuid.value,
                 ),
                 remoteId: device.remoteId,
-                isPrimary: service.primary,
                 characteristics: service.characteristics.map(
                   (characteristic) {
                     return BmBluetoothCharacteristic(
@@ -342,10 +341,10 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
                       serviceUuid: Guid.fromBytes(
                         service.uuid.value,
                       ),
-                      secondaryServiceUuid: null,
                       characteristicUuid: Guid.fromBytes(
                         characteristic.uuid.value,
                       ),
+                      primaryServiceUuid: null,
                       descriptors: characteristic.descriptors.map(
                         (descriptor) {
                           return BmBluetoothDescriptor(
@@ -359,6 +358,7 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
                             descriptorUuid: Guid.fromBytes(
                               descriptor.uuid.value,
                             ),
+                            primaryServiceUuid: null,
                           );
                         },
                       ).toList(),
@@ -393,7 +393,7 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
                     );
                   },
                 ).toList(),
-                includedServices: [],
+                primaryServiceUuid: null,
               );
             },
           ).toList(),
@@ -548,10 +548,10 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
           serviceUuid: Guid.fromBytes(
             service.uuid.value,
           ),
-          secondaryServiceUuid: null,
           characteristicUuid: Guid.fromBytes(
             characteristic.uuid.value,
           ),
+          primaryServiceUuid: null,
           value: value,
           success: true,
           errorCode: 0,
@@ -563,8 +563,8 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
         BmCharacteristicData(
           remoteId: request.remoteId,
           serviceUuid: request.serviceUuid,
-          secondaryServiceUuid: null,
           characteristicUuid: request.characteristicUuid,
+          primaryServiceUuid: null,
           value: [],
           success: false,
           errorCode: 0,
@@ -625,13 +625,13 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
           serviceUuid: Guid.fromBytes(
             service.uuid.value,
           ),
-          secondaryServiceUuid: null,
           characteristicUuid: Guid.fromBytes(
             characteristic.uuid.value,
           ),
           descriptorUuid: Guid.fromBytes(
             descriptor.uuid.value,
           ),
+          primaryServiceUuid: null,
           value: value,
           success: true,
           errorCode: 0,
@@ -643,9 +643,9 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
         BmDescriptorData(
           remoteId: request.remoteId,
           serviceUuid: request.serviceUuid,
-          secondaryServiceUuid: null,
           characteristicUuid: request.characteristicUuid,
           descriptorUuid: request.descriptorUuid,
+          primaryServiceUuid: null,
           value: [],
           success: false,
           errorCode: 0,
@@ -835,10 +835,10 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
           serviceUuid: Guid.fromBytes(
             service.uuid.value,
           ),
-          secondaryServiceUuid: null,
           characteristicUuid: Guid.fromBytes(
             characteristic.uuid.value,
           ),
+          primaryServiceUuid: null,
           value: request.value,
           success: true,
           errorCode: 0,
@@ -850,8 +850,8 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
         BmCharacteristicData(
           remoteId: request.remoteId,
           serviceUuid: request.serviceUuid,
-          secondaryServiceUuid: null,
           characteristicUuid: request.characteristicUuid,
+          primaryServiceUuid: null,
           value: request.value,
           success: false,
           errorCode: 0,
@@ -912,13 +912,13 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
           serviceUuid: Guid.fromBytes(
             service.uuid.value,
           ),
-          secondaryServiceUuid: null,
           characteristicUuid: Guid.fromBytes(
             characteristic.uuid.value,
           ),
           descriptorUuid: Guid.fromBytes(
             descriptor.uuid.value,
           ),
+          primaryServiceUuid: null,
           value: request.value,
           success: true,
           errorCode: 0,
@@ -930,9 +930,9 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
         BmDescriptorData(
           remoteId: request.remoteId,
           serviceUuid: request.serviceUuid,
-          secondaryServiceUuid: null,
           characteristicUuid: request.characteristicUuid,
           descriptorUuid: request.descriptorUuid,
+          primaryServiceUuid: null,
           value: request.value,
           success: false,
           errorCode: 0,

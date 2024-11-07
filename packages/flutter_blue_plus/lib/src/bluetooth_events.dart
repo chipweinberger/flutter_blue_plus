@@ -153,7 +153,7 @@ class OnCharacteristicReceivedEvent {
       remoteId: _response.remoteId,
       characteristicUuid: _response.characteristicUuid,
       serviceUuid: _response.serviceUuid,
-      secondaryServiceUuid: _response.secondaryServiceUuid);
+      primaryServiceUuid: _response.primaryServiceUuid);
 
   /// the new data
   List<int> get value => _response.value;
@@ -176,7 +176,7 @@ class OnCharacteristicWrittenEvent {
       remoteId: _response.remoteId,
       characteristicUuid: _response.characteristicUuid,
       serviceUuid: _response.serviceUuid,
-      secondaryServiceUuid: _response.secondaryServiceUuid);
+      primaryServiceUuid: _response.primaryServiceUuid);
 
   /// the new data
   List<int> get value => _response.value;

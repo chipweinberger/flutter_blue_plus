@@ -9,21 +9,21 @@ final Guid cccdUuid = Guid("00002902-0000-1000-8000-00805f9b34fb");
 class BluetoothCharacteristic {
   final DeviceIdentifier remoteId;
   final Guid serviceUuid;
-  final Guid? secondaryServiceUuid;
   final Guid characteristicUuid;
+  final Guid? primaryServiceUuid;
 
   BluetoothCharacteristic({
     required this.remoteId,
     required this.serviceUuid,
-    this.secondaryServiceUuid,
     required this.characteristicUuid,
+    this.primaryServiceUuid,
   });
 
   BluetoothCharacteristic.fromProto(BmBluetoothCharacteristic p)
       : remoteId = p.remoteId,
         serviceUuid = p.serviceUuid,
-        secondaryServiceUuid = p.secondaryServiceUuid != null ? p.secondaryServiceUuid! : null,
-        characteristicUuid = p.characteristicUuid;
+        characteristicUuid = p.characteristicUuid,
+        primaryServiceUuid = p.primaryServiceUuid;
 
   /// convenience accessor
   Guid get uuid => characteristicUuid;
@@ -60,6 +60,7 @@ class BluetoothCharacteristic {
       .where((p) => p.remoteId == remoteId)
       .where((p) => p.serviceUuid == serviceUuid)
       .where((p) => p.characteristicUuid == characteristicUuid)
+      .where((p) => p.primaryServiceUuid == primaryServiceUuid)
       .where((p) => p.success == true)
       .map((c) => c.value)
       .newStreamWithInitialValue(lastValue);
@@ -71,6 +72,7 @@ class BluetoothCharacteristic {
       .where((p) => p.remoteId == remoteId)
       .where((p) => p.serviceUuid == serviceUuid)
       .where((p) => p.characteristicUuid == characteristicUuid)
+      .where((p) => p.primaryServiceUuid == primaryServiceUuid)
       .where((p) => p.success == true)
       .map((c) => c.value);
 
@@ -106,13 +108,14 @@ class BluetoothCharacteristic {
         remoteId: remoteId,
         characteristicUuid: characteristicUuid,
         serviceUuid: serviceUuid,
-        secondaryServiceUuid: secondaryServiceUuid,
+        primaryServiceUuid: primaryServiceUuid,
       );
 
       var responseStream = FlutterBluePlusPlatform.instance.onCharacteristicReceived
           .where((p) => p.remoteId == request.remoteId)
           .where((p) => p.serviceUuid == request.serviceUuid)
-          .where((p) => p.characteristicUuid == request.characteristicUuid);
+          .where((p) => p.characteristicUuid == request.characteristicUuid)
+          .where((p) => p.primaryServiceUuid == request.primaryServiceUuid);
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmCharacteristicData> futureResponse = responseStream.first;
@@ -174,16 +177,17 @@ class BluetoothCharacteristic {
         remoteId: remoteId,
         characteristicUuid: characteristicUuid,
         serviceUuid: serviceUuid,
-        secondaryServiceUuid: secondaryServiceUuid,
         writeType: writeType,
         allowLongWrite: allowLongWrite,
         value: value,
+        primaryServiceUuid: primaryServiceUuid,
       );
 
       var responseStream = FlutterBluePlusPlatform.instance.onCharacteristicWritten
           .where((p) => p.remoteId == request.remoteId)
           .where((p) => p.serviceUuid == request.serviceUuid)
-          .where((p) => p.characteristicUuid == request.characteristicUuid);
+          .where((p) => p.characteristicUuid == request.characteristicUuid)
+          .where((p) => p.primaryServiceUuid == request.primaryServiceUuid);
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmCharacteristicData> futureResponse = responseStream.first;
@@ -234,10 +238,10 @@ class BluetoothCharacteristic {
       var request = BmSetNotifyValueRequest(
         remoteId: remoteId,
         serviceUuid: serviceUuid,
-        secondaryServiceUuid: secondaryServiceUuid,
         characteristicUuid: characteristicUuid,
         forceIndications: forceIndications,
         enable: notify,
+        primaryServiceUuid: primaryServiceUuid,
       );
 
       // invoke
@@ -257,14 +261,7 @@ class BluetoothCharacteristic {
     if (FlutterBluePlus._knownServices[remoteId] != null) {
       for (var s in FlutterBluePlus._knownServices[remoteId]!.services) {
         if (s.serviceUuid == serviceUuid) {
-          if (secondaryServiceUuid != null) {
-            // search includedServices (i.e. secondary services)
-            for (var s2 in s.includedServices) {
-              if (s2.serviceUuid == secondaryServiceUuid) {
-                return s2;
-              }
-            }
-          } else {
+          if (s.primaryServiceUuid == primaryServiceUuid) {
             return s;
           }
         }
@@ -290,8 +287,8 @@ class BluetoothCharacteristic {
     return 'BluetoothCharacteristic{'
         'remoteId: $remoteId, '
         'serviceUuid: $serviceUuid, '
-        'secondaryServiceUuid: $secondaryServiceUuid, '
         'characteristicUuid: $characteristicUuid, '
+        'primaryServiceUuid: $primaryServiceUuid, '
         'descriptors: $descriptors, '
         'properties: $properties, '
         'value: $lastValue'

@@ -164,6 +164,7 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
                 serviceUuid: Guid.fromString(s.uuid),
                 characteristicUuid: Guid.fromString(c.uuid),
                 descriptorUuid: Guid.fromString(d.uuid),
+                primaryServiceUuid: null,
               ),
             );
           }
@@ -172,8 +173,8 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
             BmBluetoothCharacteristic(
               remoteId: device.remoteId,
               serviceUuid: Guid.fromString(s.uuid),
-              secondaryServiceUuid: null,
               characteristicUuid: Guid.fromString(c.uuid),
+              primaryServiceUuid: null,
               descriptors: descriptors,
               properties: BmCharacteristicProperties(
                 broadcast: c.properties.broadcast,
@@ -194,11 +195,10 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
 
         services.add(
           BmBluetoothService(
-            remoteId: device.remoteId,
             serviceUuid: Guid.fromString(s.uuid),
-            isPrimary: s.isPrimary,
+            remoteId: device.remoteId,
             characteristics: characteristics,
-            includedServices: [],
+            primaryServiceUuid: null,
           ),
         );
       }
@@ -270,8 +270,8 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
         BmCharacteristicData(
           remoteId: device.remoteId,
           serviceUuid: Guid.fromString(service.uuid),
-          secondaryServiceUuid: null,
           characteristicUuid: Guid.fromString(characteristic.uuid),
+          primaryServiceUuid: null,
           value: value.buffer.asUint8List(),
           success: true,
           errorCode: 0,
@@ -283,8 +283,8 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
         BmCharacteristicData(
           remoteId: request.remoteId,
           serviceUuid: request.serviceUuid,
-          secondaryServiceUuid: null,
           characteristicUuid: request.characteristicUuid,
+          primaryServiceUuid: null,
           value: [],
           success: false,
           errorCode: 0,
@@ -332,9 +332,9 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
         BmDescriptorData(
           remoteId: device.remoteId,
           serviceUuid: Guid.fromString(service.uuid),
-          secondaryServiceUuid: null,
           characteristicUuid: Guid.fromString(characteristic.uuid),
           descriptorUuid: Guid.fromString(descriptor.uuid),
+          primaryServiceUuid: null,
           value: value.buffer.asUint8List(),
           success: true,
           errorCode: 0,
@@ -346,9 +346,9 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
         BmDescriptorData(
           remoteId: request.remoteId,
           serviceUuid: request.serviceUuid,
-          secondaryServiceUuid: null,
           characteristicUuid: request.characteristicUuid,
           descriptorUuid: request.descriptorUuid,
+          primaryServiceUuid: null,
           value: [],
           success: false,
           errorCode: 0,
@@ -565,8 +565,8 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
         BmCharacteristicData(
           remoteId: device.remoteId,
           serviceUuid: Guid.fromString(service.uuid),
-          secondaryServiceUuid: null,
           characteristicUuid: Guid.fromString(characteristic.uuid),
+          primaryServiceUuid: null,
           value: request.value,
           success: true,
           errorCode: 0,
@@ -578,8 +578,8 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
         BmCharacteristicData(
           remoteId: request.remoteId,
           serviceUuid: request.serviceUuid,
-          secondaryServiceUuid: null,
           characteristicUuid: request.characteristicUuid,
+          primaryServiceUuid: null,
           value: request.value,
           success: false,
           errorCode: 0,
@@ -629,9 +629,9 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
         BmDescriptorData(
           remoteId: device.remoteId,
           serviceUuid: Guid.fromString(service.uuid),
-          secondaryServiceUuid: null,
           characteristicUuid: Guid.fromString(characteristic.uuid),
           descriptorUuid: Guid.fromString(descriptor.uuid),
+          primaryServiceUuid: null,
           value: request.value,
           success: true,
           errorCode: 0,
@@ -643,9 +643,9 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
         BmDescriptorData(
           remoteId: request.remoteId,
           serviceUuid: request.serviceUuid,
-          secondaryServiceUuid: null,
           characteristicUuid: request.characteristicUuid,
           descriptorUuid: request.descriptorUuid,
+          primaryServiceUuid: null,
           value: request.value,
           success: false,
           errorCode: 0,
@@ -664,8 +664,8 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
       BmCharacteristicData(
         remoteId: characteristic.service.device.remoteId,
         serviceUuid: Guid.fromString(characteristic.service.uuid),
-        secondaryServiceUuid: null,
         characteristicUuid: Guid.fromString(characteristic.uuid),
+        primaryServiceUuid: null,
         value: characteristic.value?.toDart.buffer.asUint8List() ?? [],
         success: true,
         errorCode: 0,

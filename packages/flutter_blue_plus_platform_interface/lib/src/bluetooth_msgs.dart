@@ -270,16 +270,14 @@ class BmNameChanged {
 class BmBluetoothService {
   final DeviceIdentifier remoteId;
   final Guid serviceUuid;
-  bool isPrimary;
+  final Guid? primaryServiceUuid;
   List<BmBluetoothCharacteristic> characteristics;
-  List<BmBluetoothService> includedServices;
 
   BmBluetoothService({
     required this.serviceUuid,
     required this.remoteId,
-    required this.isPrimary,
     required this.characteristics,
-    required this.includedServices,
+    required this.primaryServiceUuid,
   });
 
   factory BmBluetoothService.fromMap(Map<dynamic, dynamic> json) {
@@ -289,18 +287,11 @@ class BmBluetoothService {
       chrs.add(BmBluetoothCharacteristic.fromMap(v));
     }
 
-    // convert services
-    List<BmBluetoothService> svcs = [];
-    for (var v in json['included_services']) {
-      svcs.add(BmBluetoothService.fromMap(v));
-    }
-
     return BmBluetoothService(
-      serviceUuid: Guid(json['service_uuid']),
       remoteId: DeviceIdentifier(json['remote_id']),
-      isPrimary: json['is_primary'] != 0,
+      serviceUuid: Guid(json['service_uuid']),
+      primaryServiceUuid: Guid.parse(json['primary_service_uuid']),
       characteristics: chrs,
-      includedServices: svcs,
     );
   }
 }
@@ -308,16 +299,17 @@ class BmBluetoothService {
 class BmBluetoothCharacteristic {
   final DeviceIdentifier remoteId;
   final Guid serviceUuid;
-  final Guid? secondaryServiceUuid;
   final Guid characteristicUuid;
+  final Guid? primaryServiceUuid;
   List<BmBluetoothDescriptor> descriptors;
   BmCharacteristicProperties properties;
+
 
   BmBluetoothCharacteristic({
     required this.remoteId,
     required this.serviceUuid,
-    required this.secondaryServiceUuid,
     required this.characteristicUuid,
+    required this.primaryServiceUuid,
     required this.descriptors,
     required this.properties,
   });
@@ -332,8 +324,8 @@ class BmBluetoothCharacteristic {
     return BmBluetoothCharacteristic(
       remoteId: DeviceIdentifier(json['remote_id']),
       serviceUuid: Guid(json['service_uuid']),
-      secondaryServiceUuid: json['secondary_service_uuid'] != null ? Guid(json['secondary_service_uuid']) : null,
       characteristicUuid: Guid(json['characteristic_uuid']),
+      primaryServiceUuid: Guid.parse(json['primary_service_uuid']),
       descriptors: descs,
       properties: BmCharacteristicProperties.fromMap(json['properties']),
     );
@@ -345,12 +337,14 @@ class BmBluetoothDescriptor {
   final Guid serviceUuid;
   final Guid characteristicUuid;
   final Guid descriptorUuid;
+  final Guid? primaryServiceUuid;
 
   BmBluetoothDescriptor({
     required this.remoteId,
     required this.serviceUuid,
     required this.characteristicUuid,
     required this.descriptorUuid,
+    required this.primaryServiceUuid,
   });
 
   factory BmBluetoothDescriptor.fromMap(Map<dynamic, dynamic> json) {
@@ -359,6 +353,7 @@ class BmBluetoothDescriptor {
       serviceUuid: Guid(json['service_uuid']),
       characteristicUuid: Guid(json['characteristic_uuid']),
       descriptorUuid: Guid(json['descriptor_uuid']),
+      primaryServiceUuid: Guid.parse(json['primary_service_uuid']),
     );
   }
 }
@@ -443,22 +438,22 @@ class BmDiscoverServicesResult {
 class BmReadCharacteristicRequest {
   final DeviceIdentifier remoteId;
   final Guid serviceUuid;
-  final Guid? secondaryServiceUuid;
   final Guid characteristicUuid;
+  final Guid? primaryServiceUuid;
 
   BmReadCharacteristicRequest({
     required this.remoteId,
     required this.serviceUuid,
-    this.secondaryServiceUuid,
     required this.characteristicUuid,
+    this.primaryServiceUuid,
   });
 
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> data = {};
     data['remote_id'] = remoteId.str;
     data['service_uuid'] = serviceUuid.str;
-    data['secondary_service_uuid'] = secondaryServiceUuid?.str;
     data['characteristic_uuid'] = characteristicUuid.str;
+    data['primary_service_uuid'] = primaryServiceUuid?.str;
     return data;
   }
 }
@@ -466,18 +461,19 @@ class BmReadCharacteristicRequest {
 class BmCharacteristicData {
   final DeviceIdentifier remoteId;
   final Guid serviceUuid;
-  final Guid? secondaryServiceUuid;
   final Guid characteristicUuid;
+  final Guid? primaryServiceUuid;
   final List<int> value;
   final bool success;
   final int errorCode;
   final String errorString;
 
+
   BmCharacteristicData({
     required this.remoteId,
     required this.serviceUuid,
-    required this.secondaryServiceUuid,
     required this.characteristicUuid,
+    required this.primaryServiceUuid,
     required this.value,
     required this.success,
     required this.errorCode,
@@ -488,8 +484,8 @@ class BmCharacteristicData {
     return BmCharacteristicData(
       remoteId: DeviceIdentifier(json['remote_id']),
       serviceUuid: Guid(json['service_uuid']),
-      secondaryServiceUuid: json['secondary_service_uuid'] != null ? Guid(json['secondary_service_uuid']) : null,
       characteristicUuid: Guid(json['characteristic_uuid']),
+      primaryServiceUuid: Guid.parse(json['primary_service_uuid']),
       value: _hexDecode(json['value']),
       success: json['success'] != 0,
       errorCode: json['error_code'],
@@ -501,25 +497,25 @@ class BmCharacteristicData {
 class BmReadDescriptorRequest {
   final DeviceIdentifier remoteId;
   final Guid serviceUuid;
-  final Guid? secondaryServiceUuid;
   final Guid characteristicUuid;
   final Guid descriptorUuid;
+  final Guid? primaryServiceUuid;
 
   BmReadDescriptorRequest({
     required this.remoteId,
     required this.serviceUuid,
-    required this.secondaryServiceUuid,
     required this.characteristicUuid,
     required this.descriptorUuid,
+    required this.primaryServiceUuid,
   });
 
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> data = {};
     data['remote_id'] = remoteId.str;
     data['service_uuid'] = serviceUuid.str;
-    data['secondary_service_uuid'] = secondaryServiceUuid?.str;
     data['characteristic_uuid'] = characteristicUuid.str;
     data['descriptor_uuid'] = descriptorUuid.str;
+    data['primary_service_uuid'] = primaryServiceUuid?.str;
     return data;
   }
 }
@@ -532,17 +528,18 @@ enum BmWriteType {
 class BmWriteCharacteristicRequest {
   final DeviceIdentifier remoteId;
   final Guid serviceUuid;
-  final Guid? secondaryServiceUuid;
   final Guid characteristicUuid;
+  final Guid? primaryServiceUuid;
   final BmWriteType writeType;
   final bool allowLongWrite;
   final List<int> value;
 
+
   BmWriteCharacteristicRequest({
     required this.remoteId,
     required this.serviceUuid,
-    required this.secondaryServiceUuid,
     required this.characteristicUuid,
+    required this.primaryServiceUuid,
     required this.writeType,
     required this.allowLongWrite,
     required this.value,
@@ -552,8 +549,8 @@ class BmWriteCharacteristicRequest {
     final Map<dynamic, dynamic> data = {};
     data['remote_id'] = remoteId.str;
     data['service_uuid'] = serviceUuid.str;
-    data['secondary_service_uuid'] = secondaryServiceUuid?.str;
     data['characteristic_uuid'] = characteristicUuid.str;
+    data['primary_service_uuid'] = primaryServiceUuid?.str;
     data['write_type'] = writeType.index;
     data['allow_long_write'] = allowLongWrite ? 1 : 0;
     data['value'] = _hexEncode(value);
@@ -564,16 +561,16 @@ class BmWriteCharacteristicRequest {
 class BmWriteDescriptorRequest {
   final DeviceIdentifier remoteId;
   final Guid serviceUuid;
-  final Guid? secondaryServiceUuid;
   final Guid characteristicUuid;
+  final Guid? primaryServiceUuid;
   final Guid descriptorUuid;
   final List<int> value;
 
   BmWriteDescriptorRequest({
     required this.remoteId,
     required this.serviceUuid,
-    required this.secondaryServiceUuid,
     required this.characteristicUuid,
+    required this.primaryServiceUuid,
     required this.descriptorUuid,
     required this.value,
   });
@@ -582,9 +579,9 @@ class BmWriteDescriptorRequest {
     final Map<dynamic, dynamic> data = {};
     data['remote_id'] = remoteId.str;
     data['service_uuid'] = serviceUuid.str;
-    data['secondary_service_uuid'] = secondaryServiceUuid?.str;
     data['characteristic_uuid'] = characteristicUuid.str;
     data['descriptor_uuid'] = descriptorUuid.str;
+    data['primary_service_uuid'] = primaryServiceUuid?.str;
     data['value'] = _hexEncode(value);
     return data;
   }
@@ -593,9 +590,9 @@ class BmWriteDescriptorRequest {
 class BmDescriptorData {
   final DeviceIdentifier remoteId;
   final Guid serviceUuid;
-  final Guid? secondaryServiceUuid;
   final Guid characteristicUuid;
   final Guid descriptorUuid;
+  final Guid? primaryServiceUuid;
   final List<int> value;
   final bool success;
   final int errorCode;
@@ -604,9 +601,9 @@ class BmDescriptorData {
   BmDescriptorData({
     required this.remoteId,
     required this.serviceUuid,
-    required this.secondaryServiceUuid,
     required this.characteristicUuid,
     required this.descriptorUuid,
+    required this.primaryServiceUuid,
     required this.value,
     required this.success,
     required this.errorCode,
@@ -617,9 +614,9 @@ class BmDescriptorData {
     return BmDescriptorData(
       remoteId: DeviceIdentifier(json['remote_id']),
       serviceUuid: Guid(json['service_uuid']),
-      secondaryServiceUuid: json['secondary_service_uuid'] != null ? Guid(json['secondary_service_uuid']) : null,
       characteristicUuid: Guid(json['characteristic_uuid']),
       descriptorUuid: Guid(json['descriptor_uuid']),
+      primaryServiceUuid: Guid.parse(json['primary_service_uuid']),
       value: _hexDecode(json['value']),
       success: json['success'] != 0,
       errorCode: json['error_code'],
@@ -631,16 +628,17 @@ class BmDescriptorData {
 class BmSetNotifyValueRequest {
   final DeviceIdentifier remoteId;
   final Guid serviceUuid;
-  final Guid? secondaryServiceUuid;
   final Guid characteristicUuid;
+  final Guid? primaryServiceUuid;
   final bool forceIndications;
   final bool enable;
+
 
   BmSetNotifyValueRequest({
     required this.remoteId,
     required this.serviceUuid,
-    required this.secondaryServiceUuid,
     required this.characteristicUuid,
+    required this.primaryServiceUuid,
     required this.forceIndications,
     required this.enable,
   });
@@ -649,8 +647,8 @@ class BmSetNotifyValueRequest {
     final Map<dynamic, dynamic> data = {};
     data['remote_id'] = remoteId.str;
     data['service_uuid'] = serviceUuid.str;
-    data['secondary_service_uuid'] = secondaryServiceUuid?.str;
     data['characteristic_uuid'] = characteristicUuid.str;
+    data['primary_service_uuid'] = primaryServiceUuid?.str;
     data['force_indications'] = forceIndications;
     data['enable'] = enable;
     return data;
