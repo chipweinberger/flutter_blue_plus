@@ -592,7 +592,7 @@ public class FlutterBluePlusPlugin implements
                         // service data
                         for (int i = 0; i < withServiceData.size(); i++) {
                             HashMap<String, Object> m = (HashMap<String, Object>) withServiceData.get(i);
-                            ParcelUuid s = ParcelUuid.fromString((String) m.get("service"));
+                            ParcelUuid s = ParcelUuid.fromString(uuid128((String) m.get("service")));
                             byte[] mdata =             hexToBytes((String) m.get("data"));
                             byte[] mask =              hexToBytes((String) m.get("mask"));
                             ScanFilter f = null;
