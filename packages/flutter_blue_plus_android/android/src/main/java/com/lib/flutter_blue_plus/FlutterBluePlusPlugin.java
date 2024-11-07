@@ -882,10 +882,10 @@ public class FlutterBluePlusPlugin implements
                     String remoteId =           (String) data.get("remote_id");
                     String serviceUuid =        (String) data.get("service_uuid");
                     String characteristicUuid = (String) data.get("characteristic_uuid");
+                    String primaryServiceUuid = (String) data.get("primary_service_uuid");
                     String value =              (String) data.get("value");
                     int writeTypeInt =             (int) data.get("write_type");
                     boolean allowLongWrite =      ((int) data.get("allow_long_write")) != 0;
-                    String primaryServiceUuid = (String) data.get("primary_service_uuid");
 
                     int writeType = writeTypeInt == 0 ?
                         BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT :
@@ -1108,9 +1108,9 @@ public class FlutterBluePlusPlugin implements
                     String remoteId =            (String) data.get("remote_id");
                     String serviceUuid =         (String) data.get("service_uuid");
                     String characteristicUuid =  (String) data.get("characteristic_uuid");
+                    String primaryServiceUuid = (String) data.get("primary_service_uuid");
                     boolean forceIndications =  (boolean) data.get("force_indications");
                     boolean enable =            (boolean) data.get("enable");
-                    String primaryServiceUuid = (String) data.get("primary_service_uuid");
 
                     // check connection
                     BluetoothGatt gatt = mConnectedDevices.get(remoteId);
