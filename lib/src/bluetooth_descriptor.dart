@@ -53,6 +53,7 @@ class BluetoothDescriptor {
       .where((p) => p.characteristicUuid == characteristicUuid)
       .where((p) => p.serviceUuid == serviceUuid)
       .where((p) => p.descriptorUuid == descriptorUuid)
+      .where((p) => p.primaryServiceUuid == primaryServiceUuid)
       .where((p) => p.success == true)
       .map((p) => p.value)
       .newStreamWithInitialValue(lastValue);
@@ -67,6 +68,7 @@ class BluetoothDescriptor {
       .where((p) => p.characteristicUuid == characteristicUuid)
       .where((p) => p.serviceUuid == serviceUuid)
       .where((p) => p.descriptorUuid == descriptorUuid)
+      .where((p) => p.primaryServiceUuid == primaryServiceUuid)
       .where((p) => p.success == true)
       .map((p) => p.value);
 
