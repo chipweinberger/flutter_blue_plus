@@ -252,16 +252,33 @@ class BluetoothCharacteristic {
     return true;
   }
 
-  /// look through known services
-  BmBluetoothCharacteristic? get _bmchr {
+  // get known service
+  BmBluetoothService? get _bmsvc {
     if (FlutterBluePlus._knownServices[remoteId] != null) {
       for (var s in FlutterBluePlus._knownServices[remoteId]!.services) {
-        if (s.serviceUuid == (secondaryServiceUuid ?? serviceUuid)) {
-          for (var c in s.characteristics) {
-            if (c.characteristicUuid == uuid) {
-              return c;
+        if (s.serviceUuid == serviceUuid) {
+          if (secondaryServiceUuid != null) {
+            // search includedServices (i.e. secondary services)
+            for (var s2 in s.includedServices) {
+              if (s2.serviceUuid == secondaryServiceUuid) {
+                return s2;
+              }
             }
+          } else {
+            return s;
           }
+        }
+      }
+    }
+    return null;
+  }
+
+  /// get known characteristic
+  BmBluetoothCharacteristic? get _bmchr {
+    if (_bmsvc != null) {
+      for (var c in _bmsvc!.characteristics) {
+        if (c.characteristicUuid == uuid) {
+          return c;
         }
       }
     }
