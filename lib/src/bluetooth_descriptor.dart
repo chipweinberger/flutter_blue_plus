@@ -9,19 +9,22 @@ class BluetoothDescriptor {
   final Guid serviceUuid;
   final Guid characteristicUuid;
   final Guid descriptorUuid;
+  final Guid? primaryServiceUuid;
 
   BluetoothDescriptor({
     required this.remoteId,
     required this.serviceUuid,
     required this.characteristicUuid,
     required this.descriptorUuid,
+    this.primaryServiceUuid,
   });
 
   BluetoothDescriptor.fromProto(BmBluetoothDescriptor p)
       : remoteId = p.remoteId,
         serviceUuid = p.serviceUuid,
         characteristicUuid = p.characteristicUuid,
-        descriptorUuid = p.descriptorUuid;
+        descriptorUuid = p.descriptorUuid,
+        primaryServiceUuid = p.primaryServiceUuid;
 
   /// convenience accessor
   Guid get uuid => descriptorUuid;
@@ -86,9 +89,9 @@ class BluetoothDescriptor {
       var request = BmReadDescriptorRequest(
         remoteId: remoteId,
         serviceUuid: serviceUuid,
-        secondaryServiceUuid: null,
         characteristicUuid: characteristicUuid,
         descriptorUuid: descriptorUuid,
+        primaryServiceUuid: primaryServiceUuid,
       );
 
       Stream<BmDescriptorData> responseStream = FlutterBluePlus._methodStream.stream
@@ -98,7 +101,8 @@ class BluetoothDescriptor {
           .where((p) => p.remoteId == request.remoteId)
           .where((p) => p.serviceUuid == request.serviceUuid)
           .where((p) => p.characteristicUuid == request.characteristicUuid)
-          .where((p) => p.descriptorUuid == request.descriptorUuid);
+          .where((p) => p.descriptorUuid == request.descriptorUuid)
+          .where((p) => p.primaryServiceUuid == request.primaryServiceUuid);
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmDescriptorData> futureResponse = responseStream.first;
@@ -141,10 +145,10 @@ class BluetoothDescriptor {
       var request = BmWriteDescriptorRequest(
         remoteId: remoteId,
         serviceUuid: serviceUuid,
-        secondaryServiceUuid: null,
         characteristicUuid: characteristicUuid,
         descriptorUuid: descriptorUuid,
         value: value,
+        primaryServiceUuid: primaryServiceUuid,
       );
 
       Stream<BmDescriptorData> responseStream = FlutterBluePlus._methodStream.stream
@@ -154,7 +158,8 @@ class BluetoothDescriptor {
           .where((p) => p.remoteId == request.remoteId)
           .where((p) => p.serviceUuid == request.serviceUuid)
           .where((p) => p.characteristicUuid == request.characteristicUuid)
-          .where((p) => p.descriptorUuid == request.descriptorUuid);
+          .where((p) => p.descriptorUuid == request.descriptorUuid)
+          .where((p) => p.primaryServiceUuid == request.primaryServiceUuid);
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmDescriptorData> futureResponse = responseStream.first;
@@ -186,6 +191,7 @@ class BluetoothDescriptor {
         'serviceUuid: $serviceUuid, '
         'characteristicUuid: $characteristicUuid, '
         'descriptorUuid: $descriptorUuid, '
+        'primaryServiceUuid: $primaryServiceUuid'
         'lastValue: $lastValue'
         '}';
   }

@@ -12,11 +12,19 @@ class Guid {
 
   Guid.fromBytes(this.bytes) : assert(_checkLen(bytes.length), 'GUID must be 16, 32, or 128 bit.');
 
-  Guid.fromString(String input) : bytes = _fromString(input);
+  Guid.fromString(String input) : bytes = _toBytes(input);
 
-  Guid(String input) : bytes = _fromString(input);
+  Guid(String input) : bytes = _toBytes(input);
 
-  static List<int> _fromString(String input) {
+  static Guid? parse(String? input) {
+    if (input == null || input.length == 0) {
+      return null;
+    } else {
+      return Guid(input);
+    }
+  }
+
+  static List<int> _toBytes(String input) {
     if (input.isEmpty) {
       return List.filled(16, 0);
     }
