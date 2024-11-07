@@ -10,15 +10,45 @@ class BluetoothService {
   final Guid? primaryServiceUuid;
   final List<BluetoothCharacteristic> characteristics;
 
-  // for convenience
-  bool get isPrimary => primaryServiceUuid == null;
-
-  // for convenience
-  bool get isSecondary => primaryServiceUuid != null;
-
   /// convenience accessor
   Guid get uuid => serviceUuid;
 
+  /// for convenience
+  bool get isPrimary => primaryServiceUuid == null;
+
+  /// for convenience
+  bool get isSecondary => primaryServiceUuid != null;
+
+  /// (for primary services)
+  ///  get it's secondary services (i.e. includedServices)
+  List<BluetoothService> get includedServices {
+    List<BluetoothService> out = [];
+    if (FlutterBluePlus._knownServices[remoteId] != null) {
+      for (var s in FlutterBluePlus._knownServices[remoteId]!.services) {
+        if (s.primaryServiceUuid == serviceUuid) {
+          out.add(BluetoothService.fromProto(s));
+        }
+      }
+    }
+    return out;
+  }
+
+  /// (for secondary services)
+  ///  get the primary service it is associated with
+  BluetoothService? get primaryService {
+    if (primaryServiceUuid != null) {
+      if (FlutterBluePlus._knownServices[remoteId] != null) {
+        for (var s in FlutterBluePlus._knownServices[remoteId]!.services) {
+          if (s.serviceUuid == primaryServiceUuid) {
+            return BluetoothService.fromProto(s);
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  /// for internal use
   BluetoothService.fromProto(BmBluetoothService p)
       : remoteId = p.remoteId,
         serviceUuid = p.serviceUuid,
@@ -30,7 +60,7 @@ class BluetoothService {
     return 'BluetoothService{'
         'remoteId: $remoteId, '
         'serviceUuid: $serviceUuid, '
-        'primaryService: $primaryServiceUuid, '
+        'primaryServiceUuid: $primaryServiceUuid, '
         'characteristics: $characteristics, '
         '}';
   }
