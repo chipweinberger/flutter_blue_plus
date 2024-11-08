@@ -57,25 +57,27 @@ If you are new to Bluetooth, you should start by reading BLE tutorials.
 
 FlutterBluePlus supports nearly every feature on all supported platforms: iOS, macOS, Android.
 
-## Windows Support
-
-Use [flutter_blue_plus_windows](https://pub.dev/packages/flutter_blue_plus_windows) if you need Windows support.
-
-It is maintained by @chan150. 
-
 ## No Dependencies
 
 FlutterBluePlus has zero dependencies besides Flutter, Android, iOS, and macOS themselves.
 
 This makes FlutterBluePlus very stable, and easy to maintain.
 
-## Other BLE Libraries
+## Windows Support
 
-These other libraries are worth considering. They support more platforms than FBP, but not to the same quality as FBP and don't support as many BLE features.
+Use [flutter_blue_plus_windows](https://pub.dev/packages/flutter_blue_plus_windows) if you need Windows support.
 
-- [bluetooth_low_energy](https://pub.dev/packages/bluetooth_low_energy) 
-- [universal_ble](https://pub.dev/packages/universal_ble)
-- [quick_blue](https://pub.dev/packages/quick_blue)
+It is maintained by @chan150. 
+
+## Linus & Web Support
+
+[Linux](https://github.com/chipweinberger/flutter_blue_plus/issues/983) & [Web](https://github.com/chipweinberger/flutter_blue_plus/issues/769) support are not planned for FlutterBluePlus.
+
+This lets us maintain iOS, Android, & macOS at higher quality.
+
+If you would like to implement `flutter_blue_plus_linux`, or `flutter_blue_plus_web`, please do! 
+
+See: [flutter_blue_plus_windows](https://pub.dev/packages/flutter_blue_plus_windows) for an example.
 
 ## ⭐ Stars ⭐
 
