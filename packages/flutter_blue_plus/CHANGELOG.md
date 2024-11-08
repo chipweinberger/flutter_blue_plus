@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org) for commit guidelines.
 
+## 2.0.4 (2024-11-23)
+
+### Bug Fixes
+
+* `stopScan` was not propagating errors ([d9de147](https://github.com/tnc1997/flutter-blue-plus/commit/d9de1479a6629cec94d38325c7a779f481b7fef1))
+
 ## 2.0.3 (2024-11-23)
 
 ### Documentation
