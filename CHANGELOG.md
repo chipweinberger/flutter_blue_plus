@@ -1,7 +1,9 @@
+## 1.34.1
+* **[Fix]** Android: `SCAN_FAILED_ALREADY_STARTED` could sometimes occur after bluetooth restart
 
 ## 1.34.0
 * **[Feature]** support `includedServices`, aka primary/secondary services
-* **[Fix]** Adrioid: `withServiceData` scan filter was not working
+* **[Fix]** Android: `withServiceData` scan filter was not working
 
 ## 1.33.6
 * **[Feature]** verbose logs: make function results easier to see
