@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org) for commit guidelines.
 
+## 2.0.3 (2024-11-23)
+
+### Documentation
+
+* update readme ([8e58c84](https://github.com/tnc1997/flutter-blue-plus/commit/8e58c8452ff41e50b3e47d612fcb29fdae179e3d))
+
 ## 2.0.2 (2024-11-23)
 
 ### Chores

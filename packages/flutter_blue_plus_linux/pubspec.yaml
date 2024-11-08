@@ -1,6 +1,6 @@
 name: flutter_blue_plus_linux
 description: Linux implementation of the flutter_blue_plus plugin.
-version: 2.0.0
+version: 2.0.1
 homepage: https://github.com/tnc1997/flutter-blue-plus
 
 environment:
@@ -15,7 +15,7 @@ dependencies:
     git:
       url: https://github.com/tnc1997/flutter-blue-plus.git
       path: packages/flutter_blue_plus_platform_interface
-      ref: flutter_blue_plus_platform_interface-v2.0.0
+      ref: flutter_blue_plus_platform_interface-v2.0.1
   rxdart: '>=0.27.0 <0.29.0'
 
 dev_dependencies:

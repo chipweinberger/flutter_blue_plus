@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org) for commit guidelines.
 
+## 2.0.2 (2024-11-23)
+
+### Bug Fixes
+
+* characteristic not found ([d24711f](https://github.com/tnc1997/flutter-blue-plus/commit/d24711fbb2fc1be7e9deaacbc09f6eb1ce0995db))
+
 ## 2.0.1 (2024-11-23)
 
 ### Bug Fixes
