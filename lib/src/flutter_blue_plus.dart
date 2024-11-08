@@ -291,7 +291,10 @@ class FlutterBluePlus {
       _scanBuffer = _BufferStream.listen(responseStream);
 
       // invoke platform method
-      await _invokeMethod('startScan', settings.toMap()).onError((e, s) => _stopScan(invokePlatform: false));
+      await _invokeMethod('startScan', settings.toMap()).onError((e, s) {
+        _stopScan(invokePlatform: false);
+        throw e!;
+      });
 
       // check every 250ms for gone devices?
       late Stream<BmScanResponse?> outputStream = removeIfGone != null
@@ -439,7 +442,7 @@ class FlutterBluePlus {
       String func = '[[ ${call.method} ]]';
       String result;
       if (call.method == 'OnDiscoveredServices') {
-        // this is really slow, so we can't 
+        // this is really slow, so we can't
         // pretty print anything that happens alot
         result = _prettyPrint(call.arguments);
       } else {
