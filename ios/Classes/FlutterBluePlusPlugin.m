@@ -1438,7 +1438,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"remote_id":                   [peripheral.identifier UUIDString],
         @"service_uuid":                [characteristic.service.UUID uuidStr],
         @"characteristic_uuid":         [characteristic.UUID uuidStr],
-        @"primary_service_uuid":        primaryService? [primaryService.UUID uuidStr] : [NSNull null],
+        @"primary_service_uuid":        primaryService ? [primaryService.UUID uuidStr] : [NSNull null],
         @"value":                       [self convertDataToHex:characteristic.value],
         @"success":                     error == nil ? @(1) : @(0),
         @"error_string":                error ? [error localizedDescription] : @"success",
@@ -1524,7 +1524,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"service_uuid":           [characteristic.service.UUID uuidStr],
         @"characteristic_uuid":    [characteristic.UUID uuidStr],
         @"descriptor_uuid":        CCCD,
-        @"primary_service_uuid":   primaryService? [primaryService.UUID uuidStr] : [NSNull null],
+        @"primary_service_uuid":   primaryService ? [primaryService.UUID uuidStr] : [NSNull null],
         @"value":                  [self convertDataToHex:[NSData dataWithBytes:&value length:sizeof(value)]],
         @"success":                @(error == nil),
         @"error_string":           error ? [error localizedDescription] : @"success",
@@ -1559,7 +1559,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"service_uuid":           [descriptor.characteristic.service.UUID uuidStr],
         @"characteristic_uuid":    [descriptor.characteristic.UUID uuidStr],
         @"descriptor_uuid":        [descriptor.UUID uuidStr],
-        @"primary_service_uuid":   primaryService? [primaryService.UUID uuidStr] : [NSNull null],
+        @"primary_service_uuid":   primaryService ? [primaryService.UUID uuidStr] : [NSNull null],
         @"value":                  [self convertDataToHex:data],
         @"success":                @(error == nil),
         @"error_string":           error ? [error localizedDescription] : @"success",
@@ -1605,7 +1605,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"service_uuid":           serviceUuid,
         @"characteristic_uuid":    characteristicUuid,
         @"descriptor_uuid":        descriptorUuid,
-        @"primary_service_uuid":   primaryService? [primaryService.UUID uuidStr] : [NSNull null],
+        @"primary_service_uuid":   primaryService ? [primaryService.UUID uuidStr] : [NSNull null],
         @"value":                  value,
         @"success":                @(error == nil),
         @"error_string":           error ? [error localizedDescription] : @"success",
@@ -1870,7 +1870,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             @"service_uuid":           [d.characteristic.service.UUID uuidStr],
             @"characteristic_uuid":    [d.characteristic.UUID uuidStr],
             @"descriptor_uuid":        [d.UUID uuidStr],
-            @"primary_service_uuid":    primaryService? [primaryService.UUID uuidStr] : [NSNull null],
+            @"primary_service_uuid":    primaryService ? [primaryService.UUID uuidStr] : [NSNull null],
         };
 
         [descriptors addObject:desc];
@@ -1897,7 +1897,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"remote_id":              [peripheral.identifier UUIDString],
         @"service_uuid":           [characteristic.service.UUID uuidStr],
         @"characteristic_uuid":    [characteristic.UUID uuidStr],
-        @"primary_service_uuid":    primaryService? [primaryService.UUID uuidStr] : [NSNull null],
+        @"primary_service_uuid":    primaryService ? [primaryService.UUID uuidStr] : [NSNull null],
         @"descriptors":            descriptors,
         @"properties":             propsMap,
     };
@@ -2162,9 +2162,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 {
     CBService *service = characteristic.service;
 
-    // is this a primary service?
+    // is this *already* a primary service?
     if ([service isPrimary]) {
-        return service;
+        return nil;
     } 
 
     // Otherwise, iterate all services until we find the primary service

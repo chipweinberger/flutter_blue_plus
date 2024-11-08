@@ -438,6 +438,7 @@ class BmReadCharacteristicRequest {
     data['service_uuid'] = serviceUuid.str;
     data['characteristic_uuid'] = characteristicUuid.str;
     data['primary_service_uuid'] = primaryServiceUuid?.str;
+    data.removeWhere((key, value) => value == null);
     return data;
   }
 }
@@ -500,6 +501,7 @@ class BmReadDescriptorRequest {
     data['characteristic_uuid'] = characteristicUuid.str;
     data['descriptor_uuid'] = descriptorUuid.str;
     data['primary_service_uuid'] = primaryServiceUuid?.str;
+    data.removeWhere((key, value) => value == null);
     return data;
   }
 }
@@ -538,6 +540,7 @@ class BmWriteCharacteristicRequest {
     data['write_type'] = writeType.index;
     data['allow_long_write'] = allowLongWrite ? 1 : 0;
     data['value'] = _hexEncode(value);
+    data.removeWhere((key, value) => value == null);
     return data;
   }
 }
@@ -567,6 +570,7 @@ class BmWriteDescriptorRequest {
     data['descriptor_uuid'] = descriptorUuid.str;
     data['primary_service_uuid'] = primaryServiceUuid?.str;
     data['value'] = _hexEncode(value);
+    data.removeWhere((key, value) => value == null);
     return data;
   }
 }
@@ -635,6 +639,7 @@ class BmSetNotifyValueRequest {
     data['primary_service_uuid'] = primaryServiceUuid?.str;
     data['force_indications'] = forceIndications;
     data['enable'] = enable;
+    data.removeWhere((key, value) => value == null);
     return data;
   }
 }

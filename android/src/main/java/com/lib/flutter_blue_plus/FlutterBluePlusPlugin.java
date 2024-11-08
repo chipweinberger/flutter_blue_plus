@@ -2725,9 +2725,9 @@ public class FlutterBluePlusPlugin implements
 
         BluetoothGattService service = characteristic.getService();
 
-        // is this a primary service?
+        // is this *already* a primary service? 
         if(service.getType() == BluetoothGattService.SERVICE_TYPE_PRIMARY) {
-            return service;
+            return null;
         }
 
         // Otherwise, iterate included services until we find the primary service
