@@ -1,3 +1,8 @@
+
+## 1.34.0
+* **[Feature]** support `includedServices`, aka primary/secondary services
+* **[Fix]** Adrioid: `withServiceData` scan filter was not working
+
 ## 1.33.6
 * **[Feature]** verbose logs: make function results easier to see
 
