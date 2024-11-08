@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org) for commit guidelines.
 
+## 2.0.1 (2024-11-23)
+
+### Bug Fixes
+
+* SCAN_FAILED_ALREADY_STARTED could sometimes occur ([a8790ca](https://github.com/tnc1997/flutter-blue-plus/commit/a8790ca2d3d1ca64afb2f1616eea26697905c73a))
+
+### Code Refactoring
+
+* log when we call `stopScan` ([f7ec3de](https://github.com/tnc1997/flutter-blue-plus/commit/f7ec3de5fdc76dd6fee163b41adb2413dd7c9d34))
+
 ## 2.0.0 (2024-11-23)
 
 ### Bug Fixes
