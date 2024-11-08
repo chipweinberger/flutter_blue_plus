@@ -217,6 +217,7 @@ public class FlutterBluePlusPlugin implements
         if (mBluetoothAdapter != null && mIsScanning) {
             BluetoothLeScanner scanner = mBluetoothAdapter.getBluetoothLeScanner();
             if (scanner != null) {
+                log(LogLevel.DEBUG, "calling stopScan (OnDetachedFromEngine)");
                 scanner.stopScan(getScanCallback());
                 mIsScanning = false;
             }
@@ -322,6 +323,7 @@ public class FlutterBluePlusPlugin implements
                     // stop scanning
                     BluetoothLeScanner scanner = mBluetoothAdapter.getBluetoothLeScanner();
                     if(scanner != null && mIsScanning) {
+                        log(LogLevel.DEBUG, "calling stopScan (flutterRestart)");
                         scanner.stopScan(getScanCallback());
                         mIsScanning = false;
                     }
@@ -1920,6 +1922,7 @@ public class FlutterBluePlusPlugin implements
                 if (mBluetoothAdapter != null && mIsScanning) {
                     BluetoothLeScanner scanner = mBluetoothAdapter.getBluetoothLeScanner();
                     if (scanner != null) {
+                        log(LogLevel.DEBUG, "calling stopScan (Bluetooth Off)");
                         scanner.stopScan(getScanCallback());
                         mIsScanning = false;
                     }
