@@ -1,3 +1,6 @@
+## 1.34.3
+* **[Fix]** `startScan` was not propogating errors
+
 ## 1.34.2
 * **[Fix]** characteristic not found (regression 1.34.0)
 
