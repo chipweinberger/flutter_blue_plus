@@ -93,6 +93,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
         // ignore connections canceled by the user
       } else {
         Snackbar.show(ABC.c, prettyException("Connect Error:", e), success: false);
+        print(e);
       }
     }
   }
@@ -103,6 +104,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
       Snackbar.show(ABC.c, "Cancel: Success", success: true);
     } catch (e) {
       Snackbar.show(ABC.c, prettyException("Cancel Error:", e), success: false);
+      print(e);
     }
   }
 
@@ -112,6 +114,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
       Snackbar.show(ABC.c, "Disconnect: Success", success: true);
     } catch (e) {
       Snackbar.show(ABC.c, prettyException("Disconnect Error:", e), success: false);
+      print(e);
     }
   }
 
@@ -126,6 +129,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
       Snackbar.show(ABC.c, "Discover Services: Success", success: true);
     } catch (e) {
       Snackbar.show(ABC.c, prettyException("Discover Services Error:", e), success: false);
+      print(e);
     }
     if (mounted) {
       setState(() {
@@ -140,6 +144,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
       Snackbar.show(ABC.c, "Request Mtu: Success", success: true);
     } catch (e) {
       Snackbar.show(ABC.c, prettyException("Change Mtu Error:", e), success: false);
+      print(e);
     }
   }
 
