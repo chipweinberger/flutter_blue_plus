@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -430,7 +431,12 @@ class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
   ) async {
     // log result
     if (_logLevel == LogLevel.verbose) {
-      print("[FBP] [[ ${call.method} ]] result: ${call.arguments}");
+      if (call.method == 'OnDiscoveredServices') {
+        // this is really slow so we can't pretty print anything that happens a lot
+        print('[FBP] [[ ${call.method} ]] result: ${_prettyPrint(call.arguments)}');
+      } else {
+        print('[FBP] [[ ${call.method} ]] result: ${call.arguments}');
+      }
     }
 
     // handle method call
@@ -517,6 +523,16 @@ class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
             call.arguments,
           ),
         );
+    }
+  }
+
+  String _prettyPrint(
+    dynamic data,
+  ) {
+    if (data is Map || data is List) {
+      return JsonEncoder.withIndent('  ').convert(data);
+    } else {
+      return data.toString();
     }
   }
 }
