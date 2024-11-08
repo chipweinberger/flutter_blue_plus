@@ -687,13 +687,17 @@ class AdvertisementData {
   final Map<Guid, List<int>> serviceData; // key: service guid
   final List<Guid> serviceUuids;
 
-  /// raw manufacturer specific data
+  /// for convenience, raw msd data
+  ///   * interprets the first two byte as raw data,
+  ///     as opposed to a `manufacturerId`
   List<List<int>> get msd {
-    List<List<int>> out = [];
-    manufacturerData.forEach((key, value) {
-      out.add([key & 0xFF, (key >> 8) & 0xFF] + value);
+    List<List<int>> output = [];
+    manufacturerData.forEach((manufacturerId, bytes) {
+      int low = manufacturerId & 0xFF;
+      int high = (manufacturerId >> 8) & 0xFF;
+      output.add([low, high] + bytes);
     });
-    return out;
+    return output;
   }
 
   AdvertisementData({
