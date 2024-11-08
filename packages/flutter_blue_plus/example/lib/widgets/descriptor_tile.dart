@@ -50,6 +50,7 @@ class _DescriptorTileState extends State<DescriptorTile> {
       Snackbar.show(ABC.c, "Descriptor Read : Success", success: true);
     } catch (e) {
       Snackbar.show(ABC.c, prettyException("Descriptor Read Error:", e), success: false);
+      print(e);
     }
   }
 
@@ -59,6 +60,7 @@ class _DescriptorTileState extends State<DescriptorTile> {
       Snackbar.show(ABC.c, "Descriptor Write : Success", success: true);
     } catch (e) {
       Snackbar.show(ABC.c, prettyException("Descriptor Write Error:", e), success: false);
+      print(e);
     }
   }
 

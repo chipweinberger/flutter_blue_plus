@@ -38,6 +38,7 @@ class BluetoothOffScreen extends StatelessWidget {
             }
           } catch (e) {
             Snackbar.show(ABC.a, prettyException("Error Turning On:", e), success: false);
+            print(e);
           }
         },
       ),
