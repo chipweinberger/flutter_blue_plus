@@ -291,7 +291,14 @@ class FlutterBluePlus {
       _scanBuffer = _BufferStream.listen(responseStream);
 
       // invoke platform method
-      await _invokeMethod('startScan', settings.toMap()).onError((e, s) => _stopScan(invokePlatform: false));
+      await _invokeMethod('startScan', settings.toMap()).onError((e, s) {
+        _stopScan(invokePlatform: false);
+        if (e is PlatformException) {
+          throw FlutterBluePlusException(_nativeError, "startScan", FbpErrorCode.startScanFailed.index, e.message);
+        } else {
+          throw FlutterBluePlusException(ErrorPlatform.fbp, "startScan", -1, e.toString());
+        }
+      });
 
       // check every 250ms for gone devices?
       late Stream<BmScanResponse?> outputStream = removeIfGone != null
@@ -896,7 +903,8 @@ enum FbpErrorCode {
   characteristicNotFound,
   adapterIsOff,
   connectionCanceled,
-  userRejected
+  userRejected,
+  startScanFailed,
 }
 
 class FlutterBluePlusException implements Exception {
