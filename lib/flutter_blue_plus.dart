@@ -6,6 +6,7 @@ library flutter_blue_plus;
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:convert';
 
 import 'package:flutter/services.dart';
 

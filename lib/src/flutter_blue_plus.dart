@@ -437,7 +437,14 @@ class FlutterBluePlus {
     // log result
     if (logLevel == LogLevel.verbose) {
       String func = '[[ ${call.method} ]]';
-      String result = call.arguments.toString();
+      String result;
+      if (call.method == 'OnDiscoveredServices') {
+        // this is really slow, so we can't 
+        // pretty print anything that happens alot
+        result = _prettyPrint(call.arguments);
+      } else {
+        result = call.arguments.toString();
+      }
       func = _logColor ? _black(func) : func;
       result = _logColor ? _brown(result) : result;
       print("[FBP] $func result: $result");
@@ -641,6 +648,15 @@ class FlutterBluePlus {
 
     // wait for response
     await futureResponse.fbpTimeout(timeout, "turnOff");
+  }
+
+  static String _prettyPrint(dynamic data) {
+    if (data is Map || data is List) {
+      const JsonEncoder encoder = JsonEncoder.withIndent('  ');
+      return encoder.convert(data);
+    } else {
+      return data.toString();
+    }
   }
 
   /// Checks if Bluetooth functionality is turned on
