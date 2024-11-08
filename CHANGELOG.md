@@ -1,3 +1,6 @@
+## 1.34.2
+* **[Fix]** characteristic not found (regression 1.34.0)
+
 ## 1.34.1
 * **[Fix]** Android: `SCAN_FAILED_ALREADY_STARTED` could sometimes occur after bluetooth restart
 
