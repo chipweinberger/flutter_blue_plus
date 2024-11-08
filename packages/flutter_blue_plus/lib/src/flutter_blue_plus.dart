@@ -254,7 +254,10 @@ class FlutterBluePlus {
       _scanBuffer = _BufferStream.listen(responseStream);
 
       // invoke platform method
-      await _invokeMethod(() => FlutterBluePlusPlatform.instance.startScan(settings)).onError((e, s) => _stopScan(invokePlatform: false));
+      await _invokeMethod(() => FlutterBluePlusPlatform.instance.startScan(settings)).onError((e, s) {
+        _stopScan(invokePlatform: false);
+        throw e!;
+      });
 
       // check every 250ms for gone devices?
       late Stream<BmScanResponse?> outputStream = removeIfGone != null
