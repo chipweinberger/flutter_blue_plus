@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org) for commit guidelines.
 
+## 2.0.4 (2024-11-23)
+
+### Code Refactoring
+
+* improve error message when secondary service is not found ([2875252](https://github.com/tnc1997/flutter-blue-plus/commit/2875252ca019bff5e931806e14bcfc41962fc7ac))
+
 ## 2.0.3 (2024-11-23)
 
 ### Code Refactoring
