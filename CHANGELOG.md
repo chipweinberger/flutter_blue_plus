@@ -1,5 +1,5 @@
 ## 1.34.4
-* **[Improve]** improve error message when secondary service is not found (regression in 1.28.3)
+* **[Improve]** improve error message when secondary service is not found
 
 ## 1.34.3
 * **[Fix]** `startScan` was not propogating errors (regression 1.31.7)
@@ -12,7 +12,7 @@
 
 ## 1.34.0
 * **[Feature]** support `includedServices`, aka primary/secondary services
-* **[Fix]** Android: `withServiceData` scan filter was not working
+* **[Fix]** Android: `withServiceData` scan filter was not working (regression in 1.28.3)
 
 ## 1.33.6
 * **[Feature]** verbose logs: make function results easier to see
