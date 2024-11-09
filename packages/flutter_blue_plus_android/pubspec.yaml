@@ -1,0 +1,30 @@
+name: flutter_blue_plus_android
+description: Android implementation of the flutter_blue_plus plugin.
+version: 1.0.0
+homepage: https://github.com/tnc1997/flutter-blue-plus
+
+environment:
+  sdk: '>=2.17.0 <4.0.0'
+  flutter: '>=3.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_blue_plus_platform_interface:
+    git:
+      url: https://github.com/tnc1997/flutter-blue-plus.git
+      path: packages/flutter_blue_plus_platform_interface
+      ref: flutter_blue_plus_platform_interface-v1.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  plugin:
+    implements: flutter_blue_plus
+    platforms:
+      android:
+        package: com.lib.flutter_blue_plus
+        pluginClass: FlutterBluePlusPlugin
+        dartPluginClass: FlutterBluePlusAndroid
