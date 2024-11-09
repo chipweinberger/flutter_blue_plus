@@ -1,8 +1,8 @@
 ## 1.34.4
-* **[Improve]** improve error message when secondary service is not found
+* **[Improve]** improve error message when secondary service is not found (regression in 1.28.3)
 
 ## 1.34.3
-* **[Fix]** `startScan` was not propogating errors
+* **[Fix]** `startScan` was not propogating errors (regression 1.31.7)
 
 ## 1.34.2
 * **[Fix]** characteristic not found (regression 1.34.0)
