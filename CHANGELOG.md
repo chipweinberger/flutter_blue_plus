@@ -998,6 +998,11 @@ This release closes many open issues on Github.
 * **[Improve]** iOS: Use `CBCentralManagerOptionShowPowerAlertKey` for better UI popups
 * **[Improve]** Dart: Removed RxDart and other dependencies
 
+---
+
+# Chip Weinberger Becomes Maintainer
+
+---
 
 ## 1.4.0
 * Android: Add clear gatt cache method #142 (thanks to joistaus)
