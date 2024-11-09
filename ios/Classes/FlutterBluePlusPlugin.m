@@ -848,7 +848,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     {
         secondaryService = [self getServiceFromArray:serviceUuid array:[primaryService includedServices]];
         if (error && !secondaryService) {
-            NSString* s = [NSString stringWithFormat:@"secondary service not found '%@'", serviceUuid];
+            NSString* s = [NSString stringWithFormat:@"secondary service not found '%@' (primary service %@)", serviceUuid, primaryServiceUuid];
             NSDictionary* d = @{NSLocalizedDescriptionKey : s};
             *error = [NSError errorWithDomain:@"flutterBluePlus" code:1001 userInfo:d];
             return nil;

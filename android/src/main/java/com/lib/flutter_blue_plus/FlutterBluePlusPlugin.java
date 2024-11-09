@@ -1638,7 +1638,7 @@ public class FlutterBluePlusPlugin implements
         if(isSecondaryService) {
             secondaryService = getServiceFromArray(serviceUuid, primaryService.getIncludedServices());
             if(secondaryService == null) {
-                return new ChrFound(null, "secondary service not found '" + serviceUuid + "'");
+                return new ChrFound(null, "secondary service not found '" + serviceUuid + "' (primary service '" + primaryServiceUuid + "')");
             }
         }
 
