@@ -38,8 +38,6 @@ If you need BLE Peripheral Role, you should check out [FlutterBlePeripheral](htt
 
 FlutterBluePlus is proudly sponsored by [Jamcorder](https://www.jamcorder.com/). 
 
-If you'd like to support continued development of FlutterBluePlus, consider buying one :smiley:.
-
 ## Tutorial
 
 If you are new to Bluetooth, you should start by reading BLE tutorials.
