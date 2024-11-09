@@ -1,3 +1,6 @@
+## 1.34.4
+* **[Improve]** improve error message when secondary service is not found
+
 ## 1.34.3
 * **[Fix]** `startScan` was not propogating errors
 
