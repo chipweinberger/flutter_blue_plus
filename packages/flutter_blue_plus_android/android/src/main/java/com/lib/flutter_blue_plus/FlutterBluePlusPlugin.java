@@ -1590,6 +1590,8 @@ public class FlutterBluePlusPlugin implements
     // ██    ██     ██     ██  ██            ██
     //  ██████      ██     ██  ███████  ███████
 
+    // for highest reliability, it is recommended to not do
+    // anything while the device is busy bonding.
     private void waitIfBonding() {
         int counter = 0;
         if (mBondingDevices.isEmpty() == false) {
