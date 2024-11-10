@@ -71,8 +71,6 @@ It is maintained by @chan150.
 
 [Linux](https://github.com/chipweinberger/flutter_blue_plus/issues/983) & [Web](https://github.com/chipweinberger/flutter_blue_plus/issues/769) support are not planned for FlutterBluePlus.
 
-This lets us maintain iOS, Android, & macOS at higher quality.
-
 If you would like to implement `flutter_blue_plus_linux`, or `flutter_blue_plus_web`, please do! 
 
 See: [flutter_blue_plus_windows](https://pub.dev/packages/flutter_blue_plus_windows) for an example.
