@@ -6,92 +6,34 @@ part of flutter_blue_plus;
 
 final Guid cccdUuid = Guid("00002902-0000-1000-8000-00805f9b34fb");
 
-class BluetoothCharacteristic {
-  final DeviceIdentifier remoteId;
-  final Guid serviceUuid;
-  final Guid characteristicUuid;
-  final Guid? primaryServiceUuid;
+class BluetoothCharacteristic extends BluetoothValueAttribute {
+  final BluetoothService service;
+  final CharacteristicProperties properties;
+  late final List<BluetoothDescriptor> descriptors;
 
-  BluetoothCharacteristic({
-    required this.remoteId,
-    required this.serviceUuid,
-    required this.characteristicUuid,
-    this.primaryServiceUuid,
-  });
+  BluetoothCharacteristic.fromProto(BmBluetoothCharacteristic p, BluetoothService service)
+      : service = service,
+        properties = CharacteristicProperties.fromProto(p.properties),
+        super(device: service.device, uuid: p.uuid, index: p.index) {
+    descriptors = p.descriptors.map((d) => BluetoothDescriptor.fromProto(d, this)).toList();
+  }
 
-  BluetoothCharacteristic.fromProto(BmBluetoothCharacteristic p)
-      : remoteId = p.remoteId,
-        serviceUuid = p.serviceUuid,
-        characteristicUuid = p.characteristicUuid,
-        primaryServiceUuid = p.primaryServiceUuid;
+  @override
+  BluetoothAttribute? get _parentAttribute => service;
 
   /// convenience accessor
-  Guid get uuid => characteristicUuid;
+  Guid get characteristicUuid => uuid;
 
   /// convenience accessor
-  BluetoothDevice get device => BluetoothDevice(remoteId: remoteId);
-
-  /// Get Properties from known services
-  CharacteristicProperties get properties {
-    return _bmchr != null ? CharacteristicProperties.fromProto(_bmchr!.properties) : CharacteristicProperties();
+  BluetoothDescriptor? get cccd {
+    return descriptors._firstWhereOrNull((d) => d.uuid == cccdUuid);
   }
-
-  /// Get Descriptors from known services
-  List<BluetoothDescriptor> get descriptors {
-    return _bmchr != null ? _bmchr!.descriptors.map((d) => BluetoothDescriptor.fromProto(d)).toList() : [];
-  }
-
-  /// this variable is updated:
-  ///   - anytime `read()` is called
-  ///   - anytime `write()` is called
-  ///   - anytime a notification arrives (if subscribed)
-  ///   - when the device is disconnected it is cleared
-  List<int> get lastValue {
-    String key = "$serviceUuid:$characteristicUuid";
-    return FlutterBluePlus._lastChrs[remoteId]?[key] ?? [];
-  }
-
-  /// this stream emits values:
-  ///   - anytime `read()` is called
-  ///   - anytime `write()` is called
-  ///   - anytime a notification arrives (if subscribed)
-  ///   - and when first listened to, it re-emits the last value for convenience
-  Stream<List<int>> get lastValueStream => FlutterBluePlus._methodStream.stream
-      .where((m) => m.method == "OnCharacteristicReceived" || m.method == "OnCharacteristicWritten")
-      .map((m) => m.arguments)
-      .map((args) => BmCharacteristicData.fromMap(args))
-      .where((p) => p.remoteId == remoteId)
-      .where((p) => p.serviceUuid == serviceUuid)
-      .where((p) => p.characteristicUuid == characteristicUuid)
-      .where((p) => p.primaryServiceUuid == primaryServiceUuid)
-      .where((p) => p.success == true)
-      .map((c) => c.value)
-      .newStreamWithInitialValue(lastValue);
-
-  /// this stream emits values:
-  ///   - anytime `read()` is called
-  ///   - anytime a notification arrives (if subscribed)
-  Stream<List<int>> get onValueReceived => FlutterBluePlus._methodStream.stream
-      .where((m) => m.method == "OnCharacteristicReceived")
-      .map((m) => m.arguments)
-      .map((args) => BmCharacteristicData.fromMap(args))
-      .where((p) => p.remoteId == remoteId)
-      .where((p) => p.serviceUuid == serviceUuid)
-      .where((p) => p.characteristicUuid == characteristicUuid)
-      .where((p) => p.primaryServiceUuid == primaryServiceUuid)
-      .where((p) => p.success == true)
-      .map((c) => c.value);
 
   /// return true if we're subscribed to this characteristic
   ///   -  you can subscribe using setNotifyValue(true)
   bool get isNotifying {
-    var cccd = descriptors._firstWhereOrNull((d) => d.descriptorUuid == cccdUuid);
-    if (cccd == null) {
-      return false;
-    }
-    var hasNotify = cccd.lastValue.isNotEmpty && (cccd.lastValue[0] & 0x01) > 0;
-    var hasIndicate = cccd.lastValue.isNotEmpty && (cccd.lastValue[0] & 0x02) > 0;
-    return hasNotify || hasIndicate;
+    List<int> lastValue = cccd?.lastValue ?? [];
+    return lastValue.isNotEmpty && (lastValue[0] & 0x03) > 0;
   }
 
   /// read a characteristic
@@ -106,50 +48,33 @@ class BluetoothCharacteristic {
     _Mutex mtx = _MutexFactory.getMutexForKey("global");
     await mtx.take();
 
-    // return value
-    List<int> responseValue = [];
-
     try {
       var request = BmReadCharacteristicRequest(
         remoteId: remoteId,
-        characteristicUuid: characteristicUuid,
-        serviceUuid: serviceUuid,
-        primaryServiceUuid: primaryServiceUuid,
+        identifier: identifierPath,
       );
 
-      var responseStream = FlutterBluePlus._methodStream.stream
-          .where((m) => m.method == "OnCharacteristicReceived")
-          .map((m) => m.arguments)
-          .map((args) => BmCharacteristicData.fromMap(args))
-          .where((p) => p.remoteId == request.remoteId)
-          .where((p) => p.serviceUuid == request.serviceUuid)
-          .where((p) => p.characteristicUuid == request.characteristicUuid)
-          .where((p) => p.primaryServiceUuid == request.primaryServiceUuid);
-
-      // Start listening now, before invokeMethod, to ensure we don't miss the response
-      Future<BmCharacteristicData> futureResponse = responseStream.first;
-
       // invoke
-      await FlutterBluePlus._invokeMethod('readCharacteristic', request.toMap());
+      final futureResponse = FlutterBluePlus._invokeMethodAndWaitForEvent<OnCharacteristicReceivedEvent>(
+        'readCharacteristic',
+        request.toMap(),
+        (e) => e.characteristic == this,
+      );
 
       // wait for response
-      BmCharacteristicData response = await futureResponse
+      OnCharacteristicReceivedEvent response = await futureResponse
           .fbpEnsureAdapterIsOn("readCharacteristic")
           .fbpEnsureDeviceIsConnected(device, "readCharacteristic")
           .fbpTimeout(timeout, "readCharacteristic");
 
       // failed?
-      if (!response.success) {
-        throw FlutterBluePlusException(_nativeError, "readCharacteristic", response.errorCode, response.errorString);
-      }
+      response.ensureSuccess('readCharacteristic');
 
       // set return value
-      responseValue = response.value;
+      return response.value;
     } finally {
       mtx.give();
     }
-
-    return responseValue;
   }
 
   /// Writes a characteristic.
@@ -184,41 +109,29 @@ class BluetoothCharacteristic {
 
       var request = BmWriteCharacteristicRequest(
         remoteId: remoteId,
-        characteristicUuid: characteristicUuid,
-        serviceUuid: serviceUuid,
+        identifier: identifierPath,
         writeType: writeType,
         allowLongWrite: allowLongWrite,
         value: value,
-        primaryServiceUuid: primaryServiceUuid,
       );
 
-      var responseStream = FlutterBluePlus._methodStream.stream
-          .where((m) => m.method == "OnCharacteristicWritten")
-          .map((m) => m.arguments)
-          .map((args) => BmCharacteristicData.fromMap(args))
-          .where((p) => p.remoteId == request.remoteId)
-          .where((p) => p.serviceUuid == request.serviceUuid)
-          .where((p) => p.characteristicUuid == request.characteristicUuid)
-          .where((p) => p.primaryServiceUuid == request.primaryServiceUuid);
-
-      // Start listening now, before invokeMethod, to ensure we don't miss the response
-      Future<BmCharacteristicData> futureResponse = responseStream.first;
-
       // invoke
-      await FlutterBluePlus._invokeMethod('writeCharacteristic', request.toMap());
+      final futureResponse = FlutterBluePlus._invokeMethodAndWaitForEvent<OnCharacteristicWrittenEvent>(
+        'writeCharacteristic',
+        request.toMap(),
+        (e) => e.characteristic == this,
+      );
 
       // wait for response so that we can:
       //  1. check for success (writeWithResponse)
       //  2. wait until the packet has been sent, to prevent iOS & Android dropping packets (writeWithoutResponse)
-      BmCharacteristicData response = await futureResponse
+      OnCharacteristicWrittenEvent response = await futureResponse
           .fbpEnsureAdapterIsOn("writeCharacteristic")
           .fbpEnsureDeviceIsConnected(device, "writeCharacteristic")
           .fbpTimeout(timeout, "writeCharacteristic");
 
       // failed?
-      if (!response.success) {
-        throw FlutterBluePlusException(_nativeError, "writeCharacteristic", response.errorCode, response.errorString);
-      }
+      response.ensureSuccess('writeCharacteristic');
 
       return Future.value();
     } finally {
@@ -249,42 +162,31 @@ class BluetoothCharacteristic {
     try {
       var request = BmSetNotifyValueRequest(
         remoteId: remoteId,
-        serviceUuid: serviceUuid,
-        characteristicUuid: characteristicUuid,
+        identifier: identifierPath,
         forceIndications: forceIndications,
         enable: notify,
-        primaryServiceUuid: primaryServiceUuid,
       );
 
       // Notifications & Indications are configured by writing to the
       // Client Characteristic Configuration Descriptor (CCCD)
-      Stream<BmDescriptorData> responseStream = FlutterBluePlus._methodStream.stream
-          .where((m) => m.method == "OnDescriptorWritten")
-          .map((m) => m.arguments)
-          .map((args) => BmDescriptorData.fromMap(args))
-          .where((p) => p.remoteId == request.remoteId)
-          .where((p) => p.serviceUuid == request.serviceUuid)
-          .where((p) => p.characteristicUuid == request.characteristicUuid)
-          .where((p) => p.descriptorUuid == cccdUuid)
-          .where((p) => p.primaryServiceUuid == request.primaryServiceUuid);
+      Stream<OnDescriptorWrittenEvent> responseStream =
+          FlutterBluePlus._extractEventStream<OnDescriptorWrittenEvent>((m) => m.descriptor == cccd);
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
-      Future<BmDescriptorData> futureResponse = responseStream.first;
+      Future<OnDescriptorWrittenEvent> futureResponse = responseStream.first;
 
       // invoke
       bool hasCCCD = await FlutterBluePlus._invokeMethod('setNotifyValue', request.toMap());
 
       // wait for CCCD descriptor to be written?
       if (hasCCCD) {
-        BmDescriptorData response = await futureResponse
+        OnDescriptorWrittenEvent response = await futureResponse
             .fbpEnsureAdapterIsOn("setNotifyValue")
             .fbpEnsureDeviceIsConnected(device, "setNotifyValue")
             .fbpTimeout(timeout, "setNotifyValue");
 
         // failed?
-        if (!response.success) {
-          throw FlutterBluePlusException(_nativeError, "setNotifyValue", response.errorCode, response.errorString);
-        }
+        response.ensureSuccess("setNotifyValue");
       }
     } finally {
       mtx.give();
@@ -293,53 +195,17 @@ class BluetoothCharacteristic {
     return true;
   }
 
-  // get known service
-  BmBluetoothService? get _bmsvc {
-    if (FlutterBluePlus._knownServices[remoteId] != null) {
-      for (var s in FlutterBluePlus._knownServices[remoteId]!.services) {
-        if (s.serviceUuid == serviceUuid) {
-          if (s.primaryServiceUuid == primaryServiceUuid) {
-            return s;
-          }
-        }
-      }
-    }
-    return null;
-  }
-
-  /// get known characteristic
-  BmBluetoothCharacteristic? get _bmchr {
-    if (_bmsvc != null) {
-      for (var c in _bmsvc!.characteristics) {
-        if (c.characteristicUuid == uuid) {
-          return c;
-        }
-      }
-    }
-    return null;
-  }
-
   @override
   String toString() {
     return 'BluetoothCharacteristic{'
         'remoteId: $remoteId, '
-        'serviceUuid: $serviceUuid, '
-        'characteristicUuid: $characteristicUuid, '
-        'primaryServiceUuid: $primaryServiceUuid, '
+        'uuid: $uuid, '
+        'serviceUuid: ${service.uuid}, '
         'descriptors: $descriptors, '
         'properties: $properties, '
         'value: $lastValue'
         '}';
   }
-
-  @Deprecated('Use remoteId instead')
-  DeviceIdentifier get deviceId => remoteId;
-
-  @Deprecated('Use lastValueStream instead')
-  Stream<List<int>> get value => lastValueStream;
-
-  @Deprecated('Use onValueReceived instead')
-  Stream<List<int>> get onValueChangedStream => onValueReceived;
 }
 
 class CharacteristicProperties {
