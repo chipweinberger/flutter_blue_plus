@@ -1819,6 +1819,9 @@ public class FlutterBluePlusPlugin implements
         return 0;
     }
 
+    // The original android implementation has a bug - it does not 
+    // handle multiple of the same manufacturerId in the same advertisement.
+    // Here, we copy the iOS approach and append it to the same map entry.
     Map<Integer, byte[]> getManufacturerSpecificData(ScanRecord adv) {
         byte[] bytes = adv.getBytes();
         Map<Integer, byte[]> manufacturerDataMap = new HashMap<>();
