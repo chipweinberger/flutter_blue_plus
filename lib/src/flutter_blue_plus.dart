@@ -229,6 +229,7 @@ class FlutterBluePlus {
     List<MsdFilter> withMsd = const [],
     List<ServiceDataFilter> withServiceData = const [],
     Duration? timeout,
+    void Function()? onTimeout,
     Duration? removeIfGone,
     bool continuousUpdates = false,
     int continuousDivisor = 1,
@@ -355,7 +356,13 @@ class FlutterBluePlus {
       // Start timer *after* stream is being listened to, to make sure the
       // timeout does not fire before _scanSubscription is set
       if (timeout != null) {
-        _scanTimeout = Timer(timeout, stopScan);
+        _scanTimeout = Timer(
+          timeout,
+          () async {
+            await stopScan();
+            onTimeout?.call();
+          },
+        );
       }
     } finally {
       mtx.give();
