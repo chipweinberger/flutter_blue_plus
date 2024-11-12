@@ -65,8 +65,9 @@ class FlutterBluePlus {
   static Future<bool> get isSupported async => await _invokeMethod('isSupported');
 
   /// The current adapter state
-  static BluetoothAdapterState get adapterStateNow =>
-      _adapterStateNow != null ? _bmToAdapterState(_adapterStateNow!) : BluetoothAdapterState.unknown;
+  static BluetoothAdapterState get adapterStateNow => _adapterStateNow != null
+      ? _bmToAdapterState(_adapterStateNow!)
+      : BluetoothAdapterState.unknown;
 
   /// Return the friendly Bluetooth name of the local Bluetooth adapter
   static Future<String> get adapterName async => await _invokeMethod('getAdapterName');
@@ -112,7 +113,8 @@ class FlutterBluePlus {
     bool showPowerAlert = true,
     bool restoreState = false,
   }) async {
-    await _invokeMethod('setOptions', {"show_power_alert": showPowerAlert, "restore_state": restoreState});
+    await _invokeMethod(
+        'setOptions', {"show_power_alert": showPowerAlert, "restore_state": restoreState});
   }
 
   /// Turn on Bluetooth (Android only),
@@ -135,11 +137,15 @@ class FlutterBluePlus {
 
       // check response
       if (response.userAccepted == false) {
-        throw FlutterBluePlusException(ErrorPlatform.fbp, "turnOn", FbpErrorCode.userRejected.index, "user rejected");
+        throw FlutterBluePlusException(
+            ErrorPlatform.fbp, "turnOn", FbpErrorCode.userRejected.index, "user rejected");
       }
 
       // wait for adapter to turn on
-      await adapterState.where((s) => s == BluetoothAdapterState.on).first.fbpTimeout(timeout, "turnOn");
+      await adapterState
+          .where((s) => s == BluetoothAdapterState.on)
+          .first
+          .fbpTimeout(timeout, "turnOn");
     }
   }
 
@@ -175,7 +181,8 @@ class FlutterBluePlus {
   /// - You must still call device.connect() to connect them to *your app*
   /// - [withServices] required on iOS (for privacy purposes). ignored on android.
   static Future<List<BluetoothDevice>> systemDevices(List<Guid> withServices) async {
-    var result = await _invokeMethod('getSystemDevices', {"with_services": withServices.map((s) => s.str).toList()});
+    var result = await _invokeMethod(
+        'getSystemDevices', {"with_services": withServices.map((s) => s.str).toList()});
     var r = BmDevicesList.fromMap(result);
     for (BmBluetoothDevice device in r.devices) {
       if (device.platformName != null) {
@@ -230,6 +237,7 @@ class FlutterBluePlus {
     List<ServiceDataFilter> withServiceData = const [],
     Duration? timeout,
     Duration? removeIfGone,
+    void Function()? onTimeout,
     bool continuousUpdates = false,
     int continuousDivisor = 1,
     bool oneByOne = false,
@@ -310,13 +318,15 @@ class FlutterBluePlus {
       _scanSubscription = outputStream.listen((BmScanResponse? response) {
         if (response == null) {
           // if null, this is just a periodic update to remove old results
-          if (output._removeWhere((elm) => DateTime.now().difference(elm.timeStamp) > removeIfGone!)) {
+          if (output
+              ._removeWhere((elm) => DateTime.now().difference(elm.timeStamp) > removeIfGone!)) {
             _scanResults.add(List.from(output)); // push to stream
           }
         } else {
           // failure?
           if (response.success == false) {
-            var e = FlutterBluePlusException(_nativeError, "scan", response.errorCode, response.errorString);
+            var e = FlutterBluePlusException(
+                _nativeError, "scan", response.errorCode, response.errorString);
             _scanResults.addError(e);
             _stopScan(invokePlatform: false);
           }
@@ -355,7 +365,13 @@ class FlutterBluePlus {
       // Start timer *after* stream is being listened to, to make sure the
       // timeout does not fire before _scanSubscription is set
       if (timeout != null) {
-        _scanTimeout = Timer(timeout, stopScan);
+        _scanTimeout = Timer(
+          timeout,
+          () async {
+           await stopScan();
+           onTimeout?.call();
+          },
+        );
       }
     } finally {
       mtx.give();
@@ -571,7 +587,8 @@ class FlutterBluePlus {
       var r = BmDescriptorData.fromMap(call.arguments);
       if (r.success == true) {
         _lastDescs[r.remoteId] ??= {};
-        _lastDescs[r.remoteId]!["${r.serviceUuid}:${r.characteristicUuid}:${r.descriptorUuid}"] = r.value;
+        _lastDescs[r.remoteId]!["${r.serviceUuid}:${r.characteristicUuid}:${r.descriptorUuid}"] =
+            r.value;
       }
     }
 
@@ -641,7 +658,8 @@ class FlutterBluePlus {
   /// Turn off Bluetooth (Android only),
   @Deprecated('Deprecated in Android SDK 33 with no replacement')
   static Future<void> turnOff({int timeout = 10}) async {
-    Stream<BluetoothAdapterState> responseStream = adapterState.where((s) => s == BluetoothAdapterState.off);
+    Stream<BluetoothAdapterState> responseStream =
+        adapterState.where((s) => s == BluetoothAdapterState.off);
 
     // Start listening now, before invokeMethod, to ensure we don't miss the response
     Future<BluetoothAdapterState> futureResponse = responseStream.first;
@@ -697,6 +715,7 @@ enum LogLevel {
 
 class AndroidScanMode {
   const AndroidScanMode(this.value);
+
   static const lowPower = AndroidScanMode(0);
   static const balanced = AndroidScanMode(1);
   static const lowLatency = AndroidScanMode(2);
@@ -746,6 +765,7 @@ class ServiceDataFilter {
 
 class DeviceIdentifier {
   final String str;
+
   const DeviceIdentifier(this.str);
 
   @override
@@ -755,7 +775,8 @@ class DeviceIdentifier {
   int get hashCode => str.hashCode;
 
   @override
-  bool operator ==(other) => other is DeviceIdentifier && _compareAsciiLowerCase(str, other.str) == 0;
+  bool operator ==(other) =>
+      other is DeviceIdentifier && _compareAsciiLowerCase(str, other.str) == 0;
 
   @Deprecated('Use str instead')
   String get id => str;
@@ -782,7 +803,8 @@ class ScanResult {
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) || other is ScanResult && runtimeType == other.runtimeType && device == other.device;
+      identical(this, other) ||
+      other is ScanResult && runtimeType == other.runtimeType && device == other.device;
 
   @override
   int get hashCode => device.hashCode;
