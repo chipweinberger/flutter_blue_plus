@@ -186,12 +186,16 @@ FlutterBluePlus.cancelWhenScanComplete(subscription);
 // In your real app you should use `FlutterBluePlus.adapterState.listen` to handle all states
 await FlutterBluePlus.adapterState.where((val) => val == BluetoothAdapterState.on).first;
 
-// Start scanning w/ timeout
+// Start scanning w/ timeout and onTimeout callback if you want to do action after timeout
 // Optional: use `stopScan()` as an alternative to timeout
 await FlutterBluePlus.startScan(
   withServices:[Guid("180D")], // match any of the specified services
   withNames:["Bluno"], // *or* any of the specified names
-  timeout: Duration(seconds:15));
+  timeout: Duration(seconds:15),
+  onTimeout: () {
+    print("Scan timed out");
+  },
+);
 
 // wait for scanning to stop
 await FlutterBluePlus.isScanning.where((val) => val == false).first;
