@@ -222,8 +222,8 @@ class BluetoothCharacteristic {
     }
 
     // check
-    if (Platform.isMacOS || Platform.isIOS) {
-      assert(forceIndications == false, "iOS & macOS do not support forcing indications");
+    if (!kIsWeb && !Platform.isAndroid) {
+      assert(forceIndications == false, "Only Android supports forcing indications");
     }
 
     // Only allow a single ble operation to be underway at a time

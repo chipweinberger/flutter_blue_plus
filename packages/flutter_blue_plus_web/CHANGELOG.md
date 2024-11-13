@@ -2,16 +2,4 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org) for commit guidelines.
 
-## 1.2.0 (2024-11-13)
-
-### Code Refactoring
-
-* implement web platform
-
-## 1.1.0 (2024-11-09)
-
-### Code Refactoring
-
-* implement linux platform
-
-## 1.0.0 (2024-11-09)
+## 1.0.0 (2024-11-13)

@@ -218,7 +218,7 @@ class FlutterBluePlus {
     // Note: `withKeywords` is not compatible with other filters on android
     // because it is implemented in custom fbp code, not android code, and the
     // android 'name' filter is only available as of android sdk 33 (August 2022)
-    assert(!(Platform.isAndroid && withKeywords.isNotEmpty && hasOtherFilter),
+    assert(!(!kIsWeb && Platform.isAndroid && withKeywords.isNotEmpty && hasOtherFilter),
         "withKeywords is not compatible with other filters on Android");
 
     // only allow a single task to call
@@ -369,7 +369,7 @@ class FlutterBluePlus {
   /// Request Bluetooth PHY support
   static Future<PhySupport> getPhySupport() async {
     // check android
-    if (Platform.isAndroid == false) {
+    if (kIsWeb || !Platform.isAndroid) {
       throw FlutterBluePlusException(
           ErrorPlatform.fbp, "getPhySupport", FbpErrorCode.androidOnly.index, "android-only");
     }
@@ -385,124 +385,164 @@ class FlutterBluePlus {
     _initialized = true;
 
     // android only
-    if (Platform.isAndroid) {
+    if (!kIsWeb && Platform.isAndroid) {
       FlutterBluePlusPlatform.instance.onDetachedFromEngine.listen((r) {
         _stopScan(invokePlatform: false);
       });
     }
 
     // keep track of adapter states
-    FlutterBluePlusPlatform.instance.onAdapterStateChanged.listen((r) {
-      _adapterStateNow = r.adapterState;
-      if (isScanningNow && r.adapterState != BmAdapterStateEnum.on) {
-        _stopScan(invokePlatform: false);
-      }
-      if (r.adapterState == BmAdapterStateEnum.on) {
-        for (DeviceIdentifier d in _autoConnect) {
-          BluetoothDevice(remoteId: d).connect(autoConnect: true, mtu: null).onError((e, s) {
-            if (logLevel != LogLevel.none) {
-              print("[FBP] [AutoConnect] connection failed: $e");
-            }
-          });
+    try {
+      FlutterBluePlusPlatform.instance.onAdapterStateChanged.listen((r) {
+        _adapterStateNow = r.adapterState;
+        if (isScanningNow && r.adapterState != BmAdapterStateEnum.on) {
+          _stopScan(invokePlatform: false);
         }
-      }
-    });
+        if (r.adapterState == BmAdapterStateEnum.on) {
+          for (DeviceIdentifier d in _autoConnect) {
+            BluetoothDevice(remoteId: d).connect(autoConnect: true, mtu: null).onError((e, s) {
+              if (logLevel != LogLevel.none) {
+                print("[FBP] [AutoConnect] connection failed: $e");
+              }
+            });
+          }
+        }
+      });
+    } on UnimplementedError {
+      // ignored
+    }
 
     // keep track of connection states
-    FlutterBluePlusPlatform.instance.onConnectionStateChanged.listen((r) {
-      _connectionStates[r.remoteId] = r;
-      if (r.connectionState == BmConnectionStateEnum.disconnected) {
-        // clear mtu
-        _mtuValues.remove(r.remoteId);
+    try {
+      FlutterBluePlusPlatform.instance.onConnectionStateChanged.listen((r) {
+        _connectionStates[r.remoteId] = r;
+        if (r.connectionState == BmConnectionStateEnum.disconnected) {
+          // clear mtu
+          _mtuValues.remove(r.remoteId);
 
-        // clear lastDescs (resets 'isNotifying')
-        _lastDescs.remove(r.remoteId);
+          // clear lastDescs (resets 'isNotifying')
+          _lastDescs.remove(r.remoteId);
 
-        // clear lastChrs (api consistency)
-        _lastChrs.remove(r.remoteId);
+          // clear lastChrs (api consistency)
+          _lastChrs.remove(r.remoteId);
 
-        // cancel & delete subscriptions
-        _deviceSubscriptions[r.remoteId]?.forEach((s) => s.cancel());
-        _deviceSubscriptions.remove(r.remoteId);
+          // cancel & delete subscriptions
+          _deviceSubscriptions[r.remoteId]?.forEach((s) => s.cancel());
+          _deviceSubscriptions.remove(r.remoteId);
 
-        // Note: to make FBP easier to use, we do not clear `knownServices`,
-        // otherwise `servicesList` would be more annoying to use. We also
-        // do not clear `bondState`, for faster performance.
+          // Note: to make FBP easier to use, we do not clear `knownServices`,
+          // otherwise `servicesList` would be more annoying to use. We also
+          // do not clear `bondState`, for faster performance.
 
-        // autoconnect
-        if (Platform.isAndroid == false) {
-          if (_autoConnect.contains(r.remoteId)) {
-            if (_adapterStateNow == BmAdapterStateEnum.on) {
-              var d = BluetoothDevice(remoteId: r.remoteId);
-              d.connect(autoConnect: true, mtu: null).onError((e, s) {
-                if (logLevel != LogLevel.none) {
-                  print("[FBP] [AutoConnect] connection failed: $e");
-                }
-              });
+          // autoconnect
+          if (Platform.isAndroid == false) {
+            if (_autoConnect.contains(r.remoteId)) {
+              if (_adapterStateNow == BmAdapterStateEnum.on) {
+                var d = BluetoothDevice(remoteId: r.remoteId);
+                d.connect(autoConnect: true, mtu: null).onError((e, s) {
+                  if (logLevel != LogLevel.none) {
+                    print("[FBP] [AutoConnect] connection failed: $e");
+                  }
+                });
+              }
             }
           }
         }
-      }
-    });
+      });
+    } on UnimplementedError {
+      // ignored
+    }
 
     // keep track of device name
-    FlutterBluePlusPlatform.instance.onNameChanged.listen((r) {
-      _platformNames[r.remoteId] = r.name;
-    });
+    try {
+      FlutterBluePlusPlatform.instance.onNameChanged.listen((r) {
+        _platformNames[r.remoteId] = r.name;
+      });
+    } on UnimplementedError {
+      // ignored
+    }
 
     // keep track of services resets
-    FlutterBluePlusPlatform.instance.onServicesReset.listen((r) {
-      _knownServices.remove(r.remoteId);
-    });
+    try {
+      FlutterBluePlusPlatform.instance.onServicesReset.listen((r) {
+        _knownServices.remove(r.remoteId);
+      });
+    } on UnimplementedError {
+      // ignored
+    }
 
     // keep track of bond state
-    FlutterBluePlusPlatform.instance.onBondStateChanged.listen((r) {
-      _bondStates[r.remoteId] = r;
-    });
+    try {
+      FlutterBluePlusPlatform.instance.onBondStateChanged.listen((r) {
+        _bondStates[r.remoteId] = r;
+      });
+    } on UnimplementedError {
+      // ignored
+    }
 
     // keep track of services
-    FlutterBluePlusPlatform.instance.onDiscoveredServices.listen((r) {
-      if (r.success == true) {
-        _knownServices[r.remoteId] = r;
-      }
-    });
+    try {
+      FlutterBluePlusPlatform.instance.onDiscoveredServices.listen((r) {
+        if (r.success == true) {
+          _knownServices[r.remoteId] = r;
+        }
+      });
+    } on UnimplementedError {
+      // ignored
+    }
 
     // keep track of mtu values
-    FlutterBluePlusPlatform.instance.onMtuChanged.listen((r) {
-      if (r.success == true) {
-        _mtuValues[r.remoteId] = r;
-      }
-    });
+    try {
+      FlutterBluePlusPlatform.instance.onMtuChanged.listen((r) {
+        if (r.success == true) {
+          _mtuValues[r.remoteId] = r;
+        }
+      });
+    } on UnimplementedError {
+      // ignored
+    }
 
     // keep track of characteristic values
-    _mergeStreams([FlutterBluePlusPlatform.instance.onCharacteristicReceived, FlutterBluePlusPlatform.instance.onCharacteristicWritten]).listen((r) {
-      if (r.success == true) {
-        _lastChrs[r.remoteId] ??= {};
-        _lastChrs[r.remoteId]!["${r.serviceUuid}:${r.characteristicUuid}"] = r.value;
-      }
-    });
+    try {
+      _mergeStreams([FlutterBluePlusPlatform.instance.onCharacteristicReceived, FlutterBluePlusPlatform.instance.onCharacteristicWritten]).listen((r) {
+        if (r.success == true) {
+          _lastChrs[r.remoteId] ??= {};
+          _lastChrs[r.remoteId]!["${r.serviceUuid}:${r.characteristicUuid}"] = r.value;
+        }
+      });
+    } on UnimplementedError {
+      // ignored
+    }
 
     // keep track of descriptor values
-    _mergeStreams([FlutterBluePlusPlatform.instance.onDescriptorRead, FlutterBluePlusPlatform.instance.onDescriptorWritten]).listen((r) {
-      if (r.success == true) {
-        _lastDescs[r.remoteId] ??= {};
-        _lastDescs[r.remoteId]!["${r.serviceUuid}:${r.characteristicUuid}:${r.descriptorUuid}"] = r.value;
-      }
-    });
+    try {
+      _mergeStreams([FlutterBluePlusPlatform.instance.onDescriptorRead, FlutterBluePlusPlatform.instance.onDescriptorWritten]).listen((r) {
+        if (r.success == true) {
+          _lastDescs[r.remoteId] ??= {};
+          _lastDescs[r.remoteId]!["${r.serviceUuid}:${r.characteristicUuid}:${r.descriptorUuid}"] = r.value;
+        }
+      });
+    } on UnimplementedError {
+      // ignored
+    }
 
     // cancel delayed subscriptions
-    FlutterBluePlusPlatform.instance.onConnectionStateChanged.listen((r) {
-      if (_delayedSubscriptions.isNotEmpty) {
-        if (r.connectionState == BmConnectionStateEnum.disconnected) {
-          var remoteId = r.remoteId;
-          // use delayed to update the stream before we cancel it
-          Future.delayed(Duration.zero).then((_) {
-            _delayedSubscriptions[remoteId]?.forEach((s) => s.cancel()); // cancel
-            _delayedSubscriptions.remove(remoteId); // delete
-          });
+    try {
+      FlutterBluePlusPlatform.instance.onConnectionStateChanged.listen((r) {
+        if (_delayedSubscriptions.isNotEmpty) {
+          if (r.connectionState == BmConnectionStateEnum.disconnected) {
+            var remoteId = r.remoteId;
+            // use delayed to update the stream before we cancel it
+            Future.delayed(Duration.zero).then((_) {
+              _delayedSubscriptions[remoteId]?.forEach((s) => s.cancel()); // cancel
+              _delayedSubscriptions.remove(remoteId); // delete
+            });
+          }
         }
-      }
-    });
+      });
+    } on UnimplementedError {
+      // ignored
+    }
   }
 
   /// invoke a platform method
@@ -696,13 +736,21 @@ enum ErrorPlatform {
   fbp,
   android,
   apple,
+  linux,
+  web,
 }
 
 final ErrorPlatform _nativeError = (() {
-  if (Platform.isAndroid) {
+  if (kIsWeb) {
+    return ErrorPlatform.web;
+  } else if (Platform.isAndroid) {
     return ErrorPlatform.android;
-  } else {
+  } else if (Platform.isIOS || Platform.isMacOS) {
     return ErrorPlatform.apple;
+  } else if (Platform.isLinux) {
+    return ErrorPlatform.linux;
+  } else {
+    return ErrorPlatform.fbp;
   }
 })();
 

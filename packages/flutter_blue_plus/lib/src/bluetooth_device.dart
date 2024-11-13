@@ -127,7 +127,7 @@ class BluetoothDevice {
       Future<BmConnectionStateResponse> futureState = responseStream.first;
 
       // record connection time
-      if (Platform.isAndroid) {
+      if (!kIsWeb && Platform.isAndroid) {
         FlutterBluePlus._connectTimestamp[remoteId] = DateTime.now();
       }
 
@@ -171,7 +171,7 @@ class BluetoothDevice {
     }
 
     // request larger mtu
-    if (Platform.isAndroid && isConnected && mtu != null) {
+    if (!kIsWeb && Platform.isAndroid && isConnected && mtu != null) {
       await requestMtu(mtu);
     }
   }
@@ -224,7 +224,7 @@ class BluetoothDevice {
         await futureState.fbpEnsureAdapterIsOn("disconnect").fbpTimeout(timeout, "disconnect");
       }
 
-      if (Platform.isAndroid) {
+      if (!kIsWeb && Platform.isAndroid) {
         // Disconnected, remove connect timestamp
         FlutterBluePlus._connectTimestamp.remove(remoteId);
       }
@@ -279,10 +279,10 @@ class BluetoothDevice {
       mtx.give();
     }
 
-    // in order to match iOS behavior on all platforms,
+    // in order to match iOS behavior on all platforms (except web),
     // we always listen to the Services Changed characteristic if it exists.
     if (subscribeToServicesChanged) {
-      if (Platform.isIOS == false && Platform.isMacOS == false) {
+      if (!kIsWeb && !Platform.isIOS && !Platform.isMacOS) {
         BluetoothCharacteristic? c = _servicesChangedCharacteristic;
         if (c != null && (c.properties.notify || c.properties.indicate) && c.isNotifying == false) {
           await c.setNotifyValue(true);
@@ -391,7 +391,7 @@ class BluetoothDevice {
   ///  - [predelay] adds delay to avoid race conditions on some peripherals. see comments below.
   Future<int> requestMtu(int desiredMtu, {double predelay = 0.35, int timeout = 15}) async {
     // check android
-    if (Platform.isAndroid == false) {
+    if (kIsWeb || !Platform.isAndroid) {
       throw FlutterBluePlusException(ErrorPlatform.fbp, "requestMtu", FbpErrorCode.androidOnly.index, "android-only");
     }
 
@@ -459,7 +459,7 @@ class BluetoothDevice {
   /// Request connection priority update (Android only)
   Future<void> requestConnectionPriority({required ConnectionPriority connectionPriorityRequest}) async {
     // check android
-    if (Platform.isAndroid == false) {
+    if (kIsWeb || !Platform.isAndroid) {
       throw FlutterBluePlusException(
           ErrorPlatform.fbp, "requestConnectionPriority", FbpErrorCode.androidOnly.index, "android-only");
     }
@@ -490,7 +490,7 @@ class BluetoothDevice {
     required PhyCoding option,
   }) async {
     // check android
-    if (Platform.isAndroid == false) {
+    if (kIsWeb || !Platform.isAndroid) {
       throw FlutterBluePlusException(
           ErrorPlatform.fbp, "setPreferredPhy", FbpErrorCode.androidOnly.index, "android-only");
     }
@@ -516,7 +516,7 @@ class BluetoothDevice {
   /// Note! calling this is usually not necessary!! The platform does it automatically.
   Future<void> createBond({int timeout = 90}) async {
     // check android
-    if (Platform.isAndroid == false) {
+    if (kIsWeb || !Platform.isAndroid) {
       throw FlutterBluePlusException(ErrorPlatform.fbp, "createBond", FbpErrorCode.androidOnly.index, "android-only");
     }
 
@@ -563,7 +563,7 @@ class BluetoothDevice {
   /// Remove bond (Android Only)
   Future<void> removeBond({int timeout = 30}) async {
     // check android
-    if (Platform.isAndroid == false) {
+    if (kIsWeb || !Platform.isAndroid) {
       throw FlutterBluePlusException(ErrorPlatform.fbp, "removeBond", FbpErrorCode.androidOnly.index, "android-only");
     }
 
@@ -604,7 +604,7 @@ class BluetoothDevice {
   /// Refresh ble services & characteristics (Android Only)
   Future<void> clearGattCache() async {
     // check android
-    if (Platform.isAndroid == false) {
+    if (kIsWeb || !Platform.isAndroid) {
       throw FlutterBluePlusException(
           ErrorPlatform.fbp, "clearGattCache", FbpErrorCode.androidOnly.index, "android-only");
     }
@@ -622,7 +622,7 @@ class BluetoothDevice {
   /// Get the current bondState of the device (Android Only)
   Stream<BluetoothBondState> get bondState async* {
     // check android
-    if (Platform.isAndroid == false) {
+    if (kIsWeb || !Platform.isAndroid) {
       throw FlutterBluePlusException(ErrorPlatform.fbp, "bondState", FbpErrorCode.androidOnly.index, "android-only");
     }
 
@@ -661,7 +661,7 @@ class BluetoothDevice {
   /// so FBP will have no idea this connection is active. Adding a delay fixes this issue.
   /// https://issuetracker.google.com/issues/37121040
   Future<void> _ensureAndroidDisconnectionDelay(int androidDelay) async {
-    if (Platform.isAndroid) {
+    if (!kIsWeb && Platform.isAndroid) {
       if (FlutterBluePlus._connectTimestamp.containsKey(remoteId)) {
         Duration minGap = Duration(milliseconds: androidDelay);
         Duration elapsed = DateTime.now().difference(FlutterBluePlus._connectTimestamp[remoteId]!);
