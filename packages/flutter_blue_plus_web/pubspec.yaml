@@ -1,6 +1,6 @@
 name: flutter_blue_plus_web
 description: Web implementation of the flutter_blue_plus plugin.
-version: 1.0.0
+version: 1.0.1
 homepage: https://github.com/tnc1997/flutter-blue-plus
 
 environment:
