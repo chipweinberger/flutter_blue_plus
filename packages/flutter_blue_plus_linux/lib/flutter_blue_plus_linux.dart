@@ -315,92 +315,104 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   Future<void> discoverServices(
     BmDiscoverServicesRequest request,
   ) async {
-    await _initFlutterBluePlus();
+    try {
+      await _initFlutterBluePlus();
 
-    final device = _client.devices.singleWhere(
-      (device) {
-        return device.remoteId == request.remoteId;
-      },
-    );
+      final device = _client.devices.singleWhere(
+        (device) {
+          return device.remoteId == request.remoteId;
+        },
+      );
 
-    _onDiscoveredServicesController.add(
-      BmDiscoverServicesResult(
-        remoteId: device.remoteId,
-        services: device.gattServices.map(
-          (service) {
-            return BmBluetoothService(
-              serviceUuid: Guid.fromBytes(
-                service.uuid.value,
-              ),
-              remoteId: device.remoteId,
-              isPrimary: service.primary,
-              characteristics: service.characteristics.map(
-                (characteristic) {
-                  return BmBluetoothCharacteristic(
-                    remoteId: device.remoteId,
-                    serviceUuid: Guid.fromBytes(
-                      service.uuid.value,
-                    ),
-                    secondaryServiceUuid: null,
-                    characteristicUuid: Guid.fromBytes(
-                      characteristic.uuid.value,
-                    ),
-                    descriptors: characteristic.descriptors.map(
-                      (descriptor) {
-                        return BmBluetoothDescriptor(
-                          remoteId: device.remoteId,
-                          serviceUuid: Guid.fromBytes(
-                            service.uuid.value,
-                          ),
-                          characteristicUuid: Guid.fromBytes(
-                            characteristic.uuid.value,
-                          ),
-                          descriptorUuid: Guid.fromBytes(
-                            descriptor.uuid.value,
-                          ),
-                        );
-                      },
-                    ).toList(),
-                    properties: BmCharacteristicProperties(
-                      broadcast: characteristic.flags.contains(
-                        BlueZGattCharacteristicFlag.broadcast,
+      _onDiscoveredServicesController.add(
+        BmDiscoverServicesResult(
+          remoteId: device.remoteId,
+          services: device.gattServices.map(
+            (service) {
+              return BmBluetoothService(
+                serviceUuid: Guid.fromBytes(
+                  service.uuid.value,
+                ),
+                remoteId: device.remoteId,
+                isPrimary: service.primary,
+                characteristics: service.characteristics.map(
+                  (characteristic) {
+                    return BmBluetoothCharacteristic(
+                      remoteId: device.remoteId,
+                      serviceUuid: Guid.fromBytes(
+                        service.uuid.value,
                       ),
-                      read: characteristic.flags.contains(
-                        BlueZGattCharacteristicFlag.read,
+                      secondaryServiceUuid: null,
+                      characteristicUuid: Guid.fromBytes(
+                        characteristic.uuid.value,
                       ),
-                      writeWithoutResponse: characteristic.flags.contains(
-                        BlueZGattCharacteristicFlag.writeWithoutResponse,
+                      descriptors: characteristic.descriptors.map(
+                        (descriptor) {
+                          return BmBluetoothDescriptor(
+                            remoteId: device.remoteId,
+                            serviceUuid: Guid.fromBytes(
+                              service.uuid.value,
+                            ),
+                            characteristicUuid: Guid.fromBytes(
+                              characteristic.uuid.value,
+                            ),
+                            descriptorUuid: Guid.fromBytes(
+                              descriptor.uuid.value,
+                            ),
+                          );
+                        },
+                      ).toList(),
+                      properties: BmCharacteristicProperties(
+                        broadcast: characteristic.flags.contains(
+                          BlueZGattCharacteristicFlag.broadcast,
+                        ),
+                        read: characteristic.flags.contains(
+                          BlueZGattCharacteristicFlag.read,
+                        ),
+                        writeWithoutResponse: characteristic.flags.contains(
+                          BlueZGattCharacteristicFlag.writeWithoutResponse,
+                        ),
+                        write: characteristic.flags.contains(
+                          BlueZGattCharacteristicFlag.write,
+                        ),
+                        notify: characteristic.flags.contains(
+                          BlueZGattCharacteristicFlag.notify,
+                        ),
+                        indicate: characteristic.flags.contains(
+                          BlueZGattCharacteristicFlag.indicate,
+                        ),
+                        authenticatedSignedWrites: characteristic.flags.contains(
+                          BlueZGattCharacteristicFlag.authenticatedSignedWrites,
+                        ),
+                        extendedProperties: characteristic.flags.contains(
+                          BlueZGattCharacteristicFlag.extendedProperties,
+                        ),
+                        notifyEncryptionRequired: false,
+                        indicateEncryptionRequired: false,
                       ),
-                      write: characteristic.flags.contains(
-                        BlueZGattCharacteristicFlag.write,
-                      ),
-                      notify: characteristic.flags.contains(
-                        BlueZGattCharacteristicFlag.notify,
-                      ),
-                      indicate: characteristic.flags.contains(
-                        BlueZGattCharacteristicFlag.indicate,
-                      ),
-                      authenticatedSignedWrites: characteristic.flags.contains(
-                        BlueZGattCharacteristicFlag.authenticatedSignedWrites,
-                      ),
-                      extendedProperties: characteristic.flags.contains(
-                        BlueZGattCharacteristicFlag.extendedProperties,
-                      ),
-                      notifyEncryptionRequired: false,
-                      indicateEncryptionRequired: false,
-                    ),
-                  );
-                },
-              ).toList(),
-              includedServices: [],
-            );
-          },
-        ).toList(),
-        success: true,
-        errorCode: 0,
-        errorString: '',
-      ),
-    );
+                    );
+                  },
+                ).toList(),
+                includedServices: [],
+              );
+            },
+          ).toList(),
+          success: true,
+          errorCode: 0,
+          errorString: '',
+        ),
+      );
+    } catch (e) {
+      _onDiscoveredServicesController.add(
+        BmDiscoverServicesResult(
+          remoteId: request.remoteId,
+          services: [],
+          success: false,
+          errorCode: 0,
+          errorString: '',
+        ),
+      );
+    }
   }
 
   @override
@@ -499,140 +511,183 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   Future<void> readCharacteristic(
     BmReadCharacteristicRequest request,
   ) async {
-    await _initFlutterBluePlus();
+    try {
+      await _initFlutterBluePlus();
 
-    final device = _client.devices.singleWhere(
-      (device) {
-        return device.remoteId == request.remoteId;
-      },
-    );
+      final device = _client.devices.singleWhere(
+        (device) {
+          return device.remoteId == request.remoteId;
+        },
+      );
 
-    final service = device.gattServices.singleWhere(
-      (service) {
-        final uuid = Guid.fromBytes(
-          service.uuid.value,
-        );
+      final service = device.gattServices.singleWhere(
+        (service) {
+          final uuid = Guid.fromBytes(
+            service.uuid.value,
+          );
 
-        return uuid == request.serviceUuid;
-      },
-    );
+          return uuid == request.serviceUuid;
+        },
+      );
 
-    final characteristic = service.characteristics.singleWhere(
-      (characteristic) {
-        final uuid = Guid.fromBytes(
-          characteristic.uuid.value,
-        );
+      final characteristic = service.characteristics.singleWhere(
+        (characteristic) {
+          final uuid = Guid.fromBytes(
+            characteristic.uuid.value,
+          );
 
-        return uuid == request.characteristicUuid;
-      },
-    );
+          return uuid == request.characteristicUuid;
+        },
+      );
 
-    final value = await characteristic.readValue();
+      final value = await characteristic.readValue();
 
-    _onCharacteristicReadController.add(
-      BmCharacteristicData(
-        remoteId: device.remoteId,
-        serviceUuid: Guid.fromBytes(
-          service.uuid.value,
+      _onCharacteristicReadController.add(
+        BmCharacteristicData(
+          remoteId: device.remoteId,
+          serviceUuid: Guid.fromBytes(
+            service.uuid.value,
+          ),
+          secondaryServiceUuid: null,
+          characteristicUuid: Guid.fromBytes(
+            characteristic.uuid.value,
+          ),
+          value: value,
+          success: true,
+          errorCode: 0,
+          errorString: '',
         ),
-        secondaryServiceUuid: null,
-        characteristicUuid: Guid.fromBytes(
-          characteristic.uuid.value,
+      );
+    }  catch (e) {
+      _onCharacteristicReadController.add(
+        BmCharacteristicData(
+          remoteId: request.remoteId,
+          serviceUuid: request.serviceUuid,
+          secondaryServiceUuid: null,
+          characteristicUuid: request.characteristicUuid,
+          value: [],
+          success: false,
+          errorCode: 0,
+          errorString: e.toString(),
         ),
-        value: value,
-        success: true,
-        errorCode: 0,
-        errorString: '',
-      ),
-    );
+      );
+    }
   }
 
   @override
   Future<void> readDescriptor(
     BmReadDescriptorRequest request,
   ) async {
-    await _initFlutterBluePlus();
+    try {
+      await _initFlutterBluePlus();
 
-    final device = _client.devices.singleWhere(
-      (device) {
-        return device.remoteId == request.remoteId;
-      },
-    );
+      final device = _client.devices.singleWhere(
+        (device) {
+          return device.remoteId == request.remoteId;
+        },
+      );
 
-    final service = device.gattServices.singleWhere(
-      (service) {
-        final uuid = Guid.fromBytes(
-          service.uuid.value,
-        );
+      final service = device.gattServices.singleWhere(
+        (service) {
+          final uuid = Guid.fromBytes(
+            service.uuid.value,
+          );
 
-        return uuid == request.serviceUuid;
-      },
-    );
+          return uuid == request.serviceUuid;
+        },
+      );
 
-    final characteristic = service.characteristics.singleWhere(
-      (characteristic) {
-        final uuid = Guid.fromBytes(
-          characteristic.uuid.value,
-        );
+      final characteristic = service.characteristics.singleWhere(
+        (characteristic) {
+          final uuid = Guid.fromBytes(
+            characteristic.uuid.value,
+          );
 
-        return uuid == request.characteristicUuid;
-      },
-    );
+          return uuid == request.characteristicUuid;
+        },
+      );
 
-    final descriptor = characteristic.descriptors.singleWhere(
-      (descriptor) {
-        final uuid = Guid.fromBytes(
-          descriptor.uuid.value,
-        );
+      final descriptor = characteristic.descriptors.singleWhere(
+        (descriptor) {
+          final uuid = Guid.fromBytes(
+            descriptor.uuid.value,
+          );
 
-        return uuid == request.descriptorUuid;
-      },
-    );
+          return uuid == request.descriptorUuid;
+        },
+      );
 
-    final value = await characteristic.readValue();
+      final value = await characteristic.readValue();
 
-    _onDescriptorReadController.add(
-      BmDescriptorData(
-        remoteId: device.remoteId,
-        serviceUuid: Guid.fromBytes(
-          service.uuid.value,
+      _onDescriptorReadController.add(
+        BmDescriptorData(
+          remoteId: device.remoteId,
+          serviceUuid: Guid.fromBytes(
+            service.uuid.value,
+          ),
+          secondaryServiceUuid: null,
+          characteristicUuid: Guid.fromBytes(
+            characteristic.uuid.value,
+          ),
+          descriptorUuid: Guid.fromBytes(
+            descriptor.uuid.value,
+          ),
+          value: value,
+          success: true,
+          errorCode: 0,
+          errorString: '',
         ),
-        secondaryServiceUuid: null,
-        characteristicUuid: Guid.fromBytes(
-          characteristic.uuid.value,
+      );
+    } catch (e) {
+      _onDescriptorReadController.add(
+        BmDescriptorData(
+          remoteId: request.remoteId,
+          serviceUuid: request.serviceUuid,
+          secondaryServiceUuid: null,
+          characteristicUuid: request.characteristicUuid,
+          descriptorUuid: request.descriptorUuid,
+          value: [],
+          success: false,
+          errorCode: 0,
+          errorString: e.toString(),
         ),
-        descriptorUuid: Guid.fromBytes(
-          descriptor.uuid.value,
-        ),
-        value: value,
-        success: true,
-        errorCode: 0,
-        errorString: '',
-      ),
-    );
+      );
+    }
   }
 
   @override
   Future<void> readRssi(
     BmReadRssiRequest request,
   ) async {
-    await _initFlutterBluePlus();
+    try {
+      await _initFlutterBluePlus();
 
-    final device = _client.devices.singleWhere(
-      (device) {
-        return device.remoteId == request.remoteId;
-      },
-    );
+      final device = _client.devices.singleWhere(
+        (device) {
+          return device.remoteId == request.remoteId;
+        },
+      );
 
-    _onReadRssiController.add(
-      BmReadRssiResult(
-        remoteId: device.remoteId,
-        rssi: device.rssi,
-        success: true,
-        errorCode: 0,
-        errorString: '',
-      ),
-    );
+      _onReadRssiController.add(
+        BmReadRssiResult(
+          remoteId: device.remoteId,
+          rssi: device.rssi,
+          success: true,
+          errorCode: 0,
+          errorString: '',
+        ),
+      );
+    } catch (e) {
+      _onReadRssiController.add(
+        BmReadRssiResult(
+          remoteId: request.remoteId,
+          rssi: 0,
+          success: false,
+          errorCode: 0,
+          errorString: e.toString(),
+        ),
+      );
+    }
   }
 
   @override
@@ -738,122 +793,153 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   Future<void> writeCharacteristic(
     BmWriteCharacteristicRequest request,
   ) async {
-    await _initFlutterBluePlus();
+    try {
+      await _initFlutterBluePlus();
 
-    final device = _client.devices.singleWhere(
-      (device) {
-        return device.remoteId == request.remoteId;
-      },
-    );
+      final device = _client.devices.singleWhere(
+        (device) {
+          return device.remoteId == request.remoteId;
+        },
+      );
 
-    final service = device.gattServices.singleWhere(
-      (service) {
-        final uuid = Guid.fromBytes(
-          service.uuid.value,
-        );
+      final service = device.gattServices.singleWhere(
+        (service) {
+          final uuid = Guid.fromBytes(
+            service.uuid.value,
+          );
 
-        return uuid == request.serviceUuid;
-      },
-    );
+          return uuid == request.serviceUuid;
+        },
+      );
 
-    final characteristic = service.characteristics.singleWhere(
-      (characteristic) {
-        final uuid = Guid.fromBytes(
-          characteristic.uuid.value,
-        );
+      final characteristic = service.characteristics.singleWhere(
+        (characteristic) {
+          final uuid = Guid.fromBytes(
+            characteristic.uuid.value,
+          );
 
-        return uuid == request.characteristicUuid;
-      },
-    );
+          return uuid == request.characteristicUuid;
+        },
+      );
 
-    await characteristic.writeValue(
-      request.value,
-      type: request.writeType == BmWriteType.withResponse
-          ? BlueZGattCharacteristicWriteType.request
-          : BlueZGattCharacteristicWriteType.command,
-    );
+      await characteristic.writeValue(
+        request.value,
+        type: request.writeType == BmWriteType.withResponse
+            ? BlueZGattCharacteristicWriteType.request
+            : BlueZGattCharacteristicWriteType.command,
+      );
 
-    _onCharacteristicWrittenController.add(
-      BmCharacteristicData(
-        remoteId: device.remoteId,
-        serviceUuid: Guid.fromBytes(
-          service.uuid.value,
+      _onCharacteristicWrittenController.add(
+        BmCharacteristicData(
+          remoteId: device.remoteId,
+          serviceUuid: Guid.fromBytes(
+            service.uuid.value,
+          ),
+          secondaryServiceUuid: null,
+          characteristicUuid: Guid.fromBytes(
+            characteristic.uuid.value,
+          ),
+          value: request.value,
+          success: true,
+          errorCode: 0,
+          errorString: '',
         ),
-        secondaryServiceUuid: null,
-        characteristicUuid: Guid.fromBytes(
-          characteristic.uuid.value,
+      );
+    } catch (e) {
+      _onCharacteristicWrittenController.add(
+        BmCharacteristicData(
+          remoteId: request.remoteId,
+          serviceUuid: request.serviceUuid,
+          secondaryServiceUuid: null,
+          characteristicUuid: request.characteristicUuid,
+          value: request.value,
+          success: false,
+          errorCode: 0,
+          errorString: e.toString(),
         ),
-        value: request.value,
-        success: true,
-        errorCode: 0,
-        errorString: '',
-      ),
-    );
+      );
+    }
   }
 
   @override
   Future<void> writeDescriptor(
     BmWriteDescriptorRequest request,
   ) async {
-    await _initFlutterBluePlus();
+    try {
+      await _initFlutterBluePlus();
 
-    final device = _client.devices.singleWhere(
-      (device) {
-        return device.remoteId == request.remoteId;
-      },
-    );
+      final device = _client.devices.singleWhere(
+        (device) {
+          return device.remoteId == request.remoteId;
+        },
+      );
 
-    final service = device.gattServices.singleWhere(
-      (service) {
-        final uuid = Guid.fromBytes(
-          service.uuid.value,
-        );
+      final service = device.gattServices.singleWhere(
+        (service) {
+          final uuid = Guid.fromBytes(
+            service.uuid.value,
+          );
 
-        return uuid == request.serviceUuid;
-      },
-    );
+          return uuid == request.serviceUuid;
+        },
+      );
 
-    final characteristic = service.characteristics.singleWhere(
-      (characteristic) {
-        final uuid = Guid.fromBytes(
-          characteristic.uuid.value,
-        );
+      final characteristic = service.characteristics.singleWhere(
+        (characteristic) {
+          final uuid = Guid.fromBytes(
+            characteristic.uuid.value,
+          );
 
-        return uuid == request.characteristicUuid;
-      },
-    );
+          return uuid == request.characteristicUuid;
+        },
+      );
 
-    final descriptor = characteristic.descriptors.singleWhere(
-      (descriptor) {
-        final uuid = Guid.fromBytes(
-          descriptor.uuid.value,
-        );
+      final descriptor = characteristic.descriptors.singleWhere(
+        (descriptor) {
+          final uuid = Guid.fromBytes(
+            descriptor.uuid.value,
+          );
 
-        return uuid == request.descriptorUuid;
-      },
-    );
+          return uuid == request.descriptorUuid;
+        },
+      );
 
-    await descriptor.writeValue(request.value);
+      await descriptor.writeValue(request.value);
 
-    _onDescriptorWrittenController.add(
-      BmDescriptorData(
-        remoteId: device.remoteId,
-        serviceUuid: Guid.fromBytes(
-          service.uuid.value,
+      _onDescriptorWrittenController.add(
+        BmDescriptorData(
+          remoteId: device.remoteId,
+          serviceUuid: Guid.fromBytes(
+            service.uuid.value,
+          ),
+          secondaryServiceUuid: null,
+          characteristicUuid: Guid.fromBytes(
+            characteristic.uuid.value,
+          ),
+          descriptorUuid: Guid.fromBytes(
+            descriptor.uuid.value,
+          ),
+          value: request.value,
+          success: true,
+          errorCode: 0,
+          errorString: '',
         ),
-        secondaryServiceUuid: null,
-        characteristicUuid: Guid.fromBytes(
-          characteristic.uuid.value,
+      );
+    } catch (e) {
+      _onDescriptorWrittenController.add(
+        BmDescriptorData(
+          remoteId: request.remoteId,
+          serviceUuid: request.serviceUuid,
+          secondaryServiceUuid: null,
+          characteristicUuid: request.characteristicUuid,
+          descriptorUuid: request.descriptorUuid,
+          value: request.value,
+          success: false,
+          errorCode: 0,
+          errorString: e.toString(),
         ),
-        descriptorUuid: Guid.fromBytes(
-          descriptor.uuid.value,
-        ),
-        value: request.value,
-        success: true,
-        errorCode: 0,
-        errorString: '',
-      ),
-    );
+      );
+    }
   }
 
   static void registerWith() {
