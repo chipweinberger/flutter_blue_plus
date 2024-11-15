@@ -217,9 +217,9 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
         BmDiscoverServicesResult(
           remoteId: request.remoteId,
           services: [],
-          success: true,
+          success: false,
           errorCode: 0,
-          errorString: '',
+          errorString: e.toString(),
         ),
       );
     }
