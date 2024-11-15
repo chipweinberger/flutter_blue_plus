@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org) for commit guidelines.
 
+## 1.2.2 (2024-11-15)
+
+### Chores
+
+* applying package updates
+
 ## 1.2.1 (2024-11-15)
 
 ### Chores
