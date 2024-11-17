@@ -1,3 +1,6 @@
+## 1.34.5
+* **[Feature]** add `FlutterBluePlus.logs` to get access to FBP logs
+
 ## 1.34.4
 * **[Improve]** improve error message when secondary service is not found
 
