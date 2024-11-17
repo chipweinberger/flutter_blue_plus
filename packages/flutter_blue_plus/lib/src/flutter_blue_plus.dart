@@ -32,6 +32,9 @@ class FlutterBluePlus {
   /// stream used for the scanResults public api
   static final _scanResults = _StreamControllerReEmit<List<ScanResult>>(initialValue: []);
 
+  /// stream used for the scanResults public api
+  static final _logsController = StreamController<String>.broadcast();
+
   /// buffers the scan results
   static _BufferStream<BmScanResponse>? _scanBuffer;
 
@@ -92,6 +95,9 @@ class FlutterBluePlus {
 
   /// Get access to all device event streams
   static final BluetoothEvents events = BluetoothEvents();
+
+  /// Get access to FBP logs
+  static Stream<String> get logs => _logsController.stream;
 
   /// Set configurable options
   ///   - [showPowerAlert] Whether to show the power alert (iOS & MacOS only). i.e. CBCentralManagerOptionShowPowerAlertKey
@@ -333,7 +339,7 @@ class FlutterBluePlus {
       if (isScanningNow) {
         await _stopScan();
       } else if (_logLevel.index >= LogLevel.info.index) {
-        print("[FBP] stopScan: already stopped");
+        log("[FBP] stopScan: already stopped");
       }
     } finally {
       mtx.give();
@@ -405,7 +411,7 @@ class FlutterBluePlus {
           for (DeviceIdentifier d in _autoConnect) {
             BluetoothDevice(remoteId: d).connect(autoConnect: true, mtu: null).onError((e, s) {
               if (logLevel != LogLevel.none) {
-                print("[FBP] [AutoConnect] connection failed: $e");
+                log("[FBP] [AutoConnect] connection failed: $e");
               }
             });
           }
@@ -444,7 +450,7 @@ class FlutterBluePlus {
                 var d = BluetoothDevice(remoteId: r.remoteId);
                 d.connect(autoConnect: true, mtu: null).onError((e, s) {
                   if (logLevel != LogLevel.none) {
-                    print("[FBP] [AutoConnect] connection failed: $e");
+                    log("[FBP] [AutoConnect] connection failed: $e");
                   }
                 });
               }
@@ -570,6 +576,11 @@ class FlutterBluePlus {
   static Future<void> turnOff({int timeout = 10}) async {
     // invoke
     await _invokeMethod(() => FlutterBluePlusPlatform.instance.turnOff(BmTurnOffRequest())).fbpTimeout(timeout, "turnOff");
+  }
+
+  static void log(String s) {
+    _logsController.add(s);
+    print(s);
   }
 
   /// Checks if Bluetooth functionality is turned on
