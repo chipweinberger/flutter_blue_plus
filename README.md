@@ -795,7 +795,7 @@ You can also use `FlutterBluePlus.adapterState.listen(...)`. See [Usage](#usage)
 `adapterState` always starts as `unknown`. You need to wait longer for the service to initialize. As simple as:
 
 ```
-if (FlutterBluePlus.adapterStateNow == BluetoothAdapterState.unknown) {
+if (await FlutterBluePlus.adapterState.first == BluetoothAdapterState.unknown) {
     await Future.delayed(const Duration(seconds: 1));
 }
 ```
