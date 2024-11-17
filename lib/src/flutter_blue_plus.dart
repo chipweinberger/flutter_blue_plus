@@ -39,6 +39,9 @@ class FlutterBluePlus {
   /// stream used for the scanResults public api
   static final _scanResults = _StreamControllerReEmit<List<ScanResult>>(initialValue: []);
 
+  /// stream used for the scanResults public api
+  static final _logsController = StreamController<String>.broadcast();
+
   /// buffers the scan results
   static _BufferStream<BmScanResponse>? _scanBuffer;
 
@@ -99,6 +102,9 @@ class FlutterBluePlus {
 
   /// Get access to all device event streams
   static final BluetoothEvents events = BluetoothEvents();
+
+  /// Get access to FBP logs
+  static Stream<String> get logs => _logsController.stream;
 
   /// Set configurable options
   ///   - [showPowerAlert] Whether to show the power alert (iOS & MacOS only). i.e. CBCentralManagerOptionShowPowerAlertKey
@@ -370,7 +376,7 @@ class FlutterBluePlus {
       if (isScanningNow) {
         await _stopScan();
       } else if (_logLevel.index >= LogLevel.info.index) {
-        print("[FBP] stopScan: already stopped");
+        log("[FBP] stopScan: already stopped");
       }
     } finally {
       mtx.give();
@@ -450,7 +456,7 @@ class FlutterBluePlus {
       }
       func = _logColor ? _black(func) : func;
       result = _logColor ? _brown(result) : result;
-      print("[FBP] $func result: $result");
+      log("[FBP] $func result: $result");
     }
 
     // android only
@@ -469,7 +475,7 @@ class FlutterBluePlus {
         for (DeviceIdentifier d in _autoConnect) {
           BluetoothDevice(remoteId: d).connect(autoConnect: true, mtu: null).onError((e, s) {
             if (logLevel != LogLevel.none) {
-              print("[FBP] [AutoConnect] connection failed: $e");
+              log("[FBP] [AutoConnect] connection failed: $e");
             }
           });
         }
@@ -511,7 +517,7 @@ class FlutterBluePlus {
               var d = BluetoothDevice(remoteId: r.remoteId);
               d.connect(autoConnect: true, mtu: null).onError((e, s) {
                 if (logLevel != LogLevel.none) {
-                  print("[FBP] [AutoConnect] connection failed: $e");
+                  log("[FBP] [AutoConnect] connection failed: $e");
                 }
               });
             }
@@ -617,7 +623,7 @@ class FlutterBluePlus {
         String args = arguments.toString();
         func = _logColor ? _black(func) : func;
         args = _logColor ? _magenta(args) : args;
-        print("[FBP] $func args: $args");
+        log("[FBP] $func args: $args");
       }
 
       // invoke
@@ -629,7 +635,7 @@ class FlutterBluePlus {
         String result = out.toString();
         func = _logColor ? _black(func) : func;
         result = _logColor ? _brown(result) : result;
-        print("[FBP] $func result: $result");
+        log("[FBP] $func result: $result");
       }
     } finally {
       mtx.give();
@@ -660,6 +666,11 @@ class FlutterBluePlus {
     } else {
       return data.toString();
     }
+  }
+
+  static void log(String s) {
+    _logsController.add(s);
+    print(s);
   }
 
   /// Checks if Bluetooth functionality is turned on

@@ -112,7 +112,12 @@ Every error returned by the native platform is checked and thrown as an exceptio
 
 ```dart
 // if your terminal doesn't support color you'll see annoying logs like `\x1B[1;35m`
-FlutterBluePlus.setLogLevel(LogLevel.verbose, color:false)
+FlutterBluePlus.setLogLevel(LogLevel.verbose, color:false);
+
+// optional
+FlutterBluePlus.logs.listen((String s){
+    // send logs anywhere you want
+});
 ```
 
 Setting `LogLevel.verbose` shows *all* data in and out.
