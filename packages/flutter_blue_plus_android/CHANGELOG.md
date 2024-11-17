@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org) for commit guidelines.
 
+## 2.0.5 (2024-11-23)
+
+### Documentation
+
+* update `FlutterBluePlusPlugin` ([ae9ea66](https://github.com/tnc1997/flutter-blue-plus/commit/ae9ea66182266af47d2cf52b3c0bb56fadddb71e))
+* update `FlutterBluePlusPlugin` ([90a8332](https://github.com/tnc1997/flutter-blue-plus/commit/90a83326446a668b53726d977c349d603ef12211))
+
 ## 2.0.4 (2024-11-23)
 
 ### Code Refactoring
