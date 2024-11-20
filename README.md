@@ -11,6 +11,14 @@
 
 Migrating from [FlutterBlue](https://github.com/pauldemarco/flutter_blue)? See [Migration Guide](MIGRATION.md)
 
+## Sponsored
+
+<p align="left">
+<img width="250px" alt="FlutterBlue" src="https://github.com/boskokg/flutter_blue_plus/blob/master/site/jamcorder.png?raw=true" />
+</p>
+
+FlutterBluePlus is proudly sponsored by [Jamcorder](https://www.jamcorder.com/). 
+
 ## Contents
 
 - [Introduction](#introduction)
@@ -30,13 +38,6 @@ It supports BLE Central Role only (most common).
 
 If you need BLE Peripheral Role, you should check out [FlutterBlePeripheral](https://pub.dev/packages/flutter_ble_peripheral), or [bluetooth_low_energy](https://pub.dev/packages/bluetooth_low_energy).
 
-## Sponsored
-
-<p align="left">
-<img width="250px" alt="FlutterBlue" src="https://github.com/boskokg/flutter_blue_plus/blob/master/site/jamcorder.png?raw=true" />
-</p>
-
-FlutterBluePlus is proudly sponsored by [Jamcorder](https://www.jamcorder.com/). 
 
 ## Tutorial
 
