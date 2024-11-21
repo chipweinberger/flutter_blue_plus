@@ -76,8 +76,6 @@ It is maintained by @chan150.
 
 If you would like to implement `flutter_blue_plus_linux`, or `flutter_blue_plus_web`, please do! 
 
-See: [flutter_blue_plus_windows](https://pub.dev/packages/flutter_blue_plus_windows) for an example.
-
 ## ⭐ Stars ⭐
 
 Please star this repo & on [pub.dev](https://pub.dev/packages/flutter_blue_plus). We all benefit from having a larger community.
