@@ -13,7 +13,7 @@
 <img width="250px" alt="FlutterBlue" src="https://github.com/boskokg/flutter_blue_plus/blob/master/site/jamcorder.png?raw=true" />
 </p>
 
-FlutterBluePlus is proudly sponsored by [Jamcorder](https://www.jamcorder.com/). 
+FlutterBluePlus is sponsored by [Jamcorder](https://www.jamcorder.com/). 
 
 ---
 
