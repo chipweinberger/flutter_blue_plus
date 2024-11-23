@@ -874,6 +874,10 @@ for (var d in system) {
 
 On Adroid you can only call `startScan` 5 times per 30 second period. This is a platform restriction.
 
+**7. Android: make sure location services are enabled**
+
+Android requires location services to allow bluetooth scanning.
+
 ---
 
 ### Scanned device never goes away
