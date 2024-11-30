@@ -4,67 +4,31 @@
 
 part of flutter_blue_plus;
 
-class BluetoothService {
-  final DeviceIdentifier remoteId;
-  final Guid serviceUuid;
-  final Guid? primaryServiceUuid;
-  final List<BluetoothCharacteristic> characteristics;
+class BluetoothService extends BluetoothAttribute {
+  final bool isPrimary;
+  late final List<BluetoothService> includedServices;
+  late final List<BluetoothCharacteristic> characteristics;
 
   /// convenience accessor
-  Guid get uuid => serviceUuid;
+  Guid get serviceUuid => uuid;
 
   /// for convenience
-  bool get isPrimary => primaryServiceUuid == null;
-
-  /// for convenience
-  bool get isSecondary => primaryServiceUuid != null;
-
-  /// (for primary services)
-  ///  get it's secondary services (i.e. includedServices)
-  List<BluetoothService> get includedServices {
-    List<BluetoothService> out = [];
-    if (FlutterBluePlus._knownServices[remoteId] != null) {
-      for (var s in FlutterBluePlus._knownServices[remoteId]!.services) {
-        if (s.primaryServiceUuid == serviceUuid) {
-          out.add(BluetoothService.fromProto(s));
-        }
-      }
-    }
-    return out;
-  }
-
-  /// (for secondary services)
-  ///  get the primary service it is associated with
-  BluetoothService? get primaryService {
-    if (primaryServiceUuid != null) {
-      if (FlutterBluePlus._knownServices[remoteId] != null) {
-        for (var s in FlutterBluePlus._knownServices[remoteId]!.services) {
-          if (s.serviceUuid == primaryServiceUuid) {
-            return BluetoothService.fromProto(s);
-          }
-        }
-      }
-    }
-    return null;
-  }
+  bool get isSecondary => !isPrimary;
 
   /// for internal use
-  BluetoothService.fromProto(BmBluetoothService p)
-      : remoteId = p.remoteId,
-        serviceUuid = p.serviceUuid,
-        primaryServiceUuid = p.primaryServiceUuid,
-        characteristics = p.characteristics.map((c) => BluetoothCharacteristic.fromProto(c)).toList();
+  BluetoothService.fromProto(BluetoothDevice device, BmBluetoothService p)
+      : isPrimary = p.isPrimary,
+        super(device: device, uuid: p.uuid, index: p.index) {
+    characteristics = p.characteristics.map((c) => BluetoothCharacteristic.fromProto(c, this)).toList();
+  }
 
   @override
   String toString() {
     return 'BluetoothService{'
         'remoteId: $remoteId, '
-        'serviceUuid: $serviceUuid, '
-        'primaryServiceUuid: $primaryServiceUuid, '
+        'isPrimary: $isPrimary, '
         'characteristics: $characteristics, '
+        'includedServices: $includedServices'
         '}';
   }
-
-  @Deprecated('Use remoteId instead')
-  DeviceIdentifier get deviceId => remoteId;
 }
