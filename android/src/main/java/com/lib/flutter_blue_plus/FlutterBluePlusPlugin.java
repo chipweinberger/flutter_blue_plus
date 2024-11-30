@@ -718,7 +718,16 @@ public class FlutterBluePlusPlugin implements
                         if (Build.VERSION.SDK_INT >= 23) { // Android 6.0 (October 2015)
                             gatt = device.connectGatt(context, autoConnect, mGattCallback, BluetoothDevice.TRANSPORT_LE);
                         } else {
-                            gatt = device.connectGatt(context, autoConnect, mGattCallback);
+                            try {
+                                // From Android LOLLIPOP (21) the transport types exists, but it is private
+                                // have to use reflection to call it for TRANSPORT_LE
+                                Method connectGattMethod = device.getClass().getDeclaredMethod("connectGatt", Context.class, boolean.class, BluetoothGattCallback.class, int.class);
+                                connectGattMethod.setAccessible(true);
+                                gatt = (BluetoothGatt) connectGattMethod.invoke(device, context, autoConnect, mGattCallback, 2 /* TRANSPORT_LE */);
+                            } catch (Exception ex) {
+                                // fall back to default method if reflection fails
+                                gatt = device.connectGatt(context, autoConnect, mGattCallback);
+                            }
                         }
 
                         // error check
