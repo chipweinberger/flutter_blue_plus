@@ -7,7 +7,7 @@
 </p>
 <br><br>
 
-## Sponsored
+## Sponsor
 
 <p align="left">
 <img width="250px" alt="FlutterBlue" src="https://github.com/boskokg/flutter_blue_plus/blob/master/site/jamcorder.png?raw=true" />
