@@ -1,18 +1,18 @@
 part of flutter_blue_plus;
 
-String _hexEncode(Uint8List numbers) {
+String _hexEncode(List<int> numbers) {
   return numbers.map((n) => (n & 0xFF).toRadixString(16).padLeft(2, '0')).join();
 }
 
-Uint8List? _tryHexDecode(String hex) {
-  Uint8List numbers = Uint8List(hex.length ~/ 2);
+List<int>? _tryHexDecode(String hex) {
+  List<int> numbers = [];
   for (int i = 0; i < hex.length; i += 2) {
     String hexPart = hex.substring(i, i + 2);
     int? num = int.tryParse(hexPart, radix: 16);
     if (num == null) {
       return null;
     }
-    numbers[i ~/ 2] = num;
+    numbers.add(num);
   }
   return numbers;
 }

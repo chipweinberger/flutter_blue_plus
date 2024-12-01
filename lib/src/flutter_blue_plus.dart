@@ -25,8 +25,8 @@ class FlutterBluePlus {
   static final Map<DeviceIdentifier, BmMtuChangedResponse> _mtuValues = {};
   static final Map<DeviceIdentifier, String> _platformNames = {};
   static final Map<DeviceIdentifier, String> _advNames = {};
-  static final Map<DeviceIdentifier, Map<String, Uint8List>> _lastChrs = {};
-  static final Map<DeviceIdentifier, Map<String, Uint8List>> _lastDescs = {};
+  static final Map<DeviceIdentifier, Map<String, List<int>>> _lastChrs = {};
+  static final Map<DeviceIdentifier, Map<String, List<int>>> _lastDescs = {};
   static final Map<DeviceIdentifier, List<StreamSubscription>> _deviceSubscriptions = {};
   static final Map<DeviceIdentifier, List<StreamSubscription>> _delayedSubscriptions = {};
   static final Map<DeviceIdentifier, DateTime> _connectTimestamp = {};
@@ -719,12 +719,12 @@ class MsdFilter {
   int manufacturerId;
 
   /// filter for this data
-  Uint8List data;
+  List<int> data;
 
   /// For any bit in the mask, set it the 1 if it needs to match
   /// the one in manufacturer data, otherwise set it to 0.
   /// The 'mask' must have the same length as 'data'.
-  Uint8List mask;
+  List<int> mask;
 
   MsdFilter(this.manufacturerId, {required this.data, required this.mask});
 
@@ -739,12 +739,12 @@ class ServiceDataFilter {
   Guid service;
 
   // filter for this data
-  Uint8List data;
+  List<int> data;
 
   // For any bit in the mask, set it the 1 if it needs to match
   // the one in service data, otherwise set it to 0.
   // The 'mask' must have the same length as 'data'.
-  Uint8List mask;
+  List<int> mask;
 
   ServiceDataFilter(this.service, {required this.data, required this.mask});
 
@@ -814,19 +814,19 @@ class AdvertisementData {
   final int? txPowerLevel;
   final int? appearance; // not supported on iOS / macOS
   final bool connectable;
-  final Map<int, Uint8List> manufacturerData; // key: manufacturerId
-  final Map<Guid, Uint8List> serviceData; // key: service guid
+  final Map<int, List<int>> manufacturerData; // key: manufacturerId
+  final Map<Guid, List<int>> serviceData; // key: service guid
   final List<Guid> serviceUuids;
 
   /// for convenience, raw msd data
   ///   * interprets the first two byte as raw data,
   ///     as opposed to a `manufacturerId`
-  List<Uint8List> get msd {
-    List<Uint8List> output = [];
+  List<List<int>> get msd {
+    List<List<int>> output = [];
     manufacturerData.forEach((manufacturerId, bytes) {
       int low = manufacturerId & 0xFF;
       int high = (manufacturerId >> 8) & 0xFF;
-      output.add(Uint8List.fromList([low, high] + bytes));
+      output.add([low, high] + bytes);
     });
     return output;
   }
