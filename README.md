@@ -7,6 +7,16 @@
 </p>
 <br><br>
 
+## Sponsor
+
+<p align="left">
+<img width="250px" alt="FlutterBlue" src="https://github.com/boskokg/flutter_blue_plus/blob/master/site/jamcorder.png?raw=true" />
+</p>
+
+FlutterBluePlus is sponsored by [Jamcorder](https://www.jamcorder.com/). 
+
+---
+
 **Note: this plugin is continuous work from [FlutterBlue](https://github.com/pauldemarco/flutter_blue).**
 
 Migrating from [FlutterBlue](https://github.com/pauldemarco/flutter_blue)? See [Migration Guide](MIGRATION.md)
@@ -30,6 +40,7 @@ It supports BLE Central Role only (most common).
 
 If you need BLE Peripheral Role, you should check out [FlutterBlePeripheral](https://pub.dev/packages/flutter_ble_peripheral), or [bluetooth_low_energy](https://pub.dev/packages/bluetooth_low_energy).
 
+
 ## Tutorial
 
 If you are new to Bluetooth, you should start by reading BLE tutorials.
@@ -47,25 +58,23 @@ If you are new to Bluetooth, you should start by reading BLE tutorials.
 
 FlutterBluePlus supports nearly every feature on all supported platforms: iOS, macOS, Android.
 
-## Windows Support
-
-Use [flutter_blue_plus_windows](https://pub.dev/packages/flutter_blue_plus_windows) if you need Windows support.
-
-It is maintained by @chan150. 
-
 ## No Dependencies
 
 FlutterBluePlus has zero dependencies besides Flutter, Android, iOS, and macOS themselves.
 
 This makes FlutterBluePlus very stable, and easy to maintain.
 
-## Other BLE Libraries
+## Windows Support
 
-These other libraries are worth considering. They support more platforms than FBP, but not to the same quality as FBP.
+Use [flutter_blue_plus_windows](https://pub.dev/packages/flutter_blue_plus_windows) if you need Windows support.
 
-- [bluetooth_low_energy](https://pub.dev/packages/bluetooth_low_energy) 
-- [universal_ble](https://pub.dev/packages/universal_ble)
-- [quick_blue](https://pub.dev/packages/quick_blue)
+It is maintained by @chan150. 
+
+## Linus & Web Support
+
+[Linux](https://github.com/chipweinberger/flutter_blue_plus/issues/983) & [Web](https://github.com/chipweinberger/flutter_blue_plus/issues/769) support are not planned for FlutterBluePlus.
+
+If you would like to implement `flutter_blue_plus_linux`, or `flutter_blue_plus_web`, please do! 
 
 ## ⭐ Stars ⭐
 
@@ -104,7 +113,12 @@ Every error returned by the native platform is checked and thrown as an exceptio
 
 ```dart
 // if your terminal doesn't support color you'll see annoying logs like `\x1B[1;35m`
-FlutterBluePlus.setLogLevel(LogLevel.verbose, color:false)
+FlutterBluePlus.setLogLevel(LogLevel.verbose, color:false);
+
+// optional
+FlutterBluePlus.logs.listen((String s){
+    // send logs anywhere you want
+});
 ```
 
 Setting `LogLevel.verbose` shows *all* data in and out.
@@ -161,7 +175,7 @@ If your device is not found, see [Common Problems](#common-problems).
 ```dart
 // listen to scan results
 // Note: `onScanResults` clears the results between scans. You should use
-//  `scanResults` if you want the current scan results *or* the results from a previous scan.
+//  `scanResults` if you want the current scan results *or* the results from the previous scan.
 var subscription = FlutterBluePlus.onScanResults.listen((results) {
         if (results.isNotEmpty) {
             ScanResult r = results.last; // the most recently found device
@@ -791,7 +805,7 @@ You can also use `FlutterBluePlus.adapterState.listen(...)`. See [Usage](#usage)
 `adapterState` always starts as `unknown`. You need to wait longer for the service to initialize. As simple as:
 
 ```
-if (FlutterBluePlus.adapterStateNow == BluetoothAdapterState.unknown) {
+if (await FlutterBluePlus.adapterState.first == BluetoothAdapterState.unknown) {
     await Future.delayed(const Duration(seconds: 1));
 }
 ```
@@ -868,6 +882,10 @@ for (var d in system) {
 **6. Android: you're calling startScan too often**
 
 On Adroid you can only call `startScan` 5 times per 30 second period. This is a platform restriction.
+
+**7. Android: make sure location services are enabled**
+
+Android requires location services to allow bluetooth scanning.
 
 ---
 
@@ -1067,9 +1085,9 @@ Bluetooth is wireless and will not always work.
 
 **1. you are not calling the right function**
 
-`lastValueStream` is called for `chr.read()` & `chr.write()` & `chr.setNotifyValue(true)` 
+`lastValueStream` will receive data for `chr.read()` & `chr.write()` & `chr.setNotifyValue(true)` 
 
-`onValueReceived` is only called for `chr.read()` & `chr.setNotifyValue(true)` 
+`onValueReceived` will receive data for `chr.read()` & `chr.setNotifyValue(true)` 
 
 **2. your device has nothing to send**
 

@@ -1,3 +1,25 @@
+## 1.34.5
+* **[Feature]** add `FlutterBluePlus.logs` to get access to FBP logs
+
+## 1.34.4
+* **[Improve]** improve error message when secondary service is not found
+
+## 1.34.3
+* **[Fix]** `startScan` was not propogating errors (regression 1.31.7)
+
+## 1.34.2
+* **[Fix]** characteristic not found (regression 1.34.0)
+
+## 1.34.1
+* **[Fix]** Android: `SCAN_FAILED_ALREADY_STARTED` could sometimes occur after bluetooth restart
+
+## 1.34.0
+* **[Feature]** support `includedServices`, aka primary/secondary services
+* **[Fix]** Android: `withServiceData` scan filter was not working (regression in 1.28.3)
+
+## 1.33.6
+* **[Feature]** verbose logs: make function results easier to see
+
 ## 1.33.5
 * **[Fix]** iOS: crash caused by 1-byte advertisements (#1022)
 
@@ -979,6 +1001,11 @@ This release closes many open issues on Github.
 * **[Improve]** iOS: Use `CBCentralManagerOptionShowPowerAlertKey` for better UI popups
 * **[Improve]** Dart: Removed RxDart and other dependencies
 
+---
+
+# Chip Weinberger Becomes Maintainer
+
+---
 
 ## 1.4.0
 * Android: Add clear gatt cache method #142 (thanks to joistaus)

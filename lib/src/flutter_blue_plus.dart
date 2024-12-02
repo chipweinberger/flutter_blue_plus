@@ -39,6 +39,9 @@ class FlutterBluePlus {
   /// stream used for the scanResults public api
   static final _scanResults = _StreamControllerReEmit<List<ScanResult>>(initialValue: []);
 
+  /// stream used for the scanResults public api
+  static final _logsController = StreamController<String>.broadcast();
+
   /// buffers the scan results
   static _BufferStream<BmScanResponse>? _scanBuffer;
 
@@ -101,6 +104,9 @@ class FlutterBluePlus {
 
   /// Get access to all device event streams
   static final BluetoothEvents events = BluetoothEvents();
+
+  /// Get access to FBP logs
+  static Stream<String> get logs => _logsController.stream;
 
   /// Set configurable options
   ///   - [showPowerAlert] Whether to show the power alert (iOS & MacOS only). i.e. CBCentralManagerOptionShowPowerAlertKey
@@ -306,7 +312,10 @@ class FlutterBluePlus {
       _scanBuffer = _BufferStream.listen(responseStream);
 
       // invoke platform method
-      await _invokeMethod('startScan', settings.toMap()).onError((e, s) => _stopScan(invokePlatform: false));
+      await _invokeMethod('startScan', settings.toMap()).onError((e, s) {
+        _stopScan(invokePlatform: false);
+        throw e!;
+      });
 
       // check every 250ms for gone devices?
       late Stream<BmScanResponse?> outputStream = removeIfGone != null
@@ -382,7 +391,7 @@ class FlutterBluePlus {
       if (isScanningNow) {
         await _stopScan();
       } else if (_logLevel.index >= LogLevel.info.index) {
-        print("[FBP] stopScan: already stopped");
+        log("[FBP] stopScan: already stopped");
       }
     } finally {
       mtx.give();
@@ -472,10 +481,17 @@ class FlutterBluePlus {
     // log result
     if (logLevel == LogLevel.verbose) {
       String func = '[[ ${call.method} ]]';
-      String result = call.arguments.toString();
+      String result;
+      if (call.method == 'OnDiscoveredServices') {
+        // this is really slow, so we can't
+        // pretty print anything that happens alot
+        result = _prettyPrint(call.arguments);
+      } else {
+        result = call.arguments.toString();
+      }
       func = _logColor ? _black(func) : func;
       result = _logColor ? _brown(result) : result;
-      print("[FBP] $func result: $result");
+      log("[FBP] $func result: $result");
     }
 
     // android only
@@ -494,7 +510,7 @@ class FlutterBluePlus {
         for (DeviceIdentifier d in _autoConnect) {
           BluetoothDevice(remoteId: d).connect(autoConnect: true, mtu: null).onError((e, s) {
             if (logLevel != LogLevel.none) {
-              print("[FBP] [AutoConnect] connection failed: $e");
+              log("[FBP] [AutoConnect] connection failed: $e");
             }
           });
         }
@@ -536,7 +552,7 @@ class FlutterBluePlus {
               var d = BluetoothDevice(remoteId: r.remoteId);
               d.connect(autoConnect: true, mtu: null).onError((e, s) {
                 if (logLevel != LogLevel.none) {
-                  print("[FBP] [AutoConnect] connection failed: $e");
+                  log("[FBP] [AutoConnect] connection failed: $e");
                 }
               });
             }
@@ -642,7 +658,7 @@ class FlutterBluePlus {
         String args = arguments.toString();
         func = _logColor ? _black(func) : func;
         args = _logColor ? _magenta(args) : args;
-        print("[FBP] $func args: $args");
+        log("[FBP] $func args: $args");
       }
 
       // invoke
@@ -650,11 +666,11 @@ class FlutterBluePlus {
 
       // log result
       if (logLevel == LogLevel.verbose) {
-        String func = '<$method>';
+        String func = '($method)';
         String result = out.toString();
         func = _logColor ? _black(func) : func;
         result = _logColor ? _brown(result) : result;
-        print("[FBP] $func result: $result");
+        log("[FBP] $func result: $result");
       }
     } finally {
       mtx.give();
@@ -676,6 +692,20 @@ class FlutterBluePlus {
 
     // wait for response
     await futureResponse.fbpTimeout(timeout, "turnOff");
+  }
+
+  static String _prettyPrint(dynamic data) {
+    if (data is Map || data is List) {
+      const JsonEncoder encoder = JsonEncoder.withIndent('  ');
+      return encoder.convert(data);
+    } else {
+      return data.toString();
+    }
+  }
+
+  static void log(String s) {
+    _logsController.add(s);
+    print(s);
   }
 
   /// Checks if Bluetooth functionality is turned on
@@ -823,13 +853,17 @@ class AdvertisementData {
   final Map<Guid, List<int>> serviceData; // key: service guid
   final List<Guid> serviceUuids;
 
-  /// raw manufacturer specific data
+  /// for convenience, raw msd data
+  ///   * interprets the first two byte as raw data,
+  ///     as opposed to a `manufacturerId`
   List<List<int>> get msd {
-    List<List<int>> out = [];
-    manufacturerData.forEach((key, value) {
-      out.add([key & 0xFF, (key >> 8) & 0xFF] + value);
+    List<List<int>> output = [];
+    manufacturerData.forEach((manufacturerId, bytes) {
+      int low = manufacturerId & 0xFF;
+      int high = (manufacturerId >> 8) & 0xFF;
+      output.add([low, high] + bytes);
     });
-    return out;
+    return output;
   }
 
   AdvertisementData({
