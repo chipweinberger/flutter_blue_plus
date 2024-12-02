@@ -97,12 +97,12 @@ public class L2CapChannelManager : NSObject, CBPeripheralManagerDelegate {
         let psm = CBL2CAPPSM(request.psm)
         guard let openChannel = openL2CapChannelInfos.first(where: {$0.getPSM() == psm}) else {
             LogUtil.log(logLevel: LogLevel.debug, message: String(format: "No open channel found with PSM: %d", psm))
-            resultCallback(FlutterError(code: ErrorCodes.noOpenL2CapChannelFound, message: "No open channel found for device and psm", details: nil))
+            resultCallback(FlutterError(code: ErrorCodes.noOpenL2CapChannelFound, message: String(format: "No open channel found with PSM: %d", psm), details: nil))
             return
         }
         guard let deviceUUID = UUID(uuidString: request.remoteId) else {
             LogUtil.log(logLevel: LogLevel.debug, message: String(format: "Provided device identifier is no UUID: %s", request.remoteId))
-            resultCallback(FlutterError(code: ErrorCodes.inputStreamReadFailed, message: "Provided device identifier is no UUID.", details: nil))
+            resultCallback(FlutterError(code: ErrorCodes.inputStreamReadFailed, message: String(format: "Provided device identifier is no UUID: %s", request.remoteId), details: nil))
             return
         }
         openChannel.read(deviceIdentifier: deviceUUID, result: resultCallback)
@@ -113,12 +113,12 @@ public class L2CapChannelManager : NSObject, CBPeripheralManagerDelegate {
         let psm = CBL2CAPPSM(request.psm)
         guard let openChannel = openL2CapChannelInfos.first(where: {$0.getPSM() == psm}) else {
             LogUtil.log(logLevel: LogLevel.debug, message: String(format: "No open channel found with PSM: %d", psm))
-            resultCallback(FlutterError(code: ErrorCodes.noOpenL2CapChannelFound, message: "No open channel found for device and psm", details: nil))
+            resultCallback(FlutterError(code: ErrorCodes.noOpenL2CapChannelFound, message: String(format: "No open channel found with PSM: %d", psm), details: nil))
             return
         }
         guard let deviceUUID = UUID(uuidString: request.remoteId) else {
             LogUtil.log(logLevel: LogLevel.debug, message: String(format: "Provided device identifier is no UUID: %s", request.remoteId))
-            resultCallback(FlutterError(code: ErrorCodes.outputStreamWriteFailed, message: "Provided device identifier is no UUID.", details: nil))
+            resultCallback(FlutterError(code: ErrorCodes.outputStreamWriteFailed, message: String(format: "Provided device identifier is no UUID: %s", request.remoteId), details: nil))
             return
         }
         openChannel.write(deviceIdentifier: deviceUUID, payload: request.value, result: resultCallback)
@@ -202,20 +202,23 @@ public class L2CapChannelManager : NSObject, CBPeripheralManagerDelegate {
     public func peripheralManager(_ peripheral: CBPeripheralManager, didOpen channel: CBL2CAPChannel?, error: Error?) {
         LogUtil.log(logLevel: LogLevel.debug, message: "L2Cap Channel opened.")
         if let error = error {
-            LogUtil.log(logLevel: LogLevel.error, message: String(format: "didOpenL2CapChannel returns error: %s", error.localizedDescription))
+            LogUtil.log(logLevel: LogLevel.error, message: String(format: "didOpenL2CapChannel returns error: %@", error.localizedDescription))
+            openL2CapChannelCallback?(FlutterError(code: ErrorCodes.openL2CapChannelFailed, message: error.localizedDescription, details: nil))
         } else {
             guard let channel = channel else {
                 LogUtil.log(logLevel: LogLevel.error, message: "No L2Cap channel provided. This should not happen.")
                 return
             }
             handleNewConnection(channel: channel)
+            openL2CapChannelCallback?(["psm": Int(channel.psm)])
         }
     }
     
     @objc
     public func didOpenChannel(peripheral: CBPeripheral, channel: CBL2CAPChannel?, error: (any Error)?) {
         if let error = error {
-            LogUtil.log(logLevel: LogLevel.error, message: String(format: "didOpenL2CapChannel returns error: %s", error.localizedDescription))
+            LogUtil.log(logLevel: LogLevel.error, message: String(format: "didOpenL2CapChannel returns error: %@", error.localizedDescription))
+            openL2CapChannelCallback?(FlutterError(code: ErrorCodes.openL2CapChannelFailed, message: error.localizedDescription, details: nil))
         } else {
             guard let channel = channel else {
                 LogUtil.log(logLevel: LogLevel.error, message: "No L2Cap channel provided. This should not happen.")
