@@ -151,7 +151,7 @@ public class MarshallingUtil {
 
     static HashMap<String, Object> bmBluetoothCharacteristic(BluetoothDevice device, BluetoothGattCharacteristic characteristic, BluetoothGatt gatt) {
 
-        FlutterBluePlusPlugin.ServicePair pair = getServicePair(gatt, characteristic);
+        BluetoothGattService primaryService = FlutterBluePlusPlugin.getPrimaryService(gatt, characteristic);
 
         List<Object> descriptors = new ArrayList<Object>();
         for (BluetoothGattDescriptor d : characteristic.getDescriptors()) {
@@ -161,10 +161,7 @@ public class MarshallingUtil {
         // See: BmBluetoothCharacteristic
         HashMap<String, Object> map = new HashMap<>();
         map.put("remote_id", device.getAddress());
-        map.put("service_uuid", uuidStr(pair.primary));
-        if (pair.secondary != null) {
-            map.put("secondary_service_uuid", uuidStr(pair.secondary));
-        }
+        map.put("service_uuid", uuidStr(primaryService));
         map.put("characteristic_uuid", uuidStr(characteristic.getUuid()));
         map.put("descriptors", descriptors);
         map.put("properties", bmCharacteristicProperties(characteristic.getProperties()));
@@ -277,32 +274,6 @@ public class MarshallingUtil {
             sb.append(String.format("%02x", b));
         }
         return sb.toString();
-    }
-
-    static FlutterBluePlusPlugin.ServicePair getServicePair(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-
-        FlutterBluePlusPlugin.ServicePair result = new FlutterBluePlusPlugin.ServicePair();
-
-        BluetoothGattService service = characteristic.getService();
-
-        // is this a primary service?
-        if (service.getType() == BluetoothGattService.SERVICE_TYPE_PRIMARY) {
-            result.primary = service.getUuid();
-            return result;
-        }
-
-        // Otherwise, iterate all services until we find the primary service
-        for (BluetoothGattService primary : gatt.getServices()) {
-            for (BluetoothGattService secondary : primary.getIncludedServices()) {
-                if (secondary.getUuid().equals(service.getUuid())) {
-                    result.primary = primary.getUuid();
-                    result.secondary = secondary.getUuid();
-                    return result;
-                }
-            }
-        }
-
-        return result;
     }
 
     static String uuid128(Object uuid) {
