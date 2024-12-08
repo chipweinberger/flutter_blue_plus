@@ -726,7 +726,7 @@ class MsdFilter {
   /// The 'mask' must have the same length as 'data'.
   List<int> mask;
 
-  MsdFilter(this.manufacturerId, {required this.data, required this.mask});
+  MsdFilter(this.manufacturerId, {this.data = const [], this.mask = const []});
 
   // convert to bmMsg
   BmMsdFilter get _bm {
@@ -746,7 +746,7 @@ class ServiceDataFilter {
   // The 'mask' must have the same length as 'data'.
   List<int> mask;
 
-  ServiceDataFilter(this.service, {required this.data, required this.mask});
+  ServiceDataFilter(this.service, {this.data = const [], this.mask = const []});
 
   // convert to bmMsg
   BmServiceDataFilter get _bm {

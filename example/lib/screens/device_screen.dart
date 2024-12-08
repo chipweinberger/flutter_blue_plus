@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:flutter_blue_plus_example/screens/performance_screen.dart';
 
 import '../utils/extra.dart';
 import '../utils/snackbar.dart';
@@ -229,20 +228,6 @@ class _DeviceScreenState extends State<DeviceScreen> {
         ));
   }
 
-  Widget buildPerformanceButton(BuildContext context) {
-    if (!isConnected) {
-      return const SizedBox.shrink();
-    }
-
-    return IconButton(
-      onPressed: () {
-        final route = MaterialPageRoute(builder: (context) => PerformanceScreen(device: widget.device));
-        Navigator.of(context).push(route);
-      },
-      icon: Icon(Icons.speed),
-    );
-  }
-
   Widget buildConnectButton(BuildContext context) {
     return Row(children: [
       if (_isConnecting || _isDisconnecting) buildSpinner(context),
@@ -262,10 +247,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(widget.device.platformName),
-          actions: [
-            buildPerformanceButton(context),
-            buildConnectButton(context),
-          ],
+          actions: [buildConnectButton(context)],
         ),
         body: SingleChildScrollView(
           child: Column(

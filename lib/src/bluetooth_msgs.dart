@@ -127,9 +127,9 @@ class BmScanAdvertisement {
 
   factory BmScanAdvertisement.fromMap(Map<dynamic, dynamic> json) {
     // Get raw data
-    Map<Object?, Object?> rawManufacturerData = json['manufacturer_data'] ?? <int, List<int>>{};
-    Map<Object?, Object?> rawServiceData = json['service_data'] ?? <int, List<int>>{};
-    List<Object?> rawServiceUuids = json['service_uuids'] ?? <String>[];
+    var rawManufacturerData = json['manufacturer_data'] ?? {};
+    var rawServiceData = json['service_data'] ?? {};
+    var rawServiceUuids = json['service_uuids'] ?? [];
 
     // Cast the data to the right type
     Map<int, List<int>> manufacturerData =
