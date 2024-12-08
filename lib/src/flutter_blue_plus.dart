@@ -619,8 +619,18 @@ class FlutterBluePlus {
 
       // log args
       if (logLevel == LogLevel.verbose) {
+        var logArgs = arguments;
+        if (arguments is Map) {
+          logArgs = arguments.map((key, value) {
+            if (value is Uint8List) {
+              value = _hexEncode(value);
+            }
+            return MapEntry(key, value);
+          });
+        }
+
         String func = '<$method>';
-        String args = arguments.toString();
+        String args = logArgs.toString();
         func = _logColor ? _black(func) : func;
         args = _logColor ? _magenta(args) : args;
         log("[FBP] $func args: $args");
