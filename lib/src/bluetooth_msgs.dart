@@ -452,6 +452,7 @@ class BmCharacteristicData {
   final bool success;
   final int errorCode;
   final String errorString;
+  final bool fromReadOperation;
 
 
   BmCharacteristicData({
@@ -463,6 +464,7 @@ class BmCharacteristicData {
     required this.success,
     required this.errorCode,
     required this.errorString,
+    required this.fromReadOperation,
   });
 
   factory BmCharacteristicData.fromMap(Map<dynamic, dynamic> json) {
@@ -475,6 +477,7 @@ class BmCharacteristicData {
       success: json['success'] != 0,
       errorCode: json['error_code'],
       errorString: json['error_string'],
+      fromReadOperation: json.containsKey('from_read_operation') && (json['from_read_operation'] != 0),
     );
   }
 }

@@ -1441,6 +1441,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"success":                     error == nil ? @(1) : @(0),
         @"error_string":                error ? [error localizedDescription] : @"success",
         @"error_code":                  error ? @(error.code) : @(0),
+        // TODO: How to determine this on iOS / macOS?
+        @"from_read_operation":         @(1),
     } mutableCopy];
 
     // remove if null

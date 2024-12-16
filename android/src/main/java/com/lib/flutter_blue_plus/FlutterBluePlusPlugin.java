@@ -2279,7 +2279,7 @@ public class FlutterBluePlusPlugin implements
         }
 
         // called for both notifications & reads
-        public void onCharacteristicReceived(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, byte[] value, int status)
+        public void onCharacteristicReceived(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, byte[] value, int status, boolean fromReadOperation)
         {
             // GATT Service?
             if (uuidStr(characteristic.getService().getUuid()) == "1800") {
@@ -2306,6 +2306,7 @@ public class FlutterBluePlusPlugin implements
             if (primaryService != null) {
                 response.put("primary_service_uuid", uuidStr(primaryService.getUuid()));
             }
+            response.put("from_read_operation", fromReadOperation ? 1 : 0);
 
             invokeMethodUIThread("OnCharacteristicReceived", response);
         }
@@ -2318,7 +2319,7 @@ public class FlutterBluePlusPlugin implements
             LogLevel level = LogLevel.DEBUG;
             log(level, "onCharacteristicChanged:");
             log(level, "  chr: " + uuidStr(characteristic.getUuid()));
-            onCharacteristicReceived(gatt, characteristic, value, BluetoothGatt.GATT_SUCCESS);
+            onCharacteristicReceived(gatt, characteristic, value, BluetoothGatt.GATT_SUCCESS, false);
         }
 
         @Override
@@ -2330,7 +2331,7 @@ public class FlutterBluePlusPlugin implements
             log(level, "onCharacteristicRead:");
             log(level, "  chr: " + uuidStr(characteristic.getUuid()));
             log(level, "  status: " + gattErrorString(status) + " (" + status + ")");
-            onCharacteristicReceived(gatt, characteristic, value, status);
+            onCharacteristicReceived(gatt, characteristic, value, status, true);
         }
 
         @Override
