@@ -124,7 +124,8 @@ class BluetoothCharacteristic {
           .where((p) => p.remoteId == request.remoteId)
           .where((p) => p.serviceUuid == request.serviceUuid)
           .where((p) => p.characteristicUuid == request.characteristicUuid)
-          .where((p) => p.primaryServiceUuid == request.primaryServiceUuid);
+          .where((p) => p.primaryServiceUuid == request.primaryServiceUuid)
+          .where((p) => p.fromReadOperation == true);
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmCharacteristicData> futureResponse = responseStream.first;
