@@ -38,7 +38,7 @@ class BluetoothDescriptor {
   ///   - when the device is disconnected it is cleared
   List<int> get lastValue {
     String key = "$serviceUuid:$characteristicUuid:$descriptorUuid";
-    return FlutterBluePlus._lastDescs[remoteId]?[key] ?? [];
+    return FlutterBluePlus._lastDescs[remoteId]?[key]?.toList() ?? [];
   }
 
   /// this stream emits values:
