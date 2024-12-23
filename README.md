@@ -72,9 +72,7 @@ It is maintained by @chan150.
 
 ## Linus & Web Support
 
-[Linux](https://github.com/chipweinberger/flutter_blue_plus/issues/983) & [Web](https://github.com/chipweinberger/flutter_blue_plus/issues/769) support are not planned for FlutterBluePlus.
-
-If you would like to implement `flutter_blue_plus_linux`, or `flutter_blue_plus_web`, please do! 
+You can use [this FlutterBluePlus fork](https://github.com/tnc1997/flutter-blue-plus) maintained by @tnc1997.
 
 ## ⭐ Stars ⭐
 
