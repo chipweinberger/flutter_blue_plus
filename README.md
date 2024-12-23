@@ -72,7 +72,7 @@ It is maintained by @chan150.
 
 ## Linus & Web Support
 
-You can use [this FlutterBluePlus fork](https://github.com/tnc1997/flutter-blue-plus) maintained by @tnc1997.
+You can use [this](https://github.com/tnc1997/flutter-blue-plus) FlutterBluePlus fork maintained by @tnc1997.
 
 ## ⭐ Stars ⭐
 
