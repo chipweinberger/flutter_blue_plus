@@ -438,7 +438,7 @@ Get devices connected to the system by *any* app.
 
 ```dart
 // `withServices` required on iOS, ignored on android
-List<Guid> withServices = [Guid("180F")]; 
+List<Guid> withServices = [Guid("180F")]; // e.g. Battery Service
 List<BluetoothDevice> devs = await FlutterBluePlus.systemDevices(withServices);
 for (var d in devs) {
     await d.connect(); // Must connect *our* app to the device
