@@ -1,9 +1,9 @@
 #
 # To learn more about a Podspec see http://guides.cocoapods.org/syntax/podspec.html.
-# Run `pod lib lint flutter_blue_plus.podspec` to validate before publishing.
+# Run `pod lib lint flutter_blue_plus_ios.podspec` to validate before publishing.
 #
 Pod::Spec.new do |s|
-  s.name             = 'flutter_blue_plus'
+  s.name             = 'flutter_blue_plus_ios'
   s.version          = '0.0.1'
   s.summary          = 'Flutter plugin for connecting and communicationg with Bluetooth Low Energy devices, on Android and iOS'
   s.description      = 'Flutter plugin for connecting and communicationg with Bluetooth Low Energy devices, on Android and iOS'
