@@ -1,6 +1,6 @@
 name: flutter_blue_plus_ios
 description: iOS implementation of the flutter_blue_plus plugin.
-version: 2.0.3
+version: 2.0.4
 homepage: https://github.com/tnc1997/flutter-blue-plus
 
 environment:

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org) for commit guidelines.
 
+## 2.0.7 (2025-01-01)
+
+### Chores
+
+* applying package updates
+
 ## 2.0.6 (2024-11-23)
 
 ### Documentation

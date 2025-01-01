@@ -1,6 +1,6 @@
 name: flutter_blue_plus_macos
 description: macOS implementation of the flutter_blue_plus plugin.
-version: 2.0.4
+version: 2.0.5
 homepage: https://github.com/tnc1997/flutter-blue-plus
 
 environment:

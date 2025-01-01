@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org) for commit guidelines.
 
+## 2.0.5 (2025-01-01)
+
+### Build System
+
+* fix ios and macos podspec files and names ([d45a11e](https://github.com/tnc1997/flutter-blue-plus/commit/d45a11e32d9ca2c99a1b7df9990d7276521b3720))
+
 ## 2.0.4 (2024-11-23)
 
 ### Code Refactoring
