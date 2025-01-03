@@ -1,7 +1,7 @@
 name: flutter_blue_plus_web
 description: Web implementation of the flutter_blue_plus plugin.
-version: 2.0.1
-homepage: https://github.com/tnc1997/flutter-blue-plus
+version: 1.0.0
+homepage: https://github.com/chipweinberger/flutter_blue_plus
 
 environment:
   sdk: '>=3.3.0 <4.0.0'
@@ -10,11 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_blue_plus_platform_interface:
-    git:
-      url: https://github.com/tnc1997/flutter-blue-plus.git
-      path: packages/flutter_blue_plus_platform_interface
-      ref: flutter_blue_plus_platform_interface-v2.0.1
+  flutter_blue_plus_platform_interface: ^1.0.0
   flutter_web_plugins:
     sdk: flutter
   web: '>=0.5.0 <2.0.0'
