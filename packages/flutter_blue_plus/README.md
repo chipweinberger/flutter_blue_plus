@@ -56,7 +56,7 @@ If you are new to Bluetooth, you should start by reading BLE tutorials.
 
 ## Cross-Platform Bluetooth Low Energy
 
-FlutterBluePlus supports nearly every feature on all supported platforms: iOS, macOS, Android.
+FlutterBluePlus supports nearly every feature on all supported platforms: iOS, macOS, Android, Linux, Web.
 
 ## No Dependencies
 
@@ -69,10 +69,6 @@ This makes FlutterBluePlus very stable, and easy to maintain.
 Use [flutter_blue_plus_windows](https://pub.dev/packages/flutter_blue_plus_windows) if you need Windows support.
 
 It is maintained by @chan150. Eventually the goal is to merge. 
-
-## Linus & Web Support
-
-You can use [this](https://github.com/tnc1997/flutter-blue-plus) FlutterBluePlus fork maintained by @tnc1997.
 
 ## ⭐ Stars ⭐
 
