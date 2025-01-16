@@ -10,12 +10,14 @@ class BluetoothCharacteristic {
   final DeviceIdentifier remoteId;
   final Guid serviceUuid;
   final Guid characteristicUuid;
+  final int characteristicId;
   final Guid? primaryServiceUuid;
 
   BluetoothCharacteristic({
     required this.remoteId,
     required this.serviceUuid,
     required this.characteristicUuid,
+    required this.characteristicId,
     this.primaryServiceUuid,
   });
 
@@ -23,6 +25,7 @@ class BluetoothCharacteristic {
       : remoteId = p.remoteId,
         serviceUuid = p.serviceUuid,
         characteristicUuid = p.characteristicUuid,
+        characteristicId = p.characteristicId,
         primaryServiceUuid = p.primaryServiceUuid;
 
   /// convenience accessor
@@ -47,7 +50,7 @@ class BluetoothCharacteristic {
   ///   - anytime a notification arrives (if subscribed)
   ///   - when the device is disconnected it is cleared
   List<int> get lastValue {
-    String key = "$serviceUuid:$characteristicUuid";
+    String key = "$serviceUuid:$characteristicUuid($characteristicId)";
     return FlutterBluePlus._lastChrs[remoteId]?[key] ?? [];
   }
 
@@ -56,14 +59,18 @@ class BluetoothCharacteristic {
   ///   - anytime `write()` is called
   ///   - anytime a notification arrives (if subscribed)
   ///   - and when first listened to, it re-emits the last value for convenience
-  Stream<List<int>> get lastValueStream => _mergeStreams([FlutterBluePlusPlatform.instance.onCharacteristicReceived, FlutterBluePlusPlatform.instance.onCharacteristicWritten])
-      .where((p) => p.remoteId == remoteId)
-      .where((p) => p.serviceUuid == serviceUuid)
-      .where((p) => p.characteristicUuid == characteristicUuid)
-      .where((p) => p.primaryServiceUuid == primaryServiceUuid)
-      .where((p) => p.success == true)
-      .map((c) => c.value)
-      .newStreamWithInitialValue(lastValue);
+  Stream<List<int>> get lastValueStream => _mergeStreams([
+        FlutterBluePlusPlatform.instance.onCharacteristicReceived,
+        FlutterBluePlusPlatform.instance.onCharacteristicWritten
+      ])
+          .where((p) => p.remoteId == remoteId)
+          .where((p) => p.serviceUuid == serviceUuid)
+          .where((p) => p.characteristicUuid == characteristicUuid)
+          .where((p) => p.characteristicId == characteristicId)
+          .where((p) => p.primaryServiceUuid == primaryServiceUuid)
+          .where((p) => p.success == true)
+          .map((c) => c.value)
+          .newStreamWithInitialValue(lastValue);
 
   /// this stream emits values:
   ///   - anytime `read()` is called
@@ -72,6 +79,7 @@ class BluetoothCharacteristic {
       .where((p) => p.remoteId == remoteId)
       .where((p) => p.serviceUuid == serviceUuid)
       .where((p) => p.characteristicUuid == characteristicUuid)
+      .where((p) => p.characteristicId == characteristicId)
       .where((p) => p.primaryServiceUuid == primaryServiceUuid)
       .where((p) => p.success == true)
       .map((c) => c.value);
@@ -107,6 +115,7 @@ class BluetoothCharacteristic {
       var request = BmReadCharacteristicRequest(
         remoteId: remoteId,
         characteristicUuid: characteristicUuid,
+        characteristicId: characteristicId,
         serviceUuid: serviceUuid,
         primaryServiceUuid: primaryServiceUuid,
       );
@@ -115,6 +124,7 @@ class BluetoothCharacteristic {
           .where((p) => p.remoteId == request.remoteId)
           .where((p) => p.serviceUuid == request.serviceUuid)
           .where((p) => p.characteristicUuid == request.characteristicUuid)
+          .where((p) => p.characteristicId == request.characteristicId)
           .where((p) => p.primaryServiceUuid == request.primaryServiceUuid);
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
@@ -176,6 +186,7 @@ class BluetoothCharacteristic {
       var request = BmWriteCharacteristicRequest(
         remoteId: remoteId,
         characteristicUuid: characteristicUuid,
+        characteristicId: characteristicId,
         serviceUuid: serviceUuid,
         writeType: writeType,
         allowLongWrite: allowLongWrite,
@@ -187,6 +198,7 @@ class BluetoothCharacteristic {
           .where((p) => p.remoteId == request.remoteId)
           .where((p) => p.serviceUuid == request.serviceUuid)
           .where((p) => p.characteristicUuid == request.characteristicUuid)
+          .where((p) => p.characteristicId == request.characteristicId)
           .where((p) => p.primaryServiceUuid == request.primaryServiceUuid);
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
@@ -239,6 +251,7 @@ class BluetoothCharacteristic {
         remoteId: remoteId,
         serviceUuid: serviceUuid,
         characteristicUuid: characteristicUuid,
+        characteristicId: characteristicId,
         forceIndications: forceIndications,
         enable: notify,
         primaryServiceUuid: primaryServiceUuid,
@@ -288,6 +301,7 @@ class BluetoothCharacteristic {
         'remoteId: $remoteId, '
         'serviceUuid: $serviceUuid, '
         'characteristicUuid: $characteristicUuid, '
+        'characteristicId: $characteristicId, '
         'primaryServiceUuid: $primaryServiceUuid, '
         'descriptors: $descriptors, '
         'properties: $properties, '
@@ -319,15 +333,15 @@ class CharacteristicProperties {
 
   const CharacteristicProperties(
       {this.broadcast = false,
-        this.read = false,
-        this.writeWithoutResponse = false,
-        this.write = false,
-        this.notify = false,
-        this.indicate = false,
-        this.authenticatedSignedWrites = false,
-        this.extendedProperties = false,
-        this.notifyEncryptionRequired = false,
-        this.indicateEncryptionRequired = false});
+      this.read = false,
+      this.writeWithoutResponse = false,
+      this.write = false,
+      this.notify = false,
+      this.indicate = false,
+      this.authenticatedSignedWrites = false,
+      this.extendedProperties = false,
+      this.notifyEncryptionRequired = false,
+      this.indicateEncryptionRequired = false});
 
   CharacteristicProperties.fromProto(BmCharacteristicProperties p)
       : broadcast = p.broadcast,

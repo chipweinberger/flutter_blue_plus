@@ -2,58 +2,47 @@ part of flutter_blue_plus;
 
 class BluetoothEvents {
   Stream<OnConnectionStateChangedEvent> get onConnectionStateChanged {
-    return FlutterBluePlusPlatform.instance.onConnectionStateChanged
-        .map((p) => OnConnectionStateChangedEvent(p));
+    return FlutterBluePlusPlatform.instance.onConnectionStateChanged.map((p) => OnConnectionStateChangedEvent(p));
   }
 
   Stream<OnMtuChangedEvent> get onMtuChanged {
-    return FlutterBluePlusPlatform.instance.onMtuChanged
-        .map((p) => OnMtuChangedEvent(p));
+    return FlutterBluePlusPlatform.instance.onMtuChanged.map((p) => OnMtuChangedEvent(p));
   }
 
   Stream<OnReadRssiEvent> get onReadRssi {
-    return FlutterBluePlusPlatform.instance.onReadRssi
-        .map((p) => OnReadRssiEvent(p));
+    return FlutterBluePlusPlatform.instance.onReadRssi.map((p) => OnReadRssiEvent(p));
   }
 
   Stream<OnServicesResetEvent> get onServicesReset {
-    return FlutterBluePlusPlatform.instance.onServicesReset
-        .map((p) => OnServicesResetEvent(p));
+    return FlutterBluePlusPlatform.instance.onServicesReset.map((p) => OnServicesResetEvent(p));
   }
 
   Stream<OnDiscoveredServicesEvent> get onDiscoveredServices {
-    return FlutterBluePlusPlatform.instance.onDiscoveredServices
-        .map((p) => OnDiscoveredServicesEvent(p));
+    return FlutterBluePlusPlatform.instance.onDiscoveredServices.map((p) => OnDiscoveredServicesEvent(p));
   }
 
   Stream<OnCharacteristicReceivedEvent> get onCharacteristicReceived {
-    return FlutterBluePlusPlatform.instance.onCharacteristicReceived
-        .map((p) => OnCharacteristicReceivedEvent(p));
+    return FlutterBluePlusPlatform.instance.onCharacteristicReceived.map((p) => OnCharacteristicReceivedEvent(p));
   }
 
   Stream<OnCharacteristicWrittenEvent> get onCharacteristicWritten {
-    return FlutterBluePlusPlatform.instance.onCharacteristicWritten
-        .map((p) => OnCharacteristicWrittenEvent(p));
+    return FlutterBluePlusPlatform.instance.onCharacteristicWritten.map((p) => OnCharacteristicWrittenEvent(p));
   }
 
   Stream<OnDescriptorReadEvent> get onDescriptorRead {
-    return FlutterBluePlusPlatform.instance.onDescriptorRead
-        .map((p) => OnDescriptorReadEvent(p));
+    return FlutterBluePlusPlatform.instance.onDescriptorRead.map((p) => OnDescriptorReadEvent(p));
   }
 
   Stream<OnDescriptorWrittenEvent> get onDescriptorWritten {
-    return FlutterBluePlusPlatform.instance.onDescriptorWritten
-        .map((p) => OnDescriptorWrittenEvent(p));
+    return FlutterBluePlusPlatform.instance.onDescriptorWritten.map((p) => OnDescriptorWrittenEvent(p));
   }
 
   Stream<OnNameChangedEvent> get onNameChanged {
-    return FlutterBluePlusPlatform.instance.onNameChanged
-        .map((p) => OnNameChangedEvent(p));
+    return FlutterBluePlusPlatform.instance.onNameChanged.map((p) => OnNameChangedEvent(p));
   }
 
   Stream<OnBondStateChangedEvent> get onBondStateChanged {
-    return FlutterBluePlusPlatform.instance.onBondStateChanged
-        .map((p) => OnBondStateChangedEvent(p));
+    return FlutterBluePlusPlatform.instance.onBondStateChanged.map((p) => OnBondStateChangedEvent(p));
   }
 }
 
@@ -152,6 +141,7 @@ class OnCharacteristicReceivedEvent {
   BluetoothCharacteristic get characteristic => BluetoothCharacteristic(
       remoteId: _response.remoteId,
       characteristicUuid: _response.characteristicUuid,
+      characteristicId: 0,
       serviceUuid: _response.serviceUuid,
       primaryServiceUuid: _response.primaryServiceUuid);
 
@@ -175,6 +165,7 @@ class OnCharacteristicWrittenEvent {
   BluetoothCharacteristic get characteristic => BluetoothCharacteristic(
       remoteId: _response.remoteId,
       characteristicUuid: _response.characteristicUuid,
+      characteristicId: 0,
       serviceUuid: _response.serviceUuid,
       primaryServiceUuid: _response.primaryServiceUuid);
 

@@ -2299,6 +2299,7 @@ public class FlutterBluePlusPlugin implements
             response.put("remote_id", gatt.getDevice().getAddress());
             response.put("service_uuid", uuidStr(characteristic.getService().getUuid()));
             response.put("characteristic_uuid", uuidStr(characteristic.getUuid()));
+            response.put("characteristic_id", 0);
             response.put("value", bytesToHex(value));
             response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
             response.put("error_code", status);
@@ -2639,6 +2640,7 @@ public class FlutterBluePlusPlugin implements
         return map;
     }
 
+    static int characteristicCounter = 1;
     HashMap<String, Object> bmBluetoothCharacteristic(BluetoothDevice device, BluetoothGattCharacteristic characteristic, BluetoothGatt gatt) {
 
         List<Object> descriptors = new ArrayList<Object>();
@@ -2654,6 +2656,7 @@ public class FlutterBluePlusPlugin implements
         map.put("remote_id", device.getAddress());
         map.put("service_uuid", uuidStr(characteristic.getService().getUuid()));
         map.put("characteristic_uuid", uuidStr(characteristic.getUuid()));
+        map.put("characteristic_id", Integer.toString(characteristicCounter++));
         map.put("descriptors", descriptors);
         map.put("properties", bmCharacteristicProperties(characteristic.getProperties()));
         if (primaryService != null) {

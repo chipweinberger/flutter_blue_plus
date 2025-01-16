@@ -45,7 +45,8 @@ class BluetoothDescriptor {
   ///   - anytime `read()` is called
   ///   - anytime `write()` is called
   ///   - and when first listened to, it re-emits the last value for convenience
-  Stream<List<int>> get lastValueStream => _mergeStreams([FlutterBluePlusPlatform.instance.onDescriptorRead, FlutterBluePlusPlatform.instance.onDescriptorWritten])
+  Stream<List<int>> get lastValueStream => _mergeStreams(
+          [FlutterBluePlusPlatform.instance.onDescriptorRead, FlutterBluePlusPlatform.instance.onDescriptorWritten])
       .where((p) => p.remoteId == remoteId)
       .where((p) => p.characteristicUuid == characteristicUuid)
       .where((p) => p.serviceUuid == serviceUuid)
@@ -86,6 +87,7 @@ class BluetoothDescriptor {
         remoteId: remoteId,
         serviceUuid: serviceUuid,
         characteristicUuid: characteristicUuid,
+        characteristicId: 0,
         descriptorUuid: descriptorUuid,
         primaryServiceUuid: primaryServiceUuid,
       );
@@ -139,6 +141,7 @@ class BluetoothDescriptor {
         remoteId: remoteId,
         serviceUuid: serviceUuid,
         characteristicUuid: characteristicUuid,
+        characteristicId: 0,
         descriptorUuid: descriptorUuid,
         value: value,
         primaryServiceUuid: primaryServiceUuid,

@@ -88,7 +88,8 @@ class _CharacteristicTileState extends State<CharacteristicTile> {
   }
 
   Widget buildUuid(BuildContext context) {
-    String uuid = '0x${widget.characteristic.uuid.str.toUpperCase()}';
+    String uuid =
+        '0x${widget.characteristic.uuid.str.toUpperCase()} (${widget.characteristic.characteristicId.toString()})';
     return Text(uuid, style: TextStyle(fontSize: 13));
   }
 
