@@ -207,7 +207,7 @@ abstract class FlutterBluePlusPlatform extends PlatformInterface {
     throw UnimplementedError();
   }
 
-  Future<void> setNotifyValue(
+  Future<bool> setNotifyValue(
     BmSetNotifyValueRequest request,
   ) {
     throw UnimplementedError();
