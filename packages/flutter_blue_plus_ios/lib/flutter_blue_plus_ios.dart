@@ -206,10 +206,21 @@ class FlutterBluePlusIos extends FlutterBluePlusPlatform {
   Future<void> setNotifyValue(
     BmSetNotifyValueRequest request,
   ) async {
-    await _invokeMethod(
+    // Notifications & Indications are configured by writing to the Client Characteristic Configuration Descriptor (CCCD)
+    final response = _onDescriptorWrittenController.stream.where((p) => p.remoteId == request.remoteId && p.serviceUuid == request.serviceUuid && p.characteristicUuid == request.characteristicUuid && p.descriptorUuid == Guid('00002902-0000-1000-8000-00805f9b34fb') && p.primaryServiceUuid == request.primaryServiceUuid).first;
+
+    final hasCCCD = await _invokeMethod<bool>(
       'setNotifyValue',
       request.toMap(),
     );
+
+    if (hasCCCD == true) {
+      await response.timeout(
+        Duration(
+          seconds: 15,
+        ),
+      );
+    }
   }
 
   @override
