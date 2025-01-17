@@ -91,6 +91,10 @@ flutter run
 <img alt="FlutterBlue" src="https://github.com/boskokg/flutter_blue_plus/blob/master/site/example.png?raw=true" />
 </p>
 
+## Versioning
+
+FBP use 1.X.X style versioning. 
+
 ## Usage
 
 ### 🔥 Error Handling 🔥
