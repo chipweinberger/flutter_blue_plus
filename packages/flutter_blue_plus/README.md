@@ -95,7 +95,7 @@ flutter run
 
 FBP use 1.X.X style versioning. 
 
-For bigger, riskier, or breaking changes we'll bump the minor version. e.g. `1.34.X` -> `1.35.0`.
+For bigger, riskier, or minor breaking changes we'll bump the minor version. e.g. `1.34.X` -> `1.35.0`.
 
 Large breaking changes are not expected at this point. The API is stable.
 
