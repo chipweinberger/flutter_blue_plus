@@ -95,6 +95,8 @@ flutter run
 
 FBP use 1.X.X style versioning. 
 
+Why? With `1.28.5` -> `1.32.4`, it's clear you jumping 4 versions. With `1.28.5` -> `2.0.0` it's unclear.
+
 ## Usage
 
 ### 🔥 Error Handling 🔥
