@@ -338,6 +338,7 @@ class BmBluetoothDescriptor {
   final DeviceIdentifier remoteId;
   final Guid serviceUuid;
   final Guid characteristicUuid;
+  final int characteristicId;
   final Guid descriptorUuid;
   final Guid? primaryServiceUuid;
 
@@ -345,6 +346,7 @@ class BmBluetoothDescriptor {
     required this.remoteId,
     required this.serviceUuid,
     required this.characteristicUuid,
+    required this.characteristicId,
     required this.descriptorUuid,
     required this.primaryServiceUuid,
   });
@@ -354,6 +356,7 @@ class BmBluetoothDescriptor {
       remoteId: DeviceIdentifier(json['remote_id']),
       serviceUuid: Guid(json['service_uuid']),
       characteristicUuid: Guid(json['characteristic_uuid']),
+      characteristicUuid: Int.parse(json['characteristic_id']),
       descriptorUuid: Guid(json['descriptor_uuid']),
       primaryServiceUuid: Guid.parse(json['primary_service_uuid']),
     );
