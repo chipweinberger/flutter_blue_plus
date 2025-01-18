@@ -33,14 +33,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.19.0"
-  convert:
-    dependency: transitive
-    description:
-      name: convert
-      sha256: b30acd5944035672bc15c6b7a8b47d773e41e2f17de064350988c5d02adb1c68
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.1.2"
   dbus:
     dependency: transitive
     description:
@@ -68,42 +60,59 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "1.0.0"
+    version: "1.35.0"
   flutter_blue_plus_android:
     dependency: transitive
     description:
-      path: "../../flutter_blue_plus_android"
-      relative: true
-    source: path
-    version: "1.0.0"
+      name: flutter_blue_plus_android
+      sha256: c6ad39d039bc638d47138c6ca957b6f58e60c62528d6e2ac2368f659995b2932
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.35.0"
   flutter_blue_plus_ios:
     dependency: transitive
     description:
       path: "../../flutter_blue_plus_ios"
       relative: true
     source: path
-    version: "1.0.0"
+    version: "1.35.0"
   flutter_blue_plus_linux:
     dependency: transitive
     description:
-      path: "../../flutter_blue_plus_linux"
-      relative: true
-    source: path
+      name: flutter_blue_plus_linux
+      sha256: d36a9890498dc0e49ce2d5b6625cf94fa6dc6257fa1a6e8b2010bfab4e381b33
+      url: "https://pub.dev"
+    source: hosted
     version: "1.0.0"
   flutter_blue_plus_macos:
     dependency: transitive
     description:
-      path: "../../flutter_blue_plus_macos"
-      relative: true
-    source: path
-    version: "1.0.0"
+      name: flutter_blue_plus_macos
+      sha256: "8e79496a422f0ccab890b6f3d22e1b05540e42e5d35e1f5047b8a82147fa346b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.35.0"
   flutter_blue_plus_platform_interface:
     dependency: transitive
     description:
-      path: "../../flutter_blue_plus_platform_interface"
-      relative: true
-    source: path
+      name: flutter_blue_plus_platform_interface
+      sha256: e6231cd38b110fcbd910bb89c276fc2668492838fd7d53e1afce3c79c9c1ba38
+      url: "https://pub.dev"
+    source: hosted
     version: "1.0.0"
+  flutter_blue_plus_web:
+    dependency: transitive
+    description:
+      name: flutter_blue_plus_web
+      sha256: "57ce85830f30cac9b51d93e7114ccde4d7ec0e12e84eb04bde12b2857e045f9d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
+  flutter_web_plugins:
+    dependency: transitive
+    description: flutter
+    source: sdk
+    version: "0.0.0"
   material_color_utilities:
     dependency: transitive
     description:
@@ -149,14 +158,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  typed_data:
-    dependency: transitive
-    description:
-      name: typed_data
-      sha256: f9049c039ebfeb4cf7a7104a675823cd72dba8297f264b6637062516699fa006
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.4.0"
   vector_math:
     dependency: transitive
     description:
@@ -165,6 +166,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.4"
+  web:
+    dependency: transitive
+    description:
+      name: web
+      sha256: cd3543bd5798f6ad290ea73d210f423502e71900302dde696f8bff84bf89a1cb
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
   xml:
     dependency: transitive
     description:
@@ -174,5 +183,5 @@ packages:
     source: hosted
     version: "6.5.0"
 sdks:
-  dart: ">=3.5.0 <4.0.0"
-  flutter: ">=3.0.0"
+  dart: ">=3.4.0 <4.0.0"
+  flutter: ">=3.19.0"

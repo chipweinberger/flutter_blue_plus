@@ -11,7 +11,8 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_blue_plus_android: 1.35.0
-  flutter_blue_plus_ios: 1.35.0
+  flutter_blue_plus_ios:
+    path: ../flutter_blue_plus_ios
   flutter_blue_plus_linux: 1.0.0
   flutter_blue_plus_macos: 1.35.0
   flutter_blue_plus_platform_interface: 1.0.0
