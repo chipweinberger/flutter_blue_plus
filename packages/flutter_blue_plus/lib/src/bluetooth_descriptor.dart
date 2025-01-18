@@ -90,7 +90,7 @@ class BluetoothDescriptor {
         remoteId: remoteId,
         serviceUuid: serviceUuid,
         characteristicUuid: characteristicUuid,
-        characteristicId: characteristicId, 
+        characteristicId: characteristicId,
         descriptorUuid: descriptorUuid,
         primaryServiceUuid: primaryServiceUuid,
       );
@@ -155,7 +155,7 @@ class BluetoothDescriptor {
           .where((p) => p.remoteId == request.remoteId)
           .where((p) => p.serviceUuid == request.serviceUuid)
           .where((p) => p.characteristicUuid == request.characteristicUuid)
-          .where((p) => p.characteristicId == request.characteristicId
+          .where((p) => p.characteristicId == request.characteristicId)
           .where((p) => p.descriptorUuid == request.descriptorUuid)
           .where((p) => p.primaryServiceUuid == request.primaryServiceUuid);
 

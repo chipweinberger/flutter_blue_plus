@@ -66,7 +66,6 @@ class BluetoothCharacteristic {
           .where((p) => p.remoteId == remoteId)
           .where((p) => p.serviceUuid == serviceUuid)
           .where((p) => p.characteristicUuid == characteristicUuid)
-          .where((p) => p.characteristicId == characteristicId)
           .where((p) => p.primaryServiceUuid == primaryServiceUuid)
           .where((p) => p.success == true)
           .map((c) => c.value)
@@ -79,7 +78,6 @@ class BluetoothCharacteristic {
       .where((p) => p.remoteId == remoteId)
       .where((p) => p.serviceUuid == serviceUuid)
       .where((p) => p.characteristicUuid == characteristicUuid)
-      .where((p) => p.characteristicId == characteristicId)
       .where((p) => p.primaryServiceUuid == primaryServiceUuid)
       .where((p) => p.success == true)
       .map((c) => c.value);
@@ -124,7 +122,6 @@ class BluetoothCharacteristic {
           .where((p) => p.remoteId == request.remoteId)
           .where((p) => p.serviceUuid == request.serviceUuid)
           .where((p) => p.characteristicUuid == request.characteristicUuid)
-          .where((p) => p.characteristicId == request.characteristicId)
           .where((p) => p.primaryServiceUuid == request.primaryServiceUuid);
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
@@ -198,7 +195,6 @@ class BluetoothCharacteristic {
           .where((p) => p.remoteId == request.remoteId)
           .where((p) => p.serviceUuid == request.serviceUuid)
           .where((p) => p.characteristicUuid == request.characteristicUuid)
-          .where((p) => p.characteristicId == request.characteristicId)
           .where((p) => p.primaryServiceUuid == request.primaryServiceUuid);
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response

@@ -92,7 +92,6 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
                         characteristicUuid: Guid.fromBytes(
                           characteristic.uuid.value,
                         ),
-                        characteristicId: 0,
                         primaryServiceUuid: null,
                         value: characteristic.value,
                         success: true,
@@ -341,7 +340,7 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
                       characteristicUuid: Guid.fromBytes(
                         characteristic.uuid.value,
                       ),
-                      characteristicId: characteristicCounter++,
+                      characteristicId: characteristicCounter,
                       primaryServiceUuid: null,
                       descriptors: characteristic.descriptors.map(
                         (descriptor) {
@@ -353,6 +352,7 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
                             characteristicUuid: Guid.fromBytes(
                               characteristic.uuid.value,
                             ),
+                            characteristicId: characteristicCounter++,
                             descriptorUuid: Guid.fromBytes(
                               descriptor.uuid.value,
                             ),
@@ -547,7 +547,6 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
           characteristicUuid: Guid.fromBytes(
             characteristic.uuid.value,
           ),
-          characteristicId: 0,
           primaryServiceUuid: null,
           value: value,
           success: true,
@@ -561,7 +560,6 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
           remoteId: request.remoteId,
           serviceUuid: request.serviceUuid,
           characteristicUuid: request.characteristicUuid,
-          characteristicId: 0,
           primaryServiceUuid: null,
           value: [],
           success: false,
@@ -838,7 +836,6 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
           characteristicUuid: Guid.fromBytes(
             characteristic.uuid.value,
           ),
-          characteristicId: 0,
           primaryServiceUuid: null,
           value: request.value,
           success: true,
@@ -852,7 +849,6 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
           remoteId: request.remoteId,
           serviceUuid: request.serviceUuid,
           characteristicUuid: request.characteristicUuid,
-          characteristicId: request.characteristicId,
           primaryServiceUuid: null,
           value: request.value,
           success: false,

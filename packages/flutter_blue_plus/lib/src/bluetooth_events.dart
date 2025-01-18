@@ -141,7 +141,7 @@ class OnCharacteristicReceivedEvent {
   BluetoothCharacteristic get characteristic => BluetoothCharacteristic(
       remoteId: _response.remoteId,
       characteristicUuid: _response.characteristicUuid,
-      characteristicId: _response.characteristicId,
+      characteristicId: 0,
       serviceUuid: _response.serviceUuid,
       primaryServiceUuid: _response.primaryServiceUuid);
 
@@ -165,7 +165,7 @@ class OnCharacteristicWrittenEvent {
   BluetoothCharacteristic get characteristic => BluetoothCharacteristic(
       remoteId: _response.remoteId,
       characteristicUuid: _response.characteristicUuid,
-      characteristicId: _response.characteristicId,
+      characteristicId: 0,
       serviceUuid: _response.serviceUuid,
       primaryServiceUuid: _response.primaryServiceUuid);
 

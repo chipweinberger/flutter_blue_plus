@@ -319,7 +319,12 @@ class BmBluetoothCharacteristic {
     // convert descriptors
     List<BmBluetoothDescriptor> descs = [];
     for (var v in json['descriptors']) {
-      descs.add(BmBluetoothDescriptor.fromMap(v));
+      final Map<dynamic, dynamic> bv = {};
+      for (var key in v.keys) {
+        bv[key] = v[key];
+        bv['characteristic_id'] = json['characteristic_id'];
+      }
+      descs.add(BmBluetoothDescriptor.fromMap(bv));
     }
 
     return BmBluetoothCharacteristic(
@@ -356,7 +361,7 @@ class BmBluetoothDescriptor {
       remoteId: DeviceIdentifier(json['remote_id']),
       serviceUuid: Guid(json['service_uuid']),
       characteristicUuid: Guid(json['characteristic_uuid']),
-      characteristicUuid: Int.parse(json['characteristic_id']),
+      characteristicId: int.parse(json['characteristic_id']),
       descriptorUuid: Guid(json['descriptor_uuid']),
       primaryServiceUuid: Guid.parse(json['primary_service_uuid']),
     );
@@ -471,7 +476,6 @@ class BmCharacteristicData {
   final DeviceIdentifier remoteId;
   final Guid serviceUuid;
   final Guid characteristicUuid;
-  final int characteristicId;
   final Guid? primaryServiceUuid;
   final List<int> value;
   final bool success;
@@ -482,7 +486,6 @@ class BmCharacteristicData {
     required this.remoteId,
     required this.serviceUuid,
     required this.characteristicUuid,
-    required this.characteristicId,
     required this.primaryServiceUuid,
     required this.value,
     required this.success,
@@ -495,7 +498,6 @@ class BmCharacteristicData {
       remoteId: DeviceIdentifier(json['remote_id']),
       serviceUuid: Guid(json['service_uuid']),
       characteristicUuid: Guid(json['characteristic_uuid']),
-      characteristicId: int.parse(json['characteristic_id']),
       primaryServiceUuid: Guid.parse(json['primary_service_uuid']),
       value: _hexDecode(json['value']),
       success: json['success'] != 0,
@@ -566,7 +568,7 @@ class BmWriteCharacteristicRequest {
     data['remote_id'] = remoteId.str;
     data['service_uuid'] = serviceUuid.str;
     data['characteristic_uuid'] = characteristicUuid.str;
-    data['characteristic_id'] = characteristicUuid.toString();
+    data['characteristic_id'] = characteristicId.toString();
     data['primary_service_uuid'] = primaryServiceUuid?.str;
     data['write_type'] = writeType.index;
     data['allow_long_write'] = allowLongWrite ? 1 : 0;
