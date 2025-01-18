@@ -2653,7 +2653,7 @@ public class FlutterBluePlusPlugin implements
         return map;
     }
 
-    static int characteristicCounter = 1;
+    static int characteristicCounter = 0;
     HashMap<String, Object> bmBluetoothCharacteristic(BluetoothDevice device, BluetoothGattCharacteristic characteristic, BluetoothGatt gatt) {
 
         List<Object> descriptors = new ArrayList<Object>();
