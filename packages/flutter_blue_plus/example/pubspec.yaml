@@ -18,8 +18,16 @@ dependencies:
     path: ../
 
 dependency_overrides:
+  flutter_blue_plus:
+    path: ../
+  flutter_blue_plus_android:
+    path: ../../flutter_blue_plus_android
   flutter_blue_plus_darwin:
     path: ../../flutter_blue_plus_darwin
+  flutter_blue_plus_linux:
+    path: ../../flutter_blue_plus_linux
+  flutter_blue_plus_web:
+    path: ../../flutter_blue_plus_web
 
 flutter:
   uses-material-design: true
