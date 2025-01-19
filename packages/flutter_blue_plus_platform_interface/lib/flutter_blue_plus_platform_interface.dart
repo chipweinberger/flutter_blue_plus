@@ -1,5 +1,3 @@
-import 'package:plugin_platform_interface/plugin_platform_interface.dart';
-
 import 'src/bluetooth_msgs.dart';
 
 export 'src/bluetooth_msgs.dart';
@@ -8,11 +6,7 @@ export 'src/guid.dart';
 export 'src/log_level.dart';
 
 /// The interface that implementations of flutter_blue_plus must implement.
-abstract class FlutterBluePlusPlatform extends PlatformInterface {
-  static final _token = Object();
-
-  FlutterBluePlusPlatform() : super(token: _token);
-
+abstract base class FlutterBluePlusPlatform {
   static FlutterBluePlusPlatform? _instance;
 
   /// The default instance of [FlutterBluePlusPlatform] to use. Throws an [UnsupportedError] if flutter_blue_plus is unsupported on this platform.
@@ -32,8 +26,6 @@ abstract class FlutterBluePlusPlatform extends PlatformInterface {
   static set instance(
     FlutterBluePlusPlatform instance,
   ) {
-    PlatformInterface.verify(instance, _token);
-
     _instance = instance;
   }
 
