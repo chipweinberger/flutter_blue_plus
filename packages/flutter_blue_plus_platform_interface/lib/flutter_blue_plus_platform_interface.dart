@@ -30,226 +30,253 @@ abstract base class FlutterBluePlusPlatform {
   }
 
   Stream<BmBluetoothAdapterState> get onAdapterStateChanged {
-    throw UnimplementedError();
+    return Stream.empty();
   }
 
   Stream<BmBondStateResponse> get onBondStateChanged {
-    throw UnimplementedError();
+    return Stream.empty();
   }
 
   Stream<BmCharacteristicData> get onCharacteristicReceived {
-    throw UnimplementedError();
+    return Stream.empty();
   }
 
   Stream<BmCharacteristicData> get onCharacteristicWritten {
-    throw UnimplementedError();
+    return Stream.empty();
   }
 
   Stream<BmConnectionStateResponse> get onConnectionStateChanged {
-    throw UnimplementedError();
+    return Stream.empty();
   }
 
   Stream<BmDescriptorData> get onDescriptorRead {
-    throw UnimplementedError();
+    return Stream.empty();
   }
 
   Stream<BmDescriptorData> get onDescriptorWritten {
-    throw UnimplementedError();
+    return Stream.empty();
   }
 
   Stream<BmDetachedFromEngineResponse> get onDetachedFromEngine {
-    throw UnimplementedError();
+    return Stream.empty();
   }
 
   Stream<BmDiscoverServicesResult> get onDiscoveredServices {
-    throw UnimplementedError();
+    return Stream.empty();
   }
 
   Stream<BmMtuChangedResponse> get onMtuChanged {
-    throw UnimplementedError();
+    return Stream.empty();
   }
 
   Stream<BmNameChanged> get onNameChanged {
-    throw UnimplementedError();
+    return Stream.empty();
   }
 
   Stream<BmReadRssiResult> get onReadRssi {
-    throw UnimplementedError();
+    return Stream.empty();
   }
 
   Stream<BmScanResponse> get onScanResponse {
-    throw UnimplementedError();
+    return Stream.empty();
   }
 
   Stream<BmBluetoothDevice> get onServicesReset {
-    throw UnimplementedError();
+    return Stream.empty();
   }
 
   Future<void> clearGattCache(
     BmClearGattCacheRequest request,
   ) {
-    throw UnimplementedError();
+    return Future.value();
   }
 
   Future<void> connect(
     BmConnectRequest request,
   ) {
-    throw UnimplementedError();
+    return Future.value();
   }
 
   Future<void> createBond(
     BmCreateBondRequest request,
   ) {
-    throw UnimplementedError();
+    return Future.value();
   }
 
   Future<void> disconnect(
     BmDisconnectRequest request,
   ) {
-    throw UnimplementedError();
+    return Future.value();
   }
 
   Future<void> discoverServices(
     BmDiscoverServicesRequest request,
   ) {
-    throw UnimplementedError();
+    return Future.value();
   }
 
   Future<BmBluetoothAdapterName> getAdapterName(
     BmBluetoothAdapterNameRequest request,
   ) {
-    throw UnimplementedError();
+    return Future.value(
+      BmBluetoothAdapterName(
+        adapterName: '',
+      ),
+    );
   }
 
   Future<BmBluetoothAdapterState> getAdapterState(
     BmBluetoothAdapterStateRequest request,
   ) {
-    throw UnimplementedError();
+    return Future.value(
+      BmBluetoothAdapterState(
+        adapterState: BmAdapterStateEnum.unknown,
+      ),
+    );
   }
 
   Future<BmBondStateResponse> getBondState(
     BmBondStateRequest request,
   ) {
-    throw UnimplementedError();
+    return Future.value(
+      BmBondStateResponse(
+        remoteId: request.remoteId,
+        bondState: BmBondStateEnum.none,
+        prevState: null,
+      ),
+    );
   }
 
   Future<BmDevicesList> getBondedDevices(
     BmBondedDevicesRequest request,
   ) {
-    throw UnimplementedError();
+    return Future.value(
+      BmDevicesList(
+        devices: const [],
+      ),
+    );
   }
 
   Future<PhySupport> getPhySupport(
     PhySupportRequest request,
   ) {
-    throw UnimplementedError();
+    return Future.value(
+      PhySupport(
+        le2M: false,
+        leCoded: false,
+      ),
+    );
   }
 
   Future<BmDevicesList> getSystemDevices(
     BmSystemDevicesRequest request,
   ) {
-    throw UnimplementedError();
+    return Future.value(
+      BmDevicesList(
+        devices: const [],
+      ),
+    );
   }
 
   Future<bool> isSupported(
     BmIsSupportedRequest request,
   ) {
-    throw UnimplementedError();
+    return Future.value(false);
   }
 
   Future<void> readCharacteristic(
     BmReadCharacteristicRequest request,
   ) {
-    throw UnimplementedError();
+    return Future.value();
   }
 
   Future<void> readDescriptor(
     BmReadDescriptorRequest request,
   ) {
-    throw UnimplementedError();
+    return Future.value();
   }
 
   Future<void> readRssi(
     BmReadRssiRequest request,
   ) {
-    throw UnimplementedError();
+    return Future.value();
   }
 
   Future<void> removeBond(
     BmRemoveBondRequest request,
   ) {
-    throw UnimplementedError();
+    return Future.value();
   }
 
   Future<void> requestConnectionPriority(
     BmConnectionPriorityRequest request,
   ) {
-    throw UnimplementedError();
+    return Future.value();
   }
 
   Future<void> requestMtu(
     BmMtuChangeRequest request,
   ) {
-    throw UnimplementedError();
+    return Future.value();
   }
 
   Future<void> setLogLevel(
     BmSetLogLevelRequest request,
   ) {
-    throw UnimplementedError();
+    return Future.value();
   }
 
   Future<bool> setNotifyValue(
     BmSetNotifyValueRequest request,
   ) {
-    throw UnimplementedError();
+    return Future.value(false);
   }
 
   Future<void> setOptions(
     BmSetOptionsRequest request,
   ) {
-    throw UnimplementedError();
+    return Future.value();
   }
 
   Future<void> setPreferredPhy(
     BmPreferredPhy request,
   ) {
-    throw UnimplementedError();
+    return Future.value();
   }
 
   Future<void> startScan(
     BmScanSettings request,
   ) {
-    throw UnimplementedError();
+    return Future.value();
   }
 
   Future<void> stopScan(
     BmStopScanRequest request,
   ) {
-    throw UnimplementedError();
+    return Future.value();
   }
 
   Future<void> turnOff(
     BmTurnOffRequest request,
   ) {
-    throw UnimplementedError();
+    return Future.value();
   }
 
   Future<void> turnOn(
     BmTurnOnRequest request,
   ) {
-    throw UnimplementedError();
+    return Future.value();
   }
 
   Future<void> writeCharacteristic(
     BmWriteCharacteristicRequest request,
   ) {
-    throw UnimplementedError();
+    return Future.value();
   }
 
   Future<void> writeDescriptor(
     BmWriteDescriptorRequest request,
   ) {
-    throw UnimplementedError();
+    return Future.value();
   }
 }
