@@ -127,6 +127,10 @@ class FlutterBluePlus {
   static Stream<BluetoothAdapterState> get adapterState async* {
     // get current state if needed
     if (_adapterStateNow == null) {
+      if (kIsWeb) {
+        yield BluetoothAdapterState.on;
+        return;
+      }
       var result =
           await _invokeMethod(() => FlutterBluePlusPlatform.instance.getAdapterState(BmBluetoothAdapterStateRequest()));
       var value = result.adapterState;

@@ -10,7 +10,16 @@
             "request": "launch",
             "program": "packages/flutter_blue_plus/example/lib/main.dart"   
         },
-    ],
+        {
+            "name": "Example on Chrome",
+            "type": "dart",
+            "request": "launch",
+            "program": "packages/flutter_blue_plus/example/lib/main.dart",
+            "args": [
+            "-d",
+            "chrome",
+            ]
+        },    ],
     "compounds": [
 
     ]

@@ -27,7 +27,7 @@ class _ScanScreenState extends State<ScanScreen> {
   void initState() {
     super.initState();
 
-    _scanResultsSubscription = FlutterBluePlus.scanResults.listen((results) {
+    _scanResultsSubscription = FlutterBluePlus.onScanResults.listen((results) {
       _scanResults = results;
       if (mounted) {
         setState(() {});

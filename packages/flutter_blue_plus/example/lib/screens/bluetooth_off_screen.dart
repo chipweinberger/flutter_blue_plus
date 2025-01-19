@@ -47,6 +47,13 @@ class BluetoothOffScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    late bool isAndroid = false;
+    try {
+      if (Platform.isAndroid) isAndroid = true;
+    } catch (e) {
+      isAndroid = false;
+    }
+
     return ScaffoldMessenger(
       key: Snackbar.snackBarKeyA,
       child: Scaffold(
@@ -57,7 +64,7 @@ class BluetoothOffScreen extends StatelessWidget {
             children: <Widget>[
               buildBluetoothOffIcon(context),
               buildTitle(context),
-              if (Platform.isAndroid) buildTurnOnButton(context),
+              if (isAndroid) buildTurnOnButton(context),
             ],
           ),
         ),
