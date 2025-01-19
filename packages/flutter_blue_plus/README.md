@@ -640,15 +640,15 @@ Please note that not all platforms support all functionality. Where functionalit
 
 |                  | Android | iOS | Linux | macOS | Web | Description                                                 |
 |------------------|---------|-----|-------|-------|-----|-------------------------------------------------------------|
-| setLogLevel      | ✔️      | ✔️  | ✔️    | ✔️    | ✔️  | Configure plugin log level                                  |
-| setOptions       | ✔️      | ✔️  | ✔️    | ✔️    | ✔️  | Set configurable bluetooth options                          |
+| setLogLevel      | ✔️      | ✔️  | ✔️    | ✔️    | ❌   | Configure plugin log level                                  |
+| setOptions       | ✔️      | ✔️  | ❌     | ✔️    | ❌   | Set configurable bluetooth options                          |
 | isSupported      | ✔️      | ✔️  | ✔️    | ✔️    | ✔️  | Checks whether the device supports Bluetooth                |
 | turnOn           | ✔️      | ❌   | ✔️    | ❌     | ❌   | Turns on the bluetooth adapter                              |
 | turnOff          | ✔️      | ❌   | ✔️    | ❌     | ❌   | Turns off the bluetooth adapter                             |
 | adapterStateNow  | ✔️      | ✔️  | ✔️    | ✔️    | ❌   | Current state of the bluetooth adapter                      |
 | adapterState     | ✔️      | ✔️  | ✔️    | ✔️    | ❌   | Stream of on & off states of the bluetooth adapter          |
 | startScan        | ✔️      | ✔️  | ✔️    | ✔️    | ✔️  | Starts a scan for Ble devices                               |
-| stopScan         | ✔️      | ✔️  | ✔️    | ✔️    | ✔️  | Stop an existing scan for Ble devices                       |
+| stopScan         | ✔️      | ✔️  | ✔️    | ✔️    | ❌   | Stop an existing scan for Ble devices                       |
 | onScanResults    | ✔️      | ✔️  | ✔️    | ✔️    | ✔️  | Stream of live scan results                                 |
 | scanResults      | ✔️      | ✔️  | ✔️    | ✔️    | ✔️  | Stream of live scan results or previous results             |
 | lastScanResults  | ✔️      | ✔️  | ✔️    | ✔️    | ✔️  | The most recent scan results                                |
