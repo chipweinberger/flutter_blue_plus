@@ -444,7 +444,7 @@ class FlutterBluePlus {
           // do not clear `bondState`, for faster performance.
 
           // autoconnect
-          if (Platform.isAndroid == false) {
+          if (!kIsWeb && Platform.isAndroid == false) {
             if (_autoConnect.contains(r.remoteId)) {
               if (_adapterStateNow == BmAdapterStateEnum.on) {
                 var d = BluetoothDevice(remoteId: r.remoteId);

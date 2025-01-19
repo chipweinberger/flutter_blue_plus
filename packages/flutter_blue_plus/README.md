@@ -160,7 +160,7 @@ var subscription = FlutterBluePlus.adapterState.listen((BluetoothAdapterState st
 
 // turn on bluetooth ourself if we can
 // for iOS, the user controls bluetooth enable/disable
-if (Platform.isAndroid) {
+if (!kIsWeb && Platform.isAndroid) {
     await FlutterBluePlus.turnOn();
 }
 
@@ -287,7 +287,7 @@ final subscription = device.mtu.listen((int mtu) {
 device.cancelWhenDisconnected(subscription);
 
 // You can also manually change the mtu yourself.
-if (Platform.isAndroid) {
+if (!kIsWeb && Platform.isAndroid) {
     await device.requestMtu(512);
 }
 ```
