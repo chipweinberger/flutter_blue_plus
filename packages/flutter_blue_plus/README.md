@@ -634,6 +634,8 @@ You can try using https://pub.dev/packages/flutter_foreground_task or possibly h
 
 ## Compatibility
 
+Please note that not all platforms support all functionality. Where functionality is unsupported, sensible defaults will be returned, instead of an `UnimplementedError` being thrown.
+
 ### FlutterBluePlus API
 
 |                  | Android | iOS | Linux | macOS | Web | Description                                                 |
