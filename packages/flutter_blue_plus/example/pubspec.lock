@@ -62,12 +62,11 @@ packages:
     source: path
     version: "1.35.1"
   flutter_blue_plus_android:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: flutter_blue_plus_android
-      sha256: c6ad39d039bc638d47138c6ca957b6f58e60c62528d6e2ac2368f659995b2932
-      url: "https://pub.dev"
-    source: hosted
+      path: "../../flutter_blue_plus_android"
+      relative: true
+    source: path
     version: "1.35.0"
   flutter_blue_plus_darwin:
     dependency: "direct overridden"
@@ -77,12 +76,11 @@ packages:
     source: path
     version: "1.35.1"
   flutter_blue_plus_linux:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: flutter_blue_plus_linux
-      sha256: d36a9890498dc0e49ce2d5b6625cf94fa6dc6257fa1a6e8b2010bfab4e381b33
-      url: "https://pub.dev"
-    source: hosted
+      path: "../../flutter_blue_plus_linux"
+      relative: true
+    source: path
     version: "1.0.0"
   flutter_blue_plus_platform_interface:
     dependency: transitive
@@ -93,12 +91,11 @@ packages:
     source: hosted
     version: "1.0.0"
   flutter_blue_plus_web:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: flutter_blue_plus_web
-      sha256: "57ce85830f30cac9b51d93e7114ccde4d7ec0e12e84eb04bde12b2857e045f9d"
-      url: "https://pub.dev"
-    source: hosted
+      path: "../../flutter_blue_plus_web"
+      relative: true
+    source: path
     version: "1.0.0"
   flutter_web_plugins:
     dependency: transitive
@@ -176,4 +173,4 @@ packages:
     version: "6.5.0"
 sdks:
   dart: ">=3.4.0 <4.0.0"
-  flutter: ">=3.19.0"
+  flutter: ">=3.0.0"
