@@ -85,34 +85,34 @@ abstract base class FlutterBluePlusPlatform {
     return Stream.empty();
   }
 
-  Future<void> clearGattCache(
+  Future<bool> clearGattCache(
     BmClearGattCacheRequest request,
   ) {
-    return Future.value();
+    return Future.value(false);
   }
 
-  Future<void> connect(
+  Future<bool> connect(
     BmConnectRequest request,
   ) {
-    return Future.value();
+    return Future.value(false);
   }
 
-  Future<void> createBond(
+  Future<bool> createBond(
     BmCreateBondRequest request,
   ) {
-    return Future.value();
+    return Future.value(false);
   }
 
-  Future<void> disconnect(
+  Future<bool> disconnect(
     BmDisconnectRequest request,
   ) {
-    return Future.value();
+    return Future.value(false);
   }
 
-  Future<void> discoverServices(
+  Future<bool> discoverServices(
     BmDiscoverServicesRequest request,
   ) {
-    return Future.value();
+    return Future.value(false);
   }
 
   Future<BmBluetoothAdapterName> getAdapterName(
@@ -184,46 +184,46 @@ abstract base class FlutterBluePlusPlatform {
     return Future.value(false);
   }
 
-  Future<void> readCharacteristic(
+  Future<bool> readCharacteristic(
     BmReadCharacteristicRequest request,
   ) {
-    return Future.value();
+    return Future.value(false);
   }
 
-  Future<void> readDescriptor(
+  Future<bool> readDescriptor(
     BmReadDescriptorRequest request,
   ) {
-    return Future.value();
+    return Future.value(false);
   }
 
-  Future<void> readRssi(
+  Future<bool> readRssi(
     BmReadRssiRequest request,
   ) {
-    return Future.value();
+    return Future.value(false);
   }
 
-  Future<void> removeBond(
+  Future<bool> removeBond(
     BmRemoveBondRequest request,
   ) {
-    return Future.value();
+    return Future.value(false);
   }
 
-  Future<void> requestConnectionPriority(
+  Future<bool> requestConnectionPriority(
     BmConnectionPriorityRequest request,
   ) {
-    return Future.value();
+    return Future.value(false);
   }
 
-  Future<void> requestMtu(
+  Future<bool> requestMtu(
     BmMtuChangeRequest request,
   ) {
-    return Future.value();
+    return Future.value(false);
   }
 
-  Future<void> setLogLevel(
+  Future<bool> setLogLevel(
     BmSetLogLevelRequest request,
   ) {
-    return Future.value();
+    return Future.value(false);
   }
 
   Future<bool> setNotifyValue(
@@ -232,51 +232,51 @@ abstract base class FlutterBluePlusPlatform {
     return Future.value(false);
   }
 
-  Future<void> setOptions(
+  Future<bool> setOptions(
     BmSetOptionsRequest request,
   ) {
-    return Future.value();
+    return Future.value(false);
   }
 
-  Future<void> setPreferredPhy(
+  Future<bool> setPreferredPhy(
     BmPreferredPhy request,
   ) {
-    return Future.value();
+    return Future.value(false);
   }
 
-  Future<void> startScan(
+  Future<bool> startScan(
     BmScanSettings request,
   ) {
-    return Future.value();
+    return Future.value(false);
   }
 
-  Future<void> stopScan(
+  Future<bool> stopScan(
     BmStopScanRequest request,
   ) {
-    return Future.value();
+    return Future.value(false);
   }
 
-  Future<void> turnOff(
+  Future<bool> turnOff(
     BmTurnOffRequest request,
   ) {
-    return Future.value();
+    return Future.value(false);
   }
 
-  Future<void> turnOn(
+  Future<bool> turnOn(
     BmTurnOnRequest request,
   ) {
-    return Future.value();
+    return Future.value(false);
   }
 
-  Future<void> writeCharacteristic(
+  Future<bool> writeCharacteristic(
     BmWriteCharacteristicRequest request,
   ) {
-    return Future.value();
+    return Future.value(false);
   }
 
-  Future<void> writeDescriptor(
+  Future<bool> writeDescriptor(
     BmWriteDescriptorRequest request,
   ) {
-    return Future.value();
+    return Future.value(false);
   }
 }
