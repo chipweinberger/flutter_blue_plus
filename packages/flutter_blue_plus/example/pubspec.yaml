@@ -17,5 +17,9 @@ dependencies:
     # In *your* app you should use ^1.17.3 or similar
     path: ../
 
+dependency_overrides:
+  flutter_blue_plus_darwin:
+    path: ../../flutter_blue_plus_darwin
+
 flutter:
   uses-material-design: true

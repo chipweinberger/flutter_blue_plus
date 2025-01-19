@@ -60,7 +60,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "1.35.0"
+    version: "1.35.1"
   flutter_blue_plus_android:
     dependency: transitive
     description:
@@ -69,13 +69,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.35.0"
-  flutter_blue_plus_ios:
-    dependency: transitive
+  flutter_blue_plus_darwin:
+    dependency: "direct overridden"
     description:
-      path: "../../flutter_blue_plus_ios"
+      path: "../../flutter_blue_plus_darwin"
       relative: true
     source: path
-    version: "1.35.0"
+    version: "1.35.1"
   flutter_blue_plus_linux:
     dependency: transitive
     description:
@@ -84,14 +84,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
-  flutter_blue_plus_macos:
-    dependency: transitive
-    description:
-      name: flutter_blue_plus_macos
-      sha256: "8e79496a422f0ccab890b6f3d22e1b05540e42e5d35e1f5047b8a82147fa346b"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.35.0"
   flutter_blue_plus_platform_interface:
     dependency: transitive
     description:

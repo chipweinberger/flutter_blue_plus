@@ -1,6 +1,6 @@
-name: flutter_blue_plus_ios
+name: flutter_blue_plus_darwin
 description: iOS implementation of the flutter_blue_plus plugin.
-version: 1.35.0
+version: 1.35.1
 homepage: https://github.com/chipweinberger/flutter_blue_plus
 
 environment:
@@ -22,4 +22,9 @@ flutter:
     platforms:
       ios:
         pluginClass: FlutterBluePlusPlugin
-        dartPluginClass: FlutterBluePlusIos
+        dartPluginClass: FlutterBluePlusDarwin
+        sharedDarwinSource: true
+      macos:
+        pluginClass: FlutterBluePlusPlugin
+        dartPluginClass: FlutterBluePlusDarwin
+        sharedDarwinSource: true

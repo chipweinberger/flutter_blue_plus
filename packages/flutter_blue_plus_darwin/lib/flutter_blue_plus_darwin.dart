@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_blue_plus_platform_interface/flutter_blue_plus_platform_interface.dart';
 
-class FlutterBluePlusIos extends FlutterBluePlusPlatform {
+class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
   @visibleForTesting
   final methodChannel = const MethodChannel('flutter_blue_plus/methods');
 
@@ -86,7 +86,7 @@ class FlutterBluePlusIos extends FlutterBluePlusPlatform {
   }
 
   static void registerWith() {
-    FlutterBluePlusPlatform.instance = FlutterBluePlusIos();
+    FlutterBluePlusPlatform.instance = FlutterBluePlusDarwin();
   }
 
   @override
