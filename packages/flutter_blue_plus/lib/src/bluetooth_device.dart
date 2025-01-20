@@ -633,10 +633,7 @@ class BluetoothDevice {
       Future<BmBondStateResponse> futureResponse = responseStream.first;
 
       // invoke
-      bool changed = FlutterBluePlus._bondStates[remoteId]?.bondState ==
-          BmBondStateEnum.bonded;
-      await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance
-          .removeBond(BmRemoveBondRequest(remoteId: remoteId)));
+      bool changed = await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance.removeBond(BmRemoveBondRequest(remoteId: remoteId)));
 
       // only wait for 'unbonded' state if we weren't already unbonded
       if (changed) {
