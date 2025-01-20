@@ -227,11 +227,7 @@ class BluetoothDevice {
       await _ensureAndroidDisconnectionDelay(androidDelay);
 
       // invoke
-      bool changed =
-          FlutterBluePlus._connectionStates[remoteId]?.connectionState ==
-              BmConnectionStateEnum.connected;
-      await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance
-          .disconnect(BmDisconnectRequest(remoteId: remoteId)));
+      bool changed = await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance.disconnect(BmDisconnectRequest(remoteId: remoteId)));
 
       // only wait for disconnection if weren't already disconnected
       if (changed) {
