@@ -139,11 +139,7 @@ class BluetoothDevice {
       }
 
       // invoke
-      bool changed =
-          FlutterBluePlus._connectionStates[remoteId]?.connectionState !=
-              BmConnectionStateEnum.connected;
-      await FlutterBluePlus._invokeMethod(
-          () => FlutterBluePlusPlatform.instance.connect(request));
+      bool changed = await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance.connect(request));
 
       // we return the disconnect mutex now so that this
       // connection attempt can be canceled by calling disconnect
