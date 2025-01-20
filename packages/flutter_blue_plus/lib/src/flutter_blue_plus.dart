@@ -586,8 +586,20 @@ class FlutterBluePlus {
   /// Turn off Bluetooth (Android only),
   @Deprecated('Deprecated in Android SDK 33 with no replacement')
   static Future<void> turnOff({int timeout = 10}) async {
+    var responseStream = FlutterBluePlusPlatform.instance.onAdapterStateChanged
+        .where((p) => p.adapterState == BmAdapterStateEnum.off);
+
+    // Start listening now, before invokeMethod, to ensure we don't miss the response
+    Future<BmBluetoothAdapterState> futureResponse = responseStream.first;
+
     // invoke
-    await _invokeMethod(() => FlutterBluePlusPlatform.instance.turnOff(BmTurnOffRequest())).fbpTimeout(timeout, "turnOff");
+    bool changed = await _invokeMethod(() => FlutterBluePlusPlatform.instance.turnOff(BmTurnOffRequest()));
+
+    // only wait if bluetooth was on
+    if (changed) {
+      await futureResponse
+          .fbpTimeout(timeout, "turnOff");
+    }
   }
 
   static void log(String s) {
