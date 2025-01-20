@@ -116,8 +116,20 @@ class FlutterBluePlus {
 
   /// Turn on Bluetooth (Android only),
   static Future<void> turnOn({int timeout = 60}) async {
+    var responseStream = FlutterBluePlusPlatform.instance.onAdapterStateChanged
+        .where((p) => p.adapterState == BmAdapterStateEnum.on);
+
+    // Start listening now, before invokeMethod, to ensure we don't miss the response
+    Future<BmBluetoothAdapterState> futureResponse = responseStream.first;
+
     // invoke
-    await _invokeMethod(() => FlutterBluePlusPlatform.instance.turnOn(BmTurnOnRequest())).fbpTimeout(timeout, "turnOn");
+    bool changed = await _invokeMethod(() => FlutterBluePlusPlatform.instance.turnOn(BmTurnOnRequest()));
+
+    // only wait if bluetooth was off
+    if (changed) {
+      await futureResponse
+          .fbpTimeout(timeout, "turnOn");
+    }
   }
 
   /// Gets the current state of the Bluetooth module
