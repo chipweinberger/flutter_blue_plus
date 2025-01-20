@@ -244,11 +244,33 @@ class BluetoothCharacteristic {
         primaryServiceUuid: primaryServiceUuid,
       );
 
+      // Notifications & Indications are configured by writing to the
+      // Client Characteristic Configuration Descriptor (CCCD)
+      Stream<BmDescriptorData> responseStream = FlutterBluePlusPlatform.instance.onDescriptorWritten
+          .where((p) => p.remoteId == request.remoteId)
+          .where((p) => p.serviceUuid == request.serviceUuid)
+          .where((p) => p.characteristicUuid == request.characteristicUuid)
+          .where((p) => p.descriptorUuid == cccdUuid)
+          .where((p) => p.primaryServiceUuid == request.primaryServiceUuid);
+
+      // Start listening now, before invokeMethod, to ensure we don't miss the response
+      Future<BmDescriptorData> futureResponse = responseStream.first;
+
       // invoke
-      await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance.setNotifyValue(request))
-          .fbpEnsureAdapterIsOn("setNotifyValue")
-          .fbpEnsureDeviceIsConnected(device, "setNotifyValue")
-          .fbpTimeout(timeout, "setNotifyValue");
+      bool hasCCCD = await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance.setNotifyValue(request));
+
+      // wait for CCCD descriptor to be written?
+      if (hasCCCD) {
+        BmDescriptorData response = await futureResponse
+            .fbpEnsureAdapterIsOn("setNotifyValue")
+            .fbpEnsureDeviceIsConnected(device, "setNotifyValue")
+            .fbpTimeout(timeout, "setNotifyValue");
+
+        // failed?
+        if (!response.success) {
+          throw FlutterBluePlusException(_nativeError, "setNotifyValue", response.errorCode, response.errorString);
+        }
+      }
     } finally {
       mtx.give();
     }
