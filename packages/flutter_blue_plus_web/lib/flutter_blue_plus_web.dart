@@ -267,8 +267,7 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
 
       final service = await gatt.getPrimaryService(request.serviceUuid.str128.toJS).toDart;
 
-      final characteristics = (await service.getCharacteristics().toDart).toDart;
-      final characteristic = characteristics[request.characteristicId];
+      final characteristic = await service.getCharacteristic(request.characteristicUuid.str128.toJS).toDart;
       print('Reading from ${characteristic.uuid} (${request.characteristicId})');
 
       final value = (await characteristic.readValue().toDart).toDart;
@@ -324,8 +323,7 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
 
       final service = await gatt.getPrimaryService(request.serviceUuid.str128.toJS).toDart;
 
-      final characteristics = await service.getCharacteristics().toDart;
-      final characteristic = characteristics[request.characteristicId];
+      final characteristic = await service.getCharacteristic(request.characteristicUuid.str128.toJS).toDart;
 
       final descriptor = await characteristic.getDescriptor(request.characteristicUuid.str128.toJS).toDart;
 
