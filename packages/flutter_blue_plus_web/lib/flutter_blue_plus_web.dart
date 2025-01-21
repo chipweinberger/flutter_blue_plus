@@ -132,7 +132,6 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
     return true;
   }
 
-  int characteristicCounter = 1;
   @override
   Future<bool> discoverServices(
     BmDiscoverServicesRequest request,
@@ -157,7 +156,7 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
       final services = <BmBluetoothService>[];
 
       for (final s in (await gatt.getPrimaryServices().toDart).toDart) {
-        characteristicCounter = 0;
+        int characteristicCounter = 0;
         final characteristics = <BmBluetoothCharacteristic>[];
 
         for (final c in (await s.getCharacteristics().toDart).toDart) {
