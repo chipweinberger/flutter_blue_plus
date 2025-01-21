@@ -10,14 +10,14 @@ class BluetoothCharacteristic {
   final DeviceIdentifier remoteId;
   final Guid serviceUuid;
   final Guid characteristicUuid;
-  final int characteristicId;
+  final int characteristicIndex;
   final Guid? primaryServiceUuid;
 
   BluetoothCharacteristic({
     required this.remoteId,
     required this.serviceUuid,
     required this.characteristicUuid,
-    required this.characteristicId,
+    required this.characteristicIndex,
     this.primaryServiceUuid,
   });
 
@@ -25,7 +25,7 @@ class BluetoothCharacteristic {
       : remoteId = p.remoteId,
         serviceUuid = p.serviceUuid,
         characteristicUuid = p.characteristicUuid,
-        characteristicId = p.characteristicId,
+        characteristicIndex = p.characteristicIndex,
         primaryServiceUuid = p.primaryServiceUuid;
 
   /// convenience accessor
@@ -50,7 +50,7 @@ class BluetoothCharacteristic {
   ///   - anytime a notification arrives (if subscribed)
   ///   - when the device is disconnected it is cleared
   List<int> get lastValue {
-    String key = "$serviceUuid:$characteristicUuid($characteristicId)";
+    String key = "$serviceUuid:$characteristicUuid($characteristicIndex)";
     return FlutterBluePlus._lastChrs[remoteId]?[key] ?? [];
   }
 
@@ -113,7 +113,7 @@ class BluetoothCharacteristic {
       var request = BmReadCharacteristicRequest(
         remoteId: remoteId,
         characteristicUuid: characteristicUuid,
-        characteristicId: characteristicId,
+        characteristicIndex: characteristicIndex,
         serviceUuid: serviceUuid,
         primaryServiceUuid: primaryServiceUuid,
       );
@@ -183,7 +183,7 @@ class BluetoothCharacteristic {
       var request = BmWriteCharacteristicRequest(
         remoteId: remoteId,
         characteristicUuid: characteristicUuid,
-        characteristicId: characteristicId,
+        characteristicIndex: characteristicIndex,
         serviceUuid: serviceUuid,
         writeType: writeType,
         allowLongWrite: allowLongWrite,
@@ -247,7 +247,7 @@ class BluetoothCharacteristic {
         remoteId: remoteId,
         serviceUuid: serviceUuid,
         characteristicUuid: characteristicUuid,
-        characteristicId: characteristicId,
+        characteristicIndex: characteristicIndex,
         forceIndications: forceIndications,
         enable: notify,
         primaryServiceUuid: primaryServiceUuid,
@@ -297,7 +297,7 @@ class BluetoothCharacteristic {
         'remoteId: $remoteId, '
         'serviceUuid: $serviceUuid, '
         'characteristicUuid: $characteristicUuid, '
-        'characteristicId: $characteristicId, '
+        'characteristicIndex: $characteristicIndex, '
         'primaryServiceUuid: $primaryServiceUuid, '
         'descriptors: $descriptors, '
         'properties: $properties, '

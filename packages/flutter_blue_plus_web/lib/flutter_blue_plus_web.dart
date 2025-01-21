@@ -167,7 +167,7 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
                   remoteId: device.remoteId,
                   serviceUuid: Guid.fromString(s.uuid),
                   characteristicUuid: Guid.fromString(c.uuid),
-                  characteristicId: characteristicCounter,
+                  characteristicIndex: characteristicCounter,
                   descriptorUuid: Guid.fromString(d.uuid),
                   primaryServiceUuid: null,
                 ),
@@ -182,7 +182,7 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
               remoteId: device.remoteId,
               serviceUuid: Guid.fromString(s.uuid),
               characteristicUuid: Guid.fromString(c.uuid),
-              characteristicId: characteristicCounter++,
+              characteristicIndex: characteristicCounter++,
               primaryServiceUuid: null,
               descriptors: descriptors,
               properties: BmCharacteristicProperties(
@@ -267,8 +267,8 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
 
       final service = await gatt.getPrimaryService(request.serviceUuid.str128.toJS).toDart;
 
-      final characteristic = await service.getCharacteristic(request.characteristicUuid.str128.toJS).toDart;
-      print('Reading from ${characteristic.uuid} (${request.characteristicId})');
+      final characteristics = await service.getCharacteristics().toDart;
+      final characteristic = characteristics[request.characteristicIndex];
 
       final value = (await characteristic.readValue().toDart).toDart;
 
@@ -334,7 +334,7 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           remoteId: device.remoteId,
           serviceUuid: Guid.fromString(service.uuid),
           characteristicUuid: Guid.fromString(characteristic.uuid),
-          characteristicId: request.characteristicId,
+          characteristicIndex: request.characteristicIndex,
           descriptorUuid: Guid.fromString(descriptor.uuid),
           primaryServiceUuid: null,
           value: value.buffer.asUint8List(),
@@ -349,7 +349,7 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           remoteId: request.remoteId,
           serviceUuid: request.serviceUuid,
           characteristicUuid: request.characteristicUuid,
-          characteristicId: request.characteristicId,
+          characteristicIndex: request.characteristicIndex,
           descriptorUuid: request.descriptorUuid,
           primaryServiceUuid: null,
           value: [],
@@ -384,7 +384,7 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
     final service = await gatt.getPrimaryService(request.serviceUuid.str128.toJS).toDart;
 
     final characteristics = await service.getCharacteristics().toDart;
-    final characteristic = characteristics[request.characteristicId];
+    final characteristic = characteristics[request.characteristicIndex];
 
     if (request.enable) {
       characteristic.addEventListener(
@@ -547,7 +547,7 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
       final service = await gatt.getPrimaryService(request.serviceUuid.str128.toJS).toDart;
 
       final characteristics = await service.getCharacteristics().toDart;
-      final characteristic = characteristics[request.characteristicId];
+      final characteristic = characteristics[request.characteristicIndex];
 
       if (request.writeType == BmWriteType.withResponse) {
         await characteristic.writeValueWithResponse(Uint8List.fromList(request.value).toJS).toDart;
@@ -607,7 +607,7 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
       final service = await gatt.getPrimaryService(request.serviceUuid.str128.toJS).toDart;
 
       final characteristics = await service.getCharacteristics().toDart;
-      final characteristic = characteristics[request.characteristicId];
+      final characteristic = characteristics[request.characteristicIndex];
 
       final descriptor = await characteristic.getDescriptor(request.characteristicUuid.str128.toJS).toDart;
 
@@ -618,7 +618,7 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           remoteId: device.remoteId,
           serviceUuid: Guid.fromString(service.uuid),
           characteristicUuid: Guid.fromString(characteristic.uuid),
-          characteristicId: request.characteristicId,
+          characteristicIndex: request.characteristicIndex,
           descriptorUuid: Guid.fromString(descriptor.uuid),
           primaryServiceUuid: null,
           value: request.value,
@@ -633,7 +633,7 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           remoteId: request.remoteId,
           serviceUuid: request.serviceUuid,
           characteristicUuid: request.characteristicUuid,
-          characteristicId: request.characteristicId,
+          characteristicIndex: request.characteristicIndex,
           descriptorUuid: request.descriptorUuid,
           primaryServiceUuid: null,
           value: request.value,
