@@ -156,13 +156,13 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
       final services = <BmBluetoothService>[];
 
       for (final s in (await gatt.getPrimaryServices().toDart).toDart) {
-        int characteristicCounter = 0;
         final characteristics = <BmBluetoothCharacteristic>[];
 
         for (final c in (await s.getCharacteristics().toDart).toDart) {
           final descriptors = <BmBluetoothDescriptor>[];
 
           // Still have to add the characteristic even if this fails
+          int characteristicCounter = 0;
           try {
             for (final d in (await c.getDescriptors().toDart).toDart) {
               descriptors.add(
@@ -179,7 +179,7 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           } catch (e) {
             //not found
           }
-
+          // Need to add this regardless of whether getDescriptors() throws an error
           characteristics.add(
             BmBluetoothCharacteristic(
               remoteId: device.remoteId,

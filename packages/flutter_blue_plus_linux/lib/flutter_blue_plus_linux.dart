@@ -312,7 +312,6 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
     return true;
   }
 
-  int characteristicCounter = 0;
   @override
   Future<bool> discoverServices(
     BmDiscoverServicesRequest request,
@@ -331,7 +330,7 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
           remoteId: device.remoteId,
           services: device.gattServices.map(
             (service) {
-              characteristicCounter = 0;
+              int characteristicCounter = 0;
               return BmBluetoothService(
                 serviceUuid: Guid.fromBytes(
                   service.uuid.value,
@@ -347,7 +346,7 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
                       characteristicUuid: Guid.fromBytes(
                         characteristic.uuid.value,
                       ),
-                      characteristicIndex: characteristicCounter,
+                      characteristicIndex: characteristicCounter++,
                       primaryServiceUuid: null,
                       descriptors: characteristic.descriptors.map(
                         (descriptor) {
