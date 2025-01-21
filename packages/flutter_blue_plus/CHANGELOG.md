@@ -1,3 +1,12 @@
+## 1.35.1
+* **[Fix]** Bluetooth characteristic set notify value
+* **[Fix]** Bluetooth device create bond
+* **[Fix]** Bluetooth device remove bond
+* **[Fix]** Bluetooth device connect
+* **[Fix]** Bluetooth device disconnect
+* **[Fix]** Bluetooth adapter turn on
+* **[Fix]** Bluetooth adapter turn off
+
 ## 1.35.0
 * **[Feature]** add platform interface
 

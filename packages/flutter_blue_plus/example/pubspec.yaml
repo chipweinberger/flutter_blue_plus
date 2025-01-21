@@ -6,7 +6,7 @@ description: Demonstrates how to use the flutter_blue_plus plugin.
 publish_to: 'none'
 
 environment:
-  sdk: ">=2.15.1 <3.0.0"
+  sdk: ^3.0.0
 
 dependencies:
   flutter:
@@ -18,14 +18,16 @@ dependencies:
     path: ../
 
 dependency_overrides:
-  flutter_blue_plus:
-    path: ../
+  # Note: We use these dependency overrides to test the example app with the latest changes.
+  # In *your* app you should not add these overrides
   flutter_blue_plus_android:
     path: ../../flutter_blue_plus_android
   flutter_blue_plus_darwin:
     path: ../../flutter_blue_plus_darwin
   flutter_blue_plus_linux:
     path: ../../flutter_blue_plus_linux
+  flutter_blue_plus_platform_interface:
+    path: ../../flutter_blue_plus_platform_interface
   flutter_blue_plus_web:
     path: ../../flutter_blue_plus_web
 
