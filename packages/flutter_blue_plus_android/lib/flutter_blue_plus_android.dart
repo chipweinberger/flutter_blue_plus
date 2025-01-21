@@ -102,53 +102,53 @@ class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
   }
 
   @override
-  Future<void> clearGattCache(
+  Future<bool> clearGattCache(
     BmClearGattCacheRequest request,
   ) async {
-    await _invokeMethod(
+    return await _invokeMethod<bool>(
       'clearGattCache',
       request.remoteId.str,
-    );
+    ) == true;
   }
 
   @override
-  Future<void> connect(
+  Future<bool> connect(
     BmConnectRequest request,
   ) async {
-    await _invokeMethod(
+    return await _invokeMethod<bool>(
       'connect',
       request.toMap(),
-    );
+    ) == true;
   }
 
   @override
-  Future<void> createBond(
+  Future<bool> createBond(
     BmCreateBondRequest request,
   ) async {
-    await _invokeMethod(
+    return await _invokeMethod<bool>(
       'createBond',
       request.remoteId.str,
-    );
+    ) == true;
   }
 
   @override
-  Future<void> disconnect(
+  Future<bool> disconnect(
     BmDisconnectRequest request,
   ) async {
-    await _invokeMethod(
+    return await _invokeMethod<bool>(
       'disconnect',
       request.remoteId.str,
-    );
+    ) == true;
   }
 
   @override
-  Future<void> discoverServices(
+  Future<bool> discoverServices(
     BmDiscoverServicesRequest request,
   ) async {
-    await _invokeMethod(
+    return await _invokeMethod<bool>(
       'discoverServices',
       request.remoteId.str,
-    );
+    ) == true;
   }
 
   @override
@@ -222,166 +222,168 @@ class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
   Future<bool> isSupported(
     BmIsSupportedRequest request,
   ) async {
-    return await _invokeMethod<bool>('isSupported') == true;
+    return await _invokeMethod<bool>(
+      'isSupported',
+    ) == true;
   }
 
   @override
-  Future<void> readCharacteristic(
+  Future<bool> readCharacteristic(
     BmReadCharacteristicRequest request,
   ) async {
-    await _invokeMethod(
+    return await _invokeMethod<bool>(
       'readCharacteristic',
       request.toMap(),
-    );
+    ) == true;
   }
 
   @override
-  Future<void> readDescriptor(
+  Future<bool> readDescriptor(
     BmReadDescriptorRequest request,
   ) async {
-    await _invokeMethod(
+    return await _invokeMethod<bool>(
       'readDescriptor',
       request.toMap(),
-    );
+    ) == true;
   }
 
   @override
-  Future<void> readRssi(
+  Future<bool> readRssi(
     BmReadRssiRequest request,
   ) async {
-    await _invokeMethod(
+    return await _invokeMethod<bool>(
       'readRssi',
       request.remoteId.str,
-    );
+    ) == true;
   }
 
   @override
-  Future<void> removeBond(
+  Future<bool> removeBond(
     BmRemoveBondRequest request,
   ) async {
-    await _invokeMethod(
+    return await _invokeMethod<bool>(
       'removeBond',
       request.remoteId.str,
-    );
+    ) == true;
   }
 
   @override
-  Future<void> requestConnectionPriority(
+  Future<bool> requestConnectionPriority(
     BmConnectionPriorityRequest request,
   ) async {
-    await _invokeMethod(
+    return await _invokeMethod<bool>(
       'requestConnectionPriority',
       request.toMap(),
-    );
+    ) == true;
   }
 
   @override
-  Future<void> requestMtu(
+  Future<bool> requestMtu(
     BmMtuChangeRequest request,
   ) async {
-    await _invokeMethod(
+    return await _invokeMethod<bool>(
       'requestMtu',
       request.toMap(),
-    );
+    ) == true;
   }
 
   @override
-  Future<void> setLogLevel(
+  Future<bool> setLogLevel(
     BmSetLogLevelRequest request,
   ) async {
     _logLevel = request.logLevel;
 
-    await _invokeMethod(
+    return await _invokeMethod<bool>(
       'setLogLevel',
       request.logLevel.index,
-    );
+    ) == true;
   }
 
   @override
-  Future<void> setNotifyValue(
+  Future<bool> setNotifyValue(
     BmSetNotifyValueRequest request,
   ) async {
-    await _invokeMethod(
+    return await _invokeMethod<bool>(
       'setNotifyValue',
       request.toMap(),
-    );
+    ) == true;
   }
 
   @override
-  Future<void> setOptions(
+  Future<bool> setOptions(
     BmSetOptionsRequest request,
   ) async {
-    await _invokeMethod(
+    return await _invokeMethod<bool>(
       'setOptions',
       request.toMap(),
-    );
+    ) == true;
   }
 
   @override
-  Future<void> setPreferredPhy(
+  Future<bool> setPreferredPhy(
     BmPreferredPhy request,
   ) async {
-    await _invokeMethod(
+    return await _invokeMethod<bool>(
       'setPreferredPhy',
       request.toMap(),
-    );
+    ) == true;
   }
 
   @override
-  Future<void> startScan(
+  Future<bool> startScan(
     BmScanSettings request,
   ) async {
-    await _invokeMethod(
+    return await _invokeMethod<bool>(
       'startScan',
       request.toMap(),
-    );
+    ) == true;
   }
 
   @override
-  Future<void> stopScan(
+  Future<bool> stopScan(
     BmStopScanRequest request,
   ) async {
-    await _invokeMethod(
+    return await _invokeMethod<bool>(
       'stopScan',
-    );
+    ) == true;
   }
 
   @override
-  Future<void> turnOff(
+  Future<bool> turnOff(
     BmTurnOffRequest request,
   ) async {
-    await _invokeMethod(
+    return await _invokeMethod<bool>(
       'turnOff',
-    );
+    ) == true;
   }
 
   @override
-  Future<void> turnOn(
+  Future<bool> turnOn(
     BmTurnOnRequest request,
   ) async {
-    await _invokeMethod(
+    return await _invokeMethod<bool>(
       'turnOn',
-    );
+    ) == true;
   }
 
   @override
-  Future<void> writeCharacteristic(
+  Future<bool> writeCharacteristic(
     BmWriteCharacteristicRequest request,
   ) async {
-    await _invokeMethod(
+    return await _invokeMethod<bool>(
       'writeCharacteristic',
       request.toMap(),
-    );
+    ) == true;
   }
 
   @override
-  Future<void> writeDescriptor(
+  Future<bool> writeDescriptor(
     BmWriteDescriptorRequest request,
   ) async {
-    await _invokeMethod(
+    return await _invokeMethod<bool>(
       'writeDescriptor',
       request.toMap(),
-    );
+    ) == true;
   }
 
   Future<T?> _invokeMethod<T>(

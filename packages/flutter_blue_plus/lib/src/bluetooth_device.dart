@@ -139,11 +139,7 @@ class BluetoothDevice {
       }
 
       // invoke
-      bool changed =
-          FlutterBluePlus._connectionStates[remoteId]?.connectionState !=
-              BmConnectionStateEnum.connected;
-      await FlutterBluePlus._invokeMethod(
-          () => FlutterBluePlusPlatform.instance.connect(request));
+      bool changed = await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance.connect(request));
 
       // we return the disconnect mutex now so that this
       // connection attempt can be canceled by calling disconnect
@@ -231,11 +227,7 @@ class BluetoothDevice {
       await _ensureAndroidDisconnectionDelay(androidDelay);
 
       // invoke
-      bool changed =
-          FlutterBluePlus._connectionStates[remoteId]?.connectionState ==
-              BmConnectionStateEnum.connected;
-      await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance
-          .disconnect(BmDisconnectRequest(remoteId: remoteId)));
+      bool changed = await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance.disconnect(BmDisconnectRequest(remoteId: remoteId)));
 
       // only wait for disconnection if weren't already disconnected
       if (changed) {
@@ -589,10 +581,7 @@ class BluetoothDevice {
       Future<BmBondStateResponse> futureResponse = responseStream.first;
 
       // invoke
-      bool changed = FlutterBluePlus._bondStates[remoteId]?.bondState !=
-          BmBondStateEnum.bonded;
-      await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance
-          .createBond(BmCreateBondRequest(remoteId: remoteId)));
+      bool changed = await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance.createBond(BmCreateBondRequest(remoteId: remoteId)));
 
       // only wait for 'bonded' if we weren't already bonded
       if (changed) {
@@ -636,10 +625,7 @@ class BluetoothDevice {
       Future<BmBondStateResponse> futureResponse = responseStream.first;
 
       // invoke
-      bool changed = FlutterBluePlus._bondStates[remoteId]?.bondState ==
-          BmBondStateEnum.bonded;
-      await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance
-          .removeBond(BmRemoveBondRequest(remoteId: remoteId)));
+      bool changed = await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance.removeBond(BmRemoveBondRequest(remoteId: remoteId)));
 
       // only wait for 'unbonded' state if we weren't already unbonded
       if (changed) {

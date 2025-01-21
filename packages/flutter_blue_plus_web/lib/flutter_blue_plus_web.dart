@@ -65,7 +65,7 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
   }
 
   @override
-  Future<void> connect(
+  Future<bool> connect(
     BmConnectRequest request,
   ) async {
     final device = _devices[request.remoteId];
@@ -94,10 +94,12 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
         disconnectReasonString: null,
       ),
     );
+
+    return true;
   }
 
   @override
-  Future<void> disconnect(
+  Future<bool> disconnect(
     BmDisconnectRequest request,
   ) async {
     final device = _devices[request.remoteId];
@@ -126,11 +128,13 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
         disconnectReasonString: null,
       ),
     );
+
+    return true;
   }
 
   int characteristicCounter = 1;
   @override
-  Future<void> discoverServices(
+  Future<bool> discoverServices(
     BmDiscoverServicesRequest request,
   ) async {
     try {
@@ -220,6 +224,8 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           errorString: '',
         ),
       );
+
+      return true;
     } catch (e) {
       _onDiscoveredServicesController.add(
         BmDiscoverServicesResult(
@@ -230,6 +236,8 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           errorString: e.toString(),
         ),
       );
+
+      return false;
     }
   }
 
@@ -245,7 +253,7 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
   }
 
   @override
-  Future<void> readCharacteristic(
+  Future<bool> readCharacteristic(
     BmReadCharacteristicRequest request,
   ) async {
     try {
@@ -284,6 +292,8 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           errorString: '',
         ),
       );
+
+      return true;
     } catch (e) {
       _onCharacteristicReceivedController.add(
         BmCharacteristicData(
@@ -297,11 +307,13 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           errorString: e.toString(),
         ),
       );
+
+      return false;
     }
   }
 
   @override
-  Future<void> readDescriptor(
+  Future<bool> readDescriptor(
     BmReadDescriptorRequest request,
   ) async {
     try {
@@ -343,6 +355,8 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           errorString: '',
         ),
       );
+
+      return true;
     } catch (e) {
       _onDescriptorReadController.add(
         BmDescriptorData(
@@ -358,11 +372,13 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           errorString: e.toString(),
         ),
       );
+
+      return false;
     }
   }
 
   @override
-  Future<void> setNotifyValue(
+  Future<bool> setNotifyValue(
     BmSetNotifyValueRequest request,
   ) async {
     final device = _devices[request.remoteId];
@@ -401,10 +417,12 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
         _characteristicValueChangedEventListener,
       );
     }
+
+    return true;
   }
 
   @override
-  Future<void> startScan(
+  Future<bool> startScan(
     BmScanSettings request,
   ) async {
     try {
@@ -490,6 +508,8 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           errorString: '',
         ),
       );
+
+      return true;
     } catch (e) {
       _onScanResponseController.add(
         BmScanResponse(
@@ -499,32 +519,13 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           errorString: e.toString(),
         ),
       );
+
+      return false;
     }
   }
 
   @override
-  Future<void> setLogLevel(
-    BmSetLogLevelRequest request,
-  ) {
-    return Future.value();
-  }
-
-  @override
-  Future<void> setOptions(
-    BmSetOptionsRequest request,
-  ) {
-    return Future.value();
-  }
-
-  @override
-  Future<void> stopScan(
-    BmStopScanRequest request,
-  ) {
-    return Future.value();
-  }
-
-  @override
-  Future<void> writeCharacteristic(
+  Future<bool> writeCharacteristic(
     BmWriteCharacteristicRequest request,
   ) async {
     try {
@@ -567,6 +568,8 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           errorString: '',
         ),
       );
+
+      return true;
     } catch (e) {
       _onCharacteristicWrittenController.add(
         BmCharacteristicData(
@@ -580,11 +583,13 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           errorString: e.toString(),
         ),
       );
+
+      return false;
     }
   }
 
   @override
-  Future<void> writeDescriptor(
+  Future<bool> writeDescriptor(
     BmWriteDescriptorRequest request,
   ) async {
     try {
@@ -627,6 +632,8 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           errorString: '',
         ),
       );
+
+      return true;
     } catch (e) {
       _onDescriptorWrittenController.add(
         BmDescriptorData(
@@ -642,6 +649,8 @@ class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           errorString: e.toString(),
         ),
       );
+
+      return false;
     }
   }
 

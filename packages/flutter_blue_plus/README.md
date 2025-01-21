@@ -91,6 +91,24 @@ flutter run
 <img alt="FlutterBlue" src="https://github.com/boskokg/flutter_blue_plus/blob/master/site/example.png?raw=true" />
 </p>
 
+## Versioning
+
+`flutter_blue_plus` uses 1.X.X style versioning.
+
+For bigger, riskier, or minor breaking changes we'll bump the minor version. e.g. `1.34.X` -> `1.35.0`.
+
+Large breaking changes are not expected at this point. The API is stable.
+
+Developers should add a fixed version of `flutter_blue_plus` as a dependency in their `pubspec.yaml` file.
+
+`flutter_blue_plus_android`, `flutter_blue_plus_darwin`, `flutter_blue_plus_linux`, `flutter_blue_plus_platform_interface`, `flutter_blue_plus_web` use [Semantic Versioning](https://semver.org).
+
+For bug fixes we'll bump the patch version. e.g. `1.0.0` -> `1.0.1`.
+
+For new features we'll bump the minor version. e.g. `1.0.0` -> `1.1.0`.
+
+For breaking changes we'll bump the major version. e.g. `1.0.0` -> `2.0.0`.
+
 ## Usage
 
 ### 🔥 Error Handling 🔥
@@ -152,7 +170,7 @@ var subscription = FlutterBluePlus.adapterState.listen((BluetoothAdapterState st
 
 // turn on bluetooth ourself if we can
 // for iOS, the user controls bluetooth enable/disable
-if (Platform.isAndroid) {
+if (!kIsWeb && Platform.isAndroid) {
     await FlutterBluePlus.turnOn();
 }
 
@@ -279,7 +297,7 @@ final subscription = device.mtu.listen((int mtu) {
 device.cancelWhenDisconnected(subscription);
 
 // You can also manually change the mtu yourself.
-if (Platform.isAndroid) {
+if (!kIsWeb && Platform.isAndroid) {
     await device.requestMtu(512);
 }
 ```
@@ -626,19 +644,21 @@ You can try using https://pub.dev/packages/flutter_foreground_task or possibly h
 
 ## Compatibility
 
+Please note that not all platforms support all functionality. Where functionality is unsupported, sensible defaults will be returned, instead of an `UnimplementedError` being thrown.
+
 ### FlutterBluePlus API
 
 |                  | Android | iOS | Linux | macOS | Web | Description                                                 |
 |------------------|---------|-----|-------|-------|-----|-------------------------------------------------------------|
-| setLogLevel      | ✔️      | ✔️  | ✔️    | ✔️    | ✔️  | Configure plugin log level                                  |
-| setOptions       | ✔️      | ✔️  | ✔️    | ✔️    | ✔️  | Set configurable bluetooth options                          |
+| setLogLevel      | ✔️      | ✔️  | ✔️    | ✔️    | ❌   | Configure plugin log level                                  |
+| setOptions       | ✔️      | ✔️  | ❌     | ✔️    | ❌   | Set configurable bluetooth options                          |
 | isSupported      | ✔️      | ✔️  | ✔️    | ✔️    | ✔️  | Checks whether the device supports Bluetooth                |
 | turnOn           | ✔️      | ❌   | ✔️    | ❌     | ❌   | Turns on the bluetooth adapter                              |
 | turnOff          | ✔️      | ❌   | ✔️    | ❌     | ❌   | Turns off the bluetooth adapter                             |
 | adapterStateNow  | ✔️      | ✔️  | ✔️    | ✔️    | ❌   | Current state of the bluetooth adapter                      |
 | adapterState     | ✔️      | ✔️  | ✔️    | ✔️    | ❌   | Stream of on & off states of the bluetooth adapter          |
 | startScan        | ✔️      | ✔️  | ✔️    | ✔️    | ✔️  | Starts a scan for Ble devices                               |
-| stopScan         | ✔️      | ✔️  | ✔️    | ✔️    | ✔️  | Stop an existing scan for Ble devices                       |
+| stopScan         | ✔️      | ✔️  | ✔️    | ✔️    | ❌   | Stop an existing scan for Ble devices                       |
 | onScanResults    | ✔️      | ✔️  | ✔️    | ✔️    | ✔️  | Stream of live scan results                                 |
 | scanResults      | ✔️      | ✔️  | ✔️    | ✔️    | ✔️  | Stream of live scan results or previous results             |
 | lastScanResults  | ✔️      | ✔️  | ✔️    | ✔️    | ✔️  | The most recent scan results                                |

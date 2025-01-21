@@ -262,7 +262,7 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   }
 
   @override
-  Future<void> connect(
+  Future<bool> connect(
     BmConnectRequest request,
   ) async {
     await _initFlutterBluePlus();
@@ -274,10 +274,12 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
     );
 
     await device.connect();
+
+    return true;
   }
 
   @override
-  Future<void> createBond(
+  Future<bool> createBond(
     BmCreateBondRequest request,
   ) async {
     await _initFlutterBluePlus();
@@ -289,10 +291,12 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
     );
 
     await device.pair();
+
+    return true;
   }
 
   @override
-  Future<void> disconnect(
+  Future<bool> disconnect(
     BmDisconnectRequest request,
   ) async {
     await _initFlutterBluePlus();
@@ -304,11 +308,13 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
     );
 
     await device.disconnect();
+
+    return true;
   }
 
   int characteristicCounter = 0;
   @override
-  Future<void> discoverServices(
+  Future<bool> discoverServices(
     BmDiscoverServicesRequest request,
   ) async {
     try {
@@ -401,6 +407,8 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
           errorString: '',
         ),
       );
+
+      return true;
     } catch (e) {
       _onDiscoveredServicesController.add(
         BmDiscoverServicesResult(
@@ -411,6 +419,8 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
           errorString: '',
         ),
       );
+
+      return false;
     }
   }
 
@@ -505,7 +515,7 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   }
 
   @override
-  Future<void> readCharacteristic(
+  Future<bool> readCharacteristic(
     BmReadCharacteristicRequest request,
   ) async {
     try {
@@ -556,6 +566,7 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
         ),
       );
     } catch (e) {
+      // Add the characteristic regarless of whether reading descriptors fails.
       _onCharacteristicReadController.add(
         BmCharacteristicData(
           remoteId: request.remoteId,
@@ -569,10 +580,11 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
         ),
       );
     }
+    return false;
   }
 
   @override
-  Future<void> readDescriptor(
+  Future<bool> readDescriptor(
     BmReadDescriptorRequest request,
   ) async {
     try {
@@ -636,6 +648,8 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
           errorString: '',
         ),
       );
+
+      return true;
     } catch (e) {
       _onDescriptorReadController.add(
         BmDescriptorData(
@@ -651,11 +665,13 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
           errorString: e.toString(),
         ),
       );
+
+      return false;
     }
   }
 
   @override
-  Future<void> readRssi(
+  Future<bool> readRssi(
     BmReadRssiRequest request,
   ) async {
     try {
@@ -676,6 +692,8 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
           errorString: '',
         ),
       );
+
+      return true;
     } catch (e) {
       _onReadRssiController.add(
         BmReadRssiResult(
@@ -686,20 +704,24 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
           errorString: e.toString(),
         ),
       );
+
+      return false;
     }
   }
 
   @override
-  Future<void> setLogLevel(
+  Future<bool> setLogLevel(
     BmSetLogLevelRequest request,
   ) async {
     await _initFlutterBluePlus();
 
     _logLevel = request.logLevel;
+
+    return true;
   }
 
   @override
-  Future<void> setNotifyValue(
+  Future<bool> setNotifyValue(
     BmSetNotifyValueRequest request,
   ) async {
     await _initFlutterBluePlus();
@@ -735,17 +757,12 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
     } else {
       await characteristic.stopNotify();
     }
+
+    return true;
   }
 
   @override
-  Future<void> setOptions(
-    BmSetOptionsRequest request,
-  ) {
-    return Future.value();
-  }
-
-  @override
-  Future<void> startScan(
+  Future<bool> startScan(
     BmScanSettings request,
   ) async {
     await _initFlutterBluePlus();
@@ -759,37 +776,45 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
     );
 
     await _client.adapters.first.startDiscovery();
+
+    return true;
   }
 
   @override
-  Future<void> stopScan(
+  Future<bool> stopScan(
     BmStopScanRequest request,
   ) async {
     await _initFlutterBluePlus();
 
     await _client.adapters.first.stopDiscovery();
+
+    return true;
   }
 
   @override
-  Future<void> turnOff(
+  Future<bool> turnOff(
     BmTurnOffRequest request,
   ) async {
     await _initFlutterBluePlus();
 
     await _client.adapters.first.setPowered(false);
+
+    return true;
   }
 
   @override
-  Future<void> turnOn(
+  Future<bool> turnOn(
     BmTurnOnRequest request,
   ) async {
     await _initFlutterBluePlus();
 
     await _client.adapters.first.setPowered(true);
+
+    return true;
   }
 
   @override
-  Future<void> writeCharacteristic(
+  Future<bool> writeCharacteristic(
     BmWriteCharacteristicRequest request,
   ) async {
     try {
@@ -844,6 +869,8 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
           errorString: '',
         ),
       );
+
+      return true;
     } catch (e) {
       _onCharacteristicWrittenController.add(
         BmCharacteristicData(
@@ -857,11 +884,13 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
           errorString: e.toString(),
         ),
       );
+
+      return false;
     }
   }
 
   @override
-  Future<void> writeDescriptor(
+  Future<bool> writeDescriptor(
     BmWriteDescriptorRequest request,
   ) async {
     try {
@@ -925,6 +954,8 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
           errorString: '',
         ),
       );
+
+      return true;
     } catch (e) {
       _onDescriptorWrittenController.add(
         BmDescriptorData(
@@ -940,6 +971,8 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
           errorString: e.toString(),
         ),
       );
+
+      return false;
     }
   }
 

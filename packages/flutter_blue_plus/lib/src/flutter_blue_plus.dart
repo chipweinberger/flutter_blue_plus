@@ -119,8 +119,19 @@ class FlutterBluePlus {
 
   /// Turn on Bluetooth (Android only),
   static Future<void> turnOn({int timeout = 60}) async {
+    var responseStream =
+        FlutterBluePlusPlatform.instance.onAdapterStateChanged.where((p) => p.adapterState == BmAdapterStateEnum.on);
+
+    // Start listening now, before invokeMethod, to ensure we don't miss the response
+    Future<BmBluetoothAdapterState> futureResponse = responseStream.first;
+
     // invoke
-    await _invokeMethod(() => FlutterBluePlusPlatform.instance.turnOn(BmTurnOnRequest())).fbpTimeout(timeout, "turnOn");
+    bool changed = await _invokeMethod(() => FlutterBluePlusPlatform.instance.turnOn(BmTurnOnRequest()));
+
+    // only wait if bluetooth was off
+    if (changed) {
+      await futureResponse.fbpTimeout(timeout, "turnOn");
+    }
   }
 
   /// Gets the current state of the Bluetooth module
@@ -452,7 +463,7 @@ class FlutterBluePlus {
           // do not clear `bondState`, for faster performance.
 
           // autoconnect
-          if (Platform.isAndroid == false) {
+          if (!kIsWeb && Platform.isAndroid == false) {
             if (_autoConnect.contains(r.remoteId)) {
               if (_adapterStateNow == BmAdapterStateEnum.on) {
                 var d = BluetoothDevice(remoteId: r.remoteId);
@@ -587,9 +598,19 @@ class FlutterBluePlus {
   /// Turn off Bluetooth (Android only),
   @Deprecated('Deprecated in Android SDK 33 with no replacement')
   static Future<void> turnOff({int timeout = 10}) async {
+    var responseStream =
+        FlutterBluePlusPlatform.instance.onAdapterStateChanged.where((p) => p.adapterState == BmAdapterStateEnum.off);
+
+    // Start listening now, before invokeMethod, to ensure we don't miss the response
+    Future<BmBluetoothAdapterState> futureResponse = responseStream.first;
+
     // invoke
-    await _invokeMethod(() => FlutterBluePlusPlatform.instance.turnOff(BmTurnOffRequest()))
-        .fbpTimeout(timeout, "turnOff");
+    bool changed = await _invokeMethod(() => FlutterBluePlusPlatform.instance.turnOff(BmTurnOffRequest()));
+
+    // only wait if bluetooth was on
+    if (changed) {
+      await futureResponse.fbpTimeout(timeout, "turnOff");
+    }
   }
 
   static void log(String s) {
