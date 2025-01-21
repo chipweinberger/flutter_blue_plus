@@ -9,7 +9,7 @@ import 'package:web/web.dart' show Event;
 import 'src/html.dart';
 import 'src/web_bluetooth.dart';
 
-class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
+final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
   late final _characteristicValueChangedEventListener = _handleCharacteristicValueChanged.toJS;
 
   final _devices = <DeviceIdentifier, BluetoothDevice>{};
