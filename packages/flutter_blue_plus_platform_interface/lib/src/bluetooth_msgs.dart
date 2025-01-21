@@ -323,6 +323,7 @@ class BmBluetoothCharacteristic {
       for (var key in v.keys) {
         bv[key] = v[key];
       }
+      bv['characteristic_index'] = json['characteristic_index'];
       descs.add(BmBluetoothDescriptor.fromMap(bv));
     }
 
