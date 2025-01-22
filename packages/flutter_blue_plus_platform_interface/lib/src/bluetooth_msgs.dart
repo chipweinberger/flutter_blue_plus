@@ -913,9 +913,11 @@ class BmTurnOnRequest {
 
 class BmSetLogLevelRequest {
   LogLevel logLevel;
+  bool logColor;
 
   BmSetLogLevelRequest({
-    required this.logLevel,
+    this.logLevel = LogLevel.none,
+    this.logColor = true,
   });
 }
 
