@@ -1,3 +1,6 @@
+## 2.0.1
+* Add log color
+
 ## 2.0.0
 * Combine the packages previously published as flutter_blue_plus_ios and flutter_blue_plus_macos
 * Add support for Swift Package Manager
