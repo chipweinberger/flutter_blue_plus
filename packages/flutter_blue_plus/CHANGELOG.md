@@ -1,3 +1,7 @@
+## 1.35.2
+* **[Refactor]** add log color
+* **[Refactor]** resolve the Dart analyzer issues
+
 ## 1.35.1
 * **[Fix]** Bluetooth characteristic set notify value
 * **[Fix]** Bluetooth device create bond
