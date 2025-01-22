@@ -1,6 +1,6 @@
-# flutter_blue_plus_ios
+# flutter_blue_plus_darwin
 
-The iOS implementation of [`flutter_blue_plus`][1].
+The iOS and macOS implementation of [`flutter_blue_plus`][1].
 
 ## Usage
 

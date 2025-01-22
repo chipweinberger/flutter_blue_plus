@@ -11,6 +11,7 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
 
   var _initialized = false;
   var _logLevel = LogLevel.none;
+  var _logColor = true;
 
   final _onAdapterStateChangedController = StreamController<BmBluetoothAdapterState>.broadcast();
   final _onBondStateChangedController = StreamController<BmBondStateResponse>.broadcast();
@@ -292,6 +293,7 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
     BmSetLogLevelRequest request,
   ) async {
     _logLevel = request.logLevel;
+    _logColor = request.logColor;
 
     return await _invokeMethod<bool>(
       'setLogLevel',
@@ -395,18 +397,26 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
 
     // log args
     if (_logLevel == LogLevel.verbose) {
-      print("[FBP] <$method> args: $arguments");
+      var func = '<$method>';
+      var args = arguments.toString();
+      func = _logColor ? '\x1B[1;30m$func\x1B[0m' : func;
+      args = _logColor ? '\x1B[1;35m$args\x1B[0m' : args;
+      print('[FBP] $func args: $args');
     }
 
     // invoke
-    final result = await methodChannel.invokeMethod<T>(method, arguments);
+    final out = await methodChannel.invokeMethod<T>(method, arguments);
 
     // log result
     if (_logLevel == LogLevel.verbose) {
-      print("[FBP] ($method) result: $result");
+      var func = '($method)';
+      var result = out.toString();
+      func = _logColor ? '\x1B[1;30m$func\x1B[0m' : func;
+      result = _logColor ? '\x1B[1;33m$result\x1B[0m' : result;
+      print('[FBP] $func result: $result');
     }
 
-    return result;
+    return out;
   }
 
   Future<void> _initFlutterBluePlus() async {
@@ -433,12 +443,14 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
   ) async {
     // log result
     if (_logLevel == LogLevel.verbose) {
-      if (call.method == 'OnDiscoveredServices') {
-        // this is really slow so we can't pretty print anything that happens a lot
-        print('[FBP] [[ ${call.method} ]] result: ${_prettyPrint(call.arguments)}');
-      } else {
-        print('[FBP] [[ ${call.method} ]] result: ${call.arguments}');
-      }
+      var func = '[[ ${call.method} ]]';
+      var result = switch (call.method) {
+        'OnDiscoveredServices' => _prettyPrint(call.arguments),
+        _ => call.arguments.toString(),
+      };
+      func = _logColor ? '\x1B[1;30m$func\x1B[0m' : func;
+      result = _logColor ? '\x1B[1;33m$result\x1B[0m' : result;
+      print('[FBP] $func result: $result');
     }
 
     // handle method call

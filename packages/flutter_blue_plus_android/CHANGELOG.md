@@ -1,3 +1,6 @@
+## 2.0.1
+* Add log color
+
 ## 2.0.0
 * Replace void return types with bool return types
 
