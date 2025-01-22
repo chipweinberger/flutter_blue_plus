@@ -198,6 +198,7 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     BmSetLogLevelRequest request,
   ) async {
     _logLevel = request.logLevel;
+    _logColor = request.logColor;
 
     return await _invokeMethod<bool>(
       'setLogLevel',
