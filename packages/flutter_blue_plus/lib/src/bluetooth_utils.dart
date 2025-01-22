@@ -107,8 +107,6 @@ extension PhyExt on Phy {
         return 2;
       case Phy.leCoded:
         return 3;
-      default:
-        return 1;
     }
   }
 }

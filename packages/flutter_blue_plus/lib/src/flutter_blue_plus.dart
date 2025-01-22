@@ -49,7 +49,6 @@ class FlutterBluePlus {
 
   /// FlutterBluePlus log level
   static LogLevel _logLevel = LogLevel.debug;
-  static bool _logColor = true;
 
   ////////////////////
   //  Public
@@ -383,7 +382,6 @@ class FlutterBluePlus {
   /// Sets the internal FlutterBlue log level
   static Future<void> setLogLevel(LogLevel level, {color = true}) async {
     _logLevel = level;
-    _logColor = color;
     await _invokeMethod(() => FlutterBluePlusPlatform.instance.setLogLevel(BmSetLogLevelRequest(logLevel: level, logColor: color)));
   }
 

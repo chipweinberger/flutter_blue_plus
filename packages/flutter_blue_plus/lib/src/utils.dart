@@ -367,27 +367,6 @@ class _MutexFactory {
   }
 }
 
-String _black(String s) {
-  // Use ANSI escape codes
-  return '\x1B[1;30m$s\x1B[0m';
-}
-
-// ignore: unused_element
-String _green(String s) {
-  // Use ANSI escape codes
-  return '\x1B[1;32m$s\x1B[0m';
-}
-
-String _magenta(String s) {
-  // Use ANSI escape codes
-  return '\x1B[1;35m$s\x1B[0m';
-}
-
-String _brown(String s) {
-  // Use ANSI escape codes
-  return '\x1B[1;33m$s\x1B[0m';
-}
-
 extension FirstWhereOrNullExtension<T> on Iterable<T> {
   /// returns first item to satisfy `test`, else null
   T? _firstWhereOrNull(bool Function(T) test) {
