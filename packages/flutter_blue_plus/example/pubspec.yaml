@@ -35,4 +35,4 @@ flutter:
   uses-material-design: true
 
   # see https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers
-  disable-swift-package-manager: true
+  # disable-swift-package-manager: true
