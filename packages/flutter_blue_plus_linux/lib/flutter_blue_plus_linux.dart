@@ -579,7 +579,7 @@ class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
         ),
       );
     }
-    return false;
+    return true;
   }
 
   @override
