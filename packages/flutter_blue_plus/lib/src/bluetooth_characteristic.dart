@@ -17,7 +17,7 @@ class BluetoothCharacteristic {
     required this.remoteId,
     required this.serviceUuid,
     required this.characteristicUuid,
-    required this.characteristicIndex,
+    this.characteristicIndex = 0,
     this.primaryServiceUuid,
   });
 
@@ -266,7 +266,8 @@ class BluetoothCharacteristic {
       Future<BmDescriptorData> futureResponse = responseStream.first;
 
       // invoke
-      bool hasCCCD = await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance.setNotifyValue(request));
+      bool hasCCCD =
+          await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance.setNotifyValue(request));
 
       // wait for CCCD descriptor to be written?
       if (hasCCCD) {

@@ -4,7 +4,7 @@ import 'package:bluez/bluez.dart';
 import 'package:flutter_blue_plus_platform_interface/flutter_blue_plus_platform_interface.dart';
 import 'package:rxdart/rxdart.dart';
 
-final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
+class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   final _client = BlueZClient();
 
   var _initialized = false;
