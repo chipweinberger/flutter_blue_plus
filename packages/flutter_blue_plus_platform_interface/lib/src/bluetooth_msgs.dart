@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'device_identifier.dart';
 import 'guid.dart';
 import 'log_level.dart';
@@ -877,10 +879,19 @@ class BmBondStateResponse {
 
 class BmCreateBondRequest {
   DeviceIdentifier remoteId;
+  Uint8List? pin;
 
   BmCreateBondRequest({
     required this.remoteId,
+    required this.pin,
   });
+  
+  Map<dynamic, dynamic> toMap() {
+    final Map<dynamic, dynamic> data = {};
+    data['remote_id'] = remoteId.str;
+    data['pin'] = pin;
+    return data;
+  }
 }
 
 class BmRemoveBondRequest {

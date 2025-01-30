@@ -104,6 +104,7 @@ public class FlutterBluePlusPlugin implements
     private final Map<String, BluetoothGatt> mConnectedDevices = new ConcurrentHashMap<>();
     private final Map<String, BluetoothGatt> mCurrentlyConnectingDevices = new ConcurrentHashMap<>();
     private final Map<String, BluetoothDevice> mBondingDevices = new ConcurrentHashMap<>();
+    private final Map<String, byte[]> mBondingPins = new ConcurrentHashMap<>();
     private final Map<String, Integer> mMtu = new ConcurrentHashMap<>();
     private final Map<String, BluetoothGatt> mAutoConnected = new ConcurrentHashMap<>();
     private final Map<String, String> mWriteChr = new ConcurrentHashMap<>();
@@ -200,6 +201,9 @@ public class FlutterBluePlusPlugin implements
         IntentFilter filterAdapter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
         this.context.registerReceiver(mBluetoothAdapterStateReceiver, filterAdapter);
 
+        IntentFilter filterPair = new IntentFilter(BluetoothDevice.ACTION_PAIRING_REQUEST);
+        this.context.registerReceiver(mBluetoothPairRequestReceiver, filterPair);
+
         IntentFilter filterBond = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         this.context.registerReceiver(mBluetoothBondStateReceiver, filterBond);
     }
@@ -226,6 +230,7 @@ public class FlutterBluePlusPlugin implements
         disconnectAllDevices("onDetachedFromEngine");
 
         context.unregisterReceiver(mBluetoothBondStateReceiver);
+        context.unregisterReceiver(mBluetoothPairRequestReceiver);
         context.unregisterReceiver(mBluetoothAdapterStateReceiver);
         context = null;
 
@@ -1391,7 +1396,11 @@ public class FlutterBluePlusPlugin implements
 
                 case "createBond":
                 {
-                    String remoteId = (String) call.arguments;
+                    HashMap<String, Object> data = call.arguments();
+                    String remoteId = (String) data.get("remote_id");
+                    if (data.get("pin") != null) {
+                        mBondingPins.put(remoteId, (byte[]) data.get("pin"));
+                    }
 
                     // check connection
                     BluetoothGatt gatt = mConnectedDevices.get(remoteId);
@@ -1771,6 +1780,7 @@ public class FlutterBluePlusPlugin implements
         mConnectedDevices.clear();
         mCurrentlyConnectingDevices.clear();
         mBondingDevices.clear();
+        mBondingPins.clear();
         mMtu.clear();
         mWriteChr.clear();
         mWriteDesc.clear();
@@ -1970,6 +1980,36 @@ public class FlutterBluePlusPlugin implements
     // ██   ██  ██       ██       ██       ██   ██  ██   ██       ██   ██
     // ██   ██  ███████   ██████  ███████  ██    ████    ███████  ██   ██
 
+
+    private final BroadcastReceiver mBluetoothPairRequestReceiver = new BroadcastReceiver() {
+        @Override
+        @SuppressWarnings("deprecation") // need for compatability
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (action == null || action.equals(BluetoothDevice.ACTION_PAIRING_REQUEST) == false) {
+                return;
+            }
+
+            // BluetoothDevice
+            final BluetoothDevice device;
+            if (Build.VERSION.SDK_INT >= 33) { // Android 13 (August 2022)
+                device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, BluetoothDevice.class);
+            } else {
+                device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+            }
+
+            String remoteId = device.getAddress();
+            if (mBondingPins.containsKey(remoteId)) {
+                byte[] pin = mBondingPins.get(remoteId);
+                log(LogLevel.DEBUG, "Setting PIN code for " + remoteId + ": " + bytesToHex(pin));
+                // min. API level 19
+                if (device.setPin(pin) == false) {
+                    log(LogLevel.ERROR, "setPin() failed on " + remoteId);
+                }
+                mBondingPins.remove(remoteId);
+            }
+        }
+    };
 
     private final BroadcastReceiver mBluetoothBondStateReceiver = new BroadcastReceiver()
     {
@@ -2181,6 +2221,9 @@ public class FlutterBluePlusPlugin implements
                     // remove from currently bonding devices
                     mBondingDevices.remove(remoteId);
 
+                    // remove from cached PINs
+                    mBondingPins.remove(remoteId);
+
                     // we cannot call 'close' for autoconnected devices
                     // because it prevents autoconnect from working
                     if (mAutoConnected.containsKey(remoteId)) {
@@ -2225,6 +2268,9 @@ public class FlutterBluePlusPlugin implements
                     // remove from currently bonding devices
                     mBondingDevices.remove(remoteId);
 
+                    // remove from cached PINs
+                    mBondingPins.remove(remoteId);
+
                     // disconnect and close the connection straight away
                     gatt.disconnect();
                     gatt.close();
@@ -2243,6 +2289,9 @@ public class FlutterBluePlusPlugin implements
 
                     // remove from currently bonding devices
                     mBondingDevices.remove(remoteId);
+
+                    // remove from cached PINs
+                    mBondingPins.remove(remoteId);
 
                     // close the connection
                     gatt.close();

@@ -555,7 +555,7 @@ class BluetoothDevice {
 
   /// Force the bonding popup to show now (Android Only)
   /// Note! calling this is usually not necessary!! The platform does it automatically.
-  Future<void> createBond({int timeout = 90}) async {
+  Future<void> createBond({int timeout = 90, Uint8List? pin}) async {
     // check android
     if (kIsWeb || !Platform.isAndroid) {
       throw FlutterBluePlusException(ErrorPlatform.fbp, "createBond",
@@ -581,7 +581,7 @@ class BluetoothDevice {
       Future<BmBondStateResponse> futureResponse = responseStream.first;
 
       // invoke
-      bool changed = await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance.createBond(BmCreateBondRequest(remoteId: remoteId)));
+      bool changed = await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance.createBond(BmCreateBondRequest(remoteId: remoteId, pin: pin)));
 
       // only wait for 'bonded' if we weren't already bonded
       if (changed) {
