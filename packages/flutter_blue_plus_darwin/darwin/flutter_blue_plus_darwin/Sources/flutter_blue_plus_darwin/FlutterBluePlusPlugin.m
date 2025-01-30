@@ -1441,6 +1441,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"success":                     error == nil ? @(1) : @(0),
         @"error_string":                error ? [error localizedDescription] : @"success",
         @"error_code":                  error ? @(error.code) : @(0),
+        @"receive_event":               @(0), // see BmReceiveEventEnum
     } mutableCopy];
 
     // remove if null

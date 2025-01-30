@@ -459,6 +459,12 @@ class BmReadCharacteristicRequest {
   }
 }
 
+enum BmReceiveEventEnum {
+  unknown, // 0
+  read, // 1
+  notify, // 2
+}
+
 class BmCharacteristicData {
   final DeviceIdentifier remoteId;
   final Guid serviceUuid;
@@ -468,6 +474,7 @@ class BmCharacteristicData {
   final bool success;
   final int errorCode;
   final String errorString;
+  final BmReceiveEventEnum receiveEvent;
 
 
   BmCharacteristicData({
@@ -479,6 +486,7 @@ class BmCharacteristicData {
     required this.success,
     required this.errorCode,
     required this.errorString,
+    this.receiveEvent = BmReceiveEventEnum.unknown,
   });
 
   factory BmCharacteristicData.fromMap(Map<dynamic, dynamic> json) {
@@ -491,6 +499,7 @@ class BmCharacteristicData {
       success: json['success'] != 0,
       errorCode: json['error_code'],
       errorString: json['error_string'],
+      receiveEvent: BmReceiveEventEnum.values[json['receive_event']],
     );
   }
 }
