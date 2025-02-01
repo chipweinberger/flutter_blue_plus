@@ -19,7 +19,7 @@ FlutterBluePlus is sponsored by [Jamcorder](https://www.jamcorder.com/).
 
 **Note: this plugin is continuous work from [FlutterBlue](https://github.com/pauldemarco/flutter_blue).**
 
-Migrating from [FlutterBlue](https://github.com/pauldemarco/flutter_blue)? See [Migration Guide](MIGRATION.md)
+Migrating from [FlutterBlue](https://github.com/pauldemarco/flutter_blue)? See [Migration Guide](./MIGRATION.md)
 
 ## Contents
 
