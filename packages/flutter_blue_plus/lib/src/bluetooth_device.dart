@@ -630,8 +630,6 @@ class BluetoothDevice {
       // only wait for 'unbonded' state if we weren't already unbonded
       if (changed) {
         BmBondStateResponse bs = await futureResponse
-            .fbpEnsureAdapterIsOn("removeBond")
-            .fbpEnsureDeviceIsConnected(this, "removeBond")
             .fbpTimeout(timeout, "removeBond");
 
         // success?
