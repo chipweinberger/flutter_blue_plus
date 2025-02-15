@@ -219,6 +219,7 @@ class FlutterBluePlus {
     bool androidLegacy = false,
     AndroidScanMode androidScanMode = AndroidScanMode.lowLatency,
     bool androidUsesFineLocation = false,
+    List<Guid> webOptionalServices = const [],
   }) async {
     // check args
     assert(removeIfGone == null || continuousUpdates, "removeIfGone requires continuousUpdates");
@@ -263,7 +264,8 @@ class FlutterBluePlus {
           continuousDivisor: continuousDivisor,
           androidLegacy: androidLegacy,
           androidScanMode: androidScanMode.value,
-          androidUsesFineLocation: androidUsesFineLocation);
+          androidUsesFineLocation: androidUsesFineLocation,
+          webOptionalServices: webOptionalServices);
 
       Stream<BmScanResponse> responseStream = FlutterBluePlusPlatform.instance.onScanResponse;
 
