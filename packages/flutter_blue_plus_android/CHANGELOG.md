@@ -1,3 +1,6 @@
+## 3.0.0
+* Add option to provide pairing PIN to `createBond` (#1119)
+
 ## 2.0.1
 * Add log color
 
