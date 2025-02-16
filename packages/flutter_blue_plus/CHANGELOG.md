@@ -1,5 +1,6 @@
 ## 1.35.3
 * **[Feature]** support for web optional services (#1124)
+* **[Feature]** option to provide pairing PIN to `createBond` (#1119)
 
 ## 1.35.2
 * **[Refactor]** add log color
