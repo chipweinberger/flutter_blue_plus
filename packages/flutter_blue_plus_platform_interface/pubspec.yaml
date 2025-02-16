@@ -1,6 +1,6 @@
 name: flutter_blue_plus_platform_interface
 description: A common platform interface for the flutter_blue_plus plugin.
-version: 2.0.1
+version: 2.0.2
 homepage: https://github.com/chipweinberger/flutter_blue_plus
 
 environment:

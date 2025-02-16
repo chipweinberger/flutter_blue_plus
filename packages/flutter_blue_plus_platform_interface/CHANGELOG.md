@@ -1,3 +1,6 @@
+## 2.0.2
+* Add support for web optional services (#1124)
+
 ## 2.0.1
 * Add log color
 

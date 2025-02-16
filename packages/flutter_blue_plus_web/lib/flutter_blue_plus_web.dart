@@ -477,6 +477,7 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           optionalServices: request.webOptionalServices.map((e) => e.str128.toJS).toList().toJS,
         );
       } else {
+        // https://developer.mozilla.org/en-US/docs/Web/API/Bluetooth/requestDevice#acceptalldevices
         options = RequestDeviceOptions(
           acceptAllDevices: true,
           optionalServices: request.webOptionalServices.map((e) => e.str128.toJS).toList().toJS,

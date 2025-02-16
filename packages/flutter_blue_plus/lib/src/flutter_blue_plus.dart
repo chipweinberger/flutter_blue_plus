@@ -204,6 +204,9 @@ class FlutterBluePlus {
   ///        dependent on the your Bluetooth stack implementation.
   ///   - [androidScanMode] choose the android scan mode to use when scanning
   ///   - [androidUsesFineLocation] request `ACCESS_FINE_LOCATION` permission at runtime
+  ///   - [webOptionalServices] the [optional services](https://developer.mozilla.org/en-US/docs/Web/API/Bluetooth/requestDevice#optionalservices)
+  ///     for the web target. Required to [access device services](https://webbluetoothcg.github.io/web-bluetooth/#dom-requestdeviceoptions-optionalservices)
+  ///     when scanning without [withServices] parameter.
   static Future<void> startScan({
     List<Guid> withServices = const [],
     List<String> withRemoteIds = const [],

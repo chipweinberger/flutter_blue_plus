@@ -1,3 +1,7 @@
+
+## 2.0.1
+* Add support for web optional services (#1124)
+
 ## 2.0.0
 * Replace void return types with bool return types
 
