@@ -1,3 +1,6 @@
+## 3.0.0
+* Update platform interface version to 3.0.0
+
 ## 2.0.1
 * Add log color
 
