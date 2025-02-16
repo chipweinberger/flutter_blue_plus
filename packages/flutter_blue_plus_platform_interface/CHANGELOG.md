@@ -1,5 +1,6 @@
-## 2.0.2
+## 3.0.0
 * Add support for web optional services (#1124)
+* Add option to provide pairing PIN to `createBond` (#1119)
 
 ## 2.0.1
 * Add log color
