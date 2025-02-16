@@ -1,5 +1,4 @@
-
-## 2.0.1
+## 3.0.0
 * Add support for web optional services (#1124)
 
 ## 2.0.0
