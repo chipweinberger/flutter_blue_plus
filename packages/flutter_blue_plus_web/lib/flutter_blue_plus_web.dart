@@ -474,10 +474,12 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
       if (filters.length > 0) {
         options = RequestDeviceOptions(
           filters: filters.toJS,
+          optionalServices: request.webOptionalServices.map((e) => e.str128.toJS).toList().toJS,
         );
       } else {
         options = RequestDeviceOptions(
           acceptAllDevices: true,
+          optionalServices: request.webOptionalServices.map((e) => e.str128.toJS).toList().toJS,
         );
       }
 
