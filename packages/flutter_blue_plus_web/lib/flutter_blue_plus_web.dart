@@ -155,22 +155,29 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
 
       final services = <BmBluetoothService>[];
 
-      for (final s in (await gatt.getPrimaryServices().toDart).toDart) {
+      List<BluetoothRemoteGATTService> primaryServices = (await gatt.getPrimaryServices().toDart).toDart;
+      for (final s in primaryServices) {
         final characteristics = <BmBluetoothCharacteristic>[];
 
-        for (final c in (await s.getCharacteristics().toDart).toDart) {
+        List<BluetoothRemoteGATTCharacteristic> chars = (await s.getCharacteristics().toDart).toDart;
+        for (final c in chars) {
           final descriptors = <BmBluetoothDescriptor>[];
 
-          for (final d in (await c.getDescriptors().toDart).toDart) {
-            descriptors.add(
-              BmBluetoothDescriptor(
-                remoteId: device.remoteId,
-                serviceUuid: Guid.fromString(s.uuid),
-                characteristicUuid: Guid.fromString(c.uuid),
-                descriptorUuid: Guid.fromString(d.uuid),
-                primaryServiceUuid: null,
-              ),
-            );
+          try {
+            List<BluetoothRemoteGATTDescriptor> descs = (await c.getDescriptors().toDart).toDart;
+            for (final d in descs) {
+              descriptors.add(
+                BmBluetoothDescriptor(
+                  remoteId: device.remoteId,
+                  serviceUuid: Guid.fromString(s.uuid),
+                  characteristicUuid: Guid.fromString(c.uuid),
+                  descriptorUuid: Guid.fromString(d.uuid),
+                  primaryServiceUuid: null,
+                ),
+              );
+            }
+          } catch(e) {
+            // ignore errors when getting characteristics descriptors
           }
 
           characteristics.add(
@@ -242,6 +249,17 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
     } catch (e) {
       return false; // https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API#browser_compatibility
     }
+  }
+
+  @override
+  Future<BmBluetoothAdapterState> getAdapterState(
+    BmBluetoothAdapterStateRequest request,
+  ) {
+    return isSupported(BmIsSupportedRequest()).then(
+      (supported) => BmBluetoothAdapterState(
+        adapterState: supported ? BmAdapterStateEnum.on : BmAdapterStateEnum.unknown,
+      ),
+    );
   }
 
   @override
