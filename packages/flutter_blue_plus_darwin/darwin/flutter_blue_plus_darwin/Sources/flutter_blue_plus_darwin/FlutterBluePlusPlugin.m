@@ -495,7 +495,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSString  *primaryServiceUuid = args[@"primary_service_uuid"];
             NSNumber  *writeTypeNumber    = args[@"write_type"];
             NSNumber  *allowLongWrite     = args[@"allow_long_write"];
-            NSString  *value              = args[@"value"];
+            NSData    *value              = args[@"value"];
             
             // Find peripheral
             CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
@@ -513,7 +513,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             // check maximum payload
             int maxLen = [self getMaxPayload:peripheral forType:writeType allowLongWrite:[allowLongWrite boolValue]];
-            int dataLen = (int) [self convertHexToData:value].length;
+            int dataLen = value.length;
             if (dataLen > maxLen) {
                 NSString* t = [writeTypeNumber intValue] == 0 ? @"withResponse" : @"withoutResponse";
                 NSString* a = [allowLongWrite boolValue] ? @", allowLongWrite" : @", noLongWrite";
@@ -565,7 +565,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             [self.writeChrs setObject:value forKey:key];
                   
             // Write to characteristic
-            [peripheral writeValue:[self convertHexToData:value] forCharacteristic:characteristic type:writeType];
+            [peripheral writeValue:value forCharacteristic:characteristic type:writeType];
 
             // remember the most recent write withoutResponse
             if (writeType == CBCharacteristicWriteWithoutResponse) {
@@ -624,7 +624,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSString  *characteristicUuid = args[@"characteristic_uuid"];
             NSString  *descriptorUuid     = args[@"descriptor_uuid"];
             NSString  *primaryServiceUuid = args[@"primary_service_uuid"];
-            NSString  *value              = args[@"value"];
+            NSData    *value              = args[@"value"];
 
             // Find peripheral
             CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
@@ -636,7 +636,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             // check mtu
             int mtu = (int) [self getMtu:peripheral];
-            int dataLen = (int) [self convertHexToData:value].length;
+            int dataLen = value.length;
             if ((mtu-3) < dataLen) {
                 NSString* f = @"data is longer than MTU allows. dataLen: %d > maxDataLen: %d";
                 NSString* s = [NSString stringWithFormat:f, dataLen, (mtu-3)];
@@ -668,7 +668,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             [self.writeDescs setObject:value forKey:key];
 
             // Write descriptor
-            [peripheral writeValue:[self convertHexToData:value] forDescriptor:descriptor];
+            [peripheral writeValue:value forDescriptor:descriptor];
 
             result(@YES);
         }
@@ -1437,7 +1437,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"service_uuid":                [characteristic.service.UUID uuidStr],
         @"characteristic_uuid":         [characteristic.UUID uuidStr],
         @"primary_service_uuid":        primaryService ? [primaryService.UUID uuidStr] : [NSNull null],
-        @"value":                       [self convertDataToHex:characteristic.value],
+        @"value":                       characteristic.value,
         @"success":                     error == nil ? @(1) : @(0),
         @"error_string":                error ? [error localizedDescription] : @"success",
         @"error_code":                  error ? @(error.code) : @(0),
@@ -1473,7 +1473,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // what data did we write?
     NSString *key = [NSString stringWithFormat:@"%@:%@:%@:%@", remoteId, serviceUuid, characteristicUuid,
         primaryService != nil ? [primaryService.UUID uuidStr] : @""];
-    NSString *value = self.writeChrs[key] ? self.writeChrs[key] : @"";
+    NSData *value = self.writeChrs[key] ? self.writeChrs[key] : [NSMutableData data];
     [self.writeChrs removeObjectForKey:key];
 
     // See BmCharacteristicData
@@ -1529,7 +1529,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"characteristic_uuid":    [characteristic.UUID uuidStr],
         @"descriptor_uuid":        CCCD,
         @"primary_service_uuid":   primaryService ? [primaryService.UUID uuidStr] : [NSNull null],
-        @"value":                  [self convertDataToHex:[NSData dataWithBytes:&value length:sizeof(value)]],
+        @"value":                  [NSData dataWithBytes:&value length:sizeof(value)],
         @"success":                @(error == nil),
         @"error_string":           error ? [error localizedDescription] : @"success",
         @"error_code":             error ? @(error.code) : @(0),
@@ -1567,7 +1567,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"characteristic_uuid":    [descriptor.characteristic.UUID uuidStr],
         @"descriptor_uuid":        [descriptor.UUID uuidStr],
         @"primary_service_uuid":   primaryService ? [primaryService.UUID uuidStr] : [NSNull null],
-        @"value":                  [self convertDataToHex:data],
+        @"value":                  data,
         @"success":                @(error == nil),
         @"error_string":           error ? [error localizedDescription] : @"success",
         @"error_code":             error ? @(error.code) : @(0),
@@ -1605,7 +1605,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // what data did we write?
     NSString *key = [NSString stringWithFormat:@"%@:%@:%@:%@:%@", remoteId, serviceUuid, characteristicUuid,
         descriptorUuid, primaryService != nil ? [primaryService.UUID uuidStr] : @""];  
-    NSString *value = self.writeChrs[key] ? self.writeChrs[key] : @"";
+    NSData *value = self.writeChrs[key] ? self.writeChrs[key] : [NSMutableData data];
     [self.writeDescs removeObjectForKey:key];
     
     // See BmDescriptorData
@@ -1773,10 +1773,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
         // trim off first 2 bytes
         NSData* trimmed = [manufData subdataWithRange:NSMakeRange(2, manufData.length - 2)];
-        NSString* hex = [self convertDataToHex:trimmed];
-        
+
         manufDataB = @{
-            @(manufId): hex,
+            @(manufId): trimmed,
         };
     }
     
@@ -1796,8 +1795,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     {
         NSMutableDictionary *mutable = [[NSMutableDictionary alloc] init];
         for (CBUUID *uuid in serviceData) {
-            NSString* hex = [self convertDataToHex:serviceData[uuid]];
-            [mutable setObject:hex forKey:[uuid uuidStr]];
+            NSData *data = serviceData[uuid];
+            [mutable setObject:data forKey:[uuid uuidStr]];
         }
         serviceDataB = [mutable copy];
     }
@@ -2013,9 +2012,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         return NO;
     }
     for (NSDictionary *f in filters) {
-        NSString *service                   = f[@"service"];
-        NSData *data = [self convertHexToData:f[@"data"]];
-        NSData *mask = [self convertHexToData:f[@"mask"]];
+        NSString *service = f[@"service"];
+        NSData *data      = f[@"data"];
+        NSData *mask      = f[@"mask"];
 
         // mask
         if (mask.length == 0 && data.length > 0) {
@@ -2043,9 +2042,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         return NO;
     }
     for (NSDictionary *f in filters) {
-        NSNumber *manufacturerId            = f[@"manufacturer_id"];
-        NSData *data = [self convertHexToData:f[@"data"]];
-        NSData *mask = [self convertHexToData:f[@"mask"]];
+        NSNumber *manufacturerId = f[@"manufacturer_id"];
+        NSData *data =             f[@"data"];
+        NSData *mask =             f[@"mask"];
 
         // first 2 bytes are manufacturer id
         unsigned short mId = 0;
@@ -2087,40 +2086,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     }
     
     return YES;
-}
-
-- (NSString *)convertDataToHex:(NSData *)data 
-{
-    if (data == nil) {
-        return @"";
-    }
-
-    const unsigned char *bytes = (const unsigned char *)[data bytes];
-    NSMutableString *hexString = [NSMutableString new];
-
-    for (NSInteger i = 0; i < data.length; i++) {
-        [hexString appendFormat:@"%02x", bytes[i]];
-    }
-
-    return [hexString copy];
-}
-
-- (NSData *)convertHexToData:(NSString *)hexString
-{
-    if (hexString.length % 2 != 0) {
-        return nil;
-    }
-
-    NSMutableData *data = [NSMutableData new];
-
-    for (NSInteger i = 0; i < hexString.length; i += 2) {
-        unsigned int byte = 0;
-        NSRange range = NSMakeRange(i, 2);
-        [[NSScanner scannerWithString:[hexString substringWithRange:range]] scanHexInt:&byte];
-        [data appendBytes:&byte length:1];
-    }
-
-    return [data copy];
 }
 
 - (NSString *)cbManagerStateString:(CBManagerState)adapterState
