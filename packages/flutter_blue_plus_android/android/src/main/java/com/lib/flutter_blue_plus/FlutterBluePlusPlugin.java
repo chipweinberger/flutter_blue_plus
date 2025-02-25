@@ -107,8 +107,8 @@ public class FlutterBluePlusPlugin implements
     private final Map<String, byte[]> mBondingPins = new ConcurrentHashMap<>();
     private final Map<String, Integer> mMtu = new ConcurrentHashMap<>();
     private final Map<String, BluetoothGatt> mAutoConnected = new ConcurrentHashMap<>();
-    private final Map<String, String> mWriteChr = new ConcurrentHashMap<>();
-    private final Map<String, String> mWriteDesc = new ConcurrentHashMap<>();
+    private final Map<String, byte[]> mWriteChr = new ConcurrentHashMap<>();
+    private final Map<String, byte[]> mWriteDesc = new ConcurrentHashMap<>();
     private final Map<String, String> mAdvSeen = new ConcurrentHashMap<>();
     private final Map<String, Integer> mScanCounts = new ConcurrentHashMap<>();
     private HashMap<String, Object> mScanFilters = new HashMap<String, Object>();
@@ -584,9 +584,9 @@ public class FlutterBluePlusPlugin implements
                         // msd
                         for (int i = 0; i < withMsd.size(); i++) {
                             HashMap<String, Object> m = (HashMap<String, Object>) withMsd.get(i);
-                            int id =                    (int) m.get("manufacturer_id");
-                            byte[] mdata = hexToBytes((String) m.get("data"));
-                            byte[] mask =  hexToBytes((String) m.get("mask"));
+                            int id =          (int) m.get("manufacturer_id");
+                            byte[] mdata = (byte[]) m.get("data");
+                            byte[] mask =  (byte[]) m.get("mask");
                             ScanFilter f = null;
                             if (mask.length == 0) {
                                 f = new ScanFilter.Builder().setManufacturerData(id, mdata).build();
@@ -600,8 +600,8 @@ public class FlutterBluePlusPlugin implements
                         for (int i = 0; i < withServiceData.size(); i++) {
                             HashMap<String, Object> m = (HashMap<String, Object>) withServiceData.get(i);
                             ParcelUuid s = ParcelUuid.fromString(uuid128((String) m.get("service")));
-                            byte[] mdata =             hexToBytes((String) m.get("data"));
-                            byte[] mask =              hexToBytes((String) m.get("mask"));
+                            byte[] mdata = (byte[]) m.get("data");
+                            byte[] mask =  (byte[]) m.get("mask");
                             ScanFilter f = null;
                             if (mask.length == 0) {
                                 f = new ScanFilter.Builder().setServiceData(s, mdata).build();
@@ -899,7 +899,7 @@ public class FlutterBluePlusPlugin implements
                     String serviceUuid =        (String) data.get("service_uuid");
                     String characteristicUuid = (String) data.get("characteristic_uuid");
                     String primaryServiceUuid = (String) data.get("primary_service_uuid");
-                    String value =              (String) data.get("value");
+                    byte[] value =              (byte[]) data.get("value");
                     int writeTypeInt =             (int) data.get("write_type");
                     boolean allowLongWrite =      ((int) data.get("allow_long_write")) != 0;
 
@@ -943,7 +943,7 @@ public class FlutterBluePlusPlugin implements
 
                     // check maximum payload
                     int maxLen = getMaxPayload(remoteId, writeType, allowLongWrite);
-                    int dataLen = hexToBytes(value).length;
+                    int dataLen = value.length;
                     if (dataLen > maxLen) {
                         String a = writeTypeInt == 0 ? "withResponse" : "withoutResponse";
                         String b = writeTypeInt == 0 ? (allowLongWrite ? ", allowLongWrite" : ", noLongWrite") : "";
@@ -960,7 +960,7 @@ public class FlutterBluePlusPlugin implements
                     // write characteristic
                     if (Build.VERSION.SDK_INT >= 33) { // Android 13 (August 2022)
 
-                        int rv = gatt.writeCharacteristic(characteristic, hexToBytes(value), writeType);
+                        int rv = gatt.writeCharacteristic(characteristic, value, writeType);
 
                         if (rv != BluetoothStatusCodes.SUCCESS) {
                             String s = "gatt.writeCharacteristic() returned " + rv + " : " + bluetoothStatusString(rv);
@@ -970,7 +970,7 @@ public class FlutterBluePlusPlugin implements
 
                     } else {
                         // set value
-                        if(!characteristic.setValue(hexToBytes(value))) {
+                        if(!characteristic.setValue(value)) {
                             result.error("writeCharacteristic", "characteristic.setValue() returned false", null);
                             break;
                         }
@@ -1045,7 +1045,7 @@ public class FlutterBluePlusPlugin implements
                     String characteristicUuid = (String) data.get("characteristic_uuid");
                     String descriptorUuid =     (String) data.get("descriptor_uuid");
                     String primaryServiceUuid = (String) data.get("primary_service_uuid");
-                    String value =              (String) data.get("value");
+                    byte[] value =              (byte[]) data.get("value");
 
                     // check connection
                     BluetoothGatt gatt = mConnectedDevices.get(remoteId);
@@ -1076,9 +1076,8 @@ public class FlutterBluePlusPlugin implements
 
                     // check mtu
                     int mtu = mMtu.get(remoteId);
-                    if ((mtu-3) < hexToBytes(value).length) {
-                        String s = "data longer than mtu allows. dataLength: " +
-                            hexToBytes(value).length + "> max: " + (mtu-3);
+                    if ((mtu-3) < value.length) {
+                        String s = "data longer than mtu allows. dataLength: " + value.length + "> max: " + (mtu-3);
                         result.error("writeDescriptor", s, null);
                         break;
                     }
@@ -1091,7 +1090,7 @@ public class FlutterBluePlusPlugin implements
                     // write descriptor
                     if (Build.VERSION.SDK_INT >= 33) { // Android 13 (August 2022)
 
-                        int rv = gatt.writeDescriptor(descriptor, hexToBytes(value));
+                        int rv = gatt.writeDescriptor(descriptor, value);
                         if (rv != BluetoothStatusCodes.SUCCESS) {
                             String s = "gatt.writeDescriptor() returned " + rv + " : " + bluetoothStatusString(rv);
                             result.error("writeDescriptor", s, null);
@@ -1101,7 +1100,7 @@ public class FlutterBluePlusPlugin implements
                     } else {
 
                         // Set descriptor
-                        if(!descriptor.setValue(hexToBytes(value))){
+                        if(!descriptor.setValue(value)){
                             result.error("writeDescriptor", "descriptor.setValue() returned false", null);
                             break;
                         }
@@ -1199,7 +1198,7 @@ public class FlutterBluePlusPlugin implements
                     // remember the data we are writing
                     if (primaryServiceUuid == null) {primaryServiceUuid = "";}
                     String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + CCCD + ":" + primaryServiceUuid;
-                    mWriteDesc.put(key, bytesToHex(descriptorValue));
+                    mWriteDesc.put(key, descriptorValue);
 
                     // write descriptor
                     if (Build.VERSION.SDK_INT >= 33) { // Android 13 (August 2022)
@@ -2348,7 +2347,7 @@ public class FlutterBluePlusPlugin implements
             response.put("remote_id", gatt.getDevice().getAddress());
             response.put("service_uuid", uuidStr(characteristic.getService().getUuid()));
             response.put("characteristic_uuid", uuidStr(characteristic.getUuid()));
-            response.put("value", bytesToHex(value));
+            response.put("value", value);
             response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
             response.put("error_code", status);
             response.put("error_string", gattErrorString(status));
@@ -2406,7 +2405,7 @@ public class FlutterBluePlusPlugin implements
 
             // what data did we write?
             String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + primaryServiceUuid;
-            String value = mWriteChr.get(key) != null ? mWriteChr.get(key) : "";
+            byte[] value = mWriteChr.get(key) != null ? mWriteChr.get(key) : new byte[0];
             mWriteChr.remove(key);
 
             // see: BmCharacteristicData
@@ -2444,7 +2443,7 @@ public class FlutterBluePlusPlugin implements
             response.put("service_uuid", uuidStr(descriptor.getCharacteristic().getService().getUuid()));
             response.put("characteristic_uuid", uuidStr(descriptor.getCharacteristic().getUuid()));
             response.put("descriptor_uuid", uuidStr(descriptor.getUuid()));
-            response.put("value", bytesToHex(value));
+            response.put("value", value);
             response.put("success", status == BluetoothGatt.GATT_SUCCESS ? 1 : 0);
             response.put("error_code", status);
             response.put("error_string", gattErrorString(status));
@@ -2476,7 +2475,7 @@ public class FlutterBluePlusPlugin implements
 
             // what data did we write?
             String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + descriptorUuid + ":" + primaryServiceUuid;
-            String value = mWriteDesc.get(key) != null ? mWriteDesc.get(key) : "";
+            byte[] value = mWriteDesc.get(key) != null ? mWriteDesc.get(key) : new byte[0];
             mWriteDesc.remove(key);
 
             // see: BmDescriptorData
@@ -2616,20 +2615,20 @@ public class FlutterBluePlusPlugin implements
         Map<ParcelUuid, byte[]> serviceData  = adv != null ?  adv.getServiceData()               : null;
 
         // Manufacturer Specific Data
-        HashMap<Integer, String> manufDataB = new HashMap<>();
+        HashMap<Integer, byte[]> manufDataB = new HashMap<>();
         if (manufData != null) {
             for (Map.Entry<Integer, byte[]> entry : manufData.entrySet()) {
-                manufDataB.put(entry.getKey(), bytesToHex(entry.getValue()));
+                manufDataB.put(entry.getKey(), entry.getValue());
             }
         }
 
         // Service Data
-        HashMap<String, Object> serviceDataB = new HashMap<>();
+        HashMap<String, byte[]> serviceDataB = new HashMap<>();
         if (serviceData != null) {
             for (Map.Entry<ParcelUuid, byte[]> entry : serviceData.entrySet()) {
                 ParcelUuid key = entry.getKey();
                 byte[] value = entry.getValue();
-                serviceDataB.put(uuidStr(key.getUuid()), bytesToHex(value));
+                serviceDataB.put(uuidStr(key.getUuid()), value);
             }
         }
 
@@ -2853,21 +2852,6 @@ public class FlutterBluePlusPlugin implements
         } catch (Exception e) {
             return false;
         }
-    }
-
-    private static byte[] hexToBytes(String s) {
-        if (s == null) {
-            return new byte[0];
-        }
-        int len = s.length();
-        byte[] data = new byte[len / 2];
-
-        for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                                + Character.digit(s.charAt(i+1), 16));
-        }
-
-        return data;
     }
 
     private static String bytesToHex(byte[] bytes) {

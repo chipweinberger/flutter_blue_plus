@@ -48,8 +48,8 @@ class BmMsdFilter {
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> map = {};
     map['manufacturer_id'] = manufacturerId;
-    map['data'] = _hexEncode(data ?? []);
-    map['mask'] = _hexEncode(mask ?? []);
+    map['data'] = Uint8List.fromList(data ?? []);
+    map['mask'] = Uint8List.fromList(mask ?? []);
     return map;
   }
 }
@@ -62,8 +62,8 @@ class BmServiceDataFilter {
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> map = {};
     map['service'] = service.str;
-    map['data'] = _hexEncode(data);
-    map['mask'] = _hexEncode(mask);
+    map['data'] = Uint8List.fromList(data);
+    map['mask'] = Uint8List.fromList(mask);
     return map;
   }
 }
@@ -151,22 +151,13 @@ class BmScanAdvertisement {
     var rawServiceUuids = json['service_uuids'] ?? [];
 
     // Cast the data to the right type
-    Map<int, List<int>> manufacturerData = {};
-    for (var key in rawManufacturerData.keys) {
-      manufacturerData[key] = _hexDecode(rawManufacturerData[key]);
-    }
+    Map<int, List<int>> manufacturerData = rawManufacturerData.map((k, v) => MapEntry(k as int, v as Uint8List));
 
     // Cast the data to the right type
-    Map<Guid, List<int>> serviceData = {};
-    for (var key in rawServiceData.keys) {
-      serviceData[Guid(key)] = _hexDecode(rawServiceData[key]);
-    }
+    Map<Guid, List<int>> serviceData = rawServiceData.map((k, v) => MapEntry(k as Guid, v as Uint8List));
 
     // Cast the data to the right type
-    List<Guid> serviceUuids = [];
-    for (var val in rawServiceUuids) {
-      serviceUuids.add(Guid(val));
-    }
+    List<Guid> serviceUuids = rawServiceUuids.cast<String>().map((e) => Guid(e)).toList();
 
     return BmScanAdvertisement(
       remoteId: DeviceIdentifier(json['remote_id']),
@@ -492,7 +483,7 @@ class BmCharacteristicData {
       serviceUuid: Guid(json['service_uuid']),
       characteristicUuid: Guid(json['characteristic_uuid']),
       primaryServiceUuid: Guid.parse(json['primary_service_uuid']),
-      value: _hexDecode(json['value']),
+      value: json['value'] as Uint8List,
       success: json['success'] != 0,
       errorCode: json['error_code'],
       errorString: json['error_string'],
@@ -560,7 +551,7 @@ class BmWriteCharacteristicRequest {
     data['primary_service_uuid'] = primaryServiceUuid?.str;
     data['write_type'] = writeType.index;
     data['allow_long_write'] = allowLongWrite ? 1 : 0;
-    data['value'] = _hexEncode(value);
+    data['value'] = Uint8List.fromList(value);
     data.removeWhere((key, value) => value == null);
     return data;
   }
@@ -590,7 +581,7 @@ class BmWriteDescriptorRequest {
     data['characteristic_uuid'] = characteristicUuid.str;
     data['descriptor_uuid'] = descriptorUuid.str;
     data['primary_service_uuid'] = primaryServiceUuid?.str;
-    data['value'] = _hexEncode(value);
+    data['value'] = Uint8List.fromList(value);
     data.removeWhere((key, value) => value == null);
     return data;
   }
@@ -626,7 +617,7 @@ class BmDescriptorData {
       characteristicUuid: Guid(json['characteristic_uuid']),
       descriptorUuid: Guid(json['descriptor_uuid']),
       primaryServiceUuid: Guid.parse(json['primary_service_uuid']),
-      value: _hexDecode(json['value']),
+      value: json['value'] as Uint8List,
       success: json['success'] != 0,
       errorCode: json['error_code'],
       errorString: json['error_string'],
