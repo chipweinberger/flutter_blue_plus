@@ -116,7 +116,7 @@ public class FlutterBluePlusPlugin implements
     private final Map<Integer, OperationOnPermission> operationsOnPermission = new HashMap<>();
     private int lastEventId = 1452;
 
-    private final int enableBluetoothRequestCode = 1879842617;
+    private final int enableBluetoothRequestCode = 13106;
 
     private interface OperationOnPermission {
         void op(boolean granted, String permission);
