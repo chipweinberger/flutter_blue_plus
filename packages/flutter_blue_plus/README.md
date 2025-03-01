@@ -93,21 +93,22 @@ flutter run
 
 ## Versioning
 
-`flutter_blue_plus` uses 1.X.X style versioning.
+`flutter_blue_plus` uses Traditional Versioning
 
-For bigger, riskier, or minor breaking changes we'll bump the minor version. e.g. `1.34.X` -> `1.35.0`.
+`BIG.MEDIUM.SMALL`:
+* `BIG` : Rewrites, API overhauls e.g. `1.0.0` -> `2.0.0`.
+* `MEDIUM` : Breaking changes, New features. e.g. `1.0.0` -> `1.1.0`.
+* `SMALL` : Bug fixes e.g. `1.0.0` -> `1.0.1`.
+  
+---
 
-Large breaking changes are not expected at this point. The API is stable.
+`flutter_blue_plus_android`, `flutter_blue_plus_darwin`, `flutter_blue_plus_linux`, `flutter_blue_plus_platform_interface`, `flutter_blue_plus_web` use [Semantic Versioning](https://semver.org). 
 
-Developers should add a fixed version of `flutter_blue_plus` as a dependency in their `pubspec.yaml` file.
+`MAJOR.MINOR.PATCH`:
+* `MAJOR` : Breaking API changes. e.g. `1.0.0` -> `2.0.0`.
+* `MINOR` : New features. e.g. `1.0.0` -> `1.1.0`.
+* `PATCH` : Bug fixes. e.g. `1.0.0` -> `1.0.1`.
 
-`flutter_blue_plus_android`, `flutter_blue_plus_darwin`, `flutter_blue_plus_linux`, `flutter_blue_plus_platform_interface`, `flutter_blue_plus_web` use [Semantic Versioning](https://semver.org).
-
-For bug fixes we'll bump the patch version. e.g. `1.0.0` -> `1.0.1`.
-
-For new features we'll bump the minor version. e.g. `1.0.0` -> `1.1.0`.
-
-For breaking changes we'll bump the major version. e.g. `1.0.0` -> `2.0.0`.
 
 ## Usage
 
