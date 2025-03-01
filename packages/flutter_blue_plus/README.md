@@ -96,9 +96,9 @@ flutter run
 `flutter_blue_plus` uses Traditional Versioning
 
 `BIG.MEDIUM.SMALL`:
-* `BIG` : Rewrites, API overhauls e.g. `1.0.0` -> `2.0.0`.
-* `MEDIUM` : Breaking changes, New features. e.g. `1.0.0` -> `1.1.0`.
-* `SMALL` : Bug fixes e.g. `1.0.0` -> `1.0.1`.
+* `BIG` : Significant overhauls. e.g. `1.0.0` -> `2.0.0`.
+* `MEDIUM` : Moderate improvements, feature updates, breaking chages. e.g. `1.0.0` -> `1.1.0`.
+* `SMALL` : Small fixes, patches, or refinements. `1.0.0` -> `1.0.1`.
   
 ---
 
