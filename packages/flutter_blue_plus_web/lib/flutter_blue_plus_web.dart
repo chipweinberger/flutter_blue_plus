@@ -132,6 +132,53 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
     return true;
   }
 
+  Future<List<BmBluetoothCharacteristic>> extractCharacteristics(
+      BluetoothDevice device, BluetoothRemoteGATTService service, List<BluetoothRemoteGATTCharacteristic> gattCharacteristics) async {
+    final characteristics = <BmBluetoothCharacteristic>[];
+    for (final c in gattCharacteristics) {
+      final descriptors = <BmBluetoothDescriptor>[];
+      try {
+        List<BluetoothRemoteGATTDescriptor> descs = (await c.getDescriptors().toDart).toDart;
+        for (final d in descs) {
+          descriptors.add(
+            BmBluetoothDescriptor(
+              remoteId: device.remoteId,
+              serviceUuid: Guid.fromString(service.uuid),
+              characteristicUuid: Guid.fromString(c.uuid),
+              descriptorUuid: Guid.fromString(d.uuid),
+              primaryServiceUuid: null,
+            ),
+          );
+        }
+      } catch (e) {
+        // ignore errors when getting characteristics descriptors
+      }
+
+      characteristics.add(
+        BmBluetoothCharacteristic(
+          remoteId: device.remoteId,
+          serviceUuid: Guid.fromString(service.uuid),
+          characteristicUuid: Guid.fromString(c.uuid),
+          primaryServiceUuid: null,
+          descriptors: descriptors,
+          properties: BmCharacteristicProperties(
+            broadcast: c.properties.broadcast,
+            read: c.properties.read,
+            writeWithoutResponse: c.properties.writeWithoutResponse,
+            write: c.properties.write,
+            notify: c.properties.notify,
+            indicate: c.properties.indicate,
+            authenticatedSignedWrites: c.properties.authenticatedSignedWrites,
+            extendedProperties: false,
+            notifyEncryptionRequired: false,
+            indicateEncryptionRequired: false,
+          ),
+        ),
+      );
+    }
+    return characteristics;
+  }
+
   @override
   Future<bool> discoverServices(
     BmDiscoverServicesRequest request,
@@ -157,51 +204,13 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
 
       List<BluetoothRemoteGATTService> primaryServices = (await gatt.getPrimaryServices().toDart).toDart;
       for (final s in primaryServices) {
-        final characteristics = <BmBluetoothCharacteristic>[];
-
-        List<BluetoothRemoteGATTCharacteristic> chars = (await s.getCharacteristics().toDart).toDart;
-        for (final c in chars) {
-          final descriptors = <BmBluetoothDescriptor>[];
-
-          try {
-            List<BluetoothRemoteGATTDescriptor> descs = (await c.getDescriptors().toDart).toDart;
-            for (final d in descs) {
-              descriptors.add(
-                BmBluetoothDescriptor(
-                  remoteId: device.remoteId,
-                  serviceUuid: Guid.fromString(s.uuid),
-                  characteristicUuid: Guid.fromString(c.uuid),
-                  descriptorUuid: Guid.fromString(d.uuid),
-                  primaryServiceUuid: null,
-                ),
-              );
-            }
-          } catch(e) {
-            // ignore errors when getting characteristics descriptors
-          }
-
-          characteristics.add(
-            BmBluetoothCharacteristic(
-              remoteId: device.remoteId,
-              serviceUuid: Guid.fromString(s.uuid),
-              characteristicUuid: Guid.fromString(c.uuid),
-              primaryServiceUuid: null,
-              descriptors: descriptors,
-              properties: BmCharacteristicProperties(
-                broadcast: c.properties.broadcast,
-                read: c.properties.read,
-                writeWithoutResponse: c.properties.writeWithoutResponse,
-                write: c.properties.write,
-                notify: c.properties.notify,
-                indicate: c.properties.indicate,
-                authenticatedSignedWrites:
-                    c.properties.authenticatedSignedWrites,
-                extendedProperties: false,
-                notifyEncryptionRequired: false,
-                indicateEncryptionRequired: false,
-              ),
-            ),
-          );
+        List<BmBluetoothCharacteristic> characteristics = [];
+        try {
+           final chars = (await s.getCharacteristics().toDart).toDart;
+           characteristics = await extractCharacteristics(device, s, chars);
+        } catch (e) {
+           // ignore errors, services that were retrieved because they were present in `webOptionalServices`
+           // might not have characteristics, throwing an exception in getCharacteristics.
         }
 
         services.add(
