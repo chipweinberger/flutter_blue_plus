@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
@@ -51,6 +52,17 @@ class _ScanScreenState extends State<ScanScreen> {
     super.dispose();
   }
 
+  List<Guid> optionalServices() {
+    if (kIsWeb) {
+      return  [
+          Guid("180f"), // battery
+          Guid("1800"), // generic access
+          Guid("6e400001-b5a3-f393-e0a9-e50e24dcca9e"), // Nordic UART
+        ];
+    }
+    return [];
+  }
+
   Future onScanPressed() async {
     try {
       // `withServices` is required on iOS for privacy purposes, ignored on android.
@@ -63,11 +75,7 @@ class _ScanScreenState extends State<ScanScreen> {
     try {
       await FlutterBluePlus.startScan(
         timeout: const Duration(seconds: 15),
-        webOptionalServices: [
-          Guid("180f"), // battery
-          Guid("1800"), // generic access
-          Guid("6e400001-b5a3-f393-e0a9-e50e24dcca9e"), // Nordic UART
-        ],
+        webOptionalServices: optionalServices(),
       );
     } catch (e) {
       Snackbar.show(ABC.b, prettyException("Start Scan Error:", e), success: false);

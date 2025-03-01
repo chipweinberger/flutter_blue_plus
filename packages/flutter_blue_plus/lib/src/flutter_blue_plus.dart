@@ -239,9 +239,11 @@ class FlutterBluePlus {
     // Note: `withKeywords` is not compatible with other filters on android
     // because it is implemented in custom fbp code, not android code, and the
     // android 'name' filter is only available as of android sdk 33 (August 2022)
-    assert(!(!kIsWeb && Platform.isAndroid && withKeywords.isNotEmpty && hasOtherFilter),
-        "withKeywords is not compatible with other filters on Android");
-
+    assert(
+      !(!kIsWeb && Platform.isAndroid && withKeywords.isNotEmpty && hasOtherFilter),
+      "withKeywords is not compatible with other filters on Android",
+    );
+    assert(kIsWeb || webOptionalServices.isEmpty, "webOptionalServices is only supported on web");
     // only allow a single task to call
     // startScan or stopScan at a time
     _Mutex mtx = _MutexFactory.getMutexForKey("scan");
@@ -257,18 +259,19 @@ class FlutterBluePlus {
       _isScanning.add(true);
 
       var settings = BmScanSettings(
-          withServices: withServices,
-          withRemoteIds: withRemoteIds,
-          withNames: withNames,
-          withKeywords: withKeywords,
-          withMsd: withMsd.map((d) => d._bm).toList(),
-          withServiceData: withServiceData.map((d) => d._bm).toList(),
-          continuousUpdates: continuousUpdates,
-          continuousDivisor: continuousDivisor,
-          androidLegacy: androidLegacy,
-          androidScanMode: androidScanMode.value,
-          androidUsesFineLocation: androidUsesFineLocation,
-          webOptionalServices: webOptionalServices);
+        withServices: withServices,
+        withRemoteIds: withRemoteIds,
+        withNames: withNames,
+        withKeywords: withKeywords,
+        withMsd: withMsd.map((d) => d._bm).toList(),
+        withServiceData: withServiceData.map((d) => d._bm).toList(),
+        continuousUpdates: continuousUpdates,
+        continuousDivisor: continuousDivisor,
+        androidLegacy: androidLegacy,
+        androidScanMode: androidScanMode.value,
+        androidUsesFineLocation: androidUsesFineLocation,
+        webOptionalServices: webOptionalServices,
+      );
 
       Stream<BmScanResponse> responseStream = FlutterBluePlusPlatform.instance.onScanResponse;
 
