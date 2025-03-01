@@ -27,7 +27,7 @@ Migrating from [FlutterBlue](https://github.com/pauldemarco/flutter_blue)? See [
 - [Usage](#usage)
 - [Getting Started](#getting-started)
 - [Using Ble in App Background](#using-ble-in-app-background)
-- [Compatibility](#compatibility)
+- [API Reference](#api-reference)
 - [Debugging](#debugging)
 - [Mocking](#mocking)
 - [Common Problems](#common-problems)
@@ -643,11 +643,9 @@ FlutterBluePlus.setOptions(restoreState: true);
 
 You can try using https://pub.dev/packages/flutter_foreground_task or possibly https://pub.dev/packages/workmanager
 
-## Compatibility
+## API Reference
 
-Please note that not all platforms support all functionality. Where functionality is unsupported, sensible defaults will be returned, instead of an `UnimplementedError` being thrown.
-
-### FlutterBluePlus API
+Note: When functionality is unsupported on a platform, sensible defaults are returned instead of an error.
 
 * 🌀 = Stream
 * ⚡ = Synchronous
