@@ -649,9 +649,9 @@ Please note that not all platforms support all functionality. Where functionalit
 
 ### FlutterBluePlus API
 
-🌀 = Stream
-⚡ = Synchronous
-🔥 = Can fail
+* 🌀 = Stream
+* ⚡ = Synchronous
+* 🔥 = Can fail
 
 |                     | Android | iOS | Linux | macOS | Web | Description                                                 |
 |---------------------|---------|-----|-------|-------|-----|-------------------------------------------------------------|
