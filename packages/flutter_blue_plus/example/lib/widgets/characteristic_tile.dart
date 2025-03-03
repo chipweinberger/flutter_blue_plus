@@ -51,9 +51,10 @@ class _CharacteristicTileState extends State<CharacteristicTile> {
     try {
       await c.read();
       Snackbar.show(ABC.c, "Read: Success", success: true);
-    } catch (e) {
+    } catch (e, backtrace) {
       Snackbar.show(ABC.c, prettyException("Read Error:", e), success: false);
       print(e);
+      print("backtrace: $backtrace");
     }
   }
 
@@ -64,9 +65,10 @@ class _CharacteristicTileState extends State<CharacteristicTile> {
       if (c.properties.read) {
         await c.read();
       }
-    } catch (e) {
+    } catch (e, backtrace) {
       Snackbar.show(ABC.c, prettyException("Write Error:", e), success: false);
       print(e);
+      print("backtrace: $backtrace");
     }
   }
 
@@ -81,9 +83,10 @@ class _CharacteristicTileState extends State<CharacteristicTile> {
       if (mounted) {
         setState(() {});
       }
-    } catch (e) {
+    } catch (e, backtrace) {
       Snackbar.show(ABC.c, prettyException("Subscribe Error:", e), success: false);
       print(e);
+      print("backtrace: $backtrace");
     }
   }
 

@@ -56,9 +56,10 @@ class _ScanScreenState extends State<ScanScreen> {
       // `withServices` is required on iOS for privacy purposes, ignored on android.
       var withServices = [Guid("180f")]; // Battery Level Service
       _systemDevices = await FlutterBluePlus.systemDevices(withServices);
-    } catch (e) {
+    } catch (e, backtrace) {
       Snackbar.show(ABC.b, prettyException("System Devices Error:", e), success: false);
       print(e);
+      print("backtrace: $backtrace");
     }
     try {
       await FlutterBluePlus.startScan(
@@ -69,9 +70,10 @@ class _ScanScreenState extends State<ScanScreen> {
           Guid("6e400001-b5a3-f393-e0a9-e50e24dcca9e"), // Nordic UART
         ],
       );
-    } catch (e) {
+    } catch (e, backtrace) {
       Snackbar.show(ABC.b, prettyException("Start Scan Error:", e), success: false);
       print(e);
+      print("backtrace: $backtrace");
     }
     if (mounted) {
       setState(() {});
@@ -81,9 +83,10 @@ class _ScanScreenState extends State<ScanScreen> {
   Future onStopPressed() async {
     try {
       FlutterBluePlus.stopScan();
-    } catch (e) {
+    } catch (e, backtrace) {
       Snackbar.show(ABC.b, prettyException("Stop Scan Error:", e), success: false);
       print(e);
+      print("backtrace: $backtrace");
     }
   }
 

@@ -88,12 +88,13 @@ class _DeviceScreenState extends State<DeviceScreen> {
     try {
       await widget.device.connectAndUpdateStream();
       Snackbar.show(ABC.c, "Connect: Success", success: true);
-    } catch (e) {
+    } catch (e, backtrace) {
       if (e is FlutterBluePlusException && e.code == FbpErrorCode.connectionCanceled.index) {
         // ignore connections canceled by the user
       } else {
         Snackbar.show(ABC.c, prettyException("Connect Error:", e), success: false);
         print(e);
+        print("backtrace: $backtrace");
       }
     }
   }
@@ -102,9 +103,10 @@ class _DeviceScreenState extends State<DeviceScreen> {
     try {
       await widget.device.disconnectAndUpdateStream(queue: false);
       Snackbar.show(ABC.c, "Cancel: Success", success: true);
-    } catch (e) {
+    } catch (e, backtrace) {
       Snackbar.show(ABC.c, prettyException("Cancel Error:", e), success: false);
-      print(e);
+      print("$e");
+      print("backtrace: $backtrace");
     }
   }
 
@@ -112,9 +114,9 @@ class _DeviceScreenState extends State<DeviceScreen> {
     try {
       await widget.device.disconnectAndUpdateStream();
       Snackbar.show(ABC.c, "Disconnect: Success", success: true);
-    } catch (e) {
+    } catch (e, backtrace) {
       Snackbar.show(ABC.c, prettyException("Disconnect Error:", e), success: false);
-      print(e);
+      print("$e backtrace: $backtrace");
     }
   }
 
@@ -127,9 +129,10 @@ class _DeviceScreenState extends State<DeviceScreen> {
     try {
       _services = await widget.device.discoverServices();
       Snackbar.show(ABC.c, "Discover Services: Success", success: true);
-    } catch (e) {
+    } catch (e, backtrace) {
       Snackbar.show(ABC.c, prettyException("Discover Services Error:", e), success: false);
       print(e);
+      print("backtrace: $backtrace");
     }
     if (mounted) {
       setState(() {
@@ -142,9 +145,10 @@ class _DeviceScreenState extends State<DeviceScreen> {
     try {
       await widget.device.requestMtu(223, predelay: 0);
       Snackbar.show(ABC.c, "Request Mtu: Success", success: true);
-    } catch (e) {
+    } catch (e, backtrace) {
       Snackbar.show(ABC.c, prettyException("Change Mtu Error:", e), success: false);
       print(e);
+      print("backtrace: $backtrace");
     }
   }
 
