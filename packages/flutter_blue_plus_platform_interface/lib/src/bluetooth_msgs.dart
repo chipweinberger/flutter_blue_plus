@@ -151,13 +151,18 @@ class BmScanAdvertisement {
     var rawServiceUuids = json['service_uuids'] ?? [];
 
     // Cast the data to the right type
-    Map<int, List<int>> manufacturerData = rawManufacturerData.map((k, v) => MapEntry(k as int, v as Uint8List));
-
+    Map<int, List<int>> manufacturerData = {};
+    rawManufacturerData.forEach((k, v) {
+      manufacturerData[k] = v;
+    });
     // Cast the data to the right type
-    Map<Guid, List<int>> serviceData = rawServiceData.map((k, v) => MapEntry(k as Guid, v as Uint8List));
-
+    Map<Guid, List<int>> serviceData = {};
+    rawServiceData.forEach((k, v) {
+      serviceData[k] = v;
+    });
     // Cast the data to the right type
-    List<Guid> serviceUuids = rawServiceUuids.cast<String>().map((e) => Guid(e)).toList();
+    List<Guid> serviceUuids = [];
+    rawServiceUuids.forEach((e) => serviceUuids.add(e));
 
     return BmScanAdvertisement(
       remoteId: DeviceIdentifier(json['remote_id']),
