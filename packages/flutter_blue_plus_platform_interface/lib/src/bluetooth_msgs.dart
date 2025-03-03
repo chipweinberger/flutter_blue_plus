@@ -110,7 +110,7 @@ class BmScanSettings {
     data['android_legacy'] = androidLegacy;
     data['android_scan_mode'] = androidScanMode;
     data['android_uses_fine_location'] = androidUsesFineLocation;
-    data['web_optional_services'] = webOptionalServices;
+    data['web_optional_services'] = webOptionalServices.map((s) => s.str).toList();;
     return data;
   }
 }
