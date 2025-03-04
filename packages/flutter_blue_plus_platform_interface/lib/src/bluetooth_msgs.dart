@@ -158,11 +158,11 @@ class BmScanAdvertisement {
     // Cast the data to the right type
     Map<Guid, List<int>> serviceData = {};
     rawServiceData.forEach((k, v) {
-      serviceData[k] = v;
+      serviceData[Guid(k)] = v;
     });
     // Cast the data to the right type
     List<Guid> serviceUuids = [];
-    rawServiceUuids.forEach((e) => serviceUuids.add(e));
+    rawServiceUuids.forEach((e) => serviceUuids.add(Guid(e)));
 
     return BmScanAdvertisement(
       remoteId: DeviceIdentifier(json['remote_id']),
