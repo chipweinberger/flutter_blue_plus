@@ -598,8 +598,11 @@ In the **ios/Runner/Info.plist** let’s add:
 
 ```dart
 <dict>
+...
     <key>NSBluetoothAlwaysUsageDescription</key>
     <string>This app needs Bluetooth to function</string>
+...
+</dict>
 ```
 
 For location permissions on iOS see more at: [https://developer.apple.com/documentation/corelocation/requesting_authorization_for_location_services](https://developer.apple.com/documentation/corelocation/requesting_authorization_for_location_services)
