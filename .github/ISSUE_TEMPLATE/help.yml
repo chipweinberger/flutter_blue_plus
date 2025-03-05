@@ -46,6 +46,7 @@ body:
         - "Android"
         - "iOS"
         - "macOS"
+        - "Web"
         - "All"
     validations:
       required: true
@@ -53,7 +54,7 @@ body:
     id: os-version
     attributes:
       label: "OS Version"
-      description: "What version of iOS/Android/MacOS are you on?"
+      description: "What version of iOS/Android/MacOS/Browser are you on?"
       placeholder: "ex. iOS 17.3.1"
     validations:
       required: true
