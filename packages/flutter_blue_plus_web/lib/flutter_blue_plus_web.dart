@@ -435,7 +435,7 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
       );
     }
 
-    return true;
+    return false;
   }
 
   @override
