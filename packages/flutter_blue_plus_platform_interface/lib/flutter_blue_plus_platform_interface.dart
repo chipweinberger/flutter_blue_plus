@@ -226,8 +226,8 @@ abstract base class FlutterBluePlusPlatform {
     return Future.value(false);
   }
 
-  // Returns true if callers need to wait for Client Characteristic Configuration Descriptor to be written before returning.
-  // Throws an exception on error.
+  /// Returns true if callers need to wait for the Client Characteristic Configuration Descriptor (CCCD) to be written before returning.
+  /// Throws an exception on error.
   Future<bool> setNotifyValue(
     BmSetNotifyValueRequest request,
   ) {
