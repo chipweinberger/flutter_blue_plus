@@ -85,6 +85,10 @@ abstract base class FlutterBluePlusPlatform {
     return Stream.empty();
   }
 
+  Stream<BmTurnOnResponse> get onTurnOnResponse {
+    return Stream.empty();
+  }
+
   Future<bool> clearGattCache(
     BmClearGattCacheRequest request,
   ) {
