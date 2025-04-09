@@ -29,10 +29,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelUuid;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -430,7 +432,7 @@ public class FlutterBluePlusPlugin implements
 
                         if (granted == false) {
                             result.error("turnOn",
-                                String.format("FlutterBluePlus requires %s permission", perm), null);
+                                String.format("Permission %s required to turn Bluetooth on", perm), null);
                             return;
                         }
 
@@ -465,7 +467,7 @@ public class FlutterBluePlusPlugin implements
 
                         if (granted == false) {
                             result.error("turnOff",
-                                String.format("FlutterBluePlus requires %s permission", perm), null);
+                                String.format("Permission %s required to turn Bluetooth off", perm), null);
                             return;
                         }
 
@@ -498,6 +500,11 @@ public class FlutterBluePlusPlugin implements
                     int androidScanMode =                   (int) data.get("android_scan_mode");
                     boolean androidUsesFineLocation =   (boolean) data.get("android_uses_fine_location");
 
+                    if (!isLocationEnabled()) {
+                        result.error("startScan", "Location services are required for Bluetooth scan", null);
+                        return;
+                    }
+
                     ArrayList<String> permissions = new ArrayList<>();
 
                     if (Build.VERSION.SDK_INT >= 31) { // Android 12 (October 2021)
@@ -518,20 +525,20 @@ public class FlutterBluePlusPlugin implements
 
                         if (granted == false) {
                             result.error("startScan",
-                                String.format("FlutterBluePlus requires %s permission", perm), null);
+                                String.format("Permission %s required to scan devices", perm), null);
                             return;
                         }
 
                         // check adapter
                         if (isAdapterOn() == false) {
-                            result.error("startScan", String.format("bluetooth must be turned on"), null);
+                            result.error("startScan", "Bluetooth must be turned on", null);
                             return;
                         }
 
                         // get scanner
                         BluetoothLeScanner scanner = mBluetoothAdapter.getBluetoothLeScanner();
-                        if(scanner == null) {
-                            result.error("startScan", String.format("getBluetoothLeScanner() is null. Is the Adapter on?"), null);
+                        if (scanner == null) {
+                            result.error("startScan", "getBluetoothLeScanner() is null. Is the Adapter on?", null);
                             return;
                         }
 
@@ -631,7 +638,7 @@ public class FlutterBluePlusPlugin implements
                 {
                     BluetoothLeScanner scanner = mBluetoothAdapter.getBluetoothLeScanner();
 
-                    if(scanner != null) {
+                    if (scanner != null) {
                         scanner.stopScan(getScanCallback());
                         mIsScanning = false;
                     }
@@ -652,7 +659,7 @@ public class FlutterBluePlusPlugin implements
 
                         if (granted == false) {
                             result.error("getSystemDevices",
-                                String.format("FlutterBluePlus requires %s permission", perm), null);
+                                String.format("Permission %s required to get system devices", perm), null);
                             return;
                         }
 
@@ -690,13 +697,13 @@ public class FlutterBluePlusPlugin implements
 
                         if (granted == false) {
                             result.error("connect",
-                                String.format("FlutterBluePlus requires %s for new connection", perm), null);
+                                String.format("Permission %s required for new connection", perm), null);
                             return;
                         }
 
                         // check adapter
                         if (isAdapterOn() == false) {
-                            result.error("connect", String.format("bluetooth must be turned on"), null);
+                            result.error("connect", "Bluetooth must be turned on", null);
                             return;
                         }
 
@@ -726,7 +733,8 @@ public class FlutterBluePlusPlugin implements
                             try {
                                 // From Android LOLLIPOP (21) the transport types exists, but it is private
                                 // have to use reflection to call it for TRANSPORT_LE
-                                Method connectGattMethod = device.getClass().getDeclaredMethod("connectGatt", Context.class, boolean.class, BluetoothGattCallback.class, int.class);
+                                Method connectGattMethod = device.getClass()
+                                    .getDeclaredMethod("connectGatt", Context.class, boolean.class, BluetoothGattCallback.class, int.class);
                                 connectGattMethod.setAccessible(true);
                                 gatt = (BluetoothGatt) connectGattMethod.invoke(device, context, autoConnect, mGattCallback, 2 /* TRANSPORT_LE */);
                             } catch (Exception ex) {
@@ -737,7 +745,7 @@ public class FlutterBluePlusPlugin implements
 
                         // error check
                         if (gatt == null) {
-                            result.error("connect", String.format("device.connectGatt returned null"), null);
+                            result.error("connect", "device.connectGatt returned null", null);
                             return;
                         }
 
@@ -1593,6 +1601,19 @@ public class FlutterBluePlusPlugin implements
         lastEventId++;
     }
 
+    // Check if Android location services are enabled
+    private boolean isLocationEnabled() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            // This is a new method provided in API 28 / Android 9 August 2018
+            LocationManager lm = (LocationManager) activityBinding.getActivity().getSystemService(Context.LOCATION_SERVICE);
+            return lm.isLocationEnabled();
+        } else {
+            // This was deprecated in API 28
+            int mode = Settings.Secure.getInt(activityBinding.getActivity().getContentResolver(),
+                Settings.Secure.LOCATION_MODE, Settings.Secure.LOCATION_MODE_OFF);
+            return mode != Settings.Secure.LOCATION_MODE_OFF;
+        }
+    }
 
     //////////////////////////////////////////////
     // ██████   ██       ███████
