@@ -1,3 +1,7 @@
+
+## 1.35.4
+* **[Feature]** Android: on scan throw an error when location services are not enabled (#1167)
+
 ## 1.35.3
 * **[Feature]** support for web optional services (#1124)
 * **[Feature]** option to provide pairing PIN to `createBond` (#1119)
