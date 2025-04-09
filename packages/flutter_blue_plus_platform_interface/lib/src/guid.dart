@@ -84,7 +84,7 @@ class Guid {
   String toString() => str;
 
   @override
-  operator ==(other) => other is Guid && hashCode == other.hashCode;
+  operator ==(other) => other is Guid && str128 == other.str128;
 
   @override
   int get hashCode => str128.hashCode;
