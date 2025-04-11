@@ -52,6 +52,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.io.StringWriter;
 import java.io.PrintWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -1861,11 +1862,10 @@ public class FlutterBluePlusPlugin implements
     }
 
     // The original android implementation has a bug - it does not 
-    // handle multiple of the same manufacturerId in the same advertisement.
-    // Here, we copy the iOS approach and append it to the same map entry.
-    Map<Integer, byte[]> getManufacturerSpecificData(ScanRecord adv) {
+    // concatenate handle multiple MSD in the same advertisement.
+    byte[] getManufacturerSpecificData(ScanRecord adv) {
         byte[] bytes = adv.getBytes();
-        Map<Integer, byte[]> manufacturerDataMap = new HashMap<>();
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
         int n = 0;
         while (n < bytes.length) {
 
@@ -1889,46 +1889,17 @@ public class FlutterBluePlusPlugin implements
 
             int dataType = bytes[n + 1] & 0xFF;
 
-            // Manufacturer Specific Data magic number
-            // At least 3 bytes: 2 for manufacturer ID & 1 for dataType
-            if (dataType == 0xFF && fieldLen >= 3) {
-
-                // Manufacturer Id
-                int high = (bytes[n + 3] & 0xFF) << 8;
-                int low = (bytes[n + 2] & 0xFF);
-                int manufacturerId = high | low;
-
-                // the length of the msd data,
-                // excluding manufacturerId & dataType
-                int msdLen = fieldLen - 3;
-
-                // ptr to msd data
-                // excluding manufacturerId & dataType
-                int msdPtr = n + 4;
-
-                // add to map
-                if (manufacturerDataMap.containsKey(manufacturerId)) {
-                    // If the manufacturer ID already exists, append the new data to the existing list
-                    byte[] existingData = manufacturerDataMap.get(manufacturerId);
-                    byte[] mergedData = new byte[existingData.length + msdLen];
-                    // Merge arrays
-                    System.arraycopy(existingData, 0, mergedData, 0, existingData.length);
-                    System.arraycopy(bytes, msdPtr, mergedData, existingData.length, msdLen);
-                    manufacturerDataMap.put(manufacturerId, mergedData);
-                } else {
-                    // Otherwise, put the new manufacturer ID and its data into the map
-                    byte[] data = new byte[msdLen];
-                    // Starting from n+4 because manufacturerId occupies n+2 and n+3
-                    System.arraycopy(bytes, msdPtr, data, 0, data.length);
-                    manufacturerDataMap.put(manufacturerId, data);
-                }
+            // Check for Manufacturer Specific Data type (0xFF) 
+            // and that the field is large enough (at least 2 bytes: type + at least 1 data byte)
+            if (dataType == 0xFF && fieldLen >= 2) {
+                output.write(bytes, n + 2, fieldLen - 1);
             }
 
             n += fieldLen + 1;
         }
-
-        return manufacturerDataMap;
+        return output.toByteArray();
     }
+
 
     /////////////////////////////////////////////////////////////////////////////////////
     //  █████   ██████    █████   ██████   ████████  ███████  ██████
@@ -2631,7 +2602,7 @@ public class FlutterBluePlusPlugin implements
         String                  advName      = adv != null ?  adv.getDeviceName()                : null;
         int                     txPower      = adv != null ?  adv.getTxPowerLevel()              : min;
         int                     appearance   = adv != null ?  getAppearanceFromScanRecord(adv)   : 0;
-        Map<Integer, byte[]>    manufData    = adv != null ?  getManufacturerSpecificData(adv)   : null;
+        byte[]                  rawMsd       = adv != null ?  getManufacturerSpecificData(adv)   : null;
         List<ParcelUuid>        serviceUuids = adv != null ?  adv.getServiceUuids()              : null;
         Map<ParcelUuid, byte[]> serviceData  = adv != null ?  adv.getServiceData()               : null;
 
@@ -2641,6 +2612,21 @@ public class FlutterBluePlusPlugin implements
             for (Map.Entry<Integer, byte[]> entry : manufData.entrySet()) {
                 manufDataB.put(entry.getKey(), entry.getValue());
             }
+        }
+
+        // Manufacturer Specific Data 
+        HashMap<Integer, byte[]> manufDataB = new HashMap<>();
+        if (rawMsd != null && rawMsd.length >= 2) {
+            // manufacturer ID uses little-endian order.
+            int manufacturerId = (rawMsd[0] & 0xFF) | ((rawMsd[1] & 0xFF) << 8);
+
+            // payload
+            int payloadLen = rawMsd.length - 2;
+            byte[] payload = new byte[payloadLen];
+            System.arraycopy(rawMsd, 2, payload, 0, payloadLen);
+
+            // add to array
+            manufDataB.put(manufacturerId, payload);
         }
 
         // Service Data
