@@ -1,3 +1,12 @@
+## 4.0.0
+* Better guid equals operator (#1169)
+* Add on turn on response stream (#1166)
+* Don't wait for CCCD write for `setNotifyValue` on web (#1153)
+* Fix conversion code for devices with service data and uuids (#1143)
+* Correct casting of raw json in `BmScanAdvertisement` (#1142)
+* Fix `webOptionalServices` broke scanning on Android
+* Use bytes instead of hex for platform communication (#1130)
+
 ## 3.0.0
 * Add support for web optional services (#1124)
 * Add option to provide pairing PIN to `createBond` (#1119)
