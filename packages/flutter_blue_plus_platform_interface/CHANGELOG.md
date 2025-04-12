@@ -1,3 +1,6 @@
+## 4.0.1
+* Remove unused methods from Bluetooth messages
+
 ## 4.0.0
 * Better guid equals operator (#1169)
 * Add on turn on response stream (#1166)
