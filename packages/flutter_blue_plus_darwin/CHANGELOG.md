@@ -1,3 +1,6 @@
+## 4.0.0
+* Use bytes instead of hex for platform communication (#1130)
+
 ## 3.0.0
 * Update platform interface version to 3.0.0
 
