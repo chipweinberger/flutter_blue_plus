@@ -2606,14 +2606,6 @@ public class FlutterBluePlusPlugin implements
         List<ParcelUuid>        serviceUuids = adv != null ?  adv.getServiceUuids()              : null;
         Map<ParcelUuid, byte[]> serviceData  = adv != null ?  adv.getServiceData()               : null;
 
-        // Manufacturer Specific Data
-        HashMap<Integer, byte[]> manufDataB = new HashMap<>();
-        if (manufData != null) {
-            for (Map.Entry<Integer, byte[]> entry : manufData.entrySet()) {
-                manufDataB.put(entry.getKey(), entry.getValue());
-            }
-        }
-
         // Manufacturer Specific Data 
         HashMap<Integer, byte[]> manufDataB = new HashMap<>();
         if (rawMsd != null && rawMsd.length >= 2) {
