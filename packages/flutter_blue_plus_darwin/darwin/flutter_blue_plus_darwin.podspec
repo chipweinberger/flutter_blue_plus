@@ -9,7 +9,7 @@ Pod::Spec.new do |s|
   s.description      = 'Flutter plugin for connecting and communicating with Bluetooth Low Energy devices, on Android and iOS'
   s.homepage         = 'https://github.com/boskokg/flutter_blue_plus'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'Chip Weinberger' => 'weinberger.c@gmail.com' }
+  s.author           = { 'Chip Weinberger' => 'example@gmail.com' }
   s.source           = { :path => '.' }
   s.source_files        = 'flutter_blue_plus_darwin/Sources/flutter_blue_plus_darwin/**/*.{h,m}'
   s.public_header_files = 'flutter_blue_plus_darwin/Sources/flutter_blue_plus_darwin/include/**/*.h'
