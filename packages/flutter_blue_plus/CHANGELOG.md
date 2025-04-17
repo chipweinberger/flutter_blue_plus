@@ -1,6 +1,16 @@
-
 ## 1.35.4
-* **[Feature]** Android: on scan throw an error when location services are not enabled (#1167)
+* **[Fix]** `getAdapterState` and `discoverServices` fixes
+* **[Refactor]** use bytes instead of hex for platform communication (#1130)
+* **[Refactor]** use Bluetooth request code less than 2^16
+* **[Fix]** `webOptionalServices` broke scanning on android
+* **[Fix]** correct casting of raw json in `BmScanAdvertisement` (#1142)
+* **[Fix]** conversion code for devices with service data and uuids (#1143)
+* **[Fix]** don't wait for CCCD write for `setNotifyValue` on web (#1153)
+* **[Fix]** exception when adapters is empty (#1162)
+* **[Refactor]** add on turn on response stream (#1166)
+* **[Refactor]** better `Guid` equals operator (#1169)
+* **[Refactor]** check if location services are enabled when doing scan (#1167)
+* **[Fix]** multiple MSD in advertisement is wrong on Android
 
 ## 1.35.3
 * **[Feature]** support for web optional services (#1124)
