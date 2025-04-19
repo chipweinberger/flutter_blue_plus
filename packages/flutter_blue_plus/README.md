@@ -512,6 +512,16 @@ To mock `FlutterBluePlus` for development, refer to the [Mocking Guide](MOCKING.
 
 ## Getting Started
 
+### Add the `flutter_blue_plus` plugin
+
+We recommend that you pin to a specific version of the `flutter_blue_plus` plugin for maximum stability and to avoid small breaking changes.
+
+```shell
+flutter pub add flutter_blue_plus:x.y.z
+```
+
+`flutter_blue_plus` is a [federated plugin](https://docs.flutter.dev/packages-and-plugins/developing-packages#federated-plugins) with endorsed platform implementations therefore you only need to add the "app-facing package" to your `pubspec.yaml` file.
+
 ### Change the minSdkVersion for Android
 
 flutter_blue_plus is compatible only from version 21 of Android SDK so you should change this in **android/app/build.gradle**:
