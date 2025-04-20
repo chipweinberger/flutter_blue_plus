@@ -422,11 +422,8 @@ public class FlutterBluePlusPlugin implements
                     ArrayList<String> permissions = new ArrayList<>();
 
                     if (Build.VERSION.SDK_INT >= 31) { // Android 12 (October 2021)
+                        permissions.add(Manifest.permission.BLUETOOTH_SCAN);
                         permissions.add(Manifest.permission.BLUETOOTH_CONNECT);
-                    }
-
-                    if (Build.VERSION.SDK_INT <= 30) { // Android 11 (September 2020)
-                        permissions.add(Manifest.permission.BLUETOOTH);
                     }
 
                     ensurePermissions(permissions, (granted, perm) -> {
@@ -1542,7 +1539,7 @@ public class FlutterBluePlusPlugin implements
     // ██████   ███████  ██████   ███    ███  ██  ███████  ███████  ██   ██████   ███    ██
     // ██   ██  ██       ██   ██  ████  ████  ██  ██       ██       ██  ██    ██  ████   ██
     // ██████   █████    ██████   ██ ████ ██  ██  ███████  ███████  ██  ██    ██  ██ ██  ██
-    // ██       ██       ██   ██  ██  ██  ██  ██       ██       ██  ██  ██    ██  ██  ██ ██
+    // ██       ██       ██   ██  ██  ██ ██  ██       ██       ██  ██  ██    ██  ██  ██ ██
     // ██       ███████  ██   ██  ██      ██  ██  ███████  ███████  ██   ██████   ██   ████
 
     @Override
@@ -1900,6 +1897,77 @@ public class FlutterBluePlusPlugin implements
         return output.toByteArray();
     }
 
+    HashMap<String, Object> bmScanAdvertisement(BluetoothDevice device, ScanResult result) {
+
+        int min = Integer.MIN_VALUE;
+
+        ScanRecord adv = result.getScanRecord();
+
+        boolean connectable;
+        if (Build.VERSION.SDK_INT >= 26) { // Android 8.0, August 2017
+            connectable = result.isConnectable();
+        } else {
+            // Prior to Android 8.0, it is not possible to get if connectable.
+            // Previously, we used to check `adv.getAdvertiseFlags() & 0x2` but that
+            // returns if the device wants to be *discoverable*, which is not the same thing.
+            connectable = true;
+        }
+
+        String                  advName      = adv != null ?  adv.getDeviceName()                : null;
+        int                     txPower      = adv != null ?  adv.getTxPowerLevel()              : min;
+        int                     appearance   = adv != null ?  getAppearanceFromScanRecord(adv)   : 0;
+        byte[]                  rawMsd       = adv != null ?  getManufacturerSpecificData(adv)   : null;
+        List<ParcelUuid>        serviceUuids = adv != null ?  adv.getServiceUuids()              : null;
+        Map<ParcelUuid, byte[]> serviceData  = adv != null ?  adv.getServiceData()               : null;
+
+        // Manufacturer Specific Data 
+        HashMap<Integer, byte[]> manufDataB = new HashMap<>();
+        if (rawMsd != null && rawMsd.length >= 2) {
+            // manufacturer ID uses little-endian order.
+            int manufacturerId = (rawMsd[0] & 0xFF) | ((rawMsd[1] & 0xFF) << 8);
+
+            // payload
+            int payloadLen = rawMsd.length - 2;
+            byte[] payload = new byte[payloadLen];
+            System.arraycopy(rawMsd, 2, payload, 0, payloadLen);
+
+            // add to array
+            manufDataB.put(manufacturerId, payload);
+        }
+
+        // Service Data
+        HashMap<String, byte[]> serviceDataB = new HashMap<>();
+        if (serviceData != null) {
+            for (Map.Entry<ParcelUuid, byte[]> entry : serviceData.entrySet()) {
+                ParcelUuid key = entry.getKey();
+                byte[] value = entry.getValue();
+                serviceDataB.put(uuidStr(key.getUuid()), value);
+            }
+        }
+
+        // Service UUIDs
+        List<String> serviceUuidsB = new ArrayList<>();
+        if (serviceUuids != null) {
+            for (ParcelUuid s : serviceUuids) {
+                serviceUuidsB.add(uuidStr(s.getUuid()));
+            }
+        }
+
+        // See: BmScanAdvertisement
+        // perf: only add keys if they exists
+        HashMap<String, Object> map = new HashMap<>();
+        if (device.getAddress() != null) {map.put("remote_id", device.getAddress());};
+        if (device.getName() != null)    {map.put("platform_name", device.getName());}
+        if (connectable)                 {map.put("connectable", 1);}
+        if (advName != null)             {map.put("adv_name", advName);}
+        if (txPower != min)              {map.put("tx_power_level", txPower);}
+        if (appearance != 0)             {map.put("appearance", appearance);}
+        if (rawMsd != null)              {map.put("manufacturer_data", manufDataB);}
+        if (serviceData != null)         {map.put("service_data", serviceDataB);}
+        if (serviceUuids != null)        {map.put("service_uuids", serviceUuidsB);}
+        if (result.getRssi() != 0)       {map.put("rssi", result.getRssi());};
+        return map;
+    }
 
     /////////////////////////////////////////////////////////////////////////////////////
     //  █████   ██████    █████   ██████   ████████  ███████  ██████
@@ -2582,78 +2650,6 @@ public class FlutterBluePlusPlugin implements
     // ███████  █████    ██       ██████   █████    ██████   ███████
     // ██   ██  ██       ██       ██       ██       ██   ██       ██
     // ██   ██  ███████  ███████  ██       ███████  ██   ██  ███████
-
-    HashMap<String, Object> bmScanAdvertisement(BluetoothDevice device, ScanResult result) {
-
-        int min = Integer.MIN_VALUE;
-
-        ScanRecord adv = result.getScanRecord();
-
-        boolean connectable;
-        if (Build.VERSION.SDK_INT >= 26) { // Android 8.0, August 2017
-            connectable = result.isConnectable();
-        } else {
-            // Prior to Android 8.0, it is not possible to get if connectable.
-            // Previously, we used to check `adv.getAdvertiseFlags() & 0x2` but that
-            // returns if the device wants to be *discoverable*, which is not the same thing.
-            connectable = true;
-        }
-
-        String                  advName      = adv != null ?  adv.getDeviceName()                : null;
-        int                     txPower      = adv != null ?  adv.getTxPowerLevel()              : min;
-        int                     appearance   = adv != null ?  getAppearanceFromScanRecord(adv)   : 0;
-        byte[]                  rawMsd       = adv != null ?  getManufacturerSpecificData(adv)   : null;
-        List<ParcelUuid>        serviceUuids = adv != null ?  adv.getServiceUuids()              : null;
-        Map<ParcelUuid, byte[]> serviceData  = adv != null ?  adv.getServiceData()               : null;
-
-        // Manufacturer Specific Data 
-        HashMap<Integer, byte[]> manufDataB = new HashMap<>();
-        if (rawMsd != null && rawMsd.length >= 2) {
-            // manufacturer ID uses little-endian order.
-            int manufacturerId = (rawMsd[0] & 0xFF) | ((rawMsd[1] & 0xFF) << 8);
-
-            // payload
-            int payloadLen = rawMsd.length - 2;
-            byte[] payload = new byte[payloadLen];
-            System.arraycopy(rawMsd, 2, payload, 0, payloadLen);
-
-            // add to array
-            manufDataB.put(manufacturerId, payload);
-        }
-
-        // Service Data
-        HashMap<String, byte[]> serviceDataB = new HashMap<>();
-        if (serviceData != null) {
-            for (Map.Entry<ParcelUuid, byte[]> entry : serviceData.entrySet()) {
-                ParcelUuid key = entry.getKey();
-                byte[] value = entry.getValue();
-                serviceDataB.put(uuidStr(key.getUuid()), value);
-            }
-        }
-
-        // Service UUIDs
-        List<String> serviceUuidsB = new ArrayList<>();
-        if (serviceUuids != null) {
-            for (ParcelUuid s : serviceUuids) {
-                serviceUuidsB.add(uuidStr(s.getUuid()));
-            }
-        }
-
-        // See: BmScanAdvertisement
-        // perf: only add keys if they exists
-        HashMap<String, Object> map = new HashMap<>();
-        if (device.getAddress() != null) {map.put("remote_id", device.getAddress());};
-        if (device.getName() != null)    {map.put("platform_name", device.getName());}
-        if (connectable)                 {map.put("connectable", 1);}
-        if (advName != null)             {map.put("adv_name", advName);}
-        if (txPower != min)              {map.put("tx_power_level", txPower);}
-        if (appearance != 0)             {map.put("appearance", appearance);}
-        if (manufData != null)           {map.put("manufacturer_data", manufDataB);}
-        if (serviceData != null)         {map.put("service_data", serviceDataB);}
-        if (serviceUuids != null)        {map.put("service_uuids", serviceUuidsB);}
-        if (result.getRssi() != 0)       {map.put("rssi", result.getRssi());};
-        return map;
-    }
 
     // See: BmBluetoothDevice
     HashMap<String, Object> bmBluetoothDevice(BluetoothDevice device) {
