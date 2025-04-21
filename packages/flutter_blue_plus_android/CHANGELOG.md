@@ -1,3 +1,6 @@
+## 4.0.1
+* fix compile error
+
 ## 4.0.0
 * Use bytes instead of hex for platform communication (#1130)
 

@@ -1,6 +1,6 @@
 name: flutter_blue_plus_android
 description: Android implementation of the flutter_blue_plus plugin.
-version: 4.0.0
+version: 4.0.1
 homepage: https://github.com/chipweinberger/flutter_blue_plus
 
 environment:
