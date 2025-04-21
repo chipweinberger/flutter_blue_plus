@@ -1610,6 +1610,7 @@ public class FlutterBluePlusPlugin implements
             return lm.isLocationEnabled();
         } else {
             // This was deprecated in API 28
+            @SuppressWarnings("deprecation")
             int mode = Settings.Secure.getInt(activityBinding.getActivity().getContentResolver(),
                 Settings.Secure.LOCATION_MODE, Settings.Secure.LOCATION_MODE_OFF);
             return mode != Settings.Secure.LOCATION_MODE_OFF;
@@ -2606,9 +2607,10 @@ public class FlutterBluePlusPlugin implements
         List<ParcelUuid>        serviceUuids = adv != null ?  adv.getServiceUuids()              : null;
         Map<ParcelUuid, byte[]> serviceData  = adv != null ?  adv.getServiceData()               : null;
 
-        // Manufacturer Specific Data 
+        // Manufacturer Specific Data
+        boolean hasMsd = rawMsd != null && rawMsd.length >= 2;
         HashMap<Integer, byte[]> manufDataB = new HashMap<>();
-        if (rawMsd != null && rawMsd.length >= 2) {
+        if (hasMsd) {
             // manufacturer ID uses little-endian order.
             int manufacturerId = (rawMsd[0] & 0xFF) | ((rawMsd[1] & 0xFF) << 8);
 
@@ -2617,7 +2619,7 @@ public class FlutterBluePlusPlugin implements
             byte[] payload = new byte[payloadLen];
             System.arraycopy(rawMsd, 2, payload, 0, payloadLen);
 
-            // add to array
+            // add to map
             manufDataB.put(manufacturerId, payload);
         }
 
@@ -2648,7 +2650,7 @@ public class FlutterBluePlusPlugin implements
         if (advName != null)             {map.put("adv_name", advName);}
         if (txPower != min)              {map.put("tx_power_level", txPower);}
         if (appearance != 0)             {map.put("appearance", appearance);}
-        if (manufData != null)           {map.put("manufacturer_data", manufDataB);}
+        if (hasMsd)                      {map.put("manufacturer_data", manufDataB);}
         if (serviceData != null)         {map.put("service_data", serviceDataB);}
         if (serviceUuids != null)        {map.put("service_uuids", serviceUuidsB);}
         if (result.getRssi() != 0)       {map.put("rssi", result.getRssi());};

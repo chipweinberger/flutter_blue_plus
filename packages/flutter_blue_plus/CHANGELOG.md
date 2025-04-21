@@ -1,3 +1,6 @@
+## 1.35.5
+* **[Fix]** compilation error on Android
+
 ## 1.35.4
 * **[Fix]** `getAdapterState` and `discoverServices` fixes
 * **[Refactor]** use bytes instead of hex for platform communication (#1130)
