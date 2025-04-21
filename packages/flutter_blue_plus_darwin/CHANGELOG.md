@@ -1,3 +1,6 @@
+## 4.0.1
+* fix unrecognized selector sent to instance (regression from 4.0.0)
+
 ## 4.0.0
 * Use bytes instead of hex for platform communication (#1130)
 
