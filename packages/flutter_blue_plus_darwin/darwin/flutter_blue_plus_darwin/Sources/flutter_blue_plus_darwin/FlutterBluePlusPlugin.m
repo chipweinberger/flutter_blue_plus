@@ -495,7 +495,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSString  *primaryServiceUuid = args[@"primary_service_uuid"];
             NSNumber  *writeTypeNumber    = args[@"write_type"];
             NSNumber  *allowLongWrite     = args[@"allow_long_write"];
-            NSData    *value              = args[@"value"];
+            NSData    *value              = [args[@"value"] data];
             
             // Find peripheral
             CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
@@ -624,7 +624,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSString  *characteristicUuid = args[@"characteristic_uuid"];
             NSString  *descriptorUuid     = args[@"descriptor_uuid"];
             NSString  *primaryServiceUuid = args[@"primary_service_uuid"];
-            NSData    *value              = args[@"value"];
+            NSData    *value              = [args[@"value"] data];
 
             // Find peripheral
             CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
@@ -2013,8 +2013,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     }
     for (NSDictionary *f in filters) {
         NSString *service = f[@"service"];
-        NSData *data      = f[@"data"];
-        NSData *mask      = f[@"mask"];
+        NSData *data      = [f[@"data"] data];
+        NSData *mask      = [f[@"mask"] data];
 
         // mask
         if (mask.length == 0 && data.length > 0) {
@@ -2043,8 +2043,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     }
     for (NSDictionary *f in filters) {
         NSNumber *manufacturerId = f[@"manufacturer_id"];
-        NSData *data =             f[@"data"];
-        NSData *mask =             f[@"mask"];
+        NSData *data =             [f[@"data"] data];
+        NSData *mask =             [f[@"mask"] data];
 
         // first 2 bytes are manufacturer id
         unsigned short mId = 0;
