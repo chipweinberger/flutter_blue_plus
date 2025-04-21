@@ -1,3 +1,6 @@
+## 4.0.2
+* fix compile error
+
 ## 4.0.1
 * fix compile error
 
