@@ -56,14 +56,17 @@ class BluetoothCharacteristic {
   ///   - anytime `write()` is called
   ///   - anytime a notification arrives (if subscribed)
   ///   - and when first listened to, it re-emits the last value for convenience
-  Stream<List<int>> get lastValueStream => _mergeStreams([FlutterBluePlusPlatform.instance.onCharacteristicReceived, FlutterBluePlusPlatform.instance.onCharacteristicWritten])
-      .where((p) => p.remoteId == remoteId)
-      .where((p) => p.serviceUuid == serviceUuid)
-      .where((p) => p.characteristicUuid == characteristicUuid)
-      .where((p) => p.primaryServiceUuid == primaryServiceUuid)
-      .where((p) => p.success == true)
-      .map((c) => c.value)
-      .newStreamWithInitialValue(lastValue);
+  Stream<List<int>> get lastValueStream => _mergeStreams([
+        FlutterBluePlusPlatform.instance.onCharacteristicReceived,
+        FlutterBluePlusPlatform.instance.onCharacteristicWritten
+      ])
+          .where((p) => p.remoteId == remoteId)
+          .where((p) => p.serviceUuid == serviceUuid)
+          .where((p) => p.characteristicUuid == characteristicUuid)
+          .where((p) => p.primaryServiceUuid == primaryServiceUuid)
+          .where((p) => p.success == true)
+          .map((c) => c.value)
+          .newStreamWithInitialValue(lastValue);
 
   /// this stream emits values:
   ///   - anytime `read()` is called
@@ -153,8 +156,13 @@ class BluetoothCharacteristic {
   ///         2. the peripheral device must support the 'long write' ble protocol.
   ///         3. Interrupted transfers can leave the characteristic in a partially written state
   ///         4. If the mtu is small, it is very very slow.
-  Future<void> write(List<int> value,
-      {bool withoutResponse = false, bool allowLongWrite = false, int timeout = 15}) async {
+  Future<void> write(
+    List<int> value, {
+    bool withoutResponse = false,
+    bool allowLongWrite = false,
+    bool queue = true,
+    int timeout = 15,
+  }) async {
     //  check args
     if (withoutResponse && allowLongWrite) {
       throw ArgumentError("cannot longWrite withoutResponse, not allowed on iOS or Android");
@@ -167,8 +175,11 @@ class BluetoothCharacteristic {
     }
 
     // Only allow a single ble operation to be underway at a time
-    _Mutex mtx = _MutexFactory.getMutexForKey("global");
-    await mtx.take();
+    _Mutex? mtx;
+    if (queue) {
+      mtx = _MutexFactory.getMutexForKey("global");
+      await mtx.take();
+    }
 
     try {
       final writeType = withoutResponse ? BmWriteType.withoutResponse : BmWriteType.withResponse;
@@ -210,7 +221,9 @@ class BluetoothCharacteristic {
 
       return Future.value();
     } finally {
-      mtx.give();
+      if (queue && mtx != null) {
+        mtx.give();
+      }
     }
   }
 
@@ -257,7 +270,8 @@ class BluetoothCharacteristic {
       Future<BmDescriptorData> futureResponse = responseStream.first;
 
       // invoke
-      bool hasCCCD = await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance.setNotifyValue(request));
+      bool hasCCCD =
+          await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance.setNotifyValue(request));
 
       // wait for CCCD descriptor to be written?
       if (hasCCCD) {
@@ -341,15 +355,15 @@ class CharacteristicProperties {
 
   const CharacteristicProperties(
       {this.broadcast = false,
-        this.read = false,
-        this.writeWithoutResponse = false,
-        this.write = false,
-        this.notify = false,
-        this.indicate = false,
-        this.authenticatedSignedWrites = false,
-        this.extendedProperties = false,
-        this.notifyEncryptionRequired = false,
-        this.indicateEncryptionRequired = false});
+      this.read = false,
+      this.writeWithoutResponse = false,
+      this.write = false,
+      this.notify = false,
+      this.indicate = false,
+      this.authenticatedSignedWrites = false,
+      this.extendedProperties = false,
+      this.notifyEncryptionRequired = false,
+      this.indicateEncryptionRequired = false});
 
   CharacteristicProperties.fromProto(BmCharacteristicProperties p)
       : broadcast = p.broadcast,
