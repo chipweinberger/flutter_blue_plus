@@ -449,9 +449,11 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
     await _initFlutterBluePlus();
 
     return BmBluetoothAdapterState(
-      adapterState: _client.adapters.firstOrNull?.powered == true
-          ? BmAdapterStateEnum.on
-          : BmAdapterStateEnum.off,
+      adapterState: switch (_client.adapters.firstOrNull?.powered) {
+        true => BmAdapterStateEnum.on,
+        false => BmAdapterStateEnum.off,
+        _ => BmAdapterStateEnum.unknown,
+      },
     );
   }
 
