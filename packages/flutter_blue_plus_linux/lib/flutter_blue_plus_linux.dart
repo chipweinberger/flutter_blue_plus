@@ -438,7 +438,9 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
     await _initFlutterBluePlus();
 
     return BmBluetoothAdapterName(
-      adapterName: _client.adapters.first.name,
+      adapterName: _client.adapters.length > 0
+          ? _client.adapters.first.name
+          : '',
     );
   }
 
