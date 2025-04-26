@@ -778,17 +778,21 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   ) async {
     await _initFlutterBluePlus();
 
-    await _client.adapters.first.setDiscoveryFilter(
-      uuids: request.withServices.map(
-        (uuid) {
-          return uuid.str128;
-        },
-      ).toList(),
-    );
+    if (_client.adapters.firstOrNull case final adapter?) {
+      await adapter.setDiscoveryFilter(
+        uuids: request.withServices.map(
+          (uuid) {
+            return uuid.str128;
+          },
+        ).toList(),
+      );
 
-    await _client.adapters.first.startDiscovery();
+      await adapter.startDiscovery();
 
-    return true;
+      return true;
+    }
+
+    return false;
   }
 
   @override
