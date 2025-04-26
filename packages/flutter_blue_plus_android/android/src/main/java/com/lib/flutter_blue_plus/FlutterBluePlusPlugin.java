@@ -500,8 +500,9 @@ public class FlutterBluePlusPlugin implements
                     boolean androidLegacy =             (boolean) data.get("android_legacy");
                     int androidScanMode =                   (int) data.get("android_scan_mode");
                     boolean androidUsesFineLocation =   (boolean) data.get("android_uses_fine_location");
+                    boolean androidCheckLocationServices = (boolean) data.get("android_check_location_services");
 
-                    if (!isLocationEnabled()) {
+                    if (androidCheckLocationServices && !isLocationEnabled()) {
                         result.error("startScan", "Location services are required for Bluetooth scan", null);
                         return;
                     }
@@ -1605,13 +1606,17 @@ public class FlutterBluePlusPlugin implements
     // Check if Android location services are enabled
     @SuppressWarnings("deprecation")
     private boolean isLocationEnabled() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        Activity activity = activityBinding.getActivity();
+        if (Build.VERSION.SDK_INT >= 31) {
+            // Android 12 (October 2021) - location services are not required for BLE scanning
+            return true;
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             // This is a new method provided in API 28 / Android 9 August 2018
-            LocationManager lm = (LocationManager) activityBinding.getActivity().getSystemService(Context.LOCATION_SERVICE);
-            return lm.isLocationEnabled();
+            LocationManager lm = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
+            return lm != null && lm.isLocationEnabled();
         } else {
             // This was deprecated in API 28
-            int mode = Settings.Secure.getInt(activityBinding.getActivity().getContentResolver(),
+            int mode = Settings.Secure.getInt(activity.getContentResolver(),
                 Settings.Secure.LOCATION_MODE, Settings.Secure.LOCATION_MODE_OFF);
             return mode != Settings.Secure.LOCATION_MODE_OFF;
         }
