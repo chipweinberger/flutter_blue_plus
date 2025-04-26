@@ -797,9 +797,13 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   ) async {
     await _initFlutterBluePlus();
 
-    await _client.adapters.first.stopDiscovery();
+    if (_client.adapters.firstOrNull case final adapter?) {
+      await adapter.stopDiscovery();
 
-    return true;
+      return true;
+    }
+
+    return false;
   }
 
   @override
