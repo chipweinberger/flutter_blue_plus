@@ -95,7 +95,7 @@ class BmScanSettings {
     required this.androidLegacy,
     required this.androidScanMode,
     required this.androidUsesFineLocation,
-    required this.androidCheckLocationServices,
+    this.androidCheckLocationServices = true,
     required this.webOptionalServices,
   });
 
