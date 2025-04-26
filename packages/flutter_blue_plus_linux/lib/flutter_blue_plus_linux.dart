@@ -808,10 +808,12 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   ) async {
     await _initFlutterBluePlus();
 
-    if (_client.adapters.first.powered == true) {
-      await _client.adapters.first.setPowered(false);
+    if (_client.adapters.firstOrNull case final adapter?) {
+      if (adapter.powered) {
+        await adapter.setPowered(false);
 
-      return true;
+        return true;
+      }
     }
 
     return false;
