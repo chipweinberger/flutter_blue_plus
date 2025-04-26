@@ -1606,17 +1606,16 @@ public class FlutterBluePlusPlugin implements
     // Check if Android location services are enabled
     @SuppressWarnings("deprecation")
     private boolean isLocationEnabled() {
-        Activity activity = activityBinding.getActivity();
         if (Build.VERSION.SDK_INT >= 31) {
             // Android 12 (October 2021) - location services are not required for BLE scanning
             return true;
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             // This is a new method provided in API 28 / Android 9 August 2018
-            LocationManager lm = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
+            LocationManager lm = (LocationManager) activityBinding.getActivity().getSystemService(Context.LOCATION_SERVICE);
             return lm != null && lm.isLocationEnabled();
         } else {
             // This was deprecated in API 28
-            int mode = Settings.Secure.getInt(activity.getContentResolver(),
+            int mode = Settings.Secure.getInt(activityBinding.getActivity().getContentResolver(),
                 Settings.Secure.LOCATION_MODE, Settings.Secure.LOCATION_MODE_OFF);
             return mode != Settings.Secure.LOCATION_MODE_OFF;
         }
