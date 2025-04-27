@@ -230,6 +230,7 @@ class FlutterBluePlus {
     bool androidLegacy = false,
     AndroidScanMode androidScanMode = AndroidScanMode.lowLatency,
     bool androidUsesFineLocation = false,
+    bool androidCheckLocationServices = true,
     List<Guid> webOptionalServices = const [],
   }) async {
     // check args
@@ -276,6 +277,7 @@ class FlutterBluePlus {
           androidLegacy: androidLegacy,
           androidScanMode: androidScanMode.value,
           androidUsesFineLocation: androidUsesFineLocation,
+          androidCheckLocationServices: androidCheckLocationServices,
           webOptionalServices: webOptionalServices);
 
       Stream<BmScanResponse> responseStream = FlutterBluePlusPlatform.instance.onScanResponse;
