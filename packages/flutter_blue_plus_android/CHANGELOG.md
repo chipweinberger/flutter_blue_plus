@@ -1,3 +1,6 @@
+## 4.0.3
+* added option to disable Location Services check
+
 ## 4.0.2
 * fix compile error
 
