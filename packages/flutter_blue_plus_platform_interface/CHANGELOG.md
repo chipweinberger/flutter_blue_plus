@@ -1,3 +1,6 @@
+## 4.0.2
+* Added `androidCheckLocationServices` to `BmScanSettings` (#1199)
+
 ## 4.0.1
 * Remove unused methods from Bluetooth messages
 
