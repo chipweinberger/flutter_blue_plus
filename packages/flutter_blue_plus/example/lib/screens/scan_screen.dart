@@ -10,7 +10,7 @@ import '../widgets/scan_result_tile.dart';
 import '../utils/extra.dart';
 
 class ScanScreen extends StatefulWidget {
-  const ScanScreen({Key? key}) : super(key: key);
+  const ScanScreen({super.key});
 
   @override
   State<ScanScreen> createState() => _ScanScreenState();
@@ -28,18 +28,16 @@ class _ScanScreenState extends State<ScanScreen> {
     super.initState();
 
     _scanResultsSubscription = FlutterBluePlus.scanResults.listen((results) {
-      _scanResults = results;
       if (mounted) {
-        setState(() {});
+        setState(() => _scanResults = results);
       }
     }, onError: (e) {
       Snackbar.show(ABC.b, prettyException("Scan Error:", e), success: false);
     });
 
     _isScanningSubscription = FlutterBluePlus.isScanning.listen((state) {
-      _isScanning = state;
       if (mounted) {
-        setState(() {});
+        setState(() => _isScanning = state);
       }
     });
   }
@@ -64,8 +62,15 @@ class _ScanScreenState extends State<ScanScreen> {
     try {
       await FlutterBluePlus.startScan(
         timeout: const Duration(seconds: 15),
+        withServices: [
+          // Guid("180f"), // battery
+          // Guid("180a"), // device info
+          // Guid("1800"), // generic access
+          // Guid("6e400001-b5a3-f393-e0a9-e50e24dcca9e"), // Nordic UART
+        ],
         webOptionalServices: [
           Guid("180f"), // battery
+          Guid("180a"), // device info
           Guid("1800"), // generic access
           Guid("6e400001-b5a3-f393-e0a9-e50e24dcca9e"), // Nordic UART
         ],
@@ -112,12 +117,12 @@ class _ScanScreenState extends State<ScanScreen> {
   Widget buildScanButton(BuildContext context) {
     if (FlutterBluePlus.isScanningNow) {
       return FloatingActionButton(
-        child: const Icon(Icons.stop),
         onPressed: onStopPressed,
         backgroundColor: Colors.red,
+        child: const Icon(Icons.stop),
       );
     } else {
-      return FloatingActionButton(child: const Text("SCAN"), onPressed: onScanPressed);
+      return FloatingActionButton(onPressed: onScanPressed, child: const Text("SCAN"));
     }
   }
 

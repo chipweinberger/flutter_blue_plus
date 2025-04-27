@@ -20,7 +20,7 @@ void main() {
 // ScanScreen depending on the adapter state
 //
 class FlutterBlueApp extends StatefulWidget {
-  const FlutterBlueApp({Key? key}) : super(key: key);
+  const FlutterBlueApp({super.key});
 
   @override
   State<FlutterBlueApp> createState() => _FlutterBlueAppState();

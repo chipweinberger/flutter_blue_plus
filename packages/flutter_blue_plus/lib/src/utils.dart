@@ -1,4 +1,4 @@
-part of flutter_blue_plus;
+part of '../flutter_blue_plus.dart';
 
 extension AddOrUpdate<T> on List<T> {
   /// add an item to a list, or update item if it already exists
@@ -14,7 +14,7 @@ extension AddOrUpdate<T> on List<T> {
 
 extension FutureTimeout<T> on Future<T> {
   Future<T> fbpTimeout(int seconds, String function) {
-    return this.timeout(Duration(seconds: seconds), onTimeout: () {
+    return timeout(Duration(seconds: seconds), onTimeout: () {
       throw FlutterBluePlusException(
           ErrorPlatform.fbp, function, FbpErrorCode.timeout.index, "Timed out after ${seconds}s");
     });
@@ -36,7 +36,7 @@ extension FutureTimeout<T> on Future<T> {
 
     // When the original future completes
     // complete our completer and cancel the subscription.
-    this.then((value) {
+    then((value) {
       if (!completer.isCompleted) {
         subscription.cancel();
         completer.complete(value);
@@ -67,7 +67,7 @@ extension FutureTimeout<T> on Future<T> {
 
     // When the original future completes
     // complete our completer and cancel the subscription.
-    this.then((value) {
+    then((value) {
       if (!completer.isCompleted) {
         subscription.cancel();
         completer.complete(value);
@@ -92,7 +92,7 @@ class _StreamControllerReEmit<T> {
 
   final StreamController<T> _controller = StreamController<T>.broadcast();
 
-  _StreamControllerReEmit({required T initialValue}) : this.latestValue = initialValue;
+  _StreamControllerReEmit({required T initialValue}) : latestValue = initialValue;
 
   Stream<T> get stream {
     if (latestValue != null) {
@@ -382,8 +382,8 @@ extension FirstWhereOrNullExtension<T> on Iterable<T> {
 extension RemoveWhere<T> on List<T> {
   /// returns true if some items where removed
   bool _removeWhere(bool Function(T) test) {
-    int initialLength = this.length;
-    this.removeWhere(test);
-    return this.length != initialLength;
+    int initialLength = length;
+    removeWhere(test);
+    return length != initialLength;
   }
 }

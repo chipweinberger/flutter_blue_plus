@@ -113,7 +113,7 @@ class BmScanSettings {
     data['android_scan_mode'] = androidScanMode;
     data['android_uses_fine_location'] = androidUsesFineLocation;
     data['android_check_location_services'] = androidCheckLocationServices;
-    data['web_optional_services'] = webOptionalServices.map((s) => s.str).toList();;
+    data['web_optional_services'] = webOptionalServices.map((s) => s.str).toList();
     return data;
   }
 }
@@ -177,7 +177,7 @@ class BmScanAdvertisement {
       manufacturerData: manufacturerData,
       serviceData: serviceData,
       serviceUuids: serviceUuids,
-      rssi: json['rssi'] != null ? json['rssi'] : 0,
+      rssi: json['rssi'] ?? 0,
     );
   }
 }

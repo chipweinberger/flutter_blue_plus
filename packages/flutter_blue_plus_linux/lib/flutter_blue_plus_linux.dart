@@ -22,7 +22,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   Stream<BmBluetoothAdapterState> get onAdapterStateChanged {
     return _client.adaptersChanged.where(
       (adapters) {
-        return adapters.length > 0;
+        return adapters.isNotEmpty;
       },
     ).switchMap(
       (adapters) {
@@ -522,7 +522,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   ) async {
     await _initFlutterBluePlus();
 
-    return _client.adapters.length > 0;
+    return _client.adapters.isNotEmpty;
   }
 
   @override

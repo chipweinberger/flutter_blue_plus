@@ -489,7 +489,7 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
 
       final RequestDeviceOptions options;
 
-      if (filters.length > 0) {
+      if (filters.isNotEmpty) {
         options = RequestDeviceOptions(
           filters: filters.toJS,
           optionalServices: request.webOptionalServices.map((e) => e.str128.toJS).toList().toJS,

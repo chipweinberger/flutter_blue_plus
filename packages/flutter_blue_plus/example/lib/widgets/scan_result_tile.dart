@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 class ScanResultTile extends StatefulWidget {
-  const ScanResultTile({Key? key, required this.result, this.onTap}) : super(key: key);
+  const ScanResultTile({super.key, required this.result, this.onTap});
 
   final ScanResult result;
   final VoidCallback? onTap;
@@ -41,7 +41,7 @@ class _ScanResultTileState extends State<ScanResultTile> {
   }
 
   String getNiceManufacturerData(List<List<int>> data) {
-    return data.map((val) => '${getNiceHexArray(val)}').join(', ').toUpperCase();
+    return data.map((val) => getNiceHexArray(val)).join(', ').toUpperCase();
   }
 
   String getNiceServiceData(Map<Guid, List<int>> data) {
@@ -79,12 +79,12 @@ class _ScanResultTileState extends State<ScanResultTile> {
 
   Widget _buildConnectButton(BuildContext context) {
     return ElevatedButton(
-      child: isConnected ? const Text('OPEN') : const Text('CONNECT'),
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
       ),
       onPressed: (widget.result.advertisementData.connectable) ? widget.onTap : null,
+      child: isConnected ? const Text('OPEN') : const Text('CONNECT'),
     );
   }
 
