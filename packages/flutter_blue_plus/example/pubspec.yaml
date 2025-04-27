@@ -17,6 +17,9 @@ dependencies:
     # In *your* app you should use ^1.17.3 or similar
     path: ../
 
+dev_dependencies:
+  flutter_lints: ^5.0.0
+
 dependency_overrides:
   # Note: We use these dependency overrides to test the example app with the latest changes.
   # In *your* app you should not add these overrides
