@@ -803,7 +803,13 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   ) async {
     await _initFlutterBluePlus();
 
-    await _client.adapters.first.stopDiscovery();
+    final adapter = _client.adapters.firstOrNull;
+
+    if (adapter == null) {
+      return false;
+    }
+
+    await adapter.stopDiscovery();
 
     return true;
   }
