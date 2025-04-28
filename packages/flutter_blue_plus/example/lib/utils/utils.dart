@@ -11,7 +11,7 @@ class StreamControllerReemit<T> {
   StreamControllerReemit({T? initialValue}) : _latestValue = initialValue;
 
   Stream<T> get stream {
-    return _latestValue != null ? _controller.stream.newStreamWithInitialValue(_latestValue!) : _controller.stream;
+    return _latestValue != null ? _controller.stream.newStreamWithInitialValue(_latestValue as T) : _controller.stream;
   }
 
   T? get value => _latestValue;

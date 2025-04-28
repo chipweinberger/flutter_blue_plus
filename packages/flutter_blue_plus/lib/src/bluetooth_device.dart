@@ -368,7 +368,7 @@ class BluetoothDevice {
   Stream<void> get onServicesReset {
     return FlutterBluePlusPlatform.instance.onServicesReset
         .where((p) => p.remoteId == remoteId)
-        .map((m) => null);
+        .map<void>((_) { /* no return, so this is a void callback */ });
   }
 
   /// Read the RSSI of connected remote device
