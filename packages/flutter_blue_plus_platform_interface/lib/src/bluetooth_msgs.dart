@@ -113,7 +113,8 @@ class BmScanSettings {
     data['android_scan_mode'] = androidScanMode;
     data['android_uses_fine_location'] = androidUsesFineLocation;
     data['android_check_location_services'] = androidCheckLocationServices;
-    data['web_optional_services'] = webOptionalServices.map((s) => s.str).toList();;
+    data['web_optional_services'] = webOptionalServices.map((s) => s.str).toList();
+    ;
     return data;
   }
 }
@@ -215,16 +216,19 @@ class BmScanResponse {
 class BmConnectRequest {
   DeviceIdentifier remoteId;
   bool autoConnect;
+  bool ctdk;
 
   BmConnectRequest({
     required this.remoteId,
     required this.autoConnect,
+    required this.ctdk,
   });
 
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> data = {};
     data['remote_id'] = remoteId.str;
     data['auto_connect'] = autoConnect ? 1 : 0;
+    data['ctdk'] = ctdk ? 1 : 0;
     return data;
   }
 }
@@ -307,7 +311,6 @@ class BmBluetoothCharacteristic {
   final Guid? primaryServiceUuid;
   List<BmBluetoothDescriptor> descriptors;
   BmCharacteristicProperties properties;
-
 
   BmBluetoothCharacteristic({
     required this.remoteId,
@@ -473,7 +476,6 @@ class BmCharacteristicData {
   final int errorCode;
   final String errorString;
 
-
   BmCharacteristicData({
     required this.remoteId,
     required this.serviceUuid,
@@ -539,7 +541,6 @@ class BmWriteCharacteristicRequest {
   final BmWriteType writeType;
   final bool allowLongWrite;
   final List<int> value;
-
 
   BmWriteCharacteristicRequest({
     required this.remoteId,
@@ -640,7 +641,6 @@ class BmSetNotifyValueRequest {
   final Guid? primaryServiceUuid;
   final bool forceIndications;
   final bool enable;
-
 
   BmSetNotifyValueRequest({
     required this.remoteId,
@@ -887,7 +887,7 @@ class BmCreateBondRequest {
     required this.remoteId,
     required this.pin,
   });
-  
+
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> data = {};
     data['remote_id'] = remoteId.str;
