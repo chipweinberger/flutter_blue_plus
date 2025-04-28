@@ -67,7 +67,7 @@ packages:
       path: "../../flutter_blue_plus_android"
       relative: true
     source: path
-    version: "4.0.2"
+    version: "4.0.3"
   flutter_blue_plus_darwin:
     dependency: "direct overridden"
     description:
@@ -81,14 +81,14 @@ packages:
       path: "../../flutter_blue_plus_linux"
       relative: true
     source: path
-    version: "3.0.1"
+    version: "3.0.2"
   flutter_blue_plus_platform_interface:
     dependency: "direct overridden"
     description:
       path: "../../flutter_blue_plus_platform_interface"
       relative: true
     source: path
-    version: "4.0.1"
+    version: "4.0.2"
   flutter_blue_plus_web:
     dependency: "direct overridden"
     description:

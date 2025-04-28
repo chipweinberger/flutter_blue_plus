@@ -101,6 +101,7 @@ class BluetoothDevice {
     Duration timeout = const Duration(seconds: 35),
     int? mtu = 512,
     bool autoConnect = false,
+    bool ctdk = false,
   }) async {
     // If you hit this assert, you must set `mtu:null`, i.e `device.connect(mtu:null, autoConnect:true)`
     // and you'll have to call `requestMtu` yourself. `autoConnect` is not compatibile with `mtu`.
@@ -124,6 +125,7 @@ class BluetoothDevice {
       var request = BmConnectRequest(
         remoteId: remoteId,
         autoConnect: autoConnect,
+        ctdk: ctdk,
       );
 
       var responseStream = FlutterBluePlusPlatform

@@ -325,7 +325,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSDictionary* args = (NSDictionary*)call.arguments;
             NSString  *remoteId       = args[@"remote_id"];
             NSNumber  *autoConnect    = args[@"auto_connect"];
-
+            NSNumber  *ctdk           = args[@"ctdk"];
             // check adapter state
             if ([self isAdapterOn] == false) {
                 NSString* as = [self cbManagerStateString:self.centralManager.state];
@@ -385,8 +385,15 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 // note: use CBConnectPeripheralOptionEnableAutoReconnect constant
                 // when all developers can be excpected to be on iOS 17+
                 [options setObject:autoConnect forKey:@"kCBConnectOptionEnableAutoReconnect"];
-            } 
-
+            }
+            
+            if (ctdk.boolValue) {
+                if (@available(iOS 13, *)) {
+                    //*  @discussion An NSNumber (Boolean) indicating that the system will bring up classic transport profiles when low energy transport for peripheral is connected.
+                    [options setObject:@(true) forKey:CBConnectPeripheralOptionEnableTransportBridgingKey];
+                }
+            }
+            
             [self.centralManager connectPeripheral:peripheral options:options];
 
             // add to currently connecting peripherals
@@ -495,7 +502,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSString  *primaryServiceUuid = args[@"primary_service_uuid"];
             NSNumber  *writeTypeNumber    = args[@"write_type"];
             NSNumber  *allowLongWrite     = args[@"allow_long_write"];
-            NSData    *value              = [args[@"value"] data];
+            NSData    *value              = args[@"value"];
             
             // Find peripheral
             CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
@@ -624,7 +631,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSString  *characteristicUuid = args[@"characteristic_uuid"];
             NSString  *descriptorUuid     = args[@"descriptor_uuid"];
             NSString  *primaryServiceUuid = args[@"primary_service_uuid"];
-            NSData    *value              = [args[@"value"] data];
+            NSData    *value              = args[@"value"];
 
             // Find peripheral
             CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
@@ -771,7 +778,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         }
         else if([@"createBond" isEqualToString:call.method])
         {
-            result([FlutterError errorWithCode:@"createBond" 
+            result([FlutterError errorWithCode:@"setPreferredPhy" 
                                     message:@"android only"
                                     details:NULL]);
         }
@@ -2013,8 +2020,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     }
     for (NSDictionary *f in filters) {
         NSString *service = f[@"service"];
-        NSData *data      = [f[@"data"] data];
-        NSData *mask      = [f[@"mask"] data];
+        NSData *data      = f[@"data"];
+        NSData *mask      = f[@"mask"];
 
         // mask
         if (mask.length == 0 && data.length > 0) {
@@ -2043,8 +2050,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     }
     for (NSDictionary *f in filters) {
         NSNumber *manufacturerId = f[@"manufacturer_id"];
-        NSData *data =             [f[@"data"] data];
-        NSData *mask =             [f[@"mask"] data];
+        NSData *data =             f[@"data"];
+        NSData *mask =             f[@"mask"];
 
         // first 2 bytes are manufacturer id
         unsigned short mId = 0;
