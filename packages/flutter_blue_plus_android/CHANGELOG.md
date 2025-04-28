@@ -1,4 +1,4 @@
-## 4.0.4
+## 4.0.5
 * Fixes to check for location services when plugin is called from a service
 
 ## 4.0.3
