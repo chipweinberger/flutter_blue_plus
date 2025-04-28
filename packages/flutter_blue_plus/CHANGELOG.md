@@ -32,6 +32,7 @@
 * **[Fix]** Bluetooth adapter turn off (regression 1.35.0)
 
 ## 1.35.0
+This release adds support for Web, Linux, and the Platform Interface.
 * **[Feature]** add platform interface
 
 ## 1.34.5
