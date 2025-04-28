@@ -3,18 +3,16 @@
 * **[Feature]** added `androidCheckLocationServices` to `startScan` (#1199)
 
 ## 1.35.4
-* **[Fix]** `getAdapterState` and `discoverServices` fixes
-* **[Refactor]** use bytes instead of hex for platform communication (#1130)
-* **[Refactor]** use Bluetooth request code less than 2^16
-* **[Fix]** `webOptionalServices` broke scanning on android
-* **[Fix]** correct casting of raw json in `BmScanAdvertisement` (#1142)
-* **[Fix]** conversion code for devices with service data and uuids (#1143)
-* **[Fix]** don't wait for CCCD write for `setNotifyValue` on web (#1153)
-* **[Fix]** exception when adapters is empty (#1162)
-* **[Refactor]** add on turn on response stream (#1166)
-* **[Refactor]** better `Guid` equals operator (#1169)
-* **[Refactor]** check if location services are enabled when doing scan (#1167)
-* **[Fix]** multiple MSD in advertisement is wrong on Android
+* **[Feature]** Android: check if location services are enabled before doing scan (#1167)
+* **[Improve]** better `Guid` equals operator (#1169)
+* **[Fix]** Android: `webOptionalServices` broke scanning on android (regression 1.35.4)
+* **[Fix]** Android: turnOn was not checking response (#1166) (regression 1.35.0)
+* **[Fix]** Android: multiple MSD in advertisement is wrong on Android
+* **[Fix]** Android: use Bluetooth request code less than 2^16 to prevent permissions error
+* **[Fix]** Linux: exception when adapters is empty (#1162)
+* **[Fix]** Web:`getAdapterState` and `discoverServices` fixes 
+* **[Fix]** Web: don't wait for CCCD write for `setNotifyValue` (#1153)
+* **[Refactor]** Performance: use bytes instead of hex for platform communication (#1130)
 
 ## 1.35.3
 * **[Feature]** support for web optional services (#1124)
