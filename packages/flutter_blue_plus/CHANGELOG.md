@@ -1,3 +1,7 @@
+## 1.35.5
+
+* **[Feature]** added `androidCheckLocationServices` to `startScan` (#1199)
+
 ## 1.35.4
 * **[Fix]** `getAdapterState` and `discoverServices` fixes
 * **[Refactor]** use bytes instead of hex for platform communication (#1130)
