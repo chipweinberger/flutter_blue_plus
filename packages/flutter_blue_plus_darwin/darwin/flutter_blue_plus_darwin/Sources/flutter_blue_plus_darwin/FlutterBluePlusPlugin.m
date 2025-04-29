@@ -1444,7 +1444,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"service_uuid":                [characteristic.service.UUID uuidStr],
         @"characteristic_uuid":         [characteristic.UUID uuidStr],
         @"primary_service_uuid":        primaryService ? [primaryService.UUID uuidStr] : [NSNull null],
-        @"value":                       characteristic.value,
+        @"value":                       characteristic.value ? characteristic.value : [NSData data],
         @"success":                     error == nil ? @(1) : @(0),
         @"error_string":                error ? [error localizedDescription] : @"success",
         @"error_code":                  error ? @(error.code) : @(0),
