@@ -11,6 +11,15 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_blue_plus_android:
+  flutter_blue_plus_darwin:
+  flutter_blue_plus_linux:
+  flutter_blue_plus_platform_interface:
+  flutter_blue_plus_web:
+
+dependency_overrides:
+  # Note: We use these dependency overrides to test the example app with the latest changes.
+  # In *your* app you should not add these overrides
+  flutter_blue_plus_android:
     path: ../flutter_blue_plus_android
   flutter_blue_plus_darwin:
     path: ../flutter_blue_plus_darwin
