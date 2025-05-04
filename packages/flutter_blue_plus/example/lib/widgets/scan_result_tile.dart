@@ -78,13 +78,9 @@ class _ScanResultTileState extends State<ScanResultTile> {
   }
 
   Widget _buildConnectButton(BuildContext context) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
-      ),
-      onPressed: (widget.result.advertisementData.connectable) ? widget.onTap : null,
-      child: isConnected ? const Text('OPEN') : const Text('CONNECT'),
+    return TextButton(
+      onPressed: widget.result.advertisementData.connectable ? widget.onTap : null,
+      child: isConnected ? const Text('Open') : const Text('Connect'),
     );
   }
 

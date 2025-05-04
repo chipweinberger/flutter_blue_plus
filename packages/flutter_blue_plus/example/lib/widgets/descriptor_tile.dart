@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
+import '../utils/data_entry.dart';
 import "../utils/snackbar.dart";
 
 class DescriptorTile extends StatefulWidget {
@@ -39,11 +39,6 @@ class _DescriptorTileState extends State<DescriptorTile> {
 
   BluetoothDescriptor get d => widget.descriptor;
 
-  List<int> _getRandomBytes() {
-    final math = Random();
-    return [math.nextInt(255), math.nextInt(255), math.nextInt(255), math.nextInt(255)];
-  }
-
   Future onReadPressed() async {
     try {
       await d.read();
@@ -57,8 +52,11 @@ class _DescriptorTileState extends State<DescriptorTile> {
 
   Future onWritePressed() async {
     try {
-      await d.write(_getRandomBytes());
-      Snackbar.show(ABC.c, "Descriptor Write : Success", success: true);
+      List<int>? value = await DataEntry.enterData(context);
+      if (value != null) {
+        await d.write(value);
+        Snackbar.show(ABC.c, "Descriptor Write : Success", success: true);
+      }
     } catch (e, backtrace) {
       Snackbar.show(ABC.c, prettyException("Descriptor Write Error:", e), success: false);
       print(e);
@@ -107,7 +105,7 @@ class _DescriptorTileState extends State<DescriptorTile> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          const Text('Descriptor'),
+          Text('Descriptor', style: TextStyle(color: Theme.of(context).primaryColor)),
           buildUuid(context),
           buildValue(context),
         ],
