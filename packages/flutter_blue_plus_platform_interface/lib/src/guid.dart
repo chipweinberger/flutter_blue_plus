@@ -14,7 +14,7 @@ class Guid {
   Guid(String input) : bytes = _toBytes(input);
 
   static Guid? parse(String? input) {
-    if (input == null || input.length == 0) {
+    if (input == null || input.isEmpty) {
       return null;
     } else {
       return Guid(input);

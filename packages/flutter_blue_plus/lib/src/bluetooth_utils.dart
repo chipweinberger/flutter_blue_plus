@@ -1,4 +1,4 @@
-part of flutter_blue_plus;
+part of '../flutter_blue_plus.dart';
 
 /// State of the bluetooth adapter.
 enum BluetoothAdapterState { unknown, unavailable, unauthorized, turningOn, on, turningOff, off }

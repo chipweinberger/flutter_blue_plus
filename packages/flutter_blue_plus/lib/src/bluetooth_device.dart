@@ -2,7 +2,7 @@
 // All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-part of flutter_blue_plus;
+part of '../flutter_blue_plus.dart';
 
 class BluetoothDevice {
   final DeviceIdentifier remoteId;
@@ -368,7 +368,7 @@ class BluetoothDevice {
   Stream<void> get onServicesReset {
     return FlutterBluePlusPlatform.instance.onServicesReset
         .where((p) => p.remoteId == remoteId)
-        .map((m) => null);
+        .map<void>((_) { /* no return, so this is a void callback */ });
   }
 
   /// Read the RSSI of connected remote device

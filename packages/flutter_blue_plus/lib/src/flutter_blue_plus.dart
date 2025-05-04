@@ -2,7 +2,7 @@
 // All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-part of flutter_blue_plus;
+part of '../flutter_blue_plus.dart';
 
 class FlutterBluePlus {
   ///////////////////
@@ -144,11 +144,8 @@ class FlutterBluePlus {
     // get current state if needed
     if (_adapterStateNow == null) {
       var result = await _invokeMethod(() => FlutterBluePlusPlatform.instance.getAdapterState(BmBluetoothAdapterStateRequest()));
-      var value = result.adapterState;
       // update _adapterStateNow if it is still null after the await
-      if (_adapterStateNow == null) {
-        _adapterStateNow = value;
-      }
+      _adapterStateNow ??= result.adapterState;
     }
 
     yield* FlutterBluePlusPlatform.instance.onAdapterStateChanged
