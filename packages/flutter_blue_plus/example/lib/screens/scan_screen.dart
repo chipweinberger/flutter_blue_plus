@@ -115,16 +115,6 @@ class _ScanScreenState extends State<ScanScreen> {
   }
 
   Widget buildScanButton() {
-    // if (FlutterBluePlus.isScanningNow) {
-    //   return FloatingActionButton(
-    //     onPressed: onStopPressed,
-    //     backgroundColor: Colors.red,
-    //     child: const Icon(Icons.stop),
-    //   );
-    // } else {
-    //   return FloatingActionButton(onPressed: onScanPressed, child: const Text("SCAN"));
-    // }
-
     return Row(children: [
       if (FlutterBluePlus.isScanningNow)
         buildSpinner()
