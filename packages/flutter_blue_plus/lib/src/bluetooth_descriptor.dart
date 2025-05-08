@@ -10,6 +10,7 @@ class BluetoothDescriptor {
   final Guid characteristicUuid;
   final Guid descriptorUuid;
   final Guid? primaryServiceUuid;
+  final int? instanceId;
 
   BluetoothDescriptor({
     required this.remoteId,
@@ -17,6 +18,7 @@ class BluetoothDescriptor {
     required this.characteristicUuid,
     required this.descriptorUuid,
     this.primaryServiceUuid,
+    this.instanceId,
   });
 
   BluetoothDescriptor.fromProto(BmBluetoothDescriptor p)
@@ -24,7 +26,8 @@ class BluetoothDescriptor {
         serviceUuid = p.serviceUuid,
         characteristicUuid = p.characteristicUuid,
         descriptorUuid = p.descriptorUuid,
-        primaryServiceUuid = p.primaryServiceUuid;
+        primaryServiceUuid = p.primaryServiceUuid,
+        instanceId = p.instanceId;
 
   /// convenience accessor
   Guid get uuid => descriptorUuid;
@@ -45,7 +48,8 @@ class BluetoothDescriptor {
   ///   - anytime `read()` is called
   ///   - anytime `write()` is called
   ///   - and when first listened to, it re-emits the last value for convenience
-  Stream<List<int>> get lastValueStream => _mergeStreams([FlutterBluePlusPlatform.instance.onDescriptorRead, FlutterBluePlusPlatform.instance.onDescriptorWritten])
+  Stream<List<int>> get lastValueStream => _mergeStreams(
+          [FlutterBluePlusPlatform.instance.onDescriptorRead, FlutterBluePlusPlatform.instance.onDescriptorWritten])
       .where((p) => p.remoteId == remoteId)
       .where((p) => p.characteristicUuid == characteristicUuid)
       .where((p) => p.serviceUuid == serviceUuid)
@@ -88,6 +92,7 @@ class BluetoothDescriptor {
         characteristicUuid: characteristicUuid,
         descriptorUuid: descriptorUuid,
         primaryServiceUuid: primaryServiceUuid,
+        instanceId: instanceId,
       );
 
       Stream<BmDescriptorData> responseStream = FlutterBluePlusPlatform.instance.onDescriptorRead
@@ -142,6 +147,7 @@ class BluetoothDescriptor {
         descriptorUuid: descriptorUuid,
         value: value,
         primaryServiceUuid: primaryServiceUuid,
+        instanceId: instanceId,
       );
 
       Stream<BmDescriptorData> responseStream = FlutterBluePlusPlatform.instance.onDescriptorWritten
@@ -183,6 +189,7 @@ class BluetoothDescriptor {
         'descriptorUuid: $descriptorUuid, '
         'primaryServiceUuid: $primaryServiceUuid'
         'lastValue: $lastValue'
+        'instanceId: $instanceId'
         '}';
   }
 
