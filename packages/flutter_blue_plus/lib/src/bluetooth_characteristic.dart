@@ -87,12 +87,17 @@ class BluetoothCharacteristic {
   /// return true if we're subscribed to this characteristic
   ///   -  you can subscribe using setNotifyValue(true)
   bool get isNotifying {
-    var cccd = descriptors._firstWhereOrNull((d) => d.descriptorUuid == cccdUuid);
+    var cccd = descriptors._firstWhereOrNull(
+      (d) => d.descriptorUuid == cccdUuid && d.instanceId == instanceId,
+    );
+
     if (cccd == null) {
       return false;
     }
+
     var hasNotify = cccd.lastValue.isNotEmpty && (cccd.lastValue[0] & 0x01) > 0;
     var hasIndicate = cccd.lastValue.isNotEmpty && (cccd.lastValue[0] & 0x02) > 0;
+
     return hasNotify || hasIndicate;
   }
 
@@ -312,7 +317,9 @@ class BluetoothCharacteristic {
     if (_bmsvc != null) {
       for (var c in _bmsvc!.characteristics) {
         if (c.characteristicUuid == uuid) {
-          return c;
+          if (c.instanceId == null || c.instanceId == instanceId) {
+            return c;
+          }
         }
       }
     }
@@ -329,6 +336,7 @@ class BluetoothCharacteristic {
         'descriptors: $descriptors, '
         'properties: $properties, '
         'value: $lastValue'
+        'instanceId: $instanceId'
         '}';
   }
 

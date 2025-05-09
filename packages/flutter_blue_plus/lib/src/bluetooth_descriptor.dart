@@ -40,7 +40,7 @@ class BluetoothDescriptor {
   ///   - anytime `write()` is called
   ///   - when the device is disconnected it is cleared
   List<int> get lastValue {
-    String key = "$serviceUuid:$characteristicUuid:$descriptorUuid";
+    String key = "$serviceUuid:$characteristicUuid:$descriptorUuid:${instanceId ?? 'noinst'}";
     return FlutterBluePlus._lastDescs[remoteId]?[key] ?? [];
   }
 
@@ -56,6 +56,7 @@ class BluetoothDescriptor {
       .where((p) => p.descriptorUuid == descriptorUuid)
       .where((p) => p.primaryServiceUuid == primaryServiceUuid)
       .where((p) => p.success == true)
+      .where((p) => p.instanceId == null || p.instanceId == instanceId)
       .map((p) => p.value)
       .newStreamWithInitialValue(lastValue);
 
@@ -68,6 +69,7 @@ class BluetoothDescriptor {
       .where((p) => p.descriptorUuid == descriptorUuid)
       .where((p) => p.primaryServiceUuid == primaryServiceUuid)
       .where((p) => p.success == true)
+      .where((p) => p.instanceId == null || p.instanceId == instanceId)
       .map((p) => p.value);
 
   /// Retrieves the value of a specified descriptor
@@ -100,7 +102,8 @@ class BluetoothDescriptor {
           .where((p) => p.serviceUuid == request.serviceUuid)
           .where((p) => p.characteristicUuid == request.characteristicUuid)
           .where((p) => p.descriptorUuid == request.descriptorUuid)
-          .where((p) => p.primaryServiceUuid == request.primaryServiceUuid);
+          .where((p) => p.primaryServiceUuid == request.primaryServiceUuid)
+          .where((p) => p.instanceId == null || p.instanceId == instanceId);
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmDescriptorData> futureResponse = responseStream.first;
@@ -155,7 +158,8 @@ class BluetoothDescriptor {
           .where((p) => p.serviceUuid == request.serviceUuid)
           .where((p) => p.characteristicUuid == request.characteristicUuid)
           .where((p) => p.descriptorUuid == request.descriptorUuid)
-          .where((p) => p.primaryServiceUuid == request.primaryServiceUuid);
+          .where((p) => p.primaryServiceUuid == request.primaryServiceUuid)
+          .where((p) => p.instanceId == null || p.instanceId == instanceId);
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmDescriptorData> futureResponse = responseStream.first;

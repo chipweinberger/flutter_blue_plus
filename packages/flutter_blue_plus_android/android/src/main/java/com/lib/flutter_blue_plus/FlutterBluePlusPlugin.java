@@ -968,7 +968,7 @@ public class FlutterBluePlusPlugin implements
 
                     // remember the data we are writing
                     if (primaryServiceUuid == null) {primaryServiceUuid = "";}
-                    String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + primaryServiceUuid;
+                    String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + primaryServiceUuid + ":" + (instanceId != null ? instanceId : "noinst");
                     mWriteChr.put(key, value);
 
                     // write characteristic
@@ -1101,7 +1101,7 @@ public class FlutterBluePlusPlugin implements
 
                     // remember the data we are writing
                     if (primaryServiceUuid == null) {primaryServiceUuid = "";}
-                    String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + descriptorUuid + ":" + primaryServiceUuid;
+                    String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + CCCD + ":" + primaryServiceUuid + ":" + (instanceId != null ? instanceId : "noinst");
                     mWriteDesc.put(key, value);
 
                     // write descriptor
@@ -1215,7 +1215,7 @@ public class FlutterBluePlusPlugin implements
 
                     // remember the data we are writing
                     if (primaryServiceUuid == null) {primaryServiceUuid = "";}
-                    String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + CCCD + ":" + primaryServiceUuid;
+                    String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + CCCD + ":" + primaryServiceUuid + ":" + (instanceId != null ? instanceId : "noinst");
                     mWriteDesc.put(key, descriptorValue);
 
                     // write descriptor
@@ -2415,10 +2415,10 @@ public class FlutterBluePlusPlugin implements
             String serviceUuid = uuidStr(characteristic.getService().getUuid());
             String characteristicUuid = uuidStr(characteristic.getUuid());
             String primaryServiceUuid = primaryService != null ? uuidStr(primaryService.getUuid()) : "";
-            int instanceId = characteristic.getInstanceId();
+            Integer instanceId = characteristic.getInstanceId();
 
             // what data did we write?
-            String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + primaryServiceUuid;
+            String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + primaryServiceUuid + ":" + instanceId;
             byte[] value = mWriteChr.get(key) != null ? mWriteChr.get(key) : new byte[0];
             mWriteChr.remove(key);
 
@@ -2488,9 +2488,10 @@ public class FlutterBluePlusPlugin implements
             String characteristicUuid = uuidStr(descriptor.getCharacteristic().getUuid());
             String descriptorUuid = uuidStr(descriptor.getUuid());
             String primaryServiceUuid = primaryService != null ? uuidStr(primaryService.getUuid()) : "";
+            Integer instanceId = descriptor.getCharacteristic().getInstanceId();
 
             // what data did we write?
-            String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + descriptorUuid + ":" + primaryServiceUuid;
+            String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + descriptorUuid + ":" + primaryServiceUuid + ":" + instanceId;
             byte[] value = mWriteDesc.get(key) != null ? mWriteDesc.get(key) : new byte[0];
             mWriteDesc.remove(key);
 
@@ -2740,7 +2741,6 @@ public class FlutterBluePlusPlugin implements
 
         // has associated primary service?
         BluetoothGattService primaryService = getPrimaryService(gatt, descriptor.getCharacteristic());
-        log(LogLevel.INFO, "DO WE GET SAME ID TWICE??" + descriptor.getCharacteristic().getInstanceId());
 
         HashMap<String, Object> map = new HashMap<>();
         map.put("remote_id", device.getAddress());
