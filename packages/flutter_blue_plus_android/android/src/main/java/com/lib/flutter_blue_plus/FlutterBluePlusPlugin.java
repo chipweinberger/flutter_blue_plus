@@ -2329,11 +2329,13 @@ public class FlutterBluePlusPlugin implements
         // called for both notifications & reads
         public void onCharacteristicReceived(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, byte[] value, int status)
         {
-            // GATT Service?
-            if (uuidStr(characteristic.getService().getUuid()) == "1801") {
+            // https://www.bluetooth.com/wp-content/uploads/Files/Specification/Assigned_Numbers.html
 
-                // services changed
-                if (uuidStr(characteristic.getUuid()) == "2A05") {
+            // Generic Attribute service 0x1801
+            if (uuidStr(characteristic.getService().getUuid()).equals("1801")) {
+
+                // Service Changed 0x2A05
+                if (uuidStr(characteristic.getUuid()).toUpperCase().equals("2A05")) {
                     HashMap<String, Object> response = bmBluetoothDevice(gatt.getDevice());
                     invokeMethodUIThread("OnServicesReset", response);
                 }
