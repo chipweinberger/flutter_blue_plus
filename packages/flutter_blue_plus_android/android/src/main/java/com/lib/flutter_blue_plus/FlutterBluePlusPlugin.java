@@ -2330,7 +2330,7 @@ public class FlutterBluePlusPlugin implements
         public void onCharacteristicReceived(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, byte[] value, int status)
         {
             // GATT Service?
-            if (uuidStr(characteristic.getService().getUuid()) == "1800") {
+            if (uuidStr(characteristic.getService().getUuid()) == "1801") {
 
                 // services changed
                 if (uuidStr(characteristic.getUuid()) == "2A05") {
