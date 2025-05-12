@@ -3,6 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 #import "./include/flutter_blue_plus_darwin/FlutterBluePlusPlugin.h"
+#include <Foundation/NSObjCRuntime.h>
 
 #define Log(LEVEL, FORMAT, ...) [self log:LEVEL format:@"[FBP-iOS] " FORMAT, ##__VA_ARGS__]
 
@@ -452,6 +453,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSString  *serviceUuid        = args[@"service_uuid"];
             NSString  *characteristicUuid = args[@"characteristic_uuid"];
             NSString  *primaryServiceUuid = args[@"primary_service_uuid"];
+            NSNumber  *instanceId         = args[@"instance_id"];
 
             // Find peripheral
             CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
@@ -467,7 +469,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                                                                peripheral:peripheral
                                                               serviceUuid:serviceUuid
                                                        primaryServiceUuid:primaryServiceUuid
-                                                                    error:&error];
+                                                                    error:&error
+                                                                    instanceId:instanceId];
             if (characteristic == nil) {
                 result([FlutterError errorWithCode:@"readCharacteristic" message:error.localizedDescription details:NULL]);
                 return;
@@ -496,6 +499,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSNumber  *writeTypeNumber    = args[@"write_type"];
             NSNumber  *allowLongWrite     = args[@"allow_long_write"];
             NSData    *value              = [args[@"value"] data];
+            NSNumber  *instanceId         = args[@"instance_id"];
             
             // Find peripheral
             CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
@@ -538,7 +542,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                                                                peripheral:peripheral
                                                               serviceUuid:serviceUuid
                                                        primaryServiceUuid:primaryServiceUuid
-                                                                    error:&error];
+                                                                    error:&error
+                                                                    instanceId:instanceId];
             if (characteristic == nil) {
                 result([FlutterError errorWithCode:@"writeCharacteristic" message:error.localizedDescription details:NULL]);
                 return;
@@ -583,6 +588,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSString  *characteristicUuid       = args[@"characteristic_uuid"];
             NSString  *descriptorUuid           = args[@"descriptor_uuid"];
             NSString  *primaryServiceUuid       = args[@"primary_service_uuid"];
+            NSNumber  *instanceId               = args[@"instance_id"];
 
             // Find peripheral
             CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
@@ -598,7 +604,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                                                                peripheral:peripheral
                                                               serviceUuid:serviceUuid
                                                        primaryServiceUuid:primaryServiceUuid
-                                                                    error:&error];
+                                                                    error:&error
+                                                                    instanceId:instanceId];
             if (characteristic == nil) {
                 result([FlutterError errorWithCode:@"readDescriptor" message:error.localizedDescription details:NULL]);
                 return;
@@ -625,6 +632,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSString  *descriptorUuid     = args[@"descriptor_uuid"];
             NSString  *primaryServiceUuid = args[@"primary_service_uuid"];
             NSData    *value              = [args[@"value"] data];
+            NSNumber  *instanceId         = args[@"instance_id"];
 
             // Find peripheral
             CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
@@ -650,7 +658,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                                                                peripheral:peripheral
                                                               serviceUuid:serviceUuid
                                                        primaryServiceUuid:primaryServiceUuid
-                                                                    error:&error];
+                                                                    error:&error
+                                                                    instanceId:instanceId];
             if (characteristic == nil) {
                 result([FlutterError errorWithCode:@"writeDescriptor" message:error.localizedDescription details:NULL]);
                 return;
@@ -681,6 +690,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSString   *characteristicUuid       = args[@"characteristic_uuid"];
             NSString   *primaryServiceUuid       = args[@"primary_service_uuid"];
             NSNumber   *enable                   = args[@"enable"];
+            NSNumber   *instanceId               = args[@"instance_id"];
 
             // Find peripheral
             CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
@@ -696,7 +706,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                                                                peripheral:peripheral
                                                               serviceUuid:serviceUuid
                                                        primaryServiceUuid:primaryServiceUuid
-                                                                    error:&error];
+                                                                    error:&error
+                                                                    instanceId:instanceId];
             if (characteristic == nil) {
                 result([FlutterError errorWithCode:@"setNotifyValue" message:error.localizedDescription details:NULL]);
                 return;
@@ -823,6 +834,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                                serviceUuid:(NSString *)serviceUuid
                         primaryServiceUuid:(NSString *)primaryServiceUuid
                                      error:(NSError **)error
+                                     instanceId: (NSNumber *) instanceId
 {
     // remember
     bool isSecondaryService = primaryServiceUuid != nil;
@@ -859,7 +871,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     CBService *service = (secondaryService != nil) ? secondaryService : primaryService;
 
     // characteristic
-    CBCharacteristic *characteristic = [self getCharacteristicFromArray:characteristicId array:[service characteristics]];
+    CBCharacteristic *characteristic = [self getCharacteristicFromArray:characteristicId 
+                                                                       array:[service characteristics] 
+                                                                       instanceId:instanceId];
+
     if (characteristic == nil)
     {
         NSString* format = @"characteristic not found in service (chr: '%@', svc: '%@')";
@@ -898,13 +913,21 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     return nil;
 }
 
-- (CBCharacteristic *)getCharacteristicFromArray:(NSString *)uuid array:(NSArray<CBCharacteristic *> *)array
+- (CBCharacteristic *)getCharacteristicFromArray:(NSString *)uuid 
+                                                array:(NSArray<CBCharacteristic *> *)array
+                                                instanceId:(NSNumber *) instanceId
 {
+    
     for (CBCharacteristic *c in array)
     {
+        NSNumber *charInstanceId = [self getInstanceId:c];
         if ([c.UUID isEqual:[CBUUID UUIDWithString:uuid]])
         {
-            return c;
+            if (instanceId == nil || [instanceId isEqualToNumber:charInstanceId])
+            {
+                 return c;
+            }
+           
         }
     }
     return nil;
@@ -1430,6 +1453,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     }
 
     CBService *primaryService = [self getPrimaryService:peripheral characteristic:characteristic];
+    NSNumber *instanceId = [self getInstanceId:characteristic];
 
     // See BmCharacteristicData
     NSMutableDictionary* result = [@{
@@ -1441,6 +1465,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"success":                     error == nil ? @(1) : @(0),
         @"error_string":                error ? [error localizedDescription] : @"success",
         @"error_code":                  error ? @(error.code) : @(0),
+        @"instance_id":                 instanceId ? instanceId : [NSNull null],
     } mutableCopy];
 
     // remove if null
@@ -1469,6 +1494,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     NSString *remoteId = [peripheral.identifier UUIDString];
     NSString *serviceUuid = [characteristic.service.UUID uuidStr];
     NSString *characteristicUuid = [characteristic.UUID uuidStr];
+    NSNumber *instanceId = [self getInstanceId:characteristic];
 
     // what data did we write?
     NSString *key = [NSString stringWithFormat:@"%@:%@:%@:%@", remoteId, serviceUuid, characteristicUuid,
@@ -1486,6 +1512,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"success":                 @(error == nil),
         @"error_string":            error ? [error localizedDescription] : @"success",
         @"error_code":              error ? @(error.code) : @(0),
+        @"instance_id":             instanceId ? instanceId : [NSNull null],
     } mutableCopy];
 
     // remove if null
@@ -1508,6 +1535,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     }
 
     CBService *primaryService = [self getPrimaryService:peripheral characteristic:characteristic];
+    NSNumber *instanceId = [self getInstanceId:characteristic];
 
     // Oddly iOS does not update the CCCD descriptors when didUpdateNotificationState is called. 
     // So instead of using characteristic.descriptors we have to manually recreate the
@@ -1533,6 +1561,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"success":                @(error == nil),
         @"error_string":           error ? [error localizedDescription] : @"success",
         @"error_code":             error ? @(error.code) : @(0),
+        @"instance_id":            instanceId ? instanceId : [NSNull null],
     } mutableCopy];
 
     // remove if null
@@ -1557,6 +1586,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     }
 
     CBService *primaryService = [self getPrimaryService:peripheral characteristic:descriptor.characteristic];
+    NSNumber *instanceId = [self getInstanceId:descriptor.characteristic];
 
     NSData* data = [self descriptorToData:descriptor];
     
@@ -1571,6 +1601,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"success":                @(error == nil),
         @"error_string":           error ? [error localizedDescription] : @"success",
         @"error_code":             error ? @(error.code) : @(0),
+        @"instance_id":            instanceId ? instanceId : [NSNull null],
     } mutableCopy];
 
     // remove if null
@@ -1595,6 +1626,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     }
 
     CBService *primaryService = [self getPrimaryService:peripheral characteristic:descriptor.characteristic];
+    NSNumber *instanceId = [self getInstanceId:descriptor.characteristic];
 
     // for convenience
     NSString *remoteId = [peripheral.identifier UUIDString];
@@ -1619,6 +1651,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"success":                @(error == nil),
         @"error_string":           error ? [error localizedDescription] : @"success",
         @"error_code":             error ? @(error.code) : @(0),
+        @"instance_id":            instanceId ? instanceId : [NSNull null],
     } mutableCopy];
 
     // remove if null
@@ -1692,6 +1725,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     NSString  *characteristicUuid = request[@"characteristic_uuid"];
     NSString  *primaryServiceUuid = request[@"primary_service_uuid"];
     NSString  *value              = request[@"value"];
+    NSNumber  *instanceId         = request[@"instance_id"];
 
     // Find characteristic
     NSError *error = nil;
@@ -1699,7 +1733,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                                                        peripheral:peripheral
                                                      serviceUuid:serviceUuid
                                                primaryServiceUuid:primaryServiceUuid
-                                                            error:&error];
+                                                            error:&error
+                                                            instanceId:instanceId];
     if (characteristic == nil) {
         Log(LERROR, @"Error: peripheralIsReadyToSendWriteWithoutResponse: %@", [error localizedDescription]);
         return;
@@ -1715,6 +1750,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"success":                 @(error == nil),
         @"error_string":            error ? [error localizedDescription] : @"success",
         @"error_code":              error ? @(error.code) : @(0),
+        @"instance_id":             instanceId ? instanceId : [NSNull null],
     } mutableCopy];
 
     // remove if null
@@ -1873,6 +1909,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                             characteristic:(CBCharacteristic *)characteristic
 {
     CBService *primaryService = [self getPrimaryService:peripheral characteristic:characteristic];
+    NSNumber *instanceId = [self getInstanceId:characteristic];
 
     // descriptors
     NSMutableArray *descriptors = [NSMutableArray new];
@@ -1884,7 +1921,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             @"service_uuid":           [d.characteristic.service.UUID uuidStr],
             @"characteristic_uuid":    [d.characteristic.UUID uuidStr],
             @"descriptor_uuid":        [d.UUID uuidStr],
-            @"primary_service_uuid":    primaryService ? [primaryService.UUID uuidStr] : [NSNull null],
+            @"primary_service_uuid":   primaryService ? [primaryService.UUID uuidStr] : [NSNull null],
+            @"instance_id":            instanceId ? instanceId : [NSNull null], 
         } mutableCopy];
 
         // remove if null
@@ -1917,6 +1955,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         @"primary_service_uuid":    primaryService ? [primaryService.UUID uuidStr] : [NSNull null],
         @"descriptors":            descriptors,
         @"properties":             propsMap,
+        @"instance_id":            instanceId ? instanceId : [NSNull null],
     } mutableCopy];
 
     // remove if null
@@ -2168,6 +2207,20 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     }
 
     return NULL;
+}
+
+// uniquely distinguish similar characteristics within a single discovery session.
+- (nullable NSNumber *)getInstanceId:(CBCharacteristic *)characteristic
+{
+    NSArray<CBDescriptor *> *descriptors = characteristic.descriptors;
+
+    if (descriptors == nil || descriptors.count == 0) {
+        return nil; // No instance ID available
+    }
+
+    // use the first descriptor as the instance ID when we have descriptors
+    NSUInteger descriptorHash = characteristic.descriptors.firstObject.hash;
+    return @(descriptorHash); // Return the descriptor hash as an NSNumber
 }
 
 - (NSData *)descriptorToData:(CBDescriptor *)descriptor
