@@ -307,7 +307,7 @@ class BmBluetoothCharacteristic {
   final Guid? primaryServiceUuid;
   List<BmBluetoothDescriptor> descriptors;
   BmCharacteristicProperties properties;
-
+  final int? instanceId;
 
   BmBluetoothCharacteristic({
     required this.remoteId,
@@ -316,6 +316,7 @@ class BmBluetoothCharacteristic {
     required this.primaryServiceUuid,
     required this.descriptors,
     required this.properties,
+    this.instanceId,
   });
 
   factory BmBluetoothCharacteristic.fromMap(Map<dynamic, dynamic> json) {
@@ -332,6 +333,7 @@ class BmBluetoothCharacteristic {
       primaryServiceUuid: Guid.parse(json['primary_service_uuid']),
       descriptors: descs,
       properties: BmCharacteristicProperties.fromMap(json['properties']),
+      instanceId: json['instance_id'],
     );
   }
 }
@@ -342,6 +344,7 @@ class BmBluetoothDescriptor {
   final Guid characteristicUuid;
   final Guid descriptorUuid;
   final Guid? primaryServiceUuid;
+  final int? instanceId;
 
   BmBluetoothDescriptor({
     required this.remoteId,
@@ -349,6 +352,7 @@ class BmBluetoothDescriptor {
     required this.characteristicUuid,
     required this.descriptorUuid,
     required this.primaryServiceUuid,
+    this.instanceId,
   });
 
   factory BmBluetoothDescriptor.fromMap(Map<dynamic, dynamic> json) {
@@ -358,6 +362,7 @@ class BmBluetoothDescriptor {
       characteristicUuid: Guid(json['characteristic_uuid']),
       descriptorUuid: Guid(json['descriptor_uuid']),
       primaryServiceUuid: Guid.parse(json['primary_service_uuid']),
+      instanceId: json['instance_id'],
     );
   }
 }
@@ -444,12 +449,14 @@ class BmReadCharacteristicRequest {
   final Guid serviceUuid;
   final Guid characteristicUuid;
   final Guid? primaryServiceUuid;
+  final int? instanceId;
 
   BmReadCharacteristicRequest({
     required this.remoteId,
     required this.serviceUuid,
     required this.characteristicUuid,
     this.primaryServiceUuid,
+    this.instanceId,
   });
 
   Map<dynamic, dynamic> toMap() {
@@ -458,6 +465,7 @@ class BmReadCharacteristicRequest {
     data['service_uuid'] = serviceUuid.str;
     data['characteristic_uuid'] = characteristicUuid.str;
     data['primary_service_uuid'] = primaryServiceUuid?.str;
+    data['instance_id'] = instanceId;
     data.removeWhere((key, value) => value == null);
     return data;
   }
@@ -472,7 +480,7 @@ class BmCharacteristicData {
   final bool success;
   final int errorCode;
   final String errorString;
-
+  final int? instanceId;
 
   BmCharacteristicData({
     required this.remoteId,
@@ -483,6 +491,7 @@ class BmCharacteristicData {
     required this.success,
     required this.errorCode,
     required this.errorString,
+    this.instanceId,
   });
 
   factory BmCharacteristicData.fromMap(Map<dynamic, dynamic> json) {
@@ -495,6 +504,7 @@ class BmCharacteristicData {
       success: json['success'] != 0,
       errorCode: json['error_code'],
       errorString: json['error_string'],
+      instanceId: json['instance_id'],
     );
   }
 }
@@ -505,6 +515,7 @@ class BmReadDescriptorRequest {
   final Guid characteristicUuid;
   final Guid descriptorUuid;
   final Guid? primaryServiceUuid;
+  final int? instanceId;
 
   BmReadDescriptorRequest({
     required this.remoteId,
@@ -512,6 +523,7 @@ class BmReadDescriptorRequest {
     required this.characteristicUuid,
     required this.descriptorUuid,
     required this.primaryServiceUuid,
+    this.instanceId,
   });
 
   Map<dynamic, dynamic> toMap() {
@@ -521,6 +533,7 @@ class BmReadDescriptorRequest {
     data['characteristic_uuid'] = characteristicUuid.str;
     data['descriptor_uuid'] = descriptorUuid.str;
     data['primary_service_uuid'] = primaryServiceUuid?.str;
+    data['instance_id'] = instanceId;
     data.removeWhere((key, value) => value == null);
     return data;
   }
@@ -539,7 +552,7 @@ class BmWriteCharacteristicRequest {
   final BmWriteType writeType;
   final bool allowLongWrite;
   final List<int> value;
-
+  final int? instanceId;
 
   BmWriteCharacteristicRequest({
     required this.remoteId,
@@ -549,6 +562,7 @@ class BmWriteCharacteristicRequest {
     required this.writeType,
     required this.allowLongWrite,
     required this.value,
+    this.instanceId,
   });
 
   Map<dynamic, dynamic> toMap() {
@@ -560,6 +574,7 @@ class BmWriteCharacteristicRequest {
     data['write_type'] = writeType.index;
     data['allow_long_write'] = allowLongWrite ? 1 : 0;
     data['value'] = Uint8List.fromList(value);
+    data['instance_id'] = instanceId;
     data.removeWhere((key, value) => value == null);
     return data;
   }
@@ -572,6 +587,7 @@ class BmWriteDescriptorRequest {
   final Guid? primaryServiceUuid;
   final Guid descriptorUuid;
   final List<int> value;
+  final int? instanceId;
 
   BmWriteDescriptorRequest({
     required this.remoteId,
@@ -580,6 +596,7 @@ class BmWriteDescriptorRequest {
     required this.primaryServiceUuid,
     required this.descriptorUuid,
     required this.value,
+    this.instanceId,
   });
 
   Map<dynamic, dynamic> toMap() {
@@ -590,6 +607,7 @@ class BmWriteDescriptorRequest {
     data['descriptor_uuid'] = descriptorUuid.str;
     data['primary_service_uuid'] = primaryServiceUuid?.str;
     data['value'] = Uint8List.fromList(value);
+    data['instance_id'] = instanceId;
     data.removeWhere((key, value) => value == null);
     return data;
   }
@@ -605,6 +623,7 @@ class BmDescriptorData {
   final bool success;
   final int errorCode;
   final String errorString;
+  final int? instanceId;
 
   BmDescriptorData({
     required this.remoteId,
@@ -616,6 +635,7 @@ class BmDescriptorData {
     required this.success,
     required this.errorCode,
     required this.errorString,
+    this.instanceId,
   });
 
   factory BmDescriptorData.fromMap(Map<dynamic, dynamic> json) {
@@ -629,6 +649,7 @@ class BmDescriptorData {
       success: json['success'] != 0,
       errorCode: json['error_code'],
       errorString: json['error_string'],
+      instanceId: json['instance_id'],
     );
   }
 }
@@ -640,7 +661,7 @@ class BmSetNotifyValueRequest {
   final Guid? primaryServiceUuid;
   final bool forceIndications;
   final bool enable;
-
+  final int? instanceId;
 
   BmSetNotifyValueRequest({
     required this.remoteId,
@@ -649,6 +670,7 @@ class BmSetNotifyValueRequest {
     required this.primaryServiceUuid,
     required this.forceIndications,
     required this.enable,
+    this.instanceId,
   });
 
   Map<dynamic, dynamic> toMap() {
@@ -659,6 +681,7 @@ class BmSetNotifyValueRequest {
     data['primary_service_uuid'] = primaryServiceUuid?.str;
     data['force_indications'] = forceIndications;
     data['enable'] = enable;
+    data['instance_id'] = instanceId;
     data.removeWhere((key, value) => value == null);
     return data;
   }
@@ -887,7 +910,7 @@ class BmCreateBondRequest {
     required this.remoteId,
     required this.pin,
   });
-  
+
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> data = {};
     data['remote_id'] = remoteId.str;

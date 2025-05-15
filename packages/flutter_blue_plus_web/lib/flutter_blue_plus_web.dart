@@ -160,8 +160,14 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
         final characteristics = <BmBluetoothCharacteristic>[];
 
         List<BluetoothRemoteGATTCharacteristic> chars = (await s.getCharacteristics().toDart).toDart;
+
+        resetInstanceIds();
         for (final c in chars) {
           final descriptors = <BmBluetoothDescriptor>[];
+
+          int instanceId = _UniqueCharacteristicInstanceId.next();
+          instanceIdToCharMap[instanceId] = c;
+          charToInstanceIdMap[c] = instanceId;
 
           try {
             List<BluetoothRemoteGATTDescriptor> descs = (await c.getDescriptors().toDart).toDart;
@@ -173,10 +179,11 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
                   characteristicUuid: Guid.fromString(c.uuid),
                   descriptorUuid: Guid.fromString(d.uuid),
                   primaryServiceUuid: null,
+                  instanceId: c.instanceId,
                 ),
               );
             }
-          } catch(e) {
+          } catch (e) {
             // ignore errors when getting characteristics descriptors
           }
 
@@ -194,12 +201,12 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
                 write: c.properties.write,
                 notify: c.properties.notify,
                 indicate: c.properties.indicate,
-                authenticatedSignedWrites:
-                    c.properties.authenticatedSignedWrites,
+                authenticatedSignedWrites: c.properties.authenticatedSignedWrites,
                 extendedProperties: false,
                 notifyEncryptionRequired: false,
                 indicateEncryptionRequired: false,
               ),
+              instanceId: c.instanceId,
             ),
           );
         }
@@ -283,12 +290,13 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
         );
       }
 
-      final service =
-          await gatt.getPrimaryService(request.serviceUuid.str128.toJS).toDart;
+      final service = await gatt.getPrimaryService(request.serviceUuid.str128.toJS).toDart;
 
-      final characteristic = await service
-          .getCharacteristic(request.characteristicUuid.str128.toJS)
-          .toDart;
+      final characteristic = await _locateCharacteristic(
+        request.characteristicUuid,
+        service,
+        request.instanceId,
+      );
 
       final value = (await characteristic.readValue().toDart).toDart;
 
@@ -302,6 +310,7 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           success: true,
           errorCode: 0,
           errorString: '',
+          instanceId: request.instanceId,
         ),
       );
 
@@ -317,6 +326,7 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           success: false,
           errorCode: 0,
           errorString: e.toString(),
+          instanceId: request.instanceId,
         ),
       );
 
@@ -345,16 +355,15 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
         );
       }
 
-      final service =
-          await gatt.getPrimaryService(request.serviceUuid.str128.toJS).toDart;
+      final service = await gatt.getPrimaryService(request.serviceUuid.str128.toJS).toDart;
 
-      final characteristic = await service
-          .getCharacteristic(request.characteristicUuid.str128.toJS)
-          .toDart;
+      final characteristic = await _locateCharacteristic(
+        request.characteristicUuid,
+        service,
+        request.instanceId,
+      );
 
-      final descriptor = await characteristic
-          .getDescriptor(request.characteristicUuid.str128.toJS)
-          .toDart;
+      final descriptor = await characteristic.getDescriptor(request.descriptorUuid.str128.toJS).toDart;
 
       final value = (await descriptor.readValue().toDart).toDart;
 
@@ -369,6 +378,7 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           success: true,
           errorCode: 0,
           errorString: '',
+          instanceId: request.instanceId,
         ),
       );
 
@@ -385,6 +395,7 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           success: false,
           errorCode: 0,
           errorString: e.toString(),
+          instanceId: request.instanceId,
         ),
       );
 
@@ -412,12 +423,12 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
       );
     }
 
-    final service =
-        await gatt.getPrimaryService(request.serviceUuid.str128.toJS).toDart;
-
-    final characteristic = await service
-        .getCharacteristic(request.characteristicUuid.str128.toJS)
-        .toDart;
+    final service = await gatt.getPrimaryService(request.serviceUuid.str128.toJS).toDart;
+    final characteristic = await _locateCharacteristic(
+      request.characteristicUuid,
+      service,
+      request.instanceId,
+    );
 
     if (request.enable) {
       characteristic.addEventListener(
@@ -502,8 +513,7 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
         );
       }
 
-      final device =
-          await window.navigator.bluetooth.requestDevice(options).toDart;
+      final device = await window.navigator.bluetooth.requestDevice(options).toDart;
 
       _devices[device.remoteId] = device;
       _onDevicesChangedController.add([..._devices.values]);
@@ -566,21 +576,18 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
         );
       }
 
-      final service =
-          await gatt.getPrimaryService(request.serviceUuid.str128.toJS).toDart;
+      final service = await gatt.getPrimaryService(request.serviceUuid.str128.toJS).toDart;
 
-      final characteristic = await service
-          .getCharacteristic(request.characteristicUuid.str128.toJS)
-          .toDart;
+      final characteristic = await _locateCharacteristic(
+        request.characteristicUuid,
+        service,
+        request.instanceId,
+      );
 
       if (request.writeType == BmWriteType.withResponse) {
-        await characteristic
-            .writeValueWithResponse(Uint8List.fromList(request.value).toJS)
-            .toDart;
+        await characteristic.writeValueWithResponse(Uint8List.fromList(request.value).toJS).toDart;
       } else {
-        await characteristic
-            .writeValueWithoutResponse(Uint8List.fromList(request.value).toJS)
-            .toDart;
+        await characteristic.writeValueWithoutResponse(Uint8List.fromList(request.value).toJS).toDart;
       }
 
       _onCharacteristicWrittenController.add(
@@ -593,6 +600,7 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           success: true,
           errorCode: 0,
           errorString: '',
+          instanceId: request.instanceId,
         ),
       );
 
@@ -608,6 +616,7 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           success: false,
           errorCode: 0,
           errorString: e.toString(),
+          instanceId: request.instanceId,
         ),
       );
 
@@ -636,20 +645,17 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
         );
       }
 
-      final service =
-          await gatt.getPrimaryService(request.serviceUuid.str128.toJS).toDart;
+      final service = await gatt.getPrimaryService(request.serviceUuid.str128.toJS).toDart;
 
-      final characteristic = await service
-          .getCharacteristic(request.characteristicUuid.str128.toJS)
-          .toDart;
+      final characteristic = await _locateCharacteristic(
+        request.characteristicUuid,
+        service,
+        request.instanceId,
+      );
 
-      final descriptor = await characteristic
-          .getDescriptor(request.characteristicUuid.str128.toJS)
-          .toDart;
+      final descriptor = await characteristic.getDescriptor(request.descriptorUuid.str128.toJS).toDart;
 
-      await descriptor
-          .writeValue(Uint8List.fromList(request.value).toJS)
-          .toDart;
+      await descriptor.writeValue(Uint8List.fromList(request.value).toJS).toDart;
 
       _onDescriptorWrittenController.add(
         BmDescriptorData(
@@ -662,6 +668,7 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           success: true,
           errorCode: 0,
           errorString: '',
+          instanceId: request.instanceId,
         ),
       );
 
@@ -678,6 +685,7 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           success: false,
           errorCode: 0,
           errorString: e.toString(),
+          instanceId: request.instanceId,
         ),
       );
 
@@ -687,7 +695,7 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
 
   void _handleCharacteristicValueChanged(
     Event event,
-  ) {
+  ) async {
     final characteristic = event.target as BluetoothRemoteGATTCharacteristic;
 
     _onCharacteristicReceivedController.add(
@@ -700,8 +708,38 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
         success: true,
         errorCode: 0,
         errorString: '',
+        instanceId: characteristic.instanceId,
       ),
     );
+  }
+
+  Future<BluetoothRemoteGATTCharacteristic> _locateCharacteristic(
+    Guid uuid,
+    BluetoothRemoteGATTService service,
+    int? instanceId,
+  ) async {
+    final chars = (await service.getCharacteristics().toDart).toDart;
+
+    // Find characteristic by UUID and instanceId, and if not found, use the first one
+    final characteristic = await _getCharacteristicFromArray(uuid.str128, chars, instanceId) ??
+        await service.getCharacteristic(uuid.str128.toJS).toDart;
+
+    return characteristic;
+  }
+
+  Future<BluetoothRemoteGATTCharacteristic?> _getCharacteristicFromArray(
+    String uuid,
+    List<BluetoothRemoteGATTCharacteristic> array,
+    int? instanceId,
+  ) async {
+    for (final c in array) {
+      if (c.uuid == uuid) {
+        if (instanceId == null || c.instanceId == instanceId) {
+          return c;
+        }
+      }
+    }
+    return null;
   }
 }
 
@@ -710,3 +748,29 @@ extension on BluetoothDevice {
     return DeviceIdentifier(id);
   }
 }
+
+extension on BluetoothRemoteGATTCharacteristic {
+  int? get instanceId {
+    return charToInstanceIdMap[this];
+  }
+}
+
+class _UniqueCharacteristicInstanceId {
+  static int _counter = 0;
+
+  static int next() {
+    _counter++;
+    return _counter;
+  }
+}
+
+/// Resets the instance IDs for all characteristics so we do not
+/// keep incrementing the map for multiple calls to discoverServices
+void resetInstanceIds() {
+  _UniqueCharacteristicInstanceId._counter = 0;
+  instanceIdToCharMap.clear();
+  charToInstanceIdMap.clear();
+}
+
+Map<int, BluetoothRemoteGATTCharacteristic> instanceIdToCharMap = {};
+Map<BluetoothRemoteGATTCharacteristic, int> charToInstanceIdMap = {};
