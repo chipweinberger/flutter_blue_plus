@@ -160,8 +160,14 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
         final characteristics = <BmBluetoothCharacteristic>[];
 
         List<BluetoothRemoteGATTCharacteristic> chars = (await s.getCharacteristics().toDart).toDart;
+
+        resetInstanceIds();
         for (final c in chars) {
           final descriptors = <BmBluetoothDescriptor>[];
+
+          int instanceId = _UniqueCharacteristicInstanceId.next();
+          instanceIdToCharMap[instanceId] = c;
+          charToInstanceIdMap[c] = instanceId;
 
           try {
             List<BluetoothRemoteGATTDescriptor> descs = (await c.getDescriptors().toDart).toDart;
@@ -173,7 +179,7 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
                   characteristicUuid: Guid.fromString(c.uuid),
                   descriptorUuid: Guid.fromString(d.uuid),
                   primaryServiceUuid: null,
-                  instanceId: await c.instanceId,
+                  instanceId: c.instanceId,
                 ),
               );
             }
@@ -200,7 +206,7 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
                 notifyEncryptionRequired: false,
                 indicateEncryptionRequired: false,
               ),
-              instanceId: await c.instanceId,
+              instanceId: c.instanceId,
             ),
           );
         }
@@ -702,7 +708,7 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
         success: true,
         errorCode: 0,
         errorString: '',
-        instanceId: await characteristic.instanceId,
+        instanceId: characteristic.instanceId,
       ),
     );
   }
@@ -728,7 +734,7 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
   ) async {
     for (final c in array) {
       if (c.uuid == uuid) {
-        if (instanceId == null || await c.instanceId == instanceId) {
+        if (instanceId == null || c.instanceId == instanceId) {
           return c;
         }
       }
@@ -744,13 +750,27 @@ extension on BluetoothDevice {
 }
 
 extension on BluetoothRemoteGATTCharacteristic {
-  /// Gets a unique identifier for the characteristic
-  /// that is valid for one service discovery session.
-  Future<int?> get instanceId async {
-    final descriptors = (await getDescriptors().toDart).toDart;
-
-    if (descriptors.isEmpty) return null;
-
-    return descriptors.first.hashCode;
+  int? get instanceId {
+    return charToInstanceIdMap[this];
   }
 }
+
+class _UniqueCharacteristicInstanceId {
+  static int _counter = 0;
+
+  static int next() {
+    _counter++;
+    return _counter;
+  }
+}
+
+/// Resets the instance IDs for all characteristics so we do not
+/// keep incrementing the map for multiple calls to discoverServices
+void resetInstanceIds() {
+  _UniqueCharacteristicInstanceId._counter = 0;
+  instanceIdToCharMap.clear();
+  charToInstanceIdMap.clear();
+}
+
+Map<int, BluetoothRemoteGATTCharacteristic> instanceIdToCharMap = {};
+Map<BluetoothRemoteGATTCharacteristic, int> charToInstanceIdMap = {};

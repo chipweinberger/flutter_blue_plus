@@ -8,6 +8,36 @@
 #define Log(LEVEL, FORMAT, ...) [self log:LEVEL format:@"[FBP-iOS] " FORMAT, ##__VA_ARGS__]
 
 NSString * const CCCD = @"2902";
+const NSMutableDictionary<NSNumber *, CBCharacteristic *> *instanceIdToCharMap = nil;
+NSMutableDictionary<NSValue *, NSNumber *> *charToInstanceIdMap = nil;
+
+__attribute__((constructor))
+static void initializeInstanceIdToCharMap(void) {
+    instanceIdToCharMap = [[NSMutableDictionary alloc] init];
+    charToInstanceIdMap = [[NSMutableDictionary alloc] init];
+}
+
+
+
+@interface UniqueCharacteristicInstanceId : NSObject
++ (int)next;
++ (void)reset;
+@end
+
+@implementation UniqueCharacteristicInstanceId
+static int counter = 0;
+
++ (int)next {
+    counter++;
+    return counter;
+}
+
+
++ (void)reset {
+    counter = 0;
+}
+@end
+
 
 @interface CBUUID (CBUUIDAdditionsFlutterBluePlus)
 - (NSString *)uuidStr;
@@ -439,6 +469,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // Clear helper arrays
             [self.servicesToDiscover removeAllObjects];
             [self.characteristicsToDiscover removeAllObjects];
+            [self resetInstanceIds];
 
             // start discovery
             [peripheral discoverServices:nil];
@@ -1370,6 +1401,13 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     [self.characteristicsToDiscover addObjectsFromArray:service.characteristics];
     for (CBCharacteristic *c in [service characteristics])
     {
+        int instanceId = [UniqueCharacteristicInstanceId next];
+        instanceIdToCharMap[@(instanceId)] = c;
+
+        NSValue *key = [NSValue valueWithNonretainedObject:c];
+        charToInstanceIdMap[key] = @(instanceId);
+        
+
         Log(LDEBUG, @"    chr: %@", [c.UUID uuidStr]);
         [peripheral discoverDescriptorsForCharacteristic:c];
     }
@@ -2212,16 +2250,20 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 // uniquely distinguish similar characteristics within a single discovery session.
 - (nullable NSNumber *)getInstanceId:(CBCharacteristic *)characteristic
 {
-    NSArray<CBDescriptor *> *descriptors = characteristic.descriptors;
-
-    if (descriptors == nil || descriptors.count == 0) {
-        return nil; // No instance ID available
-    }
-
-    // use the first descriptor as the instance ID when we have descriptors
-    NSUInteger descriptorHash = characteristic.descriptors.firstObject.hash;
-    return @(descriptorHash); // Return the descriptor hash as an NSNumber
+    NSValue *key = [NSValue valueWithNonretainedObject:characteristic];
+    return charToInstanceIdMap[key];
 }
+
+
+
+
+
+- (void)resetInstanceIds {
+    [UniqueCharacteristicInstanceId reset];
+    [instanceIdToCharMap removeAllObjects];
+    [charToInstanceIdMap removeAllObjects];
+}
+
 
 - (NSData *)descriptorToData:(CBDescriptor *)descriptor
 {

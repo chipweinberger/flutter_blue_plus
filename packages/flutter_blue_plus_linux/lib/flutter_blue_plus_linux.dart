@@ -331,6 +331,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
         },
       );
 
+      resetInstanceIds();
       _onDiscoveredServicesController.add(
         BmDiscoverServicesResult(
           remoteId: device.remoteId,
@@ -343,6 +344,10 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
                 remoteId: device.remoteId,
                 characteristics: service.characteristics.map(
                   (characteristic) {
+                    int instanceId = _UniqueCharacteristicInstanceId.next();
+                    instanceIdToCharMap[instanceId] = characteristic;
+                    charToInstanceIdMap[characteristic] = instanceId;
+
                     return BmBluetoothCharacteristic(
                       remoteId: device.remoteId,
                       serviceUuid: Guid.fromBytes(
@@ -1119,10 +1124,25 @@ extension on BlueZDevice {
 extension on BlueZGattCharacteristic {
   /// gets the instance id of the characteristic, unique
   /// for one discovery session.
-  int? get instanceId {
-    if (descriptors.isEmpty) {
-      return null;
-    }
-    return descriptors.first.hashCode;
+  int? get instanceId => charToInstanceIdMap[this];
+}
+
+class _UniqueCharacteristicInstanceId {
+  static int _counter = 0;
+
+  static int next() {
+    _counter++;
+    return _counter;
   }
 }
+
+/// Resets the instance IDs for all characteristics so we do not
+/// keep incrementing the map for multiple calls to discoverServices
+void resetInstanceIds() {
+  _UniqueCharacteristicInstanceId._counter = 0;
+  instanceIdToCharMap.clear();
+  charToInstanceIdMap.clear();
+}
+
+Map<int, BlueZGattCharacteristic> instanceIdToCharMap = {};
+Map<BlueZGattCharacteristic, int> charToInstanceIdMap = {};
