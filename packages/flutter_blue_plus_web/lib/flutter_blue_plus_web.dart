@@ -161,13 +161,14 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
 
         List<BluetoothRemoteGATTCharacteristic> chars = (await s.getCharacteristics().toDart).toDart;
 
-        resetInstanceIds();
+        resetInstanceIds(request.remoteId);
         for (final c in chars) {
           final descriptors = <BmBluetoothDescriptor>[];
 
           int instanceId = _UniqueCharacteristicInstanceId.next();
           instanceIdToCharMap[instanceId] = c;
           charToInstanceIdMap[c] = instanceId;
+          instanceIdToDeviceMap[instanceId] = device.remoteId.str;
 
           try {
             List<BluetoothRemoteGATTDescriptor> descs = (await c.getDescriptors().toDart).toDart;
@@ -764,13 +765,25 @@ class _UniqueCharacteristicInstanceId {
   }
 }
 
-/// Resets the instance IDs for all characteristics so we do not
-/// keep incrementing the map for multiple calls to discoverServices
-void resetInstanceIds() {
-  _UniqueCharacteristicInstanceId._counter = 0;
-  instanceIdToCharMap.clear();
-  charToInstanceIdMap.clear();
+/// Resets the instance IDs for all characteristics for a specific device,
+/// so we do not keep incrementing the map for multiple
+/// calls to discoverServices.
+void resetInstanceIds(DeviceIdentifier discoveredDevice) {
+  List<int> instanceIdsToRemove = [];
+
+  for (final entry in instanceIdToDeviceMap.entries) {
+    if (entry.value == discoveredDevice.str) {
+      instanceIdsToRemove.add(entry.key);
+    }
+  }
+
+  for (final instanceId in instanceIdsToRemove) {
+    instanceIdToCharMap.remove(instanceId);
+    charToInstanceIdMap.removeWhere((key, value) => value == instanceId);
+    instanceIdToDeviceMap.remove(instanceId);
+  }
 }
 
 Map<int, BluetoothRemoteGATTCharacteristic> instanceIdToCharMap = {};
 Map<BluetoothRemoteGATTCharacteristic, int> charToInstanceIdMap = {};
+Map<int, String> instanceIdToDeviceMap = {};
