@@ -469,7 +469,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // Clear helper arrays
             [self.servicesToDiscover removeAllObjects];
             [self.characteristicsToDiscover removeAllObjects];
-            [self resetInstanceIds];
+            [self resetInstanceIds:remoteId];
 
             // start discovery
             [peripheral discoverServices:nil];
@@ -2258,10 +2258,34 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
 
 
-- (void)resetInstanceIds {
-    [UniqueCharacteristicInstanceId reset];
-    [instanceIdToCharMap removeAllObjects];
-    [charToInstanceIdMap removeAllObjects];
+- (void)resetInstanceIds:(NSString *)discoveredDeviceId {
+    NSMutableArray<NSNumber *> *instanceIdsToRemove = [NSMutableArray array];
+    NSArray<NSNumber *> *keys = [instanceIdToCharMap allKeys];
+
+    for (NSNumber *instanceId in keys) {
+        CBCharacteristic *characteristic = instanceIdToCharMap[instanceId];
+        NSString *charRemoteId = characteristic.service.peripheral.identifier.UUIDString;
+
+        if ([charRemoteId isEqualToString:discoveredDeviceId]) {
+            [instanceIdsToRemove addObject:instanceId];
+        }
+    }
+
+    for (NSNumber *instanceId in instanceIdsToRemove) {
+        [instanceIdToCharMap removeObjectForKey:instanceId];
+        
+        // removal from charToInstanceIdMap
+        NSString *keyToRemove = nil;
+        for (NSString *key in charToInstanceIdMap) {
+            if ([charToInstanceIdMap[key] isEqual:instanceId]) {
+                keyToRemove = key;
+                break;
+            }
+        }
+        if (keyToRemove) {
+            [charToInstanceIdMap removeObjectForKey:keyToRemove];
+        }
+    }
 }
 
 
