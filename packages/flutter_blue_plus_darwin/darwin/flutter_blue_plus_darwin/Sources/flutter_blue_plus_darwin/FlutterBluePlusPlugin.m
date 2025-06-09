@@ -322,9 +322,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         else if ([@"connect" isEqualToString:call.method])
         {
             // See BmConnectRequest
-            NSDictionary* args = (NSDictionary*)call.arguments;
-            NSString  *remoteId       = args[@"remote_id"];
-            NSNumber  *autoConnect    = args[@"auto_connect"];
+            NSDictionary *args = (NSDictionary *)call.arguments;
+            NSString *remoteId                  = args[@"remote_id"];
+            NSNumber *autoConnect               = args[@"auto_connect"];
+            NSNumber *enableTransportBridging   = args[@"enableTransportBridging"];
+            NSNumber *requiresANCS              = args[@"requiresANCS"];
 
             // check adapter state
             if ([self isAdapterOn] == false) {
@@ -385,7 +387,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 // note: use CBConnectPeripheralOptionEnableAutoReconnect constant
                 // when all developers can be excpected to be on iOS 17+
                 [options setObject:autoConnect forKey:@"kCBConnectOptionEnableAutoReconnect"];
-            } 
+            }
+
+            [options setObject:enableTransportBridging forKey:CBConnectPeripheralOptionEnableTransportBridgingKey];
+            [options setObject:requiresANCS forKey:CBConnectPeripheralOptionRequiresANCS];
 
             [self.centralManager connectPeripheral:peripheral options:options];
 

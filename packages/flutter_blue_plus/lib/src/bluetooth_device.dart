@@ -97,10 +97,14 @@ class BluetoothDevice {
   ///      - auto connect is turned off by calling `disconnect`
   ///      - auto connect results in a slower connection process compared to a direct connection
   ///        because it relies on the internal scheduling of background scans.
+  ///   [enableTransportBridging] iOS only. This option tells the system to connect non-GATT profiles on classic Bluetooth devices, if there is a low energy GATT connection to the same device.
+  ///   [requiresANCS] iOS only. An option to require Apple Notification Center Service (ANCS) when connecting a device..
   Future<void> connect({
     Duration timeout = const Duration(seconds: 35),
     int? mtu = 512,
     bool autoConnect = false,
+    bool enableTransportBridging = false,
+    bool requiresANCS = false,
   }) async {
     // If you hit this assert, you must set `mtu:null`, i.e `device.connect(mtu:null, autoConnect:true)`
     // and you'll have to call `requestMtu` yourself. `autoConnect` is not compatibile with `mtu`.
@@ -124,6 +128,8 @@ class BluetoothDevice {
       var request = BmConnectRequest(
         remoteId: remoteId,
         autoConnect: autoConnect,
+        enableTransportBridging: enableTransportBridging,
+        requiresANCS: requiresANCS,
       );
 
       var responseStream = FlutterBluePlusPlatform
