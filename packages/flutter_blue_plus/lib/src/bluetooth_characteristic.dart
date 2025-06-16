@@ -11,19 +11,22 @@ class BluetoothCharacteristic {
   final Guid serviceUuid;
   final Guid characteristicUuid;
   final Guid? primaryServiceUuid;
+  final int? instanceId;
 
   BluetoothCharacteristic({
     required this.remoteId,
     required this.serviceUuid,
     required this.characteristicUuid,
     this.primaryServiceUuid,
+    this.instanceId,
   });
 
   BluetoothCharacteristic.fromProto(BmBluetoothCharacteristic p)
       : remoteId = p.remoteId,
         serviceUuid = p.serviceUuid,
         characteristicUuid = p.characteristicUuid,
-        primaryServiceUuid = p.primaryServiceUuid;
+        primaryServiceUuid = p.primaryServiceUuid,
+        instanceId = p.instanceId;
 
   /// convenience accessor
   Guid get uuid => characteristicUuid;
@@ -56,14 +59,18 @@ class BluetoothCharacteristic {
   ///   - anytime `write()` is called
   ///   - anytime a notification arrives (if subscribed)
   ///   - and when first listened to, it re-emits the last value for convenience
-  Stream<List<int>> get lastValueStream => _mergeStreams([FlutterBluePlusPlatform.instance.onCharacteristicReceived, FlutterBluePlusPlatform.instance.onCharacteristicWritten])
-      .where((p) => p.remoteId == remoteId)
-      .where((p) => p.serviceUuid == serviceUuid)
-      .where((p) => p.characteristicUuid == characteristicUuid)
-      .where((p) => p.primaryServiceUuid == primaryServiceUuid)
-      .where((p) => p.success == true)
-      .map((c) => c.value)
-      .newStreamWithInitialValue(lastValue);
+  Stream<List<int>> get lastValueStream => _mergeStreams([
+        FlutterBluePlusPlatform.instance.onCharacteristicReceived,
+        FlutterBluePlusPlatform.instance.onCharacteristicWritten
+      ])
+          .where((p) => p.remoteId == remoteId)
+          .where((p) => p.serviceUuid == serviceUuid)
+          .where((p) => p.characteristicUuid == characteristicUuid)
+          .where((p) => p.primaryServiceUuid == primaryServiceUuid)
+          .where((p) => p.success == true)
+          .where((p) => p.instanceId == null || p.instanceId == instanceId)
+          .map((c) => c.value)
+          .newStreamWithInitialValue(lastValue);
 
   /// this stream emits values:
   ///   - anytime `read()` is called
@@ -74,17 +81,23 @@ class BluetoothCharacteristic {
       .where((p) => p.characteristicUuid == characteristicUuid)
       .where((p) => p.primaryServiceUuid == primaryServiceUuid)
       .where((p) => p.success == true)
+      .where((p) => p.instanceId == null || p.instanceId == instanceId)
       .map((c) => c.value);
 
   /// return true if we're subscribed to this characteristic
   ///   -  you can subscribe using setNotifyValue(true)
   bool get isNotifying {
-    var cccd = descriptors._firstWhereOrNull((d) => d.descriptorUuid == cccdUuid);
+    var cccd = descriptors._firstWhereOrNull(
+      (d) => d.descriptorUuid == cccdUuid && d.instanceId == instanceId,
+    );
+
     if (cccd == null) {
       return false;
     }
+
     var hasNotify = cccd.lastValue.isNotEmpty && (cccd.lastValue[0] & 0x01) > 0;
     var hasIndicate = cccd.lastValue.isNotEmpty && (cccd.lastValue[0] & 0x02) > 0;
+
     return hasNotify || hasIndicate;
   }
 
@@ -109,13 +122,15 @@ class BluetoothCharacteristic {
         characteristicUuid: characteristicUuid,
         serviceUuid: serviceUuid,
         primaryServiceUuid: primaryServiceUuid,
+        instanceId: instanceId,
       );
 
       var responseStream = FlutterBluePlusPlatform.instance.onCharacteristicReceived
           .where((p) => p.remoteId == request.remoteId)
           .where((p) => p.serviceUuid == request.serviceUuid)
           .where((p) => p.characteristicUuid == request.characteristicUuid)
-          .where((p) => p.primaryServiceUuid == request.primaryServiceUuid);
+          .where((p) => p.primaryServiceUuid == request.primaryServiceUuid)
+          .where((p) => p.instanceId == null || p.instanceId == request.instanceId);
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmCharacteristicData> futureResponse = responseStream.first;
@@ -181,13 +196,15 @@ class BluetoothCharacteristic {
         allowLongWrite: allowLongWrite,
         value: value,
         primaryServiceUuid: primaryServiceUuid,
+        instanceId: instanceId,
       );
 
       var responseStream = FlutterBluePlusPlatform.instance.onCharacteristicWritten
           .where((p) => p.remoteId == request.remoteId)
           .where((p) => p.serviceUuid == request.serviceUuid)
           .where((p) => p.characteristicUuid == request.characteristicUuid)
-          .where((p) => p.primaryServiceUuid == request.primaryServiceUuid);
+          .where((p) => p.primaryServiceUuid == request.primaryServiceUuid)
+          .where((p) => p.instanceId == null || p.instanceId == instanceId);
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmCharacteristicData> futureResponse = responseStream.first;
@@ -242,6 +259,7 @@ class BluetoothCharacteristic {
         forceIndications: forceIndications,
         enable: notify,
         primaryServiceUuid: primaryServiceUuid,
+        instanceId: instanceId,
       );
 
       // Notifications & Indications are configured by writing to the
@@ -251,13 +269,15 @@ class BluetoothCharacteristic {
           .where((p) => p.serviceUuid == request.serviceUuid)
           .where((p) => p.characteristicUuid == request.characteristicUuid)
           .where((p) => p.descriptorUuid == cccdUuid)
-          .where((p) => p.primaryServiceUuid == request.primaryServiceUuid);
+          .where((p) => p.primaryServiceUuid == request.primaryServiceUuid)
+          .where((p) => p.instanceId == null || p.instanceId == instanceId);
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmDescriptorData> futureResponse = responseStream.first;
 
       // invoke
-      bool hasCCCD = await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance.setNotifyValue(request));
+      bool hasCCCD =
+          await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance.setNotifyValue(request));
 
       // wait for CCCD descriptor to be written?
       if (hasCCCD) {
@@ -297,7 +317,9 @@ class BluetoothCharacteristic {
     if (_bmsvc != null) {
       for (var c in _bmsvc!.characteristics) {
         if (c.characteristicUuid == uuid) {
-          return c;
+          if (c.instanceId == null || c.instanceId == instanceId) {
+            return c;
+          }
         }
       }
     }
@@ -314,6 +336,7 @@ class BluetoothCharacteristic {
         'descriptors: $descriptors, '
         'properties: $properties, '
         'value: $lastValue'
+        'instanceId: $instanceId'
         '}';
   }
 
@@ -341,15 +364,15 @@ class CharacteristicProperties {
 
   const CharacteristicProperties(
       {this.broadcast = false,
-        this.read = false,
-        this.writeWithoutResponse = false,
-        this.write = false,
-        this.notify = false,
-        this.indicate = false,
-        this.authenticatedSignedWrites = false,
-        this.extendedProperties = false,
-        this.notifyEncryptionRequired = false,
-        this.indicateEncryptionRequired = false});
+      this.read = false,
+      this.writeWithoutResponse = false,
+      this.write = false,
+      this.notify = false,
+      this.indicate = false,
+      this.authenticatedSignedWrites = false,
+      this.extendedProperties = false,
+      this.notifyEncryptionRequired = false,
+      this.indicateEncryptionRequired = false});
 
   CharacteristicProperties.fromProto(BmCharacteristicProperties p)
       : broadcast = p.broadcast,
