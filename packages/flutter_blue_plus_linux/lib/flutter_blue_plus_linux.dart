@@ -1046,7 +1046,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
     _client.devicesChanged.switchMap(
       (devices) {
         if (_logLevel == LogLevel.verbose) {
-          print(
+          FlutterBluePlusPlatform.log(
             '[FBP-Linux] devices changed ${devices.map((device) => device.remoteId).toList()}',
           );
         }
@@ -1057,7 +1057,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
               return device.propertiesChanged.switchMap(
                 (properties) {
                   if (_logLevel == LogLevel.verbose) {
-                    print(
+                    FlutterBluePlusPlatform.log(
                       '[FBP-Linux] device ${device.remoteId} properties changed $properties',
                     );
                   }
@@ -1070,7 +1070,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
                         characteristic.propertiesChanged.map(
                           (properties) {
                             if (_logLevel == LogLevel.verbose) {
-                              print(
+                              FlutterBluePlusPlatform.log(
                                 '[FBP-Linux] device ${device.remoteId} service ${service.uuid} characteristic ${characteristic.uuid} properties changed $properties',
                               );
                             }

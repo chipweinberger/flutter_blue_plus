@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'src/bluetooth_msgs.dart';
 
 export 'src/bluetooth_msgs.dart';
@@ -87,6 +89,14 @@ abstract base class FlutterBluePlusPlatform {
 
   Stream<BmTurnOnResponse> get onTurnOnResponse {
     return Stream.empty();
+  }
+
+  static final _logsController = StreamController<String>.broadcast();
+  static Stream<String> get logs => _logsController.stream;
+  
+  static void log(String s) {
+    _logsController.add(s);
+    print(s);
   }
 
   Future<bool> clearGattCache(
