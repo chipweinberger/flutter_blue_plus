@@ -153,7 +153,7 @@ class BluetoothDevice {
             .catchError((e) async {
           if (e is FlutterBluePlusException &&
               e.code == FbpErrorCode.timeout.index) {
-            FlutterBluePlus.log("[FBP] connection timeout");
+            FlutterBluePlusPlatform.log("[FBP] connection timeout");
             await FlutterBluePlus._invokeMethod(() =>
                 FlutterBluePlusPlatform.instance.disconnect(BmDisconnectRequest(
                     remoteId: remoteId))); // cancel connection attempt
@@ -720,7 +720,7 @@ class BluetoothDevice {
             .difference(FlutterBluePlus._connectTimestamp[remoteId]!);
         if (elapsed.compareTo(minGap) < 0) {
           Duration timeLeft = minGap - elapsed;
-          FlutterBluePlus.log(
+          FlutterBluePlusPlatform.log(
               "[FBP] disconnect: enforcing ${minGap.inMilliseconds}ms disconnect gap, delaying "
               "${timeLeft.inMilliseconds}ms");
           await Future<void>.delayed(timeLeft);
