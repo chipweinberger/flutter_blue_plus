@@ -2999,6 +2999,7 @@ public class FlutterBluePlusPlugin implements
 
     // Defined in the Bluetooth Standard, Volume 1, Part F, 1.3 HCI Error Code, pages 364-377.
     // See https://www.bluetooth.org/docman/handlers/downloaddoc.ashx?doc_id=478726,
+    // For Android specific errors, see https://developer.android.com/reference/android/bluetooth/BluetoothGatt#constants_1
     private static String hciStatusString(int value) {
          switch(value) {
             case 0x00: return "SUCCESS";
@@ -3072,6 +3073,8 @@ public class FlutterBluePlusPlugin implements
             case 0x44: return "OPERATION_CANCELLED_BY_HOST"; // A request to the Controller issued by the Host and still pending was successfully canceled.
             case 0x45: return "PACKET_TOO_LONG"; // An attempt was made to send or receive a packet that exceeds the maximum allowed packet length.
             case 0x85: return "ANDROID_SPECIFIC_ERROR"; // Additional Android specific errors
+            case 0x8f: return "GATT_CONNECTION_CONGESTED"; // A remote device connection is congested.
+            case 0x93: return "GATT_CONNECTION_TIMEOUT"; // GATT connection timed out, likely due to the remote device being out of range or not advertising as connectable.
             case 0x101: return "FAILURE_REGISTERING_CLIENT"; //  max of 30 clients has been reached.
             default: return "UNKNOWN_HCI_ERROR (" + value + ")";
          }
