@@ -8,11 +8,13 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_blue_plus_platform_interface/flutter_blue_plus_platform_interface.dart';
 
 export 'package:flutter_blue_plus_platform_interface/flutter_blue_plus_platform_interface.dart' show DeviceIdentifier, Guid, LogLevel, PhySupport;
 
 part 'src/bluetooth_characteristic.dart';
+part 'src/bluetooth_cdm_helper.dart';
 part 'src/bluetooth_descriptor.dart';
 part 'src/bluetooth_device.dart';
 part 'src/bluetooth_events.dart';

@@ -97,10 +97,16 @@ class BluetoothDevice {
   ///      - auto connect is turned off by calling `disconnect`
   ///      - auto connect results in a slower connection process compared to a direct connection
   ///        because it relies on the internal scheduling of background scans.
+  ///   [allowAutoBonding] Android only. If false, disables automatic bonding for this device.
+  ///      - Useful for CDM devices that reject traditional Bluetooth bonding
+  ///   [isCdmDevice] Android only. Indicates this device was associated via Companion Device Manager
+  ///      - When true, automatically disables auto-bonding to prevent connection failures
   Future<void> connect({
     Duration timeout = const Duration(seconds: 35),
     int? mtu = 512,
     bool autoConnect = false,
+    bool allowAutoBonding = true,
+    bool isCdmDevice = false,
   }) async {
     // If you hit this assert, you must set `mtu:null`, i.e `device.connect(mtu:null, autoConnect:true)`
     // and you'll have to call `requestMtu` yourself. `autoConnect` is not compatibile with `mtu`.
@@ -124,6 +130,8 @@ class BluetoothDevice {
       var request = BmConnectRequest(
         remoteId: remoteId,
         autoConnect: autoConnect,
+        allowAutoBonding: allowAutoBonding,
+        isCdmDevice: isCdmDevice,
       );
 
       var responseStream = FlutterBluePlusPlatform

@@ -822,7 +822,8 @@ enum FbpErrorCode {
   characteristicNotFound,
   adapterIsOff,
   connectionCanceled,
-  userRejected
+  userRejected,
+  cdmAuthenticationRequired
 }
 
 class FlutterBluePlusException implements Exception {

@@ -60,42 +60,42 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "1.35.5"
+    version: "1.36.0"
   flutter_blue_plus_android:
     dependency: "direct overridden"
     description:
       path: "../../flutter_blue_plus_android"
       relative: true
     source: path
-    version: "4.0.5"
+    version: "4.1.0"
   flutter_blue_plus_darwin:
     dependency: "direct overridden"
     description:
       path: "../../flutter_blue_plus_darwin"
       relative: true
     source: path
-    version: "4.0.1"
+    version: "4.1.0"
   flutter_blue_plus_linux:
     dependency: "direct overridden"
     description:
       path: "../../flutter_blue_plus_linux"
       relative: true
     source: path
-    version: "3.0.2"
+    version: "3.1.0"
   flutter_blue_plus_platform_interface:
     dependency: "direct overridden"
     description:
       path: "../../flutter_blue_plus_platform_interface"
       relative: true
     source: path
-    version: "4.0.2"
+    version: "4.1.0"
   flutter_blue_plus_web:
     dependency: "direct overridden"
     description:
       path: "../../flutter_blue_plus_web"
       relative: true
     source: path
-    version: "3.0.1"
+    version: "3.1.0"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -158,10 +158,10 @@ packages:
     dependency: transitive
     description:
       name: vector_math
-      sha256: "80b3257d1492ce4d091729e3a67a60407d227c27241d6927be0130c98e741803"
+      sha256: d530bd74fea330e6e364cda7a85019c434070188383e1cd8d9777ee586914c5b
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.4"
+    version: "2.2.0"
   web:
     dependency: transitive
     description:
@@ -179,5 +179,5 @@ packages:
     source: hosted
     version: "6.5.0"
 sdks:
-  dart: ">=3.7.0 <4.0.0"
+  dart: ">=3.8.0-0 <4.0.0"
   flutter: ">=3.7.0"

@@ -215,16 +215,22 @@ class BmScanResponse {
 class BmConnectRequest {
   DeviceIdentifier remoteId;
   bool autoConnect;
+  bool allowAutoBonding;
+  bool isCdmDevice;
 
   BmConnectRequest({
     required this.remoteId,
     required this.autoConnect,
+    this.allowAutoBonding = true,
+    this.isCdmDevice = false,
   });
 
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> data = {};
     data['remote_id'] = remoteId.str;
     data['auto_connect'] = autoConnect ? 1 : 0;
+    data['allow_auto_bonding'] = allowAutoBonding ? 1 : 0;
+    data['is_cdm_device'] = isCdmDevice ? 1 : 0;
     return data;
   }
 }

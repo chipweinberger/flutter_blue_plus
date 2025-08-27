@@ -24,6 +24,7 @@ import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanRecord;
 import android.bluetooth.le.ScanSettings;
+import android.companion.CompanionDeviceManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -46,9 +47,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.io.StringWriter;
 import java.io.PrintWriter;
@@ -110,6 +111,9 @@ public class FlutterBluePlusPlugin implements
     private final Map<String, byte[]> mBondingPins = new ConcurrentHashMap<>();
     private final Map<String, Integer> mMtu = new ConcurrentHashMap<>();
     private final Map<String, BluetoothGatt> mAutoConnected = new ConcurrentHashMap<>();
+    private final Set<String> mCdmDevices = new ConcurrentHashMap<String, Boolean>().keySet(ConcurrentHashMap.newKeySet());
+    private CompanionDeviceManager mCompanionDeviceManager;
+    private CdmBluetoothManager mCdmManager;
     private final Map<String, byte[]> mWriteChr = new ConcurrentHashMap<>();
     private final Map<String, byte[]> mWriteDesc = new ConcurrentHashMap<>();
     private final Map<String, String> mAdvSeen = new ConcurrentHashMap<>();
@@ -251,6 +255,11 @@ public class FlutterBluePlusPlugin implements
         activityBinding = binding;
         activityBinding.addRequestPermissionsResultListener(this);
         activityBinding.addActivityResultListener(this);
+        
+        // Initialize CDM manager with activity context
+        if (mCdmManager == null && context != null && mBluetoothAdapter != null) {
+            mCdmManager = new CdmBluetoothManager(context, binding.getActivity(), mBluetoothAdapter);
+        }
     }
 
     @Override
@@ -303,6 +312,11 @@ public class FlutterBluePlusPlugin implements
                 log(LogLevel.DEBUG, "initializing BluetoothAdapter");
                 mBluetoothManager = (BluetoothManager) this.context.getSystemService(Context.BLUETOOTH_SERVICE);
                 mBluetoothAdapter = mBluetoothManager != null ? mBluetoothManager.getAdapter() : null;
+                
+                // Initialize CDM if available (Android 8.0+)
+                if (Build.VERSION.SDK_INT >= 26) {
+                    mCompanionDeviceManager = (CompanionDeviceManager) this.context.getSystemService(Context.COMPANION_DEVICE_SERVICE);
+                }
             }
 
             // check that we have an adapter, except for
@@ -688,6 +702,8 @@ public class FlutterBluePlusPlugin implements
                     HashMap<String, Object> args = call.arguments();
                     String remoteId =    (String) args.get("remote_id");
                     boolean autoConnect = ((int) args.get("auto_connect")) != 0;
+                    boolean allowAutoBonding = args.get("allow_auto_bonding") != null ? ((int) args.get("allow_auto_bonding")) != 0 : true;
+                    boolean isCdmDevice = args.get("is_cdm_device") != null ? ((int) args.get("is_cdm_device")) != 0 : false;
 
                     ArrayList<String> permissions = new ArrayList<>();
 
@@ -759,6 +775,14 @@ public class FlutterBluePlusPlugin implements
                             mAutoConnected.put(remoteId, gatt);
                         } else {
                             mAutoConnected.remove(remoteId);
+                        }
+
+                        // track CDM devices
+                        if (isCdmDevice || !allowAutoBonding) {
+                            mCdmDevices.add(remoteId);
+                            if (mCdmManager != null) {
+                                mCdmManager.markAsCdmDevice(remoteId);
+                            }
                         }
 
                         result.success(true);
@@ -1476,6 +1500,57 @@ public class FlutterBluePlusPlugin implements
                     break;
                 }
 
+                case "isCdmDeviceAssociated":
+                {
+                    String deviceId = (String) call.arguments;
+                    
+                    if (mCdmManager == null || !mCdmManager.isCdmSupported()) {
+                        result.success(false);
+                        break;
+                    }
+                    
+                    boolean isAssociated = mCdmManager.isDeviceAssociated(deviceId);
+                    result.success(isAssociated);
+                    break;
+                }
+
+                case "getCdmAssociatedDevices":
+                {
+                    if (Build.VERSION.SDK_INT < 26 || mCdmManager == null) {
+                        result.success(new ArrayList<String>());
+                        break;
+                    }
+                    
+                    List<String> associations = mCdmManager.getAssociatedDevices();
+                    result.success(associations);
+                    break;
+                }
+
+                case "startCdmPairing":
+                {
+                    if (mCdmManager == null || !mCdmManager.isCdmSupported()) {
+                        result.error("CDM_NOT_SUPPORTED", "Companion Device Manager not supported on this device", null);
+                        break;
+                    }
+                    
+                    mCdmManager.startCdmPairing(result);
+                    break;
+                }
+
+                case "removeCdmAssociation":
+                {
+                    String deviceId = (String) call.arguments;
+                    
+                    if (mCdmManager == null || !mCdmManager.isCdmSupported()) {
+                        result.success(false);
+                        break;
+                    }
+                    
+                    boolean removed = mCdmManager.removeAssociation(deviceId);
+                    result.success(removed);
+                    break;
+                }
+
                 case "clearGattCache":
                 {
                     String remoteId = (String) call.arguments;
@@ -1541,6 +1616,11 @@ public class FlutterBluePlusPlugin implements
 
             invokeMethodUIThread("OnTurnOnResponse", map);
 
+            return true;
+        }
+
+        // Handle CDM pairing results
+        if (mCdmManager != null && mCdmManager.handleCdmPairingResult(requestCode, resultCode, data)) {
             return true;
         }
 
@@ -2497,6 +2577,12 @@ public class FlutterBluePlusPlugin implements
             byte[] value = mWriteDesc.get(key) != null ? mWriteDesc.get(key) : new byte[0];
             mWriteDesc.remove(key);
 
+            // Handle CDM devices - authentication errors for CDM devices should not trigger auto-bonding
+            if (status == BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION && mCdmDevices.contains(remoteId)) {
+                log(LogLevel.WARNING, "CDM device authentication required but auto-bonding disabled for: " + remoteId);
+                // Note: For CDM devices, the app should handle this differently or may not need encryption
+            }
+
             // see: BmDescriptorData
             HashMap<String, Object> response = new HashMap<>();
             response.put("remote_id", remoteId);
@@ -2964,6 +3050,14 @@ public class FlutterBluePlusPlugin implements
             case BluetoothGatt.GATT_FAILURE                     : return "GATT_FAILURE";                     // 257
             default: return "UNKNOWN_GATT_ERROR (" + value + ")";
         }
+    }
+
+    // CDM helper methods
+    private boolean isCdmDevice(String deviceId) {
+        if (mCdmManager == null) {
+            return false;
+        }
+        return mCdmManager.isCdmDevice(deviceId);
     }
 
     private static String bluetoothStatusString(int value) {

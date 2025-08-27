@@ -15,6 +15,7 @@ class ScanResultTile extends StatefulWidget {
 
 class _ScanResultTileState extends State<ScanResultTile> {
   BluetoothConnectionState _connectionState = BluetoothConnectionState.disconnected;
+  bool _isCdmDevice = false;
 
   late StreamSubscription<BluetoothConnectionState> _connectionStateSubscription;
 
@@ -28,6 +29,22 @@ class _ScanResultTileState extends State<ScanResultTile> {
         setState(() {});
       }
     });
+
+    // Check if device is CDM-associated
+    _checkCdmStatus();
+  }
+
+  void _checkCdmStatus() async {
+    try {
+      bool isCdm = await BluetoothCdmHelper.isDeviceAssociated(widget.result.device.remoteId.str);
+      if (mounted) {
+        setState(() {
+          _isCdmDevice = isCdm;
+        });
+      }
+    } catch (e) {
+      // CDM check failed, probably not supported
+    }
   }
 
   @override
@@ -62,9 +79,31 @@ class _ScanResultTileState extends State<ScanResultTile> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(
-            widget.result.device.platformName,
-            overflow: TextOverflow.ellipsis,
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  widget.result.device.platformName,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (_isCdmDevice)
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.green,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    'CDM',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+            ],
           ),
           Text(
             widget.result.device.remoteId.str,
@@ -73,7 +112,29 @@ class _ScanResultTileState extends State<ScanResultTile> {
         ],
       );
     } else {
-      return Text(widget.result.device.remoteId.str);
+      return Row(
+        children: [
+          Expanded(
+            child: Text(widget.result.device.remoteId.str),
+          ),
+          if (_isCdmDevice)
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.green,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                'CDM',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+        ],
+      );
     }
   }
 

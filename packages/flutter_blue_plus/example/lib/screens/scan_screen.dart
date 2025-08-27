@@ -7,7 +7,6 @@ import 'device_screen.dart';
 import '../utils/snackbar.dart';
 import '../widgets/system_device_tile.dart';
 import '../widgets/scan_result_tile.dart';
-import '../utils/extra.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -96,7 +95,12 @@ class _ScanScreenState extends State<ScanScreen> {
   }
 
   void onConnectPressed(BluetoothDevice device) {
-    device.connectAndUpdateStream().catchError((e) {
+    // Use CDM-aware connection that automatically detects and handles CDM devices
+    BluetoothCdmHelper.connectWithCdmDetection(device).then((wasCdmDevice) {
+      if (wasCdmDevice) {
+        Snackbar.show(ABC.c, "Connected to CDM device: ${device.platformName}", success: true);
+      }
+    }).catchError((e) {
       Snackbar.show(ABC.c, prettyException("Connect Error:", e), success: false);
     });
     MaterialPageRoute route = MaterialPageRoute(

@@ -402,3 +402,147 @@ class CharacteristicProperties {
         '}';
   }
 }
+
+/// CDM-aware extensions for BluetoothCharacteristic
+/// 
+/// These extensions provide CDM-specific GATT operations that avoid
+/// triggering traditional Bluetooth bonding for CDM devices.
+extension BluetoothCharacteristicCdm on BluetoothCharacteristic {
+  
+  /// Enable/disable notifications with CDM-aware handling
+  /// 
+  /// For CDM devices, this method attempts to set up notifications
+  /// without triggering automatic bonding that may cause disconnection.
+  /// 
+  /// [notify] whether to enable or disable notifications
+  /// [forceIndications] force INDICATE over NOTIFY (Android only)
+  /// 
+  /// Returns a Future that completes when the operation finishes.
+  /// For CDM devices, authentication failures are handled gracefully.
+  Future<void> setNotifyValueCdmSafe(bool notify, {bool forceIndications = false}) async {
+    
+    // Check if this is a CDM device
+    bool isCdmDevice = false;
+    try {
+      isCdmDevice = await BluetoothCdmHelper.isDeviceAssociated(remoteId.str);
+    } catch (e) {
+      // CDM check failed, proceed with normal operation
+    }
+    
+    if (isCdmDevice) {
+      // For CDM devices, we still try the standard method but handle failures gracefully
+      try {
+        await setNotifyValue(notify, forceIndications: forceIndications);
+      } catch (e) {
+        // Check if this is an authentication error that's expected for CDM devices
+        if (e.toString().contains('GATT_INSUFFICIENT_AUTHENTICATION') || 
+            e.toString().contains('19')) {
+          // For CDM devices, this might be expected behavior
+          // Log a warning but don't throw the error
+          if (kDebugMode) {
+            print('CDM device authentication required for notifications, but auto-bonding disabled. '
+                  'This may be expected behavior for CDM device: ${remoteId.str}');
+          }
+        } else {
+          // Re-throw other types of errors
+          rethrow;
+        }
+      }
+    } else {
+      // Regular device - use standard method
+      await setNotifyValue(notify, forceIndications: forceIndications);
+    }
+  }
+
+  /// Write characteristic value with CDM-aware handling
+  /// 
+  /// For CDM devices, this method handles authentication errors gracefully
+  /// and provides better error reporting for CDM-specific issues.
+  /// 
+  /// [value] the bytes to write
+  /// [withoutResponse] write without waiting for response (faster but no confirmation)
+  /// [allowLongWrite] allow long writes (Android only)
+  /// 
+  /// Returns a Future that completes when the operation finishes.
+  Future<void> writeCdmSafe(List<int> value, {bool withoutResponse = false, bool allowLongWrite = false}) async {
+    
+    // Check if this is a CDM device
+    bool isCdmDevice = false;
+    try {
+      isCdmDevice = await BluetoothCdmHelper.isDeviceAssociated(remoteId.str);
+    } catch (e) {
+      // CDM check failed, proceed with normal operation
+    }
+    
+    if (isCdmDevice) {
+      try {
+        await write(value, withoutResponse: withoutResponse, allowLongWrite: allowLongWrite);
+      } catch (e) {
+        // Handle CDM-specific authentication errors
+        if (e.toString().contains('GATT_INSUFFICIENT_AUTHENTICATION') || 
+            e.toString().contains('19')) {
+          
+          if (withoutResponse) {
+            // For writeWithoutResponse, we might still succeed even with auth error
+            if (kDebugMode) {
+              print('CDM device authentication warning for write without response. '
+                    'Operation may have succeeded despite warning.');
+            }
+          } else {
+            // For writeWithResponse, authentication is required
+            throw FlutterBluePlusException(
+              ErrorPlatform.fbp, 
+              "writeCdmSafe", 
+              FbpErrorCode.cdmAuthenticationRequired.index,
+              "CDM device requires authentication for write operations. "
+              "Consider using writeWithoutResponse or ensure proper CDM association."
+            );
+          }
+        } else {
+          rethrow;
+        }
+      }
+    } else {
+      // Regular device - use standard method
+      await write(value, withoutResponse: withoutResponse, allowLongWrite: allowLongWrite);
+    }
+  }
+
+  /// Read characteristic value with CDM-aware error handling
+  /// 
+  /// For CDM devices, provides better error reporting and handles
+  /// authentication requirements specific to CDM workflows.
+  Future<List<int>> readCdmSafe() async {
+    
+    // Check if this is a CDM device
+    bool isCdmDevice = false;
+    try {
+      isCdmDevice = await BluetoothCdmHelper.isDeviceAssociated(remoteId.str);
+    } catch (e) {
+      // CDM check failed, proceed with normal operation
+    }
+    
+    if (isCdmDevice) {
+      try {
+        return await read();
+      } catch (e) {
+        // Handle CDM-specific authentication errors
+        if (e.toString().contains('GATT_INSUFFICIENT_AUTHENTICATION') || 
+            e.toString().contains('19')) {
+          throw FlutterBluePlusException(
+            ErrorPlatform.fbp, 
+            "readCdmSafe", 
+            FbpErrorCode.cdmAuthenticationRequired.index,
+            "CDM device requires authentication for read operations. "
+            "Ensure proper CDM association and permissions."
+          );
+        } else {
+          rethrow;
+        }
+      }
+    } else {
+      // Regular device - use standard method
+      return await read();
+    }
+  }
+}
