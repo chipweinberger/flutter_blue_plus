@@ -11,6 +11,9 @@ class BluetoothCharacteristic {
   final Guid serviceUuid;
   final Guid characteristicUuid;
   final Guid? primaryServiceUuid;
+
+  /// uniquely identifies this characteristic
+  /// on the platform native side
   final int? instanceId;
 
   BluetoothCharacteristic({
