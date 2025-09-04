@@ -14,6 +14,11 @@ dependencies:
   flutter_blue_plus_platform_interface: ^4.0.0
   rxdart: '>=0.27.0 <0.29.0'
 
+# uncomment for platform interface local development
+#dependency_overrides:
+#  flutter_blue_plus_platform_interface:
+#    path: ../flutter_blue_plus_platform_interface
+
 dev_dependencies:
   flutter_lints: ^5.0.0
   flutter_test:
