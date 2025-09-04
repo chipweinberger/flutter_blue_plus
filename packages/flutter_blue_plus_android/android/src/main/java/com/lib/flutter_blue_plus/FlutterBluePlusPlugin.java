@@ -2420,9 +2420,10 @@ public class FlutterBluePlusPlugin implements
             Integer instanceId = characteristic.getInstanceId();
 
             // what data did we write?
-            String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + primaryServiceUuid + ":" + instanceId;
-            byte[] value = mWriteChr.get(key) != null ? mWriteChr.get(key) : new byte[0];
-            mWriteChr.remove(key);
+            String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + primaryServiceUuid;
+            byte[] value = mWriteChr.remove(key + ":" + instanceId);
+            if (value == null) value = mWriteChr.remove(key + ":noinst"); //fallback
+            if (value == null) value = new byte[0];
 
             // see: BmCharacteristicData
             HashMap<String, Object> response = new HashMap<>();
@@ -2493,9 +2494,10 @@ public class FlutterBluePlusPlugin implements
             Integer instanceId = descriptor.getCharacteristic().getInstanceId();
 
             // what data did we write?
-            String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + descriptorUuid + ":" + primaryServiceUuid + ":" + instanceId;
-            byte[] value = mWriteDesc.get(key) != null ? mWriteDesc.get(key) : new byte[0];
-            mWriteDesc.remove(key);
+            String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + descriptorUuid + ":" + primaryServiceUuid;
+            byte[] value = mWriteDesc.remove(key + ":" + instanceId);
+            if (value == null) value = mWriteDesc.remove(key + ":noinst"); // fallback
+            if (value == null) value = new byte[0];
 
             // see: BmDescriptorData
             HashMap<String, Object> response = new HashMap<>();
