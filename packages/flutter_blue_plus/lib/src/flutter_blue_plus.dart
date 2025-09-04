@@ -635,6 +635,7 @@ class FlutterBluePlus {
   static Future<List<BluetoothDevice>> get connectedSystemDevices => systemDevices([Guid("1800")]);
 
   @Deprecated('No longer needed, remove this from your code')
+  // ignore: avoid_returning_null_for_void
   static void get instance => null;
 
   @Deprecated('Use isSupported instead')

@@ -96,6 +96,7 @@ abstract base class FlutterBluePlusPlatform {
   
   static void log(String s) {
     _logsController.add(s);
+    // ignore: avoid_print
     print(s);
   }
 
