@@ -548,7 +548,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             // check maximum payload
             int maxLen = [self getMaxPayload:peripheral forType:writeType allowLongWrite:[allowLongWrite boolValue]];
-            int dataLen = value.length;
+            int dataLen = (int) value.length;
             if (dataLen > maxLen) {
                 NSString* t = [writeTypeNumber intValue] == 0 ? @"withResponse" : @"withoutResponse";
                 NSString* a = [allowLongWrite boolValue] ? @", allowLongWrite" : @", noLongWrite";
@@ -675,7 +675,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             // check mtu
             int mtu = (int) [self getMtu:peripheral];
-            int dataLen = value.length;
+            int dataLen = (int) value.length;
             if ((mtu-3) < dataLen) {
                 NSString* f = @"data is longer than MTU allows. dataLen: %d > maxDataLen: %d";
                 NSString* s = [NSString stringWithFormat:f, dataLen, (mtu-3)];
