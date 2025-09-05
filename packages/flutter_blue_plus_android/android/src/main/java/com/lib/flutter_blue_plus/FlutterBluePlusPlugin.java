@@ -1578,6 +1578,12 @@ public class FlutterBluePlusPlugin implements
     }
 
     private void ensurePermissions(List<String> permissions, OperationOnPermission operation) {
+        // check that we have a context
+        if (context == null) {
+            operation.op(false, "Application Context is null");
+            return;
+        }
+
         // Filter out permissions that are already granted
         List<String> permissionsNeeded = new ArrayList<>();
         for (String permission : permissions) {
