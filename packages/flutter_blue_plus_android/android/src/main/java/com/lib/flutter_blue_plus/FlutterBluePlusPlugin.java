@@ -1797,8 +1797,13 @@ public class FlutterBluePlusPlugin implements
     {
         log(LogLevel.DEBUG, "disconnectAllDevices("+func+")");
 
+        // merge connected & autoconnected
+        Map<String, BluetoothGatt> allDevices = new HashMap<>();
+        allDevices.putAll(mConnectedDevices);
+        allDevices.putAll(mAutoConnected);
+
         // request disconnections
-        for (BluetoothGatt gatt : mConnectedDevices.values()) {
+        for (BluetoothGatt gatt : allDevices.values()) {
 
             if (func == "adapterTurnOff") {
 
