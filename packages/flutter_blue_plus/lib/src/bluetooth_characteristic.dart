@@ -1,7 +1,7 @@
 // Copyright 2017-2023, Charles Weinberger & Paul DeMarco.
 // All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
-
+import 'dart:io' show Platform;
 part of '../flutter_blue_plus.dart';
 
 final Guid cccdUuid = Guid("00002902-0000-1000-8000-00805f9b34fb");
@@ -11,9 +11,6 @@ class BluetoothCharacteristic {
   final Guid serviceUuid;
   final Guid characteristicUuid;
   final Guid? primaryServiceUuid;
-
-  /// uniquely identifies this characteristic
-  /// on the platform native side
   final int? instanceId;
 
   BluetoothCharacteristic({
@@ -71,7 +68,7 @@ class BluetoothCharacteristic {
           .where((p) => p.characteristicUuid == characteristicUuid)
           .where((p) => p.primaryServiceUuid == primaryServiceUuid)
           .where((p) => p.success == true)
-          .where((p) => p.instanceId == null || p.instanceId == instanceId)
+          .where((p) => !Platform.isAndroid || (p.instanceId == null || p.instanceId == instanceId))
           .map((c) => c.value)
           .newStreamWithInitialValue(lastValue);
 
@@ -84,14 +81,14 @@ class BluetoothCharacteristic {
       .where((p) => p.characteristicUuid == characteristicUuid)
       .where((p) => p.primaryServiceUuid == primaryServiceUuid)
       .where((p) => p.success == true)
-      .where((p) => p.instanceId == null || p.instanceId == instanceId)
+      .where((p) => !Platform.isAndroid || (p.instanceId == null || p.instanceId == instanceId))
       .map((c) => c.value);
 
   /// return true if we're subscribed to this characteristic
   ///   -  you can subscribe using setNotifyValue(true)
   bool get isNotifying {
     var cccd = descriptors._firstWhereOrNull(
-      (d) => d.descriptorUuid == cccdUuid && d.instanceId == instanceId,
+      (d) => d.descriptorUuid == cccdUuid && (!Platform.isAndroid || d.instanceId == instanceId),
     );
 
     if (cccd == null) {
@@ -125,7 +122,7 @@ class BluetoothCharacteristic {
         characteristicUuid: characteristicUuid,
         serviceUuid: serviceUuid,
         primaryServiceUuid: primaryServiceUuid,
-        instanceId: instanceId,
+        instanceId: Platform.isAndroid ? instanceId : null,
       );
 
       var responseStream = FlutterBluePlusPlatform.instance.onCharacteristicReceived
@@ -133,7 +130,7 @@ class BluetoothCharacteristic {
           .where((p) => p.serviceUuid == request.serviceUuid)
           .where((p) => p.characteristicUuid == request.characteristicUuid)
           .where((p) => p.primaryServiceUuid == request.primaryServiceUuid)
-          .where((p) => p.instanceId == null || p.instanceId == request.instanceId);
+         .where((p) => !Platform.isAndroid || (p.instanceId == null || p.instanceId == request.instanceId));
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmCharacteristicData> futureResponse = responseStream.first;
@@ -199,7 +196,8 @@ class BluetoothCharacteristic {
         allowLongWrite: allowLongWrite,
         value: value,
         primaryServiceUuid: primaryServiceUuid,
-        instanceId: instanceId,
+        instanceId: Platform.isAndroid ? instanceId : null,
+
       );
 
       var responseStream = FlutterBluePlusPlatform.instance.onCharacteristicWritten
@@ -207,7 +205,8 @@ class BluetoothCharacteristic {
           .where((p) => p.serviceUuid == request.serviceUuid)
           .where((p) => p.characteristicUuid == request.characteristicUuid)
           .where((p) => p.primaryServiceUuid == request.primaryServiceUuid)
-          .where((p) => p.instanceId == null || p.instanceId == instanceId);
+          .where((p) => !Platform.isAndroid || (p.instanceId == null || p.instanceId == instanceId));
+
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmCharacteristicData> futureResponse = responseStream.first;
@@ -262,7 +261,8 @@ class BluetoothCharacteristic {
         forceIndications: forceIndications,
         enable: notify,
         primaryServiceUuid: primaryServiceUuid,
-        instanceId: instanceId,
+        instanceId: Platform.isAndroid ? instanceId : null,
+
       );
 
       // Notifications & Indications are configured by writing to the
@@ -273,7 +273,8 @@ class BluetoothCharacteristic {
           .where((p) => p.characteristicUuid == request.characteristicUuid)
           .where((p) => p.descriptorUuid == cccdUuid)
           .where((p) => p.primaryServiceUuid == request.primaryServiceUuid)
-          .where((p) => p.instanceId == null || p.instanceId == instanceId);
+          .where((p) => !Platform.isAndroid || (p.instanceId == null || p.instanceId == instanceId));
+
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmDescriptorData> futureResponse = responseStream.first;
