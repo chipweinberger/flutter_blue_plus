@@ -194,6 +194,7 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
               serviceUuid: Guid.fromString(s.uuid),
               characteristicUuid: Guid.fromString(c.uuid),
               primaryServiceUuid: null,
+              instanceId: c.instanceId,
               descriptors: descriptors,
               properties: BmCharacteristicProperties(
                 broadcast: c.properties.broadcast,
@@ -207,7 +208,6 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
                 notifyEncryptionRequired: false,
                 indicateEncryptionRequired: false,
               ),
-              instanceId: c.instanceId,
             ),
           );
         }
@@ -307,11 +307,11 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           serviceUuid: Guid.fromString(service.uuid),
           characteristicUuid: Guid.fromString(characteristic.uuid),
           primaryServiceUuid: null,
+          instanceId: request.instanceId,
           value: value.buffer.asUint8List(),
           success: true,
           errorCode: 0,
           errorString: '',
-          instanceId: request.instanceId,
         ),
       );
 
@@ -323,11 +323,11 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           serviceUuid: request.serviceUuid,
           characteristicUuid: request.characteristicUuid,
           primaryServiceUuid: null,
+          instanceId: request.instanceId,
           value: [],
           success: false,
           errorCode: 0,
           errorString: e.toString(),
-          instanceId: request.instanceId,
         ),
       );
 
@@ -375,11 +375,11 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           characteristicUuid: Guid.fromString(characteristic.uuid),
           descriptorUuid: Guid.fromString(descriptor.uuid),
           primaryServiceUuid: null,
+          instanceId: request.instanceId,
           value: value.buffer.asUint8List(),
           success: true,
           errorCode: 0,
           errorString: '',
-          instanceId: request.instanceId,
         ),
       );
 
@@ -392,11 +392,11 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           characteristicUuid: request.characteristicUuid,
           descriptorUuid: request.descriptorUuid,
           primaryServiceUuid: null,
+          instanceId: request.instanceId,
           value: [],
           success: false,
           errorCode: 0,
           errorString: e.toString(),
-          instanceId: request.instanceId,
         ),
       );
 
@@ -613,11 +613,11 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           serviceUuid: request.serviceUuid,
           characteristicUuid: request.characteristicUuid,
           primaryServiceUuid: null,
+          instanceId: request.instanceId,
           value: request.value,
           success: false,
           errorCode: 0,
           errorString: e.toString(),
-          instanceId: request.instanceId,
         ),
       );
 
@@ -665,11 +665,11 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           characteristicUuid: Guid.fromString(characteristic.uuid),
           descriptorUuid: Guid.fromString(descriptor.uuid),
           primaryServiceUuid: null,
+          instanceId: request.instanceId,
           value: request.value,
           success: true,
           errorCode: 0,
           errorString: '',
-          instanceId: request.instanceId,
         ),
       );
 
@@ -682,11 +682,11 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           characteristicUuid: request.characteristicUuid,
           descriptorUuid: request.descriptorUuid,
           primaryServiceUuid: null,
+          instanceId: request.instanceId,
           value: request.value,
           success: false,
           errorCode: 0,
           errorString: e.toString(),
-          instanceId: request.instanceId,
         ),
       );
 
@@ -705,11 +705,11 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
         serviceUuid: Guid.fromString(characteristic.service.uuid),
         characteristicUuid: Guid.fromString(characteristic.uuid),
         primaryServiceUuid: null,
+        instanceId: characteristic.instanceId,
         value: characteristic.value?.toDart.buffer.asUint8List() ?? [],
         success: true,
         errorCode: 0,
         errorString: '',
-        instanceId: characteristic.instanceId,
       ),
     );
   }

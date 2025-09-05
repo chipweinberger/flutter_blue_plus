@@ -573,11 +573,11 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
             characteristic.uuid.value,
           ),
           primaryServiceUuid: null,
+          instanceId: characteristic.instanceId,
           value: value,
           success: true,
           errorCode: 0,
           errorString: '',
-          instanceId: characteristic.instanceId,
         ),
       );
 
@@ -589,11 +589,11 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
           serviceUuid: request.serviceUuid,
           characteristicUuid: request.characteristicUuid,
           primaryServiceUuid: null,
+          instanceId: request.instanceId,
           value: [],
           success: false,
           errorCode: 0,
           errorString: e.toString(),
-          instanceId: request.instanceId,
         ),
       );
 
@@ -660,11 +660,11 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
             descriptor.uuid.value,
           ),
           primaryServiceUuid: null,
+          instanceId: characteristic.instanceId,
           value: value,
           success: true,
           errorCode: 0,
           errorString: '',
-          instanceId: characteristic.instanceId,
         ),
       );
 
@@ -677,11 +677,11 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
           characteristicUuid: request.characteristicUuid,
           descriptorUuid: request.descriptorUuid,
           primaryServiceUuid: null,
+          instanceId: request.instanceId,
           value: [],
           success: false,
           errorCode: 0,
           errorString: e.toString(),
-          instanceId: request.instanceId,
         ),
       );
 
@@ -914,11 +914,11 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
             characteristic.uuid.value,
           ),
           primaryServiceUuid: null,
+          instanceId: characteristic.instanceId,
           value: request.value,
           success: true,
           errorCode: 0,
           errorString: '',
-          instanceId: characteristic.instanceId,
         ),
       );
 
@@ -930,11 +930,11 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
           serviceUuid: request.serviceUuid,
           characteristicUuid: request.characteristicUuid,
           primaryServiceUuid: null,
+          instanceId: request.instanceId,
           value: request.value,
           success: false,
           errorCode: 0,
           errorString: e.toString(),
-          instanceId: request.instanceId,
         ),
       );
 
@@ -1001,11 +1001,11 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
             descriptor.uuid.value,
           ),
           primaryServiceUuid: null,
+          instanceId: characteristic.instanceId,
           value: request.value,
           success: true,
           errorCode: 0,
           errorString: '',
-          instanceId: characteristic.instanceId,
         ),
       );
 
@@ -1018,11 +1018,11 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
           characteristicUuid: request.characteristicUuid,
           descriptorUuid: request.descriptorUuid,
           primaryServiceUuid: null,
+          instanceId: request.instanceId,
           value: request.value,
           success: false,
           errorCode: 0,
           errorString: e.toString(),
-          instanceId: request.instanceId,
         ),
       );
 
