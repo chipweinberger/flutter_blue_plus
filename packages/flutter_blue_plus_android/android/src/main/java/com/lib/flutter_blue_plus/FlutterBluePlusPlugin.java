@@ -1657,7 +1657,7 @@ public class FlutterBluePlusPlugin implements
     // anything while the device is busy bonding.
     private void waitIfBonding() {
         int counter = 0;
-        if (mBondingDevices.isEmpty() == false) {
+        while (mBondingDevices.isEmpty() == false) {
             if (counter == 0) {
                 log(LogLevel.DEBUG, "[FBP] waiting for bonding to complete...");
             }
