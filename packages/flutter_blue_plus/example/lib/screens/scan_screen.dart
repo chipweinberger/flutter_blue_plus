@@ -62,12 +62,6 @@ class _ScanScreenState extends State<ScanScreen> {
     try {
       await FlutterBluePlus.startScan(
         timeout: const Duration(seconds: 15),
-        withServices: [
-          // Guid("180f"), // battery
-          // Guid("180a"), // device info
-          // Guid("1800"), // generic access
-          // Guid("6e400001-b5a3-f393-e0a9-e50e24dcca9e"), // Nordic UART
-        ],
         webOptionalServices: [
           Guid("180f"), // battery
           Guid("180a"), // device info
@@ -115,29 +109,40 @@ class _ScanScreenState extends State<ScanScreen> {
   }
 
   Widget buildScanButton() {
-    return Row(children: [
-      if (FlutterBluePlus.isScanningNow)
-        buildSpinner()
-      else
-        ElevatedButton(
+    final button = _isScanning
+        ? ElevatedButton(
+            onPressed: onStopPressed,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text("STOP"),
+          )
+        : ElevatedButton(
             onPressed: onScanPressed,
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).primaryColor,
               foregroundColor: Colors.white,
             ),
-            child: Text("SCAN"))
-    ]);
+            child: const Text("SCAN"),
+          );
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (_isScanning) buildSpinner(),
+        button,
+      ],
+    );
   }
 
   Widget buildSpinner() {
-    return Padding(
-      padding: const EdgeInsets.all(14.0),
-      child: AspectRatio(
-        aspectRatio: 1.0,
-        child: CircularProgressIndicator(
-          backgroundColor: Colors.black12,
-          color: Colors.black26,
-        ),
+    return const Padding(
+      padding: EdgeInsets.only(right: 20.0),
+      child: SizedBox(
+        width: 20,
+        height: 20,
+        child: CircularProgressIndicator(strokeWidth: 2.5),
       ),
     );
   }
