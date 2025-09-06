@@ -10,10 +10,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_blue_plus_android: 5.0.0
-  flutter_blue_plus_darwin: 5.0.0
-  flutter_blue_plus_linux: 5.0.0
   flutter_blue_plus_platform_interface: 5.0.0
+  flutter_blue_plus_android: 5.0.1
+  flutter_blue_plus_darwin: 5.0.1
+  flutter_blue_plus_linux: 5.0.0
   flutter_blue_plus_web: 5.0.1
 
 dev_dependencies:
