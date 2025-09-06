@@ -2260,10 +2260,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     return charToInstanceIdMap[key];
 }
 
-
-
-
-
 - (void)resetInstanceIds:(NSString *)discoveredDeviceId {
     NSMutableArray<NSNumber *> *instanceIdsToRemove = [NSMutableArray array];
     NSArray<NSNumber *> *keys = [instanceIdToCharMap allKeys];
@@ -2279,11 +2275,12 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     for (NSNumber *instanceId in instanceIdsToRemove) {
         [instanceIdToCharMap removeObjectForKey:instanceId];
-        
+
         // removal from charToInstanceIdMap
-        NSString *keyToRemove = nil;
-        for (NSString *key in charToInstanceIdMap) {
-            if ([charToInstanceIdMap[key] isEqual:instanceId]) {
+        NSValue *keyToRemove = nil;
+        for (NSValue *key in charToInstanceIdMap) {
+            NSNumber *val = charToInstanceIdMap[key];
+            if ([val isEqualToNumber:instanceId]) {
                 keyToRemove = key;
                 break;
             }
