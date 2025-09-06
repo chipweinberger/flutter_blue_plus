@@ -967,7 +967,7 @@ public class FlutterBluePlusPlugin implements
 
                     // remember the data we are writing
                     if (primaryServiceUuid == null) {primaryServiceUuid = "";}
-                    String inst = (instanceId != null ? instanceId : "noinst");
+                    String inst = (instanceId != null ? instanceId.toString() : "noinst");
                     String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + primaryServiceUuid + ":" + inst;
                     mWriteChr.put(key, value);
 
@@ -1101,7 +1101,7 @@ public class FlutterBluePlusPlugin implements
 
                     // remember the data we are writing
                     if (primaryServiceUuid == null) {primaryServiceUuid = "";}
-                    String inst = (instanceId != null ? instanceId : "noinst");
+                    String inst = (instanceId != null ? instanceId.toString() : "noinst");
                     String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + CCCD + ":" + primaryServiceUuid + ":" + inst;
                     mWriteDesc.put(key, value);
 
@@ -1216,7 +1216,7 @@ public class FlutterBluePlusPlugin implements
 
                     // remember the data we are writing
                     if (primaryServiceUuid == null) {primaryServiceUuid = "";}
-                    String inst = (instanceId != null ? instanceId : "noinst");
+                    String inst = (instanceId != null ? instanceId.toString() : "noinst");
                     String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + CCCD + ":" + primaryServiceUuid + ":" + inst;
                     mWriteDesc.put(key, descriptorValue);
 

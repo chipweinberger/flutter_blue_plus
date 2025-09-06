@@ -32,7 +32,6 @@ static int counter = 0;
     return counter;
 }
 
-
 + (void)reset {
     counter = 0;
 }
