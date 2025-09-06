@@ -1411,7 +1411,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
         NSValue *key = [NSValue valueWithNonretainedObject:c];
         charToInstanceIdMap[key] = @(instanceId);
-        
 
         Log(LDEBUG, @"    chr: %@", [c.UUID uuidStr]);
         [peripheral discoverDescriptorsForCharacteristic:c];
@@ -2261,36 +2260,19 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 }
 
 - (void)resetInstanceIds:(NSString *)discoveredDeviceId {
-    NSMutableArray<NSNumber *> *instanceIdsToRemove = [NSMutableArray array];
-    NSArray<NSNumber *> *keys = [instanceIdToCharMap allKeys];
+    NSMutableArray<NSNumber *> *idsToRemove = [NSMutableArray array];
+    NSMutableArray<NSValue *>  *chrsToRemove    = [NSMutableArray array];
 
-    for (NSNumber *instanceId in keys) {
-        CBCharacteristic *characteristic = instanceIdToCharMap[instanceId];
-        NSString *charRemoteId = characteristic.service.peripheral.identifier.UUIDString;
-
-        if ([charRemoteId isEqualToString:discoveredDeviceId]) {
-            [instanceIdsToRemove addObject:instanceId];
+    [instanceIdToCharMap enumerateKeysAndObjectsUsingBlock:^(NSNumber *iid, CBCharacteristic *chr, BOOL *stop) {
+        if ([[chr.service.peripheral.identifier UUIDString] isEqualToString:discoveredDeviceId]) {
+            [idsToRemove addObject:iid];
+            [chrsToRemove addObject:[NSValue valueWithNonretainedObject:chr]];
         }
-    }
+    }];
 
-    for (NSNumber *instanceId in instanceIdsToRemove) {
-        [instanceIdToCharMap removeObjectForKey:instanceId];
-
-        // removal from charToInstanceIdMap
-        NSValue *keyToRemove = nil;
-        for (NSValue *key in charToInstanceIdMap) {
-            NSNumber *val = charToInstanceIdMap[key];
-            if ([val isEqualToNumber:instanceId]) {
-                keyToRemove = key;
-                break;
-            }
-        }
-        if (keyToRemove) {
-            [charToInstanceIdMap removeObjectForKey:keyToRemove];
-        }
-    }
+    [instanceIdToCharMap removeObjectsForKeys:idsToRemove];
+    [charToInstanceIdMap removeObjectsForKeys:chrsToRemove];
 }
-
 
 - (NSData *)descriptorToData:(CBDescriptor *)descriptor
 {
