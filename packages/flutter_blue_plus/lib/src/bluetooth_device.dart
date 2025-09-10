@@ -34,9 +34,10 @@ class BluetoothDevice {
   String get advName => FlutterBluePlus._advNames[remoteId] ?? "";
 
   /// Get services
-  ///  - returns empty if discoverServices() has not been called
-  ///    after the most recent connection, or if your device
-  ///    does not have any services (rare)
+  ///  returns empty when: 
+  ///   - disconnected
+  ///   - discoverServices() has not been called
+  ///   - your device does not have services (rare)
   List<BluetoothService> get servicesList {
     BmDiscoverServicesResult? result = FlutterBluePlus._knownServices[remoteId];
     if (result == null) {
