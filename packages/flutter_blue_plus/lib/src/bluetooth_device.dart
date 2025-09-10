@@ -35,7 +35,8 @@ class BluetoothDevice {
 
   /// Get services
   ///  - returns empty if discoverServices() has not been called
-  ///    or if your device does not have any services (rare)
+  ///    after the most recent connection, or if your device
+  ///    does not have any services (rare)
   List<BluetoothService> get servicesList {
     BmDiscoverServicesResult? result = FlutterBluePlus._knownServices[remoteId];
     if (result == null) {
@@ -235,6 +236,9 @@ class BluetoothDevice {
             .fbpEnsureAdapterIsOn("disconnect")
             .fbpTimeout(timeout, "disconnect");
       }
+
+      // Wipe known services to avoid inconsistent state between Flutter and the platform
+      FlutterBluePlus._knownServices.remove(remoteId);
 
       if (!kIsWeb && Platform.isAndroid) {
         // Disconnected, remove connect timestamp
