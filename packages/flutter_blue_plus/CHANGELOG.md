@@ -1,3 +1,6 @@
+## 1.35.12
+* **[Improve]** Dart: add `pubspec_overrides.yaml` for easier local development
+
 ## 1.35.11
 * **[Fix]** Android: fix main thread crash due to `waitIfBonding` (regression 1.35.8)
 * **[Fix]** Dart: clear `servicesList` after disconnection
