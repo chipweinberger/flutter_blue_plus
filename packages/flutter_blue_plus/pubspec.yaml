@@ -10,6 +10,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  # use specific versions. 
+  #  - users otherwise forget to update all
+  #  - simpler bug reporting
+  #  - unified changelog
+  #  - users can still manually override
   flutter_blue_plus_platform_interface: 5.0.0
   flutter_blue_plus_android: 5.0.4
   flutter_blue_plus_darwin: 5.0.1
