@@ -1,0 +1,6 @@
+framework module flutter_blue_plus_darwin {
+  umbrella header "flutter_blue_plus_darwin-umbrella.h"
+
+  export *
+  module * { export * }
+}

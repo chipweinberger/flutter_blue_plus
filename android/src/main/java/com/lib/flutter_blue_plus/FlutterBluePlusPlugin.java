@@ -34,23 +34,16 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelUuid;
+import android.bluetooth.BluetoothServerSocket;
+import android.bluetooth.BluetoothSocket;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.lib.flutter_blue_plus.l2cap.L2CapChannelManager;
-import com.lib.flutter_blue_plus.l2cap.L2CapMethodNames;
-import com.lib.flutter_blue_plus.l2cap.messages.CloseL2CapChannelRequest;
-import com.lib.flutter_blue_plus.l2cap.messages.CloseL2CapServer;
-import com.lib.flutter_blue_plus.l2cap.messages.DeviceConnectedToL2CapChannel;
-import com.lib.flutter_blue_plus.l2cap.messages.ListenL2CapChannelRequest;
-import com.lib.flutter_blue_plus.l2cap.messages.OpenL2CapChannelRequest;
-import com.lib.flutter_blue_plus.l2cap.messages.ReadL2CapChannelRequest;
-import com.lib.flutter_blue_plus.l2cap.messages.WriteL2CapChannelRequest;
-import com.lib.flutter_blue_plus.log.LogLevel;
-import com.lib.flutter_blue_plus.permission.PermissionUtil;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -63,6 +56,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.LinkedList;
+import java.util.Collections;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
@@ -111,11 +106,275 @@ public class FlutterBluePlusPlugin implements
 
     private final int enableBluetoothRequestCode = 1879842617;
 
-    private L2CapChannelManager l2CapChannelManager;
-    private final L2CapChannelManager.DeviceConnected deviceConnectedCallback = (remoteDevice, psm) -> {
-        final DeviceConnectedToL2CapChannel newConnectedDeviceState = new DeviceConnectedToL2CapChannel(remoteDevice, psm);
-        invokeMethodUIThread(L2CapMethodNames.DEVICE_CONNECTED, newConnectedDeviceState.marshal());
-    };
+    // L2CAP Channel Management - Consolidated Implementation
+    private final List<L2CapInfo> openL2CapChannelInfos = Collections.synchronizedList(new LinkedList<>());
+    
+    // L2CAP Info Interface
+    private interface L2CapInfo {
+        Type getType();
+        int getPsm();
+        L2CapChannel getL2CapChannel(BluetoothDevice remoteDevice);
+        void close(BluetoothDevice device) throws IOException;
+        
+        enum Type {
+            CLIENT,
+            SERVER,
+        }
+    }
+    
+    // L2CAP Channel Base Class  
+    private abstract class L2CapChannel {
+        protected static final int DEFAULT_READ_BUFFER_SIZE = 50;
+        protected final byte[] readBuffer;
+        protected BluetoothSocket socket;
+        protected OutputStream outputStream;
+        protected InputStream inputStream;
+
+        public L2CapChannel(int readBufferSize) {
+            readBuffer = new byte[readBufferSize];
+        }
+
+        public BluetoothSocket getSocket() {
+            return socket;
+        }
+
+        public void readL2CapChannel(String remoteId, int psm, Result resultCallback) {
+            if (inputStream == null || socket == null || !socket.isConnected()) {
+                resultCallback.error("socketNotOpen", "The bluetooth socket or the input stream is not open.", null);
+                return;
+            }
+            try {
+                int bytesRead = inputStream.read(readBuffer);
+                // see: BmReadL2CapChannelResponse
+                HashMap<String, Object> response = new HashMap<>();
+                response.put("remote_id", remoteId);
+                response.put("psm", psm);
+                response.put("bytes_read", bytesRead);
+                response.put("value", Arrays.copyOf(readBuffer, bytesRead));
+                resultCallback.success(response);
+            } catch (IOException e) {
+                resultCallback.error("inputStreamReadFailed", e.getMessage(), null);
+            }
+        }
+
+        public void writeL2CapChannel(byte[] data, Result resultCallback) {
+            if (outputStream == null || socket == null || !socket.isConnected()) {
+                resultCallback.error("socketNotOpen", "The bluetooth socket or the output stream is not open.", null);
+                return;
+            }
+            try {
+                outputStream.write(data);
+                resultCallback.success(null);
+            } catch (IOException e) {
+                resultCallback.error("outputStreamWriteFailed", e.getMessage(), null);
+            }
+        }
+
+        public synchronized void close() {
+            if (outputStream != null) {
+                try {
+                    outputStream.close();
+                } catch (IOException e) {
+                    // ignore
+                } finally {
+                    outputStream = null;
+                }
+            }
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    // ignore
+                } finally {
+                    inputStream = null;
+                }
+            }
+            if (socket != null) {
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    // ignore
+                } finally {
+                    socket = null;
+                }
+            }
+        }
+    }
+    
+    // L2CAP Client Channel Implementation
+    private class L2CapClientChannel extends L2CapChannel {
+        private final BluetoothDevice device;
+        private final int psm;
+
+        public L2CapClientChannel(BluetoothDevice device, int psm) {
+            this(device, psm, DEFAULT_READ_BUFFER_SIZE);
+        }
+
+        public L2CapClientChannel(BluetoothDevice device, int psm, int readBufferSize) {
+            super(readBufferSize);
+            this.psm = psm;
+            this.device = device;
+        }
+
+        @SuppressLint("MissingPermission")
+        @TargetApi(Build.VERSION_CODES.Q)
+        public synchronized void connectToL2CapChannel(boolean secure, Result resultCallback) {
+            try {
+                if (secure) {
+                    socket = device.createL2capChannel(psm);
+                } else {
+                    socket = device.createInsecureL2capChannel(psm);
+                }
+                socket.connect();
+                inputStream = socket.getInputStream();
+                outputStream = socket.getOutputStream();
+                resultCallback.success(null);
+            } catch (IOException e) {
+                resultCallback.error("openL2capChannelFailed", e.getMessage(), null);
+            }
+        }
+
+        public BluetoothDevice getDevice() {
+            return device;
+        }
+
+        public int getPsm() {
+            return psm;
+        }
+    }
+    
+    // L2CAP Server Channel Implementation  
+    private class L2CapServerChannel extends L2CapChannel {
+        public L2CapServerChannel(BluetoothSocket socket) {
+            super(DEFAULT_READ_BUFFER_SIZE);
+            this.socket = socket;
+        }
+
+        public void openStreams() throws IOException {
+            inputStream = socket.getInputStream();
+            outputStream = socket.getOutputStream();
+        }
+    }
+    
+    // Client Socket Info Implementation
+    private class ClientSocketInfo implements L2CapInfo {
+        private final L2CapClientChannel l2CapChannel;
+
+        public ClientSocketInfo(L2CapClientChannel l2CapChannel) {
+            this.l2CapChannel = l2CapChannel;
+        }
+
+        @Override
+        public Type getType() {
+            return Type.CLIENT;
+        }
+
+        @Override
+        public int getPsm() {
+            return l2CapChannel.getPsm();
+        }
+
+        @Override
+        public L2CapChannel getL2CapChannel(BluetoothDevice remoteDevice) {
+            if (remoteDevice.getAddress().equals(l2CapChannel.getDevice().getAddress())) {
+                return l2CapChannel;
+            }
+            return null;
+        }
+
+        @Override
+        public void close(BluetoothDevice device) throws IOException {
+            l2CapChannel.close();
+        }
+    }
+    
+    // Server Socket Info Implementation
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    private class ServerSocketInfo implements L2CapInfo {
+        private final BluetoothServerSocket serverSocket;
+        private final List<L2CapServerChannel> openChannels;
+        private boolean isAcceptingConnections;
+
+        public ServerSocketInfo(BluetoothServerSocket serverSocket) {
+            this.serverSocket = serverSocket;
+            this.openChannels = Collections.synchronizedList(new LinkedList<>());
+            this.isAcceptingConnections = false;
+        }
+
+        @Override
+        public Type getType() {
+            return Type.SERVER;
+        }
+
+        @Override
+        public int getPsm() {
+            return serverSocket.getPsm();
+        }
+
+        void addConnection(L2CapServerChannel channel) {
+            openChannels.add(channel);
+        }
+
+        @Override
+        public L2CapServerChannel getL2CapChannel(BluetoothDevice remoteDevice) {
+            for (L2CapServerChannel openChannel : openChannels) {
+                if (remoteDevice.getAddress().equals(openChannel.getSocket().getRemoteDevice().getAddress())) {
+                    return openChannel;
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public void close(BluetoothDevice device) {
+            L2CapServerChannel channelToDelete = getL2CapChannel(device);
+            if (channelToDelete == null) {
+                return;
+            }
+            channelToDelete.close();
+            openChannels.remove(channelToDelete);
+        }
+
+        public void acceptConnections() {
+            isAcceptingConnections = true;
+            new Thread(() -> {
+                while (isAcceptingConnections) {
+                    try {
+                        BluetoothSocket socket = serverSocket.accept();
+                        if (!isAcceptingConnections) {
+                            break;
+                        }
+                        L2CapServerChannel l2capChannel = new L2CapServerChannel(socket);
+                        l2capChannel.openStreams();
+                        addConnection(l2capChannel);
+                        
+                        // Fire device connected event
+                        HashMap<String, Object> deviceConnectedData = new HashMap<>();
+                        deviceConnectedData.put("remote_id", socket.getRemoteDevice().getAddress());
+                        deviceConnectedData.put("psm", getPsm());
+                        invokeMethodUIThread("deviceConnectedToL2CapChannel", deviceConnectedData);
+                    } catch (IOException e) {
+                        if (isAcceptingConnections) {
+                            // Only log if we're still supposed to be accepting
+                        }
+                    }
+                }
+            }).start();
+        }
+
+        public void closeSocket() {
+            for (L2CapServerChannel openChannel : openChannels) {
+                openChannel.close();
+            }
+            openChannels.clear();
+            isAcceptingConnections = false;
+            try {
+                serverSocket.close();
+            } catch (IOException e) {
+                // ignore
+            }
+        }
+    }
 
     private interface OperationOnPermission {
         void op(boolean granted, String permission);
@@ -246,9 +505,7 @@ public class FlutterBluePlusPlugin implements
                 result.error("bluetoothUnavailable", "the device does not support bluetooth", null);
                 return;
             }
-            if (l2CapChannelManager == null) {
-                l2CapChannelManager = new L2CapChannelManager(mBluetoothAdapter, deviceConnectedCallback);
-            }
+            // L2CAP functionality integrated directly - no separate manager needed
 
             switch (call.method) {
 
@@ -1391,92 +1648,80 @@ public class FlutterBluePlusPlugin implements
                     result.success(true);
                     break;
                 }
-                case L2CapMethodNames.CONNECT_TO_L2CAP_CHANNEL: {
-                    ensurePermissions(PermissionUtil.permissionForBleConnection(), (granted, permission) -> {
-                        if (!granted) {
-                            result.error(
-                                    "no_permissions", String.format("flutter_blue plugin requires %s for new connection", permission), null);
-                            return;
-                        }
-                        final Map<String, Object> data = call.arguments();
-                        if (data == null) {
-                            result.error(ErrorCodes.MESSAGE_ARGUMENTS_NOT_PROVIDED, "Call arguments are not provided.", null);
-                            return;
-                        }
-                        final OpenL2CapChannelRequest options = OpenL2CapChannelRequest.unmarshal(data);
-                        l2CapChannelManager.connectToL2CapChannel(options, result);
-                    });
-                    break;
-                }
-                case L2CapMethodNames.CLOSE_L2CAP_CHANNEL: {
-                    ensurePermissions(PermissionUtil.permissionForBleConnection(), (granted, permission) -> {
-                        if (!granted) {
-                            result.error(
-                                    "no_permissions", String.format("flutter_blue plugin requires %s for new connection", permission), null);
-                            return;
-                        }
-                        final Map<String, Object> data = call.arguments();
-                        if (data == null) {
-                            result.error(ErrorCodes.MESSAGE_ARGUMENTS_NOT_PROVIDED, "Call arguments are not provided.", null);
-                            return;
-                        }
-                        CloseL2CapChannelRequest options = CloseL2CapChannelRequest.unmarshal(data);
-                        l2CapChannelManager.closeChannel(options, result);
-                    });
-                    break;
-                }
-                case L2CapMethodNames.LISTEN_L2CAP_CHANNEL: {
-                    ensurePermissions(PermissionUtil.permissionForBleConnection(), (granted, permission) -> {
-                        if (!granted) {
-                            result.error(
-                                    "no_permissions", String.format("flutter_blue plugin requires %s for listening to l2cap channel", permission), null);
-                            return;
-                        }
-                        final Map<String, Object> data = call.arguments();
-                        if (data == null) {
-                            result.error(ErrorCodes.MESSAGE_ARGUMENTS_NOT_PROVIDED, "Call arguments are not provided.", null);
-                            return;
-                        }
-                        final ListenL2CapChannelRequest options = ListenL2CapChannelRequest.unmarshal(data);
-                        l2CapChannelManager.listenUsingL2capChannel(options, result);
-                    });
-                    break;
-                }
-                case L2CapMethodNames.CLOSE_L2CAP_SERVER: {
-                    ensurePermissions(PermissionUtil.permissionForBleConnection(), (granted, permission) -> {
-                        if (!granted) {
-                            result.error(
-                                    "no_permissions", String.format("flutter_blue plugin requires %s for listening to l2cap channel", permission), null);
-                            return;
-                        }
-                        final Map<String, Object> data = call.arguments();
-                        if (data == null) {
-                            result.error(ErrorCodes.MESSAGE_ARGUMENTS_NOT_PROVIDED, "Call arguments are not provided.", null);
-                            return;
-                        }
-                        CloseL2CapServer options = CloseL2CapServer.unmarshal(data);
-                        l2CapChannelManager.closeServerSocket(options, result);
-                    });
-                    break;
-                }
-                case L2CapMethodNames.READ_L2CAP_CHANNEL: {
-                    final Map<String, Object> data = call.arguments();
-                    if (data == null) {
-                        result.error(ErrorCodes.MESSAGE_ARGUMENTS_NOT_PROVIDED, "Call arguments are not provided.", null);
-                        return;
+                case "connectToL2CapChannel": {
+                    ArrayList<String> permissions = new ArrayList<>();
+                    if (Build.VERSION.SDK_INT >= 31) {
+                        permissions.add(Manifest.permission.BLUETOOTH_CONNECT);
                     }
-                    final ReadL2CapChannelRequest options = ReadL2CapChannelRequest.unmarshal(data);
-                    l2CapChannelManager.read(options, result);
+                    if (Build.VERSION.SDK_INT <= 30) {
+                        permissions.add(Manifest.permission.BLUETOOTH);
+                    }
+                    ensurePermissions(permissions, (granted, permission) -> {
+                        if (!granted) {
+                            result.error("no_permissions", String.format("FlutterBluePlus requires %s permission", permission), null);
+                            return;
+                        }
+                        connectToL2CapChannel(call, result);
+                    });
                     break;
                 }
-                case L2CapMethodNames.WRITE_L2CAP_CHANNEL: {
-                    final Map<String, Object> data = call.arguments();
-                    if (data == null) {
-                        result.error(ErrorCodes.MESSAGE_ARGUMENTS_NOT_PROVIDED, "Call arguments are not provided.", null);
-                        return;
+                case "closeL2CapChannel": {
+                    ArrayList<String> permissions = new ArrayList<>();
+                    if (Build.VERSION.SDK_INT >= 31) {
+                        permissions.add(Manifest.permission.BLUETOOTH_CONNECT);
                     }
-                    final WriteL2CapChannelRequest options = WriteL2CapChannelRequest.unmarshal(data);
-                    l2CapChannelManager.write(options, result);
+                    if (Build.VERSION.SDK_INT <= 30) {
+                        permissions.add(Manifest.permission.BLUETOOTH);
+                    }
+                    ensurePermissions(permissions, (granted, permission) -> {
+                        if (!granted) {
+                            result.error("no_permissions", String.format("FlutterBluePlus requires %s permission", permission), null);
+                            return;
+                        }
+                        closeL2CapChannel(call, result);
+                    });
+                    break;
+                }
+                case "listenL2CapChannel": {
+                    ArrayList<String> permissions = new ArrayList<>();
+                    if (Build.VERSION.SDK_INT >= 31) {
+                        permissions.add(Manifest.permission.BLUETOOTH_CONNECT);
+                    }
+                    if (Build.VERSION.SDK_INT <= 30) {
+                        permissions.add(Manifest.permission.BLUETOOTH);
+                    }
+                    ensurePermissions(permissions, (granted, permission) -> {
+                        if (!granted) {
+                            result.error("no_permissions", String.format("FlutterBluePlus requires %s permission", permission), null);
+                            return;
+                        }
+                        listenL2CapChannel(call, result);
+                    });
+                    break;
+                }
+                case "closeL2CapServer": {
+                    ArrayList<String> permissions = new ArrayList<>();
+                    if (Build.VERSION.SDK_INT >= 31) {
+                        permissions.add(Manifest.permission.BLUETOOTH_CONNECT);
+                    }
+                    if (Build.VERSION.SDK_INT <= 30) {
+                        permissions.add(Manifest.permission.BLUETOOTH);
+                    }
+                    ensurePermissions(permissions, (granted, permission) -> {
+                        if (!granted) {
+                            result.error("no_permissions", String.format("FlutterBluePlus requires %s permission", permission), null);
+                            return;
+                        }
+                        closeL2CapServer(call, result);
+                    });
+                    break;
+                }
+                case "readL2CapChannel": {
+                    readL2CapChannel(call, result);
+                    break;
+                }
+                case "writeL2CapChannel": {
+                    writeL2CapChannel(call, result);
                     break;
                 }
                 default:
@@ -2525,5 +2770,213 @@ public class FlutterBluePlusPlugin implements
             case 0x101: return "FAILURE_REGISTERING_CLIENT"; //  max of 30 clients has been reached.
             default: return "UNKNOWN_HCI_ERROR (" + value + ")";
          }
+    }
+
+    //////////////////////////////////////////////////////////////////////
+    // ██      ██████   ██████  █████  ██████  
+    // ██           ██ ██      ██   ██ ██   ██ 
+    // ██       █████  ██      ███████ ██████  
+    // ██      ██      ██      ██   ██ ██      
+    // ███████ ███████  ██████ ██   ██ ██      
+    
+    // L2CAP Method Implementations - Consolidated following FBP patterns
+    
+    @SuppressLint("MissingPermission")
+    @TargetApi(Build.VERSION_CODES.Q)
+    private void listenL2CapChannel(MethodCall call, Result result) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            result.error("platformNotSupported", "The device is running an older Android version. Minimum version is Android Q.", null);
+            return;
+        }
+        
+        if (!mBluetoothAdapter.isEnabled()) {
+            result.error("bluetoothTurnedOff", "Bluetooth is turned off.", null);
+            return;
+        }
+
+        Map<String, Object> data = call.arguments();
+        if (data == null) {
+            result.error("invalidArguments", "Arguments required", null);
+            return;
+        }
+
+        // Extract parameters inline
+        boolean secure = (boolean) data.get("secure");
+
+        try {
+            BluetoothServerSocket serverSocket;
+            if (secure) {
+                serverSocket = mBluetoothAdapter.listenUsingL2capChannel();
+            } else {
+                serverSocket = mBluetoothAdapter.listenUsingInsecureL2capChannel();
+            }
+            
+            ServerSocketInfo socketInfo = new ServerSocketInfo(serverSocket);
+            openL2CapChannelInfos.add(socketInfo);
+            int psm = serverSocket.getPsm();
+            socketInfo.acceptConnections();
+
+            // see: BmListenL2CapChannelResponse
+            HashMap<String, Object> response = new HashMap<>();
+            response.put("psm", psm);
+            result.success(response);
+
+        } catch (IOException e) {
+            result.error("openL2capChannelFailed", e.getMessage(), null);
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.Q)
+    private void connectToL2CapChannel(MethodCall call, Result result) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            result.error("platformNotSupported", "The device is running an older Android version. Minimum version is Android Q.", null);
+            return;
+        }
+
+        Map<String, Object> data = call.arguments();
+        if (data == null) {
+            result.error("invalidArguments", "Arguments required", null);
+            return;
+        }
+
+        // Extract parameters inline
+        String remoteId = (String) data.get("remote_id");
+        int psm = (int) data.get("psm");
+        boolean secure = (boolean) data.get("secure");
+        
+        BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
+
+        L2CapInfo l2CapInfo = findL2CapInfo(psm);
+        if (l2CapInfo == null) {
+            l2CapInfo = new ClientSocketInfo(new L2CapClientChannel(device, psm));
+            openL2CapChannelInfos.add(l2CapInfo);
+        }
+        
+        L2CapClientChannel l2CapChannel = (L2CapClientChannel) l2CapInfo.getL2CapChannel(device);
+        l2CapChannel.connectToL2CapChannel(secure, result);
+    }
+
+    private void readL2CapChannel(MethodCall call, Result result) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            result.error("platformNotSupported", "The device is running an older Android version. Minimum version is Android Q.", null);
+            return;
+        }
+
+        Map<String, Object> data = call.arguments();
+        if (data == null) {
+            result.error("invalidArguments", "Arguments required", null);
+            return;
+        }
+
+        // Extract parameters inline
+        String remoteId = (String) data.get("remote_id");
+        int psm = (int) data.get("psm");
+        
+        BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
+        L2CapChannel channel = findL2CapChannel(psm, device);
+        
+        if (channel == null) {
+            result.error("noOpenL2capChannelFound", "No open channel found for device " + device.getAddress() + " / psm " + psm, null);
+            return;
+        }
+        
+        channel.readL2CapChannel(remoteId, psm, result);
+    }
+
+    private void writeL2CapChannel(MethodCall call, Result result) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            result.error("platformNotSupported", "The device is running an older Android version. Minimum version is Android Q.", null);
+            return;
+        }
+
+        Map<String, Object> data = call.arguments();
+        if (data == null) {
+            result.error("invalidArguments", "Arguments required", null);
+            return;
+        }
+
+        // Extract parameters inline
+        String remoteId = (String) data.get("remote_id");
+        int psm = (int) data.get("psm");
+        byte[] value = (byte[]) data.get("value");
+        
+        BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
+        L2CapChannel channel = findL2CapChannel(psm, device);
+        
+        if (channel == null) {
+            result.error("noOpenL2capChannelFound", "No open channel found for device " + device.getAddress() + " / psm " + psm, null);
+            return;
+        }
+        
+        channel.writeL2CapChannel(value, result);
+    }
+
+    private synchronized void closeL2CapChannel(MethodCall call, Result result) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            result.error("platformNotSupported", "The device is running an older Android version. Minimum version is Android Q.", null);
+            return;
+        }
+
+        Map<String, Object> data = call.arguments();
+        if (data == null) {
+            result.error("invalidArguments", "Arguments required", null);
+            return;
+        }
+
+        // Extract parameters inline
+        String remoteId = (String) data.get("remote_id");
+        int psm = (int) data.get("psm");
+        
+        BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(remoteId);
+        L2CapInfo channelInfo = findL2CapInfo(psm);
+        
+        if (channelInfo != null) {
+            try {
+                channelInfo.close(device);
+            } catch (IOException e) {
+                result.error("closeL2capChannelFailed", "Can't close channel with psm " + psm, null);
+                return;
+            }
+            if (channelInfo.getType() == L2CapInfo.Type.CLIENT) {
+                openL2CapChannelInfos.remove(channelInfo);
+            }
+        }
+        result.success(null);
+    }
+
+    private synchronized void closeL2CapServer(MethodCall call, Result result) {
+        Map<String, Object> data = call.arguments();
+        if (data == null) {
+            result.error("invalidArguments", "Arguments required", null);
+            return;
+        }
+
+        // Extract parameters inline
+        int psm = (int) data.get("psm");
+        
+        L2CapInfo channelInfo = findL2CapInfo(psm);
+        if (channelInfo != null && channelInfo.getType() == L2CapInfo.Type.SERVER) {
+            ((ServerSocketInfo) channelInfo).closeSocket();
+            openL2CapChannelInfos.remove(channelInfo);
+        }
+        result.success(null);
+    }
+
+    // Helper methods for L2CAP functionality
+    private L2CapInfo findL2CapInfo(int psm) {
+        for (L2CapInfo channelInfo : openL2CapChannelInfos) {
+            if (psm == channelInfo.getPsm()) {
+                return channelInfo;
+            }
+        }
+        return null;
+    }
+
+    private L2CapChannel findL2CapChannel(int psm, BluetoothDevice remoteDevice) {
+        L2CapInfo l2CapInfo = findL2CapInfo(psm);
+        if (l2CapInfo == null) {
+            return null;
+        }
+        return l2CapInfo.getL2CapChannel(remoteDevice);
     }
 }

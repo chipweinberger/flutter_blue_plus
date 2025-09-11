@@ -852,3 +852,129 @@ class BmTurnOnResponse {
     );
   }
 }
+
+// L2CAP Message Classes
+class BmL2CapChannelConnected {
+  final BluetoothDevice device;
+  final int psm;
+
+  BmL2CapChannelConnected.fromMap(Map<dynamic, dynamic> map)
+      : device = BluetoothDevice.fromProto(
+            BmBluetoothDevice.fromMap(map['bluetoothDevice'])),
+        psm = map['psm'];
+}
+
+class BmListenL2CapChannelRequest {
+  final bool secure;
+
+  BmListenL2CapChannelRequest({required this.secure});
+
+  Map<dynamic, dynamic> toMap() {
+    return {
+      'secure': secure,
+    };
+  }
+}
+
+class BmListenL2CapChannelResponse {
+  final int psm;
+
+  BmListenL2CapChannelResponse.fromMap(Map<dynamic, dynamic> map)
+      : psm = map['psm'];
+}
+
+class BmCloseL2CapServer {
+  final int psm;
+
+  BmCloseL2CapServer({required this.psm});
+
+  Map<dynamic, dynamic> toMap() {
+    return {
+      'psm': psm,
+    };
+  }
+}
+
+class BmOpenL2CapChannelRequest {
+  final String remoteId;
+  final int psm;
+  final bool secure;
+
+  BmOpenL2CapChannelRequest({
+    required this.remoteId,
+    required this.psm,
+    required this.secure,
+  });
+
+  Map<dynamic, dynamic> toMap() {
+    return {
+      'psm': psm,
+      'remote_id': remoteId,
+      'secure': secure,
+    };
+  }
+}
+
+class BmCloseL2CapChannelRequest {
+  final String remoteId;
+  final int psm;
+
+  BmCloseL2CapChannelRequest({
+    required this.remoteId,
+    required this.psm,
+  });
+
+  Map<dynamic, dynamic> toMap() {
+    return {
+      'psm': psm,
+      'remote_id': remoteId,
+    };
+  }
+}
+
+class BmReadL2CapChannelRequest {
+  final String remoteId;
+  final int psm;
+
+  BmReadL2CapChannelRequest({
+    required this.remoteId,
+    required this.psm,
+  });
+
+  Map<dynamic, dynamic> toMap() {
+    return {
+      'psm': psm,
+      'remote_id': remoteId,
+    };
+  }
+}
+
+class BmReadL2CapChannelResponse {
+  final String remoteId;
+  final int psm;
+  final int bytesRead;
+  final List<int> value;
+
+  BmReadL2CapChannelResponse.fromMap(Map<dynamic, dynamic> map)
+      : remoteId = map['remote_id'],
+        psm = map['psm'],
+        bytesRead = map['bytes_read'],
+        value = _hexDecode(map['value']);
+}
+
+class BmWriteL2CapChannelRequest {
+  final String remoteId;
+  final int psm;
+  final List<int> value;
+
+  BmWriteL2CapChannelRequest(
+      {required this.remoteId, required this.psm, required this.value});
+
+  Map<dynamic, dynamic> toMap() {
+    return {
+      'psm': psm,
+      'remote_id': remoteId,
+      'value': _hexEncode(value),
+    };
+  }
+}

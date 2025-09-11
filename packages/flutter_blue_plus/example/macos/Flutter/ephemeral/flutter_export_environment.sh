@@ -1,0 +1,15 @@
+#!/bin/sh
+# This is a generated file; do not edit or check into version control.
+export "FLUTTER_ROOT=/Users/danielmolnar/fvm/versions/3.35.2"
+export "FLUTTER_APPLICATION_PATH=/Users/danielmolnar/projects/flutter_blue_plus_phntm/flutter_blue_plus/packages/flutter_blue_plus/example"
+export "COCOAPODS_PARALLEL_CODE_SIGN=true"
+export "FLUTTER_TARGET=/Users/danielmolnar/projects/flutter_blue_plus_phntm/flutter_blue_plus/packages/flutter_blue_plus/example/lib/main.dart"
+export "FLUTTER_BUILD_DIR=build"
+export "FLUTTER_BUILD_NAME=1.0.0"
+export "FLUTTER_BUILD_NUMBER=1"
+export "FLUTTER_CLI_BUILD_MODE=debug"
+export "DART_DEFINES=RkxVVFRFUl9WRVJTSU9OPTMuMzUuMg==,RkxVVFRFUl9DSEFOTkVMPXN0YWJsZQ==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MDVkYjk2ODkwOA==,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YThiZmRmYzM5NA==,RkxVVFRFUl9EQVJUX1ZFUlNJT049My45LjA="
+export "DART_OBFUSCATION=false"
+export "TRACK_WIDGET_CREATION=true"
+export "TREE_SHAKE_ICONS=false"
+export "PACKAGE_CONFIG=/Users/danielmolnar/projects/flutter_blue_plus_phntm/flutter_blue_plus/packages/flutter_blue_plus/example/.dart_tool/package_config.json"

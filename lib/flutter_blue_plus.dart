@@ -8,7 +8,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
-import 'package:flutter_blue_plus/src/l2cap_constants.dart';
 
 part 'src/bluetooth_characteristic.dart';
 part 'src/bluetooth_descriptor.dart';
@@ -19,5 +18,4 @@ part 'src/bluetooth_service.dart';
 part 'src/bluetooth_utils.dart';
 part 'src/flutter_blue_plus.dart';
 part 'src/guid.dart';
-part 'src/l2cap_messages.dart';
 part 'src/utils.dart';

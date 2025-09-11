@@ -344,39 +344,39 @@ class BluetoothDevice {
     required final int psm,
     bool secure = true,
   }) async {
-    var request = OpenL2CapChannelRequest(
+    var request = BmOpenL2CapChannelRequest(
       remoteId: remoteId.toString(),
       psm: psm,
       secure: secure,
     );
 
     await FlutterBluePlus._invokeMethod(
-        methodConnectToL2CapChannel, request.toMap());
+        "connectToL2CapChannel", request.toMap());
   }
 
   /// Close a L2CAP channel to the Bluetooth Device.
   Future<void> closeL2CapChannel({required final int psm}) async {
-    var request = CloseL2CapChannelRequest(
+    var request = BmCloseL2CapChannelRequest(
       remoteId: remoteId.toString(),
       psm: psm,
     );
 
     await FlutterBluePlus._invokeMethod(
-        methodCloseL2CapChannel, request.toMap());
+        "closeL2CapChannel", request.toMap());
   }
 
   /// Read from a L2CAP channel
   Future<List<int>> readL2CapChannel({
     required final int psm,
   }) async {
-    final request = ReadL2CapChannelRequest(
+    final request = BmReadL2CapChannelRequest(
       remoteId: remoteId.toString(),
       psm: psm,
     );
 
     return await FlutterBluePlus._invokeMethod(
-            methodReadL2CapChannel, request.toMap())
-        .then((buffer) => ReadL2CapChannelResponse.fromMap(buffer))
+            "readL2CapChannel", request.toMap())
+        .then((buffer) => BmReadL2CapChannelResponse.fromMap(buffer))
         .then((readChannelResponse) {
       return readChannelResponse.value
           .sublist(0, readChannelResponse.bytesRead);
@@ -386,14 +386,14 @@ class BluetoothDevice {
   /// Write some [bytesToSend] using the L2CAP channel with the PSM: [psm]
   Future<void> writeL2CapChannel(
       {required final int psm, required final List<int> bytesToSend}) async {
-    var request = WriteL2CapChannelRequest(
+    var request = BmWriteL2CapChannelRequest(
       remoteId: remoteId.toString(),
       psm: psm,
       value: bytesToSend,
     );
 
     return await FlutterBluePlus._invokeMethod(
-        methodWriteL2CapChannel, request.toMap());
+        "writeL2CapChannel", request.toMap());
   }
 
   /// Read the RSSI of connected remote device

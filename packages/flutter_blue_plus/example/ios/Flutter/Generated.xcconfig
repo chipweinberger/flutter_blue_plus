@@ -1,0 +1,16 @@
+// This is a generated file; do not edit or check into version control.
+FLUTTER_ROOT=/Users/danielmolnar/fvm/versions/3.35.2
+FLUTTER_APPLICATION_PATH=/Users/danielmolnar/projects/flutter_blue_plus_phntm/flutter_blue_plus/packages/flutter_blue_plus/example
+COCOAPODS_PARALLEL_CODE_SIGN=true
+FLUTTER_TARGET=/Users/danielmolnar/projects/flutter_blue_plus_phntm/flutter_blue_plus/packages/flutter_blue_plus/example/lib/main.dart
+FLUTTER_BUILD_DIR=build
+FLUTTER_BUILD_NAME=1.0.0
+FLUTTER_BUILD_NUMBER=1
+FLUTTER_CLI_BUILD_MODE=debug
+EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386
+EXCLUDED_ARCHS[sdk=iphoneos*]=armv7
+DART_DEFINES=RkxVVFRFUl9WRVJTSU9OPTMuMzUuMg==,RkxVVFRFUl9DSEFOTkVMPXN0YWJsZQ==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MDVkYjk2ODkwOA==,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YThiZmRmYzM5NA==,RkxVVFRFUl9EQVJUX1ZFUlNJT049My45LjA=
+DART_OBFUSCATION=false
+TRACK_WIDGET_CREATION=true
+TREE_SHAKE_ICONS=false
+PACKAGE_CONFIG=/Users/danielmolnar/projects/flutter_blue_plus_phntm/flutter_blue_plus/packages/flutter_blue_plus/example/.dart_tool/package_config.json
