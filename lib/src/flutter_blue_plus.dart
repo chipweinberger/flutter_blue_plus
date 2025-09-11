@@ -186,7 +186,7 @@ class FlutterBluePlus {
   /// L2Cap channel.
   static Stream<L2CapChannelConnected> get l2CapChannelConnected {
     _l2CapChannelConnected ??= FlutterBluePlus._methodStream.stream
-        .where((m) => m.method == deviceConnectedCallback)
+        .where((m) => m.method == "deviceConnectedToL2CapChannel")
         .map((m) => m.arguments)
         .map((sourceMap) {
       return L2CapChannelConnected.fromMap(sourceMap);
@@ -438,19 +438,19 @@ class FlutterBluePlus {
   static Future<int> listenL2CapChannel({
     bool secure = true,
   }) async {
-    var request = ListenL2CapChannelRequest(secure: secure);
+    var request = BmListenL2CapChannelRequest(secure: secure);
 
-    return await _invokeMethod(methodListenL2CapChannel, request.toMap())
-        .then((buffer) => ListenL2CapChannelResponse.fromMap(buffer))
+    return await _invokeMethod("listenL2CapChannel", request.toMap())
+        .then((buffer) => BmListenL2CapChannelResponse.fromMap(buffer))
         .then((p) => p.psm);
   }
 
   /// Closes the server socket with the provided [psm].
   /// This closes all open input/output streams to this L2Cap server.
   static Future<void> closeL2CapServer({required final int psm}) async {
-    var request = CloseL2CapServer(psm: psm);
+    var request = BmCloseL2CapServer(psm: psm);
 
-    return await _invokeMethod(methodCloseL2CapServer, request.toMap());
+    return await _invokeMethod("closeL2CapServer", request.toMap());
   }
 
   static Future<dynamic> _methodCallHandler(MethodCall call) async {
@@ -684,6 +684,16 @@ class FlutterBluePlus {
 
   @Deprecated('removed. read MIGRATION.md for simple alternatives')
   static Stream<ScanResult> scan() => throw Exception;
+}
+
+class L2CapChannelConnected {
+  final BluetoothDevice device;
+  final int psm;
+
+  L2CapChannelConnected.fromMap(Map<dynamic, dynamic> map)
+      : device = BluetoothDevice.fromProto(
+            BmBluetoothDevice.fromMap(map['bluetoothDevice'])),
+        psm = map['psm'];
 }
 
 /// Log levels for FlutterBlue
