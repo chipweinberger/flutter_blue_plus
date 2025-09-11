@@ -3,6 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 #import "FlutterBluePlusPlugin.h"
+#import <flutter_blue_plus/flutter_blue_plus-Swift.h>
 
 #define Log(LEVEL, FORMAT, ...) [self log:LEVEL format:@"[FBP-iOS] " FORMAT, ##__VA_ARGS__]
 
@@ -16,144 +17,6 @@ NSString * const CCCD = @"2902";
 @implementation ServicePair
 @end
 
-@interface L2CapServerInfo : NSObject
-@property (nonatomic) CBL2CAPPSM psm;
-@property (nonatomic) int readBufferSize;
-@property (nonatomic, strong) NSMutableArray<CBL2CAPChannel *> *openChannels;
-- (instancetype)initWithPsm:(CBL2CAPPSM)psm readBufferSize:(int)readBufferSize;
-- (void)addConnection:(CBL2CAPChannel *)l2CapChannel;
-- (void)readFromDeviceIdentifier:(NSString *)deviceIdentifier result:(FlutterResult)result;
-- (void)writeToDeviceIdentifier:(NSString *)deviceIdentifier payload:(NSData *)payload result:(FlutterResult)result;
-- (void)closeDeviceIdentifier:(NSString *)deviceIdentifier;
-- (void)closeAllConnections;
-@end
-
-@implementation L2CapServerInfo
-
-- (instancetype)initWithPsm:(CBL2CAPPSM)psm readBufferSize:(int)readBufferSize {
-    self = [super init];
-    if (self) {
-        _psm = psm;
-        _readBufferSize = readBufferSize > 0 ? readBufferSize : 50; // default buffer size
-        _openChannels = [[NSMutableArray alloc] init];
-    }
-    return self;
-}
-
-- (void)addConnection:(CBL2CAPChannel *)l2CapChannel {
-    [self.openChannels addObject:l2CapChannel];
-    [l2CapChannel.inputStream open];
-    [l2CapChannel.outputStream open];
-}
-
-- (void)readFromDeviceIdentifier:(NSString *)deviceIdentifier result:(FlutterResult)result {
-    NSUUID *deviceUUID = [[NSUUID alloc] initWithUUIDString:deviceIdentifier];
-    if (!deviceUUID) {
-        result([FlutterError errorWithCode:@"inputStreamReadFailed" 
-                                   message:@"Provided device identifier is no UUID." 
-                                   details:nil]);
-        return;
-    }
-    
-    CBL2CAPChannel *channelToRead = nil;
-    for (CBL2CAPChannel *channel in self.openChannels) {
-        if ([channel.peer.identifier isEqual:deviceUUID]) {
-            channelToRead = channel;
-            break;
-        }
-    }
-    
-    if (!channelToRead) {
-        result([FlutterError errorWithCode:@"noOpenL2CapChannelFound" 
-                                   message:@"No open channel found for device and psm" 
-                                   details:nil]);
-        return;
-    }
-    
-    uint8_t *readBuffer = malloc(self.readBufferSize);
-    NSInteger bytesRead = [channelToRead.inputStream read:readBuffer maxLength:self.readBufferSize];
-    
-    NSData *data = [NSData dataWithBytes:readBuffer length:bytesRead];
-    free(readBuffer);
-    
-    // See BmReadL2CapChannelResponse
-    NSDictionary *response = @{
-        @"remote_id": deviceIdentifier,
-        @"psm": @(self.psm),
-        @"bytes_read": @(bytesRead),
-        @"value": [FlutterStandardTypedData typedDataWithBytes:data]
-    };
-    
-    result(response);
-}
-
-- (void)writeToDeviceIdentifier:(NSString *)deviceIdentifier payload:(NSData *)payload result:(FlutterResult)result {
-    NSUUID *deviceUUID = [[NSUUID alloc] initWithUUIDString:deviceIdentifier];
-    if (!deviceUUID) {
-        result([FlutterError errorWithCode:@"outputStreamWriteFailed" 
-                                   message:@"Provided device identifier is no UUID." 
-                                   details:nil]);
-        return;
-    }
-    
-    CBL2CAPChannel *channelToWrite = nil;
-    for (CBL2CAPChannel *channel in self.openChannels) {
-        if ([channel.peer.identifier isEqual:deviceUUID]) {
-            channelToWrite = channel;
-            break;
-        }
-    }
-    
-    if (!channelToWrite) {
-        result([FlutterError errorWithCode:@"noOpenL2CapChannelFound" 
-                                   message:@"No open channel found for device and psm" 
-                                   details:nil]);
-        return;
-    }
-    
-    NSInteger bytesWritten = [channelToWrite.outputStream write:payload.bytes maxLength:payload.length];
-    NSLog(@"[FBP-iOS] Send %ld bytes.", (long)bytesWritten);
-    result(nil);
-}
-
-- (void)closeDeviceIdentifier:(NSString *)deviceIdentifier {
-    NSUUID *deviceUUID = [[NSUUID alloc] initWithUUIDString:deviceIdentifier];
-    if (!deviceUUID) {
-        NSLog(@"[FBP-iOS] Provided device identifier is no UUID: %@", deviceIdentifier);
-        return;
-    }
-    
-    CBL2CAPChannel *channelToClose = nil;
-    NSUInteger indexToRemove = NSNotFound;
-    for (NSUInteger i = 0; i < self.openChannels.count; i++) {
-        CBL2CAPChannel *channel = self.openChannels[i];
-        if ([channel.peer.identifier isEqual:deviceUUID]) {
-            channelToClose = channel;
-            indexToRemove = i;
-            break;
-        }
-    }
-    
-    if (channelToClose) {
-        [channelToClose.inputStream close];
-        [channelToClose.outputStream close];
-        [self.openChannels removeObjectAtIndex:indexToRemove];
-    } else {
-        NSLog(@"[FBP-iOS] No open channel found for device and psm");
-    }
-}
-
-- (void)closeAllConnections {
-    for (CBL2CAPChannel *channel in self.openChannels) {
-        [channel.inputStream close];
-        [channel.outputStream close];
-    }
-    [self.openChannels removeAllObjects];
-}
-
-
-@end
-
 @interface CBUUID (CBUUIDAdditionsFlutterBluePlus)
 - (NSString *)uuidStr;
 @end
@@ -165,14 +28,11 @@ NSString * const CCCD = @"2902";
 }
 @end
 
-@interface FlutterBluePlusPlugin () <CBPeripheralManagerDelegate>
+@interface FlutterBluePlusPlugin ()
 @property(nonatomic, retain) NSObject<FlutterPluginRegistrar> *registrar;
 @property(nonatomic, retain) FlutterMethodChannel *methodChannel;
 @property(nonatomic, retain) CBCentralManager *centralManager;
-@property(nonatomic, retain) CBPeripheralManager *peripheralManager;
-@property(nonatomic, strong) NSMutableArray<L2CapServerInfo *> *openL2CapChannelInfos;
-@property(nonatomic, copy) FlutterResult listenL2CapChannelCallback;
-@property(nonatomic, copy) FlutterResult closeL2CapChannelCallback;
+@property(nonatomic, retain) L2CapChannelManager *l2capManager;
 @property(nonatomic) NSMutableDictionary *knownPeripherals;
 @property(nonatomic) NSMutableDictionary *connectedPeripherals;
 @property(nonatomic) NSMutableDictionary *currentlyConnectingPeripherals;
@@ -206,7 +66,6 @@ NSString * const CCCD = @"2902";
     instance.writeDescs = [NSMutableDictionary new];
     instance.scanCounts = [NSMutableDictionary new];
     instance.showPowerAlert = @(YES);
-    instance.openL2CapChannelInfos = [NSMutableArray new];
 
     [registrar addMethodCallDelegate:instance channel:methodChannel];
 }
@@ -236,10 +95,10 @@ NSString * const CCCD = @"2902";
     {
         [LogUtil logWithLogLevel:LogLevelDebug message:[NSString stringWithFormat:@"handleMethodCall: %@", call.method]];
         
-        // initialize peripheral manager for L2CAP
+        // initialize l2cap channel manager
         if (@available(iOS 13.0, *)) {
-            if (self.peripheralManager == nil) {
-                self.peripheralManager = [[CBPeripheralManager alloc] initWithDelegate:self queue:nil];
+            if (self.l2capManager == nil) {
+                  self.l2capManager = [[L2CapChannelManager alloc] initWithDeviceConnectedMethodChannel:_methodChannel ];
             }
         }
 
@@ -918,154 +777,27 @@ NSString * const CCCD = @"2902";
                                     message:@"android only"
                                     details:NULL]);
         }
-        else if([@"listenL2CapChannel" isEqualToString:call.method]) {
-            if (@available(iOS 13.0, *)) {
-                if (self.peripheralManager.state != CBManagerStatePoweredOn) {
-                    result([FlutterError errorWithCode:@"bluetoothTurnedOff" 
-                                               message:@"peripheralManager is not in poweredOn state." 
-                                               details:nil]);
-                    return;
-                }
-                
-                // See BmListenL2CapChannelRequest
-                NSDictionary *data = (NSDictionary*)call.arguments;
-                BOOL secure = [data[@"secure"] boolValue];
-                
-                self.listenL2CapChannelCallback = result;
-                [self.peripheralManager publishL2CAPChannel:secure];
-            } else {
-                result([FlutterError errorWithCode:@"platform_not_supported" 
-                                           message:@"L2CAP channels require iOS 13.0 or later" 
-                                           details:nil]);
-            }
-        } else if([@"closeL2CapServer" isEqualToString:call.method]) {
-            if (@available(iOS 13.0, *)) {
-                // See BmCloseL2CapServer
-                NSDictionary *data = (NSDictionary*)call.arguments;
-                NSNumber *psmNumber = data[@"psm"];
-                CBL2CAPPSM psmToClose = [psmNumber unsignedShortValue];
-                
-                Log(LogLevelDebug, @"Closing L2CapChannel with PSM %d", psmToClose);
-                
-                // Find and remove the channel info
-                L2CapServerInfo *channelToClose = nil;
-                NSUInteger indexToRemove = NSNotFound;
-                for (NSUInteger i = 0; i < self.openL2CapChannelInfos.count; i++) {
-                    L2CapServerInfo *info = self.openL2CapChannelInfos[i];
-                    if (info.psm == psmToClose) {
-                        channelToClose = info;
-                        indexToRemove = i;
-                        break;
-                    }
-                }
-                
-                if (channelToClose) {
-                    [channelToClose closeAllConnections];
-                    [self.openL2CapChannelInfos removeObjectAtIndex:indexToRemove];
-                }
-                
-                self.closeL2CapChannelCallback = result;
-                [self.peripheralManager unpublishL2CAPChannel:psmToClose];
-            } else {
-                result([FlutterError errorWithCode:@"platform_not_supported" 
-                                           message:@"L2CAP channels require iOS 13.0 or later" 
-                                           details:nil]);
-            }
-        } else if([@"closeL2CapChannel" isEqualToString:call.method]) {
-            if (@available(iOS 13.0, *)) {
-                // See BmCloseL2CapChannelRequest
-                NSDictionary *data = (NSDictionary*)call.arguments;
-                NSNumber *psmNumber = data[@"psm"];
-                NSString *remoteId = data[@"remote_id"];
-                CBL2CAPPSM psm = [psmNumber unsignedShortValue];
-                
-                // Find the channel info
-                L2CapServerInfo *channelInfo = nil;
-                for (L2CapServerInfo *info in self.openL2CapChannelInfos) {
-                    if (info.psm == psm) {
-                        channelInfo = info;
-                        break;
-                    }
-                }
-                
-                if (!channelInfo) {
-                    Log(LogLevelDebug, @"No open channel found with PSM: %d", psm);
-                    result([FlutterError errorWithCode:@"noOpenL2CapChannelFound" 
-                                               message:@"No open channel found for device and psm" 
-                                               details:nil]);
-                    return;
-                }
-                
-                [channelInfo closeDeviceIdentifier:remoteId];
-                result(nil);
-            } else {
-                result([FlutterError errorWithCode:@"platform_not_supported" 
-                                           message:@"L2CAP channels require iOS 13.0 or later" 
-                                           details:nil]);
-            }
-        } else if([@"readL2CapChannel" isEqualToString:call.method]) {
-            if (@available(iOS 13.0, *)) {
-                // See BmReadL2CapChannelRequest
-                NSDictionary *data = (NSDictionary*)call.arguments;
-                NSNumber *psmNumber = data[@"psm"];
-                NSString *remoteId = data[@"remote_id"];
-                CBL2CAPPSM psm = [psmNumber unsignedShortValue];
-                
-                // Find the channel info
-                L2CapServerInfo *channelInfo = nil;
-                for (L2CapServerInfo *info in self.openL2CapChannelInfos) {
-                    if (info.psm == psm) {
-                        channelInfo = info;
-                        break;
-                    }
-                }
-                
-                if (!channelInfo) {
-                    Log(LogLevelDebug, @"No open channel found with PSM: %d", psm);
-                    result([FlutterError errorWithCode:@"noOpenL2CapChannelFound" 
-                                               message:@"No open channel found for device and psm" 
-                                               details:nil]);
-                    return;
-                }
-                
-                [channelInfo readFromDeviceIdentifier:remoteId result:result];
-            } else {
-                result([FlutterError errorWithCode:@"platform_not_supported" 
-                                           message:@"L2CAP channels require iOS 13.0 or later" 
-                                           details:nil]);
-            }
-        }  else if([@"writeL2CapChannel" isEqualToString:call.method]) {
-            if (@available(iOS 13.0, *)) {
-                // See BmWriteL2CapChannelRequest
-                NSDictionary *data = (NSDictionary*)call.arguments;
-                NSNumber *psmNumber = data[@"psm"];
-                NSString *remoteId = data[@"remote_id"];
-                FlutterStandardTypedData *typedData = data[@"value"];
-                CBL2CAPPSM psm = [psmNumber unsignedShortValue];
-                
-                // Find the channel info
-                L2CapServerInfo *channelInfo = nil;
-                for (L2CapServerInfo *info in self.openL2CapChannelInfos) {
-                    if (info.psm == psm) {
-                        channelInfo = info;
-                        break;
-                    }
-                }
-                
-                if (!channelInfo) {
-                    Log(LogLevelDebug, @"No open channel found with PSM: %d", psm);
-                    result([FlutterError errorWithCode:@"noOpenL2CapChannelFound" 
-                                               message:@"No open channel found for device and psm" 
-                                               details:nil]);
-                    return;
-                }
-                
-                [channelInfo writeToDeviceIdentifier:remoteId payload:typedData.data result:result];
-            } else {
-                result([FlutterError errorWithCode:@"platform_not_supported" 
-                                           message:@"L2CAP channels require iOS 13.0 or later" 
-                                           details:nil]);
-            }
+        else if([L2CapMethodNames.listenL2CapChannel isEqualToString:call.method]) {
+            NSDictionary *data = (NSDictionary*)call.arguments;
+            ListenL2CapChannelRequest *request = [[ListenL2CapChannelRequest alloc] initWithData:data];
+            [_l2capManager listenUsingL2capChannelWithRequest:request
+                                               resultCallback:result];
+        } else if([L2CapMethodNames.closeL2CapServer isEqualToString:call.method]) {
+            NSDictionary *data = (NSDictionary*)call.arguments;
+            CloseL2CapServer *request = [[CloseL2CapServer alloc] initWithData:data];
+            [_l2capManager closeServerSocketWithRequest:request resultCallback:result];
+        } else if([L2CapMethodNames.closeL2CapChannel isEqualToString:call.method]) {
+            NSDictionary *data = (NSDictionary*)call.arguments;
+            CloseL2CapChannelRequest *request = [[CloseL2CapChannelRequest alloc] initWithData:data];
+            [_l2capManager closeChannelWithRequest:request resultCallback:result];
+        } else if([L2CapMethodNames.readL2CapChannel isEqualToString:call.method]) {
+            NSDictionary *data = (NSDictionary*)call.arguments;
+            ReadL2CapChannelRequest *request = [[ReadL2CapChannelRequest alloc] initWithData:data];
+            [_l2capManager readWithRequest:request resultCallback:result];
+        }  else if([L2CapMethodNames.writeL2CapChannel isEqualToString:call.method]) {
+            NSDictionary *data = (NSDictionary*)call.arguments;
+            WriteL2CapChannelRequest *request = [[WriteL2CapChannelRequest alloc] initWithData:data];
+            [_l2capManager writeWithRequest:request resultCallback:result];
         }
         else
         {
@@ -2410,110 +2142,4 @@ NSString * const CCCD = @"2902";
     }
     return data;
 }
-
-///////////////////////////////////////////////////////////////////////////////////
-// ██       ██████   ██████   █████   ██████     ██████  ███████ ██      ███████ 
-// ██           ██  ██      ██   ██  ██   ██     ██   ██ ██      ██      ██      
-// ██       █████   ██      ███████  ██████      ██   ██ █████   ██      █████   
-// ██      ██       ██      ██   ██  ██          ██   ██ ██      ██      ██      
-// ███████ ███████   ██████ ██   ██  ██          ██████  ███████ ███████ ███████
-
-// MARK: - CBPeripheralManagerDelegate
-
-- (void)peripheralManagerDidUpdateState:(CBPeripheralManager *)peripheral API_AVAILABLE(ios(13.0)) {
-    Log(LogLevelDebug, @"peripheralManagerDidUpdateState called");
-}
-
-- (void)peripheralManager:(CBPeripheralManager *)peripheral 
-     didPublishL2CAPChannel:(CBL2CAPPSM)PSM 
-                      error:(NSError *)error API_AVAILABLE(ios(13.0)) {
-    if (error) {
-        NSLog(@"Published L2Cap channel failed: %@", error.localizedDescription);
-        Log(LogLevelError, @"Published L2Cap channel failed: %@", error.localizedDescription);
-        if (self.listenL2CapChannelCallback) {
-            self.listenL2CapChannelCallback([FlutterError errorWithCode:@"openL2CapChannelFailed" 
-                                                               message:error.localizedDescription 
-                                                               details:nil]);
-            self.listenL2CapChannelCallback = nil;
-        }
-    } else {
-        Log(LogLevelDebug, @"Published L2Cap channel with PSM %d successfully", PSM);
-        
-        // Create and store server info
-        L2CapServerInfo *serverInfo = [[L2CapServerInfo alloc] initWithPsm:PSM readBufferSize:50];
-        [self.openL2CapChannelInfos addObject:serverInfo];
-        
-        // Return response to Flutter
-        // See BmListenL2CapChannelResponse
-        NSDictionary *response = @{@"psm": @(PSM)};
-        if (self.listenL2CapChannelCallback) {
-            self.listenL2CapChannelCallback(response);
-            self.listenL2CapChannelCallback = nil;
-        }
-    }
-}
-
-- (void)peripheralManager:(CBPeripheralManager *)peripheral 
-   didUnpublishL2CAPChannel:(CBL2CAPPSM)PSM 
-                      error:(NSError *)error API_AVAILABLE(ios(13.0)) {
-    Log(LogLevelDebug, @"Closed L2Cap channel");
-    if (self.closeL2CapChannelCallback) {
-        if (error) {
-            self.closeL2CapChannelCallback([FlutterError errorWithCode:@"closeL2CapChannelFailed" 
-                                                               message:error.localizedDescription 
-                                                               details:nil]);
-        } else {
-            self.closeL2CapChannelCallback(nil);
-        }
-        self.closeL2CapChannelCallback = nil;
-    }
-}
-
-- (void)peripheralManager:(CBPeripheralManager *)peripheral 
-                didOpenL2CAPChannel:(CBL2CAPChannel *)channel 
-                      error:(NSError *)error API_AVAILABLE(ios(13.0)) {
-    Log(LogLevelDebug, @"L2Cap Channel opened");
-    
-    if (error) {
-        Log(LogLevelError, @"didOpenL2CapChannel returns error: %@", error.localizedDescription);
-    } else {
-        if (!channel) {
-            Log(LogLevelError, @"No L2Cap channel provided. This should not happen.");
-            return;
-        }
-        [self handleNewConnection:channel];
-    }
-}
-
-- (void)handleNewConnection:(CBL2CAPChannel *)channel API_AVAILABLE(ios(13.0)) {
-    // Find the server info for this PSM
-    L2CapServerInfo *channelInfo = nil;
-    for (L2CapServerInfo *info in self.openL2CapChannelInfos) {
-        if (info.psm == channel.psm) {
-            channelInfo = info;
-            break;
-        }
-    }
-    
-    if (!channelInfo) {
-        Log(LogLevelError, @"No server info found for PSM %d", channel.psm);
-        return;
-    }
-    
-    // Add the connection to the server info
-    [channelInfo addConnection:channel];
-    
-    // Notify Flutter about the new connection
-    // See BmDeviceConnectedToL2CapChannel
-    NSDictionary *event = @{
-        @"bluetoothDevice": @{
-            @"remote_id": [channel.peer.identifier UUIDString],
-            @"platform_name": [channel.peer.identifier UUIDString]
-        },
-        @"psm": @(channel.psm)
-    };
-    
-    [self.methodChannel invokeMethod:@"deviceConnected" arguments:event];
-}
-
 @end

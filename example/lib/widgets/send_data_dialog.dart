@@ -1,3 +1,4 @@
+import 'package:convert/convert.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
@@ -22,13 +23,7 @@ class _SendDataDialogState extends State<SendDataDialog> {
   }
 
   List<int> _hexStringToIntList(String str) {
-    final String sanitized = str.replaceAll(' ', '').toLowerCase();
-    final List<int> result = <int>[];
-    for (int i = 0; i < sanitized.length; i += 2) {
-      final String byteStr = sanitized.substring(i, i + 2);
-      result.add(int.parse(byteStr, radix: 16));
-    }
-    return result;
+    return hex.decode(str.replaceAll(' ', ''));
   }
 
   @override
@@ -41,7 +36,9 @@ class _SendDataDialogState extends State<SendDataDialog> {
         controller: _controller,
         decoration: InputDecoration(
             hintText: 'Enter data in hex',
-            errorText: hexReg.hasMatch(_controller.text) ? null : 'Please enter data in hex!'),
+            errorText: hexReg.hasMatch(_controller.text)
+                ? null
+                : 'Please enter data in hex!'),
         onChanged: (value) {
           setState(() {});
         },
