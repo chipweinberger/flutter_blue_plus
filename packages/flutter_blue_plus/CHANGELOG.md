@@ -1,5 +1,30 @@
-## 1.35.5
+## 1.35.11
+* **[Fix]** Android: fix main thread crash due to `waitIfBonding` (regression 1.35.8)
+* **[Fix]** Dart: clear `servicesList` after disconnection
 
+## 1.35.10
+* **[Fix]** Android: use user provided `compileSdkVersion`
+
+## 1.35.9
+* **[Fix]** Android: compile error, due to missing `toString` (regression 1.35.8)
+
+## 1.35.8
+* **[Fix]** Android: HotRestart must also cancel autoconnect
+* **[Fix]** Android: `waitIfBonding` was not waiting
+* **[Improve]** iOS/macOS: resolve warning in `resetInstanceIds`
+* **[Improve]** Android: show nicer `ensurePermissions` error for no Context
+
+## 1.35.7
+* **[Fix]** pubspec.yaml was broken, due to invalid constraints in web package (regression 1.35.6)
+
+## 1.35.6
+* **[Feature]** Support multiple characteristics with the same UUID
+* **[Fix]** iOS/macOS: fix crash on incorrect PIN
+* **[Fix]** Android: fix `onServicesReset`
+* **[Improve]** iOS/macOS: resolve integer conversion warnings
+* **[Improve]** Android: more HCI status codes
+
+## 1.35.5
 * **[Feature]** Android: added `androidCheckLocationServices` to `startScan` (#1199)
 
 ## 1.35.4
