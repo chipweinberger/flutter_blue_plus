@@ -14,14 +14,14 @@ class BluetoothCharacteristic {
 
   /// uniquely identifies this characteristic
   /// on the platform native side
-  final int? instanceId;
+  final int instanceId;
 
   BluetoothCharacteristic({
     required this.remoteId,
     required this.serviceUuid,
     required this.characteristicUuid,
     this.primaryServiceUuid,
-    this.instanceId,
+    this.instanceId = 0,
   });
 
   BluetoothCharacteristic.fromProto(BmBluetoothCharacteristic p)
@@ -70,7 +70,7 @@ class BluetoothCharacteristic {
           .where((p) => p.serviceUuid == serviceUuid)
           .where((p) => p.characteristicUuid == characteristicUuid)
           .where((p) => p.primaryServiceUuid == primaryServiceUuid)
-          .where((p) => p.instanceId == null || p.instanceId == instanceId)
+          .where((p) => p.instanceId == instanceId)
           .where((p) => p.success == true)
           .map((c) => c.value)
           .newStreamWithInitialValue(lastValue);
@@ -83,7 +83,7 @@ class BluetoothCharacteristic {
       .where((p) => p.serviceUuid == serviceUuid)
       .where((p) => p.characteristicUuid == characteristicUuid)
       .where((p) => p.primaryServiceUuid == primaryServiceUuid)
-      .where((p) => p.instanceId == null || p.instanceId == instanceId)
+      .where((p) => p.instanceId == instanceId)
       .where((p) => p.success == true)
       .map((c) => c.value);
 
@@ -133,7 +133,7 @@ class BluetoothCharacteristic {
           .where((p) => p.serviceUuid == request.serviceUuid)
           .where((p) => p.characteristicUuid == request.characteristicUuid)
           .where((p) => p.primaryServiceUuid == request.primaryServiceUuid)
-          .where((p) => p.instanceId == null || p.instanceId == request.instanceId);
+          .where((p) => p.instanceId == request.instanceId);
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmCharacteristicData> futureResponse = responseStream.first;
@@ -207,7 +207,7 @@ class BluetoothCharacteristic {
           .where((p) => p.serviceUuid == request.serviceUuid)
           .where((p) => p.characteristicUuid == request.characteristicUuid)
           .where((p) => p.primaryServiceUuid == request.primaryServiceUuid)
-          .where((p) => p.instanceId == null || p.instanceId == instanceId);
+          .where((p) => p.instanceId == instanceId);
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmCharacteristicData> futureResponse = responseStream.first;
@@ -273,7 +273,7 @@ class BluetoothCharacteristic {
           .where((p) => p.characteristicUuid == request.characteristicUuid)
           .where((p) => p.descriptorUuid == cccdUuid)
           .where((p) => p.primaryServiceUuid == request.primaryServiceUuid)
-          .where((p) => p.instanceId == null || p.instanceId == instanceId);
+          .where((p) => p.instanceId == instanceId);
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmDescriptorData> futureResponse = responseStream.first;
@@ -320,7 +320,7 @@ class BluetoothCharacteristic {
     if (_bmsvc != null) {
       for (var c in _bmsvc!.characteristics) {
         if (c.characteristicUuid == uuid) {
-          if (c.instanceId == null || c.instanceId == instanceId) {
+          if (c.instanceId == instanceId) {
             return c;
           }
         }

@@ -305,7 +305,7 @@ class BmBluetoothCharacteristic {
   final Guid serviceUuid;
   final Guid characteristicUuid;
   final Guid? primaryServiceUuid;
-  final int? instanceId;
+  final int instanceId;
   List<BmBluetoothDescriptor> descriptors;
   BmCharacteristicProperties properties;
 
@@ -314,7 +314,7 @@ class BmBluetoothCharacteristic {
     required this.serviceUuid,
     required this.characteristicUuid,
     required this.primaryServiceUuid,
-    this.instanceId,
+    required this.instanceId,
     required this.descriptors,
     required this.properties,
   });
@@ -344,7 +344,7 @@ class BmBluetoothDescriptor {
   final Guid characteristicUuid;
   final Guid descriptorUuid;
   final Guid? primaryServiceUuid;
-  final int? instanceId;
+  final int instanceId;
 
   BmBluetoothDescriptor({
     required this.remoteId,
@@ -352,7 +352,7 @@ class BmBluetoothDescriptor {
     required this.characteristicUuid,
     required this.descriptorUuid,
     required this.primaryServiceUuid,
-    this.instanceId,
+    required this.instanceId,
   });
 
   factory BmBluetoothDescriptor.fromMap(Map<dynamic, dynamic> json) {
@@ -449,14 +449,14 @@ class BmReadCharacteristicRequest {
   final Guid serviceUuid;
   final Guid characteristicUuid;
   final Guid? primaryServiceUuid;
-  final int? instanceId;
+  final int instanceId;
 
   BmReadCharacteristicRequest({
     required this.remoteId,
     required this.serviceUuid,
     required this.characteristicUuid,
     this.primaryServiceUuid,
-    this.instanceId,
+    required this.instanceId,
   });
 
   Map<dynamic, dynamic> toMap() {
@@ -480,7 +480,7 @@ class BmCharacteristicData {
   final bool success;
   final int errorCode;
   final String errorString;
-  final int? instanceId;
+  final int instanceId;
 
   BmCharacteristicData({
     required this.remoteId,
@@ -491,7 +491,7 @@ class BmCharacteristicData {
     required this.success,
     required this.errorCode,
     required this.errorString,
-    this.instanceId,
+    required this.instanceId,
   });
 
   factory BmCharacteristicData.fromMap(Map<dynamic, dynamic> json) {
@@ -515,7 +515,7 @@ class BmReadDescriptorRequest {
   final Guid characteristicUuid;
   final Guid descriptorUuid;
   final Guid? primaryServiceUuid;
-  final int? instanceId;
+  final int instanceId;
 
   BmReadDescriptorRequest({
     required this.remoteId,
@@ -523,7 +523,7 @@ class BmReadDescriptorRequest {
     required this.characteristicUuid,
     required this.descriptorUuid,
     required this.primaryServiceUuid,
-    this.instanceId,
+    required this.instanceId,
   });
 
   Map<dynamic, dynamic> toMap() {
@@ -549,7 +549,7 @@ class BmWriteCharacteristicRequest {
   final Guid serviceUuid;
   final Guid characteristicUuid;
   final Guid? primaryServiceUuid;
-  final int? instanceId;
+  final int instanceId;
   final BmWriteType writeType;
   final bool allowLongWrite;
   final List<int> value;
@@ -559,7 +559,7 @@ class BmWriteCharacteristicRequest {
     required this.serviceUuid,
     required this.characteristicUuid,
     required this.primaryServiceUuid,
-    this.instanceId,
+    required this.instanceId,
     required this.writeType,
     required this.allowLongWrite,
     required this.value,
@@ -585,7 +585,7 @@ class BmWriteDescriptorRequest {
   final Guid serviceUuid;
   final Guid characteristicUuid;
   final Guid? primaryServiceUuid;
-  final int? instanceId;
+  final int instanceId;
   final Guid descriptorUuid;
   final List<int> value;
 
@@ -595,7 +595,7 @@ class BmWriteDescriptorRequest {
     required this.characteristicUuid,
     required this.primaryServiceUuid,
     required this.descriptorUuid,
-    this.instanceId,
+    required this.instanceId,
     required this.value,
   });
 
@@ -619,7 +619,7 @@ class BmDescriptorData {
   final Guid characteristicUuid;
   final Guid descriptorUuid;
   final Guid? primaryServiceUuid;
-  final int? instanceId;
+  final int instanceId;
   final List<int> value;
   final bool success;
   final int errorCode;
@@ -631,7 +631,7 @@ class BmDescriptorData {
     required this.characteristicUuid,
     required this.descriptorUuid,
     required this.primaryServiceUuid,
-    this.instanceId,
+    required this.instanceId,
     required this.value,
     required this.success,
     required this.errorCode,
@@ -659,7 +659,7 @@ class BmSetNotifyValueRequest {
   final Guid serviceUuid;
   final Guid characteristicUuid;
   final Guid? primaryServiceUuid;
-  final int? instanceId;
+  final int instanceId;
   final bool forceIndications;
   final bool enable;
 
@@ -668,7 +668,7 @@ class BmSetNotifyValueRequest {
     required this.serviceUuid,
     required this.characteristicUuid,
     required this.primaryServiceUuid,
-    this.instanceId,
+    required this.instanceId,
     required this.forceIndications,
     required this.enable,
   });

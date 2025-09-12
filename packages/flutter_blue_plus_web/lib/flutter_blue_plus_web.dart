@@ -9,51 +9,13 @@ import 'package:web/web.dart' show Event;
 import 'src/html.dart';
 import 'src/web_bluetooth.dart';
 
-final Map<int, BluetoothRemoteGATTCharacteristic> _instanceIdToCharMap = {};
-final Map<BluetoothRemoteGATTCharacteristic, int> _charToInstanceIdMap = {};
-final Map<int, DeviceIdentifier> _instanceIdToDeviceMap = {};
-
-class _UniqueCharacteristicInstanceId {
-  static int _counter = 0;
-  static int next() => ++_counter;
-}
-
-void _resetInstanceIds(DeviceIdentifier remoteId) {
-  final toRemove = <int>[];
-  for (final e in _instanceIdToDeviceMap.entries) {
-    if (e.value == remoteId) toRemove.add(e.key);
-  }
-  for (final iid in toRemove) {
-    _instanceIdToCharMap.remove(iid);
-    _charToInstanceIdMap.removeWhere((k, v) => v == iid);
-    _instanceIdToDeviceMap.remove(iid);
-  }
-}
-
-int _addInstanceIdIfNeeded(
-  DeviceIdentifier remoteId,
-  BluetoothRemoteGATTCharacteristic c,
-) {
-  final existing = _charToInstanceIdMap[c];
-  if (existing != null) return existing;
-
-  final iid = _UniqueCharacteristicInstanceId.next();
-  _charToInstanceIdMap[c] = iid;
-  _instanceIdToCharMap[iid] = c;
-  _instanceIdToDeviceMap[iid] = remoteId;
-  return iid;
-}
-
-extension on BluetoothRemoteGATTCharacteristic {
-  int? get instanceId {
-    return _charToInstanceIdMap[this];
-  }
-}
-
 final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
   late final _characteristicValueChangedEventListener = _handleCharacteristicValueChanged.toJS;
 
   final _devices = <DeviceIdentifier, BluetoothDevice>{};
+
+  // for instanceIds
+  final _charCache = <DeviceIdentifier, Map<Guid, Map<Guid, List<BluetoothRemoteGATTCharacteristic>>>>{};
 
   final _onCharacteristicReceivedController = StreamController<BmCharacteristicData>.broadcast();
   final _onCharacteristicWrittenController = StreamController<BmCharacteristicData>.broadcast();
@@ -63,6 +25,28 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
   final _onDevicesChangedController = StreamController<List<BluetoothDevice>>.broadcast();
   final _onDiscoveredServicesController = StreamController<BmDiscoverServicesResult>.broadcast();
   final _onScanResponseController = StreamController<BmScanResponse>.broadcast();
+
+  BluetoothRemoteGATTCharacteristic _findCharacteristicOrThrow({
+    required DeviceIdentifier devId,
+    required Guid serviceUuid,
+    required Guid charUuid,
+    required int instanceId,
+  }) {
+    final list = _charCache[devId]?[serviceUuid]?[charUuid];
+    if (list == null || instanceId < 0 || instanceId >= list.length) {
+      throw Exception(
+        'Characteristic not found in cache: service=$serviceUuid char=$charUuid instanceId=$instanceId',
+      );
+    }
+    return list[instanceId];
+  }
+
+  int _instanceId(DeviceIdentifier devId, Guid serviceUuid, BluetoothRemoteGATTCharacteristic target) {
+    final list = _charCache[devId]?[serviceUuid]?[Guid(target.uuid)];
+    if (list == null) return 0;
+    final idx = list.indexWhere((c) => identical(c, target));
+    return idx >= 0 ? idx : 0;
+  }
 
   @override
   Stream<BmCharacteristicData> get onCharacteristicReceived {
@@ -161,6 +145,9 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
 
     gatt.disconnect();
 
+    // drop cache for this device to avoid stale entries
+    _charCache.remove(request.remoteId);
+
     _onConnectionStateChangedController.add(
       BmConnectionStateResponse(
         remoteId: device.remoteId,
@@ -196,27 +183,46 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
 
       final services = <BmBluetoothService>[];
 
-      List<BluetoothRemoteGATTService> primaryServices = (await gatt.getPrimaryServices().toDart).toDart;
+      // ensure dev map exists
+      final devMap = _charCache.putIfAbsent(device.remoteId, () {
+        return <Guid, Map<Guid, List<BluetoothRemoteGATTCharacteristic>>>{};
+      });
+
+      // Enumerate services and characteristics; build cache synchronously from discovery results
+      final primaryServices = (await gatt.getPrimaryServices().toDart).toDart;
       for (final s in primaryServices) {
         final characteristics = <BmBluetoothCharacteristic>[];
 
-        List<BluetoothRemoteGATTCharacteristic> chars = (await s.getCharacteristics().toDart).toDart;
+        // reset/ensure service map
+        final charsByUuid = devMap.putIfAbsent(Guid(s.uuid), () {
+          return <Guid, List<BluetoothRemoteGATTCharacteristic>>{};
+        });
 
-        _resetInstanceIds(request.remoteId);
+        // pull all chars and cache them grouped by char.uuid (order matters and defines instanceId)
+        final chars = (await s.getCharacteristics().toDart).toDart;
+
+        // rebuild for this service
+        charsByUuid
+          ..clear()
+          ..addAll(<Guid, List<BluetoothRemoteGATTCharacteristic>>{});
+        for (final c in chars) {
+          (charsByUuid[Guid(c.uuid)] ??= <BluetoothRemoteGATTCharacteristic>[]).add(c);
+        }
+
         for (final c in chars) {
           final descriptors = <BmBluetoothDescriptor>[];
-          _addInstanceIdIfNeeded(device.remoteId, c);
+
           try {
-            List<BluetoothRemoteGATTDescriptor> descs = (await c.getDescriptors().toDart).toDart;
+            final descs = (await c.getDescriptors().toDart).toDart;
             for (final d in descs) {
               descriptors.add(
                 BmBluetoothDescriptor(
                   remoteId: device.remoteId,
-                  serviceUuid: Guid.fromString(s.uuid),
-                  characteristicUuid: Guid.fromString(c.uuid),
-                  descriptorUuid: Guid.fromString(d.uuid),
+                  serviceUuid: Guid(s.uuid),
+                  characteristicUuid: Guid(c.uuid),
+                  descriptorUuid: Guid(d.uuid),
                   primaryServiceUuid: null,
-                  instanceId: c.instanceId,
+                  instanceId: _instanceId(device.remoteId, Guid(s.uuid), c),
                 ),
               );
             }
@@ -227,10 +233,10 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
           characteristics.add(
             BmBluetoothCharacteristic(
               remoteId: device.remoteId,
-              serviceUuid: Guid.fromString(s.uuid),
-              characteristicUuid: Guid.fromString(c.uuid),
+              serviceUuid: Guid(s.uuid),
+              characteristicUuid: Guid(c.uuid),
               primaryServiceUuid: null,
-              instanceId: c.instanceId,
+              instanceId: _instanceId(device.remoteId, Guid(s.uuid), c),
               descriptors: descriptors,
               properties: BmCharacteristicProperties(
                 broadcast: c.properties.broadcast,
@@ -250,7 +256,7 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
 
         services.add(
           BmBluetoothService(
-            serviceUuid: Guid.fromString(s.uuid),
+            serviceUuid: Guid(s.uuid),
             remoteId: device.remoteId,
             characteristics: characteristics,
             primaryServiceUuid: null,
@@ -327,12 +333,15 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
         );
       }
 
-      final service = await gatt.getPrimaryService(request.serviceUuid.str128.toJS).toDart;
+      final serviceUuid = request.serviceUuid.str128;
+      final charUuid = request.characteristicUuid.str128;
 
-      final characteristic = await _locateCharacteristic(
-        request.characteristicUuid,
-        service,
-        request.instanceId,
+      // Resolve characteristic from cache using instanceId
+      final characteristic = _findCharacteristicOrThrow(
+        devId: device.remoteId,
+        serviceUuid: Guid(serviceUuid),
+        charUuid: Guid(charUuid),
+        instanceId: request.instanceId,
       );
 
       final value = (await characteristic.readValue().toDart).toDart;
@@ -340,8 +349,8 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
       _onCharacteristicReceivedController.add(
         BmCharacteristicData(
           remoteId: device.remoteId,
-          serviceUuid: Guid.fromString(service.uuid),
-          characteristicUuid: Guid.fromString(characteristic.uuid),
+          serviceUuid: request.serviceUuid,
+          characteristicUuid: request.characteristicUuid,
           primaryServiceUuid: null,
           instanceId: request.instanceId,
           value: value.buffer.asUint8List(),
@@ -392,14 +401,18 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
         );
       }
 
-      final service = await gatt.getPrimaryService(request.serviceUuid.str128.toJS).toDart;
+      final serviceUuid = request.serviceUuid.str128;
+      final charUuid = request.characteristicUuid.str128;
 
-      final characteristic = await _locateCharacteristic(
-        request.characteristicUuid,
-        service,
-        request.instanceId,
+      // Resolve characteristic by instanceId from cache
+      final characteristic = _findCharacteristicOrThrow(
+        devId: device.remoteId,
+        serviceUuid: Guid(serviceUuid),
+        charUuid: Guid(charUuid),
+        instanceId: request.instanceId,
       );
 
+      // Then resolve descriptor by UUID on that characteristic
       final descriptor = await characteristic.getDescriptor(request.descriptorUuid.str128.toJS).toDart;
 
       final value = (await descriptor.readValue().toDart).toDart;
@@ -407,8 +420,8 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
       _onDescriptorReadController.add(
         BmDescriptorData(
           remoteId: device.remoteId,
-          serviceUuid: Guid.fromString(service.uuid),
-          characteristicUuid: Guid.fromString(characteristic.uuid),
+          serviceUuid: request.serviceUuid,
+          characteristicUuid: request.characteristicUuid,
           descriptorUuid: Guid.fromString(descriptor.uuid),
           primaryServiceUuid: null,
           instanceId: request.instanceId,
@@ -460,11 +473,15 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
       );
     }
 
-    final service = await gatt.getPrimaryService(request.serviceUuid.str128.toJS).toDart;
-    final characteristic = await _locateCharacteristic(
-      request.characteristicUuid,
-      service,
-      request.instanceId,
+    final serviceUuid = request.serviceUuid.str128;
+    final charUuid = request.characteristicUuid.str128;
+
+    // Resolve from cache using instanceId
+    final characteristic = _findCharacteristicOrThrow(
+      devId: device.remoteId,
+      serviceUuid: Guid(serviceUuid),
+      charUuid: Guid(charUuid),
+      instanceId: request.instanceId,
     );
 
     if (request.enable) {
@@ -483,7 +500,7 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
       );
     }
 
-    return false;
+    return true;
   }
 
   @override
@@ -613,12 +630,15 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
         );
       }
 
-      final service = await gatt.getPrimaryService(request.serviceUuid.str128.toJS).toDart;
+      final serviceUuid = request.serviceUuid.str128;
+      final charUuid = request.characteristicUuid.str128;
 
-      final characteristic = await _locateCharacteristic(
-        request.characteristicUuid,
-        service,
-        request.instanceId,
+      // Resolve characteristic from cache using instanceId
+      final characteristic = _findCharacteristicOrThrow(
+        devId: device.remoteId,
+        serviceUuid: Guid(serviceUuid),
+        charUuid: Guid(charUuid),
+        instanceId: request.instanceId,
       );
 
       if (request.writeType == BmWriteType.withResponse) {
@@ -630,14 +650,14 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
       _onCharacteristicWrittenController.add(
         BmCharacteristicData(
           remoteId: device.remoteId,
-          serviceUuid: Guid.fromString(service.uuid),
-          characteristicUuid: Guid.fromString(characteristic.uuid),
+          serviceUuid: request.serviceUuid,
+          characteristicUuid: request.characteristicUuid,
           primaryServiceUuid: null,
+          instanceId: request.instanceId,
           value: request.value,
           success: true,
           errorCode: 0,
           errorString: '',
-          instanceId: request.instanceId,
         ),
       );
 
@@ -682,12 +702,15 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
         );
       }
 
-      final service = await gatt.getPrimaryService(request.serviceUuid.str128.toJS).toDart;
+      final serviceUuid = request.serviceUuid.str128;
+      final charUuid = request.characteristicUuid.str128;
 
-      final characteristic = await _locateCharacteristic(
-        request.characteristicUuid,
-        service,
-        request.instanceId,
+      // Resolve characteristic by instanceId from cache
+      final characteristic = _findCharacteristicOrThrow(
+        devId: device.remoteId,
+        serviceUuid: Guid(serviceUuid),
+        charUuid: Guid(charUuid),
+        instanceId: request.instanceId,
       );
 
       final descriptor = await characteristic.getDescriptor(request.descriptorUuid.str128.toJS).toDart;
@@ -697,8 +720,8 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
       _onDescriptorWrittenController.add(
         BmDescriptorData(
           remoteId: device.remoteId,
-          serviceUuid: Guid.fromString(service.uuid),
-          characteristicUuid: Guid.fromString(characteristic.uuid),
+          serviceUuid: request.serviceUuid,
+          characteristicUuid: request.characteristicUuid,
           descriptorUuid: Guid.fromString(descriptor.uuid),
           primaryServiceUuid: null,
           instanceId: request.instanceId,
@@ -732,51 +755,25 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
 
   void _handleCharacteristicValueChanged(
     Event event,
-  ) async {
+  ) {
     final characteristic = event.target as BluetoothRemoteGATTCharacteristic;
+
+    final devId = characteristic.service.device.remoteId;
+    final svcUuid = characteristic.service.uuid;
 
     _onCharacteristicReceivedController.add(
       BmCharacteristicData(
-        remoteId: characteristic.service.device.remoteId,
-        serviceUuid: Guid.fromString(characteristic.service.uuid),
+        remoteId: devId,
+        serviceUuid: Guid.fromString(svcUuid),
         characteristicUuid: Guid.fromString(characteristic.uuid),
         primaryServiceUuid: null,
-        instanceId: characteristic.instanceId,
+        instanceId: _instanceId(devId, Guid(svcUuid), characteristic),
         value: characteristic.value?.toDart.buffer.asUint8List() ?? [],
         success: true,
         errorCode: 0,
         errorString: '',
       ),
     );
-  }
-
-  Future<BluetoothRemoteGATTCharacteristic> _locateCharacteristic(
-    Guid uuid,
-    BluetoothRemoteGATTService service,
-    int? instanceId,
-  ) async {
-    final chars = (await service.getCharacteristics().toDart).toDart;
-
-    // Find characteristic by UUID and instanceId, and if not found, use the first one
-    final characteristic = await _getCharacteristicFromArray(uuid.str128, chars, instanceId) ??
-        await service.getCharacteristic(uuid.str128.toJS).toDart;
-
-    return characteristic;
-  }
-
-  Future<BluetoothRemoteGATTCharacteristic?> _getCharacteristicFromArray(
-    String uuid,
-    List<BluetoothRemoteGATTCharacteristic> array,
-    int? instanceId,
-  ) async {
-    for (final c in array) {
-      if (c.uuid == uuid) {
-        if (instanceId == null || c.instanceId == instanceId) {
-          return c;
-        }
-      }
-    }
-    return null;
   }
 }
 

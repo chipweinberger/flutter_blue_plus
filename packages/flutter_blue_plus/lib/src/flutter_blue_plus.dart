@@ -544,7 +544,7 @@ class FlutterBluePlus {
       ]).listen((r) {
         if (r.success == true) {
           _lastChrs[r.remoteId] ??= {};
-          _lastChrs[r.remoteId]!["${r.serviceUuid}:${r.characteristicUuid}${r.instanceId ?? 'noinst'}"] = r.value;
+          _lastChrs[r.remoteId]!["${r.serviceUuid}:${r.characteristicUuid}${r.instanceId}"] = r.value;
         }
       });
     } on UnimplementedError {
@@ -559,7 +559,7 @@ class FlutterBluePlus {
         if (r.success == true) {
           _lastDescs[r.remoteId] ??= {};
           _lastDescs[r.remoteId]![
-              "${r.serviceUuid}:${r.characteristicUuid}:${r.descriptorUuid}:${r.instanceId ?? 'noinst'}"] = r.value;
+              "${r.serviceUuid}:${r.characteristicUuid}:${r.descriptorUuid}:${r.instanceId}"] = r.value;
         }
       });
     } on UnimplementedError {

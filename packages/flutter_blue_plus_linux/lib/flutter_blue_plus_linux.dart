@@ -4,65 +4,25 @@ import 'package:bluez/bluez.dart';
 import 'package:flutter_blue_plus_platform_interface/flutter_blue_plus_platform_interface.dart';
 import 'package:rxdart/rxdart.dart';
 
-final Map<int, BlueZGattCharacteristic> _instanceIdToCharMap = {};
-final Map<BlueZGattCharacteristic, int> _charToInstanceIdMap = {};
-final Map<int, DeviceIdentifier> _instanceIdToDeviceMap = {};
-
-class _UniqueCharacteristicInstanceId {
-  static int _counter = 0;
-
-  static int next() {
-    _counter++;
-    return _counter;
-  }
-}
-
-void _resetInstanceIds(DeviceIdentifier remoteId) {
-  List<int> instanceIdsToRemove = [];
-
-  for (final entry in _instanceIdToDeviceMap.entries) {
-    if (entry.value == remoteId) {
-      instanceIdsToRemove.add(entry.key);
-    }
-  }
-
-  for (final instanceId in instanceIdsToRemove) {
-    _instanceIdToCharMap.remove(instanceId);
-    _charToInstanceIdMap.removeWhere((key, value) => value == instanceId);
-    _instanceIdToDeviceMap.remove(instanceId);
-  }
-}
-
-int _addInstanceIdIfNeeded(
-  DeviceIdentifier remoteId,
-  BlueZGattCharacteristic characteristic,
-) {
-  // If we've already assigned an instanceId for this characteristic, reuse it.
-  final existing = _charToInstanceIdMap[characteristic];
-  if (existing != null) {
-    return existing;
-  }
-
-  // Otherwise, allocate a new one and populate all maps.
-  final instanceId = _UniqueCharacteristicInstanceId.next();
-  _charToInstanceIdMap[characteristic] = instanceId;
-  _instanceIdToCharMap[instanceId] = characteristic;
-  _instanceIdToDeviceMap[instanceId] = remoteId;
-  return instanceId;
-}
-
-extension on BlueZGattCharacteristic {
-  /// gets the instance id of the characteristic, unique
-  /// for one discovery session.
-  int? get instanceId => _charToInstanceIdMap[this];
-}
-
 extension on BlueZDevice {
   DeviceIdentifier get remoteId {
     return DeviceIdentifier(address);
   }
 }
 
+extension on BlueZGattCharacteristic {
+  int instanceId(BlueZGattService service) {
+    final target = Guid.fromBytes(uuid.value);
+    var idx = 0;
+    for (final c in service.characteristics) {
+      if (Guid.fromBytes(c.uuid.value) == target) {
+        if (identical(c, this)) return idx;
+        idx++;
+      }
+    }
+    return 0;
+  }
+}
 
 final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   final _client = BlueZClient();
@@ -154,6 +114,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
                           characteristic.uuid.value,
                         ),
                         primaryServiceUuid: null,
+                        instanceId: characteristic.instanceId(service),
                         value: characteristic.value,
                         success: true,
                         errorCode: 0,
@@ -391,7 +352,6 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
         },
       );
 
-      _resetInstanceIds(device.remoteId);
       _onDiscoveredServicesController.add(
         BmDiscoverServicesResult(
           remoteId: device.remoteId,
@@ -404,7 +364,6 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
                 remoteId: device.remoteId,
                 characteristics: service.characteristics.map(
                   (characteristic) {
-                    _addInstanceIdIfNeeded(device.remoteId, characteristic);
                     return BmBluetoothCharacteristic(
                       remoteId: device.remoteId,
                       serviceUuid: Guid.fromBytes(
@@ -414,7 +373,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
                         characteristic.uuid.value,
                       ),
                       primaryServiceUuid: null,
-                      instanceId: characteristic.instanceId,
+                      instanceId: characteristic.instanceId(service),
                       descriptors: characteristic.descriptors.map(
                         (descriptor) {
                           return BmBluetoothDescriptor(
@@ -429,7 +388,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
                               descriptor.uuid.value,
                             ),
                             primaryServiceUuid: null,
-                            instanceId: characteristic.instanceId,
+                            instanceId: characteristic.instanceId(service),
                           );
                         },
                       ).toList(),
@@ -614,7 +573,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
           );
 
           return uuid == request.characteristicUuid &&
-              (characteristic.instanceId == null || characteristic.instanceId == request.instanceId);
+              (characteristic.instanceId(service) == request.instanceId);
         },
       );
 
@@ -630,7 +589,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
             characteristic.uuid.value,
           ),
           primaryServiceUuid: null,
-          instanceId: characteristic.instanceId,
+          instanceId: characteristic.instanceId(service),
           value: value,
           success: true,
           errorCode: 0,
@@ -688,7 +647,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
           );
 
           return uuid == request.characteristicUuid &&
-              (characteristic.instanceId == null || characteristic.instanceId == request.instanceId);
+              (characteristic.instanceId(service) == request.instanceId);
         },
       );
 
@@ -702,7 +661,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
         },
       );
 
-      final value = await characteristic.readValue();
+      final value = await descriptor.readValue();
 
       _onDescriptorReadController.add(
         BmDescriptorData(
@@ -717,7 +676,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
             descriptor.uuid.value,
           ),
           primaryServiceUuid: null,
-          instanceId: characteristic.instanceId,
+          instanceId: characteristic.instanceId(service),
           value: value,
           success: true,
           errorCode: 0,
@@ -825,7 +784,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
         );
 
         return uuid == request.characteristicUuid &&
-            (characteristic.instanceId == null || characteristic.instanceId == request.instanceId);
+            (characteristic.instanceId(service) == request.instanceId);
       },
     );
 
@@ -950,7 +909,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
           );
 
           return uuid == request.characteristicUuid &&
-              (characteristic.instanceId == null || characteristic.instanceId == request.instanceId);
+              (characteristic.instanceId(service) == request.instanceId);
         },
       );
 
@@ -971,7 +930,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
             characteristic.uuid.value,
           ),
           primaryServiceUuid: null,
-          instanceId: characteristic.instanceId,
+          instanceId: characteristic.instanceId(service),
           value: request.value,
           success: true,
           errorCode: 0,
@@ -1029,7 +988,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
           );
 
           return uuid == request.characteristicUuid &&
-              (characteristic.instanceId == null || characteristic.instanceId == request.instanceId);
+              (characteristic.instanceId(service) == request.instanceId);
         },
       );
 
@@ -1058,7 +1017,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
             descriptor.uuid.value,
           ),
           primaryServiceUuid: null,
-          instanceId: characteristic.instanceId,
+          instanceId: characteristic.instanceId(service),
           value: request.value,
           success: true,
           errorCode: 0,

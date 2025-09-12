@@ -14,7 +14,7 @@ class BluetoothDescriptor {
   /// uniquely identifies the characteristic
   /// this descriptor is associated with
   /// on the platform native side
-  final int? instanceId;
+  final int instanceId;
 
   BluetoothDescriptor({
     required this.remoteId,
@@ -22,7 +22,7 @@ class BluetoothDescriptor {
     required this.characteristicUuid,
     required this.descriptorUuid,
     this.primaryServiceUuid,
-    this.instanceId,
+    this.instanceId = 0,
   });
 
   BluetoothDescriptor.fromProto(BmBluetoothDescriptor p)
@@ -44,7 +44,7 @@ class BluetoothDescriptor {
   ///   - anytime `write()` is called
   ///   - when the device is disconnected it is cleared
   List<int> get lastValue {
-    String key = "$serviceUuid:$characteristicUuid:$descriptorUuid:${instanceId ?? 'noinst'}";
+    String key = "$serviceUuid:$characteristicUuid:$descriptorUuid:$instanceId";
     return FlutterBluePlus._lastDescs[remoteId]?[key] ?? [];
   }
 
@@ -59,7 +59,7 @@ class BluetoothDescriptor {
       .where((p) => p.serviceUuid == serviceUuid)
       .where((p) => p.descriptorUuid == descriptorUuid)
       .where((p) => p.primaryServiceUuid == primaryServiceUuid)
-      .where((p) => p.instanceId == null || p.instanceId == instanceId)
+      .where((p) => p.instanceId == instanceId)
       .where((p) => p.success == true)
       .map((p) => p.value)
       .newStreamWithInitialValue(lastValue);
@@ -72,7 +72,7 @@ class BluetoothDescriptor {
       .where((p) => p.serviceUuid == serviceUuid)
       .where((p) => p.descriptorUuid == descriptorUuid)
       .where((p) => p.primaryServiceUuid == primaryServiceUuid)
-      .where((p) => p.instanceId == null || p.instanceId == instanceId)
+      .where((p) => p.instanceId == instanceId)
       .where((p) => p.success == true)
       .map((p) => p.value);
 
@@ -107,7 +107,7 @@ class BluetoothDescriptor {
           .where((p) => p.characteristicUuid == request.characteristicUuid)
           .where((p) => p.descriptorUuid == request.descriptorUuid)
           .where((p) => p.primaryServiceUuid == request.primaryServiceUuid)
-          .where((p) => p.instanceId == null || p.instanceId == instanceId);
+          .where((p) => p.instanceId == instanceId);
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmDescriptorData> futureResponse = responseStream.first;
@@ -163,7 +163,7 @@ class BluetoothDescriptor {
           .where((p) => p.characteristicUuid == request.characteristicUuid)
           .where((p) => p.descriptorUuid == request.descriptorUuid)
           .where((p) => p.primaryServiceUuid == request.primaryServiceUuid)
-          .where((p) => p.instanceId == null || p.instanceId == instanceId);
+          .where((p) => p.instanceId == instanceId);
 
       // Start listening now, before invokeMethod, to ensure we don't miss the response
       Future<BmDescriptorData> futureResponse = responseStream.first;
