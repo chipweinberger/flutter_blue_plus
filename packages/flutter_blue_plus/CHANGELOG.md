@@ -1,3 +1,6 @@
+## 1.36.0
+* **[Fix]** characteristic not found, due to `instanceId` bug (regression 1.35.6)
+
 ## 1.35.12
 * **[Improve]** Dart: add `pubspec_overrides.yaml` for easier local development
 
@@ -6,7 +9,7 @@
 * **[Fix]** Dart: clear `servicesList` after disconnection
 
 ## 1.35.10
-* **[Fix]** Android: use user provided `compileSdkVersion`
+* **[Improve]** Android: use user provided `compileSdkVersion`
 
 ## 1.35.9
 * **[Fix]** Android: compile error, due to missing `toString` (regression 1.35.8)
@@ -14,7 +17,7 @@
 ## 1.35.8
 * **[Fix]** Android: HotRestart must also cancel autoconnect
 * **[Fix]** Android: `waitIfBonding` was not waiting
-* **[Improve]** iOS/macOS: resolve warning in `resetInstanceIds`
+* **[Fix]** iOS/macOS: fix warnings in `resetInstanceIds` (regression 1.35.6)
 * **[Improve]** Android: show nicer `ensurePermissions` error for no Context
 
 ## 1.35.7
@@ -24,7 +27,7 @@
 * **[Feature]** Support multiple characteristics with the same UUID
 * **[Fix]** iOS/macOS: fix crash on incorrect PIN
 * **[Fix]** Android: fix `onServicesReset`
-* **[Improve]** iOS/macOS: resolve integer conversion warnings
+* **[Fix]** iOS/macOS: fix integer conversion warnings
 * **[Improve]** Android: more HCI status codes
 
 ## 1.35.5
