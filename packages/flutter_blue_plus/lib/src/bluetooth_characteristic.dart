@@ -12,8 +12,12 @@ class BluetoothCharacteristic {
   final Guid characteristicUuid;
   final Guid? primaryServiceUuid;
 
-  /// uniquely identifies this characteristic
-  /// on the platform native side
+  /// typically 0. If set, it distinguishes duplicate  
+  /// characteristics within the same service (rare), 
+  ///  - iOS: index within `CBService` -> characteristics
+  ///  - Android: uses `getInstanceId()` directly
+  ///  - Linux: index of chr during discovery
+  ///  - Web: index within `BlueZGattService` -> characteristics
   final int instanceId;
 
   BluetoothCharacteristic({

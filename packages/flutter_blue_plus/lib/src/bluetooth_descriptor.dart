@@ -11,9 +11,7 @@ class BluetoothDescriptor {
   final Guid descriptorUuid;
   final Guid? primaryServiceUuid;
 
-  /// uniquely identifies the characteristic
-  /// this descriptor is associated with
-  /// on the platform native side
+  /// see `BluetoothCharacteristic.instanceId`
   final int instanceId;
 
   BluetoothDescriptor({
