@@ -1,3 +1,6 @@
+## 1.36.1
+* **[Fix]** `onValueReceived` no longer emits data after reconnection #1262 (regression 1.35.6)
+
 ## 1.36.0
 * **[Fix]** characteristic not found, due to `instanceId` bug (regression 1.35.6)
 
