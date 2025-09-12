@@ -4,6 +4,66 @@ import 'package:bluez/bluez.dart';
 import 'package:flutter_blue_plus_platform_interface/flutter_blue_plus_platform_interface.dart';
 import 'package:rxdart/rxdart.dart';
 
+final Map<int, BlueZGattCharacteristic> _instanceIdToCharMap = {};
+final Map<BlueZGattCharacteristic, int> _charToInstanceIdMap = {};
+final Map<int, DeviceIdentifier> _instanceIdToDeviceMap = {};
+
+class _UniqueCharacteristicInstanceId {
+  static int _counter = 0;
+
+  static int next() {
+    _counter++;
+    return _counter;
+  }
+}
+
+void _resetInstanceIds(DeviceIdentifier remoteId) {
+  List<int> instanceIdsToRemove = [];
+
+  for (final entry in _instanceIdToDeviceMap.entries) {
+    if (entry.value == remoteId) {
+      instanceIdsToRemove.add(entry.key);
+    }
+  }
+
+  for (final instanceId in instanceIdsToRemove) {
+    _instanceIdToCharMap.remove(instanceId);
+    _charToInstanceIdMap.removeWhere((key, value) => value == instanceId);
+    _instanceIdToDeviceMap.remove(instanceId);
+  }
+}
+
+int _addInstanceIdIfNeeded(
+  DeviceIdentifier remoteId,
+  BlueZGattCharacteristic characteristic,
+) {
+  // If we've already assigned an instanceId for this characteristic, reuse it.
+  final existing = _charToInstanceIdMap[characteristic];
+  if (existing != null) {
+    return existing;
+  }
+
+  // Otherwise, allocate a new one and populate all maps.
+  final instanceId = _UniqueCharacteristicInstanceId.next();
+  _charToInstanceIdMap[characteristic] = instanceId;
+  _instanceIdToCharMap[instanceId] = characteristic;
+  _instanceIdToDeviceMap[instanceId] = remoteId;
+  return instanceId;
+}
+
+extension on BlueZGattCharacteristic {
+  /// gets the instance id of the characteristic, unique
+  /// for one discovery session.
+  int? get instanceId => _charToInstanceIdMap[this];
+}
+
+extension on BlueZDevice {
+  DeviceIdentifier get remoteId {
+    return DeviceIdentifier(address);
+  }
+}
+
+
 final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   final _client = BlueZClient();
 
@@ -331,7 +391,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
         },
       );
 
-      resetInstanceIds(device.remoteId);
+      _resetInstanceIds(device.remoteId);
       _onDiscoveredServicesController.add(
         BmDiscoverServicesResult(
           remoteId: device.remoteId,
@@ -344,10 +404,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
                 remoteId: device.remoteId,
                 characteristics: service.characteristics.map(
                   (characteristic) {
-                    int instanceId = _UniqueCharacteristicInstanceId.next();
-                    instanceIdToCharMap[instanceId] = characteristic;
-                    charToInstanceIdMap[characteristic] = instanceId;
-
+                    _addInstanceIdIfNeeded(device.remoteId, characteristic);
                     return BmBluetoothCharacteristic(
                       remoteId: device.remoteId,
                       serviceUuid: Guid.fromBytes(
@@ -1115,46 +1172,3 @@ extension on BlueZClient {
   }
 }
 
-extension on BlueZDevice {
-  DeviceIdentifier get remoteId {
-    return DeviceIdentifier(address);
-  }
-}
-
-extension on BlueZGattCharacteristic {
-  /// gets the instance id of the characteristic, unique
-  /// for one discovery session.
-  int? get instanceId => charToInstanceIdMap[this];
-}
-
-class _UniqueCharacteristicInstanceId {
-  static int _counter = 0;
-
-  static int next() {
-    _counter++;
-    return _counter;
-  }
-}
-
-/// Resets the instance IDs for all characteristics for a specific device,
-/// so we do not keep incrementing the map for multiple
-/// calls to discoverServices.
-void resetInstanceIds(DeviceIdentifier discoveredDevice) {
-  List<int> instanceIdsToRemove = [];
-
-  for (final entry in instanceIdToDeviceMap.entries) {
-    if (entry.value == discoveredDevice.str) {
-      instanceIdsToRemove.add(entry.key);
-    }
-  }
-
-  for (final instanceId in instanceIdsToRemove) {
-    instanceIdToCharMap.remove(instanceId);
-    charToInstanceIdMap.removeWhere((key, value) => value == instanceId);
-    instanceIdToDeviceMap.remove(instanceId);
-  }
-}
-
-Map<int, BlueZGattCharacteristic> instanceIdToCharMap = {};
-Map<BlueZGattCharacteristic, int> charToInstanceIdMap = {};
-Map<int, String> instanceIdToDeviceMap = {};

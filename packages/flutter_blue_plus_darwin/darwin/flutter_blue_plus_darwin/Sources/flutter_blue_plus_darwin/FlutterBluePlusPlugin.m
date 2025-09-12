@@ -8,8 +8,8 @@
 #define Log(LEVEL, FORMAT, ...) [self log:LEVEL format:@"[FBP-iOS] " FORMAT, ##__VA_ARGS__]
 
 NSString * const CCCD = @"2902";
-const NSMutableDictionary<NSNumber *, CBCharacteristic *> *instanceIdToCharMap = nil;
-NSMutableDictionary<NSValue *, NSNumber *> *charToInstanceIdMap = nil;
+static NSMutableDictionary<NSNumber *, CBCharacteristic *> *instanceIdToCharMap = nil;
+static NSMutableDictionary<NSValue *, NSNumber *> *charToInstanceIdMap = nil;
 
 __attribute__((constructor))
 static void initializeInstanceIdToCharMap(void) {
@@ -1405,11 +1405,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     [self.characteristicsToDiscover addObjectsFromArray:service.characteristics];
     for (CBCharacteristic *c in [service characteristics])
     {
-        int instanceId = [UniqueCharacteristicInstanceId next];
-        instanceIdToCharMap[@(instanceId)] = c;
+        NSNumber *instanceId = [self addInstanceIdIfNeeded:c];
+        instanceIdToCharMap[instanceId] = c;
 
         NSValue *key = [NSValue valueWithNonretainedObject:c];
-        charToInstanceIdMap[key] = @(instanceId);
+        charToInstanceIdMap[key] = instanceId;
 
         Log(LDEBUG, @"    chr: %@", [c.UUID uuidStr]);
         [peripheral discoverDescriptorsForCharacteristic:c];
@@ -2258,17 +2258,29 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     return charToInstanceIdMap[key];
 }
 
-- (void)resetInstanceIds:(NSString *)discoveredDeviceId {
-    NSMutableArray<NSNumber *> *idsToRemove = [NSMutableArray array];
-    NSMutableArray<NSValue *>  *chrsToRemove    = [NSMutableArray array];
+// Create once per *pointer*
+// reuse if we've seen this pointer before.
+- (NSNumber *)addInstanceIdIfNeeded:(CBCharacteristic *)characteristic
+{
+    NSValue *cc = [NSValue valueWithNonretainedObject:characteristic];
+    NSNumber *iid = [charToInstanceIdMap objectForKey:cc];
+    if (iid) return iid; // same pointer => same id
+    iid = @([UniqueCharacteristicInstanceId next]);
+    instanceIdToCharMap[iid] = characteristic;
+    [charToInstanceIdMap setObject:iid forKey:cc];
+    return iid;
+}
 
+- (void)resetInstanceIds:(NSString *)discoveredDeviceId
+{ 
+    NSMutableArray<NSNumber *> *idsToRemove = [NSMutableArray array];
+    NSMutableArray<NSValue *> *chrsToRemove = [NSMutableArray array];
     [instanceIdToCharMap enumerateKeysAndObjectsUsingBlock:^(NSNumber *iid, CBCharacteristic *chr, BOOL *stop) {
         if ([[chr.service.peripheral.identifier UUIDString] isEqualToString:discoveredDeviceId]) {
-            [idsToRemove addObject:iid];
-            [chrsToRemove addObject:[NSValue valueWithNonretainedObject:chr]];
-        }
-    }];
-
+            [idsToRemove addObject:iid]; 
+            [chrsToRemove addObject:[NSValue valueWithNonretainedObject:chr]]; 
+        } 
+    }]; 
     [instanceIdToCharMap removeObjectsForKeys:idsToRemove];
     [charToInstanceIdMap removeObjectsForKeys:chrsToRemove];
 }

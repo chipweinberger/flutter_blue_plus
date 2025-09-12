@@ -9,6 +9,47 @@ import 'package:web/web.dart' show Event;
 import 'src/html.dart';
 import 'src/web_bluetooth.dart';
 
+final Map<int, BluetoothRemoteGATTCharacteristic> _instanceIdToCharMap = {};
+final Map<BluetoothRemoteGATTCharacteristic, int> _charToInstanceIdMap = {};
+final Map<int, DeviceIdentifier> _instanceIdToDeviceMap = {};
+
+class _UniqueCharacteristicInstanceId {
+  static int _counter = 0;
+  static int next() => ++_counter;
+}
+
+void _resetInstanceIds(DeviceIdentifier remoteId) {
+  final toRemove = <int>[];
+  for (final e in _instanceIdToDeviceMap.entries) {
+    if (e.value == remoteId) toRemove.add(e.key);
+  }
+  for (final iid in toRemove) {
+    _instanceIdToCharMap.remove(iid);
+    _charToInstanceIdMap.removeWhere((k, v) => v == iid);
+    _instanceIdToDeviceMap.remove(iid);
+  }
+}
+
+int _addInstanceIdIfNeeded(
+  DeviceIdentifier remoteId,
+  BluetoothRemoteGATTCharacteristic c,
+) {
+  final existing = _charToInstanceIdMap[c];
+  if (existing != null) return existing;
+
+  final iid = _UniqueCharacteristicInstanceId.next();
+  _charToInstanceIdMap[c] = iid;
+  _instanceIdToCharMap[iid] = c;
+  _instanceIdToDeviceMap[iid] = remoteId;
+  return iid;
+}
+
+extension on BluetoothRemoteGATTCharacteristic {
+  int? get instanceId {
+    return _charToInstanceIdMap[this];
+  }
+}
+
 final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
   late final _characteristicValueChangedEventListener = _handleCharacteristicValueChanged.toJS;
 
@@ -161,15 +202,10 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
 
         List<BluetoothRemoteGATTCharacteristic> chars = (await s.getCharacteristics().toDart).toDart;
 
-        resetInstanceIds(request.remoteId);
+        _resetInstanceIds(request.remoteId);
         for (final c in chars) {
           final descriptors = <BmBluetoothDescriptor>[];
-
-          int instanceId = _UniqueCharacteristicInstanceId.next();
-          instanceIdToCharMap[instanceId] = c;
-          charToInstanceIdMap[c] = instanceId;
-          instanceIdToDeviceMap[instanceId] = device.remoteId.str;
-
+          _addInstanceIdIfNeeded(device.remoteId, c);
           try {
             List<BluetoothRemoteGATTDescriptor> descs = (await c.getDescriptors().toDart).toDart;
             for (final d in descs) {
@@ -749,41 +785,3 @@ extension on BluetoothDevice {
     return DeviceIdentifier(id);
   }
 }
-
-extension on BluetoothRemoteGATTCharacteristic {
-  int? get instanceId {
-    return charToInstanceIdMap[this];
-  }
-}
-
-class _UniqueCharacteristicInstanceId {
-  static int _counter = 0;
-
-  static int next() {
-    _counter++;
-    return _counter;
-  }
-}
-
-/// Resets the instance IDs for all characteristics for a specific device,
-/// so we do not keep incrementing the map for multiple
-/// calls to discoverServices.
-void resetInstanceIds(DeviceIdentifier discoveredDevice) {
-  List<int> instanceIdsToRemove = [];
-
-  for (final entry in instanceIdToDeviceMap.entries) {
-    if (entry.value == discoveredDevice.str) {
-      instanceIdsToRemove.add(entry.key);
-    }
-  }
-
-  for (final instanceId in instanceIdsToRemove) {
-    instanceIdToCharMap.remove(instanceId);
-    charToInstanceIdMap.removeWhere((key, value) => value == instanceId);
-    instanceIdToDeviceMap.remove(instanceId);
-  }
-}
-
-Map<int, BluetoothRemoteGATTCharacteristic> instanceIdToCharMap = {};
-Map<BluetoothRemoteGATTCharacteristic, int> charToInstanceIdMap = {};
-Map<int, String> instanceIdToDeviceMap = {};
