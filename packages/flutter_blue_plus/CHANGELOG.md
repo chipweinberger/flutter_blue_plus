@@ -1,3 +1,6 @@
+## 1.36.2
+* **[Fix]** `lastValue` was broken (regression 1.35.6)
+
 ## 1.36.1
 * **[Fix]** `onValueReceived` no longer emits data after reconnection #1262 (regression 1.35.6)
 
