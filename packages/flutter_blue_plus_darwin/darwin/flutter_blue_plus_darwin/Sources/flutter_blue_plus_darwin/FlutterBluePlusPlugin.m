@@ -450,9 +450,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // See BmReadCharacteristicRequest
             NSDictionary *args = (NSDictionary*)call.arguments;
             NSString  *remoteId           = args[@"remote_id"];
+            NSString  *primaryServiceUuid = args[@"primary_service_uuid"];
             NSString  *serviceUuid        = args[@"service_uuid"];
             NSString  *characteristicUuid = args[@"characteristic_uuid"];
-            NSString  *primaryServiceUuid = args[@"primary_service_uuid"];
             NSNumber  *instanceId         = args[@"instance_id"];
 
             // Find peripheral
@@ -467,8 +467,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSError *error = nil;
             CBCharacteristic *characteristic = [self locateCharacteristic:characteristicUuid
                                                                peripheral:peripheral
-                                                              serviceUuid:serviceUuid
                                                        primaryServiceUuid:primaryServiceUuid
+                                                              serviceUuid:serviceUuid
                                                                instanceId:instanceId
                                                                     error:&error];
             if (characteristic == nil) {
@@ -493,9 +493,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // See BmWriteCharacteristicRequest
             NSDictionary *args = (NSDictionary*)call.arguments;
             NSString  *remoteId           = args[@"remote_id"];
+            NSString  *primaryServiceUuid = args[@"primary_service_uuid"];
             NSString  *serviceUuid        = args[@"service_uuid"];
             NSString  *characteristicUuid = args[@"characteristic_uuid"];
-            NSString  *primaryServiceUuid = args[@"primary_service_uuid"];
             NSNumber  *instanceId         = args[@"instance_id"];
             NSNumber  *writeTypeNumber    = args[@"write_type"];
             NSNumber  *allowLongWrite     = args[@"allow_long_write"];
@@ -540,8 +540,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSError *error = nil;
             CBCharacteristic *characteristic = [self locateCharacteristic:characteristicUuid
                                                                peripheral:peripheral
-                                                              serviceUuid:serviceUuid
                                                        primaryServiceUuid:primaryServiceUuid
+                                                              serviceUuid:serviceUuid
                                                                instanceId:instanceId
                                                                     error:&error];
 
@@ -586,11 +586,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // See BmReadDescriptorRequest
             NSDictionary *args = (NSDictionary*)call.arguments;
             NSString  *remoteId                 = args[@"remote_id"];
+            NSString  *primaryServiceUuid       = args[@"primary_service_uuid"];
             NSString  *serviceUuid              = args[@"service_uuid"];
             NSString  *characteristicUuid       = args[@"characteristic_uuid"];
-            NSString  *descriptorUuid           = args[@"descriptor_uuid"];
-            NSString  *primaryServiceUuid       = args[@"primary_service_uuid"];
             NSNumber  *instanceId               = args[@"instance_id"];
+            NSString  *descriptorUuid           = args[@"descriptor_uuid"];
 
             // Find peripheral
             CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
@@ -604,8 +604,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSError *error = nil;
             CBCharacteristic *characteristic = [self locateCharacteristic:characteristicUuid
                                                                peripheral:peripheral
-                                                              serviceUuid:serviceUuid
                                                        primaryServiceUuid:primaryServiceUuid
+                                                              serviceUuid:serviceUuid
                                                                instanceId:instanceId
                                                                     error:&error];
 
@@ -630,11 +630,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // See BmWriteDescriptorRequest
             NSDictionary *args = (NSDictionary*)call.arguments;
             NSString  *remoteId           = args[@"remote_id"];
+            NSString  *primaryServiceUuid = args[@"primary_service_uuid"];
             NSString  *serviceUuid        = args[@"service_uuid"];
             NSString  *characteristicUuid = args[@"characteristic_uuid"];
-            NSString  *descriptorUuid     = args[@"descriptor_uuid"];
-            NSString  *primaryServiceUuid = args[@"primary_service_uuid"];
             NSNumber  *instanceId         = args[@"instance_id"];
+            NSString  *descriptorUuid     = args[@"descriptor_uuid"];
             NSData    *value              = [args[@"value"] data];
 
             // Find peripheral
@@ -659,8 +659,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSError *error = nil;
             CBCharacteristic *characteristic = [self locateCharacteristic:characteristicUuid
                                                                peripheral:peripheral
-                                                              serviceUuid:serviceUuid
                                                        primaryServiceUuid:primaryServiceUuid
+                                                              serviceUuid:serviceUuid
                                                                instanceId:instanceId
                                                                     error:&error];
 
@@ -692,9 +692,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // See BmSetNotifyValueRequest
             NSDictionary *args = (NSDictionary*)call.arguments;
             NSString   *remoteId                 = args[@"remote_id"];
+            NSString   *primaryServiceUuid       = args[@"primary_service_uuid"];
             NSString   *serviceUuid              = args[@"service_uuid"];
             NSString   *characteristicUuid       = args[@"characteristic_uuid"];
-            NSString   *primaryServiceUuid       = args[@"primary_service_uuid"];
             NSNumber   *instanceId               = args[@"instance_id"];
             NSNumber   *enable                   = args[@"enable"];
 
@@ -710,8 +710,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             NSError *error = nil;
             CBCharacteristic *characteristic = [self locateCharacteristic:characteristicUuid
                                                                peripheral:peripheral
-                                                              serviceUuid:serviceUuid
                                                        primaryServiceUuid:primaryServiceUuid
+                                                              serviceUuid:serviceUuid
                                                                instanceId:instanceId
                                                                     error:&error];
 
@@ -857,8 +857,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
 - (CBCharacteristic *)locateCharacteristic:(NSString *)characteristicId
                                 peripheral:(CBPeripheral *)peripheral
-                               serviceUuid:(NSString *)serviceUuid
                         primaryServiceUuid:(NSString *)primaryServiceUuid
+                               serviceUuid:(NSString *)serviceUuid
                                 instanceId:(NSNumber *)instanceId
                                      error:(NSError **)error
 
@@ -1484,9 +1484,9 @@ didDiscoverCharacteristicsForService:(CBService *)service
     // See BmCharacteristicData
     NSMutableDictionary* result = [@{
         @"remote_id":                   [peripheral.identifier UUIDString],
+        @"primary_service_uuid":        primaryService ? [primaryService.UUID uuidStr] : [NSNull null],
         @"service_uuid":                [characteristic.service.UUID uuidStr],
         @"characteristic_uuid":         [characteristic.UUID uuidStr],
-        @"primary_service_uuid":        primaryService ? [primaryService.UUID uuidStr] : [NSNull null],
         @"instance_id":                 [self getInstanceId:characteristic],
         @"value":                       characteristic.value ? characteristic.value : [NSNull null],
         @"success":                     error == nil ? @(1) : @(0),
@@ -1518,10 +1518,10 @@ didDiscoverCharacteristicsForService:(CBService *)service
 
     // for convenience
     NSString *remoteId = [peripheral.identifier UUIDString];
+    NSString *primarySvcKey = primaryService != nil ? [primaryService.UUID uuidStr] : @"";
     NSString *serviceUuid = [characteristic.service.UUID uuidStr];
     NSString *characteristicUuid = [characteristic.UUID uuidStr];
     NSNumber *instanceId = [self getInstanceId:characteristic];
-    NSString *primarySvcKey = primaryService != nil ? [primaryService.UUID uuidStr] : @"";
 
     // what data did we write?
     NSString *key = [NSString stringWithFormat:@"%@:%@:%@:%@:%@", 
@@ -1532,9 +1532,9 @@ didDiscoverCharacteristicsForService:(CBService *)service
     // See BmCharacteristicData
     NSMutableDictionary* result = [@{
         @"remote_id":               remoteId,
+        @"primary_service_uuid":    primaryService ? [primaryService.UUID uuidStr] : [NSNull null],
         @"service_uuid":            [characteristic.service.UUID uuidStr],
         @"characteristic_uuid":     characteristicUuid,
-        @"primary_service_uuid":    primaryService ? [primaryService.UUID uuidStr] : [NSNull null],
         @"instance_id":             instanceId,
         @"value":                   value,
         @"success":                 @(error == nil),
@@ -1580,10 +1580,10 @@ didDiscoverCharacteristicsForService:(CBService *)service
     // See BmDescriptorData
     NSMutableDictionary* result = [@{
         @"remote_id":              [peripheral.identifier UUIDString],
+        @"primary_service_uuid":   primaryService ? [primaryService.UUID uuidStr] : [NSNull null],
         @"service_uuid":           [characteristic.service.UUID uuidStr],
         @"characteristic_uuid":    [characteristic.UUID uuidStr],
         @"descriptor_uuid":        CCCD,
-        @"primary_service_uuid":   primaryService ? [primaryService.UUID uuidStr] : [NSNull null],
         @"instance_id":            instanceId,
         @"value":                  [NSData dataWithBytes:&value length:sizeof(value)],
         @"success":                @(error == nil),
@@ -1620,11 +1620,11 @@ didDiscoverCharacteristicsForService:(CBService *)service
     // See BmDescriptorData
     NSMutableDictionary* result = [@{
         @"remote_id":              [peripheral.identifier UUIDString],
+        @"primary_service_uuid":   primaryService ? [primaryService.UUID uuidStr] : [NSNull null],
         @"service_uuid":           [descriptor.characteristic.service.UUID uuidStr],
         @"characteristic_uuid":    [descriptor.characteristic.UUID uuidStr],
-        @"descriptor_uuid":        [descriptor.UUID uuidStr],
-        @"primary_service_uuid":   primaryService ? [primaryService.UUID uuidStr] : [NSNull null],
         @"instance_id":            instanceId,
+        @"descriptor_uuid":        [descriptor.UUID uuidStr],
         @"value":                  data,
         @"success":                @(error == nil),
         @"error_string":           error ? [error localizedDescription] : @"success",
@@ -1671,11 +1671,11 @@ didDiscoverCharacteristicsForService:(CBService *)service
     // See BmDescriptorData
     NSMutableDictionary* result = [@{
         @"remote_id":              remoteId,
+        @"primary_service_uuid":   primaryService ? [primaryService.UUID uuidStr] : [NSNull null],
         @"service_uuid":           serviceUuid,
         @"characteristic_uuid":    characteristicUuid,
-        @"descriptor_uuid":        descriptorUuid,
-        @"primary_service_uuid":   primaryService ? [primaryService.UUID uuidStr] : [NSNull null],
         @"instance_id":            instanceId,
+        @"descriptor_uuid":        descriptorUuid,
         @"value":                  value,
         @"success":                @(error == nil),
         @"error_string":           error ? [error localizedDescription] : @"success",
@@ -1749,9 +1749,9 @@ didDiscoverCharacteristicsForService:(CBService *)service
     }
     
     // See BmWriteCharacteristicRequest
+    NSString  *primaryServiceUuid = request[@"primary_service_uuid"];
     NSString  *serviceUuid        = request[@"service_uuid"];
     NSString  *characteristicUuid = request[@"characteristic_uuid"];
-    NSString  *primaryServiceUuid = request[@"primary_service_uuid"];
     NSNumber  *instanceId         = request[@"instance_id"];
     NSString  *value              = request[@"value"];
 
@@ -1759,8 +1759,8 @@ didDiscoverCharacteristicsForService:(CBService *)service
     NSError *error = nil;
     CBCharacteristic *characteristic = [self locateCharacteristic:characteristicUuid
                                                        peripheral:peripheral
-                                                     serviceUuid:serviceUuid
                                                primaryServiceUuid:primaryServiceUuid
+                                                     serviceUuid:serviceUuid
                                                       instanceId:instanceId
                                                             error:&error];
 
@@ -1772,9 +1772,9 @@ didDiscoverCharacteristicsForService:(CBService *)service
     // See BmCharacteristicData
     NSMutableDictionary* result = [@{
         @"remote_id":               [peripheral.identifier UUIDString],
+        @"primary_service_uuid":    primaryServiceUuid != nil ? primaryServiceUuid : [NSNull null],
         @"service_uuid":            [characteristic.service.UUID uuidStr],
         @"characteristic_uuid":     [characteristic.UUID uuidStr],
-        @"primary_service_uuid":    primaryServiceUuid != nil ? primaryServiceUuid : [NSNull null],
         @"instance_id":             instanceId,
         @"value":                   value,
         @"success":                 @(error == nil),
@@ -1947,11 +1947,11 @@ didDiscoverCharacteristicsForService:(CBService *)service
         // See: BmBluetoothDescriptor
         NSMutableDictionary* desc = [@{
             @"remote_id":              [peripheral.identifier UUIDString],
+            @"primary_service_uuid":   primaryService ? [primaryService.UUID uuidStr] : [NSNull null],
             @"service_uuid":           [d.characteristic.service.UUID uuidStr],
             @"characteristic_uuid":    [d.characteristic.UUID uuidStr],
-            @"descriptor_uuid":        [d.UUID uuidStr],
-            @"primary_service_uuid":   primaryService ? [primaryService.UUID uuidStr] : [NSNull null],
             @"instance_id":            instanceId, 
+            @"descriptor_uuid":        [d.UUID uuidStr],
         } mutableCopy];
 
         // remove if null
@@ -1979,9 +1979,9 @@ didDiscoverCharacteristicsForService:(CBService *)service
     // See BmBluetoothCharacteristic
     NSMutableDictionary* result = [@{
         @"remote_id":              [peripheral.identifier UUIDString],
+        @"primary_service_uuid":    primaryService ? [primaryService.UUID uuidStr] : [NSNull null],
         @"service_uuid":           [characteristic.service.UUID uuidStr],
         @"characteristic_uuid":    [characteristic.UUID uuidStr],
-        @"primary_service_uuid":    primaryService ? [primaryService.UUID uuidStr] : [NSNull null],
         @"instance_id":            instanceId,
         @"descriptors":            descriptors,
         @"properties":             propsMap,

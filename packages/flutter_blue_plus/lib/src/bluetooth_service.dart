@@ -6,8 +6,8 @@ part of '../flutter_blue_plus.dart';
 
 class BluetoothService {
   final DeviceIdentifier remoteId;
-  final Guid serviceUuid;
   final Guid? primaryServiceUuid;
+  final Guid serviceUuid;
   final List<BluetoothCharacteristic> characteristics;
 
   /// convenience accessor
@@ -51,16 +51,16 @@ class BluetoothService {
   /// for internal use
   BluetoothService.fromProto(BmBluetoothService p)
       : remoteId = p.remoteId,
-        serviceUuid = p.serviceUuid,
         primaryServiceUuid = p.primaryServiceUuid,
+        serviceUuid = p.serviceUuid,
         characteristics = p.characteristics.map((c) => BluetoothCharacteristic.fromProto(c)).toList();
 
   @override
   String toString() {
     return 'BluetoothService{'
         'remoteId: $remoteId, '
-        'serviceUuid: $serviceUuid, '
         'primaryServiceUuid: $primaryServiceUuid, '
+        'serviceUuid: $serviceUuid, '
         'characteristics: $characteristics, '
         '}';
   }
