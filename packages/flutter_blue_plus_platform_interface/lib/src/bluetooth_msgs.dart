@@ -343,16 +343,16 @@ class BmBluetoothDescriptor {
   final Guid? primaryServiceUuid;
   final Guid serviceUuid;
   final Guid characteristicUuid;
-  final Guid descriptorUuid;
   final int instanceId;
+  final Guid descriptorUuid;
 
   BmBluetoothDescriptor({
     required this.remoteId,
     required this.primaryServiceUuid,
     required this.serviceUuid,
     required this.characteristicUuid,
-    required this.descriptorUuid,
     required this.instanceId,
+    required this.descriptorUuid,
   });
 
   factory BmBluetoothDescriptor.fromMap(Map<dynamic, dynamic> json) {
@@ -361,8 +361,8 @@ class BmBluetoothDescriptor {
       primaryServiceUuid: Guid.parse(json['primary_service_uuid']),
       serviceUuid: Guid(json['service_uuid']),
       characteristicUuid: Guid(json['characteristic_uuid']),
-      descriptorUuid: Guid(json['descriptor_uuid']),
       instanceId: json['instance_id'],
+      descriptorUuid: Guid(json['descriptor_uuid']),
     );
   }
 }
