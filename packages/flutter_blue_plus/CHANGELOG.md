@@ -1,3 +1,6 @@
+## 1.36.4
+* **[Fix]** fix compile error due to out of date platform interface (regression 1.36.2)
+
 ## 1.36.3
 * **[Fix]** internal cleanup, no user facing changes
 
