@@ -475,7 +475,7 @@ class FlutterBluePlus {
                 var d = BluetoothDevice(remoteId: r.remoteId);
                 d.connect(autoConnect: true, mtu: null).onError((e, s) {
                   if (logLevel != LogLevel.none) {
-                     FlutterBluePlusPlatform.log("[FBP] [AutoConnect] connection failed: $e");
+                    FlutterBluePlusPlatform.log("[FBP] [AutoConnect] connection failed: $e");
                   }
                 });
               }
@@ -543,8 +543,9 @@ class FlutterBluePlus {
         FlutterBluePlusPlatform.instance.onCharacteristicWritten
       ]).listen((r) {
         if (r.success == true) {
+          String key = "${r.primaryServiceUuid ?? ""}:${r.serviceUuid}:${r.characteristicUuid}:${r.instanceId}";
           _lastChrs[r.remoteId] ??= {};
-          _lastChrs[r.remoteId]!["${r.serviceUuid}:${r.characteristicUuid}${r.instanceId}"] = r.value;
+          _lastChrs[r.remoteId]![key] = r.value;
         }
       });
     } on UnimplementedError {
@@ -557,9 +558,9 @@ class FlutterBluePlus {
               [FlutterBluePlusPlatform.instance.onDescriptorRead, FlutterBluePlusPlatform.instance.onDescriptorWritten])
           .listen((r) {
         if (r.success == true) {
+          String key = "${r.primaryServiceUuid ?? ""}:${r.serviceUuid}:${r.characteristicUuid}:${r.instanceId}:${r.descriptorUuid}";
           _lastDescs[r.remoteId] ??= {};
-          _lastDescs[r.remoteId]![
-              "${r.serviceUuid}:${r.characteristicUuid}:${r.descriptorUuid}:${r.instanceId}"] = r.value;
+          _lastDescs[r.remoteId]![key];
         }
       });
     } on UnimplementedError {
@@ -619,7 +620,6 @@ class FlutterBluePlus {
       await futureResponse.fbpTimeout(timeout, "turnOff");
     }
   }
-
 
   /// Checks if Bluetooth functionality is turned on
   @Deprecated('Use adapterState.first == BluetoothAdapterState.on instead')

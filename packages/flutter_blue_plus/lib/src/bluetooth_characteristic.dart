@@ -57,7 +57,7 @@ class BluetoothCharacteristic {
   ///   - anytime a notification arrives (if subscribed)
   ///   - when the device is disconnected it is cleared
   List<int> get lastValue {
-    String key = "$serviceUuid:$characteristicUuid";
+    String key = "${primaryServiceUuid ?? ""}:$serviceUuid:$characteristicUuid:$instanceId";
     return FlutterBluePlus._lastChrs[remoteId]?[key] ?? [];
   }
 

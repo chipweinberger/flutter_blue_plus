@@ -42,7 +42,7 @@ class BluetoothDescriptor {
   ///   - anytime `write()` is called
   ///   - when the device is disconnected it is cleared
   List<int> get lastValue {
-    String key = "$serviceUuid:$characteristicUuid:$descriptorUuid:$instanceId";
+    String key = "${primaryServiceUuid ?? ""}:$serviceUuid:$characteristicUuid:$instanceId:$descriptorUuid";
     return FlutterBluePlus._lastDescs[remoteId]?[key] ?? [];
   }
 
