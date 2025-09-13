@@ -1657,7 +1657,7 @@ public class FlutterBluePlusPlugin implements
 
 
     private ChrFound locateCharacteristic(BluetoothGatt gatt,
-                                        String primaryServiceUuid
+                                        String primaryServiceUuid,
                                         String serviceUuid,
                                         String characteristicUuid,
                                         Integer instanceId)
