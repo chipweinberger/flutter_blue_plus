@@ -1,3 +1,6 @@
+## 1.36.3
+* **[Fix]** internal cleanup, no user facing changes
+
 ## 1.36.2
 * **[Fix]** `lastValue` was broken (regression 1.35.6)
 
