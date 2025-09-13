@@ -568,7 +568,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // remember the data we are writing
             NSString *primarySvcKey = primaryServiceUuid != nil ? primaryServiceUuid : @"";
             NSString *key = [NSString stringWithFormat:@"%@:%@:%@:%@:%@", 
-                remoteId, serviceUuid, characteristicUuid, instanceId, primarySvcKey];
+                remoteId, primarySvcKey, serviceUuid, characteristicUuid, instanceId];
             [self.writeChrs setObject:value forKey:key];
                   
             // Write to characteristic
@@ -679,7 +679,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // remember the data we are writing
             NSString *primarySvcKey = primaryServiceUuid != nil ? primaryServiceUuid : @"";
             NSString *key = [NSString stringWithFormat:@"%@:%@:%@:%@:%@:%@",
-                remoteId, serviceUuid, characteristicUuid, instanceId, descriptorUuid, primarySvcKey];  
+                remoteId, primarySvcKey, serviceUuid, characteristicUuid, instanceId, descriptorUuid];  
             [self.writeDescs setObject:value forKey:key];
 
             // Write descriptor
@@ -1525,7 +1525,7 @@ didDiscoverCharacteristicsForService:(CBService *)service
 
     // what data did we write?
     NSString *key = [NSString stringWithFormat:@"%@:%@:%@:%@:%@", 
-        remoteId, serviceUuid, characteristicUuid, instanceId, primarySvcKey];
+        remoteId, primarySvcKey, serviceUuid, characteristicUuid, instanceId];
     NSData *value = self.writeChrs[key] ? self.writeChrs[key] : [NSMutableData data];
     [self.writeChrs removeObjectForKey:key];
 
@@ -1664,7 +1664,7 @@ didDiscoverCharacteristicsForService:(CBService *)service
 
     // what data did we write?
     NSString *key = [NSString stringWithFormat:@"%@:%@:%@:%@:%@:%@",
-        remoteId, serviceUuid, characteristicUuid, instanceId, descriptorUuid, primarySvcKey];  
+        remoteId, primarySvcKey, serviceUuid, characteristicUuid, instanceId, descriptorUuid];  
     NSData *value = self.writeDescs[key] ? self.writeDescs[key] : [NSMutableData data];
     [self.writeDescs removeObjectForKey:key];
     

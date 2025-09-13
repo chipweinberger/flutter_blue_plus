@@ -955,8 +955,8 @@ public class FlutterBluePlusPlugin implements
 
                     // remember the data we are writing
                     if (primaryServiceUuid == null) {primaryServiceUuid = "";}
-                    String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + 
-                        instanceId + ":" + primaryServiceUuid;
+                    String key = remoteId + ":" + primaryServiceUuid + ":" + serviceUuid + ":" + 
+                        characteristicUuid + ":" + instanceId;
                     mWriteChr.put(key, value);
 
                     // write characteristic
@@ -1083,8 +1083,8 @@ public class FlutterBluePlusPlugin implements
 
                     // remember the data we are writing
                     if (primaryServiceUuid == null) {primaryServiceUuid = "";}
-                    String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + 
-                        instanceId + ":" + CCCD + ":" + primaryServiceUuid;
+                    String key = remoteId + ":" + primaryServiceUuid + ":" + serviceUuid + ":" + 
+                        characteristicUuid + ":" + instanceId + ":" + descriptorUuid;
                     mWriteDesc.put(key, value);
 
                     // write descriptor
@@ -1195,8 +1195,8 @@ public class FlutterBluePlusPlugin implements
 
                     // remember the data we are writing
                     if (primaryServiceUuid == null) {primaryServiceUuid = "";}
-                    String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + 
-                        instanceId + ":" + CCCD + ":" + primaryServiceUuid;
+                    String key = remoteId + ":" + primaryServiceUuid + ":" + serviceUuid + ":" + 
+                        characteristicUuid + ":" + instanceId + ":" + CCCD;
                     mWriteDesc.put(key, descriptorValue);
 
                     // write descriptor
@@ -2410,8 +2410,8 @@ public class FlutterBluePlusPlugin implements
             Integer instanceId = getInstanceId(characteristic);
 
             // what data did we write?
-            String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + 
-                instanceId + ":" + primaryServiceUuid;
+            String key = remoteId + ":" + primaryServiceUuid + ":" + serviceUuid + ":" + 
+                characteristicUuid + ":" + instanceId;
             byte[] value = mWriteChr.remove(key);
             if (value == null) value = new byte[0];
 
@@ -2484,8 +2484,8 @@ public class FlutterBluePlusPlugin implements
             Integer instanceId = getInstanceId(descriptor.getCharacteristic());
 
             // what data did we write?
-            String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + 
-                instanceId + ":" + descriptorUuid + ":" + primaryServiceUuid;
+            String key = remoteId + ":" + primaryServiceUuid + ":" + serviceUuid + ":" + 
+                characteristicUuid + ":" + instanceId + ":" + descriptorUuid;
             byte[] value = mWriteDesc.remove(key);
             if (value == null) value = new byte[0];
 
