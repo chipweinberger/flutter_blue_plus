@@ -1,3 +1,6 @@
+## 1.36.6
+* **[Fix]** fix android compile error (regression 1.36.2)
+
 ## 1.36.5
 * **[Fix]** fix federated dependencies (regression 1.36.2)
 
