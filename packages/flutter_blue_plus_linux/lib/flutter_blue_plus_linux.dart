@@ -794,7 +794,8 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
       await characteristic.stopNotify();
     }
 
-    return true;
+    // No CCCD write on Linux; no separate response event expected
+    return false;
   }
 
   @override
@@ -1130,4 +1131,3 @@ extension on BlueZClient {
     ).startWith(devices);
   }
 }
-
