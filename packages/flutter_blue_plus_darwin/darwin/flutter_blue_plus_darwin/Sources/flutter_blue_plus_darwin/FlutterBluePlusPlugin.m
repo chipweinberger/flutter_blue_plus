@@ -68,7 +68,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     instance.writeDescs = [NSMutableDictionary new];
     instance.scanCounts = [NSMutableDictionary new];
     instance.logLevel = LDEBUG;
-    instance.showPowerAlert = @(YES);
+    instance.showPowerAlert = @(NO);
     instance.restoreState = @(NO);
 
     [registrar addMethodCallDelegate:instance channel:methodChannel];
