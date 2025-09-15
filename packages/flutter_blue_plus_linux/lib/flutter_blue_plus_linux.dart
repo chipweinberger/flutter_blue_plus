@@ -352,6 +352,11 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
         },
       );
 
+      // Ensure BlueZ has completed service discovery before returning results
+      while (!device.servicesResolved) {
+        await Future.delayed(const Duration(milliseconds: 100));
+      }
+
       _onDiscoveredServicesController.add(
         BmDiscoverServicesResult(
           remoteId: device.remoteId,
