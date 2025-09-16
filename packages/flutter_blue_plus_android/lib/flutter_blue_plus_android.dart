@@ -399,7 +399,7 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
     dynamic arguments,
   ]) async {
     // restart platform
-    if (!_didRestart) {
+    if (!_didRestart && method != "setLogLevel") {
       await _flutterRestart();
     }
 

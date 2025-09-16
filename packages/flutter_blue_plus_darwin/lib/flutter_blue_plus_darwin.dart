@@ -270,7 +270,7 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     dynamic arguments,
   ]) async {
     // restart platform
-    if (!_didRestart) {
+    if (!_didRestart && method != "setOptions" && method != "setLogLevel") {
       await _flutterRestart();
     }
 
