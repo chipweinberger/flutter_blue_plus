@@ -55,7 +55,7 @@ class FlutterBluePlus {
 
   /// Checks whether the hardware supports Bluetooth
   static Future<bool> get isSupported async =>
-      await _invokeMethod(() => FlutterBluePlusPlatform.instance.isSupported(BmIsSupportedRequest()));
+      await _invokePlatform(() => FlutterBluePlusPlatform.instance.isSupported(BmIsSupportedRequest()));
 
   /// The current adapter state
   static BluetoothAdapterState get adapterStateNow =>
@@ -63,7 +63,7 @@ class FlutterBluePlus {
 
   /// Return the friendly Bluetooth name of the local Bluetooth adapter
   static Future<String> get adapterName async =>
-      await _invokeMethod(() => FlutterBluePlusPlatform.instance.getAdapterName(BmBluetoothAdapterNameRequest()))
+      await _invokePlatform(() => FlutterBluePlusPlatform.instance.getAdapterName(BmBluetoothAdapterNameRequest()))
           .then((r) => r.adapterName);
 
   /// returns whether we are scanning as a stream
@@ -110,7 +110,7 @@ class FlutterBluePlus {
     bool showPowerAlert = true,
     bool restoreState = false,
   }) async {
-    await _invokeMethod(() => FlutterBluePlusPlatform.instance
+    await _invokePlatform(() => FlutterBluePlusPlatform.instance
         .setOptions(BmSetOptionsRequest(showPowerAlert: showPowerAlert, restoreState: restoreState)));
   }
 
@@ -122,7 +122,7 @@ class FlutterBluePlus {
     Future<BmTurnOnResponse> futureResponse = responseStream.first;
 
     // invoke
-    bool changed = await _invokeMethod(() => FlutterBluePlusPlatform.instance.turnOn(BmTurnOnRequest()));
+    bool changed = await _invokePlatform(() => FlutterBluePlusPlatform.instance.turnOn(BmTurnOnRequest()));
 
     // only wait if bluetooth was off
     if (changed) {
@@ -144,7 +144,7 @@ class FlutterBluePlus {
     // get current state if needed
     if (_adapterStateNow == null) {
       var result =
-          await _invokeMethod(() => FlutterBluePlusPlatform.instance.getAdapterState(BmBluetoothAdapterStateRequest()));
+          await _invokePlatform(() => FlutterBluePlusPlatform.instance.getAdapterState(BmBluetoothAdapterStateRequest()));
       // update _adapterStateNow if it is still null after the await
       _adapterStateNow ??= result.adapterState;
     }
@@ -166,7 +166,7 @@ class FlutterBluePlus {
   /// - You must still call device.connect() to connect them to *your app*
   /// - [withServices] required on iOS (for privacy purposes). ignored on android.
   static Future<List<BluetoothDevice>> systemDevices(List<Guid> withServices) async {
-    var r = await _invokeMethod(
+    var r = await _invokePlatform(
         () => FlutterBluePlusPlatform.instance.getSystemDevices(BmSystemDevicesRequest(withServices: withServices)));
     for (BmBluetoothDevice device in r.devices) {
       if (device.platformName != null) {
@@ -178,7 +178,7 @@ class FlutterBluePlus {
 
   /// Retrieve a list of bonded devices (Android only)
   static Future<List<BluetoothDevice>> get bondedDevices async {
-    var r = await _invokeMethod(() => FlutterBluePlusPlatform.instance.getBondedDevices(BmBondedDevicesRequest()));
+    var r = await _invokePlatform(() => FlutterBluePlusPlatform.instance.getBondedDevices(BmBondedDevicesRequest()));
     for (BmBluetoothDevice device in r.devices) {
       if (device.platformName != null) {
         _platformNames[device.remoteId] = device.platformName!;
@@ -285,7 +285,7 @@ class FlutterBluePlus {
       _scanBuffer = _BufferStream.listen(responseStream);
 
       // invoke platform method
-      await _invokeMethod(() => FlutterBluePlusPlatform.instance.startScan(settings)).onError((e, s) {
+      await _invokePlatform(() => FlutterBluePlusPlatform.instance.startScan(settings)).onError((e, s) {
         _stopScan(invokePlatform: false);
         throw e!;
       });
@@ -381,7 +381,7 @@ class FlutterBluePlus {
       subscription.cancel();
     }
     if (invokePlatform) {
-      await _invokeMethod(() => FlutterBluePlusPlatform.instance.stopScan(BmStopScanRequest()));
+      await _invokePlatform(() => FlutterBluePlusPlatform.instance.stopScan(BmStopScanRequest()));
     }
   }
 
@@ -396,7 +396,7 @@ class FlutterBluePlus {
   /// Sets the internal FlutterBlue log level
   static Future<void> setLogLevel(LogLevel level, {color = true}) async {
     _logLevel = level;
-    await _invokeMethod(
+    await _invokePlatform(
         () => FlutterBluePlusPlatform.instance.setLogLevel(BmSetLogLevelRequest(logLevel: level, logColor: color)));
   }
 
@@ -408,7 +408,7 @@ class FlutterBluePlus {
           ErrorPlatform.fbp, "getPhySupport", FbpErrorCode.androidOnly.index, "android-only");
     }
 
-    return await _invokeMethod(() => FlutterBluePlusPlatform.instance.getPhySupport(PhySupportRequest()));
+    return await _invokePlatform(() => FlutterBluePlusPlatform.instance.getPhySupport(PhySupportRequest()));
   }
 
   static Future<void> _initFlutterBluePlus() async {
@@ -547,7 +547,7 @@ class FlutterBluePlus {
   }
 
   /// invoke a platform method
-  static Future<T> _invokeMethod<T>(Future<T> Function() invoke) async {
+  static Future<T> _invokePlatform<T>(Future<T> Function() invoke) async {
     // only allow 1 invocation at a time (guarantees that hot restart finishes)
     _Mutex mtx = _MutexFactory.getMutexForKey("invokeMethod");
     await mtx.take();
@@ -573,7 +573,7 @@ class FlutterBluePlus {
     Future<BmBluetoothAdapterState> futureResponse = responseStream.first;
 
     // invoke
-    bool changed = await _invokeMethod(() => FlutterBluePlusPlatform.instance.turnOff(BmTurnOffRequest()));
+    bool changed = await _invokePlatform(() => FlutterBluePlusPlatform.instance.turnOff(BmTurnOffRequest()));
 
     // only wait if bluetooth was on
     if (changed) {

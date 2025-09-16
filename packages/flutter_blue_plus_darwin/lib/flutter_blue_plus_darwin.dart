@@ -9,7 +9,7 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
   @visibleForTesting
   final methodChannel = const MethodChannel('flutter_blue_plus/methods');
 
-  var _initialized = false;
+  var _didRestart = false;
   var _logLevel = LogLevel.none;
   var _logColor = true;
 
@@ -94,7 +94,7 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
   Future<bool> connect(
     BmConnectRequest request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callDarwinMethod<bool>(
       'connect',
       request.toMap(),
     ) == true;
@@ -104,7 +104,7 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
   Future<bool> disconnect(
     BmDisconnectRequest request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callDarwinMethod<bool>(
       'disconnect',
       request.remoteId.str,
     ) == true;
@@ -114,7 +114,7 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
   Future<bool> discoverServices(
     BmDiscoverServicesRequest request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callDarwinMethod<bool>(
       'discoverServices',
       request.remoteId.str,
     ) == true;
@@ -125,7 +125,7 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     BmBluetoothAdapterNameRequest request,
   ) async {
     return BmBluetoothAdapterName(
-      adapterName: await _invokeMethod(
+      adapterName: await _callDarwinMethod(
         'getAdapterName',
       ),
     );
@@ -136,7 +136,7 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     BmBluetoothAdapterStateRequest request,
   ) async {
     return BmBluetoothAdapterState.fromMap(
-      await _invokeMethod(
+      await _callDarwinMethod(
         'getAdapterState',
       ),
     );
@@ -147,7 +147,7 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     BmSystemDevicesRequest request,
   ) async {
     return BmDevicesList.fromMap(
-      await _invokeMethod(
+      await _callDarwinMethod(
         'getSystemDevices',
         request.toMap(),
       ),
@@ -158,7 +158,7 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
   Future<bool> isSupported(
     BmIsSupportedRequest request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callDarwinMethod<bool>(
       'isSupported',
     ) == true;
   }
@@ -167,7 +167,7 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
   Future<bool> readCharacteristic(
     BmReadCharacteristicRequest request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callDarwinMethod<bool>(
       'readCharacteristic',
       request.toMap(),
     ) == true;
@@ -177,7 +177,7 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
   Future<bool> readDescriptor(
     BmReadDescriptorRequest request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callDarwinMethod<bool>(
       'readDescriptor',
       request.toMap(),
     ) == true;
@@ -187,7 +187,7 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
   Future<bool> readRssi(
     BmReadRssiRequest request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callDarwinMethod<bool>(
       'readRssi',
       request.remoteId.str,
     ) == true;
@@ -200,7 +200,7 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     _logLevel = request.logLevel;
     _logColor = request.logColor;
 
-    return await _invokeMethod<bool>(
+    return await _callDarwinMethod<bool>(
       'setLogLevel',
       request.logLevel.index,
     ) == true;
@@ -210,7 +210,7 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
   Future<bool> setNotifyValue(
     BmSetNotifyValueRequest request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callDarwinMethod<bool>(
       'setNotifyValue',
       request.toMap(),
     ) == true;
@@ -220,7 +220,7 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
   Future<bool> setOptions(
     BmSetOptionsRequest request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callDarwinMethod<bool>(
       'setOptions',
       request.toMap(),
     ) == true;
@@ -230,7 +230,7 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
   Future<bool> startScan(
     BmScanSettings request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callDarwinMethod<bool>(
       'startScan',
       request.toMap(),
     ) == true;
@@ -240,7 +240,7 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
   Future<bool> stopScan(
     BmStopScanRequest request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callDarwinMethod<bool>(
       'stopScan',
     ) == true;
   }
@@ -249,7 +249,7 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
   Future<bool> writeCharacteristic(
     BmWriteCharacteristicRequest request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callDarwinMethod<bool>(
       'writeCharacteristic',
       request.toMap(),
     ) == true;
@@ -259,19 +259,24 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
   Future<bool> writeDescriptor(
     BmWriteDescriptorRequest request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callDarwinMethod<bool>(
       'writeDescriptor',
       request.toMap(),
     ) == true;
   }
 
-  Future<T?> _invokeMethod<T>(
+  Future<T?> _callDarwinMethod<T>(
     String method, [
     dynamic arguments,
   ]) async {
-    // initialize
-    await _initFlutterBluePlus();
+    // restart platform
+    if (!_didRestart) {
+      await _flutterRestart();
+    }
 
+    // set platform method handler
+    methodChannel.setMethodCallHandler(_methodCallHandler);
+  
     // log args
     if (_logLevel == LogLevel.verbose) {
       var func = '<$method>';
@@ -296,23 +301,15 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     return out;
   }
 
-  Future<void> _initFlutterBluePlus() async {
-    if (_initialized) {
-      return;
-    }
-
-    _initialized = true;
-
-    // set platform method handler
-    methodChannel.setMethodCallHandler(_methodCallHandler);
-
-    // flutter restart - wait for all devices to disconnect
+  Future<void> _flutterRestart() async {
+    // wait for all devices to disconnect
     if ((await methodChannel.invokeMethod('flutterRestart')) != 0) {
       await Future.delayed(Duration(milliseconds: 50));
       while ((await methodChannel.invokeMethod('connectedCount')) != 0) {
         await Future.delayed(Duration(milliseconds: 50));
       }
     }
+    _didRestart = true;
   }
 
   Future<void> _methodCallHandler(

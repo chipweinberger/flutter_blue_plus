@@ -141,7 +141,7 @@ class BluetoothDevice {
       }
 
       // invoke
-      bool changed = await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance.connect(request));
+      bool changed = await FlutterBluePlus._invokePlatform(() => FlutterBluePlusPlatform.instance.connect(request));
 
       // we return the disconnect mutex now so that this
       // connection attempt can be canceled by calling disconnect
@@ -156,7 +156,7 @@ class BluetoothDevice {
           if (e is FlutterBluePlusException &&
               e.code == FbpErrorCode.timeout.index) {
             FlutterBluePlusPlatform.log("[FBP] connection timeout");
-            await FlutterBluePlus._invokeMethod(() =>
+            await FlutterBluePlus._invokePlatform(() =>
                 FlutterBluePlusPlatform.instance.disconnect(BmDisconnectRequest(
                     remoteId: remoteId))); // cancel connection attempt
           }
@@ -229,7 +229,7 @@ class BluetoothDevice {
       await _ensureAndroidDisconnectionDelay(androidDelay);
 
       // invoke
-      bool changed = await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance.disconnect(BmDisconnectRequest(remoteId: remoteId)));
+      bool changed = await FlutterBluePlus._invokePlatform(() => FlutterBluePlusPlatform.instance.disconnect(BmDisconnectRequest(remoteId: remoteId)));
 
       // only wait for disconnection if weren't already disconnected
       if (changed) {
@@ -276,7 +276,7 @@ class BluetoothDevice {
       Future<BmDiscoverServicesResult> futureResponse = responseStream.first;
 
       // invoke
-      await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance
+      await FlutterBluePlus._invokePlatform(() => FlutterBluePlusPlatform.instance
           .discoverServices(BmDiscoverServicesRequest(remoteId: remoteId)));
 
       // wait for response
@@ -395,7 +395,7 @@ class BluetoothDevice {
       Future<BmReadRssiResult> futureResponse = responseStream.first;
 
       // invoke
-      await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance
+      await FlutterBluePlus._invokePlatform(() => FlutterBluePlusPlatform.instance
           .readRssi(BmReadRssiRequest(remoteId: remoteId)));
 
       // wait for response
@@ -475,7 +475,7 @@ class BluetoothDevice {
       Future<int> futureResponse = responseStream.first;
 
       // invoke
-      await FlutterBluePlus._invokeMethod(
+      await FlutterBluePlus._invokePlatform(
           () => FlutterBluePlusPlatform.instance.requestMtu(request));
 
       // wait for response
@@ -517,7 +517,7 @@ class BluetoothDevice {
     );
 
     // invoke
-    await FlutterBluePlus._invokeMethod(() =>
+    await FlutterBluePlus._invokePlatform(() =>
         FlutterBluePlusPlatform.instance.requestConnectionPriority(request));
   }
 
@@ -551,7 +551,7 @@ class BluetoothDevice {
     );
 
     // invoke
-    await FlutterBluePlus._invokeMethod(
+    await FlutterBluePlus._invokePlatform(
         () => FlutterBluePlusPlatform.instance.setPreferredPhy(request));
   }
 
@@ -583,7 +583,7 @@ class BluetoothDevice {
       Future<BmBondStateResponse> futureResponse = responseStream.first;
 
       // invoke
-      bool changed = await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance.createBond(BmCreateBondRequest(remoteId: remoteId, pin: pin)));
+      bool changed = await FlutterBluePlus._invokePlatform(() => FlutterBluePlusPlatform.instance.createBond(BmCreateBondRequest(remoteId: remoteId, pin: pin)));
 
       // only wait for 'bonded' if we weren't already bonded
       if (changed) {
@@ -627,7 +627,7 @@ class BluetoothDevice {
       Future<BmBondStateResponse> futureResponse = responseStream.first;
 
       // invoke
-      bool changed = await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance.removeBond(BmRemoveBondRequest(remoteId: remoteId)));
+      bool changed = await FlutterBluePlus._invokePlatform(() => FlutterBluePlusPlatform.instance.removeBond(BmRemoveBondRequest(remoteId: remoteId)));
 
       // only wait for 'unbonded' state if we weren't already unbonded
       if (changed) {
@@ -663,7 +663,7 @@ class BluetoothDevice {
     }
 
     // invoke
-    await FlutterBluePlus._invokeMethod(() => FlutterBluePlusPlatform.instance
+    await FlutterBluePlus._invokePlatform(() => FlutterBluePlusPlatform.instance
         .clearGattCache(BmClearGattCacheRequest(remoteId: remoteId)));
   }
 
@@ -677,7 +677,7 @@ class BluetoothDevice {
 
     // get current state if needed
     if (FlutterBluePlus._bondStates[remoteId] == null) {
-      var val = await FlutterBluePlus._invokeMethod(() =>
+      var val = await FlutterBluePlus._invokePlatform(() =>
           FlutterBluePlusPlatform.instance
               .getBondState(BmBondStateRequest(remoteId: remoteId)));
       // update _bondStates if it is still null after the await

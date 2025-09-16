@@ -9,7 +9,7 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
   @visibleForTesting
   final methodChannel = const MethodChannel('flutter_blue_plus/methods');
 
-  var _initialized = false;
+  var _didRestart = false;
   var _logLevel = LogLevel.none;
   var _logColor = true;
 
@@ -112,7 +112,7 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
   Future<bool> clearGattCache(
     BmClearGattCacheRequest request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callAndroidMethod<bool>(
       'clearGattCache',
       request.remoteId.str,
     ) == true;
@@ -122,7 +122,7 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
   Future<bool> connect(
     BmConnectRequest request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callAndroidMethod<bool>(
       'connect',
       request.toMap(),
     ) == true;
@@ -132,7 +132,7 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
   Future<bool> createBond(
     BmCreateBondRequest request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callAndroidMethod<bool>(
       'createBond',
       request.toMap(),
     ) == true;
@@ -142,7 +142,7 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
   Future<bool> disconnect(
     BmDisconnectRequest request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callAndroidMethod<bool>(
       'disconnect',
       request.remoteId.str,
     ) == true;
@@ -152,7 +152,7 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
   Future<bool> discoverServices(
     BmDiscoverServicesRequest request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callAndroidMethod<bool>(
       'discoverServices',
       request.remoteId.str,
     ) == true;
@@ -163,7 +163,7 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
     BmBluetoothAdapterNameRequest request,
   ) async {
     return BmBluetoothAdapterName(
-      adapterName: await _invokeMethod(
+      adapterName: await _callAndroidMethod(
         'getAdapterName',
       ),
     );
@@ -174,7 +174,7 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
     BmBluetoothAdapterStateRequest request,
   ) async {
     return BmBluetoothAdapterState.fromMap(
-      await _invokeMethod(
+      await _callAndroidMethod(
         'getAdapterState',
       ),
     );
@@ -185,7 +185,7 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
     BmBondStateRequest request,
   ) async {
     return BmBondStateResponse.fromMap(
-      await _invokeMethod(
+      await _callAndroidMethod(
         'getBondState',
         request.remoteId.str,
       ),
@@ -197,7 +197,7 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
     BmBondedDevicesRequest request,
   ) async {
     return BmDevicesList.fromMap(
-      await _invokeMethod(
+      await _callAndroidMethod(
         'getBondedDevices',
       ),
     );
@@ -208,7 +208,7 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
     PhySupportRequest request,
   ) async {
     return PhySupport.fromMap(
-      await _invokeMethod(
+      await _callAndroidMethod(
         'getPhySupport',
       ),
     );
@@ -219,7 +219,7 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
     BmSystemDevicesRequest request,
   ) async {
     return BmDevicesList.fromMap(
-      await _invokeMethod(
+      await _callAndroidMethod(
         'getSystemDevices',
       ),
     );
@@ -229,7 +229,7 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
   Future<bool> isSupported(
     BmIsSupportedRequest request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callAndroidMethod<bool>(
       'isSupported',
     ) == true;
   }
@@ -238,7 +238,7 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
   Future<bool> readCharacteristic(
     BmReadCharacteristicRequest request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callAndroidMethod<bool>(
       'readCharacteristic',
       request.toMap(),
     ) == true;
@@ -248,7 +248,7 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
   Future<bool> readDescriptor(
     BmReadDescriptorRequest request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callAndroidMethod<bool>(
       'readDescriptor',
       request.toMap(),
     ) == true;
@@ -258,7 +258,7 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
   Future<bool> readRssi(
     BmReadRssiRequest request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callAndroidMethod<bool>(
       'readRssi',
       request.remoteId.str,
     ) == true;
@@ -268,7 +268,7 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
   Future<bool> removeBond(
     BmRemoveBondRequest request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callAndroidMethod<bool>(
       'removeBond',
       request.remoteId.str,
     ) == true;
@@ -278,7 +278,7 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
   Future<bool> requestConnectionPriority(
     BmConnectionPriorityRequest request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callAndroidMethod<bool>(
       'requestConnectionPriority',
       request.toMap(),
     ) == true;
@@ -288,7 +288,7 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
   Future<bool> requestMtu(
     BmMtuChangeRequest request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callAndroidMethod<bool>(
       'requestMtu',
       request.toMap(),
     ) == true;
@@ -301,7 +301,7 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
     _logLevel = request.logLevel;
     _logColor = request.logColor;
 
-    return await _invokeMethod<bool>(
+    return await _callAndroidMethod<bool>(
       'setLogLevel',
       request.logLevel.index,
     ) == true;
@@ -311,7 +311,7 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
   Future<bool> setNotifyValue(
     BmSetNotifyValueRequest request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callAndroidMethod<bool>(
       'setNotifyValue',
       request.toMap(),
     ) == true;
@@ -321,7 +321,7 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
   Future<bool> setOptions(
     BmSetOptionsRequest request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callAndroidMethod<bool>(
       'setOptions',
       request.toMap(),
     ) == true;
@@ -331,7 +331,7 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
   Future<bool> setPreferredPhy(
     BmPreferredPhy request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callAndroidMethod<bool>(
       'setPreferredPhy',
       request.toMap(),
     ) == true;
@@ -341,7 +341,7 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
   Future<bool> startScan(
     BmScanSettings request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callAndroidMethod<bool>(
       'startScan',
       request.toMap(),
     ) == true;
@@ -351,7 +351,7 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
   Future<bool> stopScan(
     BmStopScanRequest request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callAndroidMethod<bool>(
       'stopScan',
     ) == true;
   }
@@ -360,7 +360,7 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
   Future<bool> turnOff(
     BmTurnOffRequest request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callAndroidMethod<bool>(
       'turnOff',
     ) == true;
   }
@@ -369,7 +369,7 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
   Future<bool> turnOn(
     BmTurnOnRequest request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callAndroidMethod<bool>(
       'turnOn',
     ) == true;
   }
@@ -378,7 +378,7 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
   Future<bool> writeCharacteristic(
     BmWriteCharacteristicRequest request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callAndroidMethod<bool>(
       'writeCharacteristic',
       request.toMap(),
     ) == true;
@@ -388,18 +388,23 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
   Future<bool> writeDescriptor(
     BmWriteDescriptorRequest request,
   ) async {
-    return await _invokeMethod<bool>(
+    return await _callAndroidMethod<bool>(
       'writeDescriptor',
       request.toMap(),
     ) == true;
   }
 
-  Future<T?> _invokeMethod<T>(
+  Future<T?> _callAndroidMethod<T>(
     String method, [
     dynamic arguments,
   ]) async {
-    // initialize
-    await _initFlutterBluePlus();
+    // restart platform
+    if (!_didRestart) {
+      await _flutterRestart();
+    }
+
+    // set platform method handler
+    methodChannel.setMethodCallHandler(_methodCallHandler);
 
     // log args
     if (_logLevel == LogLevel.verbose) {
@@ -425,23 +430,15 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
     return out;
   }
 
-  Future<void> _initFlutterBluePlus() async {
-    if (_initialized) {
-      return;
-    }
-
-    _initialized = true;
-
-    // set platform method handler
-    methodChannel.setMethodCallHandler(_methodCallHandler);
-
-    // flutter restart - wait for all devices to disconnect
+  Future<void> _flutterRestart() async {
+    // wait for all devices to disconnect
     if ((await methodChannel.invokeMethod('flutterRestart')) != 0) {
       await Future.delayed(Duration(milliseconds: 50));
       while ((await methodChannel.invokeMethod('connectedCount')) != 0) {
         await Future.delayed(Duration(milliseconds: 50));
       }
     }
+    _didRestart = true;
   }
 
   Future<void> _methodCallHandler(
