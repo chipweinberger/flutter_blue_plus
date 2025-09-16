@@ -1,3 +1,9 @@
+## 1.36.7
+* **[Fix]** iOS/macOS/Android: `setOptions` & `setLogLevel` should not invoke `flutterRestart` (regression 1.35.0)
+* **[Fix]** Linux: `discoverServices`: wait for `servicesResolved` to avoid partial results (#1265)
+* **[Fix]** Linux: `setNotifyValue`: return false (no CCCD) to prevent hang (#1264)
+* **[Fix]** Dart: undo "clear `servicesList` after disconnection" (regression 1.35.11)
+
 ## 1.36.6
 * **[Fix]** fix android compile error (regression 1.36.2)
 
