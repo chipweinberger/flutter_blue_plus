@@ -238,9 +238,6 @@ class BluetoothDevice {
             .fbpTimeout(timeout, "disconnect");
       }
 
-      // Wipe known services to avoid inconsistent state between Flutter and the platform
-      FlutterBluePlus._knownServices.remove(remoteId);
-
       if (!kIsWeb && Platform.isAndroid) {
         // Disconnected, remove connect timestamp
         FlutterBluePlus._connectTimestamp.remove(remoteId);
