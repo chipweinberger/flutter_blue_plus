@@ -251,7 +251,8 @@ class BluetoothDevice {
   }
 
   /// Discover services, characteristics, and descriptors of the remote device
-  ///   - [subscribeToServicesChanged] Android Only: If true, after discovering services we will subscribe
+  ///   - Note: `discoverServices` must be re-called after *every* connection!
+  ///   - [subscribeToServicesChanged] Android & Linux Only: If true, after discovering services we will subscribe
   ///     to the Services Changed Characteristic (0x2A05) used for the `device.onServicesReset` stream.
   ///     Note: this behavior happens automatically on iOS and cannot be disabled
   Future<List<BluetoothService>> discoverServices(
