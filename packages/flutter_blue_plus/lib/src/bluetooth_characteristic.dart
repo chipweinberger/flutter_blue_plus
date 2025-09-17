@@ -97,14 +97,11 @@ class BluetoothCharacteristic {
     var cccd = descriptors._firstWhereOrNull(
       (d) => d.descriptorUuid == cccdUuid && d.instanceId == instanceId,
     );
-
     if (cccd == null) {
       return false;
     }
-
     var hasNotify = cccd.lastValue.isNotEmpty && (cccd.lastValue[0] & 0x01) > 0;
     var hasIndicate = cccd.lastValue.isNotEmpty && (cccd.lastValue[0] & 0x02) > 0;
-
     return hasNotify || hasIndicate;
   }
 

@@ -527,7 +527,7 @@ class FlutterBluePlus {
       if (r.success == true) {
         String key = "${r.primaryServiceUuid ?? ""}:${r.serviceUuid}:${r.characteristicUuid}:${r.instanceId}:${r.descriptorUuid}";
         _lastDescs[r.remoteId] ??= {};
-        _lastDescs[r.remoteId]![key];
+        _lastDescs[r.remoteId]![key] = r.value;
       }
     });
 
