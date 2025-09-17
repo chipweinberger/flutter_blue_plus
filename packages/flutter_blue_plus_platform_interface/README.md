@@ -16,11 +16,15 @@ platform-specific behavior, and when you register your plugin, set the default
 
 # Note on breaking changes
 
-Strongly prefer non-breaking changes (such as adding a method to the interface)
-over breaking changes for this package.
+In a multi-dev scenario where each platform package is maintained by separate people,
+you should strongly prefer non-breaking changes to the platform interface 
+over breaking changes (such as adding a method to the interface). See 
+https://flutter.dev/go/platform-interface-breaking-changes for a discussion
+about that.
 
-See https://flutter.dev/go/platform-interface-breaking-changes for a discussion
-on why a less-clean interface is preferable to a breaking change.
+However, since FBP maintains all the platform packages ourselves, we can do breaking 
+changes freely and release the updated platform packages at the same time. There
+are therefore no restrictions when it comes to breaking changes.
 
 [1]: ../flutter_blue_plus
 [2]: lib/flutter_blue_plus_platform_interface.dart
