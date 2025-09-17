@@ -1,3 +1,6 @@
+## 1.36.8
+* **[Fix]** Dart: `isNotifying` was broken (regression 1.36.2)
+
 ## 1.36.7
 * **[Fix]** iOS/macOS/Android: `setOptions` & `setLogLevel` should not invoke `flutterRestart` (regression 1.35.0)
 * **[Fix]** Linux: `discoverServices`: wait for `servicesResolved` to avoid partial results (#1265)
