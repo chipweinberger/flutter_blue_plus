@@ -1,0 +1,1 @@
+packages/flutter_blue_plus/MOCKING.md
