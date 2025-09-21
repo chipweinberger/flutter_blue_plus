@@ -3,17 +3,24 @@
 
 <br>
 <p align="center">
-<img alt="FlutterBlue" src="https://github.com/boskokg/flutter_blue_plus/blob/master/site/flutterblueplus.png?raw=true" />
+<img alt="FlutterBlue" src="https://github.com/chipweinberger/flutter_blue_plus/blob/master/site/flutterblueplus.png?raw=true" />
 </p>
 <br><br>
 
 ## Sponsor
 
 <p align="left">
-<img width="250px" alt="FlutterBlue" src="https://github.com/boskokg/flutter_blue_plus/blob/master/site/jamcorder.png?raw=true" />
+<img width="250px" alt="FlutterBlue" src="https://github.com/chipweinberger/flutter_blue_plus/blob/master/site/jamcorder.png?raw=true" />
 </p>
 
 FlutterBluePlus is sponsored by [Jamcorder](https://www.jamcorder.com/). 
+
+## License
+
+FlutterBluePlus is licensed under the **[FlutterBluePlus License](./LICENSE)**.
+
+* **Free use**: For individuals, organizations with fewer than 50 employees, nonprofits, and educational institutions.  
+* **Commercial use**: For-profit organizations with **50 or more employees** must purchase a $2999 [Commercial License](https://jamcorder.myshopify.com/products/flutterblueplus-commercial-license). This license grants *lifetime use*, covers all FlutterBluePlus packages, and includes 365 days of updates.
 
 ---
 
@@ -88,7 +95,7 @@ flutter run
 ```
 
 <p align="center">
-<img alt="FlutterBlue" src="https://github.com/boskokg/flutter_blue_plus/blob/master/site/example.png?raw=true" />
+<img alt="FlutterBlue" src="https://github.com/chipweinberger/flutter_blue_plus/blob/master/site/example.png?raw=true" />
 </p>
 
 ## Versioning
@@ -142,7 +149,7 @@ Setting `LogLevel.verbose` shows *all* data in and out.
 
 🟡 = data from platform
 
-<img width="600" alt="Screenshot 2023-07-27 at 4 53 08 AM" src="https://github.com/boskokg/flutter_blue_plus/assets/1863934/ee37d702-2752-4402-bf26-fc661728c1c3">
+<img width="600" alt="Screenshot 2023-07-27 at 4 53 08 AM" src="https://github.com/chipweinberger/flutter_blue_plus/assets/1863934/ee37d702-2752-4402-bf26-fc661728c1c3">
 
 
 ### Bluetooth On & Off
@@ -623,7 +630,7 @@ Make sure you have granted access to the Bluetooth hardware:
 
 `Xcode -> Runners -> Targets -> Runner-> Signing & Capabilities -> App Sandbox -> Hardware -> Enable Bluetooth`
 
-<img width="528" alt="Screenshot 2023-12-11 at 10 32 04 AM" src="https://github.com/boskokg/flutter_blue_plus/assets/1863934/554079ef-4627-4dfc-97e3-1f07f84a0f3c">
+<img width="528" alt="Screenshot 2023-12-11 at 10 32 04 AM" src="https://github.com/chipweinberger/flutter_blue_plus/assets/1863934/554079ef-4627-4dfc-97e3-1f07f84a0f3c">
 
 ## Using Ble in App Background
 
@@ -755,7 +762,7 @@ The easiest way to debug issues in FlutterBluePlus is to make your own local cop
 
 ```
 cd /user/downloads
-git clone https://github.com/boskokg/flutter_blue_plus.git
+git clone https://github.com/chipweinberger/flutter_blue_plus.git
 ```
 
 then in `pubspec.yaml` add the repo by path:
