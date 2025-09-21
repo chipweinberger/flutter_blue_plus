@@ -7,7 +7,7 @@ part of '../flutter_blue_plus.dart';
 /// License type for using FlutterBluePlus.
 /// See the LICENSE file in the root of the project for full terms.
 enum License {
-  /// Free use under the FiftyPlus License, for:
+  /// Free use under the FlutterBluePlus License, for:
   /// - Individuals
   /// - Nonprofits
   /// - Educational institutions
