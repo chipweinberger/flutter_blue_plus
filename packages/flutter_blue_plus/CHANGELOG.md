@@ -1,3 +1,6 @@
+## 2.0.0
+* **[LICENSE]** switch to FlutterBluePlus license. 
+
 ## 1.36.8
 * **[Fix]** Dart: `isNotifying` was broken (regression 1.36.2)
 
