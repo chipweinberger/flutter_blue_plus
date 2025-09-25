@@ -19,7 +19,7 @@ import io.flutter.plugin.common.MethodChannel.Result;
 
 public abstract class L2CapChannel {
 
-    protected static final int DEFAULT_READ_BUFFER_SIZE = 50;
+    protected static final int DEFAULT_READ_BUFFER_SIZE = 100;
     protected final byte[] readBuffer;
     protected BluetoothSocket socket;
     protected OutputStream outputStream;
