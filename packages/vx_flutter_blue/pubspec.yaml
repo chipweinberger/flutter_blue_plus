@@ -1,0 +1,41 @@
+name: vx_flutter_blue
+description: Flutter plugin for connecting and communicating with Bluetooth Low Energy devices.
+version: 1.36.7
+homepage: https://github.com/chipweinberger/vx_flutter_blue
+
+environment:
+  sdk: ^3.0.0
+  flutter: '>=3.7.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # use specific versions. 
+  #  - users otherwise forget to update all
+  #  - simpler bug reporting
+  #  - unified changelog
+  #  - users can still manually override
+  vx_flutter_blue_platform_interface: 8.0.0
+  vx_flutter_blue_android: 8.0.0
+  vx_flutter_blue_darwin: 8.0.0
+  vx_flutter_blue_linux: 8.0.0
+  vx_flutter_blue_web: 8.0.0
+
+dev_dependencies:
+  flutter_lints: ^5.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        default_package: vx_flutter_blue_android
+      ios:
+        default_package: vx_flutter_blue_darwin
+      linux:
+        default_package: vx_flutter_blue_linux
+      macos:
+        default_package: vx_flutter_blue_darwin
+      web:
+        default_package: vx_flutter_blue_web

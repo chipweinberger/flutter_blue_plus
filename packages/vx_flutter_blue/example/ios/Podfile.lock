@@ -1,0 +1,23 @@
+PODS:
+  - Flutter (1.0.0)
+  - vx_flutter_blue_darwin (0.0.2):
+    - Flutter
+    - FlutterMacOS
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - vx_flutter_blue_darwin (from `.symlinks/plugins/vx_flutter_blue_darwin/darwin`)
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  vx_flutter_blue_darwin:
+    :path: ".symlinks/plugins/vx_flutter_blue_darwin/darwin"
+
+SPEC CHECKSUMS:
+  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  vx_flutter_blue_darwin: 904ed52825285a15f60e9d90312337a09f11a785
+
+PODFILE CHECKSUM: 819463e6a0290f5a72f145ba7cde16e8b6ef0796
+
+COCOAPODS: 1.16.2

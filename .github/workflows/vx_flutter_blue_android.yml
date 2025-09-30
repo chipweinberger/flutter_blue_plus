@@ -1,0 +1,12 @@
+name: Publish Viaanix Flutter Blue Android
+on:
+  push:
+    tags:
+      - 'vx_flutter_blue_android-[0-9]+.[0-9]+.[0-9]+'
+jobs:
+  publish:
+    permissions:
+      id-token: write
+    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
+    with:
+      working-directory: packages/vx_flutter_blue_android

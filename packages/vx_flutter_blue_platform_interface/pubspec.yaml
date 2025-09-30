@@ -1,0 +1,17 @@
+name: vx_flutter_blue_platform_interface
+description: A common platform interface for the vx_flutter_blue plugin.
+version: 7.0.0
+homepage: https://github.com/chipweinberger/vx_flutter_blue
+
+environment:
+  sdk: ^3.0.0
+  flutter: '>=3.7.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_lints: ^5.0.0
+  flutter_test:
+    sdk: flutter

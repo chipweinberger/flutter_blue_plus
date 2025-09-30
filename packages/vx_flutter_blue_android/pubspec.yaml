@@ -1,0 +1,27 @@
+name: vx_flutter_blue_android
+description: Android implementation of the vx_flutter_blue plugin.
+version: 7.0.4
+homepage: https://github.com/chipweinberger/vx_flutter_blue
+
+environment:
+  sdk: ^3.0.0
+  flutter: '>=3.7.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  vx_flutter_blue_platform_interface: 7.0.0
+
+dev_dependencies:
+  flutter_lints: ^5.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  plugin:
+    implements: vx_flutter_blue
+    platforms:
+      android:
+        package: com.lib.vx_flutter_blue
+        pluginClass: FlutterBluePlusPlugin
+        dartPluginClass: FlutterBluePlusAndroid

@@ -1,0 +1,12 @@
+# pubspec_overrides.yaml
+# These overrides only apply locally when you run `flutter pub get` in this app.
+# They replace the normal pub.dev versions with your local paths for local development.
+# The overrides are ignored when publishing packages to pub.dev and will not be
+# included in releases. Safe to keep around for local iteration.
+#
+# Use this to work on vx_flutter_blue and its platform packages without editing
+# pubspec.yaml every time.
+
+dependency_overrides:
+  vx_flutter_blue_platform_interface:
+    path: ../vx_flutter_blue_platform_interface
