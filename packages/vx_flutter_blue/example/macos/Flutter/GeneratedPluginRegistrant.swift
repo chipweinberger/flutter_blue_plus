@@ -8,5 +8,5 @@ import Foundation
 import vx_flutter_blue_darwin
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
-  FlutterBluePlusPlugin.register(with: registry.registrar(forPlugin: "FlutterBluePlusPlugin"))
+  VXFlutterBluePlugin.register(with: registry.registrar(forPlugin: "VXFlutterBluePlugin"))
 }

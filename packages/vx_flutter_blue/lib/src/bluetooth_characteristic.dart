@@ -58,7 +58,7 @@ class BluetoothCharacteristic {
   ///   - when the device is disconnected it is cleared
   List<int> get lastValue {
     String key = "${primaryServiceUuid ?? ""}:$serviceUuid:$characteristicUuid:$instanceId";
-    return FlutterBluePlus._lastChrs[remoteId]?[key] ?? [];
+    return VXFlutterBlue._lastChrs[remoteId]?[key] ?? [];
   }
 
   /// this stream emits values:
@@ -67,8 +67,8 @@ class BluetoothCharacteristic {
   ///   - anytime a notification arrives (if subscribed)
   ///   - and when first listened to, it re-emits the last value for convenience
   Stream<List<int>> get lastValueStream => _mergeStreams([
-        FlutterBluePlusPlatform.instance.onCharacteristicReceived,
-        FlutterBluePlusPlatform.instance.onCharacteristicWritten
+        VXFlutterBluePlatform.instance.onCharacteristicReceived,
+        VXFlutterBluePlatform.instance.onCharacteristicWritten
       ])
           .where((p) => p.remoteId == remoteId)
           .where((p) => p.primaryServiceUuid == primaryServiceUuid)
@@ -82,7 +82,7 @@ class BluetoothCharacteristic {
   /// this stream emits values:
   ///   - anytime `read()` is called
   ///   - anytime a notification arrives (if subscribed)
-  Stream<List<int>> get onValueReceived => FlutterBluePlusPlatform.instance.onCharacteristicReceived
+  Stream<List<int>> get onValueReceived => VXFlutterBluePlatform.instance.onCharacteristicReceived
       .where((p) => p.remoteId == remoteId)
       .where((p) => p.primaryServiceUuid == primaryServiceUuid)
       .where((p) => p.serviceUuid == serviceUuid)
@@ -112,7 +112,7 @@ class BluetoothCharacteristic {
   Future<List<int>> read({int timeout = 15}) async {
     // check connected
     if (device.isDisconnected) {
-      throw FlutterBluePlusException(
+      throw VXFlutterBlueException(
           ErrorPlatform.fbp, "readCharacteristic", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
@@ -132,7 +132,7 @@ class BluetoothCharacteristic {
         instanceId: instanceId,
       );
 
-      var responseStream = FlutterBluePlusPlatform.instance.onCharacteristicReceived
+      var responseStream = VXFlutterBluePlatform.instance.onCharacteristicReceived
           .where((p) => p.remoteId == request.remoteId)
           .where((p) => p.primaryServiceUuid == request.primaryServiceUuid)
           .where((p) => p.serviceUuid == request.serviceUuid)
@@ -143,7 +143,7 @@ class BluetoothCharacteristic {
       Future<BmCharacteristicData> futureResponse = responseStream.first;
 
       // invoke
-      await FlutterBluePlus._invokePlatform(() => FlutterBluePlusPlatform.instance.readCharacteristic(request));
+      await VXFlutterBlue._invokePlatform(() => VXFlutterBluePlatform.instance.readCharacteristic(request));
 
       // wait for response
       BmCharacteristicData response = await futureResponse
@@ -153,7 +153,7 @@ class BluetoothCharacteristic {
 
       // failed?
       if (!response.success) {
-        throw FlutterBluePlusException(_nativeError, "readCharacteristic", response.errorCode, response.errorString);
+        throw VXFlutterBlueException(_nativeError, "readCharacteristic", response.errorCode, response.errorString);
       }
 
       // set return value
@@ -184,7 +184,7 @@ class BluetoothCharacteristic {
 
     // check connected
     if (device.isDisconnected) {
-      throw FlutterBluePlusException(
+      throw VXFlutterBlueException(
           ErrorPlatform.fbp, "writeCharacteristic", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
@@ -206,7 +206,7 @@ class BluetoothCharacteristic {
         value: value,
       );
 
-      var responseStream = FlutterBluePlusPlatform.instance.onCharacteristicWritten
+      var responseStream = VXFlutterBluePlatform.instance.onCharacteristicWritten
           .where((p) => p.remoteId == request.remoteId)
           .where((p) => p.primaryServiceUuid == request.primaryServiceUuid)
           .where((p) => p.serviceUuid == request.serviceUuid)
@@ -217,7 +217,7 @@ class BluetoothCharacteristic {
       Future<BmCharacteristicData> futureResponse = responseStream.first;
 
       // invoke
-      await FlutterBluePlus._invokePlatform(() => FlutterBluePlusPlatform.instance.writeCharacteristic(request));
+      await VXFlutterBlue._invokePlatform(() => VXFlutterBluePlatform.instance.writeCharacteristic(request));
 
       // wait for response so that we can:
       //  1. check for success (writeWithResponse)
@@ -229,7 +229,7 @@ class BluetoothCharacteristic {
 
       // failed?
       if (!response.success) {
-        throw FlutterBluePlusException(_nativeError, "writeCharacteristic", response.errorCode, response.errorString);
+        throw VXFlutterBlueException(_nativeError, "writeCharacteristic", response.errorCode, response.errorString);
       }
 
       return Future.value();
@@ -245,7 +245,7 @@ class BluetoothCharacteristic {
   Future<bool> setNotifyValue(bool notify, {int timeout = 15, bool forceIndications = false}) async {
     // check connected
     if (device.isDisconnected) {
-      throw FlutterBluePlusException(
+      throw VXFlutterBlueException(
           ErrorPlatform.fbp, "setNotifyValue", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
@@ -271,7 +271,7 @@ class BluetoothCharacteristic {
 
       // Notifications & Indications are configured by writing to the
       // Client Characteristic Configuration Descriptor (CCCD)
-      Stream<BmDescriptorData> responseStream = FlutterBluePlusPlatform.instance.onDescriptorWritten
+      Stream<BmDescriptorData> responseStream = VXFlutterBluePlatform.instance.onDescriptorWritten
           .where((p) => p.remoteId == request.remoteId)
           .where((p) => p.primaryServiceUuid == request.primaryServiceUuid)
           .where((p) => p.serviceUuid == request.serviceUuid)
@@ -284,7 +284,7 @@ class BluetoothCharacteristic {
 
       // invoke
       bool hasCCCD =
-          await FlutterBluePlus._invokePlatform(() => FlutterBluePlusPlatform.instance.setNotifyValue(request));
+          await VXFlutterBlue._invokePlatform(() => VXFlutterBluePlatform.instance.setNotifyValue(request));
 
       // wait for CCCD descriptor to be written?
       if (hasCCCD) {
@@ -295,7 +295,7 @@ class BluetoothCharacteristic {
 
         // failed?
         if (!response.success) {
-          throw FlutterBluePlusException(_nativeError, "setNotifyValue", response.errorCode, response.errorString);
+          throw VXFlutterBlueException(_nativeError, "setNotifyValue", response.errorCode, response.errorString);
         }
       }
     } finally {
@@ -307,8 +307,8 @@ class BluetoothCharacteristic {
 
   // get known service
   BmBluetoothService? get _bmsvc {
-    if (FlutterBluePlus._knownServices[remoteId] != null) {
-      for (var s in FlutterBluePlus._knownServices[remoteId]!.services) {
+    if (VXFlutterBlue._knownServices[remoteId] != null) {
+      for (var s in VXFlutterBlue._knownServices[remoteId]!.services) {
         if (s.primaryServiceUuid == primaryServiceUuid) {
           if (s.serviceUuid == serviceUuid) {
             return s;

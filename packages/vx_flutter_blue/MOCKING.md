@@ -1,14 +1,14 @@
 # Mocking guide
 
-How to mock `FlutterBluePlus` for testing.
+How to mock `VXFlutterBlue` for testing.
 
 ## Overview
 
-Since version [1.10.0](https://pub.dev/packages/vx_flutter_blue/changelog#1100), `FlutterBluePlus.instance` has been deprecated in favor of static functions.
+Since version [1.10.0](https://pub.dev/packages/vx_flutter_blue/changelog#1100), `VXFlutterBlue.instance` has been deprecated in favor of static functions.
 
-Therefore, to mock FlutterBluePlus you must:
+Therefore, to mock VXFlutterBlue you must:
 
-1. Wrap `FlutterBluePlus` in a mockable non-static class
+1. Wrap `VXFlutterBlue` in a mockable non-static class
 2. Add your mocked functions to the mockable class.
 2. Use the mockable class in your code
 
@@ -21,9 +21,9 @@ Create the following class:
 ```dart
 import '../vx_flutter_blue.dart';
 
-/// Wrapper for FlutterBluePlus in order to easily mock it
+/// Wrapper for VXFlutterBlue in order to easily mock it
 /// Wraps all static calls for testing purposes
-class FlutterBluePlusMockable {
+class VXFlutterBlueMockable {
   Future<void> startScan({
     List<Guid> withServices = const [],
     Duration? timeout,
@@ -31,7 +31,7 @@ class FlutterBluePlusMockable {
     bool oneByOne = false,
     bool androidUsesFineLocation = false,
   }) {
-    return FlutterBluePlus.startScan(
+    return VXFlutterBlue.startScan(
         withServices: withServices,
         timeout: timeout,
         removeIfGone: removeIfGone,
@@ -40,66 +40,66 @@ class FlutterBluePlusMockable {
   }
 
   Stream<BluetoothAdapterState> get adapterState {
-    return FlutterBluePlus.adapterState;
+    return VXFlutterBlue.adapterState;
   }
 
   Stream<List<ScanResult>> get scanResults {
-    return FlutterBluePlus.scanResults;
+    return VXFlutterBlue.scanResults;
   }
 
   bool get isScanningNow {
-    return FlutterBluePlus.isScanningNow;
+    return VXFlutterBlue.isScanningNow;
   }
 
   Stream<bool> get isScanning {
-    return FlutterBluePlus.isScanning;
+    return VXFlutterBlue.isScanning;
   }
 
   Future<void> stopScan() {
-    return FlutterBluePlus.stopScan();
+    return VXFlutterBlue.stopScan();
   }
 
   void setLogLevel(LogLevel level, {color = true}) {
-    return FlutterBluePlus.setLogLevel(level, color: color);
+    return VXFlutterBlue.setLogLevel(level, color: color);
   }
 
   LogLevel get logLevel {
-    return FlutterBluePlus.logLevel;
+    return VXFlutterBlue.logLevel;
   }
 
   Future<bool> get isSupported {
-    return FlutterBluePlus.isSupported;
+    return VXFlutterBlue.isSupported;
   }
 
   Future<String> get adapterName {
-    return FlutterBluePlus.adapterName;
+    return VXFlutterBlue.adapterName;
   }
 
   Future<void> turnOn({int timeout = 60}) {
-    return FlutterBluePlus.turnOn(timeout: timeout);
+    return VXFlutterBlue.turnOn(timeout: timeout);
   }
 
   List<BluetoothDevice> get connectedDevices {
-    return FlutterBluePlus.connectedDevices;
+    return VXFlutterBlue.connectedDevices;
   }
 
   Future<List<BluetoothDevice>> get systemDevices {
-    return FlutterBluePlus.systemDevices;
+    return VXFlutterBlue.systemDevices;
   }
 
   Future<PhySupport> getPhySupport() {
-    return FlutterBluePlus.getPhySupport();
+    return VXFlutterBlue.getPhySupport();
   }
 
   Future<List<BluetoothDevice>> get bondedDevices {
-    return FlutterBluePlus.bondedDevices;
+    return VXFlutterBlue.bondedDevices;
   }
 }
 ```
 
 ## Mock the wrapper class
 
-Using e.g. [Mockito](https://pub.dev/packages/mockito), create a mock for the `FlutterBluePlusMockable` class, and build your tests and stubs.
+Using e.g. [Mockito](https://pub.dev/packages/mockito), create a mock for the `VXFlutterBlueMockable` class, and build your tests and stubs.
 
 ## Create instance
 
@@ -112,9 +112,9 @@ void main() {
 
 class MyApp extends StatelessWidget {
   MyApp({Key? key}) : super(key: key);
-  //instance of FlutterBluePlus that will be passed
+  //instance of VXFlutterBlue that will be passed
   //throughout the app as necessary
-  FlutterBluePlusMockable bluePlusMockable = FlutterBluePlusMockable();//<--
+  VXFlutterBlueMockable bluePlusMockable = VXFlutterBlueMockable();//<--
 
   @override
   Widget build(BuildContext context) {
@@ -131,12 +131,12 @@ class MyApp extends StatelessWidget {
 }
 ```
 
-## Use mock instead of FlutterBluePlus
+## Use mock instead of VXFlutterBlue
 
-Within your code, replace all calls to `FlutterBluePlus` with the mockable instance, e.g.:  
-`FlutterBluePlus.isScanning` --> `bluePlusMockable.isScanning`  
-`FlutterBluePlus.startScan` --> `bluePlusMockable.startScan`  
-`FlutterBluePlus.scanResults` --> `bluePlusMockable.scanResults`  
+Within your code, replace all calls to `VXFlutterBlue` with the mockable instance, e.g.:  
+`VXFlutterBlue.isScanning` --> `bluePlusMockable.isScanning`  
+`VXFlutterBlue.startScan` --> `bluePlusMockable.startScan`  
+`VXFlutterBlue.scanResults` --> `bluePlusMockable.scanResults`  
 etc.
 
 ## Example

@@ -79,7 +79,7 @@ import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry.RequestPermissionsResultListener;
 import io.flutter.plugin.common.PluginRegistry.ActivityResultListener;
 
-public class FlutterBluePlusPlugin implements
+public class VXFlutterBluePlugin implements
     FlutterPlugin,
     MethodCallHandler,
     RequestPermissionsResultListener,
@@ -125,7 +125,7 @@ public class FlutterBluePlusPlugin implements
         void op(boolean granted, String permission);
     }
 
-    public FlutterBluePlusPlugin() {}
+    public VXFlutterBluePlugin() {}
 
     // returns 128-bit representation
     public String uuid128(Object uuid)

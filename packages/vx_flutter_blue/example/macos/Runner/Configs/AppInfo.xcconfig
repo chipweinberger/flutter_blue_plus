@@ -8,7 +8,7 @@
 PRODUCT_NAME = vx_flutter_blue_example
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.lib.flutterBluePlusExample
+PRODUCT_BUNDLE_IDENTIFIER = com.lib.VXFlutterBlueExample
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2025 com.lib. All rights reserved.

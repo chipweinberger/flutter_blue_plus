@@ -23,8 +23,8 @@ class BluetoothService {
   ///  get it's secondary services (i.e. includedServices)
   List<BluetoothService> get includedServices {
     List<BluetoothService> out = [];
-    if (FlutterBluePlus._knownServices[remoteId] != null) {
-      for (var s in FlutterBluePlus._knownServices[remoteId]!.services) {
+    if (VXFlutterBlue._knownServices[remoteId] != null) {
+      for (var s in VXFlutterBlue._knownServices[remoteId]!.services) {
         if (s.primaryServiceUuid == serviceUuid) {
           out.add(BluetoothService.fromProto(s));
         }
@@ -37,8 +37,8 @@ class BluetoothService {
   ///  get the primary service it is associated with
   BluetoothService? get primaryService {
     if (primaryServiceUuid != null) {
-      if (FlutterBluePlus._knownServices[remoteId] != null) {
-        for (var s in FlutterBluePlus._knownServices[remoteId]!.services) {
+      if (VXFlutterBlue._knownServices[remoteId] != null) {
+        for (var s in VXFlutterBlue._knownServices[remoteId]!.services) {
           if (s.serviceUuid == primaryServiceUuid) {
             return BluetoothService.fromProto(s);
           }

@@ -25,5 +25,5 @@ flutter:
     implements: vx_flutter_blue
     platforms:
       web:
-        pluginClass: FlutterBluePlusWeb
+        pluginClass: VXFlutterBlueWeb
         fileName: vx_flutter_blue_web.dart

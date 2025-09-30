@@ -23,5 +23,5 @@ flutter:
     platforms:
       android:
         package: com.lib.vx_flutter_blue
-        pluginClass: FlutterBluePlusPlugin
-        dartPluginClass: FlutterBluePlusAndroid
+        pluginClass: VXFlutterBluePlugin
+        dartPluginClass: VXFlutterBlueAndroid

@@ -41,7 +41,7 @@ class BluetoothDescriptor {
   ///   - when the device is disconnected it is cleared
   List<int> get lastValue {
     String key = "${primaryServiceUuid ?? ""}:$serviceUuid:$characteristicUuid:$instanceId:$descriptorUuid";
-    return FlutterBluePlus._lastDescs[remoteId]?[key] ?? [];
+    return VXFlutterBlue._lastDescs[remoteId]?[key] ?? [];
   }
 
   /// this stream emits values:
@@ -49,7 +49,7 @@ class BluetoothDescriptor {
   ///   - anytime `write()` is called
   ///   - and when first listened to, it re-emits the last value for convenience
   Stream<List<int>> get lastValueStream => _mergeStreams(
-          [FlutterBluePlusPlatform.instance.onDescriptorRead, FlutterBluePlusPlatform.instance.onDescriptorWritten])
+          [VXFlutterBluePlatform.instance.onDescriptorRead, VXFlutterBluePlatform.instance.onDescriptorWritten])
       .where((p) => p.remoteId == remoteId)
       .where((p) => p.primaryServiceUuid == primaryServiceUuid)
       .where((p) => p.serviceUuid == serviceUuid)
@@ -62,7 +62,7 @@ class BluetoothDescriptor {
 
   /// this stream emits values:
   ///   - anytime `read()` is called
-  Stream<List<int>> get onValueReceived => FlutterBluePlusPlatform.instance.onDescriptorRead
+  Stream<List<int>> get onValueReceived => VXFlutterBluePlatform.instance.onDescriptorRead
       .where((p) => p.remoteId == remoteId)
       .where((p) => p.primaryServiceUuid == primaryServiceUuid)
       .where((p) => p.serviceUuid == serviceUuid)
@@ -76,7 +76,7 @@ class BluetoothDescriptor {
   Future<List<int>> read({int timeout = 15}) async {
     // check connected
     if (device.isDisconnected) {
-      throw FlutterBluePlusException(
+      throw VXFlutterBlueException(
           ErrorPlatform.fbp, "readDescriptor", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
@@ -97,7 +97,7 @@ class BluetoothDescriptor {
         descriptorUuid: descriptorUuid,
       );
 
-      Stream<BmDescriptorData> responseStream = FlutterBluePlusPlatform.instance.onDescriptorRead
+      Stream<BmDescriptorData> responseStream = VXFlutterBluePlatform.instance.onDescriptorRead
           .where((p) => p.remoteId == request.remoteId)
           .where((p) => p.primaryServiceUuid == request.primaryServiceUuid)
           .where((p) => p.serviceUuid == request.serviceUuid)
@@ -109,7 +109,7 @@ class BluetoothDescriptor {
       Future<BmDescriptorData> futureResponse = responseStream.first;
 
       // invoke
-      await FlutterBluePlus._invokePlatform(() => FlutterBluePlusPlatform.instance.readDescriptor(request));
+      await VXFlutterBlue._invokePlatform(() => VXFlutterBluePlatform.instance.readDescriptor(request));
 
       // wait for response
       BmDescriptorData response = await futureResponse
@@ -119,7 +119,7 @@ class BluetoothDescriptor {
 
       // failed?
       if (!response.success) {
-        throw FlutterBluePlusException(_nativeError, "readDescriptor", response.errorCode, response.errorString);
+        throw VXFlutterBlueException(_nativeError, "readDescriptor", response.errorCode, response.errorString);
       }
 
       readValue = response.value;
@@ -134,7 +134,7 @@ class BluetoothDescriptor {
   Future<void> write(List<int> value, {int timeout = 15}) async {
     // check connected
     if (device.isDisconnected) {
-      throw FlutterBluePlusException(
+      throw VXFlutterBlueException(
           ErrorPlatform.fbp, "writeDescriptor", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
@@ -153,7 +153,7 @@ class BluetoothDescriptor {
         value: value,
       );
 
-      Stream<BmDescriptorData> responseStream = FlutterBluePlusPlatform.instance.onDescriptorWritten
+      Stream<BmDescriptorData> responseStream = VXFlutterBluePlatform.instance.onDescriptorWritten
           .where((p) => p.remoteId == request.remoteId)
           .where((p) => p.primaryServiceUuid == request.primaryServiceUuid)
           .where((p) => p.serviceUuid == request.serviceUuid)
@@ -165,7 +165,7 @@ class BluetoothDescriptor {
       Future<BmDescriptorData> futureResponse = responseStream.first;
 
       // invoke
-      await FlutterBluePlus._invokePlatform(() => FlutterBluePlusPlatform.instance.writeDescriptor(request));
+      await VXFlutterBlue._invokePlatform(() => VXFlutterBluePlatform.instance.writeDescriptor(request));
 
       // wait for response
       BmDescriptorData response = await futureResponse
@@ -175,7 +175,7 @@ class BluetoothDescriptor {
 
       // failed?
       if (!response.success) {
-        throw FlutterBluePlusException(_nativeError, "writeDescriptor", response.errorCode, response.errorString);
+        throw VXFlutterBlueException(_nativeError, "writeDescriptor", response.errorCode, response.errorString);
       }
     } finally {
       mtx.give();

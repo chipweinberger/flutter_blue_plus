@@ -35,7 +35,7 @@ class BluetoothOffScreen extends StatelessWidget {
         onPressed: () async {
           try {
             if (!kIsWeb && Platform.isAndroid) {
-              await FlutterBluePlus.turnOn();
+              await VXFlutterBlue.turnOn();
             }
           } catch (e, backtrace) {
             Snackbar.show(ABC.a, prettyException("Error Turning On:", e), success: false);

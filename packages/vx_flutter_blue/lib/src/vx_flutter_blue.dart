@@ -4,7 +4,7 @@
 
 part of '../vx_flutter_blue.dart';
 
-class FlutterBluePlus {
+class VXFlutterBlue {
   ///////////////////
   //  Internal
   //
@@ -44,7 +44,7 @@ class FlutterBluePlus {
   /// the last known adapter state
   static BmAdapterStateEnum? _adapterStateNow;
 
-  /// FlutterBluePlus log level
+  /// VXFlutterBlue log level
   static LogLevel _logLevel = LogLevel.debug;
 
   ////////////////////
@@ -55,7 +55,7 @@ class FlutterBluePlus {
 
   /// Checks whether the hardware supports Bluetooth
   static Future<bool> get isSupported async =>
-      await _invokePlatform(() => FlutterBluePlusPlatform.instance.isSupported(BmIsSupportedRequest()));
+      await _invokePlatform(() => VXFlutterBluePlatform.instance.isSupported(BmIsSupportedRequest()));
 
   /// The current adapter state
   static BluetoothAdapterState get adapterStateNow =>
@@ -63,7 +63,7 @@ class FlutterBluePlus {
 
   /// Return the friendly Bluetooth name of the local Bluetooth adapter
   static Future<String> get adapterName async =>
-      await _invokePlatform(() => FlutterBluePlusPlatform.instance.getAdapterName(BmBluetoothAdapterNameRequest()))
+      await _invokePlatform(() => VXFlutterBluePlatform.instance.getAdapterName(BmBluetoothAdapterNameRequest()))
           .then((r) => r.adapterName);
 
   /// returns whether we are scanning as a stream
@@ -96,7 +96,7 @@ class FlutterBluePlus {
   static final BluetoothEvents events = BluetoothEvents();
 
   /// Get access to FBP logs
-  static Stream<String> get logs => FlutterBluePlusPlatform.logs;
+  static Stream<String> get logs => VXFlutterBluePlatform.logs;
 
   /// Set configurable options
   ///   - [showPowerAlert] Whether to show the power alert (iOS & MacOS only). i.e. CBCentralManagerOptionShowPowerAlertKey
@@ -110,19 +110,19 @@ class FlutterBluePlus {
     bool showPowerAlert = true,
     bool restoreState = false,
   }) async {
-    await _invokePlatform(() => FlutterBluePlusPlatform.instance
+    await _invokePlatform(() => VXFlutterBluePlatform.instance
         .setOptions(BmSetOptionsRequest(showPowerAlert: showPowerAlert, restoreState: restoreState)));
   }
 
   /// Turn on Bluetooth (Android only),
   static Future<void> turnOn({int timeout = 60}) async {
-    var responseStream = FlutterBluePlusPlatform.instance.onTurnOnResponse;
+    var responseStream = VXFlutterBluePlatform.instance.onTurnOnResponse;
 
     // Start listening now, before invokeMethod, to ensure we don't miss the response
     Future<BmTurnOnResponse> futureResponse = responseStream.first;
 
     // invoke
-    bool changed = await _invokePlatform(() => FlutterBluePlusPlatform.instance.turnOn(BmTurnOnRequest()));
+    bool changed = await _invokePlatform(() => VXFlutterBluePlatform.instance.turnOn(BmTurnOnRequest()));
 
     // only wait if bluetooth was off
     if (changed) {
@@ -131,7 +131,7 @@ class FlutterBluePlus {
 
       // check response
       if (response.userAccepted == false) {
-        throw FlutterBluePlusException(ErrorPlatform.fbp, "turnOn", FbpErrorCode.userRejected.index, "user rejected");
+        throw VXFlutterBlueException(ErrorPlatform.fbp, "turnOn", FbpErrorCode.userRejected.index, "user rejected");
       }
 
       // wait for adapter to turn on
@@ -144,12 +144,12 @@ class FlutterBluePlus {
     // get current state if needed
     if (_adapterStateNow == null) {
       var result =
-          await _invokePlatform(() => FlutterBluePlusPlatform.instance.getAdapterState(BmBluetoothAdapterStateRequest()));
+          await _invokePlatform(() => VXFlutterBluePlatform.instance.getAdapterState(BmBluetoothAdapterStateRequest()));
       // update _adapterStateNow if it is still null after the await
       _adapterStateNow ??= result.adapterState;
     }
 
-    yield* FlutterBluePlusPlatform.instance.onAdapterStateChanged
+    yield* VXFlutterBluePlatform.instance.onAdapterStateChanged
         .map((s) => _bmToAdapterState(s.adapterState))
         .newStreamWithInitialValue(_bmToAdapterState(_adapterStateNow!));
   }
@@ -167,7 +167,7 @@ class FlutterBluePlus {
   /// - [withServices] required on iOS (for privacy purposes). ignored on android.
   static Future<List<BluetoothDevice>> systemDevices(List<Guid> withServices) async {
     var r = await _invokePlatform(
-        () => FlutterBluePlusPlatform.instance.getSystemDevices(BmSystemDevicesRequest(withServices: withServices)));
+        () => VXFlutterBluePlatform.instance.getSystemDevices(BmSystemDevicesRequest(withServices: withServices)));
     for (BmBluetoothDevice device in r.devices) {
       if (device.platformName != null) {
         _platformNames[device.remoteId] = device.platformName!;
@@ -178,7 +178,7 @@ class FlutterBluePlus {
 
   /// Retrieve a list of bonded devices (Android only)
   static Future<List<BluetoothDevice>> get bondedDevices async {
-    var r = await _invokePlatform(() => FlutterBluePlusPlatform.instance.getBondedDevices(BmBondedDevicesRequest()));
+    var r = await _invokePlatform(() => VXFlutterBluePlatform.instance.getBondedDevices(BmBondedDevicesRequest()));
     for (BmBluetoothDevice device in r.devices) {
       if (device.platformName != null) {
         _platformNames[device.remoteId] = device.platformName!;
@@ -279,13 +279,13 @@ class FlutterBluePlus {
           androidCheckLocationServices: androidCheckLocationServices,
           webOptionalServices: webOptionalServices);
 
-      Stream<BmScanResponse> responseStream = FlutterBluePlusPlatform.instance.onScanResponse;
+      Stream<BmScanResponse> responseStream = VXFlutterBluePlatform.instance.onScanResponse;
 
       // Start listening now, before invokeMethod, so we do not miss any results
       _scanBuffer = _BufferStream.listen(responseStream);
 
       // invoke platform method
-      await _invokePlatform(() => FlutterBluePlusPlatform.instance.startScan(settings)).onError((e, s) {
+      await _invokePlatform(() => VXFlutterBluePlatform.instance.startScan(settings)).onError((e, s) {
         _stopScan(invokePlatform: false);
         throw e!;
       });
@@ -310,7 +310,7 @@ class FlutterBluePlus {
         } else {
           // failure?
           if (response.success == false) {
-            var e = FlutterBluePlusException(_nativeError, "scan", response.errorCode, response.errorString);
+            var e = VXFlutterBlueException(_nativeError, "scan", response.errorCode, response.errorString);
             _scanResults.addError(e);
             _stopScan(invokePlatform: false);
           }
@@ -364,7 +364,7 @@ class FlutterBluePlus {
       if (isScanningNow) {
         await _stopScan();
       } else if (_logLevel.index >= LogLevel.info.index) {
-        FlutterBluePlusPlatform.log("[FBP] stopScan: already stopped");
+        VXFlutterBluePlatform.log("[FBP] stopScan: already stopped");
       }
     } finally {
       mtx.give();
@@ -381,7 +381,7 @@ class FlutterBluePlus {
       subscription.cancel();
     }
     if (invokePlatform) {
-      await _invokePlatform(() => FlutterBluePlusPlatform.instance.stopScan(BmStopScanRequest()));
+      await _invokePlatform(() => VXFlutterBluePlatform.instance.stopScan(BmStopScanRequest()));
     }
   }
 
@@ -390,28 +390,28 @@ class FlutterBluePlus {
   ///   - this is an optional convenience function
   ///   - prevents accidentally creating duplicate subscriptions before each scan
   static void cancelWhenScanComplete(StreamSubscription subscription) {
-    FlutterBluePlus._scanSubscriptions.add(subscription);
+    VXFlutterBlue._scanSubscriptions.add(subscription);
   }
 
   /// Sets the internal FlutterBlue log level
   static Future<void> setLogLevel(LogLevel level, {color = true}) async {
     _logLevel = level;
     await _invokePlatform(
-        () => FlutterBluePlusPlatform.instance.setLogLevel(BmSetLogLevelRequest(logLevel: level, logColor: color)));
+        () => VXFlutterBluePlatform.instance.setLogLevel(BmSetLogLevelRequest(logLevel: level, logColor: color)));
   }
 
   /// Request Bluetooth PHY support
   static Future<PhySupport> getPhySupport() async {
     // check android
     if (kIsWeb || !Platform.isAndroid) {
-      throw FlutterBluePlusException(
+      throw VXFlutterBlueException(
           ErrorPlatform.fbp, "getPhySupport", FbpErrorCode.androidOnly.index, "android-only");
     }
 
-    return await _invokePlatform(() => FlutterBluePlusPlatform.instance.getPhySupport(PhySupportRequest()));
+    return await _invokePlatform(() => VXFlutterBluePlatform.instance.getPhySupport(PhySupportRequest()));
   }
 
-  static Future<void> _initFlutterBluePlus() async {
+  static Future<void> _initVXFlutterBlue() async {
     if (_initialized) {
       return;
     }
@@ -420,13 +420,13 @@ class FlutterBluePlus {
 
     // android only
     if (!kIsWeb && Platform.isAndroid) {
-      FlutterBluePlusPlatform.instance.onDetachedFromEngine.listen((r) {
+      VXFlutterBluePlatform.instance.onDetachedFromEngine.listen((r) {
         _stopScan(invokePlatform: false);
       });
     }
 
     // keep track of adapter states
-    FlutterBluePlusPlatform.instance.onAdapterStateChanged.listen((r) {
+    VXFlutterBluePlatform.instance.onAdapterStateChanged.listen((r) {
       _adapterStateNow = r.adapterState;
       if (isScanningNow && r.adapterState != BmAdapterStateEnum.on) {
         _stopScan(invokePlatform: false);
@@ -435,7 +435,7 @@ class FlutterBluePlus {
         for (DeviceIdentifier d in _autoConnect) {
           BluetoothDevice(remoteId: d).connect(autoConnect: true, mtu: null).onError((e, s) {
             if (logLevel != LogLevel.none) {
-              FlutterBluePlusPlatform.log("[FBP] [AutoConnect] connection failed: $e");
+              VXFlutterBluePlatform.log("[FBP] [AutoConnect] connection failed: $e");
             }
           });
         }
@@ -443,7 +443,7 @@ class FlutterBluePlus {
     });
 
     // keep track of connection states
-    FlutterBluePlusPlatform.instance.onConnectionStateChanged.listen((r) {
+    VXFlutterBluePlatform.instance.onConnectionStateChanged.listen((r) {
       _connectionStates[r.remoteId] = r;
       if (r.connectionState == BmConnectionStateEnum.disconnected) {
         // clear mtu
@@ -470,7 +470,7 @@ class FlutterBluePlus {
               var d = BluetoothDevice(remoteId: r.remoteId);
               d.connect(autoConnect: true, mtu: null).onError((e, s) {
                 if (logLevel != LogLevel.none) {
-                  FlutterBluePlusPlatform.log("[FBP] [AutoConnect] connection failed: $e");
+                  VXFlutterBluePlatform.log("[FBP] [AutoConnect] connection failed: $e");
                 }
               });
             }
@@ -480,29 +480,29 @@ class FlutterBluePlus {
     });
 
     // keep track of device name
-    FlutterBluePlusPlatform.instance.onNameChanged.listen((r) {
+    VXFlutterBluePlatform.instance.onNameChanged.listen((r) {
       _platformNames[r.remoteId] = r.name;
     });
 
     // keep track of services resets
-    FlutterBluePlusPlatform.instance.onServicesReset.listen((r) {
+    VXFlutterBluePlatform.instance.onServicesReset.listen((r) {
       _knownServices.remove(r.remoteId);
     });
 
     // keep track of bond state
-    FlutterBluePlusPlatform.instance.onBondStateChanged.listen((r) {
+    VXFlutterBluePlatform.instance.onBondStateChanged.listen((r) {
       _bondStates[r.remoteId] = r;
     });
 
     // keep track of services
-    FlutterBluePlusPlatform.instance.onDiscoveredServices.listen((r) {
+    VXFlutterBluePlatform.instance.onDiscoveredServices.listen((r) {
       if (r.success == true) {
         _knownServices[r.remoteId] = r;
       }
     });
 
     // keep track of mtu values
-    FlutterBluePlusPlatform.instance.onMtuChanged.listen((r) {
+    VXFlutterBluePlatform.instance.onMtuChanged.listen((r) {
       if (r.success == true) {
         _mtuValues[r.remoteId] = r;
       }
@@ -510,8 +510,8 @@ class FlutterBluePlus {
 
     // keep track of characteristic values
     _mergeStreams([
-      FlutterBluePlusPlatform.instance.onCharacteristicReceived,
-      FlutterBluePlusPlatform.instance.onCharacteristicWritten
+      VXFlutterBluePlatform.instance.onCharacteristicReceived,
+      VXFlutterBluePlatform.instance.onCharacteristicWritten
     ]).listen((r) {
       if (r.success == true) {
         String key = "${r.primaryServiceUuid ?? ""}:${r.serviceUuid}:${r.characteristicUuid}:${r.instanceId}";
@@ -522,7 +522,7 @@ class FlutterBluePlus {
 
     // keep track of descriptor values
     _mergeStreams(
-            [FlutterBluePlusPlatform.instance.onDescriptorRead, FlutterBluePlusPlatform.instance.onDescriptorWritten])
+            [VXFlutterBluePlatform.instance.onDescriptorRead, VXFlutterBluePlatform.instance.onDescriptorWritten])
         .listen((r) {
       if (r.success == true) {
         String key = "${r.primaryServiceUuid ?? ""}:${r.serviceUuid}:${r.characteristicUuid}:${r.instanceId}:${r.descriptorUuid}";
@@ -532,7 +532,7 @@ class FlutterBluePlus {
     });
 
     // cancel delayed subscriptions
-    FlutterBluePlusPlatform.instance.onConnectionStateChanged.listen((r) {
+    VXFlutterBluePlatform.instance.onConnectionStateChanged.listen((r) {
       if (_delayedSubscriptions.isNotEmpty) {
         if (r.connectionState == BmConnectionStateEnum.disconnected) {
           var remoteId = r.remoteId;
@@ -554,7 +554,7 @@ class FlutterBluePlus {
 
     try {
       // initialize
-      await _initFlutterBluePlus();
+      await _initVXFlutterBlue();
 
       // invoke
       return await invoke();
@@ -567,13 +567,13 @@ class FlutterBluePlus {
   @Deprecated('Deprecated in Android SDK 33 with no replacement')
   static Future<void> turnOff({int timeout = 10}) async {
     var responseStream =
-        FlutterBluePlusPlatform.instance.onAdapterStateChanged.where((p) => p.adapterState == BmAdapterStateEnum.off);
+        VXFlutterBluePlatform.instance.onAdapterStateChanged.where((p) => p.adapterState == BmAdapterStateEnum.off);
 
     // Start listening now, before invokeMethod, to ensure we don't miss the response
     Future<BmBluetoothAdapterState> futureResponse = responseStream.first;
 
     // invoke
-    bool changed = await _invokePlatform(() => FlutterBluePlusPlatform.instance.turnOff(BmTurnOffRequest()));
+    bool changed = await _invokePlatform(() => VXFlutterBluePlatform.instance.turnOff(BmTurnOffRequest()));
 
     // only wait if bluetooth was on
     if (changed) {
@@ -786,7 +786,7 @@ enum FbpErrorCode {
   userRejected
 }
 
-class FlutterBluePlusException implements Exception {
+class VXFlutterBlueException implements Exception {
   /// Which platform did the error occur on?
   final ErrorPlatform platform;
 
@@ -799,12 +799,12 @@ class FlutterBluePlusException implements Exception {
   /// note: depends on platform
   final String? description;
 
-  FlutterBluePlusException(this.platform, this.function, this.code, this.description);
+  VXFlutterBlueException(this.platform, this.function, this.code, this.description);
 
   @override
   String toString() {
     String sPlatform = platform.toString().split('.').last;
-    return 'FlutterBluePlusException | $function | $sPlatform-code: $code | $description';
+    return 'VXFlutterBlueException | $function | $sPlatform-code: $code | $description';
   }
 
   @Deprecated('Use function instead')

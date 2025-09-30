@@ -8,11 +8,11 @@ export 'src/guid.dart';
 export 'src/log_level.dart';
 
 /// The interface that implementations of vx_flutter_blue must implement.
-abstract base class FlutterBluePlusPlatform {
-  static FlutterBluePlusPlatform? _instance;
+abstract base class VXFlutterBluePlatform {
+  static VXFlutterBluePlatform? _instance;
 
-  /// The default instance of [FlutterBluePlusPlatform] to use. Throws an [UnsupportedError] if vx_flutter_blue is unsupported on this platform.
-  static FlutterBluePlusPlatform get instance {
+  /// The default instance of [VXFlutterBluePlatform] to use. Throws an [UnsupportedError] if vx_flutter_blue is unsupported on this platform.
+  static VXFlutterBluePlatform get instance {
     final instance = _instance;
 
     if (instance != null) {
@@ -24,9 +24,9 @@ abstract base class FlutterBluePlusPlatform {
     }
   }
 
-  /// Platform-specific plugins should set this with their own platform-specific class that extends [FlutterBluePlusPlatform] when they register themselves.
+  /// Platform-specific plugins should set this with their own platform-specific class that extends [VXFlutterBluePlatform] when they register themselves.
   static set instance(
-    FlutterBluePlusPlatform instance,
+    VXFlutterBluePlatform instance,
   ) {
     _instance = instance;
   }

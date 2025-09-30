@@ -24,4 +24,4 @@ flutter:
     implements: vx_flutter_blue
     platforms:
       linux:
-        dartPluginClass: FlutterBluePlusLinux
+        dartPluginClass: VXFlutterBlueLinux

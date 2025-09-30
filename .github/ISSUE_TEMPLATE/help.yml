@@ -23,7 +23,7 @@ body:
   - type: input
     id: fbp-version
     attributes:
-      label: "FlutterBluePlus Version"
+      label: "VXFlutterBlue Version"
       description: "run `flutter pub deps` in your project"
       placeholder: "ex. 1.31.4"
     validations:

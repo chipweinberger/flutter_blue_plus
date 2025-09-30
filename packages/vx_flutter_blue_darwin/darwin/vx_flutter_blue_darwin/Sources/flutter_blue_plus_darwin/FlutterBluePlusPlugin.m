@@ -2,18 +2,18 @@
 // All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-#import "./include/vx_flutter_blue_darwin/FlutterBluePlusPlugin.h"
+#import "./include/vx_flutter_blue_darwin/VXFlutterBluePlugin.h"
 #include <Foundation/NSObjCRuntime.h>
 
 #define Log(LEVEL, FORMAT, ...) [self log:LEVEL format:@"[FBP-iOS] " FORMAT, ##__VA_ARGS__]
 
 NSString * const CCCD = @"2902";
 
-@interface CBUUID (CBUUIDAdditionsFlutterBluePlus)
+@interface CBUUID (CBUUIDAdditionsVXFlutterBlue)
 - (NSString *)uuidStr;
 @end
 
-@implementation CBUUID (CBUUIDAdditionsFlutterBluePlus)
+@implementation CBUUID (CBUUIDAdditionsVXFlutterBlue)
 - (NSString *)uuidStr
 {
     return [self.UUIDString lowercaseString];
@@ -29,7 +29,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     LVERBOSE = 5,
 };
 
-@interface FlutterBluePlusPlugin ()
+@interface VXFlutterBluePlugin ()
 @property(nonatomic, retain) NSObject<FlutterPluginRegistrar> *registrar;
 @property(nonatomic, retain) FlutterMethodChannel *methodChannel;
 @property(nonatomic, retain) CBCentralManager *centralManager;
@@ -50,12 +50,12 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 @property(nonatomic) NSNumber *restoreState;
 @end
 
-@implementation FlutterBluePlusPlugin
+@implementation VXFlutterBluePlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar> *)registrar
 {
     FlutterMethodChannel *methodChannel = [FlutterMethodChannel methodChannelWithName:NAMESPACE @"/methods"
                                                                 binaryMessenger:[registrar messenger]];
-    FlutterBluePlusPlugin *instance = [[FlutterBluePlusPlugin alloc] init];
+    VXFlutterBluePlugin *instance = [[VXFlutterBluePlugin alloc] init];
     instance.methodChannel = methodChannel;
     instance.knownPeripherals = [NSMutableDictionary new];
     instance.connectedPeripherals = [NSMutableDictionary new];
@@ -128,7 +128,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             }
 
             if ([self.restoreState boolValue]) {
-                options[CBCentralManagerOptionRestoreIdentifierKey] = @"flutterBluePlusRestoreIdentifier";
+                options[CBCentralManagerOptionRestoreIdentifierKey] = @"VXFlutterBlueRestoreIdentifier";
             }
 
             Log(LDEBUG, @"showPowerAlert: %@", [self.showPowerAlert boolValue] ? @"yes" : @"no");
@@ -877,7 +877,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     {
         NSString* s = [NSString stringWithFormat:@"primary service not found '%@'", primaryServiceUuid];
         NSDictionary* d = @{NSLocalizedDescriptionKey : s};
-        *error = [NSError errorWithDomain:@"flutterBluePlus" code:1000 userInfo:d];
+        *error = [NSError errorWithDomain:@"VXFlutterBlue" code:1000 userInfo:d];
         return nil;
     }
 
@@ -889,7 +889,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         if (error && !secondaryService) {
             NSString* s = [NSString stringWithFormat:@"secondary service not found '%@' (primary service %@)", serviceUuid, primaryServiceUuid];
             NSDictionary* d = @{NSLocalizedDescriptionKey : s};
-            *error = [NSError errorWithDomain:@"flutterBluePlus" code:1001 userInfo:d];
+            *error = [NSError errorWithDomain:@"VXFlutterBlue" code:1001 userInfo:d];
             return nil;
         }
     }
@@ -907,7 +907,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         NSString* format = @"characteristic not found in service (chr: '%@', svc: '%@')";
         NSString* s = [NSString stringWithFormat:format, characteristicId, serviceUuid];
         NSDictionary* d = @{NSLocalizedDescriptionKey : s};
-        *error = [NSError errorWithDomain:@"flutterBluePlus" code:1002 userInfo:d];
+        *error = [NSError errorWithDomain:@"VXFlutterBlue" code:1002 userInfo:d];
         return nil;
     }
     return characteristic;
@@ -922,7 +922,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         NSString* format = @"descriptor not found in characteristic (desc: '%@', chr: '%@')";
         NSString* s = [NSString stringWithFormat:format, descriptorId, [characteristic.UUID uuidStr]];
         NSDictionary* d = @{NSLocalizedDescriptionKey : s};
-        *error = [NSError errorWithDomain:@"flutterBluePlus" code:1002 userInfo:d];
+        *error = [NSError errorWithDomain:@"VXFlutterBlue" code:1002 userInfo:d];
         return nil;
     }
     return descriptor;

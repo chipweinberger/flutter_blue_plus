@@ -27,7 +27,7 @@ class _ScanScreenState extends State<ScanScreen> {
   void initState() {
     super.initState();
 
-    _scanResultsSubscription = FlutterBluePlus.scanResults.listen((results) {
+    _scanResultsSubscription = VXFlutterBlue.scanResults.listen((results) {
       if (mounted) {
         setState(() => _scanResults = results);
       }
@@ -35,7 +35,7 @@ class _ScanScreenState extends State<ScanScreen> {
       Snackbar.show(ABC.b, prettyException("Scan Error:", e), success: false);
     });
 
-    _isScanningSubscription = FlutterBluePlus.isScanning.listen((state) {
+    _isScanningSubscription = VXFlutterBlue.isScanning.listen((state) {
       if (mounted) {
         setState(() => _isScanning = state);
       }
@@ -53,14 +53,14 @@ class _ScanScreenState extends State<ScanScreen> {
     try {
       // `withServices` is required on iOS for privacy purposes, ignored on android.
       var withServices = [Guid("180f")]; // Battery Level Service
-      _systemDevices = await FlutterBluePlus.systemDevices(withServices);
+      _systemDevices = await VXFlutterBlue.systemDevices(withServices);
     } catch (e, backtrace) {
       Snackbar.show(ABC.b, prettyException("System Devices Error:", e), success: false);
       print(e);
       print("backtrace: $backtrace");
     }
     try {
-      await FlutterBluePlus.startScan(
+      await VXFlutterBlue.startScan(
         timeout: const Duration(seconds: 15),
         webOptionalServices: [
           Guid("180f"), // battery
@@ -81,7 +81,7 @@ class _ScanScreenState extends State<ScanScreen> {
 
   Future onStopPressed() async {
     try {
-      FlutterBluePlus.stopScan();
+      VXFlutterBlue.stopScan();
     } catch (e, backtrace) {
       Snackbar.show(ABC.b, prettyException("Stop Scan Error:", e), success: false);
       print(e);
@@ -100,7 +100,7 @@ class _ScanScreenState extends State<ScanScreen> {
 
   Future onRefresh() {
     if (_isScanning == false) {
-      FlutterBluePlus.startScan(timeout: const Duration(seconds: 15));
+      VXFlutterBlue.startScan(timeout: const Duration(seconds: 15));
     }
     if (mounted) {
       setState(() {});

@@ -3,7 +3,7 @@
 
 <br>
 <p align="center">
-<img alt="FlutterBlue" src="https://github.com/boskokg/vx_flutter_blue/blob/master/site/flutterblueplus.png?raw=true" />
+<img alt="FlutterBlue" src="https://github.com/boskokg/vx_flutter_blue/blob/master/site/VXFlutterBlue.png?raw=true" />
 </p>
 <br><br>
 
@@ -13,7 +13,7 @@
 <img width="250px" alt="FlutterBlue" src="https://github.com/boskokg/vx_flutter_blue/blob/master/site/jamcorder.png?raw=true" />
 </p>
 
-FlutterBluePlus is sponsored by [Jamcorder](https://www.jamcorder.com/).
+VXFlutterBlue is sponsored by [Jamcorder](https://www.jamcorder.com/).
 
 ---
 
@@ -34,7 +34,7 @@ Migrating from [FlutterBlue](https://github.com/pauldemarco/flutter_blue)? See [
 
 ## Introduction
 
-FlutterBluePlus is a Bluetooth Low Energy plugin for [Flutter](https://flutter.dev).
+VXFlutterBlue is a Bluetooth Low Energy plugin for [Flutter](https://flutter.dev).
 
 It supports BLE Central Role only (most common).
 
@@ -56,13 +56,13 @@ If you are new to Bluetooth, you should start by reading BLE tutorials.
 
 ## Cross-Platform Bluetooth Low Energy
 
-FlutterBluePlus supports nearly every feature on all supported platforms: iOS, macOS, Android, Linux, Web.
+VXFlutterBlue supports nearly every feature on all supported platforms: iOS, macOS, Android, Linux, Web.
 
 ## No Dependencies
 
-FlutterBluePlus has zero dependencies besides Flutter, Android, iOS, and macOS themselves.
+VXFlutterBlue has zero dependencies besides Flutter, Android, iOS, and macOS themselves.
 
-This makes FlutterBluePlus very stable, and easy to maintain.
+This makes VXFlutterBlue very stable, and easy to maintain.
 
 ## Windows Support
 
@@ -80,7 +80,7 @@ Please star this repo & on [pub.dev](https://pub.dev/packages/vx_flutter_blue). 
 
 ## Example
 
-FlutterBluePlus has a beautiful example app, useful to debug issues.
+VXFlutterBlue has a beautiful example app, useful to debug issues.
 
 ```
 cd ./example
@@ -119,7 +119,7 @@ Flutter Blue Plus takes error handling seriously.
 
 Every error returned by the native platform is checked and thrown as an exception where appropriate.
 
-**Streams:** Streams returned by FlutterBluePlus never emit any errors and never close. There's no need to handle `onError` or `onDone` for  `stream.listen(...)`. The one exception is `FlutterBluePlus.scanResults`, which you should handle `onError`.
+**Streams:** Streams returned by VXFlutterBlue never emit any errors and never close. There's no need to handle `onError` or `onDone` for  `stream.listen(...)`. The one exception is `VXFlutterBlue.scanResults`, which you should handle `onError`.
 
 ---
 
@@ -127,10 +127,10 @@ Every error returned by the native platform is checked and thrown as an exceptio
 
 ```dart
 // if your terminal doesn't support color you'll see annoying logs like `\x1B[1;35m`
-FlutterBluePlus.setLogLevel(LogLevel.verbose, color:false);
+VXFlutterBlue.setLogLevel(LogLevel.verbose, color:false);
 
 // optional
-FlutterBluePlus.logs.listen((String s){
+VXFlutterBlue.logs.listen((String s){
     // send logs anywhere you want
 });
 ```
@@ -147,12 +147,12 @@ Setting `LogLevel.verbose` shows _all_ data in and out.
 
 ### Bluetooth On & Off
 
-**Note:** On iOS, a "_This app would like to use Bluetooth_" system dialogue appears on first call to any FlutterBluePlus method.
+**Note:** On iOS, a "_This app would like to use Bluetooth_" system dialogue appears on first call to any VXFlutterBlue method.
 
 ```dart
 // first, check if bluetooth is supported by your hardware
-// Note: The platform is initialized on the first call to any FlutterBluePlus method.
-if (await FlutterBluePlus.isSupported == false) {
+// Note: The platform is initialized on the first call to any VXFlutterBlue method.
+if (await VXFlutterBlue.isSupported == false) {
     print("Bluetooth not supported by this device");
     return;
 }
@@ -160,7 +160,7 @@ if (await FlutterBluePlus.isSupported == false) {
 // handle bluetooth on & off
 // note: for iOS the initial state is typically BluetoothAdapterState.unknown
 // note: if you have permissions issues you will get stuck at BluetoothAdapterState.unauthorized
-var subscription = FlutterBluePlus.adapterState.listen((BluetoothAdapterState state) {
+var subscription = VXFlutterBlue.adapterState.listen((BluetoothAdapterState state) {
     print(state);
     if (state == BluetoothAdapterState.on) {
         // usually start scanning, connecting, etc
@@ -172,7 +172,7 @@ var subscription = FlutterBluePlus.adapterState.listen((BluetoothAdapterState st
 // turn on bluetooth ourself if we can
 // for iOS, the user controls bluetooth enable/disable
 if (!kIsWeb && Platform.isAndroid) {
-    await FlutterBluePlus.turnOn();
+    await VXFlutterBlue.turnOn();
 }
 
 // cancel to prevent duplicate listeners
@@ -189,7 +189,7 @@ If your device is not found, see [Common Problems](#common-problems).
 // listen to scan results
 // Note: `onScanResults` clears the results between scans. You should use
 //  `scanResults` if you want the current scan results *or* the results from the previous scan.
-var subscription = FlutterBluePlus.onScanResults.listen((results) {
+var subscription = VXFlutterBlue.onScanResults.listen((results) {
         if (results.isNotEmpty) {
             ScanResult r = results.last; // the most recently found device
             print('${r.device.remoteId}: "${r.advertisementData.advName}" found!');
@@ -199,21 +199,21 @@ var subscription = FlutterBluePlus.onScanResults.listen((results) {
 );
 
 // cleanup: cancel subscription when scanning stops
-FlutterBluePlus.cancelWhenScanComplete(subscription);
+VXFlutterBlue.cancelWhenScanComplete(subscription);
 
 // Wait for Bluetooth enabled & permission granted
-// In your real app you should use `FlutterBluePlus.adapterState.listen` to handle all states
-await FlutterBluePlus.adapterState.where((val) => val == BluetoothAdapterState.on).first;
+// In your real app you should use `VXFlutterBlue.adapterState.listen` to handle all states
+await VXFlutterBlue.adapterState.where((val) => val == BluetoothAdapterState.on).first;
 
 // Start scanning w/ timeout
 // Optional: use `stopScan()` as an alternative to timeout
-await FlutterBluePlus.startScan(
+await VXFlutterBlue.startScan(
   withServices:[Guid("180D")], // match any of the specified services
   withNames:["Bluno"], // *or* any of the specified names
   timeout: Duration(seconds:15));
 
 // wait for scanning to stop
-await FlutterBluePlus.isScanning.where((val) => val == false).first;
+await VXFlutterBlue.isScanning.where((val) => val == false).first;
 ```
 
 ### Connect to a device
@@ -420,9 +420,9 @@ await d.write([0x12, 0x34])
 
 ### Services Changed Characteristic
 
-FlutterBluePlus automatically listens to the Services Changed Characteristic (0x2A05)
+VXFlutterBlue automatically listens to the Services Changed Characteristic (0x2A05)
 
-In FlutterBluePlus, we call it `onServicesReset` because you must re-discover services.
+In VXFlutterBlue, we call it `onServicesReset` because you must re-discover services.
 
 ```dart
 // - uses the GAP Services Changed characteristic (0x2A05)
@@ -438,7 +438,7 @@ device.onServicesReset.listen(() async {
 Get devices currently connected to your app.
 
 ```dart
-List<BluetoothDevice> devs = FlutterBluePlus.connectedDevices;
+List<BluetoothDevice> devs = VXFlutterBlue.connectedDevices;
 for (var d in devs) {
     print(d);
 }
@@ -453,7 +453,7 @@ Get devices connected to the system by _any_ app.
 ```dart
 // `withServices` required on iOS, ignored on android
 List<Guid> withServices = [Guid("180F")]; // e.g. Battery Service
-List<BluetoothDevice> devs = await FlutterBluePlus.systemDevices(withServices);
+List<BluetoothDevice> devs = await VXFlutterBlue.systemDevices(withServices);
 for (var d in devs) {
     await d.connect(); // Must connect *our* app to the device
     await d.discoverServices();
@@ -501,14 +501,14 @@ There are streams for:
 
 ```dart
 // listen to *any device* connection state changes 
-FlutterBluePlus.events.onConnectionStateChanged.listen((event)) {
+VXFlutterBlue.events.onConnectionStateChanged.listen((event)) {
     print('${event.device} ${event.connectionState}');
 }
 ```
 
 ## Mocking
 
-To mock `FlutterBluePlus` for development, refer to the [Mocking Guide](MOCKING.md).
+To mock `VXFlutterBlue` for development, refer to the [Mocking Guide](MOCKING.md).
 
 ## Getting Started
 
@@ -628,7 +628,7 @@ Make sure you have granted access to the Bluetooth hardware:
 
 ## Using Ble in App Background
 
-**This is an advanced use case**. FlutterBluePlus does not support everything. You may have to fork it. PRs are welcome.
+**This is an advanced use case**. VXFlutterBlue does not support everything. You may have to fork it. PRs are welcome.
 
 ### iOS
 
@@ -648,7 +648,7 @@ When this key-value pair is included in the app’s Info.plist file, the system 
 To wake up your app even after it is killed by the OS, set the `restoreState` option to true **before** starting any FBP work**:
 
 ```
-FlutterBluePlus.setOptions(restoreState: true);
+VXFlutterBlue.setOptions(restoreState: true);
 ```
 
 **Note**: Upon being woken up, an app has around 10 seconds to complete a task. Apps that spend too much time executing in the background can be throttled back by the system or killed.
@@ -685,7 +685,7 @@ Note: When functionality is unsupported on a platform, sensible defaults are ret
 | systemDevices     🔥| ✔️      | ✔️  | ✔️    | ✔️    | ❌   | List of devices connected to the system, even by other apps |
 | getPhySupport       | ✔️      | ❌   | ❌     | ❌     | ❌   | Get supported bluetooth phy codings                         |
 
-### FlutterBluePlus Events API
+### VXFlutterBlue Events API
 
 |                            | Android | iOS | Linux | macOS | Web | Description                                            |
 |----------------------------|---------|-----|-------|-------|-----|--------------------------------------------------------|
@@ -752,7 +752,7 @@ Note: When functionality is unsupported on a platform, sensible defaults are ret
 
 ## Debugging
 
-The easiest way to debug issues in FlutterBluePlus is to make your own local copy.
+The easiest way to debug issues in VXFlutterBlue is to make your own local copy.
 
 ```
 cd /user/downloads
@@ -766,7 +766,7 @@ then in `pubspec.yaml` add the repo by path:
     path: /user/downloads/vx_flutter_blue
 ```
 
-Now you can edit the FlutterBluePlus code yourself.
+Now you can edit the VXFlutterBlue code yourself.
 
 ## Common Problems
 
@@ -818,9 +818,9 @@ Flutter Errors:
 
 You need to wait for the bluetooth adapter to fully turn on.
 
-`await FlutterBluePlus.adapterState.where((state) => state == BluetoothAdapterState.on).first;`
+`await VXFlutterBlue.adapterState.where((state) => state == BluetoothAdapterState.on).first;`
 
-You can also use `FlutterBluePlus.adapterState.listen(...)`. See [Usage](#usage).
+You can also use `VXFlutterBlue.adapterState.listen(...)`. See [Usage](#usage).
 
 ---
 
@@ -831,7 +831,7 @@ You can also use `FlutterBluePlus.adapterState.listen(...)`. See [Usage](#usage)
 `adapterState` always starts as `unknown`. You need to wait longer for the service to initialize. As simple as:
 
 ```
-if (await FlutterBluePlus.adapterState.first == BluetoothAdapterState.unknown) {
+if (await VXFlutterBlue.adapterState.first == BluetoothAdapterState.unknown) {
     await Future.delayed(const Duration(seconds: 1));
 }
 ```
@@ -846,11 +846,11 @@ Check that your device supports Bluetooth & has permissions.
 
 ### adapterState is called multiple times
 
-You are forgetting to cancel the original `FlutterBluePlus.adapterState.listen` resulting in multiple listeners.
+You are forgetting to cancel the original `VXFlutterBlue.adapterState.listen` resulting in multiple listeners.
 
 ```dart
 // tip: using ??= makes it easy to only make new listener when currently null
-final subscription ??= FlutterBluePlus.adapterState.listen((value) {
+final subscription ??= VXFlutterBlue.adapterState.listen((value) {
     // ...
 });
 
@@ -877,7 +877,7 @@ Install a BLE scanner app on your phone. Can it find your device?
 
 Headphones, speakers, keyboards, mice, gamepads, & printers all use Bluetooth Classic.
 
-These devices may be found in System Settings, but they cannot be connected to by FlutterBluePlus. FlutterBluePlus only supports Bluetooth Low Energy.
+These devices may be found in System Settings, but they cannot be connected to by VXFlutterBlue. VXFlutterBlue only supports Bluetooth Low Energy.
 
 **4. your device stopped advertising.**
 
@@ -891,7 +891,7 @@ Try looking through system devices:
 
 ```dart
 // search system devices. i.e. any device connected to by *any* app
-List<BluetoothDevice> system = await FlutterBluePlus.systemDevices;
+List<BluetoothDevice> system = await VXFlutterBlue.systemDevices;
 for (var d in system) {
     print('${r.device.platformName} already connected to! ${r.device.remoteId}');
     if (d.platformName == "myBleDevice") {
@@ -966,7 +966,7 @@ You are forgetting to cancel the original `device.connectionState.listen` result
 
 ```dart
 // tip: using ??= makes it easy to only make new listener when currently null
-final subscription ??= FlutterBluePlus.device.connectionState.listen((value) {
+final subscription ??= VXFlutterBlue.device.connectionState.listen((value) {
     // ...
 });
 
@@ -994,7 +994,7 @@ e.g. `05:A4:22:31:F7:ED`
 
 You can google this error. It is a common iOS ble error code.
 
-It means your device stopped working. FlutterBluePlus cannot fix it.
+It means your device stopped working. VXFlutterBlue cannot fix it.
 
 ---
 
@@ -1004,7 +1004,7 @@ These GATT error codes are part of the BLE Specification.
 
 **These are _responses_ from your ble device because you are sending an invalid request.**
 
-FlutterBluePlus cannot fix these errors. You are doing something wrong & your device is responding with an error.
+VXFlutterBlue cannot fix these errors. You are doing something wrong & your device is responding with an error.
 
 **GATT errors as they appear on iOS**:
 

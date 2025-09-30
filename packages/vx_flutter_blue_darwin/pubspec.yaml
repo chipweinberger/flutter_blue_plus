@@ -22,10 +22,10 @@ flutter:
     implements: vx_flutter_blue
     platforms:
       ios:
-        pluginClass: FlutterBluePlusPlugin
-        dartPluginClass: FlutterBluePlusDarwin
+        pluginClass: VXFlutterBluePlugin
+        dartPluginClass: VXFlutterBlueDarwin
         sharedDarwinSource: true
       macos:
-        pluginClass: FlutterBluePlusPlugin
-        dartPluginClass: FlutterBluePlusDarwin
+        pluginClass: VXFlutterBluePlugin
+        dartPluginClass: VXFlutterBlueDarwin
         sharedDarwinSource: true

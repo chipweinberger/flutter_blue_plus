@@ -9,7 +9,7 @@ import 'package:web/web.dart' show Event;
 import 'src/html.dart';
 import 'src/web_bluetooth.dart';
 
-final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
+final class VXFlutterBlueWeb extends VXFlutterBluePlatform {
   late final _characteristicValueChangedEventListener = _handleCharacteristicValueChanged.toJS;
 
   final _devices = <DeviceIdentifier, BluetoothDevice>{};
@@ -86,7 +86,7 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
   static void registerWith(
     Registrar registrar,
   ) {
-    FlutterBluePlusPlatform.instance = FlutterBluePlusWeb();
+    VXFlutterBluePlatform.instance = VXFlutterBlueWeb();
   }
 
   @override

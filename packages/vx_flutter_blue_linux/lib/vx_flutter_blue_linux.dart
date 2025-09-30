@@ -24,7 +24,7 @@ extension on BlueZGattCharacteristic {
   }
 }
 
-final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
+final class VXFlutterBlueLinux extends VXFlutterBluePlatform {
   final _client = BlueZClient();
 
   var _initialized = false;
@@ -292,7 +292,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   Future<bool> connect(
     BmConnectRequest request,
   ) async {
-    await _initFlutterBluePlus();
+    await _initVXFlutterBlue();
 
     final device = _client.devices.singleWhere(
       (device) {
@@ -309,7 +309,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   Future<bool> createBond(
     BmCreateBondRequest request,
   ) async {
-    await _initFlutterBluePlus();
+    await _initVXFlutterBlue();
 
     final device = _client.devices.singleWhere(
       (device) {
@@ -326,7 +326,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   Future<bool> disconnect(
     BmDisconnectRequest request,
   ) async {
-    await _initFlutterBluePlus();
+    await _initVXFlutterBlue();
 
     final device = _client.devices.singleWhere(
       (device) {
@@ -344,7 +344,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
     BmDiscoverServicesRequest request,
   ) async {
     try {
-      await _initFlutterBluePlus();
+      await _initVXFlutterBlue();
 
       final device = _client.devices.singleWhere(
         (device) {
@@ -458,7 +458,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   Future<BmBluetoothAdapterName> getAdapterName(
     BmBluetoothAdapterNameRequest request,
   ) async {
-    await _initFlutterBluePlus();
+    await _initVXFlutterBlue();
 
     return BmBluetoothAdapterName(
       adapterName: _client.adapters.firstOrNull?.name ?? '',
@@ -469,7 +469,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   Future<BmBluetoothAdapterState> getAdapterState(
     BmBluetoothAdapterStateRequest request,
   ) async {
-    await _initFlutterBluePlus();
+    await _initVXFlutterBlue();
 
     return BmBluetoothAdapterState(
       adapterState: switch (_client.adapters.firstOrNull?.powered) {
@@ -484,7 +484,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   Future<BmBondStateResponse> getBondState(
     BmBondStateRequest request,
   ) async {
-    await _initFlutterBluePlus();
+    await _initVXFlutterBlue();
 
     final device = _client.devices.singleWhere(
       (device) {
@@ -503,7 +503,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   Future<BmDevicesList> getBondedDevices(
     BmBondedDevicesRequest request,
   ) async {
-    await _initFlutterBluePlus();
+    await _initVXFlutterBlue();
 
     return BmDevicesList(
       devices: _client.devices.where(
@@ -525,7 +525,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   Future<BmDevicesList> getSystemDevices(
     BmSystemDevicesRequest request,
   ) async {
-    await _initFlutterBluePlus();
+    await _initVXFlutterBlue();
 
     return BmDevicesList(
       devices: _client.devices.map(
@@ -543,7 +543,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   Future<bool> isSupported(
     BmIsSupportedRequest request,
   ) async {
-    await _initFlutterBluePlus();
+    await _initVXFlutterBlue();
 
     return _client.adapters.isNotEmpty;
   }
@@ -553,7 +553,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
     BmReadCharacteristicRequest request,
   ) async {
     try {
-      await _initFlutterBluePlus();
+      await _initVXFlutterBlue();
 
       final device = _client.devices.singleWhere(
         (device) {
@@ -627,7 +627,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
     BmReadDescriptorRequest request,
   ) async {
     try {
-      await _initFlutterBluePlus();
+      await _initVXFlutterBlue();
 
       final device = _client.devices.singleWhere(
         (device) {
@@ -715,7 +715,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
     BmReadRssiRequest request,
   ) async {
     try {
-      await _initFlutterBluePlus();
+      await _initVXFlutterBlue();
 
       final device = _client.devices.singleWhere(
         (device) {
@@ -753,7 +753,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   Future<bool> setLogLevel(
     BmSetLogLevelRequest request,
   ) async {
-    await _initFlutterBluePlus();
+    await _initVXFlutterBlue();
 
     _logLevel = request.logLevel;
 
@@ -764,7 +764,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   Future<bool> setNotifyValue(
     BmSetNotifyValueRequest request,
   ) async {
-    await _initFlutterBluePlus();
+    await _initVXFlutterBlue();
 
     final device = _client.devices.singleWhere(
       (device) {
@@ -807,7 +807,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   Future<bool> startScan(
     BmScanSettings request,
   ) async {
-    await _initFlutterBluePlus();
+    await _initVXFlutterBlue();
 
     final adapter = _client.adapters.firstOrNull;
 
@@ -832,7 +832,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   Future<bool> stopScan(
     BmStopScanRequest request,
   ) async {
-    await _initFlutterBluePlus();
+    await _initVXFlutterBlue();
 
     final adapter = _client.adapters.firstOrNull;
 
@@ -849,7 +849,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   Future<bool> turnOff(
     BmTurnOffRequest request,
   ) async {
-    await _initFlutterBluePlus();
+    await _initVXFlutterBlue();
 
     final adapter = _client.adapters.firstOrNull;
 
@@ -866,7 +866,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   Future<bool> turnOn(
     BmTurnOnRequest request,
   ) async {
-    await _initFlutterBluePlus();
+    await _initVXFlutterBlue();
 
     final adapter = _client.adapters.firstOrNull;
 
@@ -890,7 +890,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
     BmWriteCharacteristicRequest request,
   ) async {
     try {
-      await _initFlutterBluePlus();
+      await _initVXFlutterBlue();
 
       final device = _client.devices.singleWhere(
         (device) {
@@ -969,7 +969,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
     BmWriteDescriptorRequest request,
   ) async {
     try {
-      await _initFlutterBluePlus();
+      await _initVXFlutterBlue();
 
       final device = _client.devices.singleWhere(
         (device) {
@@ -1053,10 +1053,10 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   }
 
   static void registerWith() {
-    FlutterBluePlusPlatform.instance = FlutterBluePlusLinux();
+    VXFlutterBluePlatform.instance = VXFlutterBlueLinux();
   }
 
-  Future<void> _initFlutterBluePlus() async {
+  Future<void> _initVXFlutterBlue() async {
     if (_initialized) {
       return;
     }
@@ -1068,7 +1068,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
     _client.devicesChanged.switchMap(
       (devices) {
         if (_logLevel == LogLevel.verbose) {
-          FlutterBluePlusPlatform.log(
+          VXFlutterBluePlatform.log(
             '[FBP-Linux] devices changed ${devices.map((device) => device.remoteId).toList()}',
           );
         }
@@ -1079,7 +1079,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
               return device.propertiesChanged.switchMap(
                 (properties) {
                   if (_logLevel == LogLevel.verbose) {
-                    FlutterBluePlusPlatform.log(
+                    VXFlutterBluePlatform.log(
                       '[FBP-Linux] device ${device.remoteId} properties changed $properties',
                     );
                   }
@@ -1092,7 +1092,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
                         characteristic.propertiesChanged.map(
                           (properties) {
                             if (_logLevel == LogLevel.verbose) {
-                              FlutterBluePlusPlatform.log(
+                              VXFlutterBluePlatform.log(
                                 '[FBP-Linux] device ${device.remoteId} service ${service.uuid} characteristic ${characteristic.uuid} properties changed $properties',
                               );
                             }

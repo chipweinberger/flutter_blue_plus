@@ -114,7 +114,7 @@ This release adds support for Web, Linux, and the Platform Interface.
 
 ## 1.34.5
 
-* **[Feature]** add `FlutterBluePlus.logs` to get access to FBP logs
+* **[Feature]** add `VXFlutterBlue.logs` to get access to FBP logs
 
 ## 1.34.4
 
@@ -582,28 +582,28 @@ This release greatly increases reliability on android & ios.
 
 ## 1.20.7
 
-* **[Fix]**  events API was not accessible through `FlutterBluePlus.events`
+* **[Fix]**  events API was not accessible through `VXFlutterBlue.events`
 
 ## 1.20.6
 
-* **[Add]** `FlutterBluePlus.events.mtu`
+* **[Add]** `VXFlutterBlue.events.mtu`
 
 ## 1.20.5
 
-* **[Add]** `FlutterBluePlus.events.onNameChanged`
-* **[Add]** `FlutterBluePlus.events.onServicesChanged`
+* **[Add]** `VXFlutterBlue.events.onNameChanged`
+* **[Add]** `VXFlutterBlue.events.onServicesChanged`
 
 ## 1.20.4
 
-* **[Rename]** `FlutterBluePlus.connectionEvents` -> `FlutterBluePlus.events.connectionState`
-* **[Add]** `FlutterBluePlus.events.onCharacteristicReceived`
-* **[Add]** `FlutterBluePlus.events.onDescriptorRead`
-* **[Add]** `FlutterBluePlus.events.bondState`
+* **[Rename]** `VXFlutterBlue.connectionEvents` -> `VXFlutterBlue.events.connectionState`
+* **[Add]** `VXFlutterBlue.events.onCharacteristicReceived`
+* **[Add]** `VXFlutterBlue.events.onDescriptorRead`
+* **[Add]** `VXFlutterBlue.events.bondState`
 
 ## 1.20.3
 
-* **[Add]** `FlutterBluePlus.connectionEvents`, a stream of all connection & disconnected events
-* **[Add]** `FlutterBluePlus.connectedDevices`, to get currently connected devices
+* **[Add]** `VXFlutterBlue.connectionEvents`, a stream of all connection & disconnected events
+* **[Add]** `VXFlutterBlue.connectedDevices`, to get currently connected devices
 * **[Add]** `device.isConnected`, convenience accessor
 
 ## 1.20.2
@@ -613,7 +613,7 @@ This release greatly increases reliability on android & ios.
 
 ## 1.20.1
 
-* **[Remove]** `FlutterBluePlus.connectedDevices`. This API needs more thought.
+* **[Remove]** `VXFlutterBlue.connectedDevices`. This API needs more thought.
 
 ## 1.20.0
 
@@ -627,7 +627,7 @@ This release renames `connectedSystemDevices`.
 
 ## 1.19.1
 
-* **[Add]** new method `FlutterBluePlus.connectedDevices`
+* **[Add]** new method `VXFlutterBlue.connectedDevices`
 
 ## 1.19.0
 
@@ -809,7 +809,7 @@ This release simplifies BluetoothDevice construction.
 
 ## 1.15.1
 
-* **[Fix]** `FlutterBluePlus.scanResults` should always return list copy to avoid iteration exceptions (regression in 1.15.0)
+* **[Fix]** `VXFlutterBlue.scanResults` should always return list copy to avoid iteration exceptions (regression in 1.15.0)
 
 ## 1.15.0
 
@@ -822,7 +822,7 @@ This release simplifies BluetoothDevice construction.
 
 **Breaking Changes & Improvements:**
 
-* **[Simplify]** removed `FlutterBluePlus.scan`. Use `FlutterBluePlus.scartScan(oneByOne: true)` instead.
+* **[Simplify]** removed `VXFlutterBlue.scan`. Use `VXFlutterBlue.scartScan(oneByOne: true)` instead.
 * **[Simplify]** removed `allowDuplicates` option for `scartScan`. It is not supported on android. We always filter duplicates anyway.
 * **[Simplify]** removed `macAddresses` option for `scartScan`. It was not supported on iOS, and is overall not very useful.
 * **[Simplify]** `startScan` now returns `Future<void>` instead of `Future<List<ScanResult>>`. It was redundant and confusing.
@@ -938,7 +938,7 @@ This release simplifies BluetoothDevice construction.
 
 ## 1.14.1
 
-* **[Improve]** Dart: each `FlutterBluePlusException` should have unique code for handling
+* **[Improve]** Dart: each `VXFlutterBlueException` should have unique code for handling
 
 ## 1.14.0
 
@@ -991,7 +991,7 @@ This release improves bonding support.
 
 ## 1.12.13
 
-* **[Fix]** iOS: `FlutterBluePlus.isAvailable` 'int' is not a subtype of type 'FutureOr<bool>' (regressed in 1.12.10)
+* **[Fix]** iOS: `VXFlutterBlue.isAvailable` 'int' is not a subtype of type 'FutureOr<bool>' (regressed in 1.12.10)
 
 ## 1.12.12
 
@@ -1015,7 +1015,7 @@ This release improves bonding support.
 * **[Fix]** Dart: remove unecessary print (regression in 1.11.7)
 * **[Fix]** Android: add blank `AndroidManifest.xml` to fix build errors in older flutter (regression in 1.12.0)
 * **[Fix]** Android/iOS: infinite recursion when included services includes itself (bug in original `flutter_blue`)
-* **[Fix]** iOS: `FlutterBluePlus.isOn` returns 'no' first time even though it is on (bug in original `flutter_blue`)
+* **[Fix]** iOS: `VXFlutterBlue.isOn` returns 'no' first time even though it is on (bug in original `flutter_blue`)
 * **[Improve]** Dart: mutex should make sure writes happen in the same order as called
 * **[Improve]** Dart: `setLogLevel` color now optional
 
@@ -1158,7 +1158,7 @@ This release removes recent changes to the API causing issues.
 This release improves error handling and reliability.
 
 * **[BREAKING CHANGE]** Dart: `turnOn` & `turnOff` now wait for completion, return void instead of bool, and can throw
-* **[BREAKING CHANGE]** Dart: use static functions for `FlutterBluePlus` instead of `FlutterBluePlus.instance`. Multiple instances is not supported by any platform.
+* **[BREAKING CHANGE]** Dart: use static functions for `VXFlutterBlue` instead of `VXFlutterBlue.instance`. Multiple instances is not supported by any platform.
 * **[Improve]** readme: add error handling section
 * **[Improve]** iOS: handle missing bluetooth adapter gracefully
 * **[Improve]** iOS: `getAdapterState` && `getConnectionState` are more robust
@@ -1198,12 +1198,12 @@ This release improves error handling and reliability.
 ## 1.9.0
 
 This release marks the end of major work to improve reliability and
-simplicity of the FlutterBluePlus codebase. Please submit bug reports.
+simplicity of the VXFlutterBlue codebase. Please submit bug reports.
 
 * **[Breaking Change/Fix]** Android: When `read` is called `onValueChangedStream` is pushed to as well. This change was made to make both platforms behave the same way. It is an unavoidable limitation of iOS. See: <https://github.com/boskokg/vx_flutter_blue/issues/419>
 * **[Fix]** Android/iOS: mtu check minus 3 issue (reggression in 1.8.3)
 * **[Fix]** Dart: `BluetoothCharacteristic.state` variable not working (reggression in 1.8.6)
-* **[Fix]** Dart: `FlutterBluePlus.state` variable not working (reggression in 1.8.6)
+* **[Fix]** Dart: `VXFlutterBlue.state` variable not working (reggression in 1.8.6)
 * **[rename]** `BluetoothCharacteristic.value` -> `lastValueStream`
 * **[rename]** `BluetoothDescriptor.value` -> `lastValueStream`
 * **[rename]** `BluetoothCharacteristic.onValueChangedStream` -> `onValueReceived`
@@ -1227,9 +1227,9 @@ simplicity of the FlutterBluePlus codebase. Please submit bug reports.
 
 * **[rename]** Dart: `BluetoothDevice.id` -> `remoteId`
 * **[rename]** Dart: uuid -> `characteristicUuid` / `serviceUuid` / `descriptorUuid`
-* **[rename]** Dart: `FlutterBluePlus.name` -> `adapterName`
+* **[rename]** Dart: `VXFlutterBlue.name` -> `adapterName`
 * **[rename]** Dart: `BluetoothDevice.name` -> `localName`
-* **[rename]** Dart: `FlutterBluePlus.state` -> `adapterState`
+* **[rename]** Dart: `VXFlutterBlue.state` -> `adapterState`
 * **[rename]** Dart: `BluetoothDevice.state` -> `connectionState`
 * **[Improve]** iOS: add support for `autoReconnect` (iOS 17 only)
 

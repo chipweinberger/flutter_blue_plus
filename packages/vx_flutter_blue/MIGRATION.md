@@ -1,13 +1,14 @@
 
 # migration guide
 
-Breaking changes in FlutterBluePlus, listed version by version.
+Breaking changes in VXFlutterBlue, listed version by version.
 
 ## 1.8.6
+
 * **renamed:** `BluetoothDevice.id` -> `remoteId`
-* **renamed:** `FlutterBluePlus.name` -> `adapterName`
+* **renamed:** `VXFlutterBlue.name` -> `adapterName`
 * **renamed:** `BluetoothDevice.name` -> `platformName`
-* **renamed:** `FlutterBluePlus.state` -> `adapterState`
+* **renamed:** `VXFlutterBlue.state` -> `adapterState`
 * **renamed:** `BluetoothDevice.state` -> `connectionState`
 
 ## 1.9.0
@@ -24,7 +25,7 @@ Breaking changes in FlutterBluePlus, listed version by version.
 
 You no longer need to use `.instance`
 
-i.e. `FlutterBluePlus.instance.startScan` becomes `FlutterBluePlus.startScan`
+i.e. `VXFlutterBlue.instance.startScan` becomes `VXFlutterBlue.startScan`
 
 ### turnOn and turnOff
 
@@ -37,33 +38,33 @@ i.e. `FlutterBluePlus.instance.startScan` becomes `FlutterBluePlus.startScan`
 
 ## 1.15.0
 
-### `FlutterBluePlus.scan` was removed
+### `VXFlutterBlue.scan` was removed
 
-**Option 1:** migrate to `FlutterBluePlus.startScan` with `oneByOne` parameter
+**Option 1:** migrate to `VXFlutterBlue.startScan` with `oneByOne` parameter
 
 **Option 2:** use the following extension (below)
 
 ```
-extension Scan on FlutterBluePlus {
+extension Scan on VXFlutterBlue {
   static Stream<ScanResult> scan({
     List<Guid> withServices = const [],
     Duration? timeout,
     bool androidUsesFineLocation = false,
   }) {
-    if (FlutterBluePlus.isScanningNow) {
+    if (VXFlutterBlue.isScanningNow) {
         throw Exception("Another scan is already in progress");
     }
 
     final controller = StreamController<ScanResult>();
 
-    var subscription = FlutterBluePlus.scanResults.listen(
+    var subscription = VXFlutterBlue.scanResults.listen(
       (r){if(r.isNotEmpty){controller.add(r.first);}},
       onError: (e, stackTrace) => controller.addError(e, stackTrace),
     );
 
-    Future scanComplete = FlutterBluePlus.isScanning.skip(1).where((e) => e == false).first;
+    Future scanComplete = VXFlutterBlue.isScanning.skip(1).where((e) => e == false).first;
 
-    FlutterBluePlus.startScan(
+    VXFlutterBlue.startScan(
       withServices: withServices,
       timeout: timeout,
       removeIfGone: null,
@@ -83,12 +84,12 @@ extension Scan on FlutterBluePlus {
 
 ---
 
-### `FlutterBluePlus.startScan` doesn't return List<ScanResult> anymore
+### `VXFlutterBlue.startScan` doesn't return List<ScanResult> anymore
 
-**Option 1:** migrate to `FlutterBluePlus.scanResults`. Example code:
+**Option 1:** migrate to `VXFlutterBlue.scanResults`. Example code:
 
 ```
-Stream<BluetoothDevice?> myDeviceStream = FlutterBluePlus.scanResults
+Stream<BluetoothDevice?> myDeviceStream = VXFlutterBlue.scanResults
     .map((list) => list.first)
     .where((r) => r.advertisementData.advName == "myDeviceName")
     .map((r) => r.device);
@@ -98,7 +99,7 @@ Future<BluetoothDevice?> myDeviceFuture = myDeviceStream.first
     .timeout(Duration(seconds: 10))
     .catchError((error) => null);
 
-await FlutterBluePlus.startScan(timeout: Duration(seconds: 10), oneByOne:true);
+await VXFlutterBlue.startScan(timeout: Duration(seconds: 10), oneByOne:true);
 
 BluetoothDevice? myDevice = await myDeviceFuture;
 ```
@@ -106,25 +107,25 @@ BluetoothDevice? myDevice = await myDeviceFuture;
 **Option 2:** use this extension
 
 ```
-extension Scan on FlutterBluePlus {
+extension Scan on VXFlutterBlue {
   static Future<List<ScanResult>> startScanWithResult({
     List<Guid> withServices = const [],
     Duration? timeout,
     bool androidUsesFineLocation = false,
   }) async {
-    if (FlutterBluePlus.isScanningNow) {
+    if (VXFlutterBlue.isScanningNow) {
       throw Exception("Another scan is already in progress");
     }
 
     List<ScanResult> output = [];
 
-    var subscription = FlutterBluePlus.scanResults.listen((result) {
+    var subscription = VXFlutterBlue.scanResults.listen((result) {
       output = result;
     }, onError: (e, stackTrace) {
       throw Exception(e);
     });
 
-    FlutterBluePlus.startScan(
+    VXFlutterBlue.startScan(
       withServices: withServices,
       timeout: timeout,
       removeIfGone: null,
@@ -133,7 +134,7 @@ extension Scan on FlutterBluePlus {
     );
 
     // wait scan complete
-    await FlutterBluePlus.isScanning.where((e) => e == false).first;
+    await VXFlutterBlue.isScanning.where((e) => e == false).first;
 
     subscription.cancel();
 
@@ -144,20 +145,20 @@ extension Scan on FlutterBluePlus {
 
 ---
 
-### `await FlutterBluePlus.startScan()` does not wait for scan completion anymore
+### `await VXFlutterBlue.startScan()` does not wait for scan completion anymore
 
 Use `isScanning` to detect completion instead.
 
 ```
-await FlutterBluePlus.startScan(timeout: Duration(seconds:15));
-await FlutterBluePlus.isScanning.where((value) => value == false).first;
+await VXFlutterBlue.startScan(timeout: Duration(seconds:15));
+await VXFlutterBlue.isScanning.where((value) => value == false).first;
 ```
 
 ## 1.16.0
 
 * **renamed:** `BluetoothDevice.localName` -> `platformName`
 * **deleted:** `BluetoothDevice.type` & `BluetoothDevice.localName` from constructor
-* **deleted:** `servicesStream` & `isDiscoveringServices` 
+* **deleted:** `servicesStream` & `isDiscoveringServices`
 
 ## 1.17.0
 
@@ -186,7 +187,9 @@ This change was made to increase reliability, at the cost of throughput.
 * **Breaking Change:** on android, we now request an mtu of 512 by default during connection.
 
 ## 1.22.1 to 1.26.0
+
 These releases changed multiple things but then changed them back. For brevity, here are the actual changes:
+
 * **[Behavior Change]** android: always listen to Services Changed characteristic, to match iOS behavior
 * **[Rename]** `device.onServicesChanged` -> `device.onServicesReset`
 * **[Remove]** `device.onNameChanged`, in favor of only exposing `events.onNameChanged`
@@ -194,7 +197,7 @@ These releases changed multiple things but then changed them back. For brevity, 
 
 ## 1.27.0
 
-* **[Breaking Change]** scanning: `continousUpdates` is now false by default - it is not typically needed & hurts perf. 
+* **[Breaking Change]** scanning: `continousUpdates` is now false by default - it is not typically needed & hurts perf.
 
 If your app uses `startScan.removeIfGone`, or your app continually checks the value of `scanResult.timestamp` or `scanResult.rssi`, then you will need to explicitly set `continousUpdates` to true.
 

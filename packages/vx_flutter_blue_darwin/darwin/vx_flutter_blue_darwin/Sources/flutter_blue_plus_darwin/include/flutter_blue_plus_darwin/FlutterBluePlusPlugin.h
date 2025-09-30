@@ -14,10 +14,10 @@
 
 #define NAMESPACE @"vx_flutter_blue"
 
-@interface FlutterBluePlusPlugin : NSObject<FlutterPlugin, CBCentralManagerDelegate, CBPeripheralDelegate>
+@interface VXFlutterBluePlugin : NSObject<FlutterPlugin, CBCentralManagerDelegate, CBPeripheralDelegate>
 @end
 
-@interface FlutterBluePlusStreamHandler : NSObject<FlutterStreamHandler>
+@interface VXFlutterBlueStreamHandler : NSObject<FlutterStreamHandler>
 @property FlutterEventSink sink;
 @property NSDictionary *cachedBluetoothAdapterState;
 @end

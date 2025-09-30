@@ -9,10 +9,10 @@ same interface.
 # Usage
 
 To implement a new platform-specific implementation of `vx_flutter_blue`, extend
-[`FlutterBluePlusPlatform`][2] with an implementation that performs the
+[`VXFlutterBluePlatform`][2] with an implementation that performs the
 platform-specific behavior, and when you register your plugin, set the default
-`FlutterBluePlusPlatform` by calling
-`FlutterBluePlusPlatform.instance = MyPlatformFlutterBluePlus()`.
+`VXFlutterBluePlatform` by calling
+`VXFlutterBluePlatform.instance = MyPlatformVXFlutterBlue()`.
 
 # Note on breaking changes
 
