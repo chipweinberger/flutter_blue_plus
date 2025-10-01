@@ -60,7 +60,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "1.36.7"
+    version: "1.36.8"
   flutter_blue_plus_android:
     dependency: "direct overridden"
     description:

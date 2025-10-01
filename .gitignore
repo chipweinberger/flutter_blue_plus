@@ -32,3 +32,6 @@ build/
 .pub/
 
 /packages/flutter_blue_plus/example/android/app/.cxx/
+ 
+# FVM
+.fvm/
