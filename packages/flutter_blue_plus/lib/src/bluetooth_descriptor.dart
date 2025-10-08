@@ -191,7 +191,7 @@ class BluetoothDescriptor {
         'primaryServiceUuid: $primaryServiceUuid'
         'serviceUuid: $serviceUuid, '
         'characteristicUuid: $characteristicUuid, '
-        'instanceId: $instanceId'
+        'instanceId: $instanceId, '
         'descriptorUuid: $descriptorUuid, '
         'lastValue: $lastValue'
         '}';
