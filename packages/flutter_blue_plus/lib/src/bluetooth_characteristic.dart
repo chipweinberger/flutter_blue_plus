@@ -337,7 +337,7 @@ class BluetoothCharacteristic {
         'primaryServiceUuid: $primaryServiceUuid, '
         'serviceUuid: $serviceUuid, '
         'characteristicUuid: $characteristicUuid, '
-        'instanceId: $instanceId'
+        'instanceId: $instanceId, '
         'descriptors: $descriptors, '
         'properties: $properties, '
         'value: $lastValue'
