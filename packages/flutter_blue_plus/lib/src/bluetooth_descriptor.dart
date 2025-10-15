@@ -188,7 +188,7 @@ class BluetoothDescriptor {
   String toString() {
     return 'BluetoothDescriptor{'
         'remoteId: $remoteId, '
-        'primaryServiceUuid: $primaryServiceUuid'
+        'primaryServiceUuid: $primaryServiceUuid, '
         'serviceUuid: $serviceUuid, '
         'characteristicUuid: $characteristicUuid, '
         'instanceId: $instanceId'
