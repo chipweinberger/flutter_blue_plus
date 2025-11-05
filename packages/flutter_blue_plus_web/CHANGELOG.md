@@ -1,3 +1,9 @@
+## 8.0.1
+* Add License symlink
+
+## 8.0.0
+* Switch to FBP License
+
 ## 3.0.1
 * Don't wait for CCCD write for `setNotifyValue` on web (#1153)
 * Fix `getAdapterState` and `discoverServices`

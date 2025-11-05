@@ -1,3 +1,9 @@
+## 8.0.1
+* Add License symlink
+
+## 8.0.0
+* Switch to FBP License
+
 ## 3.0.2
 * Return unknown state if adaptors list empty (#1190)
 * Return empty name if adaptors list empty (#1191)

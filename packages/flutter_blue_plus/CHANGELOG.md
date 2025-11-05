@@ -1,3 +1,6 @@
+## 2.0.1
+* **[Fix]** allow calling `connect(autoConnect:true)` even when the adapter is turned off
+
 ## 2.0.0
 * **[LICENSE]** switch to FlutterBluePlus license. 
 

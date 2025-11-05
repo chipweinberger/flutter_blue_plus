@@ -1,3 +1,9 @@
+## 8.0.1
+* Add License symlink
+
+## 8.0.0
+* Switch to FBP License
+
 ## 4.0.1
 * fix unrecognized selector sent to instance (regression from 4.0.0)
 

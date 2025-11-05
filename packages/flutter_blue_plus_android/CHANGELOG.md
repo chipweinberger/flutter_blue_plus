@@ -1,3 +1,9 @@
+## 8.0.1
+* Add License symlink
+
+## 8.0.0
+* Switch to FBP License
+
 ## 4.0.5
 * Fixes to check for location services when plugin is called from a service
 

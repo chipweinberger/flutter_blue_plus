@@ -1,3 +1,9 @@
+## 8.0.1
+* Add License symlink
+
+## 8.0.0
+* Switch to FBP License
+
 ## 4.0.2
 * Added `androidCheckLocationServices` to `BmScanSettings` (#1199)
 
