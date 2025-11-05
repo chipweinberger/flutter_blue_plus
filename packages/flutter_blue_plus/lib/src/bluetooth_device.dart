@@ -159,7 +159,12 @@ class BluetoothDevice {
       }
 
       // invoke
-      bool changed = await FlutterBluePlus._invokePlatform(() => FlutterBluePlusPlatform.instance.connect(request));
+      bool changed = false;
+      if (FlutterBluePlus.adapterStateNow != BluetoothAdapterState.on && autoConnect) {
+        // we'll initiate the autoconnect later when the adapter is turned on
+      } else {
+        changed = await FlutterBluePlus._invokePlatform(() => FlutterBluePlusPlatform.instance.connect(request));
+      }
 
       // we return the disconnect mutex now so that this
       // connection attempt can be canceled by calling disconnect
