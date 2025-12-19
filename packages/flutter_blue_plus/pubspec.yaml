@@ -20,6 +20,7 @@ dependencies:
   flutter_blue_plus_darwin: 8.0.1
   flutter_blue_plus_linux: 8.0.1
   flutter_blue_plus_web: 8.0.1
+  flutter_blue_plus_winrt: any
 
 dev_dependencies:
   flutter_lints: ^5.0.0
@@ -39,3 +40,5 @@ flutter:
         default_package: flutter_blue_plus_darwin
       web:
         default_package: flutter_blue_plus_web
+      windows:
+        default_package: flutter_blue_plus_winrt
