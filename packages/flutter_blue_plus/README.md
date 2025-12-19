@@ -73,7 +73,7 @@ This makes FlutterBluePlus very stable, and easy to maintain.
 
 ## Windows Support
 
-Use [flutter_blue_plus_windows](https://pub.dev/packages/flutter_blue_plus_windows) if you need Windows support.
+Use [flutter_blue_plus_winrt](https://pub.dev/packages/flutter_blue_plus_winrt) if you need Windows support.
 
 It is maintained by [@chan150](https://github.com/chan150).
 
