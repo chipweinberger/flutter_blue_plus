@@ -11,7 +11,7 @@ All rights reserved.
 The intent of this license is to make FlutterBluePlus ("The Software") as free and open as possible for small organizations, individual developers, researchers, nonprofits, educational institutions, and hobbyists.
 For these users, the terms are similar to the BSD license: broad freedom to use, modify, and share.
 
-For larger for-profit organizations with fifty (50) or more employees worldwide, this license requires the purchase of a commercial license.
+For larger for-profit organizations with fifteen (15) or more employees worldwide, this license requires the purchase of a commercial license.
 
 The revenue from commercial licenses supports the long-term maintenance and development of FlutterBluePlus.
 This approach allows individuals, small companies, nonprofits, and educators to benefit from free and open software, while ensuring that larger companies who rely on it help sustain its future.
@@ -30,7 +30,7 @@ Permission is hereby granted to any individual or organization to use, copy, mod
 
 **2. Relicensing Prohibition.** The Software may not be relicensed under different terms by any party.
 
-**3. Commercial Use Requirement.** Use of the Software by any for-profit organization with fifty (50) or more employees worldwide requires a commercial license under Section 3, regardless of how the Software was obtained.
+**3. Commercial Use Requirement.** Use of the Software by any for-profit organization with fifteen (15) or more employees worldwide requires a commercial license under Section 3, regardless of how the Software was obtained.
 
 **4. Nonprofit & Educational Exemption.** Registered nonprofit organizations and accredited educational institutions are exempt from this requirement and may use the Software under Section 2 regardless of employee count.
 
@@ -39,17 +39,17 @@ Permission is hereby granted to any individual or organization to use, copy, mod
 
 ---
 
-### Section 2: Open Use Terms (for organizations with fewer than 50 employees, nonprofits, and educational institutions)
+### Section 2: Open Use Terms (for organizations with fewer than 15 employees, nonprofits, and educational institutions)
 
-Use of the Software is free of charge for any organization with fewer than fifty (50) employees worldwide, as well as for any registered nonprofit organization or accredited educational institution of any size, subject to the Common Conditions and the following additional terms:
+Use of the Software is free of charge for any organization with fewer than fifteen (15) employees worldwide, as well as for any registered nonprofit organization or accredited educational institution of any size, subject to the Common Conditions and the following additional terms:
 
 **1. Endorsement Restriction.** Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this Software without specific prior written permission.
 
 ---
 
-### Section 3: Commercial Terms (for for-profit organizations with 50 or more employees worldwide)
+### Section 3: Commercial Terms (for for-profit organizations with 15 or more employees worldwide)
 
-Any for-profit company, corporation, or organization with fifty (50) or more employees worldwide must purchase a commercial license for use of FlutterBluePlus, subject to the Common Conditions and the following additional terms:
+Any for-profit company, corporation, or organization with fifteen (15) or more employees worldwide must purchase a commercial license for use of FlutterBluePlus, subject to the Common Conditions and the following additional terms:
 
 **1. License Fee.** The cost of the commercial license is determined by the price listed on the official FlutterBluePlus payment portal at the time of purchase.
 
