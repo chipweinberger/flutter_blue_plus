@@ -1,3 +1,6 @@
+## 8.1.0
+* **[LICENSE]** commercial license is now required for 15 or more employees
+
 ## 8.0.1
 * Add License symlink
 

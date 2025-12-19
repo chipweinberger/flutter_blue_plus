@@ -1,6 +1,6 @@
 name: flutter_blue_plus_android
 description: Android implementation of the flutter_blue_plus plugin.
-version: 8.0.1
+version: 8.1.0
 homepage: https://github.com/chipweinberger/flutter_blue_plus
 
 environment:
@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_blue_plus_platform_interface: 8.0.1
+  flutter_blue_plus_platform_interface: 8.1.0
 
 dev_dependencies:
   flutter_lints: ^5.0.0

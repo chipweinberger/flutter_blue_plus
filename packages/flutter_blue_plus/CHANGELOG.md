@@ -1,3 +1,7 @@
+## 2.1.0
+* **[LICENSE]** commercial license is now required for 15 or more employees
+* **[Feature]** endorse `flutter_blue_plus_winrt` package
+
 ## 2.0.2
 * **[Improve]** update README
 
