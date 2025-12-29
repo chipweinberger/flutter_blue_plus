@@ -11,11 +11,11 @@ enum License {
   /// - Individuals
   /// - Nonprofits
   /// - Educational institutions
-  /// - Small organizations (<50 employees)
+  /// - Small organizations (<15 employees)
   free,
 
   /// Commercial use under the FlutterBluePlus License, required for:
-  /// - For-profit organizations with ≥50 employees worldwide
+  /// - For-profit organizations with ≥15 employees worldwide
   /// This is a paid license. See LICENSE for purchasing details.
   commercial,
 }
