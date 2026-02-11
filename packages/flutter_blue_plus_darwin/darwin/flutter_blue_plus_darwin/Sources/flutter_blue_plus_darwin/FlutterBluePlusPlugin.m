@@ -1724,7 +1724,7 @@ didDiscoverCharacteristicsForService:(CBService *)service
     // See BmReadRssiResult
     NSDictionary* result = @{
         @"remote_id":       [peripheral.identifier UUIDString],
-        @"rssi":            rssi,
+        @"rssi":            rssi ?: @(0),
         @"success":         @(error == nil),
         @"error_string":    error ? [error localizedDescription] : @"success",
         @"error_code":      error ? @(error.code) : @(0),
