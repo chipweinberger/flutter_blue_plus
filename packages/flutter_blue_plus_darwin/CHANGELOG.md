@@ -1,3 +1,6 @@
+## 8.1.1
+* **[Fix]** nil-guard rssi in didReadRSSI:error: to prevent crash (#1318)
+
 ## 8.1.0
 * **[LICENSE]** commercial license is now required for 15 or more employees
 
