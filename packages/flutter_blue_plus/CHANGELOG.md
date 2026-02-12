@@ -1,3 +1,6 @@
+## 2.1.1
+* **[Fix]** Darwin: nil-guard rssi to prevent crash (#1318)
+
 ## 2.1.0
 * **[LICENSE]** commercial license is now required for 15 or more employees
 * **[Feature]** endorse `flutter_blue_plus_winrt` package
