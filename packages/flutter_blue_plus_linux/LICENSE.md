@@ -1,5 +1,5 @@
 FlutterBluePlus License
-Version 1.2
+Version 1.3
 
 Copyright (c) 2026 Chip Weinberger
 All rights reserved.
@@ -10,10 +10,10 @@ All rights reserved.
 
 The intent of this license is to make FlutterBluePlus ("The Software") as free and open as possible for personal users, researchers, nonprofits, educational institutions, and hobbyists. For these users, the terms are similar to the BSD license: broad freedom to use, modify, and share.
 
-For any use by a for-profit organization — including commercial use by an individual, a commercial license is required.
+For for-profit use and by for-profit organizations, a commercial license is required.
 
 The revenue from commercial licenses supports the long-term maintenance and development of FlutterBluePlus.
-This approach allows individuals, small companies, nonprofits, and educators to benefit from free and open software, while ensuring that larger companies who rely on it help sustain its future.
+This approach allows hobbyists, nonprofits, and educators to benefit from free and open software, while ensuring that for-profit companies who rely on it help sustain its future.
 
 Please be aware that this project originated under the BSD-3 license, and some portions of the codebase remain under that license today. Compliance with those clauses is not required under the FlutterBluePlus License itself, but to remain fully compliant with the terms set by those contributors, it is advised that users continue to follow the BSD-3 conditions described in NOTICE.md. That relationship is between you and the BSD-licensed contributors.
 
@@ -31,10 +31,7 @@ Permission is hereby granted to any individual or organization to use, copy, mod
 
 **3. Commercial Use Requirement.** Use of the Software by any for-profit organization requires a commercial license under Section 3, regardless of how the Software was obtained.
 
-**4. Nonprofit & Educational Exemption.** Registered nonprofit organizations and accredited educational institutions are exempt from this requirement and may use the Software under Section 2 regardless of employee count.
-
-**5. Contractor Exclusion.** Short-term contractors (< 1 year) and individual contributors do not count as employees for the purposes of this license.
-
+**4. Nonprofit & Educational Exemption.** Registered nonprofit organizations and accredited educational institutions are exempt from this requirement and may use the Software under Section 2.
 
 ---
 
@@ -57,13 +54,13 @@ Any use of FlutterBluePlus by or for a for-profit company or corporation — inc
 - **Business:** 30–99 employees  
 - **Enterprise:** 100 or more employees  
 
-**2. Perpetual Use.** The license grants perpetual rights to use the Software as it exists at the time of purchase and includes any versions received during the update and bug-fix entitlement period.
+**2. Perpetual Use.** The license grants perpetual rights to use the Software as it exists at the time of purchase or any version received during the Development Period or Update Period, as defined in section 3.3.
 
-**3. Updates and Bug Fixes.** The license also entitles the licensee to updates and bug fixes for a period of two years (730 days) starting from when the Software is **first commercially shipped or publicly released** by the licensee.
+**3. Software Updates.** The license allows the licensee to receive software updates immediately after purchase (the "Development Period”), and for a two-year (730-day) period after the Software is first commercially shipped or publicly released by the licensee (the “Update Period”).
 
-**4. Renewals.** Continued access to updates beyond this period requires purchasing a new commercial license.
+**4. Renewals.** Continued access to software updates beyond the Update Period requires purchasing a new commercial license. If purchased before the Update Period expires, the Update Period is extended by an additional two years (730 days); if purchased after it has expired, a new Update Period begins on the purchase date.
 
-**5. Development Clarification.** Use of the Software by a for-profit organization during development or testing **is considered commercial use** and requires a commercial license; however, access to updates and bug fixes begins only once a product incorporating the Software is first commercially shipped or publicly released, as governed by Section 3.3.
+**5. Development Clarification.** Use of the Software during development, testing, or evaluation by a for-profit organization is considered commercial use and requires a commercial license. Section 3.3 provides leniency for developmental use by delaying the start of the Update Period until the Software is first commercially shipped or publicly released by the licensee.
 
 **6. Official Payment Portal.** Payment must be made via the official payment portal: https://jamcorder.myshopify.com/products/flutterblueplus-commercial-license
 
