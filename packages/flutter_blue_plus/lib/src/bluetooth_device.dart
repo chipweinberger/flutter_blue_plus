@@ -8,14 +8,14 @@ part of '../flutter_blue_plus.dart';
 /// See the LICENSE file in the root of the project for full terms.
 enum License {
   /// Free use under the FlutterBluePlus License, for:
-  /// - Individuals
+  /// - Personal use
   /// - Nonprofits
   /// - Educational institutions
-  /// - Small organizations (<15 employees)
   free,
 
   /// Commercial use under the FlutterBluePlus License, required for:
-  /// - For-profit organizations with ≥15 employees worldwide
+  /// - Any commercial use
+  /// - For-profit organizations
   /// This is a paid license. See LICENSE for purchasing details.
   commercial,
 }

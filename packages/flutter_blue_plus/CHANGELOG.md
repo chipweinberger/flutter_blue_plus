@@ -1,3 +1,6 @@
+## 2.2.0
+* **[LICENSE]** new tiers based on company size & development exemption
+
 ## 2.1.1
 * **[Fix]** Darwin: nil-guard rssi to prevent crash (#1318)
 

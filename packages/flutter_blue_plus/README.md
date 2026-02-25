@@ -19,8 +19,8 @@ FlutterBluePlus is sponsored by [Jamcorder](https://www.jamcorder.com/).
 
 FlutterBluePlus is licensed under the **[FlutterBluePlus License](./LICENSE.md)**.
 
-* **Free use**: For individuals, organizations with fewer than 15 employees, nonprofits, and educational institutions.  
-* **Commercial use**: For-profit organizations with **15 or more employees** must purchase a [Commercial License](https://jamcorder.myshopify.com/products/flutterblueplus-commercial-license). This license grants *lifetime use*, covers all FlutterBluePlus packages, and includes 365 days of updates.
+* **Free use**: For personal use, nonprofits, and educational institutions.  
+* **Commercial use**: Any use by a for-profit organization (including individuals) requires purchasing a [Commercial License](https://jamcorder.myshopify.com/products/flutterblueplus-commercial-license). This license grants *lifetime use*, covers all FlutterBluePlus packages, and includes two years of updates.
 
 ---
 

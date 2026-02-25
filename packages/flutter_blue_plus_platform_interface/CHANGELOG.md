@@ -1,3 +1,6 @@
+## 8.2.0
+* **[LICENSE]** new tiers based on company size & development exemption
+
 ## 8.1.0
 * **[LICENSE]** commercial license is now required for 15 or more employees
 

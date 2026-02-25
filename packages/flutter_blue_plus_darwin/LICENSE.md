@@ -1,17 +1,16 @@
 FlutterBluePlus License
-Version 1.1
+Version 1.2
 
-Copyright (c) 2025 Chip Weinberger
+Copyright (c) 2026 Chip Weinberger
 All rights reserved.
 
 ---
 
 ### Preamble (Non-Binding)
 
-The intent of this license is to make FlutterBluePlus ("The Software") as free and open as possible for small organizations, individual developers, researchers, nonprofits, educational institutions, and hobbyists.
-For these users, the terms are similar to the BSD license: broad freedom to use, modify, and share.
+The intent of this license is to make FlutterBluePlus ("The Software") as free and open as possible for personal users, researchers, nonprofits, educational institutions, and hobbyists. For these users, the terms are similar to the BSD license: broad freedom to use, modify, and share.
 
-For larger for-profit organizations with fifteen (15) or more employees worldwide, this license requires the purchase of a commercial license.
+For any use by a for-profit organization — including commercial use by an individual, a commercial license is required.
 
 The revenue from commercial licenses supports the long-term maintenance and development of FlutterBluePlus.
 This approach allows individuals, small companies, nonprofits, and educators to benefit from free and open software, while ensuring that larger companies who rely on it help sustain its future.
@@ -30,7 +29,7 @@ Permission is hereby granted to any individual or organization to use, copy, mod
 
 **2. Relicensing Prohibition.** The Software may not be relicensed under different terms by any party.
 
-**3. Commercial Use Requirement.** Use of the Software by any for-profit organization with fifteen (15) or more employees worldwide requires a commercial license under Section 3, regardless of how the Software was obtained.
+**3. Commercial Use Requirement.** Use of the Software by any for-profit organization requires a commercial license under Section 3, regardless of how the Software was obtained.
 
 **4. Nonprofit & Educational Exemption.** Registered nonprofit organizations and accredited educational institutions are exempt from this requirement and may use the Software under Section 2 regardless of employee count.
 
@@ -39,29 +38,36 @@ Permission is hereby granted to any individual or organization to use, copy, mod
 
 ---
 
-### Section 2: Open Use Terms (for organizations with fewer than 15 employees, nonprofits, and educational institutions)
+### Section 2: Open Use Terms (for nonprofits, educational institutions, personal use)
 
-Use of the Software is free of charge for any organization with fewer than fifteen (15) employees worldwide, as well as for any registered nonprofit organization or accredited educational institution of any size, subject to the Common Conditions and the following additional terms:
+Use of the Software is free of charge for any registered nonprofit organization, accredited educational institution, or personal user, subject to the Common Conditions and the following additional terms:
 
 **1. Endorsement Restriction.** Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this Software without specific prior written permission.
 
 ---
 
-### Section 3: Commercial Terms (for for-profit organizations with 15 or more employees worldwide)
+### Section 3: Commercial Terms (for for-profit organizations)
 
-Any for-profit company, corporation, or organization with fifteen (15) or more employees worldwide must purchase a commercial license for use of FlutterBluePlus, subject to the Common Conditions and the following additional terms:
+Any use of FlutterBluePlus by or for a for-profit company or corporation — including commercial use by individuals — requires the purchase of a commercial license, subject to the Common Conditions and the following additional terms:
 
-**1. License Fee.** The cost of the commercial license is determined by the price listed on the official FlutterBluePlus payment portal at the time of purchase.
+**1. License Fee.** Commercial licenses are offered in the following tiers, based on employee count **at the time of purchase or renewal**. The associated cost is listed on the official FlutterBluePlus payment portal.
 
-**2. Perpetual Use.** The license grants perpetual rights to use the Software as it exists at the time of purchase.
+- **Starter:** 0–9 employees  
+- **Team:** 10–29 employees  
+- **Business:** 30–99 employees  
+- **Enterprise:** 100 or more employees  
 
-**3. Updates and Bug Fixes.** The license also entitles the licensee to updates and bug fixes for a period of three hundred sixty-five (365) days from the date of purchase.
+**2. Perpetual Use.** The license grants perpetual rights to use the Software as it exists at the time of purchase and includes any versions received during the update and bug-fix entitlement period.
+
+**3. Updates and Bug Fixes.** The license also entitles the licensee to updates and bug fixes for a period of two years (730 days) starting from when the Software is **first commercially shipped or publicly released** by the licensee.
 
 **4. Renewals.** Continued access to updates beyond this period requires purchasing a new commercial license.
 
-**5. Official Payment Portal.** Payment must be made via the official payment portal: https://jamcorder.myshopify.com/products/flutterblueplus-commercial-license
+**5. Development Clarification.** Use of the Software by a for-profit organization during development or testing **is considered commercial use** and requires a commercial license; however, access to updates and bug fixes begins only once a product incorporating the Software is first commercially shipped or publicly released, as governed by Section 3.3.
 
-**6. Validity of Offer.** This Section constitutes an offer only while this license version is the current version published in the main branch of the official FlutterBluePlus repository. Once superseded, replaced, or withdrawn, this version shall no longer be considered an active offer, even if archived copies remain publicly visible.
+**6. Official Payment Portal.** Payment must be made via the official payment portal: https://jamcorder.myshopify.com/products/flutterblueplus-commercial-license
+
+**7. Validity of Offer.** This Section constitutes an offer only while this license version is the current version published in the main branch of the official FlutterBluePlus repository. Once superseded, replaced, or withdrawn, this version shall no longer be considered an active offer, even if archived copies remain publicly visible.
 
 
 A valid commercial license covers use of all current and future packages that

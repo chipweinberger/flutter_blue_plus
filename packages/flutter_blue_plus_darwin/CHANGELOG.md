@@ -1,3 +1,6 @@
+## 8.2.0
+* **[LICENSE]** new tiers based on company size & development exemption
+
 ## 8.1.1
 * **[Fix]** nil-guard rssi in didReadRSSI:error: to prevent crash (#1318)
 
