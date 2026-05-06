@@ -153,8 +153,9 @@ class BluetoothDevice {
 
       // invoke
       bool changed = false;
-      if (FlutterBluePlus.adapterStateNow != BluetoothAdapterState.on && autoConnect) {
+      if (FlutterBluePlus.adapterStateNow != BluetoothAdapterState.on && autoConnect && !kIsWeb) {
         // we'll initiate the autoconnect later when the adapter is turned on
+        // note(web): we cannot get adapter state, so we must try the connection anyway
       } else {
         changed = await FlutterBluePlus._invokePlatform(() => FlutterBluePlusPlatform.instance.connect(request));
       }
