@@ -1,3 +1,6 @@
+## 2.2.2
+* **[Release]** bump federated package versions for the 2.2.2 release
+
 ## 2.2.1
 * **[LICENSE]** clarifications to the development exemption
 
