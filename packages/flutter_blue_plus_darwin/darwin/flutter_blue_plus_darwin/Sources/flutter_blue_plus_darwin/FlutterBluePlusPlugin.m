@@ -1524,7 +1524,12 @@ didDiscoverCharacteristicsForService:(CBService *)service
 
     // discover the included services themselves
     for (CBService *included in [service includedServices]) {
+        // guard against pathological self-inclusion
+        if (included == service) {
+            continue;
+        }
         [peripheral discoverCharacteristics:nil forService:included];
+        [peripheral discoverIncludedServices:nil forService:included];
     }
 }
 
