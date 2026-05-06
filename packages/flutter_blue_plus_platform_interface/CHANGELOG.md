@@ -1,3 +1,6 @@
+## 9.0.0
+* `BmSetOptionsRequest.showPowerAlert` and `restoreState` are now nullable so args can be set individually
+
 ## 8.2.2
 * **[Release]** version bump for the flutter_blue_plus 2.2.2 release
 

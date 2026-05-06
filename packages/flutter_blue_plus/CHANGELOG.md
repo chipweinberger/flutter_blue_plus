@@ -1,3 +1,11 @@
+## 2.3.0
+* **[Feature]** Perf: allow writing to multiple sevices at the same time! See: `FlutterBluePlus.setOperationQueueMode`
+* **[Feature]** Support for services with the same UUID
+* **[Improve]** Darwin: allow `setOptions` arguments to be updated individually
+* **[Improve]** Linux: remove `rxdart` dependency
+* **[Fix]** Darwin: discovery would timeout if no services were present
+* **[Fix]** Darwin: included services discovery was broken
+
 ## 2.2.3
 * **[Fix]** Web: `setNotifyValue` no longer times out while notifications are already being received
 

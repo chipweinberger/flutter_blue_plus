@@ -517,13 +517,13 @@ FlutterBluePlus.events.onConnectionStateChanged.listen((event)) {
 
 We recommend using per-device queueing.
 
+Set this when your application starts, before starting any other FBP work:
+
 ```dart
 FlutterBluePlus.setOperationQueueMode(OperationQueueMode.perDevice);
 ```
 
 This allows FlutterBluePlus to talk to multiple devices at the same time.
-
-**Note:** Set this when your application starts, before starting any other FBP work.
 
 ## Mocking
 

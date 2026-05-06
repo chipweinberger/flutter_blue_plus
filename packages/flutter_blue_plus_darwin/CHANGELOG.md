@@ -1,3 +1,10 @@
+## 9.0.0
+* **[Feature]** allow discovering multiple devices at the same time
+* **[Feature]** support for services with the same UUID
+* **[Improved]** allow `setOptions` arguments to be updated individually without resetting unspecified values
+* **[Fix]** discovery would timeout if no services were present
+* **[Fix]** included services discovery was broken
+
 ## 8.2.2
 * **[Release]** version bump for the flutter_blue_plus 2.2.2 release
 

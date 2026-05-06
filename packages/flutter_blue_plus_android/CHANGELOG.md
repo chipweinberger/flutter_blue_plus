@@ -1,3 +1,6 @@
+## 9.0.0
+* **[Fix]** Android: improve characteristic `instanceId` resolution when multiple services share the same UUID
+
 ## 8.2.2
 * **[Release]** version bump for the flutter_blue_plus 2.2.2 release
 

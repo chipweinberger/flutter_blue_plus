@@ -1,3 +1,6 @@
+## 9.0.0
+* **[Fix]** Web: improve characteristic `instanceId` resolution when a service contains duplicate characteristic UUIDs
+
 ## 8.2.3
 * **[Fix]** Web: `setNotifyValue` should return `false` to avoid waiting for a CCCD write that Web Bluetooth never emits
 
