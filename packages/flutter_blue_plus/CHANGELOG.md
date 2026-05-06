@@ -1,3 +1,7 @@
+## 2.2.3
+* **[Fix]** Web: `setNotifyValue` no longer times out while notifications are already being received
+* **[Release]** bump `flutter_blue_plus_web` to `8.2.3`
+
 ## 2.2.2
 * **[Release]** bump federated package versions for the 2.2.2 release
 
