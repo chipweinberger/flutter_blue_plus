@@ -1522,8 +1522,10 @@ didDiscoverCharacteristicsForService:(CBService *)service
         Log(LDEBUG, @"  svc: %@", [service.UUID uuidStr]);
     }
 
-    // discover characteristics 
-    [peripheral discoverCharacteristics:nil forService:service];
+    // discover the included services themselves
+    for (CBService *included in [service includedServices]) {
+        [peripheral discoverCharacteristics:nil forService:included];
+    }
 }
 
 - (void)peripheral:(CBPeripheral *)peripheral
