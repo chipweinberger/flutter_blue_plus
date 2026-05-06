@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:bluez/bluez.dart';
 import 'package:flutter_blue_plus_platform_interface/flutter_blue_plus_platform_interface.dart';
-import 'package:rxdart/rxdart.dart';
+import 'src/stream_utils.dart';
 
 extension on BlueZDevice {
   DeviceIdentifier get remoteId {
@@ -65,7 +65,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   Stream<BmBondStateResponse> get onBondStateChanged {
     return _client.devicesChanged.switchMap(
       (devices) {
-        return MergeStream(
+        return mergeStreams(
           devices.map(
             (device) {
               return device.propertiesChanged.where(
@@ -127,7 +127,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
             }
           }
 
-          return MergeStream(streams);
+          return mergeStreams(streams);
         },
       ),
     ]);
@@ -142,7 +142,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   Stream<BmConnectionStateResponse> get onConnectionStateChanged {
     return _client.devicesChanged.switchMap(
       (devices) {
-        return MergeStream(
+        return mergeStreams(
           devices.map(
             (device) {
               return device.propertiesChanged.where(
@@ -191,7 +191,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   Stream<BmNameChanged> get onNameChanged {
     return _client.devicesChanged.switchMap(
       (devices) {
-        return MergeStream(
+        return mergeStreams(
           devices.map(
             (device) {
               return device.propertiesChanged.where(
@@ -261,7 +261,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   Stream<BmBluetoothDevice> get onServicesReset {
     return _client.devicesChanged.switchMap(
       (devices) {
-        return MergeStream(
+        return mergeStreams(
           devices.map(
             (device) {
               return device.propertiesChanged.where(
@@ -1068,7 +1068,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
           );
         }
 
-        return MergeStream(
+        return mergeStreams(
           devices.map(
             (device) {
               return device.propertiesChanged.switchMap(
@@ -1097,7 +1097,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
                     }
                   }
 
-                  return MergeStream(streams);
+                  return mergeStreams(streams);
                 },
               );
             },
@@ -1110,7 +1110,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
 
 extension on BlueZClient {
   Stream<List<BlueZAdapter>> get adaptersChanged {
-    return MergeStream([
+    return mergeStreams([
       adapterAdded,
       adapterRemoved,
     ]).map(
@@ -1121,7 +1121,7 @@ extension on BlueZClient {
   }
 
   Stream<List<BlueZDevice>> get devicesChanged {
-    return MergeStream([
+    return mergeStreams([
       deviceAdded,
       deviceRemoved,
     ]).map(
