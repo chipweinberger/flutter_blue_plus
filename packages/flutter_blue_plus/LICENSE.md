@@ -1,5 +1,5 @@
 FlutterBluePlus License
-Version 1.3
+Version 1.4
 
 Copyright (c) 2026 Chip Weinberger
 All rights reserved.
@@ -47,24 +47,20 @@ Use of the Software is free of charge for any registered nonprofit organization,
 
 Any use of FlutterBluePlus by or for a for-profit company or corporation — including commercial use by individuals — requires the purchase of a commercial license, subject to the Common Conditions and the following additional terms:
 
-**1. License Fee.** Commercial licenses are offered in the following tiers, based on employee count **at the time of purchase or renewal**. The associated cost is listed on the official FlutterBluePlus payment portal.
+**1. License Fee.** Commercial licenses are offered in the following tiers, based on employee count **at the time of purchase**. The associated cost is listed on the official FlutterBluePlus payment portal.
 
 - **Starter:** 0–9 employees  
 - **Team:** 10–29 employees  
 - **Business:** 30–99 employees  
 - **Enterprise:** 100 or more employees  
 
-**2. Perpetual Use.** The license grants perpetual rights to use the Software as it exists at the time of purchase or any version received during the Development Period or Update Period, as defined in section 3.3.
+**2. Perpetual Use.** The license grants perpetual rights to use the Software and to receive all current and future software updates made available by the licensor after purchase.
 
-**3. Software Updates.** The license allows the licensee to receive software updates immediately after purchase (the "Development Period”), and for a two-year (730-day) period after the Software is first commercially shipped or publicly released by the licensee (the “Update Period”).
+**3. Development Clarification.** Use of the Software during development, testing, or evaluation by a for-profit organization is considered commercial use and requires a commercial license.
 
-**4. Renewals.** Continued access to software updates beyond the Update Period requires purchasing a new commercial license. If purchased before the Update Period expires, the Update Period is extended by an additional two years (730 days); if purchased after it has expired, a new Update Period begins on the purchase date.
+**4. Official Payment Portal.** Payment must be made via the official payment portal: https://jamcorder.myshopify.com/products/flutterblueplus-commercial-license
 
-**5. Development Clarification.** Use of the Software during development, testing, or evaluation by a for-profit organization is considered commercial use and requires a commercial license. Section 3.3 provides leniency for developmental use by delaying the start of the Update Period until the Software is first commercially shipped or publicly released by the licensee.
-
-**6. Official Payment Portal.** Payment must be made via the official payment portal: https://jamcorder.myshopify.com/products/flutterblueplus-commercial-license
-
-**7. Validity of Offer.** This Section constitutes an offer only while this license version is the current version published in the main branch of the official FlutterBluePlus repository. Once superseded, replaced, or withdrawn, this version shall no longer be considered an active offer, even if archived copies remain publicly visible.
+**5. Validity of Offer.** This Section constitutes an offer only while this license version is the current version published in the main branch of the official FlutterBluePlus repository. Once superseded, replaced, or withdrawn, this version shall no longer be considered an active offer, even if archived copies remain publicly visible.
 
 
 A valid commercial license covers use of all current and future packages that

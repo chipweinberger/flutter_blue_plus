@@ -20,7 +20,7 @@ FlutterBluePlus is sponsored by [Jamcorder](https://www.jamcorder.com/).
 FlutterBluePlus is licensed under the **[FlutterBluePlus License](./LICENSE.md)**.
 
 * **Free use**: For personal use, nonprofits, and educational institutions.  
-* **Commercial use**: For for-profit use, by for-profit organizations or individuals, a [Commercial License](https://jamcorder.myshopify.com/products/flutterblueplus-commercial-license) is required. This license grants *lifetime use*, covers all FlutterBluePlus packages, and includes two years of updates.
+* **Commercial use**: For for-profit use, by for-profit organizations or individuals, a [Commercial License](https://jamcorder.myshopify.com/products/flutterblueplus-commercial-license) is required. This license grants *lifetime use*, covers all FlutterBluePlus packages, and includes lifetime updates.
 
 ---
 
@@ -1184,7 +1184,6 @@ If you just added flutter_blue_plus to your pubspec.yaml, a hot reload / hot res
 You need to fully stop your app and run again so that the native plugins are loaded.
 
 Also try `flutter clean`.
-
 
 
 
