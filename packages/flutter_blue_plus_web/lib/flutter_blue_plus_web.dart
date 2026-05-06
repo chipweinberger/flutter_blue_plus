@@ -500,7 +500,9 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
       );
     }
 
-    return true;
+    // Web Bluetooth does not surface a CCCD descriptor write completion event.
+    // Returning false tells the shared Dart layer not to wait for one.
+    return false;
   }
 
   @override
