@@ -364,6 +364,10 @@ class _MutexFactory {
     _all[key] ??= _Mutex();
     return _all[key]!;
   }
+
+  static bool hasMutexWhere(bool Function(String key) test) {
+    return _all.keys.any(test);
+  }
 }
 
 extension FirstWhereOrNullExtension<T> on Iterable<T> {

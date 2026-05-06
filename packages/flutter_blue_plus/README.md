@@ -513,6 +513,18 @@ FlutterBluePlus.events.onConnectionStateChanged.listen((event)) {
 }
 ```
 
+### Multi Device Performance
+
+We recommend using per-device queueing.
+
+```dart
+FlutterBluePlus.setOperationQueueMode(OperationQueueMode.perDevice);
+```
+
+This allows FlutterBluePlus to talk to multiple devices at the same time.
+
+**Note:** Set this when your application starts, before starting any other FBP work.
+
 ## Mocking
 
 To mock `FlutterBluePlus` for development, refer to the [Mocking Guide](MOCKING.md).
@@ -659,6 +671,18 @@ FlutterBluePlus.setOptions(restoreState: true);
 
 **Note**: Upon being woken up, an app has around 10 seconds to complete a task. Apps that spend too much time executing in the background can be throttled back by the system or killed.
 
+### Multi-Device Communication
+
+We recommend setting per-device queueing.
+
+```dart
+FlutterBluePlus.setOperationQueueMode(OperationQueueMode.perDevice);
+```
+
+This allows BLE operations on different devices to run at the same time.
+`OperationQueueMode.global` remains the default only for backward compatibility.
+Changing it after BLE work has started throws an error.
+
 ### Android
 
 You can try using https://pub.dev/packages/flutter_foreground_task or possibly https://pub.dev/packages/workmanager
@@ -675,6 +699,7 @@ Note: When functionality is unsupported on a platform, sensible defaults are ret
 |---------------------|---------|-----|-------|-------|-----|-------------------------------------------------------------|
 | setLogLevel         | ✔️      | ✔️  | ✔️    | ✔️    | ❌   | Configure plugin log level                                  |
 | setOptions          | ✔️      | ✔️  | ❌     | ✔️    | ❌   | Set configurable bluetooth options                          |
+| setOperationQueueMode ⚡| ✔️      | ✔️  | ✔️    | ✔️    | ✔️  | Configure whether BLE operations queue globally or per-device |
 | isSupported         | ✔️      | ✔️  | ✔️    | ✔️    | ✔️  | Checks whether the device supports Bluetooth                |
 | turnOn            🔥| ✔️      | ❌   | ✔️    | ❌     | ❌   | Turns on the bluetooth adapter                              |
 | turnOff           🔥| ✔️      | ❌   | ✔️    | ❌     | ❌   | Turns off the bluetooth adapter                             |
@@ -1184,10 +1209,6 @@ If you just added flutter_blue_plus to your pubspec.yaml, a hot reload / hot res
 You need to fully stop your app and run again so that the native plugins are loaded.
 
 Also try `flutter clean`.
-
-
-
-
 
 
 

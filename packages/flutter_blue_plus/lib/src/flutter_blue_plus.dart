@@ -5,7 +5,16 @@
 part of '../flutter_blue_plus.dart';
 
 enum OperationQueueMode {
+  /// Queue all BLE operations behind a single global mutex.
+  ///
+  /// This is the default and preserves the historical behavior of
+  /// `flutter_blue_plus`.
   global,
+
+  /// Queue BLE operations independently for each connected device.
+  ///
+  /// This allows operations on different devices to run concurrently while
+  /// still preserving ordering for each individual device.
   perDevice,
 }
 
@@ -104,9 +113,36 @@ class FlutterBluePlus {
   /// Get access to FBP logs
   static Stream<String> get logs => FlutterBluePlusPlatform.logs;
 
+  /// The current operation queue mode. See: setOperationQueueMode
   static OperationQueueMode get operationQueueMode => _operationQueueMode;
 
+  /// Sets how BLE operations are queued.
+  ///
+  /// Call this before starting any other BLE work.
+  ///
+  /// - [OperationQueueMode.global] keeps the historical behavior and allows
+  ///   only one BLE operation at a time across the whole app.
+  /// - [OperationQueueMode.perDevice] allows operations for different devices
+  ///   to proceed concurrently, while still serializing operations per device.
+  ///
+  /// We recommend [OperationQueueMode.perDevice] for new apps.
+  /// [OperationQueueMode.global] remains the default for backward
+  /// compatibility.
+  ///
+  /// This is useful if your app talks to multiple devices at the same time 
+  /// as it allows simultaneous device writing, discovery, and reads.
+  ///
+  /// Throws a [StateError] if you try to change modes after BLE work
+  /// has already been started in the other mode.
   static void setOperationQueueMode(OperationQueueMode mode) {
+    if (_operationQueueMode == mode) {
+      return;
+    }
+
+    if (_hasOperationMutexesForMode(_operationQueueMode)) {
+      throw StateError("setOperationQueueMode must be called before starting any BLE work");
+    }
+
     _operationQueueMode = mode;
   }
 
@@ -133,6 +169,14 @@ class FlutterBluePlus {
 
   static String _disconnectMutexKey(DeviceIdentifier remoteId) {
     return _operationQueueMode == OperationQueueMode.perDevice ? "disconnect:$remoteId" : "disconnect";
+  }
+
+  static bool _hasOperationMutexesForMode(OperationQueueMode mode) {
+    if (mode == OperationQueueMode.global) {
+      return _MutexFactory.hasMutexWhere((key) => key == "global" || key == "disconnect");
+    } else {
+      return _MutexFactory.hasMutexWhere((key) => key.startsWith("device:") || key.startsWith("disconnect:"));
+    }
   }
 
   /// Turn on Bluetooth (Android only),
