@@ -308,7 +308,13 @@ class BluetoothCharacteristic {
       for (var s in FlutterBluePlus._knownServices[remoteId]!.services) {
         if (s.primaryServiceUuid == primaryServiceUuid) {
           if (s.serviceUuid == serviceUuid) {
-            return s;
+            for (var c in s.characteristics) {
+              if (c.characteristicUuid == characteristicUuid) {
+                if (c.instanceId == instanceId) {
+                  return s;
+                }
+              }
+            }
           }
         }
       }

@@ -837,7 +837,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 }
 
 
-- (NSNumber *)getInstanceId:(CBCharacteristic *)characteristic
+- (NSNumber *)getLocalInstanceId:(CBCharacteristic *)characteristic
 {
     CBService *svc = characteristic.service;
     if (!svc) return @(0);
@@ -854,6 +854,65 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     return @(0);
 }
 
+- (NSArray<CBService *> *)getMatchingServices:(CBPeripheral *)peripheral
+                            primaryServiceUuid:(NSString *)primaryServiceUuid
+                                   serviceUuid:(NSString *)serviceUuid
+{
+    NSMutableArray<CBService *> *matches = [NSMutableArray new];
+    bool isSecondaryService = primaryServiceUuid != nil;
+
+    if (!isSecondaryService) {
+        for (CBService *service in [peripheral services]) {
+            if ([service.UUID isEqual:[CBUUID UUIDWithString:serviceUuid]]) {
+                [matches addObject:service];
+            }
+        }
+        return matches;
+    }
+
+    for (CBService *primary in [peripheral services]) {
+        if (![primary.UUID isEqual:[CBUUID UUIDWithString:primaryServiceUuid]]) {
+            continue;
+        }
+        for (CBService *secondary in [primary includedServices]) {
+            if ([secondary.UUID isEqual:[CBUUID UUIDWithString:serviceUuid]]) {
+                [matches addObject:secondary];
+            }
+        }
+    }
+
+    return matches;
+}
+
+- (NSNumber *)getInstanceId:(CBPeripheral *)peripheral characteristic:(CBCharacteristic *)characteristic
+{
+    CBService *service = characteristic.service;
+    if (!service) return @(0);
+
+    CBService *primaryService = [self getPrimaryService:peripheral characteristic:characteristic];
+    NSString *primaryServiceUuid = primaryService ? [primaryService.UUID uuidStr] : nil;
+    NSString *serviceUuid = [service.UUID uuidStr];
+    NSArray<CBService *> *services = [self getMatchingServices:peripheral
+                                            primaryServiceUuid:primaryServiceUuid
+                                                   serviceUuid:serviceUuid];
+
+    if ([services count] <= 1) {
+        return [self getLocalInstanceId:characteristic];
+    }
+
+    NSInteger idx = 0;
+    for (CBService *candidateService in services) {
+        for (CBCharacteristic *candidate in candidateService.characteristics) {
+            if (candidate == characteristic) {
+                return @(idx);
+            }
+            idx++;
+        }
+    }
+
+    return @(0);
+}
+
 
 - (CBCharacteristic *)locateCharacteristic:(NSString *)characteristicId
                                 peripheral:(CBPeripheral *)peripheral
@@ -866,41 +925,43 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // remember
     bool isSecondaryService = primaryServiceUuid != nil;
 
-    // primary service
-    if (primaryServiceUuid == nil) {
-        primaryServiceUuid = serviceUuid;
-    }
-
-    // primary service
-    CBService *primaryService = [self getServiceFromArray:primaryServiceUuid array:[peripheral services]];
-    if (primaryService == nil || !primaryService.isPrimary)
+    NSArray<CBService *> *services = [self getMatchingServices:peripheral
+                                            primaryServiceUuid:primaryServiceUuid
+                                                   serviceUuid:serviceUuid];
+    if ([services count] == 0)
     {
-        NSString* s = [NSString stringWithFormat:@"primary service not found '%@'", primaryServiceUuid];
+        NSString* s = isSecondaryService
+            ? [NSString stringWithFormat:@"secondary service not found '%@' (primary service %@)", serviceUuid, primaryServiceUuid]
+            : [NSString stringWithFormat:@"primary service not found '%@'", serviceUuid];
         NSDictionary* d = @{NSLocalizedDescriptionKey : s};
-        *error = [NSError errorWithDomain:@"flutterBluePlus" code:1000 userInfo:d];
+        *error = [NSError errorWithDomain:@"flutterBluePlus" code:isSecondaryService ? 1001 : 1000 userInfo:d];
         return nil;
     }
 
-    // associated primary service
-    CBService *secondaryService = nil;
-    if (isSecondaryService)
+    CBCharacteristic *characteristic = nil;
+    if ([services count] <= 1)
     {
-        secondaryService = [self getServiceFromArray:serviceUuid array:[primaryService includedServices]];
-        if (error && !secondaryService) {
-            NSString* s = [NSString stringWithFormat:@"secondary service not found '%@' (primary service %@)", serviceUuid, primaryServiceUuid];
-            NSDictionary* d = @{NSLocalizedDescriptionKey : s};
-            *error = [NSError errorWithDomain:@"flutterBluePlus" code:1001 userInfo:d];
-            return nil;
+        characteristic = [self getCharacteristicFromArray:characteristicId
+                                                    array:[services.firstObject characteristics]
+                                               instanceId:instanceId];
+    }
+    else
+    {
+        NSInteger idx = 0;
+        for (CBService *service in services)
+        {
+            for (CBCharacteristic *candidate in [service characteristics])
+            {
+                if (idx == [instanceId integerValue] && [candidate.UUID isEqual:[CBUUID UUIDWithString:characteristicId]])
+                {
+                    characteristic = candidate;
+                    break;
+                }
+                idx++;
+            }
+            if (characteristic != nil) {break;}
         }
     }
-
-    // which service?
-    CBService *service = (secondaryService != nil) ? secondaryService : primaryService;
-
-    // characteristic
-    CBCharacteristic *characteristic = [self getCharacteristicFromArray:characteristicId 
-                                                                       array:[service characteristics] 
-                                                                       instanceId:instanceId];
 
     if (characteristic == nil)
     {
@@ -949,7 +1010,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     {
         if ([c.UUID isEqual:[CBUUID UUIDWithString:uuid]])
         {
-            if ([instanceId isEqualToNumber:[self getInstanceId:c]])
+            if ([instanceId isEqualToNumber:[self getLocalInstanceId:c]])
             {
                  return c;
             }
@@ -1487,7 +1548,7 @@ didDiscoverCharacteristicsForService:(CBService *)service
         @"primary_service_uuid":        primaryService ? [primaryService.UUID uuidStr] : [NSNull null],
         @"service_uuid":                [characteristic.service.UUID uuidStr],
         @"characteristic_uuid":         [characteristic.UUID uuidStr],
-        @"instance_id":                 [self getInstanceId:characteristic],
+        @"instance_id":                 [self getInstanceId:peripheral characteristic:characteristic],
         @"value":                       characteristic.value ? characteristic.value : [NSNull null],
         @"success":                     error == nil ? @(1) : @(0),
         @"error_string":                error ? [error localizedDescription] : @"success",
@@ -1521,7 +1582,7 @@ didDiscoverCharacteristicsForService:(CBService *)service
     NSString *primarySvcKey = primaryService != nil ? [primaryService.UUID uuidStr] : @"";
     NSString *serviceUuid = [characteristic.service.UUID uuidStr];
     NSString *characteristicUuid = [characteristic.UUID uuidStr];
-    NSNumber *instanceId = [self getInstanceId:characteristic];
+    NSNumber *instanceId = [self getInstanceId:peripheral characteristic:characteristic];
 
     // what data did we write?
     NSString *key = [NSString stringWithFormat:@"%@:%@:%@:%@:%@", 
@@ -1562,7 +1623,7 @@ didDiscoverCharacteristicsForService:(CBService *)service
     }
 
     CBService *primaryService = [self getPrimaryService:peripheral characteristic:characteristic];
-    NSNumber *instanceId = [self getInstanceId:characteristic];
+    NSNumber *instanceId = [self getInstanceId:peripheral characteristic:characteristic];
 
     // Oddly iOS does not update the CCCD descriptors when didUpdateNotificationState is called. 
     // So instead of using characteristic.descriptors we have to manually recreate the
@@ -1613,7 +1674,7 @@ didDiscoverCharacteristicsForService:(CBService *)service
     }
 
     CBService *primaryService = [self getPrimaryService:peripheral characteristic:descriptor.characteristic];
-    NSNumber *instanceId = [self getInstanceId:descriptor.characteristic];
+    NSNumber *instanceId = [self getInstanceId:peripheral characteristic:descriptor.characteristic];
 
     NSData* data = [self descriptorToData:descriptor];
     
@@ -1658,7 +1719,7 @@ didDiscoverCharacteristicsForService:(CBService *)service
     NSString *remoteId = [peripheral.identifier UUIDString];
     NSString *serviceUuid = [descriptor.characteristic.service.UUID uuidStr];
     NSString *characteristicUuid = [descriptor.characteristic.UUID uuidStr];
-    NSNumber *instanceId = [self getInstanceId:descriptor.characteristic];
+    NSNumber *instanceId = [self getInstanceId:peripheral characteristic:descriptor.characteristic];
     NSString *primarySvcKey = primaryService != nil ? [primaryService.UUID uuidStr] : @"";
     NSString *descriptorUuid = [descriptor.UUID uuidStr];
 
@@ -1938,7 +1999,7 @@ didDiscoverCharacteristicsForService:(CBService *)service
                             characteristic:(CBCharacteristic *)characteristic
 {
     CBService *primaryService = [self getPrimaryService:peripheral characteristic:characteristic];
-    NSNumber *instanceId = [self getInstanceId:characteristic];
+    NSNumber *instanceId = [self getInstanceId:peripheral characteristic:characteristic];
 
     // descriptors
     NSMutableArray *descriptors = [NSMutableArray new];
@@ -2228,6 +2289,10 @@ didDiscoverCharacteristicsForService:(CBService *)service
     {
         for (CBService *secondary in [primary includedServices])
         {
+            if (secondary == service)
+            {
+                return primary;
+            }
             if ([secondary.UUID isEqual:service.UUID])
             {
                 return primary;

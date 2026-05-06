@@ -15,7 +15,7 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
   final _devices = <DeviceIdentifier, BluetoothDevice>{};
 
   // for instanceIds
-  final _charCache = <DeviceIdentifier, Map<Guid, Map<Guid, List<BluetoothRemoteGATTCharacteristic>>>>{};
+  final _charCache = <DeviceIdentifier, Map<Guid, List<BluetoothRemoteGATTCharacteristic>>>{};
 
   final _onCharacteristicReceivedController = StreamController<BmCharacteristicData>.broadcast();
   final _onCharacteristicWrittenController = StreamController<BmCharacteristicData>.broadcast();
@@ -32,17 +32,23 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
     required Guid charUuid,
     required int instanceId,
   }) {
-    final list = _charCache[devId]?[serviceUuid]?[charUuid];
+    final list = _charCache[devId]?[serviceUuid];
     if (list == null || instanceId < 0 || instanceId >= list.length) {
       throw Exception(
         'Characteristic not found in cache: service=$serviceUuid char=$charUuid instanceId=$instanceId',
       );
     }
-    return list[instanceId];
+    final characteristic = list[instanceId];
+    if (Guid(characteristic.uuid) != charUuid) {
+      throw Exception(
+        'Characteristic not found in cache: service=$serviceUuid char=$charUuid instanceId=$instanceId',
+      );
+    }
+    return characteristic;
   }
 
   int _instanceId(DeviceIdentifier devId, Guid serviceUuid, BluetoothRemoteGATTCharacteristic target) {
-    final list = _charCache[devId]?[serviceUuid]?[Guid(target.uuid)];
+    final list = _charCache[devId]?[serviceUuid];
     if (list == null) return 0;
     final idx = list.indexWhere((c) => identical(c, target));
     return idx >= 0 ? idx : 0;
@@ -185,8 +191,9 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
 
       // ensure dev map exists
       final devMap = _charCache.putIfAbsent(device.remoteId, () {
-        return <Guid, Map<Guid, List<BluetoothRemoteGATTCharacteristic>>>{};
+        return <Guid, List<BluetoothRemoteGATTCharacteristic>>{};
       });
+      devMap.clear();
 
       // Enumerate services and characteristics; build cache synchronously from discovery results
       final primaryServices = (await gatt.getPrimaryServices().toDart).toDart;
@@ -194,20 +201,14 @@ final class FlutterBluePlusWeb extends FlutterBluePlusPlatform {
         final characteristics = <BmBluetoothCharacteristic>[];
 
         // reset/ensure service map
-        final charsByUuid = devMap.putIfAbsent(Guid(s.uuid), () {
-          return <Guid, List<BluetoothRemoteGATTCharacteristic>>{};
+        final charsForService = devMap.putIfAbsent(Guid(s.uuid), () {
+          return <BluetoothRemoteGATTCharacteristic>[];
         });
 
         // pull all chars and cache them grouped by char.uuid (order matters and defines instanceId)
         final chars = (await s.getCharacteristics().toDart).toDart;
 
-        // rebuild for this service
-        charsByUuid
-          ..clear()
-          ..addAll(<Guid, List<BluetoothRemoteGATTCharacteristic>>{});
-        for (final c in chars) {
-          (charsByUuid[Guid(c.uuid)] ??= <BluetoothRemoteGATTCharacteristic>[]).add(c);
-        }
+        charsForService.addAll(chars);
 
         for (final c in chars) {
           final descriptors = <BmBluetoothDescriptor>[];
