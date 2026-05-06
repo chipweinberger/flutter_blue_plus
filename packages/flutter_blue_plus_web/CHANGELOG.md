@@ -2,6 +2,7 @@
 * **[Fix]** Web: `setNotifyValue` should return `false` to avoid waiting for a CCCD write that Web Bluetooth never emits
 
 ## 8.2.2
+* **[Fix]** Web: allow `autoConnect` when adapter state is unknown
 * **[Release]** version bump for the flutter_blue_plus 2.2.2 release
 
 ## 8.2.1

@@ -36,8 +36,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 @property(nonatomic) NSMutableDictionary *knownPeripherals;
 @property(nonatomic) NSMutableDictionary *connectedPeripherals;
 @property(nonatomic) NSMutableDictionary *currentlyConnectingPeripherals;
-@property(nonatomic) NSMutableArray *servicesToDiscover;
-@property(nonatomic) NSMutableArray *characteristicsToDiscover;
+@property(nonatomic) NSMutableDictionary *servicesToDiscover;
+@property(nonatomic) NSMutableDictionary *characteristicsToDiscover;
+@property(nonatomic) NSMutableDictionary *discoveryErrors;
 @property(nonatomic) NSMutableDictionary *didWriteWithoutResponse;
 @property(nonatomic) NSMutableDictionary *peripheralMtu;
 @property(nonatomic) NSMutableDictionary *writeChrs;
@@ -60,8 +61,9 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     instance.knownPeripherals = [NSMutableDictionary new];
     instance.connectedPeripherals = [NSMutableDictionary new];
     instance.currentlyConnectingPeripherals = [NSMutableDictionary new];
-    instance.servicesToDiscover = [NSMutableArray new];
-    instance.characteristicsToDiscover = [NSMutableArray new];
+    instance.servicesToDiscover = [NSMutableDictionary new];
+    instance.characteristicsToDiscover = [NSMutableDictionary new];
+    instance.discoveryErrors = [NSMutableDictionary new];
     instance.didWriteWithoutResponse = [NSMutableDictionary new];
     instance.peripheralMtu = [NSMutableDictionary new];
     instance.writeChrs = [NSMutableDictionary new];
@@ -436,9 +438,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 return;
             }
 
-            // Clear helper arrays
-            [self.servicesToDiscover removeAllObjects];
-            [self.characteristicsToDiscover removeAllObjects];
+            // Reset discovery tracking for this peripheral only.
+            [self clearPendingDiscoveryForRemoteId:remoteId];
 
             // start discovery
             [peripheral discoverServices:nil];
@@ -1082,10 +1083,92 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     [self.servicesToDiscover removeAllObjects];
     [self.characteristicsToDiscover removeAllObjects];
+    [self.discoveryErrors removeAllObjects];
     [self.didWriteWithoutResponse removeAllObjects];
     [self.peripheralMtu removeAllObjects];
     [self.writeChrs removeAllObjects];
     [self.writeDescs removeAllObjects];
+}
+
+- (NSMutableArray *)pendingServicesForRemoteId:(NSString *)remoteId createIfMissing:(BOOL)create
+{
+    NSMutableArray *pending = self.servicesToDiscover[remoteId];
+    if (pending == nil && create) {
+        pending = [NSMutableArray new];
+        self.servicesToDiscover[remoteId] = pending;
+    }
+    return pending;
+}
+
+- (NSMutableArray *)pendingCharacteristicsForRemoteId:(NSString *)remoteId createIfMissing:(BOOL)create
+{
+    NSMutableArray *pending = self.characteristicsToDiscover[remoteId];
+    if (pending == nil && create) {
+        pending = [NSMutableArray new];
+        self.characteristicsToDiscover[remoteId] = pending;
+    }
+    return pending;
+}
+
+- (void)clearPendingDiscoveryForRemoteId:(NSString *)remoteId
+{
+    [self.servicesToDiscover removeObjectForKey:remoteId];
+    [self.characteristicsToDiscover removeObjectForKey:remoteId];
+    [self.discoveryErrors removeObjectForKey:remoteId];
+}
+
+- (void)clearCachedWritesForRemoteId:(NSString *)remoteId
+{
+    NSString *prefix = [NSString stringWithFormat:@"%@:", remoteId];
+
+    for (NSString *key in [self.writeChrs allKeys]) {
+        if ([key hasPrefix:prefix]) {
+            [self.writeChrs removeObjectForKey:key];
+        }
+    }
+
+    for (NSString *key in [self.writeDescs allKeys]) {
+        if ([key hasPrefix:prefix]) {
+            [self.writeDescs removeObjectForKey:key];
+        }
+    }
+}
+
+- (void)recordDiscoveryError:(NSError *)error remoteId:(NSString *)remoteId
+{
+    if (error != nil && self.discoveryErrors[remoteId] == nil) {
+        self.discoveryErrors[remoteId] = error;
+    }
+}
+
+- (void)completeDiscoveryIfReady:(CBPeripheral *)peripheral
+{
+    NSString *remoteId = [[peripheral identifier] UUIDString];
+    NSMutableArray *pendingServices = [self pendingServicesForRemoteId:remoteId createIfMissing:NO];
+    NSMutableArray *pendingCharacteristics = [self pendingCharacteristicsForRemoteId:remoteId createIfMissing:NO];
+
+    if (pendingServices.count > 0 || pendingCharacteristics.count > 0) {
+        return;
+    }
+
+    NSError *error = self.discoveryErrors[remoteId];
+    [self clearPendingDiscoveryForRemoteId:remoteId];
+
+    NSMutableArray *services = [NSMutableArray new];
+    for (CBService *s in [peripheral services])
+    {
+        [services addObject:[self bmBluetoothService:peripheral service:s]];
+    }
+
+    NSDictionary* response = @{
+        @"remote_id":       remoteId,
+        @"services":        services,
+        @"success":         @(error == nil),
+        @"error_string":    error ? [error localizedDescription] : @"success",
+        @"error_code":      error ? @(error.code) : @(0),
+    };
+
+    [self.methodChannel invokeMethod:@"OnDiscoveredServices" arguments:response];
 }
 
 ////////////////////////////////////
@@ -1172,16 +1255,14 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // update connection state
             Log(LDEBUG, @"Restore: already connected to %@", peripheral.identifier.UUIDString);
             [self centralManager:central didConnectPeripheral:peripheral];
-            
+
+            // restore cached services and notifications for this peripheral
+            [self peripheral:peripheral didDiscoverServices:nil];
+
             for (CBService *service in peripheral.services) {
+                [self peripheral:peripheral didDiscoverCharacteristicsForService:service error:nil];
 
-                // restore services
-                [self peripheral:peripheral didDiscoverServices:nil];
-                
                 for (CBCharacteristic *characteristic in service.characteristics) {
-
-                    // restore characteristics
-                    [self peripheral:peripheral didDiscoverCharacteristicsForService:service error:nil];
 
                     // restore notifications
                     if (characteristic.isNotifying) {
@@ -1360,6 +1441,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // clear negotiated mtu
     [self.peripheralMtu removeObjectForKey:peripheral];
 
+    // clear any per-device state that would otherwise leak across reconnects
+    [self clearPendingDiscoveryForRemoteId:remoteId];
+    [self.didWriteWithoutResponse removeObjectForKey:remoteId];
+    [self clearCachedWritesForRemoteId:remoteId];
+
     // Unregister self as delegate for peripheral, not working #42
     peripheral.delegate = nil;
 
@@ -1394,6 +1480,11 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     // remove from currently connecting peripherals
     [self.currentlyConnectingPeripherals removeObjectForKey:remoteId];
 
+    // clear any state tied to the failed connection attempt
+    [self clearPendingDiscoveryForRemoteId:remoteId];
+    [self.didWriteWithoutResponse removeObjectForKey:remoteId];
+    [self clearCachedWritesForRemoteId:remoteId];
+
     // See BmConnectionStateResponse
     NSDictionary *result = @{
         @"remote_id":                [[peripheral identifier] UUIDString],
@@ -1425,24 +1516,21 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     if (error) {
         Log(LERROR, @"didDiscoverServices:");
         Log(LERROR, @"  error: %@", [error localizedDescription]);
+        [self recordDiscoveryError:error remoteId:[[peripheral identifier] UUIDString]];
     } else {
         Log(LDEBUG, @"didDiscoverServices:");
     }
 
+    NSString *remoteId = [[peripheral identifier] UUIDString];
+    NSMutableArray *pendingServices = [self pendingServicesForRemoteId:remoteId createIfMissing:YES];
+
     // discover characteristics and included services
-    [self.servicesToDiscover addObjectsFromArray:peripheral.services];
+    [pendingServices addObjectsFromArray:peripheral.services];
 
     // If there are no services, descriptor discovery will never fire,
     // so finish discovery immediately.
     if (peripheral.services.count == 0) {
-        NSDictionary* response = @{
-            @"remote_id":       [peripheral.identifier UUIDString],
-            @"services":        @[],
-            @"success":         error == nil ? @(1) : @(0),
-            @"error_string":    error ? [error localizedDescription] : @"success",
-            @"error_code":      error ? @(error.code) : @(0),
-        };
-        [self.methodChannel invokeMethod:@"OnDiscoveredServices" arguments:response];
+        [self completeDiscoveryIfReady:peripheral];
         return;
     }
 
@@ -1461,13 +1549,18 @@ didDiscoverCharacteristicsForService:(CBService *)service
         Log(LERROR, @"didDiscoverCharacteristicsForService:");
         Log(LERROR, @"  svc: %@", [service.UUID uuidStr]);
         Log(LERROR, @"  error: %@", [error localizedDescription]);
+        [self recordDiscoveryError:error remoteId:[[peripheral identifier] UUIDString]];
     } else {
         Log(LDEBUG, @"didDiscoverCharacteristicsForService:");
         Log(LDEBUG, @"  svc: %@", [service.UUID uuidStr]);
     }
 
-    [self.servicesToDiscover removeObject:service];
-    [self.characteristicsToDiscover addObjectsFromArray:service.characteristics];
+    NSString *remoteId = [[peripheral identifier] UUIDString];
+    NSMutableArray *pendingServices = [self pendingServicesForRemoteId:remoteId createIfMissing:NO];
+    NSMutableArray *pendingCharacteristics = [self pendingCharacteristicsForRemoteId:remoteId createIfMissing:YES];
+
+    [pendingServices removeObject:service];
+    [pendingCharacteristics addObjectsFromArray:service.characteristics];
 
     // Loop through and discover descriptors for characteristics
     for (CBCharacteristic *c in [service characteristics])
@@ -1475,6 +1568,8 @@ didDiscoverCharacteristicsForService:(CBService *)service
         Log(LDEBUG, @"    chr: %@", [c.UUID uuidStr]);
         [peripheral discoverDescriptorsForCharacteristic:c];
     }
+
+    [self completeDiscoveryIfReady:peripheral];
 }
 
 
@@ -1486,10 +1581,14 @@ didDiscoverCharacteristicsForService:(CBService *)service
         Log(LERROR, @"didDiscoverDescriptorsForCharacteristic:");
         Log(LERROR, @"  chr: %@", [characteristic.UUID uuidStr]);
         Log(LERROR, @"  error: %@", [error localizedDescription]);
+        [self recordDiscoveryError:error remoteId:[[peripheral identifier] UUIDString]];
     } else {
         Log(LDEBUG, @"didDiscoverDescriptorsForCharacteristic:");
         Log(LDEBUG, @"  chr: %@", [characteristic.UUID uuidStr]);
     }
+
+    NSString *remoteId = [[peripheral identifier] UUIDString];
+    NSMutableArray *pendingCharacteristics = [self pendingCharacteristicsForRemoteId:remoteId createIfMissing:NO];
 
     // print descriptors
     for (CBDescriptor *d in [characteristic descriptors])
@@ -1498,30 +1597,8 @@ didDiscoverCharacteristicsForService:(CBService *)service
     }
 
     // have we finished discovering?
-    [self.characteristicsToDiscover removeObject:characteristic];
-    if (self.servicesToDiscover.count > 0 || self.characteristicsToDiscover.count > 0)
-    {
-        return; // Still discovering
-    }
-
-    // Add BmBluetoothServices to array
-    NSMutableArray *services = [NSMutableArray new];
-    for (CBService *s in [peripheral services])
-    {
-        [services addObject:[self bmBluetoothService:peripheral service:s]];
-    }
-
-    // See BmDiscoverServicesResult
-    NSDictionary* response = @{
-        @"remote_id":       [peripheral.identifier UUIDString],
-        @"services":        services,
-        @"success":         error == nil ? @(1) : @(0),
-        @"error_string":    error ? [error localizedDescription] : @"success",
-        @"error_code":      error ? @(error.code) : @(0),
-    };
-
-    // Send updated tree
-    [self.methodChannel invokeMethod:@"OnDiscoveredServices" arguments:response];
+    [pendingCharacteristics removeObject:characteristic];
+    [self completeDiscoveryIfReady:peripheral];
 }
 
 - (void)peripheral:(CBPeripheral *)peripheral
@@ -1532,10 +1609,14 @@ didDiscoverCharacteristicsForService:(CBService *)service
         Log(LERROR, @"didDiscoverIncludedServicesForService:");
         Log(LERROR, @"  svc: %@", [service.UUID uuidStr]);
         Log(LERROR, @"  error: %@", [error localizedDescription]);
+        [self recordDiscoveryError:error remoteId:[[peripheral identifier] UUIDString]];
     } else {
         Log(LDEBUG, @"didDiscoverIncludedServicesForService:");
         Log(LDEBUG, @"  svc: %@", [service.UUID uuidStr]);
     }
+
+    NSString *remoteId = [[peripheral identifier] UUIDString];
+    NSMutableArray *pendingServices = [self pendingServicesForRemoteId:remoteId createIfMissing:YES];
 
     // discover the included services themselves
     for (CBService *included in [service includedServices]) {
@@ -1543,9 +1624,12 @@ didDiscoverCharacteristicsForService:(CBService *)service
         if (included == service) {
             continue;
         }
+        [pendingServices addObject:included];
         [peripheral discoverCharacteristics:nil forService:included];
         [peripheral discoverIncludedServices:nil forService:included];
     }
+
+    [self completeDiscoveryIfReady:peripheral];
 }
 
 - (void)peripheral:(CBPeripheral *)peripheral

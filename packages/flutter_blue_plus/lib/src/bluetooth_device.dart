@@ -121,12 +121,12 @@ class BluetoothDevice {
     // and you'll have to call `requestMtu` yourself. `autoConnect` is not compatibile with `mtu`.
     assert((mtu == null) || !autoConnect, "mtu and auto connect are incompatible");
 
-    // make sure no one else is calling disconnect
-    _Mutex dmtx = _MutexFactory.getMutexForKey("disconnect");
+    // make sure no one else is calling disconnect on this device
+    _Mutex dmtx = _MutexFactory.getMutexForKey(FlutterBluePlus._disconnectMutexKey(remoteId));
     bool dtook = await dmtx.take();
 
-    // Only allow a single ble operation to be underway at a time
-    _Mutex mtx = _MutexFactory.getMutexForKey("global");
+    // Only allow a single BLE operation to be underway per device.
+    _Mutex mtx = _MutexFactory.getMutexForKey(FlutterBluePlus._bleOperationMutexKey(remoteId));
     await mtx.take();
 
     try {
@@ -217,12 +217,12 @@ class BluetoothDevice {
     bool queue = true,
     int androidDelay = 2000,
   }) async {
-    // Only allow a single disconnect operation at a time
-    _Mutex dtx = _MutexFactory.getMutexForKey("disconnect");
+    // Only allow a single disconnect operation at a time on this device
+    _Mutex dtx = _MutexFactory.getMutexForKey(FlutterBluePlus._disconnectMutexKey(remoteId));
     await dtx.take();
 
-    // Only allow a single ble operation to be underway at a time?
-    _Mutex mtx = _MutexFactory.getMutexForKey("global");
+    // Queue behind other operations for this device only.
+    _Mutex mtx = _MutexFactory.getMutexForKey(FlutterBluePlus._bleOperationMutexKey(remoteId));
     if (queue) {
       await mtx.take();
     }
@@ -274,8 +274,8 @@ class BluetoothDevice {
           ErrorPlatform.fbp, "discoverServices", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
-    // Only allow a single ble operation to be underway at a time
-    _Mutex mtx = _MutexFactory.getMutexForKey("global");
+    // Only allow a single BLE operation to be underway per device.
+    _Mutex mtx = _MutexFactory.getMutexForKey(FlutterBluePlus._bleOperationMutexKey(remoteId));
     await mtx.take();
 
     List<BluetoothService> result = [];
@@ -382,8 +382,8 @@ class BluetoothDevice {
           ErrorPlatform.fbp, "readRssi", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
-    // Only allow a single ble operation to be underway at a time
-    _Mutex mtx = _MutexFactory.getMutexForKey("global");
+    // Only allow a single BLE operation to be underway per device.
+    _Mutex mtx = _MutexFactory.getMutexForKey(FlutterBluePlus._bleOperationMutexKey(remoteId));
     await mtx.take();
 
     int rssi = 0;
@@ -431,8 +431,8 @@ class BluetoothDevice {
           ErrorPlatform.fbp, "requestMtu", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
-    // Only allow a single ble operation to be underway at a time
-    _Mutex mtx = _MutexFactory.getMutexForKey("global");
+    // Only allow a single BLE operation to be underway per device.
+    _Mutex mtx = _MutexFactory.getMutexForKey(FlutterBluePlus._bleOperationMutexKey(remoteId));
     await mtx.take();
 
     // predelay
@@ -555,8 +555,8 @@ class BluetoothDevice {
           ErrorPlatform.fbp, "createBond", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
     }
 
-    // Only allow a single ble operation to be underway at a time
-    _Mutex mtx = _MutexFactory.getMutexForKey("global");
+    // Only allow a single BLE operation to be underway per device.
+    _Mutex mtx = _MutexFactory.getMutexForKey(FlutterBluePlus._bleOperationMutexKey(remoteId));
     await mtx.take();
 
     try {
@@ -596,8 +596,8 @@ class BluetoothDevice {
       throw FlutterBluePlusException(ErrorPlatform.fbp, "removeBond", FbpErrorCode.androidOnly.index, "android-only");
     }
 
-    // Only allow a single ble operation to be underway at a time
-    _Mutex mtx = _MutexFactory.getMutexForKey("global");
+    // Only allow a single BLE operation to be underway per device.
+    _Mutex mtx = _MutexFactory.getMutexForKey(FlutterBluePlus._bleOperationMutexKey(remoteId));
     await mtx.take();
 
     try {

@@ -4,6 +4,11 @@
 
 part of '../flutter_blue_plus.dart';
 
+enum OperationQueueMode {
+  global,
+  perDevice,
+}
+
 class FlutterBluePlus {
   ///////////////////
   //  Internal
@@ -46,6 +51,7 @@ class FlutterBluePlus {
 
   /// FlutterBluePlus log level
   static LogLevel _logLevel = LogLevel.debug;
+  static OperationQueueMode _operationQueueMode = OperationQueueMode.global;
 
   ////////////////////
   //  Public
@@ -98,6 +104,12 @@ class FlutterBluePlus {
   /// Get access to FBP logs
   static Stream<String> get logs => FlutterBluePlusPlatform.logs;
 
+  static OperationQueueMode get operationQueueMode => _operationQueueMode;
+
+  static void setOperationQueueMode(OperationQueueMode mode) {
+    _operationQueueMode = mode;
+  }
+
   /// Set configurable options
   ///   - [showPowerAlert] Whether to show the power alert (iOS & MacOS only). i.e. CBCentralManagerOptionShowPowerAlertKey
   ///       To set this option you must call this method before any other method in this package.
@@ -112,6 +124,14 @@ class FlutterBluePlus {
   }) async {
     await _invokePlatform(() => FlutterBluePlusPlatform.instance
         .setOptions(BmSetOptionsRequest(showPowerAlert: showPowerAlert, restoreState: restoreState)));
+  }
+
+  static String _bleOperationMutexKey(DeviceIdentifier remoteId) {
+    return _operationQueueMode == OperationQueueMode.perDevice ? "device:$remoteId" : "global";
+  }
+
+  static String _disconnectMutexKey(DeviceIdentifier remoteId) {
+    return _operationQueueMode == OperationQueueMode.perDevice ? "disconnect:$remoteId" : "disconnect";
   }
 
   /// Turn on Bluetooth (Android only),
