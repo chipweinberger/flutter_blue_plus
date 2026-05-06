@@ -1431,6 +1431,21 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     // discover characteristics and included services
     [self.servicesToDiscover addObjectsFromArray:peripheral.services];
+
+    // If there are no services, descriptor discovery will never fire,
+    // so finish discovery immediately.
+    if (peripheral.services.count == 0) {
+        NSDictionary* response = @{
+            @"remote_id":       [peripheral.identifier UUIDString],
+            @"services":        @[],
+            @"success":         error == nil ? @(1) : @(0),
+            @"error_string":    error ? [error localizedDescription] : @"success",
+            @"error_code":      error ? @(error.code) : @(0),
+        };
+        [self.methodChannel invokeMethod:@"OnDiscoveredServices" arguments:response];
+        return;
+    }
+
     for (CBService *s in [peripheral services]) {
         Log(LDEBUG, @"  svc: %@", [s.UUID uuidStr]);
         [peripheral discoverCharacteristics:nil forService:s];
