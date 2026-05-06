@@ -93,7 +93,7 @@ abstract base class FlutterBluePlusPlatform {
 
   static final _logsController = StreamController<String>.broadcast();
   static Stream<String> get logs => _logsController.stream;
-  
+
   static void log(String s) {
     _logsController.add(s);
     // ignore: avoid_print

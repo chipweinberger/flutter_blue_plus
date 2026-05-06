@@ -33,7 +33,6 @@ class Snackbar {
   }
 }
 
-
 String prettyException(String prefix, dynamic e) {
   if (e is FlutterBluePlusException) {
     return "$prefix ${e.description}";

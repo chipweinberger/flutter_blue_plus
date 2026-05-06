@@ -113,9 +113,10 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
     BmClearGattCacheRequest request,
   ) async {
     return await _callAndroidMethod<bool>(
-      'clearGattCache',
-      request.remoteId.str,
-    ) == true;
+          'clearGattCache',
+          request.remoteId.str,
+        ) ==
+        true;
   }
 
   @override
@@ -123,9 +124,10 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
     BmConnectRequest request,
   ) async {
     return await _callAndroidMethod<bool>(
-      'connect',
-      request.toMap(),
-    ) == true;
+          'connect',
+          request.toMap(),
+        ) ==
+        true;
   }
 
   @override
@@ -133,9 +135,10 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
     BmCreateBondRequest request,
   ) async {
     return await _callAndroidMethod<bool>(
-      'createBond',
-      request.toMap(),
-    ) == true;
+          'createBond',
+          request.toMap(),
+        ) ==
+        true;
   }
 
   @override
@@ -143,9 +146,10 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
     BmDisconnectRequest request,
   ) async {
     return await _callAndroidMethod<bool>(
-      'disconnect',
-      request.remoteId.str,
-    ) == true;
+          'disconnect',
+          request.remoteId.str,
+        ) ==
+        true;
   }
 
   @override
@@ -153,9 +157,10 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
     BmDiscoverServicesRequest request,
   ) async {
     return await _callAndroidMethod<bool>(
-      'discoverServices',
-      request.remoteId.str,
-    ) == true;
+          'discoverServices',
+          request.remoteId.str,
+        ) ==
+        true;
   }
 
   @override
@@ -230,8 +235,9 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
     BmIsSupportedRequest request,
   ) async {
     return await _callAndroidMethod<bool>(
-      'isSupported',
-    ) == true;
+          'isSupported',
+        ) ==
+        true;
   }
 
   @override
@@ -239,9 +245,10 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
     BmReadCharacteristicRequest request,
   ) async {
     return await _callAndroidMethod<bool>(
-      'readCharacteristic',
-      request.toMap(),
-    ) == true;
+          'readCharacteristic',
+          request.toMap(),
+        ) ==
+        true;
   }
 
   @override
@@ -249,9 +256,10 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
     BmReadDescriptorRequest request,
   ) async {
     return await _callAndroidMethod<bool>(
-      'readDescriptor',
-      request.toMap(),
-    ) == true;
+          'readDescriptor',
+          request.toMap(),
+        ) ==
+        true;
   }
 
   @override
@@ -259,9 +267,10 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
     BmReadRssiRequest request,
   ) async {
     return await _callAndroidMethod<bool>(
-      'readRssi',
-      request.remoteId.str,
-    ) == true;
+          'readRssi',
+          request.remoteId.str,
+        ) ==
+        true;
   }
 
   @override
@@ -269,9 +278,10 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
     BmRemoveBondRequest request,
   ) async {
     return await _callAndroidMethod<bool>(
-      'removeBond',
-      request.remoteId.str,
-    ) == true;
+          'removeBond',
+          request.remoteId.str,
+        ) ==
+        true;
   }
 
   @override
@@ -279,9 +289,10 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
     BmConnectionPriorityRequest request,
   ) async {
     return await _callAndroidMethod<bool>(
-      'requestConnectionPriority',
-      request.toMap(),
-    ) == true;
+          'requestConnectionPriority',
+          request.toMap(),
+        ) ==
+        true;
   }
 
   @override
@@ -289,9 +300,10 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
     BmMtuChangeRequest request,
   ) async {
     return await _callAndroidMethod<bool>(
-      'requestMtu',
-      request.toMap(),
-    ) == true;
+          'requestMtu',
+          request.toMap(),
+        ) ==
+        true;
   }
 
   @override
@@ -302,9 +314,10 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
     _logColor = request.logColor;
 
     return await _callAndroidMethod<bool>(
-      'setLogLevel',
-      request.logLevel.index,
-    ) == true;
+          'setLogLevel',
+          request.logLevel.index,
+        ) ==
+        true;
   }
 
   @override
@@ -312,9 +325,10 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
     BmSetNotifyValueRequest request,
   ) async {
     return await _callAndroidMethod<bool>(
-      'setNotifyValue',
-      request.toMap(),
-    ) == true;
+          'setNotifyValue',
+          request.toMap(),
+        ) ==
+        true;
   }
 
   @override
@@ -322,9 +336,10 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
     BmSetOptionsRequest request,
   ) async {
     return await _callAndroidMethod<bool>(
-      'setOptions',
-      request.toMap(),
-    ) == true;
+          'setOptions',
+          request.toMap(),
+        ) ==
+        true;
   }
 
   @override
@@ -332,9 +347,10 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
     BmPreferredPhy request,
   ) async {
     return await _callAndroidMethod<bool>(
-      'setPreferredPhy',
-      request.toMap(),
-    ) == true;
+          'setPreferredPhy',
+          request.toMap(),
+        ) ==
+        true;
   }
 
   @override
@@ -342,9 +358,10 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
     BmScanSettings request,
   ) async {
     return await _callAndroidMethod<bool>(
-      'startScan',
-      request.toMap(),
-    ) == true;
+          'startScan',
+          request.toMap(),
+        ) ==
+        true;
   }
 
   @override
@@ -352,8 +369,9 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
     BmStopScanRequest request,
   ) async {
     return await _callAndroidMethod<bool>(
-      'stopScan',
-    ) == true;
+          'stopScan',
+        ) ==
+        true;
   }
 
   @override
@@ -361,8 +379,9 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
     BmTurnOffRequest request,
   ) async {
     return await _callAndroidMethod<bool>(
-      'turnOff',
-    ) == true;
+          'turnOff',
+        ) ==
+        true;
   }
 
   @override
@@ -370,8 +389,9 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
     BmTurnOnRequest request,
   ) async {
     return await _callAndroidMethod<bool>(
-      'turnOn',
-    ) == true;
+          'turnOn',
+        ) ==
+        true;
   }
 
   @override
@@ -379,9 +399,10 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
     BmWriteCharacteristicRequest request,
   ) async {
     return await _callAndroidMethod<bool>(
-      'writeCharacteristic',
-      request.toMap(),
-    ) == true;
+          'writeCharacteristic',
+          request.toMap(),
+        ) ==
+        true;
   }
 
   @override
@@ -389,9 +410,10 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
     BmWriteDescriptorRequest request,
   ) async {
     return await _callAndroidMethod<bool>(
-      'writeDescriptor',
-      request.toMap(),
-    ) == true;
+          'writeDescriptor',
+          request.toMap(),
+        ) ==
+        true;
   }
 
   Future<T?> _callAndroidMethod<T>(

@@ -577,8 +577,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
             characteristic.uuid.value,
           );
 
-          return uuid == request.characteristicUuid &&
-              (characteristic.instanceId(service) == request.instanceId);
+          return uuid == request.characteristicUuid && (characteristic.instanceId(service) == request.instanceId);
         },
       );
 
@@ -651,8 +650,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
             characteristic.uuid.value,
           );
 
-          return uuid == request.characteristicUuid &&
-              (characteristic.instanceId(service) == request.instanceId);
+          return uuid == request.characteristicUuid && (characteristic.instanceId(service) == request.instanceId);
         },
       );
 
@@ -788,8 +786,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
           characteristic.uuid.value,
         );
 
-        return uuid == request.characteristicUuid &&
-            (characteristic.instanceId(service) == request.instanceId);
+        return uuid == request.characteristicUuid && (characteristic.instanceId(service) == request.instanceId);
       },
     );
 
@@ -914,8 +911,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
             characteristic.uuid.value,
           );
 
-          return uuid == request.characteristicUuid &&
-              (characteristic.instanceId(service) == request.instanceId);
+          return uuid == request.characteristicUuid && (characteristic.instanceId(service) == request.instanceId);
         },
       );
 
@@ -993,8 +989,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
             characteristic.uuid.value,
           );
 
-          return uuid == request.characteristicUuid &&
-              (characteristic.instanceId(service) == request.instanceId);
+          return uuid == request.characteristicUuid && (characteristic.instanceId(service) == request.instanceId);
         },
       );
 

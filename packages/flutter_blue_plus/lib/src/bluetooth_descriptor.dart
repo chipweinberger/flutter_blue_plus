@@ -9,7 +9,7 @@ class BluetoothDescriptor {
   final Guid? primaryServiceUuid;
   final Guid serviceUuid;
   final Guid characteristicUuid;
-  final int instanceId; 
+  final int instanceId;
   final Guid descriptorUuid;
 
   BluetoothDescriptor({

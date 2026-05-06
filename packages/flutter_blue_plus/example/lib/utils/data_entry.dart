@@ -1,10 +1,8 @@
-
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
 class DataEntry {
-
   static Future<List<int>?> enterData(BuildContext context) async {
     ValueNotifier<bool> isHex = ValueNotifier(false);
     TextEditingController dataController = TextEditingController(text: '');
@@ -83,7 +81,7 @@ class DataEntry {
     }
     try {
       return [for (int i = 0; i < value.length; i += 2) int.parse(value.substring(i, i + 2), radix: 16)];
-    } catch(_) {
+    } catch (_) {
       return null;
     }
   }

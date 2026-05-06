@@ -143,8 +143,8 @@ class FlutterBluePlus {
   static Stream<BluetoothAdapterState> get adapterState async* {
     // get current state if needed
     if (_adapterStateNow == null) {
-      var result =
-          await _invokePlatform(() => FlutterBluePlusPlatform.instance.getAdapterState(BmBluetoothAdapterStateRequest()));
+      var result = await _invokePlatform(
+          () => FlutterBluePlusPlatform.instance.getAdapterState(BmBluetoothAdapterStateRequest()));
       // update _adapterStateNow if it is still null after the await
       _adapterStateNow ??= result.adapterState;
     }
@@ -525,7 +525,8 @@ class FlutterBluePlus {
             [FlutterBluePlusPlatform.instance.onDescriptorRead, FlutterBluePlusPlatform.instance.onDescriptorWritten])
         .listen((r) {
       if (r.success == true) {
-        String key = "${r.primaryServiceUuid ?? ""}:${r.serviceUuid}:${r.characteristicUuid}:${r.instanceId}:${r.descriptorUuid}";
+        String key =
+            "${r.primaryServiceUuid ?? ""}:${r.serviceUuid}:${r.characteristicUuid}:${r.instanceId}:${r.descriptorUuid}";
         _lastDescs[r.remoteId] ??= {};
         _lastDescs[r.remoteId]![key] = r.value;
       }

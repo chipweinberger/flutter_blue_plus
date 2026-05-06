@@ -95,9 +95,10 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     BmConnectRequest request,
   ) async {
     return await _callDarwinMethod<bool>(
-      'connect',
-      request.toMap(),
-    ) == true;
+          'connect',
+          request.toMap(),
+        ) ==
+        true;
   }
 
   @override
@@ -105,9 +106,10 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     BmDisconnectRequest request,
   ) async {
     return await _callDarwinMethod<bool>(
-      'disconnect',
-      request.remoteId.str,
-    ) == true;
+          'disconnect',
+          request.remoteId.str,
+        ) ==
+        true;
   }
 
   @override
@@ -115,9 +117,10 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     BmDiscoverServicesRequest request,
   ) async {
     return await _callDarwinMethod<bool>(
-      'discoverServices',
-      request.remoteId.str,
-    ) == true;
+          'discoverServices',
+          request.remoteId.str,
+        ) ==
+        true;
   }
 
   @override
@@ -159,8 +162,9 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     BmIsSupportedRequest request,
   ) async {
     return await _callDarwinMethod<bool>(
-      'isSupported',
-    ) == true;
+          'isSupported',
+        ) ==
+        true;
   }
 
   @override
@@ -168,9 +172,10 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     BmReadCharacteristicRequest request,
   ) async {
     return await _callDarwinMethod<bool>(
-      'readCharacteristic',
-      request.toMap(),
-    ) == true;
+          'readCharacteristic',
+          request.toMap(),
+        ) ==
+        true;
   }
 
   @override
@@ -178,9 +183,10 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     BmReadDescriptorRequest request,
   ) async {
     return await _callDarwinMethod<bool>(
-      'readDescriptor',
-      request.toMap(),
-    ) == true;
+          'readDescriptor',
+          request.toMap(),
+        ) ==
+        true;
   }
 
   @override
@@ -188,9 +194,10 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     BmReadRssiRequest request,
   ) async {
     return await _callDarwinMethod<bool>(
-      'readRssi',
-      request.remoteId.str,
-    ) == true;
+          'readRssi',
+          request.remoteId.str,
+        ) ==
+        true;
   }
 
   @override
@@ -201,9 +208,10 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     _logColor = request.logColor;
 
     return await _callDarwinMethod<bool>(
-      'setLogLevel',
-      request.logLevel.index,
-    ) == true;
+          'setLogLevel',
+          request.logLevel.index,
+        ) ==
+        true;
   }
 
   @override
@@ -211,9 +219,10 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     BmSetNotifyValueRequest request,
   ) async {
     return await _callDarwinMethod<bool>(
-      'setNotifyValue',
-      request.toMap(),
-    ) == true;
+          'setNotifyValue',
+          request.toMap(),
+        ) ==
+        true;
   }
 
   @override
@@ -221,9 +230,10 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     BmSetOptionsRequest request,
   ) async {
     return await _callDarwinMethod<bool>(
-      'setOptions',
-      request.toMap(),
-    ) == true;
+          'setOptions',
+          request.toMap(),
+        ) ==
+        true;
   }
 
   @override
@@ -231,9 +241,10 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     BmScanSettings request,
   ) async {
     return await _callDarwinMethod<bool>(
-      'startScan',
-      request.toMap(),
-    ) == true;
+          'startScan',
+          request.toMap(),
+        ) ==
+        true;
   }
 
   @override
@@ -241,8 +252,9 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     BmStopScanRequest request,
   ) async {
     return await _callDarwinMethod<bool>(
-      'stopScan',
-    ) == true;
+          'stopScan',
+        ) ==
+        true;
   }
 
   @override
@@ -250,9 +262,10 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     BmWriteCharacteristicRequest request,
   ) async {
     return await _callDarwinMethod<bool>(
-      'writeCharacteristic',
-      request.toMap(),
-    ) == true;
+          'writeCharacteristic',
+          request.toMap(),
+        ) ==
+        true;
   }
 
   @override
@@ -260,9 +273,10 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     BmWriteDescriptorRequest request,
   ) async {
     return await _callDarwinMethod<bool>(
-      'writeDescriptor',
-      request.toMap(),
-    ) == true;
+          'writeDescriptor',
+          request.toMap(),
+        ) ==
+        true;
   }
 
   Future<T?> _callDarwinMethod<T>(
@@ -276,7 +290,7 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
 
     // set platform method handler
     methodChannel.setMethodCallHandler(_methodCallHandler);
-  
+
     // log args
     if (_logLevel == LogLevel.verbose) {
       var func = '<$method>';
