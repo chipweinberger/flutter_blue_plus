@@ -112,15 +112,16 @@ class FlutterBluePlus {
 
   /// Set configurable options
   ///   - [showPowerAlert] Whether to show the power alert (iOS & MacOS only). i.e. CBCentralManagerOptionShowPowerAlertKey
-  ///       To set this option you must call this method before any other method in this package.
+  ///       Defaults to `true` unless explicity set. To set this option you must call this method first before any other in this package.
   ///       See: https://developer.apple.com/documentation/corebluetooth/cbcentralmanageroptionshowpoweralertkey
   ///       This option has no effect on Android.
   ///   - [restoreState] Whether to opt into state restoration (iOS & MacOS only). i.e. CBCentralManagerOptionRestoreIdentifierKey
-  ///       To set this option you must call this method before any other method in this package.
+  ///       Defaults to `false` unless explicity set. To set this option you must call this method first before any other in this package.
   ///       See Apple Documentation for more details. This option has no effect on Android.
+  ///   - Any option left `null` keeps its existing value.
   static Future<void> setOptions({
-    bool showPowerAlert = true,
-    bool restoreState = false,
+    bool? showPowerAlert,
+    bool? restoreState,
   }) async {
     await _invokePlatform(() => FlutterBluePlusPlatform.instance
         .setOptions(BmSetOptionsRequest(showPowerAlert: showPowerAlert, restoreState: restoreState)));

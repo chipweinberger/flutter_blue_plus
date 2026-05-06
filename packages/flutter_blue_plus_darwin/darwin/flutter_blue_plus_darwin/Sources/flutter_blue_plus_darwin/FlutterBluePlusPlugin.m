@@ -112,8 +112,12 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         if ([@"setOptions" isEqualToString:call.method])
         {
             NSDictionary *args = (NSDictionary*) call.arguments;
-            self.showPowerAlert = args[@"show_power_alert"];
-            self.restoreState = args[@"restore_state"];
+            if (args[@"show_power_alert"] != nil) {
+                self.showPowerAlert = args[@"show_power_alert"];
+            }
+            if (args[@"restore_state"] != nil) {
+                self.restoreState = args[@"restore_state"];
+            }
             result(@YES);
             return;
         }
