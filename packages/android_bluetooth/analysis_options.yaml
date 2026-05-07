@@ -1,0 +1,6 @@
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - tool/compatibility/minimum_host/**
+include: package:flutter_lints/flutter.yaml

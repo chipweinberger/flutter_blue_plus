@@ -1,0 +1,23 @@
+def properties = new Properties()
+rootProject.file('local.properties').withInputStream { properties.load(it) }
+def flutterSdkPath = properties.getProperty('flutter.sdk')
+
+apply plugin: 'com.android.application'
+apply from: "$flutterSdkPath/packages/flutter_tools/gradle/flutter.gradle"
+
+android {
+    namespace 'com.jamcorder.android_bluetooth_minimum_host'
+    compileSdkVersion 33
+    defaultConfig {
+        applicationId 'com.jamcorder.android_bluetooth_minimum_host'
+        minSdkVersion 21
+        targetSdkVersion 33
+        versionCode 1
+        versionName '1.0'
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+}
+flutter { source '../..' }
