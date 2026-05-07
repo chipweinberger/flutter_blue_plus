@@ -10,7 +10,7 @@ dependency_overrides:
 ```
 
 ## 2.3.0
-* **[Feature]** Perf: allow writing to multiple sevices at the same time! See: `FlutterBluePlus.setOperationQueueMode`
+* **[Feature]** Perf: allow writing to multiple devices at the same time! See: `FlutterBluePlus.setOperationQueueMode`
 * **[Feature]** Support for services with the same UUID
 * **[Improve]** Darwin: allow `setOptions` arguments to be updated individually
 * **[Improve]** Linux: remove `rxdart` dependency
