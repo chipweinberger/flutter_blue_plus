@@ -30,7 +30,10 @@ dependencies:
   flutter_blue_plus_darwin: 9.0.0
   flutter_blue_plus_linux: 9.0.0
   flutter_blue_plus_web: 9.0.0
-  flutter_blue_plus_winrt: any
+
+  # winrt has not been update to 9.0.0 yet.
+  # we must temporarily drop support (or fork it..)
+  #flutter_blue_plus_winrt: any
 
 dev_dependencies:
   flutter_lints: ^5.0.0
