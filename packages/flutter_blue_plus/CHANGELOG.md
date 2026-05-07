@@ -1,3 +1,14 @@
+## 2.3.1
+* **[Fix]** temporary workaround for `flutter_blue_plus_winrt` not yet declaring compatibility 
+  with `flutter_blue_plus_platform_interface` `9.0.0`
+
+ Windows users can set  `pubspec.yaml` override until `flutter_blue_plus_winrt` updates:
+
+```yaml
+dependency_overrides:
+  flutter_blue_plus_platform_interface: 9.0.0
+```
+
 ## 2.3.0
 * **[Feature]** Perf: allow writing to multiple sevices at the same time! See: `FlutterBluePlus.setOperationQueueMode`
 * **[Feature]** Support for services with the same UUID
