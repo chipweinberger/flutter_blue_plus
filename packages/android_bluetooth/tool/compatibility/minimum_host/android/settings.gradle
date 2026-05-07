@@ -1,0 +1,7 @@
+include ':app'
+
+def properties = new Properties()
+file('local.properties').withInputStream { properties.load(it) }
+def flutterSdkPath = properties.getProperty('flutter.sdk')
+assert flutterSdkPath != null : 'Run Flutter with the pinned SDK to create local.properties'
+apply from: "$flutterSdkPath/packages/flutter_tools/gradle/app_plugin_loader.gradle"

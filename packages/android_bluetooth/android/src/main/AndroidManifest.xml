@@ -1,0 +1,3 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Applications own all permissions, features and optional component declarations. -->
+</manifest>

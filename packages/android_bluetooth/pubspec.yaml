@@ -1,0 +1,24 @@
+name: android_bluetooth
+description: Native Android Bluetooth Low Energy APIs for Dart, including GATT, advertising, L2CAP, companions and ranging.
+version: 0.1.0
+homepage: https://github.com/chipweinberger/flutter_blue_plus/tree/main/packages/android_bluetooth
+
+environment:
+  sdk: ^3.0.0
+  flutter: '>=3.7.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.3
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.jamcorder.android_bluetooth
+        pluginClass: AndroidBluetoothPlugin

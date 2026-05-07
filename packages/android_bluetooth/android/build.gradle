@@ -1,0 +1,70 @@
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.tasks.Classpath
+import org.gradle.process.CommandLineArgumentProvider
+
+// Resolve the agent only when Gradle needs test JVM arguments, and track it as an input.
+abstract class MockitoAgentArgumentProvider implements CommandLineArgumentProvider {
+    @Classpath
+    abstract ConfigurableFileCollection getAgentClasspath()
+
+    @Override
+    Iterable<String> asArguments() {
+        return ["-javaagent:${agentClasspath.singleFile.absolutePath}".toString()]
+    }
+}
+
+group 'com.jamcorder.android_bluetooth'
+version '0.1.0'
+
+apply plugin: 'com.android.library'
+
+// Follow the host Flutter SDK. SDK 36-only callbacks are optional source, so
+// FlutterBluePlus hosts using SDK 33 do not acquire a new build requirement.
+// Flutter 3.10 does not install its Flutter extension on native plugin projects.
+def flutterCompileSdk = findProperty('flutter')?.compileSdkVersion ?: 33
+def bluetoothCompileSdk = (findProperty('androidBluetoothCompileSdk') ?: flutterCompileSdk).toInteger()
+
+android {
+    namespace 'com.jamcorder.android_bluetooth'
+    compileSdkVersion bluetoothCompileSdk
+    if (bluetoothCompileSdk >= 36) {
+        sourceSets.main.java.srcDir 'src/api36/java'
+        sourceSets.test.java.srcDir 'src/testApi36/java'
+    }
+    defaultConfig {
+        minSdk 21
+        consumerProguardFiles 'consumer-rules.pro'
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    testOptions {
+        unitTests.includeAndroidResources = true
+    }
+}
+
+configurations { mockitoAgent }
+def mockitoAgentArguments = objects.newInstance(MockitoAgentArgumentProvider)
+mockitoAgentArguments.agentClasspath.from(configurations.mockitoAgent)
+
+// Newer shadows reference API 36 framework types that are absent from an SDK 33
+// test classpath. Keep the older-host harness on the matching Robolectric line.
+def robolectricVersion = bluetoothCompileSdk >= 36 ? '4.17' : '4.12.2'
+
+dependencies {
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation "org.robolectric:robolectric:$robolectricVersion"
+    testImplementation 'org.mockito:mockito-core:5.14.2'
+    mockitoAgent('org.mockito:mockito-core:5.14.2') { transitive = false }
+}
+
+// Robolectric API 36 initializes Android's shared-memory FileDescriptor.
+tasks.withType(Test).configureEach {
+    if (bluetoothCompileSdk < 36) {
+        systemProperty 'robolectric.enabledSdks', (21..bluetoothCompileSdk).join(',')
+    }
+    jvmArgs '--add-exports=java.base/jdk.internal.access=ALL-UNNAMED'
+    // Explicit instrumentation avoids self-attachment restrictions on JDK 21+.
+    jvmArgumentProviders.add(mockitoAgentArguments)
+}

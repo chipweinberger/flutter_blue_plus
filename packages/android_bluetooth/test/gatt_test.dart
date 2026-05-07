@@ -1,0 +1,61 @@
+import 'dart:typed_data';
+
+import 'package:android_bluetooth/android_bluetooth.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import 'support/bluetooth_test_host.dart';
+
+void main() {
+  final host = BluetoothTestHost();
+  setUp(host.setUp);
+  tearDown(tick);
+
+  test('UUID normalization and validation apply to local GATT models', () {
+    expect(BluetoothGattService('180D').uuid, '0000180d-0000-1000-8000-00805f9b34fb');
+    expect(BluetoothGattDescriptor('12345678', 1).uuid, '12345678-0000-1000-8000-00805f9b34fb');
+    expect(() => BluetoothGattService('invalid'), throwsArgumentError);
+    final a = BluetoothGattCharacteristic('2A37', 2, 1), b = BluetoothGattCharacteristic('2A37', 2, 1);
+    expect(a.handle, isNot(b.handle));
+  });
+
+  test('request acceptance resolves without manufacturing a completion event', () async {
+    final gatt = await BluetoothDevice(address).connectGatt(autoConnect: true, phy: BluetoothDevice.phyLe2mMask);
+    expect(host.calls.last.arguments, containsPair('autoConnect', true));
+    expect(host.calls.last.arguments, containsPair('phy', 2));
+    final received = <BluetoothGattCallback>[];
+    final sub = gatt.events.listen(received.add);
+    expect(await gatt.discoverServices(), true);
+    await Future<void>.delayed(Duration.zero);
+    expect(received, isEmpty);
+    await sub.cancel();
+    await gatt.close();
+  });
+
+  test('duplicate UUIDs retain native instance handles across the complete graph', () async {
+    final gatt = await BluetoothDevice(address).connectGatt();
+    final services = await gatt.services;
+    expect(services[0].uuid, services[1].uuid);
+    expect(services[0].handle, isNot(services[1].handle));
+    final c1 = services[0].characteristics.single, c2 = services[1].characteristics.single;
+    expect(c1.uuid, c2.uuid);
+    expect(c1.handle, isNot(c2.handle));
+    expect(c1.getDescriptor('2902')?.handle, 'd1');
+    expect(await gatt.readCharacteristic(c2), false);
+    expect(host.calls.last.arguments, containsPair('handle', 'c2'));
+    expect(await gatt.writeCharacteristic(c1, Uint8List.fromList([255, 0]), writeType: 1), 0);
+    expect(host.calls.last.arguments, containsPair('handle', 'c1'));
+    expect(host.calls.last.arguments, containsPair('value', [255, 0]));
+    await gatt.close();
+  });
+
+  test('local notification routing does not silently issue a CCCD write', () async {
+    final gatt = await BluetoothDevice(address).connectGatt();
+    final c = (await gatt.services).first.characteristics.single;
+    host.override = (_) async => true;
+    host.calls.clear();
+    expect(await gatt.setCharacteristicNotification(c, true), true);
+    expect(host.calls.map((c) => c.method), ['gatt.setCharacteristicNotification']);
+    host.override = null;
+    await gatt.close();
+  });
+}

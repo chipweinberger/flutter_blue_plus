@@ -1,0 +1,9 @@
+// Opt-in audit harness: compile the sibling backend as test source, without applying its build hooks.
+gradle.projectsEvaluated {
+    def target = gradle.rootProject.findProject(':android_bluetooth')
+    if (target == null) return
+    def packageDir = target.projectDir.parentFile
+    target.android.sourceSets.test.java.srcDir(new File(packageDir, 'tool/flutter_blue_plus_audit/java'))
+    target.android.sourceSets.test.java.srcDir(new File(packageDir.parentFile,
+        'flutter_blue_plus_android/android/src/main/java'))
+}
