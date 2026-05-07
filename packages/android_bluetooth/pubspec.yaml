@@ -1,0 +1,24 @@
+name: android_bluetooth
+description: Android Bluetooth wrapper for Dart on Android.
+version: 0.1.0
+homepage: https://github.com/chipweinberger/flutter_blue_plus
+
+environment:
+  sdk: ^3.3.0
+  flutter: ">=3.19.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_lints: ^5.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.lib.android_bluetooth
+        pluginClass: AndroidBluetoothPlugin
