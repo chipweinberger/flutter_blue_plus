@@ -65,8 +65,8 @@ Any use of FlutterBluePlus by or for a for-profit company or corporation — inc
 
 A valid commercial license covers use of all current and future packages that
 are part of the FlutterBluePlus project, including its federated packages
-(e.g., flutter_blue_plus, flutter_blue_plus_darwin, flutter_blue_plus_android,
-flutter_blue_plus_web, flutter_blue_plus_linux, flutter_blue_plus_platform_interface).
+(e.g., flutter_blue_plus, flutter_blue_plus_darwin, flutter_blue_plus_android, flutter_blue_plus_web,
+flutter_blue_plus_linux, flutter_blue_plus_platform_interface, core_bluetooth, android_bluetooth).
 Only a single commercial license is required per organization, regardless of how many
 FlutterBluePlus packages are used.
 
