@@ -1,3 +1,6 @@
+## 2.3.2
+* **[Improve]** docs & readme
+
 ## 2.3.1
 * **[Improve]** remove `winrt` as an explicit dependency. Windows users should use this:
 

@@ -1,6 +1,6 @@
 name: flutter_blue_plus
 description: Flutter plugin for connecting and communicating with Bluetooth Low Energy devices.
-version: 2.3.1
+version: 2.3.2
 homepage: https://github.com/chipweinberger/flutter_blue_plus
 
 environment:
@@ -25,15 +25,18 @@ dependencies:
   #  - simpler bug reporting
   #  - unified changelog
   #  - users can still manually override
-  flutter_blue_plus_platform_interface: 9.0.0
-  flutter_blue_plus_android: 9.0.0
-  flutter_blue_plus_darwin: 9.0.0
-  flutter_blue_plus_linux: 9.0.0
-  flutter_blue_plus_web: 9.0.0
+  flutter_blue_plus_platform_interface: ^9.0.0
+  flutter_blue_plus_android: ^9.0.0
+  flutter_blue_plus_darwin: ^9.0.0
+  flutter_blue_plus_linux: ^9.0.0
+  flutter_blue_plus_web: ^9.0.0
 
-  # winrt has not been update to 9.0.0 yet.
-  # we must temporarily unendorse it (or fork it..)
-  #flutter_blue_plus_winrt: any
+  # winrt intentionally not included:
+  #  - avoids blocking FBP releases on Windows updates
+  #  - Windows users can still add flutter_blue_plus_winrt manually
+  #  - Windows endorsement is still kept because older winrt releases
+  #    are often compatible with newer FBP releases.
+  #flutter_blue_plus_winrt: 
 
 dev_dependencies:
   flutter_lints: ^5.0.0
