@@ -1,12 +1,10 @@
 ## 2.3.1
-* **[Fix]** temporary workaround for `flutter_blue_plus_winrt` not yet declaring compatibility 
-  with `flutter_blue_plus_platform_interface` `9.0.0`
-
- Windows users can set  `pubspec.yaml` override until `flutter_blue_plus_winrt` updates:
+* **[Improve]** remove `winrt` as an explicit dependency. Windows users should use this:
 
 ```yaml
-dependency_overrides:
-  flutter_blue_plus_platform_interface: 9.0.0
+dependencies:
+  flutter_blue_plus: ^2.3.1
+  flutter_blue_plus_winrt: ^0.19
 ```
 
 ## 2.3.0
