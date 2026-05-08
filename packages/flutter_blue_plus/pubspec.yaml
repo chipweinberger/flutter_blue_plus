@@ -20,16 +20,15 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  # use specific versions to keep all users in sync. 
-  #  - users otherwise forget to update all
-  #  - simpler bug reporting
-  #  - unified changelog
-  #  - users can still manually override
-  flutter_blue_plus_platform_interface: ^9.0.0
-  flutter_blue_plus_android: ^9.0.0
-  flutter_blue_plus_darwin: ^9.0.0
-  flutter_blue_plus_linux: ^9.0.0
-  flutter_blue_plus_web: ^9.0.0
+  # use a constrained range instead of an exact version:
+  #  - avoids pub.dev warnings about pinned dependencies
+  #  - still forces all platform packages to stay perfectly in sync
+  #    for simpler bug reports and unified changelog
+  flutter_blue_plus_platform_interface: '>=9.0.0 <9.0.1'
+  flutter_blue_plus_android: '>=9.0.0 <9.0.1'
+  flutter_blue_plus_darwin: '>=9.0.0 <9.0.1'
+  flutter_blue_plus_linux: '>=9.0.0 <9.0.1'
+  flutter_blue_plus_web: '>=9.0.0 <9.0.1'
 
   # winrt intentionally not included:
   #  - avoids blocking FBP releases on Windows updates
