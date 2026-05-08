@@ -98,25 +98,6 @@ flutter run
 <img alt="FlutterBlue" src="https://github.com/chipweinberger/flutter_blue_plus/blob/master/site/example.png?raw=true" />
 </p>
 
-## Versioning
-
-`flutter_blue_plus` uses Traditional Versioning
-
-`BIG.MEDIUM.SMALL`:
-* `BIG` : Significant overhauls. e.g. `1.0.0` -> `2.0.0`.
-* `MEDIUM` : Moderate improvements, feature updates, breaking chages. e.g. `1.0.0` -> `1.1.0`.
-* `SMALL` : Small fixes, patches, or refinements. `1.0.0` -> `1.0.1`.
-  
----
-
-`flutter_blue_plus_android`, `flutter_blue_plus_darwin`, `flutter_blue_plus_linux`, `flutter_blue_plus_platform_interface`, `flutter_blue_plus_web` use [Semantic Versioning](https://semver.org). 
-
-`MAJOR.MINOR.PATCH`:
-* `MAJOR` : Breaking API changes. e.g. `1.0.0` -> `2.0.0`.
-* `MINOR` : New features. e.g. `1.0.0` -> `1.1.0`.
-* `PATCH` : Bug fixes. e.g. `1.0.0` -> `1.0.1`.
-
-
 ## Usage
 
 ### 🔥 Error Handling 🔥
