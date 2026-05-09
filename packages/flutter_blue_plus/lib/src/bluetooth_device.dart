@@ -11,6 +11,14 @@ class BluetoothDevice {
     required this.remoteId,
   });
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) || other is BluetoothDevice && remoteId == other.remoteId;
+  }
+
+  @override
+  int get hashCode => remoteId.hashCode;
+
   /// Create a device from an id
   ///   - to connect, this device must have been discovered by your app in a previous scan
   ///   - iOS uses 128-bit uuids the remoteId, e.g. e006b3a7-ef7b-4980-a668-1f8005f84383
@@ -737,7 +745,6 @@ class BluetoothDevice {
   @Deprecated('Use fromId instead')
   BluetoothDevice.fromProto(BmBluetoothDevice p) : remoteId = p.remoteId;
 }
-
 
 /// License type for using FlutterBluePlus.
 /// See the LICENSE file in the root of the project for full terms.

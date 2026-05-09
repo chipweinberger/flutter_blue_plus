@@ -35,6 +35,20 @@ class BluetoothCharacteristic {
         characteristicUuid = p.characteristicUuid,
         instanceId = p.instanceId;
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is BluetoothCharacteristic &&
+            remoteId == other.remoteId &&
+            primaryServiceUuid == other.primaryServiceUuid &&
+            serviceUuid == other.serviceUuid &&
+            characteristicUuid == other.characteristicUuid &&
+            instanceId == other.instanceId;
+  }
+
+  @override
+  int get hashCode => Object.hash(remoteId, primaryServiceUuid, serviceUuid, characteristicUuid, instanceId);
+
   /// convenience accessor
   Guid get uuid => characteristicUuid;
 

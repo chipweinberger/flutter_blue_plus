@@ -29,6 +29,28 @@ class BluetoothDescriptor {
         instanceId = p.instanceId,
         descriptorUuid = p.descriptorUuid;
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is BluetoothDescriptor &&
+            remoteId == other.remoteId &&
+            primaryServiceUuid == other.primaryServiceUuid &&
+            serviceUuid == other.serviceUuid &&
+            characteristicUuid == other.characteristicUuid &&
+            instanceId == other.instanceId &&
+            descriptorUuid == other.descriptorUuid;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+        remoteId,
+        primaryServiceUuid,
+        serviceUuid,
+        characteristicUuid,
+        instanceId,
+        descriptorUuid,
+      );
+
   /// convenience accessor
   Guid get uuid => descriptorUuid;
 

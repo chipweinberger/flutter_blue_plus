@@ -56,6 +56,19 @@ class BluetoothService {
         characteristics = p.characteristics.map((c) => BluetoothCharacteristic.fromProto(c)).toList();
 
   @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is BluetoothService &&
+            remoteId == other.remoteId &&
+            primaryServiceUuid == other.primaryServiceUuid &&
+            serviceUuid == other.serviceUuid &&
+            _characteristicsEqual(characteristics, other.characteristics);
+  }
+
+  @override
+  int get hashCode => Object.hash(remoteId, primaryServiceUuid, serviceUuid, Object.hashAll(characteristics));
+
+  @override
   String toString() {
     return 'BluetoothService{'
         'remoteId: $remoteId, '
@@ -67,4 +80,19 @@ class BluetoothService {
 
   @Deprecated('Use remoteId instead')
   DeviceIdentifier get deviceId => remoteId;
+}
+
+bool _characteristicsEqual(List<BluetoothCharacteristic> a, List<BluetoothCharacteristic> b) {
+  if (identical(a, b)) {
+    return true;
+  }
+  if (a.length != b.length) {
+    return false;
+  }
+  for (int i = 0; i < a.length; i++) {
+    if (a[i] != b[i]) {
+      return false;
+    }
+  }
+  return true;
 }
