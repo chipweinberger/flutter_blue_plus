@@ -3,6 +3,50 @@ part of '../flutter_blue_plus.dart';
 /// State of the bluetooth adapter.
 enum BluetoothAdapterState { unknown, unavailable, unauthorized, turningOn, on, turningOff, off }
 
+enum BluetoothConnectionState {
+  disconnected,
+  connected,
+}
+
+enum ConnectionPriority { balanced, high, lowPower }
+
+enum Phy { le1m, le2m, leCoded }
+
+enum PhyCoding { noPreferred, s2, s8 }
+
+enum BluetoothBondState { none, bonding, bonded }
+
+@Deprecated('Use PhyCoding instead')
+enum PhyOption { noPreferred, s2, s8 }
+
+@Deprecated('Use Phy instead')
+enum PhyType { le1m, le2m, leCoded }
+
+@Deprecated('Use BluetoothConnectionState instead')
+enum BluetoothDeviceState { disconnected, connecting, connected, disconnecting }
+
+@Deprecated('Use BluetoothAdapterState instead')
+enum BluetoothState { unknown, unavailable, unauthorized, turningOn, on, turningOff, off }
+
+extension PhyExt on Phy {
+  int get mask {
+    switch (this) {
+      case Phy.le1m:
+        return 1;
+      case Phy.le2m:
+        return 2;
+      case Phy.leCoded:
+        return 3;
+    }
+  }
+}
+
+class BluetoothConnectionEvent {
+  BluetoothDevice device;
+  BluetoothConnectionState connectionState;
+  BluetoothConnectionEvent(this.device, this.connectionState);
+}
+
 class DisconnectReason {
   final ErrorPlatform platform;
   final int? code; // specific to platform
@@ -16,17 +60,6 @@ class DisconnectReason {
         '$description'
         '}';
   }
-}
-
-class BluetoothConnectionEvent {
-  BluetoothDevice device;
-  BluetoothConnectionState connectionState;
-  BluetoothConnectionEvent(this.device, this.connectionState);
-}
-
-enum BluetoothConnectionState {
-  disconnected,
-  connected,
 }
 
 BluetoothConnectionState _bmToConnectionState(BmConnectionStateEnum value) {
@@ -68,11 +101,6 @@ BmConnectionPriorityEnum _bmFromConnectionPriority(ConnectionPriority value) {
   }
 }
 
-// [none] no bond
-// [bonding] bonding is in progress
-// [bonded] bond success
-enum BluetoothBondState { none, bonding, bonded }
-
 BluetoothBondState _bmToBondState(BmBondStateEnum value) {
   switch (value) {
     case BmBondStateEnum.none:
@@ -84,33 +112,48 @@ BluetoothBondState _bmToBondState(BmBondStateEnum value) {
   }
 }
 
-enum ConnectionPriority { balanced, high, lowPower }
-
-enum Phy { le1m, le2m, leCoded }
-
-enum PhyCoding { noPreferred, s2, s8 }
-
-extension PhyExt on Phy {
-  int get mask {
-    switch (this) {
-      case Phy.le1m:
-        return 1;
-      case Phy.le2m:
-        return 2;
-      case Phy.leCoded:
-        return 3;
-    }
-  }
+bool _isBmServiceMatch(BmBluetoothService service, BluetoothCharacteristic characteristic) {
+  return service.primaryServiceUuid == characteristic.primaryServiceUuid &&
+      service.serviceUuid == characteristic.serviceUuid;
 }
 
-@Deprecated('Use PhyCoding instead')
-enum PhyOption { noPreferred, s2, s8 }
+bool _isBmCharacteristicMatch(BmBluetoothCharacteristic bmCharacteristic, BluetoothCharacteristic characteristic) {
+  return bmCharacteristic.characteristicUuid == characteristic.characteristicUuid &&
+      bmCharacteristic.instanceId == characteristic.instanceId;
+}
 
-@Deprecated('Use Phy instead')
-enum PhyType { le1m, le2m, leCoded }
+BmBluetoothCharacteristic? _findCharacteristic(
+  BmDiscoverServicesResult? bmServices,
+  BluetoothCharacteristic characteristic,
+) {
+  if (bmServices == null) return null;
+  final services = bmServices.services.where(
+    (s) => _isBmServiceMatch(s, characteristic),
+  );
+  for (var s in services) {
+    for (var c in s.characteristics) {
+      if (_isBmCharacteristicMatch(c, characteristic)) {
+        return c;
+      }
+    }
+  }
+  return null;
+}
 
-@Deprecated('Use BluetoothConnectionState instead')
-enum BluetoothDeviceState { disconnected, connecting, connected, disconnecting }
+List<BluetoothService> _findIncludedServices(BmDiscoverServicesResult? bmServices, Guid serviceUuid) {
+  return bmServices?.services
+          .where((s) => s.primaryServiceUuid == serviceUuid)
+          .map((s) => BluetoothService.fromProto(s))
+          .toList() ??
+      [];
+}
 
-@Deprecated('Use BluetoothAdapterState instead')
-enum BluetoothState { unknown, unavailable, unauthorized, turningOn, on, turningOff, off }
+BluetoothService? _findPrimaryService(BmDiscoverServicesResult? bmServices, Guid? primaryServiceUuid) {
+  if (primaryServiceUuid == null) return null;
+  final service = bmServices?.services._firstWhereOrNull(
+    (s) => s.serviceUuid == primaryServiceUuid,
+  );
+  return service != null ? BluetoothService.fromProto(service) : null;
+}
+
+

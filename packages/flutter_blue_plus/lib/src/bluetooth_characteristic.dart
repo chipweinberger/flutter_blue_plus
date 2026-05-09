@@ -20,6 +20,22 @@ class BluetoothCharacteristic {
   ///  - Web: index within `BlueZGattService` -> characteristics
   final int instanceId;
 
+  /// for convenience
+  Guid get uuid => characteristicUuid;
+  BluetoothDevice get device => BluetoothDevice(remoteId: remoteId);
+
+  /// get properties from known services
+  CharacteristicProperties get properties {
+    final c = _findCharacteristic(FlutterBluePlus._knownServices[remoteId], this);
+    return c != null ? CharacteristicProperties.fromProto(c.properties) : CharacteristicProperties();
+  }
+
+  /// get descriptors from known services
+  List<BluetoothDescriptor> get descriptors {
+    final c = _findCharacteristic(FlutterBluePlus._knownServices[remoteId], this);
+    return c != null ? c.descriptors.map((d) => BluetoothDescriptor.fromProto(d)).toList() : [];
+  }
+
   BluetoothCharacteristic({
     required this.remoteId,
     this.primaryServiceUuid,
@@ -48,22 +64,6 @@ class BluetoothCharacteristic {
 
   @override
   int get hashCode => Object.hash(remoteId, primaryServiceUuid, serviceUuid, characteristicUuid, instanceId);
-
-  /// convenience accessor
-  Guid get uuid => characteristicUuid;
-
-  /// convenience accessor
-  BluetoothDevice get device => BluetoothDevice(remoteId: remoteId);
-
-  /// Get Properties from known services
-  CharacteristicProperties get properties {
-    return _bmchr != null ? CharacteristicProperties.fromProto(_bmchr!.properties) : CharacteristicProperties();
-  }
-
-  /// Get Descriptors from known services
-  List<BluetoothDescriptor> get descriptors {
-    return _bmchr != null ? _bmchr!.descriptors.map((d) => BluetoothDescriptor.fromProto(d)).toList() : [];
-  }
 
   /// this variable is updated:
   ///   - anytime `read()` is called
@@ -314,40 +314,6 @@ class BluetoothCharacteristic {
     }
 
     return true;
-  }
-
-  // get known service
-  BmBluetoothService? get _bmsvc {
-    if (FlutterBluePlus._knownServices[remoteId] != null) {
-      for (var s in FlutterBluePlus._knownServices[remoteId]!.services) {
-        if (s.primaryServiceUuid == primaryServiceUuid) {
-          if (s.serviceUuid == serviceUuid) {
-            for (var c in s.characteristics) {
-              if (c.characteristicUuid == characteristicUuid) {
-                if (c.instanceId == instanceId) {
-                  return s;
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    return null;
-  }
-
-  /// get known characteristic
-  BmBluetoothCharacteristic? get _bmchr {
-    if (_bmsvc != null) {
-      for (var c in _bmsvc!.characteristics) {
-        if (c.characteristicUuid == uuid) {
-          if (c.instanceId == instanceId) {
-            return c;
-          }
-        }
-      }
-    }
-    return null;
   }
 
   @override

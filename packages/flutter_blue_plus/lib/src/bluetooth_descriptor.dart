@@ -12,6 +12,10 @@ class BluetoothDescriptor {
   final int instanceId;
   final Guid descriptorUuid;
 
+  /// for convenience
+  Guid get uuid => descriptorUuid;
+  BluetoothDevice get device => BluetoothDevice(remoteId: remoteId);
+
   BluetoothDescriptor({
     required this.remoteId,
     this.primaryServiceUuid,
@@ -50,12 +54,6 @@ class BluetoothDescriptor {
         instanceId,
         descriptorUuid,
       );
-
-  /// convenience accessor
-  Guid get uuid => descriptorUuid;
-
-  /// convenience accessor
-  BluetoothDevice get device => BluetoothDevice(remoteId: remoteId);
 
   /// this variable is updated:
   ///   - anytime `read()` is called
