@@ -27,14 +27,6 @@ class BluetoothConnectionEvent {
 enum BluetoothConnectionState {
   disconnected,
   connected,
-  // Deprecated: To be more precise, 'connecting' is only returned by getConnectionState (android)
-  // or CBPeripheral.state (iOS), which FlutterBluePlus does not use. FBP only uses the OS callbacks.
-  @Deprecated('Android & iOS dont stream this state. You can delete')
-  connecting,
-  // Deprecated: To be more precise, 'disconnecting' is only returned by getConnectionState (android)
-  // or CBPeripheral.state (iOS), which FlutterBluePlus does not use. FBP only uses the OS callbacks.
-  @Deprecated('Android & iOS dont stream this state. You can delete')
-  disconnecting
 }
 
 BluetoothConnectionState _bmToConnectionState(BmConnectionStateEnum value) {

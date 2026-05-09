@@ -4,20 +4,6 @@
 
 part of '../flutter_blue_plus.dart';
 
-enum OperationQueueMode {
-  /// Queue all BLE operations behind a single global mutex.
-  ///
-  /// This is the default and preserves the historical behavior of
-  /// `flutter_blue_plus`.
-  global,
-
-  /// Queue BLE operations independently for each connected device.
-  ///
-  /// This allows operations on different devices to run concurrently while
-  /// still preserving ordering for each individual device.
-  perDevice,
-}
-
 class FlutterBluePlus {
   ///////////////////
   //  Internal
@@ -670,6 +656,20 @@ class FlutterBluePlus {
 
   @Deprecated('removed. read MIGRATION.md for simple alternatives')
   static Stream<ScanResult> scan() => throw Exception;
+}
+
+enum OperationQueueMode {
+  /// Queue all BLE operations behind a single global mutex.
+  ///
+  /// This is the default and preserves the historical behavior of
+  /// `flutter_blue_plus`.
+  global,
+
+  /// Queue BLE operations independently for each connected device.
+  ///
+  /// This allows operations on different devices to run concurrently while
+  /// still preserving ordering for each individual device.
+  perDevice,
 }
 
 class AndroidScanMode {

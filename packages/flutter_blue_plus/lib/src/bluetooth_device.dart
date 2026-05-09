@@ -4,22 +4,6 @@
 
 part of '../flutter_blue_plus.dart';
 
-/// License type for using FlutterBluePlus.
-/// See the LICENSE file in the root of the project for full terms.
-enum License {
-  /// Free use under the FlutterBluePlus License, for:
-  /// - Personal use
-  /// - Nonprofits
-  /// - Educational institutions
-  free,
-
-  /// Commercial use under the FlutterBluePlus License, required for:
-  /// - Any commercial use
-  /// - For-profit organizations
-  /// This is a paid license. See LICENSE for purchasing details.
-  commercial,
-}
-
 class BluetoothDevice {
   final DeviceIdentifier remoteId;
 
@@ -752,4 +736,21 @@ class BluetoothDevice {
 
   @Deprecated('Use fromId instead')
   BluetoothDevice.fromProto(BmBluetoothDevice p) : remoteId = p.remoteId;
+}
+
+
+/// License type for using FlutterBluePlus.
+/// See the LICENSE file in the root of the project for full terms.
+enum License {
+  /// Free use under the FlutterBluePlus License, for:
+  /// - Personal use
+  /// - Nonprofits
+  /// - Educational institutions
+  free,
+
+  /// Commercial use under the FlutterBluePlus License, required for:
+  /// - Any commercial use
+  /// - For-profit organizations
+  /// This is a paid license. See LICENSE for purchasing details.
+  commercial,
 }
