@@ -55,5 +55,3 @@ flutter:
         default_package: flutter_blue_plus_darwin
       web:
         default_package: flutter_blue_plus_web
-      windows:
-        default_package: flutter_blue_plus_winrt
