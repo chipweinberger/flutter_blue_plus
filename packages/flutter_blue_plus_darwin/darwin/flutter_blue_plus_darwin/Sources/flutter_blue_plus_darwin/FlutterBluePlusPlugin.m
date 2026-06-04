@@ -112,11 +112,20 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         if ([@"setOptions" isEqualToString:call.method])
         {
             NSDictionary *args = (NSDictionary*) call.arguments;
-            if (args[@"show_power_alert"] != nil) {
-                self.showPowerAlert = args[@"show_power_alert"];
+            // Flutter 3.10+ MethodChannel codec encodes Dart `null` as
+            // `[NSNull null]`, not `nil`. The old `args[key] != nil` check is
+            // TRUE for NSNull, so NSNull gets stored into the NSNumber* properties
+            // and later `[self.showPowerAlert boolValue]` (during adapter init)
+            // crashes with `-[NSNull boolValue]: unrecognized selector`.
+            // Explicitly reject NSNull so the property stays nil and ObjC's
+            // nil-messaging gives the expected 0 return.
+            id powerAlert = args[@"show_power_alert"];
+            if (powerAlert != nil && ![powerAlert isKindOfClass:[NSNull class]]) {
+                self.showPowerAlert = powerAlert;
             }
-            if (args[@"restore_state"] != nil) {
-                self.restoreState = args[@"restore_state"];
+            id restoreState = args[@"restore_state"];
+            if (restoreState != nil && ![restoreState isKindOfClass:[NSNull class]]) {
+                self.restoreState = restoreState;
             }
             result(@YES);
             return;
