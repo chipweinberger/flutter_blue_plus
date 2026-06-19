@@ -22,6 +22,6 @@ flutter:
     implements: flutter_blue_plus
     platforms:
       android:
-        package: com.lib.flutter_blue_plus
+        package: com.jmx.flutter_blue_plus
         pluginClass: FlutterBluePlusPlugin
         dartPluginClass: FlutterBluePlusAndroid

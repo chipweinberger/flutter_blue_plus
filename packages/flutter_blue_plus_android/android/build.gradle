@@ -1,4 +1,4 @@
-group 'com.lib.flutter_blue_plus'
+group 'com.jmx.flutter_blue_plus'
 version '1.0'
 
 apply plugin: 'com.android.library'
@@ -29,6 +29,6 @@ android {
 
     // Conditional for compatibility with AGP <4.2.
     if (project.android.hasProperty("namespace")) {
-        namespace 'com.lib.flutter_blue_plus'
+        namespace 'com.jmx.flutter_blue_plus'
     }
 }

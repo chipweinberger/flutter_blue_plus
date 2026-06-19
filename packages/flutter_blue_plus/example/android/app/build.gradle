@@ -22,7 +22,7 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace  "com.lib.flutter_blue_plus_example"    
+    namespace  "com.jmx.flutter_blue_plus_example"
     compileSdkVersion flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 
@@ -32,7 +32,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.lib.flutter_blue_plus_example"
+        applicationId "com.jmx.flutter_blue_plus_example"
         minSdkVersion 21
         targetSdkVersion 34
         versionCode flutterVersionCode.toInteger()
