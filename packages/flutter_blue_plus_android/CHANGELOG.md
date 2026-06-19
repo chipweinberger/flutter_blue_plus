@@ -1,3 +1,7 @@
+## 9.0.3
+* **[Android]** rename `com.lib.flutter_blue_plus` to `com.jmx.flutter_blue_plus`
+* **[LICENSE]** add `Corporate` tier for 250+ employees
+
 ## 9.0.2
 * **[LICENSE]** clarify build-time license ping in the FlutterBluePlus License
 
