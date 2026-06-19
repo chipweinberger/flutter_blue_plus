@@ -54,7 +54,8 @@ Any use of FlutterBluePlus by or for a for-profit company or corporation — inc
 - **Starter:** 0–9 employees  
 - **Team:** 10–29 employees  
 - **Business:** 30–99 employees  
-- **Enterprise:** 100 or more employees  
+- **Enterprise:** 100–249 employees  
+- **Corporate:** 250 or more employees  
 
 **2. Perpetual Use.** The license grants perpetual rights to use the Software and to receive all current and future software updates made available by the licensor after purchase.
 
