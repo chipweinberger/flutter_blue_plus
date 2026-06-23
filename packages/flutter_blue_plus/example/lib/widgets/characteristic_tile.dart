@@ -125,7 +125,7 @@ class _CharacteristicTileState extends State<CharacteristicTile> {
 
   Widget buildButtonRow(BuildContext context) {
     bool read = widget.characteristic.properties.read;
-    bool write = widget.characteristic.properties.write;
+    bool write = widget.characteristic.properties.write || widget.characteristic.properties.writeWithoutResponse;
     bool notify = widget.characteristic.properties.notify;
     bool indicate = widget.characteristic.properties.indicate;
     return Row(
