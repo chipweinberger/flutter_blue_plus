@@ -1,3 +1,6 @@
+## 2.3.10
+* **[Improve]** Log the FlutterBluePlus Dart package version during first-time initialization.
+
 ## 2.3.9
 * **[Android]** rename `com.lib.flutter_blue_plus` to `com.jmx.flutter_blue_plus`
 * **[LICENSE]** add `Corporate` tier for 250+ employees
