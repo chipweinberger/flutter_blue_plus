@@ -83,7 +83,7 @@ class FlutterBluePlus {
   static Stream<List<ScanResult>> get scanResults => _scanResults.stream;
 
   /// This is the same as scanResults, except:
-  /// - if you re-listen to the stream it DOES NOT re-emit previous 
+  /// - if you re-listen to the stream it DOES NOT re-emit previous
   ///   results from previously stopped scans.
   static Stream<List<ScanResult>> get onScanResults {
     if (isScanningNow) {
@@ -116,7 +116,7 @@ class FlutterBluePlus {
   /// [OperationQueueMode.global] remains the default for backward
   /// compatibility.
   ///
-  /// This is useful if your app talks to multiple devices at the same time 
+  /// This is useful if your app talks to multiple devices at the same time
   /// as it allows simultaneous device writing, discovery, and reads.
   ///
   /// Throws a [StateError] if you try to change modes after BLE work
@@ -469,6 +469,9 @@ class FlutterBluePlus {
     }
 
     _initialized = true;
+
+    // fbp version
+    FlutterBluePlusPlatform.log('flutter_blue_plus_version=$_flutterBluePlusDartVersion');
 
     // android only
     if (!kIsWeb && Platform.isAndroid) {
