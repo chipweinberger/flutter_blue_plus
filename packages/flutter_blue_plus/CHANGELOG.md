@@ -1,3 +1,6 @@
+## 2.3.11
+* **[Improve]** Unify the FlutterBluePlus version log into a single string.
+
 ## 2.3.10
 * **[Improve]** Log the FlutterBluePlus Dart package version during first-time initialization.
 
