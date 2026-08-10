@@ -146,8 +146,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             self.centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil options:options];
         }
-        // Note: the MTU poll is armed on connect (see didConnectPeripheral), not here. Arming it
-        // here left it running for the process lifetime even with nothing connected.
         // check that we have an adapter, except for the 
         // functions that don't need it
         if (self.centralManager == nil && 
