@@ -1,3 +1,6 @@
+## 2.3.12
+* **[Performance]** Darwin: only poll for MTU changes while a connection's MTU can still change (#1339)
+
 ## 2.3.11
 * **[Improve]** Unify the FlutterBluePlus version log into a single string.
 

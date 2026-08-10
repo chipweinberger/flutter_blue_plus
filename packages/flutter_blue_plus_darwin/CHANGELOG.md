@@ -1,3 +1,6 @@
+## 9.0.4
+* **[Performance]** only poll for MTU changes while a connection's MTU can still change (#1339)
+
 ## 9.0.3
 * **[LICENSE]** add `Corporate` tier for 250+ employees
 
