@@ -394,6 +394,15 @@ public class FlutterBluePlusPlugin implements
 
                     ensurePermissions(permissions, (granted, perm) -> {
 
+                        // BluetoothAdapter.getName() requires BLUETOOTH_CONNECT on Android 12+, so a
+                        // refusal has to be honoured: calling it anyway throws SecurityException, which
+                        // crashes the app. Empty string matches what a null adapter name already returns.
+                        if (!granted) {
+                            Log.w(TAG, "Cannot read the adapter name without " + perm + ".");
+                            result.success("");
+                            return;
+                        }
+
                         String adapterName = mBluetoothAdapter != null ? mBluetoothAdapter.getName() : "N/A";
                         result.success(adapterName != null ? adapterName : "");
 
@@ -514,8 +523,11 @@ public class FlutterBluePlusPlugin implements
                         if (androidUsesFineLocation) {
                             permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
                         }
-                        // it is unclear why this is needed, but some phones throw a
-                        // SecurityException AdapterService getRemoteName, without it
+                        // Scan results are turned into advertisements via BluetoothDevice.getName(),
+                        // which reaches AdapterService.getRemoteName() and requires BLUETOOTH_CONNECT --
+                        // hence the SecurityException some phones throw without it. Requesting it up
+                        // front covers the normal case; safeDeviceName() covers the one it cannot, where
+                        // the permission is revoked while a scan or connection is already live.
                         permissions.add(Manifest.permission.BLUETOOTH_CONNECT);
                     }
 
@@ -2722,8 +2734,9 @@ public class FlutterBluePlusPlugin implements
         // See: BmScanAdvertisement
         // perf: only add keys if they exists
         HashMap<String, Object> map = new HashMap<>();
+        String deviceName = safeDeviceName(device);
         if (device.getAddress() != null) {map.put("remote_id", device.getAddress());};
-        if (device.getName() != null)    {map.put("platform_name", device.getName());}
+        if (deviceName != null)          {map.put("platform_name", deviceName);}
         if (connectable)                 {map.put("connectable", 1);}
         if (advName != null)             {map.put("adv_name", advName);}
         if (txPower != min)              {map.put("tx_power_level", txPower);}
@@ -2735,11 +2748,27 @@ public class FlutterBluePlusPlugin implements
         return map;
     }
 
+    /**
+     * BLUETOOTH_CONNECT can be revoked while a scan or connection is live. getName() then throws
+     * SecurityException -- often from inside one of the stack's own callbacks, on a binder thread --
+     * which brings the app down before Android gets round to killing the process for the revocation
+     * itself. The name is optional metadata (platform_name is nullable on the Dart side), so report it
+     * as unknown instead of crashing.
+     */
+    private String safeDeviceName(BluetoothDevice device) {
+        try {
+            return device.getName();
+        } catch (SecurityException e) {
+            Log.w(TAG, "No permission to read the remote device name.", e);
+            return null;
+        }
+    }
+
     // See: BmBluetoothDevice
     HashMap<String, Object> bmBluetoothDevice(BluetoothDevice device) {
         HashMap<String, Object> map = new HashMap<>();
         map.put("remote_id", device.getAddress());
-        map.put("platform_name", device.getName());
+        map.put("platform_name", safeDeviceName(device));
         return map;
     }
 
