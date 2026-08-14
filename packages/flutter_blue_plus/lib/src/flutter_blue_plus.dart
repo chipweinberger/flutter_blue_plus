@@ -46,7 +46,13 @@ class FlutterBluePlus {
 
   /// FlutterBluePlus log level
   static LogLevel _logLevel = LogLevel.debug;
-  static OperationQueueMode _operationQueueMode = _defaultOperationQueueMode;
+  static OperationQueueMode? _operationQueueModeOverride;
+
+  /// Resolved at call time, not cached, so the platform default cannot be
+  /// captured before a test overrides the target platform.
+  static OperationQueueMode get _operationQueueMode {
+    return _operationQueueModeOverride ?? _defaultOperationQueueMode;
+  }
 
   /// Per-platform defaults, chosen to match what each platform actually constrains:
   ///  - iOS: [OperationQueueMode.unqueued]. CoreBluetooth manages its own requests.
@@ -57,13 +63,14 @@ class FlutterBluePlus {
     if (kIsWeb) {
       return OperationQueueMode.global;
     }
-    if (Platform.isIOS) {
-      return OperationQueueMode.unqueued;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        return OperationQueueMode.unqueued;
+      case TargetPlatform.android:
+        return OperationQueueMode.perDevice;
+      default:
+        return OperationQueueMode.global;
     }
-    if (Platform.isAndroid) {
-      return OperationQueueMode.perDevice;
-    }
-    return OperationQueueMode.global;
   }
 
   ////////////////////
@@ -152,7 +159,13 @@ class FlutterBluePlus {
       throw StateError("setOperationQueueMode must be called before starting any BLE work");
     }
 
-    _operationQueueMode = mode;
+    _operationQueueModeOverride = mode;
+  }
+
+  /// Drop any explicit mode and go back to the platform default. Test-only.
+  @visibleForTesting
+  static void resetOperationQueueMode() {
+    _operationQueueModeOverride = null;
   }
 
   /// Set configurable options
