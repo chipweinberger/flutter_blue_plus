@@ -902,6 +902,27 @@ class BmBondStateResponse {
   }
 }
 
+/// An ACL link came up or went down.
+///
+/// ACL state is a property of the link, shared by every GATT client on it, so this is not scoped to
+/// the calling app.
+class BmAclStateResponse {
+  final DeviceIdentifier remoteId;
+  final bool connected;
+
+  BmAclStateResponse({
+    required this.remoteId,
+    required this.connected,
+  });
+
+  factory BmAclStateResponse.fromMap(Map<dynamic, dynamic> json) {
+    return BmAclStateResponse(
+      remoteId: DeviceIdentifier(json['remote_id']),
+      connected: json['connected'] as bool,
+    );
+  }
+}
+
 class BmCreateBondRequest {
   DeviceIdentifier remoteId;
   Uint8List? pin;

@@ -44,6 +44,10 @@ class BluetoothEvents {
   Stream<OnBondStateChangedEvent> get onBondStateChanged {
     return FlutterBluePlusPlatform.instance.onBondStateChanged.map((p) => OnBondStateChangedEvent(p));
   }
+
+  Stream<OnAclStateChangedEvent> get onAclStateChanged {
+    return FlutterBluePlusPlatform.instance.onAclStateChanged.map((p) => OnAclStateChangedEvent(p));
+  }
 }
 
 class FbpError {
@@ -240,6 +244,18 @@ class OnNameChangedEvent {
 }
 
 // On Bond State Changed
+class OnAclStateChangedEvent {
+  final BmAclStateResponse _response;
+
+  OnAclStateChangedEvent(this._response);
+
+  /// the relevant device
+  BluetoothDevice get device => BluetoothDevice(remoteId: _response.remoteId);
+
+  /// whether an ACL link to the device is up
+  bool get connected => _response.connected;
+}
+
 class OnBondStateChangedEvent {
   final BmBondStateResponse _response;
 
