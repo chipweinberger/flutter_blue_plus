@@ -46,7 +46,13 @@ class FlutterBluePlus {
 
   /// FlutterBluePlus log level
   static LogLevel _logLevel = LogLevel.debug;
-  static OperationQueueMode _operationQueueMode = OperationQueueMode.global;
+  static OperationQueueMode _operationQueueMode = _defaultOperationQueueMode;
+
+  /// iOS defaults to [OperationQueueMode.unqueued]; every other platform keeps
+  /// [OperationQueueMode.global] for backward compatibility.
+  static OperationQueueMode get _defaultOperationQueueMode {
+    return (!kIsWeb && Platform.isIOS) ? OperationQueueMode.unqueued : OperationQueueMode.global;
+  }
 
   ////////////////////
   //  Public
@@ -111,6 +117,9 @@ class FlutterBluePlus {
   ///   only one BLE operation at a time across the whole app.
   /// - [OperationQueueMode.perDevice] allows operations for different devices
   ///   to proceed concurrently, while still serializing operations per device.
+  /// - [OperationQueueMode.unqueued] does not serialize operations at all. This
+  ///   is the default on iOS, where CoreBluetooth already manages its own
+  ///   requests. The disconnect mutex still applies.
   ///
   /// We recommend [OperationQueueMode.perDevice] for new apps.
   /// [OperationQueueMode.global] remains the default for backward
@@ -151,11 +160,20 @@ class FlutterBluePlus {
   }
 
   static String _bleOperationMutexKey(DeviceIdentifier remoteId) {
-    return _operationQueueMode == OperationQueueMode.perDevice ? "device:$remoteId" : "global";
+    return _operationQueueMode == OperationQueueMode.global ? "global" : "device:$remoteId";
   }
 
   static String _disconnectMutexKey(DeviceIdentifier remoteId) {
-    return _operationQueueMode == OperationQueueMode.perDevice ? "disconnect:$remoteId" : "disconnect";
+    return _operationQueueMode == OperationQueueMode.global ? "disconnect" : "disconnect:$remoteId";
+  }
+
+  /// The mutex that serialises BLE operations. Bypassed entirely under
+  /// [OperationQueueMode.unqueued]; the disconnect mutex is never bypassed.
+  static _Mutex _bleOperationMutex(DeviceIdentifier remoteId) {
+    return _MutexFactory.getMutexForKey(
+      _bleOperationMutexKey(remoteId),
+      bypass: _operationQueueMode == OperationQueueMode.unqueued,
+    );
   }
 
   static bool _hasOperationMutexesForMode(OperationQueueMode mode) {
@@ -675,6 +693,14 @@ enum OperationQueueMode {
   /// This allows operations on different devices to run concurrently while
   /// still preserving ordering for each individual device.
   perDevice,
+
+  /// Do not queue BLE operations at all.
+  ///
+  /// This is the default on iOS. CoreBluetooth completes acknowledged requests
+  /// via its delegate callbacks and exposes explicit flow control only for
+  /// writes without response, so serializing in Dart adds latency without
+  /// preventing anything.
+  unqueued,
 }
 
 class AndroidScanMode {
