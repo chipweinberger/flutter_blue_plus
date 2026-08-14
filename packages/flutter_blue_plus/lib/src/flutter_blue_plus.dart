@@ -48,10 +48,22 @@ class FlutterBluePlus {
   static LogLevel _logLevel = LogLevel.debug;
   static OperationQueueMode _operationQueueMode = _defaultOperationQueueMode;
 
-  /// iOS defaults to [OperationQueueMode.unqueued]; every other platform keeps
-  /// [OperationQueueMode.global] for backward compatibility.
+  /// Per-platform defaults, chosen to match what each platform actually constrains:
+  ///  - iOS: [OperationQueueMode.unqueued]. CoreBluetooth manages its own requests.
+  ///  - Android: [OperationQueueMode.perDevice]. `mDeviceBusy` is per `BluetoothGatt`, so the
+  ///    constraint is per connection and a global queue blocks unrelated devices.
+  ///  - everything else: [OperationQueueMode.global], unchanged.
   static OperationQueueMode get _defaultOperationQueueMode {
-    return (!kIsWeb && Platform.isIOS) ? OperationQueueMode.unqueued : OperationQueueMode.global;
+    if (kIsWeb) {
+      return OperationQueueMode.global;
+    }
+    if (Platform.isIOS) {
+      return OperationQueueMode.unqueued;
+    }
+    if (Platform.isAndroid) {
+      return OperationQueueMode.perDevice;
+    }
+    return OperationQueueMode.global;
   }
 
   ////////////////////
@@ -121,9 +133,10 @@ class FlutterBluePlus {
   ///   is the default on iOS, where CoreBluetooth already manages its own
   ///   requests. The disconnect mutex still applies.
   ///
-  /// We recommend [OperationQueueMode.perDevice] for new apps.
-  /// [OperationQueueMode.global] remains the default for backward
-  /// compatibility.
+  /// Defaults are per-platform: [OperationQueueMode.unqueued] on iOS,
+  /// [OperationQueueMode.perDevice] on Android, and
+  /// [OperationQueueMode.global] elsewhere. Pass [OperationQueueMode.global]
+  /// explicitly to restore the historical behavior on any platform.
   ///
   /// This is useful if your app talks to multiple devices at the same time
   /// as it allows simultaneous device writing, discovery, and reads.
