@@ -394,9 +394,6 @@ public class FlutterBluePlusPlugin implements
 
                     ensurePermissions(permissions, (granted, perm) -> {
 
-                        // BluetoothAdapter.getName() requires BLUETOOTH_CONNECT on Android 12+, so a
-                        // refusal has to be honoured: calling it anyway throws SecurityException, which
-                        // crashes the app. Empty string matches what a null adapter name already returns.
                         if (!granted) {
                             Log.w(TAG, "Cannot read the adapter name without " + perm + ".");
                             result.success("");
@@ -524,10 +521,8 @@ public class FlutterBluePlusPlugin implements
                             permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
                         }
                         // Scan results are turned into advertisements via BluetoothDevice.getName(),
-                        // which reaches AdapterService.getRemoteName() and requires BLUETOOTH_CONNECT --
-                        // hence the SecurityException some phones throw without it. Requesting it up
-                        // front covers the normal case; safeDeviceName() covers the one it cannot, where
-                        // the permission is revoked while a scan or connection is already live.
+                        // which reaches AdapterService.getRemoteName() and requires BLUETOOTH_CONNECT.
+                        // Some phones will throw a SecurityException without it. 
                         permissions.add(Manifest.permission.BLUETOOTH_CONNECT);
                     }
 
