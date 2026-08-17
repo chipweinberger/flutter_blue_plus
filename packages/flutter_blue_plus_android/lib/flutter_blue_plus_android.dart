@@ -14,6 +14,7 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
   var _logColor = true;
 
   final _onAdapterStateChangedController = StreamController<BmBluetoothAdapterState>.broadcast();
+  final _onAclStateChangedController = StreamController<BmAclStateResponse>.broadcast();
   final _onBondStateChangedController = StreamController<BmBondStateResponse>.broadcast();
   final _onCharacteristicReceivedController = StreamController<BmCharacteristicData>.broadcast();
   final _onCharacteristicWrittenController = StreamController<BmCharacteristicData>.broadcast();
@@ -37,6 +38,11 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
   @override
   Stream<BmBondStateResponse> get onBondStateChanged {
     return _onBondStateChangedController.stream;
+  }
+
+  @override
+  Stream<BmAclStateResponse> get onAclStateChanged {
+    return _onAclStateChangedController.stream;
   }
 
   @override
@@ -483,6 +489,12 @@ final class FlutterBluePlusAndroid extends FlutterBluePlusPlatform {
       case 'OnAdapterStateChanged':
         return _onAdapterStateChangedController.add(
           BmBluetoothAdapterState.fromMap(
+            call.arguments,
+          ),
+        );
+      case 'OnAclStateChanged':
+        return _onAclStateChangedController.add(
+          BmAclStateResponse.fromMap(
             call.arguments,
           ),
         );

@@ -209,6 +209,11 @@ public class FlutterBluePlusPlugin implements
 
         IntentFilter filterBond = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         this.context.registerReceiver(mBluetoothBondStateReceiver, filterBond);
+
+        IntentFilter filterAcl = new IntentFilter();
+        filterAcl.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
+        filterAcl.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+        this.context.registerReceiver(mBluetoothAclReceiver, filterAcl);
     }
 
     @Override
@@ -232,6 +237,7 @@ public class FlutterBluePlusPlugin implements
 
         disconnectAllDevices("onDetachedFromEngine");
 
+        context.unregisterReceiver(mBluetoothAclReceiver);
         context.unregisterReceiver(mBluetoothBondStateReceiver);
         context.unregisterReceiver(mBluetoothPairRequestReceiver);
         context.unregisterReceiver(mBluetoothAdapterStateReceiver);
@@ -2125,6 +2131,48 @@ public class FlutterBluePlusPlugin implements
             map.put("prev_state", bmBondStateEnum(prev));
 
             invokeMethodUIThread("OnBondStateChanged", map);
+        }
+    };
+
+    /// ACL link came up or went down.
+    ///
+    /// ATT MTU is negotiated once per ACL connection and shared by every GATT client on it, so the
+    /// GATT connection state cannot tell you whether a new MTU exchange is possible. This can.
+    private final BroadcastReceiver mBluetoothAclReceiver = new BroadcastReceiver()
+    {
+        @Override
+        @SuppressWarnings("deprecation") // need for compatability
+        public void onReceive(Context context, Intent intent)
+        {
+            final String action = intent.getAction();
+
+            boolean connected;
+            if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
+                connected = true;
+            } else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)) {
+                connected = false;
+            } else {
+                return;
+            }
+
+            final BluetoothDevice device;
+            if (Build.VERSION.SDK_INT >= 33) { // Android 13 (August 2022)
+                device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, BluetoothDevice.class);
+            } else {
+                device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+            }
+            if (device == null) {
+                return;
+            }
+
+            log(LogLevel.DEBUG, "OnAclStateChanged: " + (connected ? "connected" : "disconnected"));
+
+            // see: BmAclStateResponse
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("remote_id", device.getAddress());
+            map.put("connected", connected);
+
+            invokeMethodUIThread("OnAclStateChanged", map);
         }
     };
 
