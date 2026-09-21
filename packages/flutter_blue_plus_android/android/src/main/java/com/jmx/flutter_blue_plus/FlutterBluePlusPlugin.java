@@ -2259,6 +2259,13 @@ public class FlutterBluePlusPlugin implements
 
                 String remoteId = gatt.getDevice().getAddress();
 
+                // Some Android devices send duplicate connected callbacks for the same GATT client.
+                // Preserve the connection, negotiated MTU, and the single connected event sent to Dart.
+                if (newState == BluetoothProfile.STATE_CONNECTED && mConnectedDevices.get(remoteId) == gatt) {
+                    log(LogLevel.DEBUG, "[duplicate connection] ignoring connected callback");
+                    return;
+                }
+
                 // edge case. see function for details
                 if (handleUnexpectedConnectionEvents(gatt, newState, remoteId)) {
                     return;
