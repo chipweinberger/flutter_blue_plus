@@ -1,3 +1,8 @@
+## 9.0.4
+* **[Fix]** Android: duplicate connected callbacks could disconnect the device and leave Dart reporting it as connected (#1121)
+* **[Fix]** Android: callbacks from previous connection attempts could overwrite or clear the current connection state (#1121)
+* **[Fix]** Android: avoid crashes when reading adapter or device names without `BLUETOOTH_CONNECT` permission (#1340)
+
 ## 9.0.3
 * **[Android]** rename `com.lib.flutter_blue_plus` to `com.jmx.flutter_blue_plus`
 * **[LICENSE]** add `Corporate` tier for 250+ employees

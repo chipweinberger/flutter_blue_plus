@@ -1,3 +1,9 @@
+## 2.3.13
+* **[Fix]** Android: duplicate connected callbacks could disconnect the device and leave Dart reporting it as connected (#1121)
+* **[Fix]** Android: callbacks from previous connection attempts could overwrite or clear the current connection state (#1121)
+* **[Fix]** Android: avoid crashes when reading adapter or device names without `BLUETOOTH_CONNECT` permission (#1340)
+* **[Improve]** Dart: explicitly type the `setLogLevel` color parameter as `bool` (#1341)
+
 ## 2.3.12
 * **[Performance]** Darwin: only poll for MTU changes while a connection's MTU can still change (#1339)
 
