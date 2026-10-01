@@ -118,7 +118,7 @@ class BluetoothDevice {
     bool dtook = await dmtx.take();
 
     // Only allow a single BLE operation to be underway per device.
-    _Mutex mtx = _MutexFactory.getMutexForKey(FlutterBluePlus._bleOperationMutexKey(remoteId));
+    _Mutex mtx = FlutterBluePlus._bleOperationMutex(remoteId);
     await mtx.take();
 
     try {
@@ -214,7 +214,7 @@ class BluetoothDevice {
     await dtx.take();
 
     // Queue behind other operations for this device only.
-    _Mutex mtx = _MutexFactory.getMutexForKey(FlutterBluePlus._bleOperationMutexKey(remoteId));
+    _Mutex mtx = FlutterBluePlus._bleOperationMutex(remoteId);
     if (queue) {
       await mtx.take();
     }
@@ -267,7 +267,7 @@ class BluetoothDevice {
     }
 
     // Only allow a single BLE operation to be underway per device.
-    _Mutex mtx = _MutexFactory.getMutexForKey(FlutterBluePlus._bleOperationMutexKey(remoteId));
+    _Mutex mtx = FlutterBluePlus._bleOperationMutex(remoteId);
     await mtx.take();
 
     List<BluetoothService> result = [];
@@ -375,7 +375,7 @@ class BluetoothDevice {
     }
 
     // Only allow a single BLE operation to be underway per device.
-    _Mutex mtx = _MutexFactory.getMutexForKey(FlutterBluePlus._bleOperationMutexKey(remoteId));
+    _Mutex mtx = FlutterBluePlus._bleOperationMutex(remoteId);
     await mtx.take();
 
     int rssi = 0;
@@ -424,7 +424,7 @@ class BluetoothDevice {
     }
 
     // Only allow a single BLE operation to be underway per device.
-    _Mutex mtx = _MutexFactory.getMutexForKey(FlutterBluePlus._bleOperationMutexKey(remoteId));
+    _Mutex mtx = FlutterBluePlus._bleOperationMutex(remoteId);
     await mtx.take();
 
     // predelay
@@ -548,7 +548,7 @@ class BluetoothDevice {
     }
 
     // Only allow a single BLE operation to be underway per device.
-    _Mutex mtx = _MutexFactory.getMutexForKey(FlutterBluePlus._bleOperationMutexKey(remoteId));
+    _Mutex mtx = FlutterBluePlus._bleOperationMutex(remoteId);
     await mtx.take();
 
     try {
@@ -589,7 +589,7 @@ class BluetoothDevice {
     }
 
     // Only allow a single BLE operation to be underway per device.
-    _Mutex mtx = _MutexFactory.getMutexForKey(FlutterBluePlus._bleOperationMutexKey(remoteId));
+    _Mutex mtx = FlutterBluePlus._bleOperationMutex(remoteId);
     await mtx.take();
 
     try {
