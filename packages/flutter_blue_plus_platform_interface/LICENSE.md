@@ -1,5 +1,5 @@
 FlutterBluePlus License
-Version 1.5
+Version 1.6
 
 Copyright (c) 2026 Chip Weinberger
 All rights reserved.
@@ -49,13 +49,15 @@ Use of the Software is free of charge for any registered nonprofit organization,
 
 Any use of FlutterBluePlus by or for a for-profit company or corporation — including commercial use by individuals — requires the purchase of a commercial license, subject to the Common Conditions and the following additional terms:
 
-**1. License Fee.** Commercial licenses are offered in the following tiers, based on employee count **at the time of purchase**. The associated cost is listed on the official FlutterBluePlus payment portal.
+**1. License Fee.** Commercial license tiers are based on employee count **at the time of purchase**. The tier list below is provided for reference only. Current license offerings, tier definitions, and prices are listed on the official FlutterBluePlus payment portal linked below and take precedence over this reference list.
 
+- **Inventor:** Solo developers working alone
 - **Starter:** 0–9 employees  
 - **Team:** 10–29 employees  
 - **Business:** 30–99 employees  
 - **Enterprise:** 100–249 employees  
-- **Corporate:** 250 or more employees  
+- **Corporate:** 250–999 employees  
+- **Global:** 1,000 or more employees  
 
 **2. Perpetual Use.** The license grants perpetual rights to use the Software and to receive all current and future software updates made available by the licensor after purchase.
 
