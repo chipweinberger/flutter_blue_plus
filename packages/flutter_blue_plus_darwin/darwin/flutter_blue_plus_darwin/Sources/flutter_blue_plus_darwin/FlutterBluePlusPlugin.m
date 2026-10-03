@@ -1134,6 +1134,13 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
 - (void)recordDiscoveryError:(NSError *)error remoteId:(NSString *)remoteId
 {
+    // CoreBluetooth restricts access to some UUIDs, including Matter attributes.
+    // Continue discovering accessible attributes instead of failing the entire discovery.
+    if ([error.domain isEqualToString:CBErrorDomain] && error.code == CBErrorUUIDNotAllowed) {
+        Log(LWARNING, @"discovery: ignoring restricted UUID: %@", [error localizedDescription]);
+        return;
+    }
+
     if (error != nil && self.discoveryErrors[remoteId] == nil) {
         self.discoveryErrors[remoteId] = error;
     }
