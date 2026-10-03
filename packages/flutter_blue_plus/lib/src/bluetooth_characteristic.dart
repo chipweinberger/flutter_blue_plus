@@ -243,7 +243,7 @@ class BluetoothCharacteristic {
         throw FlutterBluePlusException(_nativeError, "writeCharacteristic", response.errorCode, response.errorString);
       }
 
-      return Future.value();
+      return;
     } finally {
       mtx.give();
     }
