@@ -1,3 +1,7 @@
+## 2.3.14
+* **[Fix]** Darwin: allow service discovery to finish when CoreBluetooth restricts access to a UUID, including Matter attributes (#1344)
+* **[LICENSE]** add global tier
+
 ## 2.3.13
 * **[Fix]** Android: duplicate connected callbacks could disconnect the device and leave Dart reporting it as connected (#1121)
 * **[Fix]** Android: callbacks from previous connection attempts could overwrite or clear the current connection state (#1121)

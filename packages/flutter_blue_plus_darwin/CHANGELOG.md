@@ -1,5 +1,6 @@
-## Unreleased
+## 9.0.5
 * **[Fix]** allow service discovery to finish when CoreBluetooth restricts access to a UUID, including Matter attributes (#1344)
+* **[LICENSE]** add global tier
 
 ## 9.0.4
 * **[Performance]** only poll for MTU changes while a connection's MTU can still change (#1339)

@@ -1,3 +1,6 @@
+## 9.0.4
+* **[LICENSE]** add global tier
+
 ## 9.0.3
 * **[LICENSE]** add `Corporate` tier for 250+ employees
 

@@ -1,3 +1,6 @@
+## 9.0.5
+* **[LICENSE]** add global tier
+
 ## 9.0.4
 * **[Fix]** Android: duplicate connected callbacks could disconnect the device and leave Dart reporting it as connected (#1121)
 * **[Fix]** Android: callbacks from previous connection attempts could overwrite or clear the current connection state (#1121)
