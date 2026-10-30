@@ -25,6 +25,8 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
   final _onReadRssiController = StreamController<BmReadRssiResult>.broadcast();
   final _onScanResponseController = StreamController<BmScanResponse>.broadcast();
   final _onServicesResetController = StreamController<BmBluetoothDevice>.broadcast();
+  final _onL2capDataReceivedController = StreamController<BmL2capData>.broadcast();
+  final _onL2capChannelClosedController = StreamController<BmL2capClosedResponse>.broadcast();
 
   @override
   Stream<BmBluetoothAdapterState> get onAdapterStateChanged {
@@ -84,6 +86,16 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
   @override
   Stream<BmBluetoothDevice> get onServicesReset {
     return _onServicesResetController.stream;
+  }
+
+  @override
+  Stream<BmL2capData> get onL2capDataReceived {
+    return _onL2capDataReceivedController.stream;
+  }
+
+  @override
+  Stream<BmL2capClosedResponse> get onL2capChannelClosed {
+    return _onL2capChannelClosedController.stream;
   }
 
   static void registerWith() {
@@ -279,6 +291,39 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
         true;
   }
 
+  @override
+  Future<bool> openL2capChannel(
+    BmL2capOpenRequest request,
+  ) async {
+    return await _callDarwinMethod<bool>(
+          'openL2capChannel',
+          request.toMap(),
+        ) ==
+        true;
+  }
+
+  @override
+  Future<bool> writeL2capChannel(
+    BmL2capWriteRequest request,
+  ) async {
+    return await _callDarwinMethod<bool>(
+          'writeL2capChannel',
+          request.toMap(),
+        ) ==
+        true;
+  }
+
+  @override
+  Future<bool> closeL2capChannel(
+    BmL2capCloseRequest request,
+  ) async {
+    return await _callDarwinMethod<bool>(
+          'closeL2capChannel',
+          request.toMap(),
+        ) ==
+        true;
+  }
+
   Future<T?> _callDarwinMethod<T>(
     String method, [
     dynamic arguments,
@@ -412,6 +457,18 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
       case 'OnServicesReset':
         return _onServicesResetController.add(
           BmBluetoothDevice.fromMap(
+            call.arguments,
+          ),
+        );
+      case 'OnL2capDataReceived':
+        return _onL2capDataReceivedController.add(
+          BmL2capData.fromMap(
+            call.arguments,
+          ),
+        );
+      case 'OnL2capChannelClosed':
+        return _onL2capChannelClosedController.add(
+          BmL2capClosedResponse.fromMap(
             call.arguments,
           ),
         );

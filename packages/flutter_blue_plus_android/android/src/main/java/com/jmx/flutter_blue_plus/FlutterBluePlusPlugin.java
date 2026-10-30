@@ -16,6 +16,10 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothStatusCodes;
+import android.bluetooth.BluetoothSocket;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.IOException;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.le.BluetoothLeScanner;
@@ -115,6 +119,35 @@ public class FlutterBluePlusPlugin implements
     private final Map<String, String> mAdvSeen = new ConcurrentHashMap<>();
     private final Map<String, Integer> mScanCounts = new ConcurrentHashMap<>();
     private HashMap<String, Object> mScanFilters = new HashMap<String, Object>();
+
+    private final Map<String, L2capChannelEntry> mOpenL2capChannels = new ConcurrentHashMap<>();
+
+    private static class L2capChannelEntry {
+        final String remoteId;
+        final int psm;
+        final BluetoothSocket socket;
+        final Thread readThread;
+        volatile boolean isClosed = false;
+
+        L2capChannelEntry(String remoteId, int psm, BluetoothSocket socket, Thread readThread) {
+            this.remoteId = remoteId;
+            this.psm = psm;
+            this.socket = socket;
+            this.readThread = readThread;
+        }
+
+        void close() {
+            if (isClosed) return;
+            isClosed = true;
+            try {
+                socket.close();
+            } catch (Exception ignored) {}
+            if (readThread != null && readThread.isAlive()) {
+                readThread.interrupt();
+            }
+        }
+    }
+
 
     private final Map<Integer, OperationOnPermission> operationsOnPermission = new HashMap<>();
     private int lastEventId = 1452;
@@ -831,6 +864,12 @@ public class FlutterBluePlusPlugin implements
                         invokeMethodUIThread("OnConnectionStateChanged", response);
                     }
 
+                    for (Map.Entry<String, L2capChannelEntry> entry : mOpenL2capChannels.entrySet()) {
+                        if (entry.getKey().startsWith(remoteId + ":")) {
+                            entry.getValue().close();
+                            mOpenL2capChannels.remove(entry.getKey());
+                        }
+                    }
                     result.success(true);
                     break;
                 }
@@ -1475,6 +1514,144 @@ public class FlutterBluePlusPlugin implements
                     break;
                 }
 
+                case "openL2capChannel":
+                {
+                    if (Build.VERSION.SDK_INT < 29) { // Android 10 (Q)
+                        result.error("openL2capChannel", "L2CAP channels require Android 10 (API 29) or higher", null);
+                        break;
+                    }
+
+                    HashMap<String, Object> args = call.arguments();
+                    String remoteId = (String) args.get("remote_id");
+                    int psm = (int) args.get("psm");
+                    boolean secure = ((int) args.get("secure")) != 0;
+
+                    ArrayList<String> permissions = new ArrayList<>();
+                    if (Build.VERSION.SDK_INT >= 31) {
+                        permissions.add(Manifest.permission.BLUETOOTH_CONNECT);
+                    }
+                    if (Build.VERSION.SDK_INT <= 30) {
+                        permissions.add(Manifest.permission.BLUETOOTH);
+                    }
+
+                    ensurePermissions(permissions, (granted, perm) -> {
+                        if (!granted) {
+                            result.error("openL2capChannel", String.format("Permission %s required", perm), null);
+                            return;
+                        }
+
+                        if (!isAdapterOn()) {
+                            result.error("openL2capChannel", "Bluetooth must be turned on", null);
+                            return;
+                        }
+
+                        BluetoothGatt gatt = mConnectedDevices.get(remoteId);
+                        if (gatt == null) {
+                            result.error("openL2capChannel", "device is disconnected", null);
+                            return;
+                        }
+
+                        BluetoothDevice device = gatt.getDevice();
+                        String key = remoteId + ":" + psm;
+
+                        if (mOpenL2capChannels.containsKey(key)) {
+                            result.success(true);
+                            return;
+                        }
+
+                        new Thread(() -> {
+                            try {
+                                BluetoothSocket socket = secure ?
+                                        device.createL2capChannel(psm) :
+                                        device.createInsecureL2capChannel(psm);
+                                socket.connect();
+
+                                Thread readerThread = new Thread(() -> {
+                                    byte[] buffer = new byte[8192];
+                                    try {
+                                        InputStream is = socket.getInputStream();
+                                        while (!Thread.currentThread().isInterrupted()) {
+                                            int bytesRead = is.read(buffer);
+                                            if (bytesRead == -1) {
+                                                break;
+                                            }
+                                            byte[] data = Arrays.copyOf(buffer, bytesRead);
+                                            HashMap<String, Object> map = new HashMap<>();
+                                            map.put("remote_id", remoteId);
+                                            map.put("psm", psm);
+                                            map.put("data", data);
+                                            invokeMethodUIThread("OnL2capDataReceived", map);
+                                        }
+                                    } catch (IOException ignored) {
+                                    } finally {
+                                        L2capChannelEntry entry = mOpenL2capChannels.remove(key);
+                                        if (entry != null && !entry.isClosed) {
+                                            entry.close();
+                                        }
+                                        HashMap<String, Object> map = new HashMap<>();
+                                        map.put("remote_id", remoteId);
+                                        map.put("psm", psm);
+                                        invokeMethodUIThread("OnL2capChannelClosed", map);
+                                    }
+                                }, "FBP-L2capReader-" + key);
+
+                                L2capChannelEntry entry = new L2capChannelEntry(remoteId, psm, socket, readerThread);
+                                mOpenL2capChannels.put(key, entry);
+                                readerThread.start();
+
+                                new Handler(Looper.getMainLooper()).post(() -> result.success(true));
+                            } catch (Exception e) {
+                                log(LogLevel.ERROR, "openL2capChannel failed: " + e.getMessage());
+                                new Handler(Looper.getMainLooper()).post(() ->
+                                        result.error("openL2capChannel", e.getMessage() != null ? e.getMessage() : "Failed to open L2CAP channel", null));
+                            }
+                        }, "FBP-L2capConnect-" + key).start();
+                    });
+                    break;
+                }
+
+                case "writeL2capChannel":
+                {
+                    HashMap<String, Object> args = call.arguments();
+                    String remoteId = (String) args.get("remote_id");
+                    int psm = (int) args.get("psm");
+                    byte[] value = (byte[]) args.get("value");
+
+                    String key = remoteId + ":" + psm;
+                    L2capChannelEntry entry = mOpenL2capChannels.get(key);
+                    if (entry == null || entry.isClosed) {
+                        result.error("writeL2capChannel", "L2CAP channel is not open", null);
+                        break;
+                    }
+
+                    new Thread(() -> {
+                        try {
+                            OutputStream os = entry.socket.getOutputStream();
+                            os.write(value);
+                            os.flush();
+                            new Handler(Looper.getMainLooper()).post(() -> result.success(true));
+                        } catch (Exception e) {
+                            new Handler(Looper.getMainLooper()).post(() ->
+                                    result.error("writeL2capChannel", e.getMessage() != null ? e.getMessage() : "write failed", null));
+                        }
+                    }).start();
+                    break;
+                }
+
+                case "closeL2capChannel":
+                {
+                    HashMap<String, Object> args = call.arguments();
+                    String remoteId = (String) args.get("remote_id");
+                    int psm = (int) args.get("psm");
+
+                    String key = remoteId + ":" + psm;
+                    L2capChannelEntry entry = mOpenL2capChannels.remove(key);
+                    if (entry != null) {
+                        entry.close();
+                    }
+                    result.success(true);
+                    break;
+                }
                 default:
                 {
                     result.notImplemented();
@@ -1882,6 +2059,10 @@ public class FlutterBluePlusPlugin implements
         mWriteChr.clear();
         mWriteDesc.clear();
         mAutoConnected.clear();
+        for (L2capChannelEntry entry : mOpenL2capChannels.values()) {
+            entry.close();
+        }
+        mOpenL2capChannels.clear();
     }
 
     int getAppearanceFromScanRecord(ScanRecord adv) {
@@ -2345,6 +2526,13 @@ public class FlutterBluePlusPlugin implements
                         // it is important to close after disconnection, otherwise we will
                         // quickly run out of bluetooth resources, preventing new connections
                         gatt.close();
+                    }
+                }
+
+                for (Map.Entry<String, L2capChannelEntry> entry : mOpenL2capChannels.entrySet()) {
+                    if (entry.getKey().startsWith(remoteId + ":")) {
+                        entry.getValue().close();
+                        mOpenL2capChannels.remove(entry.getKey());
                     }
                 }
 

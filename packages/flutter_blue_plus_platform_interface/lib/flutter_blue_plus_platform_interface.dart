@@ -91,6 +91,14 @@ abstract base class FlutterBluePlusPlatform {
     return Stream.empty();
   }
 
+  Stream<BmL2capData> get onL2capDataReceived {
+    return Stream.empty();
+  }
+
+  Stream<BmL2capClosedResponse> get onL2capChannelClosed {
+    return Stream.empty();
+  }
+
   static final _logsController = StreamController<String>.broadcast();
   static Stream<String> get logs => _logsController.stream;
 
@@ -291,6 +299,24 @@ abstract base class FlutterBluePlusPlatform {
 
   Future<bool> writeDescriptor(
     BmWriteDescriptorRequest request,
+  ) {
+    return Future.value(false);
+  }
+
+  Future<bool> openL2capChannel(
+    BmL2capOpenRequest request,
+  ) {
+    return Future.value(false);
+  }
+
+  Future<bool> writeL2capChannel(
+    BmL2capWriteRequest request,
+  ) {
+    return Future.value(false);
+  }
+
+  Future<bool> closeL2capChannel(
+    BmL2capCloseRequest request,
   ) {
     return Future.value(false);
   }

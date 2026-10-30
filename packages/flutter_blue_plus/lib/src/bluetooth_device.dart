@@ -715,6 +715,37 @@ class BluetoothDevice {
   @Deprecated('Use remoteId instead')
   DeviceIdentifier get id => remoteId;
 
+  /// Open an L2CAP connection-oriented channel to this device.
+  ///   - [psm] Protocol and Service Multiplexer (must match peripheral's PSM)
+  ///   - [secure] Android only: whether to create a secure or insecure channel (default: true)
+  ///   - [timeout] duration in seconds before timeout exception is thrown (default: 15)
+  Future<BluetoothL2capChannel> openL2capChannel(
+    int psm, {
+    bool secure = true,
+    int timeout = 15,
+  }) async {
+    // check connected
+    if (isDisconnected) {
+      throw FlutterBluePlusException(
+          ErrorPlatform.fbp, "openL2capChannel", FbpErrorCode.deviceIsDisconnected.index, "device is not connected");
+    }
+
+    var request = BmL2capOpenRequest(
+      remoteId: remoteId,
+      psm: psm,
+      secure: secure,
+    );
+
+    await FlutterBluePlus._invokePlatform(
+      () => FlutterBluePlusPlatform.instance.openL2capChannel(request),
+    )
+        .fbpEnsureAdapterIsOn("openL2capChannel")
+        .fbpEnsureDeviceIsConnected(this, "openL2capChannel")
+        .fbpTimeout(timeout, "openL2capChannel");
+
+    return BluetoothL2capChannel(remoteId: remoteId, psm: psm);
+  }
+
   @Deprecated('Use platformName instead')
   String get localName => platformName;
 

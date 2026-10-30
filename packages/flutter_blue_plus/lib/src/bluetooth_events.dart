@@ -44,6 +44,14 @@ class BluetoothEvents {
   Stream<OnBondStateChangedEvent> get onBondStateChanged {
     return FlutterBluePlusPlatform.instance.onBondStateChanged.map((p) => OnBondStateChangedEvent(p));
   }
+
+  Stream<OnL2capDataReceivedEvent> get onL2capDataReceived {
+    return FlutterBluePlusPlatform.instance.onL2capDataReceived.map((p) => OnL2capDataReceivedEvent(p));
+  }
+
+  Stream<OnL2capChannelClosedEvent> get onL2capChannelClosed {
+    return FlutterBluePlusPlatform.instance.onL2capChannelClosed.map((p) => OnL2capChannelClosedEvent(p));
+  }
 }
 
 class FbpError {
@@ -250,4 +258,33 @@ class OnBondStateChangedEvent {
 
   /// the new bond state
   BluetoothBondState get bondState => _bmToBondState(_response.bondState);
+}
+
+// On L2CAP Data Received
+class OnL2capDataReceivedEvent {
+  final BmL2capData _response;
+
+  OnL2capDataReceivedEvent(this._response);
+
+  /// the relevant device
+  BluetoothDevice get device => BluetoothDevice(remoteId: _response.remoteId);
+
+  /// the PSM
+  int get psm => _response.psm;
+
+  /// the received data
+  List<int> get data => _response.data;
+}
+
+// On L2CAP Channel Closed
+class OnL2capChannelClosedEvent {
+  final BmL2capClosedResponse _response;
+
+  OnL2capChannelClosedEvent(this._response);
+
+  /// the relevant device
+  BluetoothDevice get device => BluetoothDevice(remoteId: _response.remoteId);
+
+  /// the PSM
+  int get psm => _response.psm;
 }

@@ -29,6 +29,132 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     LVERBOSE = 5,
 };
 
+@class FlutterBluePlusPlugin;
+
+@interface FBPL2capChannel : NSObject <NSStreamDelegate>
+@property (nonatomic, weak) FlutterBluePlusPlugin *plugin;
+@property (nonatomic, strong) NSString *remoteId;
+@property (nonatomic, assign) UInt16 psm;
+@property (nonatomic, strong) CBL2CAPChannel *channel;
+@property (nonatomic, assign) BOOL isClosed;
+
+- (instancetype)initWithPlugin:(FlutterBluePlusPlugin *)plugin
+                      remoteId:(NSString *)remoteId
+                           psm:(UInt16)psm
+                       channel:(CBL2CAPChannel *)channel;
+- (void)open;
+- (BOOL)writeData:(NSData *)data error:(NSError **)error;
+- (void)close;
+@end
+
+@implementation FBPL2capChannel
+
+- (instancetype)initWithPlugin:(FlutterBluePlusPlugin *)plugin
+                      remoteId:(NSString *)remoteId
+                           psm:(UInt16)psm
+                       channel:(CBL2CAPChannel *)channel
+{
+    self = [super init];
+    if (self) {
+        _plugin = plugin;
+        _remoteId = remoteId;
+        _psm = psm;
+        _channel = channel;
+        _isClosed = NO;
+    }
+    return self;
+}
+
+- (void)open
+{
+    self.channel.inputStream.delegate = self;
+    self.channel.outputStream.delegate = self;
+    [self.channel.inputStream scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+    [self.channel.outputStream scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+    [self.channel.inputStream open];
+    [self.channel.outputStream open];
+}
+
+- (void)stream:(NSStream *)aStream handleEvent:(NSStreamEvent)eventCode
+{
+    switch (eventCode) {
+        case NSStreamEventHasBytesAvailable: {
+            if (aStream == self.channel.inputStream) {
+                uint8_t buffer[8192];
+                NSInteger bytesRead = [self.channel.inputStream read:buffer maxLength:sizeof(buffer)];
+                if (bytesRead > 0) {
+                    NSData *data = [NSData dataWithBytes:buffer length:bytesRead];
+                    NSDictionary *response = @{
+                        @"remote_id": self.remoteId,
+                        @"psm": @(self.psm),
+                        @"data": [FlutterStandardTypedData typedDataWithBytes:data],
+                    };
+                    [self.plugin.methodChannel invokeMethod:@"OnL2capDataReceived" arguments:response];
+                }
+            }
+            break;
+        }
+        case NSStreamEventEndEncountered:
+        case NSStreamEventErrorOccurred: {
+            [self close];
+            NSDictionary *response = @{
+                @"remote_id": self.remoteId,
+                @"psm": @(self.psm),
+            };
+            [self.plugin.methodChannel invokeMethod:@"OnL2capChannelClosed" arguments:response];
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+- (BOOL)writeData:(NSData *)data error:(NSError **)error
+{
+    if (self.isClosed || !self.channel.outputStream) {
+        if (error) {
+            *error = [NSError errorWithDomain:@"FlutterBluePlus" code:-1 userInfo:@{NSLocalizedDescriptionKey: @"Channel is closed"}];
+        }
+        return NO;
+    }
+    const uint8_t *bytes = (const uint8_t *)[data bytes];
+    NSInteger remaining = [data length];
+    while (remaining > 0) {
+        NSInteger bytesWritten = [self.channel.outputStream write:bytes maxLength:remaining];
+        if (bytesWritten < 0) {
+            if (error) {
+                *error = self.channel.outputStream.streamError;
+            }
+            return NO;
+        }
+        bytes += bytesWritten;
+        remaining -= bytesWritten;
+    }
+    return YES;
+}
+
+- (void)close
+{
+    if (self.isClosed) {
+        return;
+    }
+    self.isClosed = YES;
+    if (self.channel.inputStream) {
+        [self.channel.inputStream close];
+        [self.channel.inputStream removeFromRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+        self.channel.inputStream.delegate = nil;
+    }
+    if (self.channel.outputStream) {
+        [self.channel.outputStream close];
+        [self.channel.outputStream removeFromRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+        self.channel.outputStream.delegate = nil;
+    }
+    NSString *key = [NSString stringWithFormat:@"%@:%u", self.remoteId, self.psm];
+    [self.plugin.openL2capChannels removeObjectForKey:key];
+}
+
+@end
+
 @interface FlutterBluePlusPlugin ()
 @property(nonatomic, retain) NSObject<FlutterPluginRegistrar> *registrar;
 @property(nonatomic, retain) FlutterMethodChannel *methodChannel;
@@ -52,6 +178,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 @property(nonatomic) LogLevel logLevel;
 @property(nonatomic) NSNumber *showPowerAlert;
 @property(nonatomic) NSNumber *restoreState;
+@property(nonatomic) NSMutableDictionary *openL2capChannels;
+@property(nonatomic) NSMutableDictionary *pendingL2capOpens;
 @end
 
 @implementation FlutterBluePlusPlugin
@@ -76,6 +204,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     instance.logLevel = LDEBUG;
     instance.showPowerAlert = @(YES);
     instance.restoreState = @(NO);
+    instance.openL2capChannels = [NSMutableDictionary new];
+    instance.pendingL2capOpens = [NSMutableDictionary new];
 
     [registrar addMethodCallDelegate:instance channel:methodChannel];
 }
@@ -803,6 +933,80 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                                     message:@"android only"
                                     details:NULL]);
         }
+        else if ([@"openL2capChannel" isEqualToString:call.method])
+        {
+            NSDictionary *args = (NSDictionary *)call.arguments;
+            NSString *remoteId = args[@"remote_id"];
+            NSNumber *psmNum = args[@"psm"];
+            UInt16 psm = [psmNum unsignedShortValue];
+
+            CBPeripheral *peripheral = self.connectedPeripherals[remoteId];
+            if (peripheral == nil) {
+                result([FlutterError errorWithCode:@"openL2capChannel" message:@"device is disconnected" details:nil]);
+                return;
+            }
+
+            NSString *key = [NSString stringWithFormat:@"%@:%u", remoteId, psm];
+            if (self.openL2capChannels[key] != nil) {
+                result(@(YES));
+                return;
+            }
+
+            if (self.pendingL2capOpens[key] != nil) {
+                result([FlutterError errorWithCode:@"openL2capChannel" message:@"channel is already opening" details:nil]);
+                return;
+            }
+
+            self.pendingL2capOpens[key] = [result copy];
+
+            if (@available(iOS 11.0, macOS 10.13, watchOS 4.0, tvOS 11.0, *)) {
+                [peripheral openL2CAPChannel:(CBL2CAPPSM)psm];
+            } else {
+                FlutterResult pending = self.pendingL2capOpens[key];
+                [self.pendingL2capOpens removeObjectForKey:key];
+                if (pending) {
+                    pending([FlutterError errorWithCode:@"openL2capChannel" message:@"L2CAP channels not supported on this OS version" details:nil]);
+                }
+            }
+        }
+        else if ([@"writeL2capChannel" isEqualToString:call.method])
+        {
+            NSDictionary *args = (NSDictionary *)call.arguments;
+            NSString *remoteId = args[@"remote_id"];
+            NSNumber *psmNum = args[@"psm"];
+            UInt16 psm = [psmNum unsignedShortValue];
+            FlutterStandardTypedData *valueData = args[@"value"];
+            NSData *data = [valueData data];
+
+            NSString *key = [NSString stringWithFormat:@"%@:%u", remoteId, psm];
+            FBPL2capChannel *fbpChannel = self.openL2capChannels[key];
+            if (fbpChannel == nil || fbpChannel.isClosed) {
+                result([FlutterError errorWithCode:@"writeL2capChannel" message:@"L2CAP channel is not open" details:nil]);
+                return;
+            }
+
+            NSError *err = nil;
+            BOOL ok = [fbpChannel writeData:data error:&err];
+            if (!ok) {
+                result([FlutterError errorWithCode:@"writeL2capChannel" message:[err localizedDescription] details:nil]);
+            } else {
+                result(@(YES));
+            }
+        }
+        else if ([@"closeL2capChannel" isEqualToString:call.method])
+        {
+            NSDictionary *args = (NSDictionary *)call.arguments;
+            NSString *remoteId = args[@"remote_id"];
+            NSNumber *psmNum = args[@"psm"];
+            UInt16 psm = [psmNum unsignedShortValue];
+
+            NSString *key = [NSString stringWithFormat:@"%@:%u", remoteId, psm];
+            FBPL2capChannel *fbpChannel = self.openL2capChannels[key];
+            if (fbpChannel != nil) {
+                [fbpChannel close];
+            }
+            result(@(YES));
+        }
         else
         {
             result(FlutterMethodNotImplemented);
@@ -1083,6 +1287,14 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     [self.discoveryErrors removeAllObjects];
     [self.didWriteWithoutResponse removeAllObjects];
     [self.peripheralMtu removeAllObjects];
+    for (FBPL2capChannel *ch in [self.openL2capChannels allValues]) {
+        [ch close];
+    }
+    [self.openL2capChannels removeAllObjects];
+    for (FlutterResult pending in [self.pendingL2capOpens allValues]) {
+        pending([FlutterError errorWithCode:@"openL2capChannel" message:@"disconnected" details:nil]);
+    }
+    [self.pendingL2capOpens removeAllObjects];
     [self.peripheralMtuStableTicks removeAllObjects];
     [self.writeChrs removeAllObjects];
     [self.writeDescs removeAllObjects];
@@ -1515,6 +1727,19 @@ static const int kMtuSettledTicks = 20;
     [self clearPendingDiscoveryForRemoteId:remoteId];
     [self.didWriteWithoutResponse removeObjectForKey:remoteId];
     [self clearCachedWritesForRemoteId:remoteId];
+    for (NSString *key in [self.openL2capChannels allKeys]) {
+        if ([key hasPrefix:[NSString stringWithFormat:@"%@:", remoteId]]) {
+            FBPL2capChannel *ch = self.openL2capChannels[key];
+            [ch close];
+        }
+    }
+    for (NSString *key in [self.pendingL2capOpens allKeys]) {
+        if ([key hasPrefix:[NSString stringWithFormat:@"%@:", remoteId]]) {
+            FlutterResult pending = self.pendingL2capOpens[key];
+            [self.pendingL2capOpens removeObjectForKey:key];
+            pending([FlutterError errorWithCode:@"openL2capChannel" message:@"device is disconnected" details:nil]);
+        }
+    }
 
     // Unregister self as delegate for peripheral, not working #42
     peripheral.delegate = nil;
@@ -1784,6 +2009,44 @@ didDiscoverCharacteristicsForService:(CBService *)service
 
     [self.methodChannel invokeMethod:@"OnCharacteristicWritten" arguments:result];
 }
+
+- (void)peripheral:(CBPeripheral *)peripheral didOpenL2CAPChannel:(nullable CBL2CAPChannel *)channel error:(nullable NSError *)error
+{
+    NSString *remoteId = [peripheral.identifier UUIDString];
+    UInt16 psm = channel != nil ? (UInt16)channel.PSM : 0;
+
+    NSString *key = [NSString stringWithFormat:@"%@:%u", remoteId, psm];
+    FlutterResult pending = self.pendingL2capOpens[key];
+    if (pending == nil) {
+        for (NSString *k in [self.pendingL2capOpens allKeys]) {
+            if ([k hasPrefix:[NSString stringWithFormat:@"%@:", remoteId]]) {
+                key = k;
+                pending = self.pendingL2capOpens[k];
+                break;
+            }
+        }
+    }
+
+    if (error != nil || channel == nil) {
+        Log(LERROR, @"didOpenL2CAPChannel failed: %@", [error localizedDescription]);
+        if (pending) {
+            [self.pendingL2capOpens removeObjectForKey:key];
+            pending([FlutterError errorWithCode:@"openL2capChannel" message:[error localizedDescription] details:nil]);
+        }
+        return;
+    }
+
+    Log(LDEBUG, @"didOpenL2CAPChannel succeeded for PSM: %u", psm);
+    FBPL2capChannel *fbpChannel = [[FBPL2capChannel alloc] initWithPlugin:self remoteId:remoteId psm:psm channel:channel];
+    [fbpChannel open];
+    self.openL2capChannels[key] = fbpChannel;
+
+    if (pending) {
+        [self.pendingL2capOpens removeObjectForKey:key];
+        pending(@(YES));
+    }
+}
+
 
 - (void)peripheral:(CBPeripheral *)peripheral
     didUpdateNotificationStateForCharacteristic:(CBCharacteristic *)characteristic

@@ -1023,3 +1023,97 @@ class PhySupport {
 // random number defined by flutter blue plus.
 // Ideally it should not conflict with iOS or Android error codes.
 int bmUserCanceledErrorCode = 23789258;
+
+class BmL2capOpenRequest {
+  final DeviceIdentifier remoteId;
+  final int psm;
+  final bool secure;
+
+  BmL2capOpenRequest({
+    required this.remoteId,
+    required this.psm,
+    this.secure = true,
+  });
+
+  Map<dynamic, dynamic> toMap() {
+    final Map<dynamic, dynamic> map = {};
+    map['remote_id'] = remoteId.str;
+    map['psm'] = psm;
+    map['secure'] = secure ? 1 : 0;
+    return map;
+  }
+}
+
+class BmL2capWriteRequest {
+  final DeviceIdentifier remoteId;
+  final int psm;
+  final List<int> value;
+
+  BmL2capWriteRequest({
+    required this.remoteId,
+    required this.psm,
+    required this.value,
+  });
+
+  Map<dynamic, dynamic> toMap() {
+    final Map<dynamic, dynamic> map = {};
+    map['remote_id'] = remoteId.str;
+    map['psm'] = psm;
+    map['value'] = Uint8List.fromList(value);
+    return map;
+  }
+}
+
+class BmL2capCloseRequest {
+  final DeviceIdentifier remoteId;
+  final int psm;
+
+  BmL2capCloseRequest({
+    required this.remoteId,
+    required this.psm,
+  });
+
+  Map<dynamic, dynamic> toMap() {
+    final Map<dynamic, dynamic> map = {};
+    map['remote_id'] = remoteId.str;
+    map['psm'] = psm;
+    return map;
+  }
+}
+
+class BmL2capData {
+  final DeviceIdentifier remoteId;
+  final int psm;
+  final List<int> data;
+
+  BmL2capData({
+    required this.remoteId,
+    required this.psm,
+    required this.data,
+  });
+
+  factory BmL2capData.fromMap(Map<dynamic, dynamic> json) {
+    return BmL2capData(
+      remoteId: DeviceIdentifier(json['remote_id']),
+      psm: json['psm'],
+      data: json['data'] is Uint8List ? (json['data'] as Uint8List).toList() : List<int>.from(json['data']),
+    );
+  }
+}
+
+class BmL2capClosedResponse {
+  final DeviceIdentifier remoteId;
+  final int psm;
+
+  BmL2capClosedResponse({
+    required this.remoteId,
+    required this.psm,
+  });
+
+  factory BmL2capClosedResponse.fromMap(Map<dynamic, dynamic> json) {
+    return BmL2capClosedResponse(
+      remoteId: DeviceIdentifier(json['remote_id']),
+      psm: json['psm'],
+    );
+  }
+}
