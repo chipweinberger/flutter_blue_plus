@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:bluez/bluez.dart';
 import 'package:flutter_blue_plus_platform_interface/flutter_blue_plus_platform_interface.dart';
-import 'src/stream_utils.dart';
 
 extension on BlueZDevice {
   DeviceIdentifier get remoteId {
@@ -95,7 +94,8 @@ final class _LinuxDeviceState {
   final BlueZDevice device;
   final DeviceIdentifier remoteId;
   final Stream<_BlueZDevicePropertyChanges> propertyChanges;
-  StreamSubscription<_BlueZDevicePropertyChanges>? subscription;
+  final characteristicSubscriptions = <StreamSubscription<List<String>>>[];
+  late final StreamSubscription<_BlueZDevicePropertyChanges> subscription;
 
   _LinuxDeviceState(this.device)
       : remoteId = device.remoteId,
@@ -110,10 +110,18 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   final _client = BlueZClient();
   final _deviceStates = <DeviceIdentifier, _LinuxDeviceState>{};
 
+  BlueZAdapter? _adapter;
+  StreamSubscription<List<String>>? _adapterSubscription;
+
   var _initialized = false;
   var _logLevel = LogLevel.none;
 
-  final _onCharacteristicReadController = StreamController<BmCharacteristicData>.broadcast();
+  final _onAdapterStateChangedController = StreamController<BmBluetoothAdapterState>.broadcast();
+  final _onBondStateChangedController = StreamController<BmBondStateResponse>.broadcast();
+  final _onConnectionStateChangedController = StreamController<BmConnectionStateResponse>.broadcast();
+  final _onNameChangedController = StreamController<BmNameChanged>.broadcast();
+  final _onServicesResetController = StreamController<BmBluetoothDevice>.broadcast();
+  final _onCharacteristicReceivedController = StreamController<BmCharacteristicData>.broadcast();
   final _onCharacteristicWrittenController = StreamController<BmCharacteristicData>.broadcast();
   final _onDescriptorReadController = StreamController<BmDescriptorData>.broadcast();
   final _onDescriptorWrittenController = StreamController<BmDescriptorData>.broadcast();
@@ -194,97 +202,17 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
 
   @override
   Stream<BmBluetoothAdapterState> get onAdapterStateChanged {
-    return _client.adaptersChanged.where(
-      (adapters) {
-        return adapters.isNotEmpty;
-      },
-    ).switchMap(
-      (adapters) {
-        return adapters.first.propertiesChanged.where(
-          (properties) {
-            return properties.contains('Powered');
-          },
-        ).map(
-          (properties) {
-            return BmBluetoothAdapterState(
-              adapterState: adapters.first.powered ? BmAdapterStateEnum.on : BmAdapterStateEnum.off,
-            );
-          },
-        );
-      },
-    );
+    return _onAdapterStateChangedController.stream;
   }
 
   @override
   Stream<BmBondStateResponse> get onBondStateChanged {
-    return _client.devicesChanged.switchMap(
-      (devices) {
-        return mergeStreams(
-          devices.map(
-            (device) {
-              return device.propertiesChanged.where(
-                (properties) {
-                  return properties.contains('Paired');
-                },
-              ).map(
-                (properties) {
-                  return BmBondStateResponse(
-                    remoteId: device.remoteId,
-                    bondState: device.paired ? BmBondStateEnum.bonded : BmBondStateEnum.none,
-                    prevState: null,
-                  );
-                },
-              );
-            },
-          ),
-        );
-      },
-    );
+    return _onBondStateChangedController.stream;
   }
 
   @override
   Stream<BmCharacteristicData> get onCharacteristicReceived {
-    return _onCharacteristicReadController.stream.mergeWith([
-      _client.devicesChanged.switchMap(
-        (devices) {
-          final streams = <Stream<BmCharacteristicData>>[];
-
-          for (final device in devices) {
-            for (final service in device.gattServices) {
-              for (final characteristic in service.characteristics) {
-                streams.add(
-                  characteristic.propertiesChanged.where(
-                    (properties) {
-                      return properties.contains('Value');
-                    },
-                  ).map(
-                    (properties) {
-                      return BmCharacteristicData(
-                        remoteId: device.remoteId,
-                        primaryServiceUuid: null,
-                        serviceUuid: Guid.fromBytes(
-                          service.uuid.value,
-                        ),
-                        characteristicUuid: Guid.fromBytes(
-                          characteristic.uuid.value,
-                        ),
-                        instanceId: _instanceId(device, service, characteristic),
-                        value: characteristic.value,
-                        success: true,
-                        errorCode: 0,
-                        errorString: '',
-                      );
-                    },
-                  ),
-                );
-              }
-            }
-          }
-
-          return mergeStreams(streams);
-        },
-      ),
-    ]);
+    return _onCharacteristicReceivedController.stream;
   }
 
   @override
@@ -294,31 +222,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
 
   @override
   Stream<BmConnectionStateResponse> get onConnectionStateChanged {
-    return _client.devicesChanged.switchMap(
-      (devices) {
-        return mergeStreams(
-          devices.map(
-            (device) {
-              return device.propertiesChanged.where(
-                (properties) {
-                  return properties.contains('Connected');
-                },
-              ).map(
-                (properties) {
-                  return BmConnectionStateResponse(
-                    remoteId: device.remoteId,
-                    connectionState:
-                        device.connected ? BmConnectionStateEnum.connected : BmConnectionStateEnum.disconnected,
-                    disconnectReasonCode: null,
-                    disconnectReasonString: null,
-                  );
-                },
-              );
-            },
-          ),
-        );
-      },
-    );
+    return _onConnectionStateChangedController.stream;
   }
 
   @override
@@ -343,28 +247,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
 
   @override
   Stream<BmNameChanged> get onNameChanged {
-    return _client.devicesChanged.switchMap(
-      (devices) {
-        return mergeStreams(
-          devices.map(
-            (device) {
-              return device.propertiesChanged.where(
-                (properties) {
-                  return properties.contains('Name');
-                },
-              ).map(
-                (properties) {
-                  return BmNameChanged(
-                    remoteId: device.remoteId,
-                    name: device.name,
-                  );
-                },
-              );
-            },
-          ),
-        );
-      },
-    );
+    return _onNameChangedController.stream;
   }
 
   @override
@@ -413,28 +296,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
 
   @override
   Stream<BmBluetoothDevice> get onServicesReset {
-    return _client.devicesChanged.switchMap(
-      (devices) {
-        return mergeStreams(
-          devices.map(
-            (device) {
-              return device.propertiesChanged.where(
-                (properties) {
-                  return properties.contains('UUIDs');
-                },
-              ).map(
-                (properties) {
-                  return BmBluetoothDevice(
-                    remoteId: device.remoteId,
-                    platformName: device.name,
-                  );
-                },
-              );
-            },
-          ),
-        );
-      },
-    );
+    return _onServicesResetController.stream;
   }
 
   @override
@@ -495,37 +357,133 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
 
   // BlueZ currently does not emit errors on these streams.
   // This handler is added as a precaution.
-  void _onBlueZError(Object error) {
+  void _onStreamError(Object error) {
     _log('BlueZ stream error: $error');
   }
 
-  void _onBlueZDevicePropertiesChanged(_LinuxDeviceState state, _BlueZDevicePropertyChanges changed) {
+  void _onAdapterPropertiesChanged(BlueZAdapter adapter, List<String> changed) {
+    if (changed.contains('Powered')) {
+      _onAdapterStateChangedController.add(BmBluetoothAdapterState(
+        adapterState: adapter.powered ? BmAdapterStateEnum.on : BmAdapterStateEnum.off,
+      ));
+    }
+  }
+
+  void _onAdaptersChanged([BlueZAdapter? _]) {
+    final adapter = _client.adapters.firstOrNull;
+    if (adapter?.propertiesChanged == _adapter?.propertiesChanged) return;
+    unawaited(_adapterSubscription?.cancel());
+    _adapter = adapter;
+    _adapterSubscription = adapter?.propertiesChanged.listen(
+      (changed) => _onAdapterPropertiesChanged(adapter, changed),
+      onError: _onStreamError,
+    );
+  }
+
+  void _onCharacteristicPropertiesChanged(
+    _LinuxDeviceState state,
+    BlueZGattService service,
+    BlueZGattCharacteristic characteristic,
+    List<String> changed,
+  ) {
+    if (_logLevel == LogLevel.verbose) {
+      _log(
+        'device ${state.remoteId} service ${service.uuid} '
+        'characteristic ${characteristic.uuid} properties changed $changed',
+      );
+    }
+    if (changed.contains('Value')) {
+      _onCharacteristicReceivedController.add(BmCharacteristicData(
+        remoteId: state.remoteId,
+        primaryServiceUuid: null,
+        serviceUuid: service.guid,
+        characteristicUuid: Guid.fromBytes(characteristic.uuid.value),
+        instanceId: _instanceId(state.device, service, characteristic),
+        value: characteristic.value,
+        success: true,
+        errorCode: 0,
+        errorString: '',
+      ));
+    }
+  }
+
+  void _listenToCharacteristics(_LinuxDeviceState state) {
+    for (final subscription in state.characteristicSubscriptions) {
+      unawaited(subscription.cancel());
+    }
+    state.characteristicSubscriptions.clear();
+    if (!state.device.connected || !state.device.servicesResolved) return;
+
+    for (final service in state.device.gattServices) {
+      for (final characteristic in service.characteristics) {
+        state.characteristicSubscriptions.add(characteristic.propertiesChanged.listen(
+          (changed) => _onCharacteristicPropertiesChanged(state, service, characteristic, changed),
+          onError: _onStreamError,
+        ));
+      }
+    }
+  }
+
+  void _onDevicePropertiesChanged(_LinuxDeviceState state, _BlueZDevicePropertyChanges changed) {
+    final device = state.device;
     if (_logLevel == LogLevel.verbose) {
       _log('device ${state.remoteId} properties changed $changed');
+    }
+    if (changed.contains(_BlueZDeviceProperty.connected)) {
+      _onConnectionStateChangedController.add(BmConnectionStateResponse(
+        remoteId: state.remoteId,
+        connectionState: device.connected ? BmConnectionStateEnum.connected : BmConnectionStateEnum.disconnected,
+        disconnectReasonCode: null,
+        disconnectReasonString: null,
+      ));
+    }
+    if (changed.contains(_BlueZDeviceProperty.paired)) {
+      _onBondStateChangedController.add(BmBondStateResponse(
+        remoteId: state.remoteId,
+        bondState: device.paired ? BmBondStateEnum.bonded : BmBondStateEnum.none,
+        prevState: null,
+      ));
+    }
+    if (changed.contains(_BlueZDeviceProperty.name)) {
+      _onNameChangedController.add(BmNameChanged(remoteId: state.remoteId, name: device.name));
+    }
+    if (changed.contains(_BlueZDeviceProperty.uuids)) {
+      _onServicesResetController.add(BmBluetoothDevice(remoteId: state.remoteId, platformName: device.name));
+    }
+    if (changed.contains(_BlueZDeviceProperty.connected) ||
+        changed.contains(_BlueZDeviceProperty.servicesResolved) ||
+        changed.contains(_BlueZDeviceProperty.uuids)) {
+      _listenToCharacteristics(state);
     }
     if (changed.contains(_BlueZDeviceProperty.servicesResolved)) _publishServicesIfReady(state);
   }
 
-  Future<void> _onBlueZDeviceRemoved(BlueZDevice device, [Object? error]) async {
+  Future<void> _onDeviceRemoved(BlueZDevice device, [Object? error]) async {
     final state = _deviceStates[device.remoteId];
     if (state == null || !state.matches(device)) return;
     _deviceStates.remove(state.remoteId);
+    if (_logLevel == LogLevel.verbose) _log('device ${state.remoteId} removed');
     _discoveryFailed(state.remoteId, error ?? StateError('device removed'));
-    await state.subscription?.cancel();
+    await Future.wait([
+      state.subscription.cancel(),
+      ...state.characteristicSubscriptions.map((subscription) => subscription.cancel()),
+    ]);
   }
 
-  void _onBlueZDeviceAdded(BlueZDevice device) {
+  void _onDeviceAdded(BlueZDevice device) {
     final previous = _deviceStates[device.remoteId];
     if (previous != null && previous.matches(device)) return;
     if (previous != null) {
-      unawaited(_onBlueZDeviceRemoved(previous.device, StateError('device replaced')));
+      unawaited(_onDeviceRemoved(previous.device, StateError('device replaced')));
     }
     final state = _LinuxDeviceState(device);
     _deviceStates[state.remoteId] = state;
+    if (_logLevel == LogLevel.verbose) _log('device ${state.remoteId} added');
     state.subscription = state.propertyChanges.listen(
-      (changed) => _onBlueZDevicePropertiesChanged(state, changed),
-      onError: _onBlueZError,
+      (changed) => _onDevicePropertiesChanged(state, changed),
+      onError: _onStreamError,
     );
+    _listenToCharacteristics(state);
   }
 
   BmDiscoverServicesResult _discoveryResult(BlueZDevice device) {
@@ -737,7 +695,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
 
       final value = await characteristic.readValue();
 
-      _onCharacteristicReadController.add(
+      _onCharacteristicReceivedController.add(
         BmCharacteristicData(
           remoteId: device.remoteId,
           primaryServiceUuid: null,
@@ -757,7 +715,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
 
       return true;
     } catch (e) {
-      _onCharacteristicReadController.add(
+      _onCharacteristicReceivedController.add(
         BmCharacteristicData(
           remoteId: request.remoteId,
           primaryServiceUuid: null,
@@ -1169,72 +1127,14 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
 
     await _client.connect();
 
-    _client.deviceAdded.listen(_onBlueZDeviceAdded, onError: _onBlueZError);
-    _client.deviceRemoved.listen(_onBlueZDeviceRemoved, onError: _onBlueZError);
+    _client.deviceAdded.listen(_onDeviceAdded, onError: _onStreamError);
+    _client.deviceRemoved.listen(_onDeviceRemoved, onError: _onStreamError);
     for (final device in _client.devices) {
-      _onBlueZDeviceAdded(device);
+      _onDeviceAdded(device);
     }
 
-    _client.devicesChanged.switchMap(
-      (devices) {
-        if (_logLevel == LogLevel.verbose) {
-          _log('devices changed ${devices.map((device) => device.remoteId).toList()}');
-        }
-
-        return mergeStreams(
-          devices.map(
-            (device) {
-              return device.propertiesChanged.switchMap(
-                (_) {
-                  final streams = <Stream<void>>[];
-
-                  for (final service in device.gattServices) {
-                    for (final characteristic in service.characteristics) {
-                      streams.add(
-                        characteristic.propertiesChanged.map(
-                          (properties) {
-                            if (_logLevel == LogLevel.verbose) {
-                              _log(
-                                'device ${device.remoteId} service ${service.uuid} characteristic ${characteristic.uuid} properties changed $properties',
-                              );
-                            }
-                          },
-                        ),
-                      );
-                    }
-                  }
-
-                  return mergeStreams(streams);
-                },
-              );
-            },
-          ),
-        );
-      },
-    ).listen(null);
-  }
-}
-
-extension on BlueZClient {
-  Stream<List<BlueZAdapter>> get adaptersChanged {
-    return mergeStreams([
-      adapterAdded,
-      adapterRemoved,
-    ]).map(
-      (adapter) {
-        return adapters;
-      },
-    ).startWith(adapters);
-  }
-
-  Stream<List<BlueZDevice>> get devicesChanged {
-    return mergeStreams([
-      deviceAdded,
-      deviceRemoved,
-    ]).map(
-      (device) {
-        return devices;
-      },
-    ).startWith(devices);
+    _client.adapterAdded.listen(_onAdaptersChanged, onError: _onStreamError);
+    _client.adapterRemoved.listen(_onAdaptersChanged, onError: _onStreamError);
+    _onAdaptersChanged();
   }
 }
