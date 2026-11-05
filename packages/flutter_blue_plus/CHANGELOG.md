@@ -1,3 +1,8 @@
+## 2.3.15
+* **[Fix]** Linux: select the correct characteristic when characteristic or service UUIDs repeat (#1345)
+* **[Fix]** Linux: prevent service discovery from blocking disconnects and other platform calls (#1346)
+* **[Fix]** Linux: prevent duplicate events and missed notifications as devices connect, disconnect, and resolve services (#1347)
+
 ## 2.3.14
 * **[Fix]** Darwin: allow service discovery to finish when CoreBluetooth restricts access to a UUID, including Matter attributes (#1344)
 * **[LICENSE]** add global tier

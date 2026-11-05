@@ -1,6 +1,7 @@
-## Unreleased
-* **[Fix]** Publish service updates from BlueZ events instead of polling, so service discovery releases the invocation lock immediately.
-* **[Fix]** Prevent duplicate Bluetooth events and keep notifications working as devices connect, disconnect, and resolve services.
+## 9.0.5
+* **[Fix]** Select the correct characteristic when characteristic or service UUIDs repeat (#1345)
+* **[Fix]** Prevent service discovery from blocking disconnects and other platform calls (#1346)
+* **[Fix]** Prevent duplicate events and missed notifications as devices connect, disconnect, and resolve services (#1347)
 
 ## 9.0.4
 * **[LICENSE]** add global tier
