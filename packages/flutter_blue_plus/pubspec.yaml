@@ -28,7 +28,7 @@ dependencies:
   flutter_blue_plus_darwin: '>=9.0.5 <9.0.6'
   flutter_blue_plus_linux: '>=9.0.5 <9.0.6'
   flutter_blue_plus_web: '>=9.0.4 <9.0.5'
-  flutter_blue_plus_winrt: '>=0.0.20'
+  flutter_blue_plus_winrt: '>=0.0.20 <0.1.0'
 
 dev_dependencies:
   flutter_lints: ^5.0.0
