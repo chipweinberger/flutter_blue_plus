@@ -1,3 +1,6 @@
+## Unreleased
+* **[Fix]** Publish service updates from BlueZ events instead of polling, so service discovery releases the invocation lock immediately.
+
 ## 9.0.4
 * **[LICENSE]** add global tier
 

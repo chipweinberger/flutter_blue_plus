@@ -41,8 +41,74 @@ final class _LinuxFoundCharacteristic {
   });
 }
 
+// https://github.com/bluez/bluez/blob/master/doc/org.bluez.Device.rst#properties
+enum _BlueZDeviceProperty {
+  adapter('Adapter'),
+  address('Address'),
+  addressType('AddressType'),
+  advertisingData('AdvertisingData'),
+  advertisingFlags('AdvertisingFlags'),
+  alias('Alias'),
+  appearance('Appearance'),
+  blocked('Blocked'),
+  bonded('Bonded'),
+  cablePairing('CablePairing'),
+  connectable('Connectable'),
+  connected('Connected'),
+  deviceClass('Class'),
+  encryptionType('EncryptionType'),
+  icon('Icon'),
+  legacyPairing('LegacyPairing'),
+  manufacturerData('ManufacturerData'),
+  modalias('Modalias'),
+  name('Name'),
+  paired('Paired'),
+  preferredBearer('PreferredBearer'),
+  rssi('RSSI'),
+  securityLevel('SecurityLevel'),
+  serviceData('ServiceData'),
+  servicesResolved('ServicesResolved'),
+  sets('Sets'),
+  trusted('Trusted'),
+  txPower('TxPower'),
+  uuids('UUIDs'),
+  wakeAllowed('WakeAllowed');
+
+  final String dbusName;
+  const _BlueZDeviceProperty(this.dbusName);
+}
+
+final class _BlueZDevicePropertyChanges {
+  final List<String> _names;
+  final Set<_BlueZDeviceProperty> _properties;
+
+  _BlueZDevicePropertyChanges(this._names)
+      : _properties = _BlueZDeviceProperty.values.where((property) => _names.contains(property.dbusName)).toSet();
+
+  bool contains(_BlueZDeviceProperty property) => _properties.contains(property);
+
+  @override
+  String toString() => _names.toString();
+}
+
+final class _LinuxDeviceState {
+  final BlueZDevice device;
+  final DeviceIdentifier remoteId;
+  final Stream<_BlueZDevicePropertyChanges> propertyChanges;
+  StreamSubscription<_BlueZDevicePropertyChanges>? subscription;
+
+  _LinuxDeviceState(this.device)
+      : remoteId = device.remoteId,
+        propertyChanges = device.propertiesChanged.map(_BlueZDevicePropertyChanges.new);
+
+  // BlueZ recreates device wrappers.
+  // Their property-change streams compare equal for the same cached object.
+  bool matches(BlueZDevice other) => device.propertiesChanged == other.propertiesChanged;
+}
+
 final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   final _client = BlueZClient();
+  final _deviceStates = <DeviceIdentifier, _LinuxDeviceState>{};
 
   var _initialized = false;
   var _logLevel = LogLevel.none;
@@ -54,6 +120,20 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
   final _onDiscoveredServicesController = StreamController<BmDiscoverServicesResult>.broadcast();
   final _onReadRssiController = StreamController<BmReadRssiResult>.broadcast();
   final _onTurnOnResponseController = StreamController<BmTurnOnResponse>.broadcast();
+
+  void _log(String message) {
+    FlutterBluePlusPlatform.log('[FBP-Linux] $message');
+  }
+
+  void _discoveryFailed(DeviceIdentifier remoteId, Object error) {
+    _onDiscoveredServicesController.add(BmDiscoverServicesResult(
+      remoteId: remoteId,
+      services: [],
+      success: false,
+      errorCode: 0,
+      errorString: error.toString(),
+    ));
+  }
 
   List<BlueZGattService> _matchingServices(BlueZDevice device, Guid serviceUuid) {
     return device.gattServices.where((service) => service.guid == serviceUuid).toList();
@@ -413,119 +493,130 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
     return true;
   }
 
+  // BlueZ currently does not emit errors on these streams.
+  // This handler is added as a precaution.
+  void _onBlueZError(Object error) {
+    _log('BlueZ stream error: $error');
+  }
+
+  void _onBlueZDevicePropertiesChanged(_LinuxDeviceState state, _BlueZDevicePropertyChanges changed) {
+    if (_logLevel == LogLevel.verbose) {
+      _log('device ${state.remoteId} properties changed $changed');
+    }
+    if (changed.contains(_BlueZDeviceProperty.servicesResolved)) _publishServicesIfReady(state);
+  }
+
+  Future<void> _onBlueZDeviceRemoved(BlueZDevice device, [Object? error]) async {
+    final state = _deviceStates[device.remoteId];
+    if (state == null || !state.matches(device)) return;
+    _deviceStates.remove(state.remoteId);
+    _discoveryFailed(state.remoteId, error ?? StateError('device removed'));
+    await state.subscription?.cancel();
+  }
+
+  void _onBlueZDeviceAdded(BlueZDevice device) {
+    final previous = _deviceStates[device.remoteId];
+    if (previous != null && previous.matches(device)) return;
+    if (previous != null) {
+      unawaited(_onBlueZDeviceRemoved(previous.device, StateError('device replaced')));
+    }
+    final state = _LinuxDeviceState(device);
+    _deviceStates[state.remoteId] = state;
+    state.subscription = state.propertyChanges.listen(
+      (changed) => _onBlueZDevicePropertiesChanged(state, changed),
+      onError: _onBlueZError,
+    );
+  }
+
+  BmDiscoverServicesResult _discoveryResult(BlueZDevice device) {
+    return BmDiscoverServicesResult(
+      remoteId: device.remoteId,
+      services: device.gattServices.map(
+        (service) {
+          return BmBluetoothService(
+            primaryServiceUuid: null,
+            serviceUuid: Guid.fromBytes(service.uuid.value),
+            remoteId: device.remoteId,
+            characteristics: service.characteristics.map(
+              (characteristic) {
+                return BmBluetoothCharacteristic(
+                  remoteId: device.remoteId,
+                  primaryServiceUuid: null,
+                  serviceUuid: Guid.fromBytes(service.uuid.value),
+                  characteristicUuid: Guid.fromBytes(characteristic.uuid.value),
+                  instanceId: _instanceId(device, service, characteristic),
+                  descriptors: characteristic.descriptors.map(
+                    (descriptor) {
+                      return BmBluetoothDescriptor(
+                        remoteId: device.remoteId,
+                        primaryServiceUuid: null,
+                        serviceUuid: Guid.fromBytes(service.uuid.value),
+                        characteristicUuid: Guid.fromBytes(characteristic.uuid.value),
+                        instanceId: _instanceId(device, service, characteristic),
+                        descriptorUuid: Guid.fromBytes(descriptor.uuid.value),
+                      );
+                    },
+                  ).toList(),
+                  properties: BmCharacteristicProperties(
+                    broadcast: characteristic.flags.contains(BlueZGattCharacteristicFlag.broadcast),
+                    read: characteristic.flags.contains(BlueZGattCharacteristicFlag.read),
+                    writeWithoutResponse:
+                        characteristic.flags.contains(BlueZGattCharacteristicFlag.writeWithoutResponse),
+                    write: characteristic.flags.contains(BlueZGattCharacteristicFlag.write),
+                    notify: characteristic.flags.contains(BlueZGattCharacteristicFlag.notify),
+                    indicate: characteristic.flags.contains(BlueZGattCharacteristicFlag.indicate),
+                    authenticatedSignedWrites:
+                        characteristic.flags.contains(BlueZGattCharacteristicFlag.authenticatedSignedWrites),
+                    extendedProperties: characteristic.flags.contains(BlueZGattCharacteristicFlag.extendedProperties),
+                    notifyEncryptionRequired: false,
+                    indicateEncryptionRequired: false,
+                  ),
+                );
+              },
+            ).toList(),
+          );
+        },
+      ).toList(),
+      success: true,
+      errorCode: 0,
+      errorString: '',
+    );
+  }
+
+  void _publishServicesIfReady(_LinuxDeviceState state) {
+    final device = state.device;
+    if (!device.connected) {
+      _discoveryFailed(state.remoteId, StateError('device disconnected'));
+      return;
+    }
+    if (!_client.devices.any(state.matches)) {
+      _discoveryFailed(state.remoteId, StateError('device removed or replaced'));
+      return;
+    }
+    if (!device.servicesResolved) return;
+
+    try {
+      _onDiscoveredServicesController.add(_discoveryResult(device));
+    } catch (e) {
+      _discoveryFailed(state.remoteId, e);
+    }
+  }
+
   @override
-  Future<bool> discoverServices(
-    BmDiscoverServicesRequest request,
-  ) async {
+  Future<bool> discoverServices(BmDiscoverServicesRequest request) async {
     try {
       await _initFlutterBluePlus();
-
-      final device = _client.devices.singleWhere(
-        (device) {
-          return device.remoteId == request.remoteId;
-        },
-      );
-
-      // Ensure BlueZ has completed service discovery before returning results
-      while (!device.servicesResolved) {
-        await Future.delayed(const Duration(milliseconds: 100));
-      }
-
-      _onDiscoveredServicesController.add(
-        BmDiscoverServicesResult(
-          remoteId: device.remoteId,
-          services: device.gattServices.map(
-            (service) {
-              return BmBluetoothService(
-                primaryServiceUuid: null,
-                serviceUuid: Guid.fromBytes(
-                  service.uuid.value,
-                ),
-                remoteId: device.remoteId,
-                characteristics: service.characteristics.map(
-                  (characteristic) {
-                    return BmBluetoothCharacteristic(
-                      remoteId: device.remoteId,
-                      primaryServiceUuid: null,
-                      serviceUuid: Guid.fromBytes(
-                        service.uuid.value,
-                      ),
-                      characteristicUuid: Guid.fromBytes(
-                        characteristic.uuid.value,
-                      ),
-                      instanceId: _instanceId(device, service, characteristic),
-                      descriptors: characteristic.descriptors.map(
-                        (descriptor) {
-                          return BmBluetoothDescriptor(
-                            remoteId: device.remoteId,
-                            primaryServiceUuid: null,
-                            serviceUuid: Guid.fromBytes(
-                              service.uuid.value,
-                            ),
-                            characteristicUuid: Guid.fromBytes(
-                              characteristic.uuid.value,
-                            ),
-                            instanceId: _instanceId(device, service, characteristic),
-                            descriptorUuid: Guid.fromBytes(
-                              descriptor.uuid.value,
-                            ),
-                          );
-                        },
-                      ).toList(),
-                      properties: BmCharacteristicProperties(
-                        broadcast: characteristic.flags.contains(
-                          BlueZGattCharacteristicFlag.broadcast,
-                        ),
-                        read: characteristic.flags.contains(
-                          BlueZGattCharacteristicFlag.read,
-                        ),
-                        writeWithoutResponse: characteristic.flags.contains(
-                          BlueZGattCharacteristicFlag.writeWithoutResponse,
-                        ),
-                        write: characteristic.flags.contains(
-                          BlueZGattCharacteristicFlag.write,
-                        ),
-                        notify: characteristic.flags.contains(
-                          BlueZGattCharacteristicFlag.notify,
-                        ),
-                        indicate: characteristic.flags.contains(
-                          BlueZGattCharacteristicFlag.indicate,
-                        ),
-                        authenticatedSignedWrites: characteristic.flags.contains(
-                          BlueZGattCharacteristicFlag.authenticatedSignedWrites,
-                        ),
-                        extendedProperties: characteristic.flags.contains(
-                          BlueZGattCharacteristicFlag.extendedProperties,
-                        ),
-                        notifyEncryptionRequired: false,
-                        indicateEncryptionRequired: false,
-                      ),
-                    );
-                  },
-                ).toList(),
-              );
-            },
-          ).toList(),
-          success: true,
-          errorCode: 0,
-          errorString: '',
-        ),
-      );
-
-      return true;
     } catch (e) {
-      _onDiscoveredServicesController.add(
-        BmDiscoverServicesResult(
-          remoteId: request.remoteId,
-          services: [],
-          success: false,
-          errorCode: 0,
-          errorString: '',
-        ),
-      );
-
+      _discoveryFailed(request.remoteId, e);
       return false;
     }
+    final state = _deviceStates[request.remoteId];
+    if (state == null) {
+      _discoveryFailed(request.remoteId, StateError('device is not available'));
+      return false;
+    }
+    _publishServicesIfReady(state);
+    return true;
   }
 
   @override
@@ -1078,25 +1169,23 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
 
     await _client.connect();
 
+    _client.deviceAdded.listen(_onBlueZDeviceAdded, onError: _onBlueZError);
+    _client.deviceRemoved.listen(_onBlueZDeviceRemoved, onError: _onBlueZError);
+    for (final device in _client.devices) {
+      _onBlueZDeviceAdded(device);
+    }
+
     _client.devicesChanged.switchMap(
       (devices) {
         if (_logLevel == LogLevel.verbose) {
-          FlutterBluePlusPlatform.log(
-            '[FBP-Linux] devices changed ${devices.map((device) => device.remoteId).toList()}',
-          );
+          _log('devices changed ${devices.map((device) => device.remoteId).toList()}');
         }
 
         return mergeStreams(
           devices.map(
             (device) {
               return device.propertiesChanged.switchMap(
-                (properties) {
-                  if (_logLevel == LogLevel.verbose) {
-                    FlutterBluePlusPlatform.log(
-                      '[FBP-Linux] device ${device.remoteId} properties changed $properties',
-                    );
-                  }
-
+                (_) {
                   final streams = <Stream<void>>[];
 
                   for (final service in device.gattServices) {
@@ -1105,8 +1194,8 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
                         characteristic.propertiesChanged.map(
                           (properties) {
                             if (_logLevel == LogLevel.verbose) {
-                              FlutterBluePlusPlatform.log(
-                                '[FBP-Linux] device ${device.remoteId} service ${service.uuid} characteristic ${characteristic.uuid} properties changed $properties',
+                              _log(
+                                'device ${device.remoteId} service ${service.uuid} characteristic ${characteristic.uuid} properties changed $properties',
                               );
                             }
                           },
