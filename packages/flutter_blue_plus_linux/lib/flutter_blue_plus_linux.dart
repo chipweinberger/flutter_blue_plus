@@ -16,7 +16,8 @@ extension on BlueZGattCharacteristic {
     var idx = 0;
     for (final c in service.characteristics) {
       if (Guid.fromBytes(c.uuid.value) == target) {
-        if (identical(c, this)) return idx;
+        // BlueZ recreates wrappers; streams for the same cached object compare equal.
+        if (c.propertiesChanged == propertiesChanged) return idx;
         idx++;
       }
     }
@@ -67,7 +68,7 @@ final class FlutterBluePlusLinux extends FlutterBluePlusPlatform {
     var idx = 0;
     for (final candidateService in services) {
       for (final characteristic in candidateService.characteristics) {
-        if (identical(characteristic, target)) {
+        if (characteristic.propertiesChanged == target.propertiesChanged) {
           return idx;
         }
         idx++;
