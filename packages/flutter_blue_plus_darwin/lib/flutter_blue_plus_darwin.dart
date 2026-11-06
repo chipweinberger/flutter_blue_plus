@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -10,8 +9,6 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
   final methodChannel = const MethodChannel('flutter_blue_plus/methods');
 
   var _didRestart = false;
-  var _logLevel = LogLevel.none;
-  var _logColor = true;
 
   final _onAdapterStateChangedController = StreamController<BmBluetoothAdapterState>.broadcast();
   final _onCharacteristicReceivedController = StreamController<BmCharacteristicData>.broadcast();
@@ -204,9 +201,6 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
   Future<bool> setLogLevel(
     BmSetLogLevelRequest request,
   ) async {
-    _logLevel = request.logLevel;
-    _logColor = request.logColor;
-
     return await _callDarwinMethod<bool>(
           'setLogLevel',
           request.logLevel.index,
@@ -291,28 +285,7 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     // set platform method handler
     methodChannel.setMethodCallHandler(_methodCallHandler);
 
-    // log args
-    if (_logLevel == LogLevel.verbose) {
-      var func = '<$method>';
-      var args = arguments.toString();
-      func = _logColor ? '\x1B[1;30m$func\x1B[0m' : func;
-      args = _logColor ? '\x1B[1;35m$args\x1B[0m' : args;
-      FlutterBluePlusPlatform.log('[FBP] $func args: $args');
-    }
-
-    // invoke
-    final out = await methodChannel.invokeMethod<T>(method, arguments);
-
-    // log result
-    if (_logLevel == LogLevel.verbose) {
-      var func = '($method)';
-      var result = out.toString();
-      func = _logColor ? '\x1B[1;30m$func\x1B[0m' : func;
-      result = _logColor ? '\x1B[1;33m$result\x1B[0m' : result;
-      FlutterBluePlusPlatform.log('[FBP] $func result: $result');
-    }
-
-    return out;
+    return await methodChannel.invokeMethod<T>(method, arguments);
   }
 
   Future<void> _flutterRestart() async {
@@ -329,18 +302,6 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
   Future<void> _methodCallHandler(
     MethodCall call,
   ) async {
-    // log result
-    if (_logLevel == LogLevel.verbose) {
-      var func = '[[ ${call.method} ]]';
-      var result = switch (call.method) {
-        'OnDiscoveredServices' => _prettyPrint(call.arguments),
-        _ => call.arguments.toString(),
-      };
-      func = _logColor ? '\x1B[1;30m$func\x1B[0m' : func;
-      result = _logColor ? '\x1B[1;33m$result\x1B[0m' : result;
-      FlutterBluePlusPlatform.log('[FBP] $func result: $result');
-    }
-
     // handle method call
     switch (call.method) {
       case 'OnAdapterStateChanged':
@@ -415,16 +376,6 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
             call.arguments,
           ),
         );
-    }
-  }
-
-  String _prettyPrint(
-    dynamic data,
-  ) {
-    if (data is Map || data is List) {
-      return JsonEncoder.withIndent('  ').convert(data);
-    } else {
-      return data.toString();
     }
   }
 }

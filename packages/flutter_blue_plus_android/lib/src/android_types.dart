@@ -24,14 +24,6 @@ final class _GattTarget {
       : primaryServiceUuid = primary?.str,
         serviceUuid = service.str,
         characteristicUuid = characteristic.str;
-
-  Map<String, Object?> toMap() => {
-        'remote_id': remoteId.str,
-        if (primaryServiceUuid != null) 'primary_service_uuid': primaryServiceUuid,
-        'service_uuid': serviceUuid,
-        'characteristic_uuid': characteristicUuid,
-        'instance_id': instanceId,
-      };
 }
 
 typedef _WriteKey = ({

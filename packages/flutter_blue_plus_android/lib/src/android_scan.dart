@@ -185,7 +185,7 @@ base mixin _ScanOperations on _AndroidBackend {
   }
 
   @override
-  Future<bool> stopScan(BmStopScanRequest request) => _run('stopScan', () async {
+  Future<bool> stopScan(BmStopScanRequest request) => _run(() async {
         await _stopScan();
         return true;
       });
@@ -193,7 +193,7 @@ base mixin _ScanOperations on _AndroidBackend {
   @override
   Future<bool> startScan(BmScanSettings request) {
     final filters = _ScanFilters(request);
-    return _run('startScan', () async {
+    return _run(() async {
       await _requireScanAccess(request);
       _scanSettings = request;
       _advertisements.clear();
@@ -204,6 +204,6 @@ base mixin _ScanOperations on _AndroidBackend {
       }
       await _openScan(filters);
       return true;
-    }, arguments: request.toMap());
+    });
   }
 }

@@ -1,3 +1,6 @@
+## Unreleased
+* Let the main FBP package log standard requests, results and events; continue forwarding native log-level settings.
+
 ## 9.0.5
 * **[Fix]** allow service discovery to finish when CoreBluetooth restricts access to a UUID, including Matter attributes (#1344)
 * **[LICENSE]** add global tier

@@ -129,7 +129,8 @@ class BluetoothDescriptor {
       Future<BmDescriptorData> futureResponse = responseStream.first;
 
       // invoke
-      await FlutterBluePlus._invokePlatform(() => FlutterBluePlusPlatform.instance.readDescriptor(request));
+      await FlutterBluePlus._invokePlatform(
+          'readDescriptor', request, (request) => FlutterBluePlusPlatform.instance.readDescriptor(request));
 
       // wait for response
       BmDescriptorData response = await futureResponse
@@ -185,7 +186,8 @@ class BluetoothDescriptor {
       Future<BmDescriptorData> futureResponse = responseStream.first;
 
       // invoke
-      await FlutterBluePlus._invokePlatform(() => FlutterBluePlusPlatform.instance.writeDescriptor(request));
+      await FlutterBluePlus._invokePlatform(
+          'writeDescriptor', request, (request) => FlutterBluePlusPlatform.instance.writeDescriptor(request));
 
       // wait for response
       BmDescriptorData response = await futureResponse

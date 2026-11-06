@@ -1,4 +1,5 @@
 ## Unreleased
+* Move standard request/result/event logging to the main FBP package; retain backend initialization, availability checks and error translation.
 * Let already-granted operations proceed during unrelated permission dialogs, matching the original Android backend.
 * Implement the Android backend in Dart through AndroidBluetooth, retaining FBP operation, error and event semantics.
 * Add direct access to the existing GATT client through `FlutterBluePlusAndroid.getGatt` and AndroidBluetooth's `BluetoothDevice.gattClients`.

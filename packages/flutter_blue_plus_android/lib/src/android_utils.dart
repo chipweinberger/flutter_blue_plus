@@ -44,12 +44,6 @@ bool _equalBytes(List<int> a, List<int> b) {
   return true;
 }
 
-Map<String, Object?> _devicesMap(BmDevicesList result) => {
-      'devices': [
-        for (final device in result.devices) {'remote_id': device.remoteId.str, 'platform_name': device.platformName}
-      ],
-    };
-
 String _gattError(int value) => switch (value) {
       0 => 'GATT_SUCCESS',
       1 => 'GATT_INVALID_HANDLE',

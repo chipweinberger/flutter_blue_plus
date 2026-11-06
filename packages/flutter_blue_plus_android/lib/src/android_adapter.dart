@@ -17,21 +17,19 @@ base mixin _AdapterOperations on _AndroidBackend {
 
   @override
   Future<bool> isSupported(BmIsSupportedRequest request) =>
-      _run('isSupported', () async => _capabilities.hasAdapter, allowUnavailable: true);
+      _run(() async => _capabilities.hasAdapter, allowUnavailable: true);
 
   @override
-  Future<bool> setOptions(BmSetOptionsRequest request) =>
-      _run('setOptions', () async => true, arguments: request.toMap());
+  Future<bool> setOptions(BmSetOptionsRequest request) => _run(() async => true);
 
   @override
   Future<bool> setLogLevel(BmSetLogLevelRequest request) {
     _logLevel = request.logLevel;
-    _logColor = request.logColor;
-    return _run('setLogLevel', () async => true, arguments: request.logLevel.index, allowUnavailable: true);
+    return _run(() async => true, allowUnavailable: true);
   }
 
   @override
-  Future<bool> turnOn(BmTurnOnRequest request) => _run('turnOn', () async {
+  Future<bool> turnOn(BmTurnOnRequest request) => _run(() async {
         final adapter = ab.BluetoothAdapter.shared;
         await _requirePermission('turnOn', _adapterPermissions, 'to turn Bluetooth on');
         if (await adapter.isEnabled) return false;
@@ -40,7 +38,7 @@ base mixin _AdapterOperations on _AndroidBackend {
       });
 
   @override
-  Future<bool> turnOff(BmTurnOffRequest request) => _run('turnOff', () async {
+  Future<bool> turnOff(BmTurnOffRequest request) => _run(() async {
         final adapter = ab.BluetoothAdapter.shared;
         await _requirePermission('turnOff', _adapterPermissions, 'to turn Bluetooth off');
         if (!await adapter.isEnabled) return true;
@@ -48,50 +46,41 @@ base mixin _AdapterOperations on _AndroidBackend {
       });
 
   @override
-  Future<BmBluetoothAdapterName> getAdapterName(BmBluetoothAdapterNameRequest request) =>
-      _run('getAdapterName', () async {
+  Future<BmBluetoothAdapterName> getAdapterName(BmBluetoothAdapterNameRequest request) => _run(() async {
         final denied = await _permissions(_adapterPermissions);
         if (denied != null) return BmBluetoothAdapterName(adapterName: '');
         if (!_capabilities.hasAdapter) return BmBluetoothAdapterName(adapterName: 'N/A');
         return BmBluetoothAdapterName(adapterName: await ab.BluetoothAdapter.shared.name ?? '');
-      }, allowUnavailable: true, logResult: (result) => result.adapterName);
+      }, allowUnavailable: true);
 
   @override
   Future<BmBluetoothAdapterState> getAdapterState(BmBluetoothAdapterStateRequest request) =>
-      _run('getAdapterState', () async => BmBluetoothAdapterState(adapterState: await _readAdapterState()),
-          allowUnavailable: true, logResult: (result) => {'adapter_state': result.adapterState.index});
+      _run(() async => BmBluetoothAdapterState(adapterState: await _readAdapterState()), allowUnavailable: true);
 
   @override
-  Future<PhySupport> getPhySupport(PhySupportRequest request) => _run('getPhySupport', () async {
+  Future<PhySupport> getPhySupport(PhySupportRequest request) => _run(() async {
         _requirePhy('getPhySupport');
         final adapter = ab.BluetoothAdapter.shared;
         return PhySupport(le2M: await adapter.isLe2MPhySupported, leCoded: await adapter.isLeCodedPhySupported);
-      }, logResult: (result) => {'le_2M': result.le2M, 'le_coded': result.leCoded});
+      });
 
   @override
-  Future<BmDevicesList> getBondedDevices(BmBondedDevicesRequest request) => _run('getBondedDevices',
-      () async => BmDevicesList(devices: (await ab.BluetoothAdapter.shared.bondedDevices).map(_deviceInfo).toList()),
-      logResult: _devicesMap);
+  Future<BmDevicesList> getBondedDevices(BmBondedDevicesRequest request) => _run(
+      () async => BmDevicesList(devices: (await ab.BluetoothAdapter.shared.bondedDevices).map(_deviceInfo).toList()));
 
   @override
-  Future<BmDevicesList> getSystemDevices(BmSystemDevicesRequest request) => _run('getSystemDevices', () async {
+  Future<BmDevicesList> getSystemDevices(BmSystemDevicesRequest request) => _run(() async {
         await _requirePermission('getSystemDevices', _connectPermissions, 'to get system devices');
         return BmDevicesList(
             devices: (await ab.BluetoothManager.shared.getConnectedDevices()).map(_deviceInfo).toList());
-      }, logResult: _devicesMap);
+      });
 
   @override
   Future<BmBondStateResponse> getBondState(BmBondStateRequest request) {
     final remoteId = request.remoteId;
-    return _run('getBondState', () async {
+    return _run(() async {
       final state = await ab.BluetoothDevice(remoteId.str).getBondState();
       return BmBondStateResponse(remoteId: remoteId, bondState: _bondState(state), prevState: null);
-    },
-        arguments: remoteId.str,
-        logResult: (result) => {
-              'remote_id': result.remoteId.str,
-              'bond_state': result.bondState.index,
-              'prev_state': null,
-            });
+    });
   }
 }

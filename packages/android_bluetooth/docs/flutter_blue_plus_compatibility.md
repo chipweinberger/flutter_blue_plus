@@ -8,7 +8,7 @@ FBP's Android backend now uses AndroidBluetooth. The compatibility policies live
 
 | File | Responsibility |
 | --- | --- |
-| `android_backend.dart` | Existing event streams, initialization, permission orchestration, lifecycle and logging |
+| `android_backend.dart` | Existing event streams, initialization, permission orchestration, lifecycle and backend diagnostics |
 | `android_adapter.dart` | Adapter queries, enable/disable, system/bonded devices, bond state and PHY support |
 | `android_scan.dart` | Scan submission, filters, duplicate policy, callback conversion and raw advertisement parsing |
 | `android_device.dart` | Connection ownership, cancellation, auto-connect and bonding |
@@ -18,7 +18,9 @@ FBP's Android backend now uses AndroidBluetooth. The compatibility policies live
 
 The old Java backend is retained unchanged under [test/reference](../../flutter_blue_plus_android/test/reference/README.md), solely for comparison tests. It is not compiled into applications. FBP's plugin registration is Dart-only. AndroidBluetooth registers the native plugin once and hosts the existing FBP license build hook. The hook runs when the application lockfile contains FBP or its Android backend; standalone AndroidBluetooth builds do not acquire the FBP ping. Manifest ownership, min SDK 21 and Java 11 remain unchanged. No third-party runtime dependencies were introduced.
 
-Feature mixins override the platform interface with typed `Bm*Request` parameters and result types. A shared generic `_run<T>` handles initialization, logging and native error translation. Requests are not routed through method-name switches or unpacked from dynamic maps. GATT lookup uses a typed identity snapshot; maps remain at event serialization and diagnostic boundaries. Each event explicitly supplies its typed controller and decoder; there is no synthetic MethodChannel/MethodCall or string-based event router. Shared subscription cleanup and AndroidBluetooth constants keep lifecycle and protocol values in one place. Focused helpers separate GATT callback handling, request acceptance, write validation, notification selection, scan filter snapshots, advertisement parsing and result filtering. Their ordering retains permission prompts, payload snapshots, duplicate filtering and callback delivery semantics.
+Feature mixins override the platform interface with typed `Bm*Request` parameters and result types. A shared generic `_run<T>` handles initialization, adapter availability and native error translation. Requests are not routed through method-name switches or unpacked from dynamic maps. GATT lookup uses a typed identity snapshot; maps remain at event serialization boundaries. Each event explicitly supplies its typed controller and decoder; there is no synthetic MethodChannel/MethodCall or string-based event router. Shared subscription cleanup and AndroidBluetooth constants keep lifecycle and protocol values in one place. Focused helpers separate GATT callback handling, request acceptance, write validation, notification selection, scan filter snapshots, advertisement parsing and result filtering. Their ordering retains permission prompts, payload snapshots, duplicate filtering and callback delivery semantics.
+
+Standard verbose request/result/event logging belongs to the main `flutter_blue_plus` package. Its typed `_invokePlatform<T, R>` logs the request and result, and central listeners log each callback once regardless of application listener count. Diagnostic serialization runs only at verbose level and formatting failures do not change operation or event delivery. Android and Darwin no longer duplicate these Dart traces; backend-specific diagnostics and native log-level forwarding remain. WinRT is unchanged as requested, so that external package can still print its own verbose console traces.
 
 Adapter-state events are filtered and processed sequentially with `asyncMap`, awaiting scan/connection cleanup before the next state change. Generation checks suppress stale effects and cleanup errors after engine detach; subscription cancellation discards the old engine's queued events. Cleanup failures are forwarded to the listening zone and later events continue. Permission dialogs retain their separate future queue, while already-granted operations bypass it.
 
@@ -42,7 +44,7 @@ All 28 platform methods and 15 event streams remain available. Existing public F
 
 ### Approved diagnostic difference
 
-The user approved not retaining exact internal logs on 2026-11-06. The removed Java backend's internal Logcat messages are no longer emitted. The public `FlutterBluePlusPlatform.logs` API, configured log level/color, and verbose FBP request/result/event logging remain. Exception stacks naturally refer to the new native/Dart implementation. No intentional BLE operation, result, or callback contract change was approved or introduced.
+The user approved not retaining exact internal logs on 2026-11-06 and subsequently requested moving standard logging to the main FBP package. The removed Java backend's internal Logcat messages are no longer emitted. The public `FlutterBluePlusPlatform.logs` API, configured log level/color, and verbose FBP request/result/event logging remain; typed shared formatting replaces raw backend payload formatting. Direct platform-backend calls no longer produce standard FBP traces. Exception stacks naturally refer to the new native/Dart implementation. No intentional BLE operation, result, or callback contract change was approved or introduced.
 
 ## Direct AndroidBluetooth access
 
@@ -64,6 +66,7 @@ This migration does not change the Darwin backend. CoreBluetooth exposes `CBCent
 
 ## Validation
 
+- Shared logging suite: 8 tests covering typed request/result formatting, callback fan-out, colors/levels, readable discovery/scan data, operation/error preservation and Android/Darwin integration without duplicate Dart traces.
 - Backend Dart suite: 49 tests on current Flutter and Flutter 3.10.6/Dart 3.0.6, covering operation/error/event regressions, advertisement parsing boundaries, serialized adapter events and error recovery, concurrency, lifecycle, logging, direct client lookup, write-payload isolation and mutable FBP byte compatibility. AndroidBluetooth separately passes its 62 shared Dart tests on both toolchains, including typed-listener replay/completion, UUID lookup/validation ordering and immutable collection, capability and ranging snapshots.
 - Original-Java fixtures: complete service/characteristic/descriptor/property shapes for unique, duplicate and included graphs, plus advertisement conversion. `LegacyContractFixtureTest` generates/checks the committed fixture using the unchanged Java source; Dart tests independently compare their output with it.
 - Native suites: 151 passed/1 skipped on the current host (including original-backend comparisons), and 70 passed/1 skipped on the minimum host. AndroidBluetooth Dart/native tests and opt-in native comparisons cover permission/PIN/location primitives, foreground-service validation order and launch payloads, strict/compatibility handle lifetime, partial GATT graph rollback, LE transport on API 21–22, enable launch/results, stale routing, detach/reattach, close/stop failure recovery and engine restart.

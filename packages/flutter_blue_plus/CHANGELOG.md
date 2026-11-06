@@ -1,3 +1,6 @@
+## Unreleased
+* Centralize verbose request, result and event logging in the main package. Android and Darwin retain backend diagnostics without duplicating standard Dart traces.
+
 ## 2.3.15
 * **[Fix]** Linux: select the correct characteristic when characteristic or service UUIDs repeat (#1345)
 * **[Fix]** Linux: prevent service discovery from blocking disconnects and other platform calls (#1346)

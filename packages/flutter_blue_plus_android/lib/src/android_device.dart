@@ -44,7 +44,7 @@ base mixin _DeviceOperations on _AndroidBackend {
   Future<bool> connect(BmConnectRequest request) {
     final address = request.remoteId.str;
     final autoConnect = request.autoConnect;
-    return _run('connect', () async {
+    return _run(() async {
       await _requirePermission('connect', _connectPermissions, 'for new connection');
       if (!await _isAdapterOn()) _fail('connect', 'Bluetooth must be turned on');
       final old = _connections[address];
@@ -55,13 +55,13 @@ base mixin _DeviceOperations on _AndroidBackend {
       await _openConnection(connection);
       if (old != null) await _closeConnection(old);
       return true;
-    }, arguments: request.toMap());
+    });
   }
 
   @override
   Future<bool> disconnect(BmDisconnectRequest request) {
     final address = request.remoteId.str;
-    return _run('disconnect', () async {
+    return _run(() async {
       final connection = _connections[address];
       if (connection == null) return false;
       final pending = connection.connecting;
@@ -77,25 +77,25 @@ base mixin _DeviceOperations on _AndroidBackend {
             reasonString: 'connection canceled');
       }
       return pending || connected;
-    }, arguments: address);
+    });
   }
 
   @override
   Future<bool> removeBond(BmRemoveBondRequest request) {
     final address = request.remoteId.str;
-    return _run('removeBond', () async {
+    return _run(() async {
       final device = ab.BluetoothDevice(address);
       if (await device.getBondState() == ab.BluetoothDevice.bondNone) return false;
       if (!await device.removeBond()) _fail('removeBond', 'device.removeBond() returned false');
       return true;
-    }, arguments: address);
+    });
   }
 
   @override
   Future<bool> createBond(BmCreateBondRequest request) {
     final address = request.remoteId.str;
     final pin = request.pin == null ? null : Uint8List.fromList(request.pin!);
-    return _run('createBond', () async {
+    return _run(() async {
       final device = ab.BluetoothDevice(address);
       // Legacy prearms the PIN even when the operation later finds no connection.
       if (pin != null) await device.setPinForNextPairing(pin);
@@ -105,6 +105,6 @@ base mixin _DeviceOperations on _AndroidBackend {
       if (state == ab.BluetoothDevice.bondBonding) return true;
       if (!await device.createBond(pin: pin)) _fail('createBond', 'device.createBond() returned false');
       return true;
-    }, arguments: request.toMap());
+    });
   }
 }

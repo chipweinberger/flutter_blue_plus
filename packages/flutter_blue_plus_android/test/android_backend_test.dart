@@ -550,14 +550,12 @@ void main() {
         throwsA(platformError('setNotifyValue', 'INDICATE not supported by this BLE characteristic')));
   });
 
-  test('verbose logs retain method, event and scan output and color preference', () async {
+  test('backend leaves standard request and event logging to the main package', () async {
     final logs = host.collect(FlutterBluePlusPlatform.logs);
     await host.backend.setLogLevel(BmSetLogLevelRequest(logLevel: LogLevel.verbose, logColor: false));
     await host.backend.startScan(scanSettings());
     await host.advertisement([0]);
-    expect(logs.any((s) => s.contains('<startScan> args:')), true);
-    expect(logs.any((s) => s.contains('[[ OnScanResponse ]] result:')), true);
-    expect(logs.every((s) => !s.contains('\x1b')), true);
+    expect(logs, isEmpty);
   });
 
   test('detach forwards one event, retires direct lookup and permits backend reinitialization', () async {

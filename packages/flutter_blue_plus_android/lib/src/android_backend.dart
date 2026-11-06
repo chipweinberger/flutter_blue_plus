@@ -38,14 +38,6 @@ abstract base class _AndroidBackend extends FlutterBluePlusPlatform {
     _subscriptions.clear();
   }
 
-  String _colorize(String text, int color) => _logColor ? '\x1B[1;${color}m$text\x1B[0m' : text;
-
-  void _log(String label, String kind, Object? value, {int valueColor = 33, bool pretty = false}) {
-    if (_logLevel != LogLevel.verbose) return;
-    final output = pretty ? JsonEncoder.withIndent('  ').convert(value) : value.toString();
-    FlutterBluePlusPlatform.log('[FBP] ${_colorize(label, 30)} $kind: ${_colorize(output, valueColor)}');
-  }
-
   PlatformException _translateError(PlatformException error) {
     const nativeErrors = {
       'android_error',
@@ -67,7 +59,6 @@ abstract base class _AndroidBackend extends FlutterBluePlusPlatform {
       String name, StreamController<T> controller, Map<String, Object?> data, T Function(Map<String, Object?>) decode) {
     // Malformed callbacks were rejected at the former native channel boundary.
     try {
-      _log('[[ $name ]]', 'result', data, pretty: name == 'OnDiscoveredServices');
       controller.add(decode(data));
     } catch (error) {
       if (_logLevel.index >= LogLevel.error.index) {
@@ -193,7 +184,6 @@ abstract base class _AndroidBackend extends FlutterBluePlusPlatform {
   }
 
   var _logLevel = LogLevel.none;
-  var _logColor = true;
 
   final _onAdapterStateChangedController = StreamController<BmBluetoothAdapterState>.broadcast();
   final _onBondStateChangedController = StreamController<BmBondStateResponse>.broadcast();
@@ -256,24 +246,17 @@ abstract base class _AndroidBackend extends FlutterBluePlusPlatform {
   @override
   Stream<BmTurnOnResponse> get onTurnOnResponse => _onTurnOnResponseController.stream;
 
-  Future<T> _run<T>(String method, Future<T> Function() operation,
-      {Object? arguments, bool allowUnavailable = false, Object? Function(T)? logResult}) async {
+  Future<T> _run<T>(Future<T> Function() operation, {bool allowUnavailable = false}) async {
     await _initialize();
-    _log('<$method>', 'args', arguments, valueColor: 35);
     if (!_capabilities.hasAdapter && !allowUnavailable) {
       _fail('bluetoothUnavailable', 'the device does not support bluetooth');
     }
-    final T result;
     try {
-      result = await operation();
+      return await operation();
     } on PlatformException catch (error) {
       final translated = _translateError(error);
       if (identical(translated, error)) rethrow;
       throw translated;
     }
-    if (_logLevel == LogLevel.verbose) {
-      _log('($method)', 'result', logResult == null ? result : logResult(result));
-    }
-    return result;
   }
 }

@@ -52,13 +52,13 @@ base mixin _GattOperations on _AndroidBackend {
 
   Future<bool> _submitGattRequest(
       String method, DeviceIdentifier remoteId, Future<bool> Function(ab.BluetoothGatt) submit,
-      {String? nativeMethod, Object? arguments}) {
+      {String? nativeMethod}) {
     final address = remoteId.str;
-    return _run(method, () async {
+    return _run(() async {
       final gatt = _connected(method, address).gatt!;
       if (!await submit(gatt)) _fail(method, 'gatt.${nativeMethod ?? method}() returned false');
       return true;
-    }, arguments: arguments);
+    });
   }
 
   Future<void> _writeDescriptor(String method, _Connection connection, _Attribute attribute,
@@ -169,49 +169,45 @@ base mixin _GattOperations on _AndroidBackend {
 
   @override
   Future<bool> discoverServices(BmDiscoverServicesRequest request) =>
-      _submitGattRequest('discoverServices', request.remoteId, (gatt) => gatt.discoverServices(),
-          arguments: request.remoteId.str);
+      _submitGattRequest('discoverServices', request.remoteId, (gatt) => gatt.discoverServices());
 
   @override
   Future<bool> clearGattCache(BmClearGattCacheRequest request) {
     final address = request.remoteId.str;
-    return _run('clearGattCache', () async {
+    return _run(() async {
       // Legacy returns true if reflection succeeded, irrespective of its boolean.
       await _connected('clearGattCache', address).gatt!.refresh();
       return true;
-    }, arguments: address);
+    });
   }
 
   @override
   Future<bool> readRssi(BmReadRssiRequest request) =>
-      _submitGattRequest('readRssi', request.remoteId, (gatt) => gatt.readRemoteRssi(),
-          nativeMethod: 'readRemoteRssi', arguments: request.remoteId.str);
+      _submitGattRequest('readRssi', request.remoteId, (gatt) => gatt.readRemoteRssi(), nativeMethod: 'readRemoteRssi');
 
   @override
   Future<bool> requestMtu(BmMtuChangeRequest request) =>
-      _submitGattRequest('requestMtu', request.remoteId, (gatt) => gatt.requestMtu(request.mtu),
-          arguments: request.toMap());
+      _submitGattRequest('requestMtu', request.remoteId, (gatt) => gatt.requestMtu(request.mtu));
 
   @override
   Future<bool> requestConnectionPriority(BmConnectionPriorityRequest request) => _submitGattRequest(
       'requestConnectionPriority',
       request.remoteId,
-      (gatt) => gatt.requestConnectionPriority(request.connectionPriority.index),
-      arguments: request.toMap());
+      (gatt) => gatt.requestConnectionPriority(request.connectionPriority.index));
 
   @override
-  Future<bool> setPreferredPhy(BmPreferredPhy request) => _run('setPreferredPhy', () async {
+  Future<bool> setPreferredPhy(BmPreferredPhy request) => _run(() async {
         _requirePhy('setPreferredPhy');
         final gatt = _connected('setPreferredPhy', request.remoteId.str).gatt!;
         await gatt.setPreferredPhy(request.txPhy, request.rxPhy, phyOptions: request.phyOptions);
         return true;
-      }, arguments: request.toMap());
+      });
 
   @override
   Future<bool> readCharacteristic(BmReadCharacteristicRequest request) {
     final target = _GattTarget(request.remoteId, request.primaryServiceUuid, request.serviceUuid,
         request.characteristicUuid, request.instanceId);
-    return _run('readCharacteristic', () async {
+    return _run(() async {
       final (connection, attribute) = _resolveAttribute('readCharacteristic', target);
       final characteristic = attribute.characteristic;
       if (characteristic.properties & ab.BluetoothGattCharacteristic.propertyRead == 0) {
@@ -221,7 +217,7 @@ base mixin _GattOperations on _AndroidBackend {
         _fail('readCharacteristic', 'gatt.readCharacteristic() returned false');
       }
       return true;
-    }, arguments: target.toMap());
+    });
   }
 
   @override
@@ -229,14 +225,14 @@ base mixin _GattOperations on _AndroidBackend {
     final target = _GattTarget(request.remoteId, request.primaryServiceUuid, request.serviceUuid,
         request.characteristicUuid, request.instanceId);
     final uuid = request.descriptorUuid.str;
-    return _run('readDescriptor', () async {
+    return _run(() async {
       final (connection, attribute) = _resolveAttribute('readDescriptor', target);
       final descriptor = _descriptor(attribute, uuid);
       if (!await connection.gatt!.readDescriptor(descriptor)) {
         _fail('readDescriptor', 'gatt.readDescriptor() returned false');
       }
       return true;
-    }, arguments: {...target.toMap(), 'descriptor_uuid': uuid});
+    });
   }
 
   @override
@@ -245,7 +241,7 @@ base mixin _GattOperations on _AndroidBackend {
         request.characteristicUuid, request.instanceId);
     final uuid = request.descriptorUuid.str;
     final value = Uint8List.fromList(request.value);
-    return _run('writeDescriptor', () async {
+    return _run(() async {
       final (connection, attribute) = _resolveAttribute('writeDescriptor', target);
       final descriptor = _descriptor(attribute, uuid);
       if (value.length > connection.mtu - 3) {
@@ -254,14 +250,14 @@ base mixin _GattOperations on _AndroidBackend {
       }
       await _writeDescriptor('writeDescriptor', connection, attribute, descriptor, value);
       return true;
-    }, arguments: {...target.toMap(), 'descriptor_uuid': uuid, 'value': value});
+    });
   }
 
   @override
   Future<bool> setNotifyValue(BmSetNotifyValueRequest request) {
     final target = _GattTarget(request.remoteId, request.primaryServiceUuid, request.serviceUuid,
         request.characteristicUuid, request.instanceId);
-    return _run('setNotifyValue', () async {
+    return _run(() async {
       final (connection, attribute) = _resolveAttribute('setNotifyValue', target);
       final characteristic = attribute.characteristic;
       final enable = request.enable;
@@ -274,7 +270,7 @@ base mixin _GattOperations on _AndroidBackend {
       final value = _notificationValue(characteristic, enable: enable, forceIndications: request.forceIndications);
       await _writeDescriptor('setNotifyValue', connection, attribute, cccd, value);
       return true;
-    }, arguments: {...target.toMap(), 'force_indications': request.forceIndications, 'enable': request.enable});
+    });
   }
 
   @override
@@ -282,7 +278,7 @@ base mixin _GattOperations on _AndroidBackend {
     final target = _GattTarget(request.remoteId, request.primaryServiceUuid, request.serviceUuid,
         request.characteristicUuid, request.instanceId);
     final value = Uint8List.fromList(request.value);
-    return _run('writeCharacteristic', () async {
+    return _run(() async {
       final (connection, attribute) = _resolveAttribute('writeCharacteristic', target);
       final characteristic = attribute.characteristic;
       final noResponse = request.writeType == BmWriteType.withoutResponse;
@@ -295,11 +291,6 @@ base mixin _GattOperations on _AndroidBackend {
               : ab.BluetoothGattCharacteristic.writeTypeDefault);
       _checkWriteStatus('writeCharacteristic', 'writeCharacteristic', status);
       return true;
-    }, arguments: {
-      ...target.toMap(),
-      'write_type': request.writeType.index,
-      'allow_long_write': request.allowLongWrite ? 1 : 0,
-      'value': value
     });
   }
 }
