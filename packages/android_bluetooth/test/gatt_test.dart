@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:android_bluetooth/android_bluetooth.dart';
+import 'package:flutter/services.dart' show PlatformException;
 import 'package:flutter_test/flutter_test.dart';
 
 import 'support/bluetooth_test_host.dart';
@@ -17,6 +18,59 @@ void main() {
     final a = BluetoothGattCharacteristic('2A37', 2, 1), b = BluetoothGattCharacteristic('2A37', 2, 1);
     expect(a.handle, isNot(b.handle));
   });
+
+  test('local UUID lookup preserves first matches, normalization and empty-list behavior', () {
+    final firstDescriptor = BluetoothGattDescriptor('2902', 1);
+    final firstCharacteristic =
+        BluetoothGattCharacteristic('2a37', 2, 1, descriptors: [firstDescriptor, BluetoothGattDescriptor('2902', 1)]);
+    final service =
+        BluetoothGattService('180d', characteristics: [firstCharacteristic, BluetoothGattCharacteristic('2a37', 2, 1)]);
+    expect(service.getCharacteristic('2A37'), same(firstCharacteristic));
+    expect(service.getCharacteristic('00002A37-0000-1000-8000-00805F9B34FB'), same(firstCharacteristic));
+    expect(service.getCharacteristic('00002a37'), same(firstCharacteristic));
+    expect(firstCharacteristic.getDescriptor('00002902'), same(firstDescriptor));
+    expect(service.getCharacteristic('2a38'), isNull);
+    expect(firstCharacteristic.getDescriptor('2901'), isNull);
+    expect(() => service.getCharacteristic('invalid'), throwsArgumentError);
+    expect(() => firstCharacteristic.getDescriptor('invalid'), throwsArgumentError);
+    expect(BluetoothGattService('180d').getCharacteristic('invalid'), isNull);
+    expect(BluetoothGattCharacteristic('2a37', 2, 1).getDescriptor('invalid'), isNull);
+  });
+
+  for (final isServer in [false, true]) {
+    test('GATT ${isServer ? 'server' : 'client'} lookup retains matching and validation order', () async {
+      final Future<BluetoothGattService?> Function(String) lookup;
+      final Future<void> Function() close;
+      if (isServer) {
+        final server = await BluetoothManager.shared.openGattServer();
+        lookup = server.getService;
+        close = server.close;
+      } else {
+        final client = await BluetoothDevice(address).connectGatt();
+        lookup = client.getService;
+        close = client.close;
+      }
+      var graph = [service('s1', []), service('s2', [])];
+      host.override = (call) async => call.method.endsWith('.getServices') ? graph : null;
+      try {
+        expect((await lookup('180D'))?.handle, 's1');
+        expect((await lookup('0000180D-0000-1000-8000-00805F9B34FB'))?.handle, 's1');
+        expect((await lookup('0000180d'))?.handle, 's1');
+        expect(await lookup('180f'), isNull);
+        await expectLater(lookup('invalid'), throwsArgumentError);
+        graph = [];
+        expect(await lookup('invalid'), isNull);
+        host.override = (call) async {
+          if (call.method.endsWith('.getServices')) throw PlatformException(code: 'permission_denied');
+          return null;
+        };
+        await expectLater(lookup('invalid'),
+            throwsA(isA<PlatformException>().having((error) => error.code, 'code', 'permission_denied')));
+      } finally {
+        await close();
+      }
+    });
+  }
 
   test('request acceptance resolves without manufacturing a completion event', () async {
     final gatt = await BluetoothDevice(address).connectGatt(autoConnect: true, phy: BluetoothDevice.phyLe2mMask);

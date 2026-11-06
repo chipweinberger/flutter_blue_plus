@@ -8,6 +8,35 @@ void main() {
   setUp(host.setUp);
   tearDown(tick);
 
+  test('typed ranging listeners share buffered callbacks and finish after close', () async {
+    final id = 'ranging-replay-${host.sequence++}';
+    host.override = (call) async {
+      if (call.method == 'ranging.create') return id;
+      if (call.method == 'ranging.start') {
+        await emit({'owner': id, 'type': 'onOpened'});
+        await emit({
+          'owner': id,
+          'type': 'onStarted',
+          'peerUuid': '12345678-1234-5678-1234-567812345678',
+          'technology': RangingManager.bleRssi,
+        });
+      }
+      if (call.method == 'ranging.close') return true;
+      return null;
+    };
+    final session = await RangingManager.shared.createRangingSession();
+    await session.start(rangingPreference());
+    final opened = session.onOpened.toList();
+    final started = session.onStarted.toList();
+    final all = session.events.toList();
+    await tick();
+    await session.close();
+    await emit({'owner': id, 'type': 'onClosed', 'reason': 3});
+    expect(await opened, hasLength(1));
+    expect((await started).single.technology, RangingManager.bleRssi);
+    expect((await all).map((event) => event.type), ['onOpened', 'onStarted', 'onClosed']);
+  });
+
   test('BLE ranging uses Android role/technology constants and centimeter thresholds', () async {
     host.override = (call) async => call.method == 'ranging.create' ? 'test-ranging' : null;
     final session = await RangingManager.shared.createRangingSession();

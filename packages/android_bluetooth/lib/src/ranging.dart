@@ -83,7 +83,7 @@ final class RangingMeasurement {
 }
 
 final class RangingData {
-  RangingData._(_Map data) : data = _map(data);
+  RangingData._(this.data);
   final Map<String, Object?> data;
   int get rangingTechnology => data['rangingTechnology']! as int;
   int get timestampMillis => data['timestampMillis']! as int;
@@ -94,7 +94,7 @@ final class RangingData {
 }
 
 final class RangingCapabilities {
-  RangingCapabilities._(_Map data) : data = _map(data);
+  RangingCapabilities._(this.data);
   final Map<String, Object?> data;
   Map<int, int> get technologyAvailability =>
       Map.unmodifiable(_map(data['technologyAvailability']).map((k, v) => MapEntry(int.parse(k), v! as int)));
@@ -124,19 +124,14 @@ final class RangingSession {
   RangingSession._(String id) : _session = _Session(id);
   final _Session _session;
   String get id => _session.id;
-  Stream<RangingSessionCallback> get events => _session.events().map(RangingSessionCallback._);
-  Stream<RangingResultsResult> get onResults =>
-      events.where((event) => event.type == 'onResults').cast<RangingResultsResult>();
-  Stream<RangingStoppedResult> get onStopped =>
-      events.where((event) => event.type == 'onStopped').cast<RangingStoppedResult>();
-  Stream<RangingStartedResult> get onStarted =>
-      events.where((event) => event.type == 'onStarted').cast<RangingStartedResult>();
-  Stream<RangingClosedResult> get onClosed =>
-      events.where((event) => event.type == 'onClosed').cast<RangingClosedResult>();
-  Stream<RangingOpenFailedResult> get onOpenFailed =>
-      events.where((event) => event.type == 'onOpenFailed').cast<RangingOpenFailedResult>();
-  Stream<RangingOpenedResult> get onOpened =>
-      events.where((event) => event.type == 'onOpened').cast<RangingOpenedResult>();
+  Stream<RangingSessionCallback> _events([String? type]) => _session.events(type).map(RangingSessionCallback._);
+  Stream<RangingSessionCallback> get events => _events();
+  Stream<RangingResultsResult> get onResults => _events('onResults').cast<RangingResultsResult>();
+  Stream<RangingStoppedResult> get onStopped => _events('onStopped').cast<RangingStoppedResult>();
+  Stream<RangingStartedResult> get onStarted => _events('onStarted').cast<RangingStartedResult>();
+  Stream<RangingClosedResult> get onClosed => _events('onClosed').cast<RangingClosedResult>();
+  Stream<RangingOpenFailedResult> get onOpenFailed => _events('onOpenFailed').cast<RangingOpenFailedResult>();
+  Stream<RangingOpenedResult> get onOpened => _events('onOpened').cast<RangingOpenedResult>();
 
   /// API 36+. Requires granted RANGING permission. Completion/results arrive through the session callback streams.
   Future<void> start(RangingPreference preference) =>

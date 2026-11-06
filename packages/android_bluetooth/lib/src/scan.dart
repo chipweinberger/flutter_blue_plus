@@ -1,5 +1,10 @@
 part of '../android_bluetooth.dart';
 
+_Map _scanArguments(List<ScanFilter> filters, ScanSettings settings) => {
+      'filters': filters.map((filter) => filter._toMap()).toList(),
+      'settings': settings._toMap(),
+    };
+
 final class ScanFilter {
   const ScanFilter(
       {this.deviceName,
@@ -79,7 +84,7 @@ final class ScanSettings {
 }
 
 final class ScanRecord {
-  ScanRecord._(_Map data) : data = _map(data);
+  ScanRecord._(this.data);
   final Map<String, Object?> data;
   Uint8List get bytes => _bytes(data['bytes']);
   String? get deviceName => data['deviceName'] as String?;
@@ -108,7 +113,7 @@ final class ScanRecord {
 }
 
 final class ScanResult {
-  ScanResult._(_Map data) : data = _map(data);
+  ScanResult._(this.data);
   final Map<String, Object?> data;
   BluetoothDevice get device => BluetoothDevice._(_map(data['device']));
   int get rssi => data['rssi']! as int;
@@ -138,7 +143,7 @@ class ScanCallback extends BluetoothEvent {
   static const scanFailedOutOfHardwareResources = 5, scanFailedScanningTooFrequently = 6;
   int? get errorCode => data['errorCode'] as int?;
   int? get callbackType => data['callbackType'] as int?;
-  List<ScanResult> get results => List.unmodifiable(_maps(data['results']).map(ScanResult._));
+  List<ScanResult> get results => _decodeList(data['results'], ScanResult._);
 }
 
 /// An independent native ScanCallback registration. Android's scan quotas still apply.
@@ -164,8 +169,7 @@ final class BluetoothLeScanner {
   /// API 21+. Requires BLUETOOTH_SCAN on API 31+; API 23–30 scanning requires granted location permission and applicable system settings.
   Future<BluetoothScan> startScanSession(
           {List<ScanFilter> filters = const [], ScanSettings settings = const ScanSettings()}) async =>
-      BluetoothScan._(await _Host.call<String>(
-          'scan.startSession', {'filters': filters.map((f) => f._toMap()).toList(), 'settings': settings._toMap()}));
+      BluetoothScan._(await _Host.call<String>('scan.startSession', _scanArguments(filters, settings)));
   Stream<ScanCallback> get events => _Host.events('scanner').map(ScanCallback._);
   Stream<ScanResultEvent> get onScanResult =>
       _Host.events('scanner', 'onScanResult').map(ScanCallback._).cast<ScanResultEvent>();
@@ -176,8 +180,7 @@ final class BluetoothLeScanner {
 
   /// API 21+. Requires BLUETOOTH_SCAN on API 31+; API 23–30 scanning requires granted location permission and applicable system settings.
   Future<void> startScan({List<ScanFilter> filters = const [], ScanSettings settings = const ScanSettings()}) =>
-      _Host.call<void>(
-          'scan.start', {'filters': filters.map((f) => f._toMap()).toList(), 'settings': settings._toMap()});
+      _Host.call<void>('scan.start', _scanArguments(filters, settings));
 
   /// API 21+. Requires BLUETOOTH_SCAN on API 31+; API 23–30 scanning requires granted location permission and applicable system settings.
   Future<void> stopScan() => _Host.call<void>('scan.stop');
@@ -190,11 +193,7 @@ final class BluetoothLeScanner {
   /// Keep the integer scan ID for stopping after an engine restart.
   Future<int> startBackgroundScan(
           {required int id, required List<ScanFilter> filters, ScanSettings settings = const ScanSettings()}) =>
-      _Host.call<int>('scan.backgroundStart', {
-        'id': id,
-        'filters': filters.map((f) => f._toMap()).toList(),
-        'settings': settings._toMap(),
-      });
+      _Host.call<int>('scan.backgroundStart', {'id': id, ..._scanArguments(filters, settings)});
 
   /// API 26+. Stops the PendingIntent scan identified by id; already buffered results remain available.
   Future<void> stopBackgroundScan(int id) => _Host.call<void>('scan.backgroundStop', {'id': id});

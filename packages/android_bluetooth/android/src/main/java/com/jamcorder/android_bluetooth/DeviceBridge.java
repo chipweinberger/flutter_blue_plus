@@ -61,6 +61,9 @@ final class DeviceBridge {
             throws Exception {
         Object value;
         switch (method) {
+            case "bondState":
+                value = device(a).getBondState();
+                break;
             case "get":
                 {
                     Map<String, Object> snapshot = deviceMap(device(a));

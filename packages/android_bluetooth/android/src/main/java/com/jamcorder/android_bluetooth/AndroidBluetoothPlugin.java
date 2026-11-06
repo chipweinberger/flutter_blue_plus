@@ -63,6 +63,7 @@ public final class AndroidBluetoothPlugin
     CompanionBridge companions;
     RangingApi ranging;
     MethodChannel.Result enableResult, permissionResult;
+    final Map<Integer, MethodChannel.Result> enableEvents = new HashMap<>();
     int enableRequestCode = -1, permissionRequestCode = -1;
     String[] requestedPermissions;
     volatile boolean detached;
@@ -185,7 +186,10 @@ public final class AndroidBluetoothPlugin
         result.error(
                 code,
                 failure.toString(),
-                map("exception", failure.getClass().getName(), "apiLevel", Build.VERSION.SDK_INT));
+                map(
+                        "exception", failure.getClass().getName(),
+                        "apiLevel", Build.VERSION.SDK_INT,
+                        "stackTrace", android.util.Log.getStackTraceString(failure)));
     }
 
     interface Reply {
@@ -336,6 +340,12 @@ public final class AndroidBluetoothPlugin
 
     @Override
     public boolean onActivityResult(int code, int resultCode, Intent data) {
+        MethodChannel.Result event = enableEvents.remove(code);
+        if (event != null) {
+            releaseRequestCode(code);
+            event.success(resultCode == Activity.RESULT_OK);
+            return true;
+        }
         if (code == enableRequestCode && enableResult != null) {
             releaseRequestCode(code);
             enableRequestCode = -1;
@@ -377,6 +387,11 @@ public final class AndroidBluetoothPlugin
         activityBinding = null;
         activity = null;
         if (!reconfiguring) {
+            for (Map.Entry<Integer, MethodChannel.Result> entry : enableEvents.entrySet()) {
+                retireRequestCode(entry.getKey());
+                entry.getValue().error("activity_detached", "Activity detached", null);
+            }
+            enableEvents.clear();
             retireRequestCode(enableRequestCode);
             retireRequestCode(permissionRequestCode);
             enableRequestCode = permissionRequestCode = -1;
@@ -465,6 +480,7 @@ public final class AndroidBluetoothPlugin
         ranging = null;
         if (companions != null) companions.reset();
         permissionResult = enableResult = null;
+        enableEvents.clear();
         requestedPermissions = null;
         pendingEvents.clear();
         knownDevices.clear();

@@ -22,16 +22,18 @@ Native overloads that differ only in Context/Handler/Executor, Java builders, Pa
 | getRemoteLeDevice | getRemoteLeDevice(address, addressType) | API 33 |
 | isMultipleAdvertisementSupported | capabilities.isMultipleAdvertisementSupported | API 21 |
 | isOffloadedFilteringSupported / isOffloadedScanBatchingSupported | corresponding capabilities | API 21 |
-| isLe2MPhySupported / isLeCodedPhySupported | corresponding capabilities | API 26 |
+| isLe2MPhySupported / isLeCodedPhySupported | same-named adapter getters; corresponding capabilities | API 26; direct getters propagate permission errors, capability fields are optional |
 | isLeExtendedAdvertisingSupported / isLePeriodicAdvertisingSupported | corresponding capabilities | API 26 |
 | getLeMaximumAdvertisingDataLength | capabilities.leMaximumAdvertisingDataLength | API 26; 31 fallback earlier |
-| ACTION_REQUEST_ENABLE | requestEnable | Explicit Activity dialog, returns Activity result |
+| ACTION_REQUEST_ENABLE | requestEnable(waitForResult:) | Default awaits Activity result; false reports launch immediately and emits each result on onEnableResponse, including concurrent launches |
 | enable / disable | enable / disable | Deprecated; Android 13+ restricts ordinary apps |
 | Settings.ACTION_BLUETOOTH_SETTINGS | openSettings | Opens platform settings |
 | isDiscovering / cancelDiscovery | isDiscovering / cancelDiscovery | Stop competing Classic inquiry when needed for BLE |
 | listenUsingL2capChannel / listenUsingInsecureL2capChannel | same names | API 29, LE only |
 | listenUsingSocketSettings | same name | API 36, socket type forced to TYPE_LE |
 | BluetoothDevice.getAddress / getName / getType / getBondState / getAlias / getUuids | address / name / type / bondState / alias / uuids | Snapshot; refresh gets current values; alias API 30 |
+| getBondState | getBondState() | Fresh strict query; propagates permission errors rather than omitting optional metadata |
+| AndroidBluetooth client lookup | BluetoothDevice.gattClients | Existing client objects for this address in the current Dart isolate; no new connection or cross-app enumeration |
 | getAddressType | addressType | API 35; null earlier |
 | getIdentityAddressWithType | identityAddressWithType | API 36, privileged permission |
 | createBond | createBond(pin:) | Optional atomic one-shot PIN; request acceptance, observe bond changes |

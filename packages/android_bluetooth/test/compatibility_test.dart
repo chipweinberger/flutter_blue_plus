@@ -25,7 +25,9 @@ void main() {
     };
     final device = BluetoothDevice(address);
     final pin = Uint8List.fromList([49, 50, 51, 52]);
-    expect((await AndroidBluetooth.capabilities).hasAdapter, isTrue);
+    final capabilities = await AndroidBluetooth.capabilities;
+    expect(capabilities.hasAdapter, isTrue);
+    expect(() => capabilities.values.clear(), throwsUnsupportedError);
     expect(await AndroidBluetooth.isLocationEnabled, isFalse);
     await device.setPinForNextPairing(pin);
     expect(host.calls.last.arguments, {'address': address, 'pin': pin});

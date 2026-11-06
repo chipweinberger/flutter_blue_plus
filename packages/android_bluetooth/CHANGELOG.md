@@ -1,3 +1,10 @@
+## Unreleased
+
+* Expose existing per-device GATT clients and all-device action events for integration with BLE wrappers.
+* Add strict bond-state and PHY queries that preserve native permission failures.
+* Support concurrent split enable-dialog requests and include native stack traces in exception details.
+* Host the existing FBP license build hook when FlutterBluePlus is present; standalone builds retain their previous behavior.
+
 ## 0.1.0
 
 * Add native Android BLE scanning, advertising, GATT client/server, and LE L2CAP APIs.

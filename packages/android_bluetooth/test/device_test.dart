@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:android_bluetooth/android_bluetooth.dart';
 import 'package:flutter/services.dart' show PlatformException;
 import 'package:flutter_test/flutter_test.dart';
@@ -15,15 +17,58 @@ void main() {
     expect(BluetoothDevice(address), isNot(BluetoothDevice('00:00:00:00:00:01')));
   });
 
-  test('explicit random LE address type reaches native connection requests', () async {
-    host.override = (call) async => call.method == 'adapter.remoteLeDevice'
-        ? {'address': address, 'addressType': BluetoothDevice.addressTypeRandom}
-        : call.method == 'gatt.open'
-            ? 'gatt-typed-address'
-            : null;
+  test('device client lookup shares objects, distinguishes registrations and retires closed clients', () async {
+    final device = BluetoothDevice(address);
+    final first = await device.connectGatt();
+    final second = await device.connectGatt(autoConnect: true);
+    final other = await BluetoothDevice('00:00:00:00:00:01').connectGatt();
+    expect(BluetoothDevice(address.toLowerCase()).gattClients, [first, second]);
+    expect(() => device.gattClients.clear(), throwsUnsupportedError);
+    await first.disconnect();
+    expect(device.gattClients, [first, second]);
+    await first.close();
+    expect(device.gattClients, [second]);
+    await second.close();
+    await other.close();
+    expect(device.gattClients, isEmpty);
+  });
+
+  test('engine detach clears direct client lookup', () async {
+    await BluetoothDevice(address).connectGatt();
+    expect(BluetoothDevice(address).gattClients, isNotEmpty);
+    await emit({'owner': 'engine', 'type': 'onDetachedFromEngine'});
+    expect(BluetoothDevice(address).gattClients, isEmpty);
+  });
+
+  test('explicit random LE address type reaches device and connection requests', () async {
+    host.override = (call) async => switch (call.method) {
+          'adapter.remoteLeDevice' || 'device.get' || 'device.identityAddressWithType' => {
+              'address': address,
+              'addressType': BluetoothDevice.addressTypeRandom
+            },
+          'gatt.open' => 'gatt-typed-address',
+          'device.bondState' => BluetoothDevice.bondNone,
+          'device.setAlias' => BluetoothStatusCodes.success,
+          'device.createBond' || 'device.removeBond' || 'device.setPin' || 'device.setPairingConfirmation' => true,
+          _ => null,
+        };
     final device = await BluetoothAdapter.shared.getRemoteLeDevice(address, BluetoothDevice.addressTypeRandom);
     final gatt = await device.connectGatt();
     expect(host.calls.last.arguments, containsPair('addressType', BluetoothDevice.addressTypeRandom));
+    final refreshed = await device.refresh();
+    await refreshed.getBondState();
+    await refreshed.createBond();
+    await refreshed.setPinForNextPairing(Uint8List.fromList([49, 50]));
+    await refreshed.setAlias('Sensor');
+    await refreshed.setPairingConfirmation(true);
+    await refreshed.setPin(Uint8List.fromList([49, 50]));
+    await refreshed.removeBond();
+    final identity = await refreshed.identityAddressWithType;
+    expect(identity.addressType, BluetoothDevice.addressTypeRandom);
+    for (final call in host.calls.where((call) => call.method.startsWith('device.'))) {
+      expect(call.arguments, containsPair('address', address));
+      expect(call.arguments, containsPair('addressType', BluetoothDevice.addressTypeRandom));
+    }
     await gatt.close();
   });
 

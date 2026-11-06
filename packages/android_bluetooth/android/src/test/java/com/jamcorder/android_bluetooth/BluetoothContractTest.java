@@ -107,6 +107,46 @@ public class BluetoothContractTest {
     }
 
     @Test
+    public void rejectedDescriptorRollsBackPartialGraphWithoutStealingAnExistingAttribute() {
+        GattAttributes a = new GattAttributes();
+        BluetoothGattDescriptor existing =
+                service().getCharacteristics().get(0).getDescriptors().get(0);
+        a.bind("taken", existing);
+        Map<String, Object> graph =
+                map(
+                        "uuid", UUID_SERVICE.toString(),
+                        "handle", "new",
+                        "characteristics",
+                                Collections.singletonList(
+                                        map(
+                                                "uuid", UUID_CHARACTERISTIC.toString(),
+                                                "handle", "new-char",
+                                                "descriptors",
+                                                        Arrays.asList(
+                                                                map(
+                                                                        "uuid",
+                                                                        existing.getUuid()
+                                                                                .toString(),
+                                                                        "handle",
+                                                                        "new-desc"),
+                                                                map(
+                                                                        "uuid",
+                                                                        existing.getUuid()
+                                                                                .toString(),
+                                                                        "handle",
+                                                                        "taken")))));
+        assertThrows(IllegalArgumentException.class, () -> a.createService(graph));
+        assertSame(existing, a.get("taken", BluetoothGattDescriptor.class));
+        assertThrows(IllegalStateException.class, () -> a.get("new", BluetoothGattService.class));
+        assertThrows(
+                IllegalStateException.class,
+                () -> a.get("new-char", BluetoothGattCharacteristic.class));
+        assertThrows(
+                IllegalStateException.class,
+                () -> a.get("new-desc", BluetoothGattDescriptor.class));
+    }
+
+    @Test
     public void notificationBytesAreCopiedBeforeMainThreadDispatch() {
         AndroidBluetoothPlugin p = new AndroidBluetoothPlugin();
         p.context = RuntimeEnvironment.getApplication();

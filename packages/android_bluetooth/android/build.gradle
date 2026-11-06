@@ -17,6 +17,7 @@ group 'com.jamcorder.android_bluetooth'
 version '0.1.0'
 
 apply plugin: 'com.android.library'
+apply from: new File(project.projectDir, 'license_ping.gradle')
 
 // Follow the host Flutter SDK. SDK 36-only callbacks are optional source, so
 // FlutterBluePlus hosts using SDK 33 do not acquire a new build requirement.

@@ -5,5 +5,10 @@ gradle.projectsEvaluated {
     def packageDir = target.projectDir.parentFile
     target.android.sourceSets.test.java.srcDir(new File(packageDir, 'tool/flutter_blue_plus_audit/java'))
     target.android.sourceSets.test.java.srcDir(new File(packageDir.parentFile,
-        'flutter_blue_plus_android/android/src/main/java'))
+        'flutter_blue_plus_android/test/reference/java'))
+    target.tasks.withType(Test).configureEach {
+        systemProperty 'fbp.contractFile', new File(packageDir.parentFile,
+            'flutter_blue_plus_android/test/reference/contract.json').absolutePath
+        systemProperty 'fbp.updateContract', gradle.rootProject.findProperty('updateFbpContract') == 'true'
+    }
 }

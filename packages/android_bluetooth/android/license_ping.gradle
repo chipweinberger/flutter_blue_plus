@@ -53,15 +53,6 @@ def getPackageVersionFromLockfile(File lockfile, String packageName) {
     return null
 }
 
-def getPackageVersionFromPubspec(File pubspecFile) {
-    if (!pubspecFile.exists()) {
-        return null
-    }
-
-    def matcher = pubspecFile.getText(StandardCharsets.UTF_8.name()) =~ /(?m)^version:\s*(.+)$/
-    return matcher.find() ? normalizeVersionValue(matcher.group(1)) : null
-}
-
 def getAppLabelValue(File manifestFile) {
     if (!manifestFile.exists()) {
         return null
@@ -154,10 +145,12 @@ def registerLicensePing(Project appProject) {
 
     def flutterProjectDir = appProject.rootProject.projectDir.parentFile
     def flutterLockfile = new File(flutterProjectDir, "pubspec.lock")
-    def fallbackPubspec = new File(project.projectDir.parentFile, "pubspec.yaml")
     def fbpVersion = getPackageVersionFromLockfile(flutterLockfile, "flutter_blue_plus") ?:
-        getPackageVersionFromPubspec(fallbackPubspec) ?:
-        "unknown"
+        getPackageVersionFromLockfile(flutterLockfile, "flutter_blue_plus_android")
+    // This hook belongs to FBP; standalone AndroidBluetooth builds do not send its ping.
+    if (fbpVersion == null) {
+        return
+    }
 
     androidExtension.applicationVariants.all { variant ->
         def taskName = "flutterBluePlusLicensePing${variant.name.capitalize()}"

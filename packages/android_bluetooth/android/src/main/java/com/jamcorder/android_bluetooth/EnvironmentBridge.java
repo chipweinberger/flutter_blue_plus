@@ -3,7 +3,6 @@ package com.jamcorder.android_bluetooth;
 import static com.jamcorder.android_bluetooth.BluetoothCodec.*;
 
 import android.Manifest;
-import android.bluetooth.*;
 import android.content.*;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
@@ -47,7 +46,62 @@ final class EnvironmentBridge {
         return result;
     }
 
+    private void requestPermissions(Map<String, Object> a, MethodChannel.Result result) {
+        if (Build.VERSION.SDK_INT < 23) {
+            result.success(permissionStates(list(a.get("permissions"))));
+            return;
+        }
+        p.needActivity();
+        if (p.permissionResult != null)
+            throw new IllegalStateException("Permission request already in progress");
+        p.requestedPermissions = list(a.get("permissions")).toArray(new String[0]);
+        p.permissionRequestCode = p.newRequestCode();
+        p.permissionResult = result;
+        p.activity.requestPermissions(p.requestedPermissions, p.permissionRequestCode);
+    }
+
+    private void requireConnectionServiceAccess() {
+        p.needActivity();
+        if (Build.VERSION.SDK_INT >= 28
+                && p.context.checkSelfPermission("android.permission.FOREGROUND_SERVICE")
+                        != PackageManager.PERMISSION_GRANTED)
+            throw new SecurityException(
+                    "Declare android.permission.FOREGROUND_SERVICE in the"
+                            + " application manifest");
+        if (Build.VERSION.SDK_INT >= 34
+                && p.context.checkSelfPermission(
+                                "android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE")
+                        != PackageManager.PERMISSION_GRANTED)
+            throw new SecurityException(
+                    "Declare android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE"
+                            + " in the application manifest");
+        if (Build.VERSION.SDK_INT >= 34
+                && p.context.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT)
+                        != PackageManager.PERMISSION_GRANTED
+                && p.context.checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN)
+                        != PackageManager.PERMISSION_GRANTED
+                && p.context.checkSelfPermission(Manifest.permission.BLUETOOTH_ADVERTISE)
+                        != PackageManager.PERMISSION_GRANTED)
+            throw new SecurityException(
+                    "Grant a Bluetooth runtime permission before starting the"
+                            + " connectedDevice service");
+    }
+
     @android.annotation.SuppressLint("MissingPermission")
+    private void startConnectionService(Map<String, Object> a) {
+        requireConnectionServiceAccess();
+        int notificationId = integer(a, "notificationId", 51722);
+        if (notificationId <= 0)
+            throw new IllegalArgumentException("notificationId must be positive");
+        Intent service =
+                new Intent(p.context, BluetoothConnectionService.class)
+                        .putExtra("title", string(a, "title"))
+                        .putExtra("text", string(a, "text"))
+                        .putExtra("notificationId", notificationId);
+        if (Build.VERSION.SDK_INT >= 26) p.context.startForegroundService(service);
+        else p.context.startService(service);
+    }
+
     void handle(String method, Map<String, Object> a, MethodChannel.Result result)
             throws Exception {
         Object value;
@@ -59,63 +113,12 @@ final class EnvironmentBridge {
                 value = permissionStates(list(a.get("permissions")));
                 break;
             case "permissions.request":
-                {
-                    if (Build.VERSION.SDK_INT >= 23) {
-                        p.needActivity();
-                        if (p.permissionResult != null)
-                            throw new IllegalStateException(
-                                    "Permission request already in progress");
-                        p.requestedPermissions = list(a.get("permissions")).toArray(new String[0]);
-                        p.permissionRequestCode = p.newRequestCode();
-                        p.permissionResult = result;
-                        p.activity.requestPermissions(
-                                p.requestedPermissions, p.permissionRequestCode);
-                        return;
-                    }
-                    value = permissionStates(list(a.get("permissions")));
-                    break;
-                }
+                requestPermissions(a, result);
+                return;
             case "background.startService":
-                {
-                    p.needActivity();
-                    if (Build.VERSION.SDK_INT >= 28
-                            && p.context.checkSelfPermission(
-                                            "android.permission.FOREGROUND_SERVICE")
-                                    != PackageManager.PERMISSION_GRANTED)
-                        throw new SecurityException(
-                                "Declare android.permission.FOREGROUND_SERVICE in the"
-                                        + " application manifest");
-                    if (Build.VERSION.SDK_INT >= 34
-                            && p.context.checkSelfPermission(
-                                            "android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE")
-                                    != PackageManager.PERMISSION_GRANTED)
-                        throw new SecurityException(
-                                "Declare android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE"
-                                        + " in the application manifest");
-                    if (Build.VERSION.SDK_INT >= 34
-                            && p.context.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT)
-                                    != PackageManager.PERMISSION_GRANTED
-                            && p.context.checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN)
-                                    != PackageManager.PERMISSION_GRANTED
-                            && p.context.checkSelfPermission(
-                                            Manifest.permission.BLUETOOTH_ADVERTISE)
-                                    != PackageManager.PERMISSION_GRANTED)
-                        throw new SecurityException(
-                                "Grant a Bluetooth runtime permission before starting the"
-                                        + " connectedDevice service");
-                    int notificationId = integer(a, "notificationId", 51722);
-                    if (notificationId <= 0)
-                        throw new IllegalArgumentException("notificationId must be positive");
-                    Intent service =
-                            new Intent(p.context, BluetoothConnectionService.class)
-                                    .putExtra("title", string(a, "title"))
-                                    .putExtra("text", string(a, "text"))
-                                    .putExtra("notificationId", notificationId);
-                    if (Build.VERSION.SDK_INT >= 26) p.context.startForegroundService(service);
-                    else p.context.startService(service);
-                    value = null;
-                    break;
-                }
+                startConnectionService(a);
+                value = null;
+                break;
             case "background.stopService":
                 p.context.stopService(new Intent(p.context, BluetoothConnectionService.class));
                 value = null;

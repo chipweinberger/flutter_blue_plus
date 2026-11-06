@@ -1,3 +1,10 @@
+## Unreleased
+* Let already-granted operations proceed during unrelated permission dialogs, matching the original Android backend.
+* Implement the Android backend in Dart through AndroidBluetooth, retaining FBP operation, error and event semantics.
+* Add direct access to the existing GATT client through `FlutterBluePlusAndroid.getGatt` and AndroidBluetooth's `BluetoothDevice.gattClients`.
+* Move the conditional FBP license build hook to AndroidBluetooth and remove the native FBP plugin.
+* Preserve public logging controls; internal Java-only Logcat messages are no longer emitted.
+
 ## 9.0.5
 * **[LICENSE]** add global tier
 

@@ -23,6 +23,49 @@ import java.util.*;
         sdk = {33, 36},
         manifest = Config.NONE)
 public class CompatibilityTest {
+    @Test
+    public void bondStateQueryDoesNotTreatDeniedMetadataAsAnUnbondedDevice() throws Exception {
+        try (PluginTestSupport.Attached a = new PluginTestSupport.Attached()) {
+            BluetoothDevice device = device();
+            a.p.knownDevices.put(device.getAddress(), device);
+            when(device.getName()).thenThrow(new SecurityException("name denied"));
+            when(device.getBondState()).thenReturn(BluetoothDevice.BOND_BONDING);
+            assertNull(deviceMap(device).get("bondState"));
+            PluginTestSupport.Result result = new PluginTestSupport.Result();
+            a.p.deviceBridge.handle("bondState", map("address", device.getAddress()), result);
+            assertEquals(BluetoothDevice.BOND_BONDING, result.value);
+            when(device.getBondState()).thenThrow(new SecurityException("bond state denied"));
+            assertThrows(
+                    SecurityException.class,
+                    () ->
+                            a.p.deviceBridge.handle(
+                                    "bondState",
+                                    map("address", device.getAddress()),
+                                    new PluginTestSupport.Result()));
+        }
+    }
+
+    @Test
+    public void phyQueriesPropagatePermissionFailuresRatherThanReturningFalse() throws Exception {
+        try (PluginTestSupport.Attached a = new PluginTestSupport.Attached()) {
+            a.p.manager = mock(BluetoothManager.class);
+            BluetoothAdapter adapter = mock(BluetoothAdapter.class);
+            when(a.p.manager.getAdapter()).thenReturn(adapter);
+            when(adapter.isLe2MPhySupported()).thenReturn(true);
+            PluginTestSupport.Result result = new PluginTestSupport.Result();
+            a.p.adapterBridge.handle("adapter.isLe2MPhySupported", map(), result);
+            assertEquals(true, result.value);
+            when(adapter.isLe2MPhySupported()).thenThrow(new SecurityException("PHY denied"));
+            assertThrows(
+                    SecurityException.class,
+                    () ->
+                            a.p.adapterBridge.handle(
+                                    "adapter.isLe2MPhySupported",
+                                    map(),
+                                    new PluginTestSupport.Result()));
+        }
+    }
+
     static BluetoothDevice device() {
         BluetoothDevice device = mock(BluetoothDevice.class);
         when(device.getAddress()).thenReturn(PluginTestSupport.ADDRESS);
@@ -159,7 +202,9 @@ public class CompatibilityTest {
             assertTrue(sink.values.isEmpty());
             assertTrue(
                     p.onActivityResult(
-                            p.enableRequestCode, android.app.Activity.RESULT_CANCELED, null));
+                            p.enableEvents.keySet().iterator().next(),
+                            android.app.Activity.RESULT_CANCELED,
+                            null));
             Shadows.shadowOf(Looper.getMainLooper()).idle();
             assertEquals(true, result.value);
             assertEquals("onEnableResponse", object(sink.values.get(0)).get("type"));
@@ -192,6 +237,33 @@ public class CompatibilityTest {
             assertEquals(true, retry.value);
         } finally {
             p.io.shutdownNow();
+        }
+    }
+
+    @Test
+    public void splitEnableRequestsAllowConcurrentLaunchesAndRouteEachResult() throws Exception {
+        try (PluginTestSupport.Attached a = new PluginTestSupport.Attached()) {
+            a.p.activity = mock(android.app.Activity.class);
+            PluginTestSupport.Sink sink = new PluginTestSupport.Sink();
+            a.p.sink = sink;
+            for (int i = 0; i < 2; i++) {
+                PluginTestSupport.Result result = new PluginTestSupport.Result();
+                a.p.onMethodCall(
+                        new MethodCall("adapter.requestEnable", map("waitForResult", false)),
+                        result);
+                result.await();
+                assertEquals(true, result.value);
+            }
+            assertEquals(2, a.p.enableEvents.size());
+            List<Integer> codes = new ArrayList<>(a.p.enableEvents.keySet());
+            assertTrue(a.p.onActivityResult(codes.get(1), android.app.Activity.RESULT_OK, null));
+            assertTrue(
+                    a.p.onActivityResult(codes.get(0), android.app.Activity.RESULT_CANCELED, null));
+            Shadows.shadowOf(Looper.getMainLooper()).idle();
+            assertEquals(2, sink.values.size());
+            assertEquals(true, object(sink.values.get(0)).get("userAccepted"));
+            assertEquals(false, object(sink.values.get(1)).get("userAccepted"));
+            assertTrue(a.p.enableEvents.isEmpty());
         }
     }
 

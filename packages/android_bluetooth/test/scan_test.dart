@@ -46,21 +46,35 @@ void main() {
   });
 
   test('advanced scan settings and filter masks survive transport unchanged', () async {
-    host.override = (_) async => null;
-    await BluetoothLeScanner.shared.startScan(
-        filters: [
-          ScanFilter(
-              serviceUuid: '180D',
-              manufacturerId: 7,
-              manufacturerData: Uint8List.fromList([128]),
-              manufacturerDataMask: Uint8List.fromList([255]))
-        ],
-        settings:
-            const ScanSettings(legacy: false, phy: ScanSettings.phyLeAllSupported, scanType: 1, rssiThreshold: -80));
+    host.override = (call) async => switch (call.method) {
+          'scan.startSession' => 'scan-arguments-${host.sequence++}',
+          'scan.backgroundStart' => 0,
+          _ => null,
+        };
+    final scanner = BluetoothLeScanner.shared;
+    final filters = [
+      ScanFilter(
+          serviceUuid: '180D',
+          manufacturerId: 7,
+          manufacturerData: Uint8List.fromList([128]),
+          manufacturerDataMask: Uint8List.fromList([255]))
+    ];
+    const settings = ScanSettings(legacy: false, phy: ScanSettings.phyLeAllSupported, scanType: 1, rssiThreshold: -80);
+    await scanner.startScan(filters: filters, settings: settings);
     final args = host.calls.last.arguments as Map;
     expect((args['filters'] as List).single['serviceUuid'], '0000180d-0000-1000-8000-00805f9b34fb');
     expect(args['settings']['rssiThreshold'], -80);
     expect(args['settings']['legacy'], false);
+    final session = await scanner.startScanSession(filters: filters, settings: settings);
+    try {
+      expect(host.calls.last.arguments, args);
+      expect(await scanner.startBackgroundScan(id: 7, filters: filters, settings: settings), 0);
+      expect(host.calls.last.arguments, {'id': 7, ...args});
+    } finally {
+      await session.stop();
+      await scanner.stopScan();
+      await scanner.stopBackgroundScan(7);
+    }
   });
 
   test('background scan callbacks retain typed results and raw bytes in memory', () async {

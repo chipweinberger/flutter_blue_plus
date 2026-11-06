@@ -174,6 +174,31 @@ class GattAttributes {
         }
     }
 
+    private void addDescriptor(BluetoothGattCharacteristic characteristic, Map<String, Object> a) {
+        String handle = string(a, "handle");
+        if (attributes.containsKey(handle))
+            throw new IllegalArgumentException("Descriptor already belongs to a characteristic");
+        BluetoothGattDescriptor descriptor =
+                new BluetoothGattDescriptor(
+                        UUID.fromString(string(a, "uuid")), integer(a, "permissions", 0));
+        characteristic.addDescriptor(descriptor);
+        bind(handle, descriptor);
+    }
+
+    private void addCharacteristic(BluetoothGattService service, Map<String, Object> a) {
+        String handle = string(a, "handle");
+        if (attributes.containsKey(handle))
+            throw new IllegalArgumentException("Characteristic already belongs to a service");
+        BluetoothGattCharacteristic characteristic =
+                new BluetoothGattCharacteristic(
+                        UUID.fromString(string(a, "uuid")),
+                        integer(a, "properties", 0),
+                        integer(a, "permissions", 0));
+        service.addCharacteristic(characteristic);
+        bind(handle, characteristic);
+        for (Object raw : list(a.get("descriptors"))) addDescriptor(characteristic, object(raw));
+    }
+
     synchronized BluetoothGattService createService(Map<String, Object> a) {
         String serviceHandle = string(a, "handle");
         if (attributes.containsKey(serviceHandle))
@@ -183,33 +208,8 @@ class GattAttributes {
                         UUID.fromString(string(a, "uuid")), integer(a, "serviceType", 0));
         bind(serviceHandle, service);
         try {
-            for (Object raw : list(a.get("characteristics"))) {
-                Map<String, Object> c = object(raw);
-                String ch = string(c, "handle");
-                if (attributes.containsKey(ch))
-                    throw new IllegalArgumentException(
-                            "Characteristic already belongs to a service");
-                BluetoothGattCharacteristic characteristic =
-                        new BluetoothGattCharacteristic(
-                                UUID.fromString(string(c, "uuid")),
-                                integer(c, "properties", 0),
-                                integer(c, "permissions", 0));
-                service.addCharacteristic(characteristic);
-                bind(ch, characteristic);
-                for (Object rd : list(c.get("descriptors"))) {
-                    Map<String, Object> d = object(rd);
-                    String dh = string(d, "handle");
-                    if (attributes.containsKey(dh))
-                        throw new IllegalArgumentException(
-                                "Descriptor already belongs to a characteristic");
-                    BluetoothGattDescriptor descriptor =
-                            new BluetoothGattDescriptor(
-                                    UUID.fromString(string(d, "uuid")),
-                                    integer(d, "permissions", 0));
-                    characteristic.addDescriptor(descriptor);
-                    bind(dh, descriptor);
-                }
-            }
+            for (Object raw : list(a.get("characteristics")))
+                addCharacteristic(service, object(raw));
             for (Object raw : list(a.get("includedServices")))
                 service.addService(get(string(object(raw), "handle"), BluetoothGattService.class));
             return service;

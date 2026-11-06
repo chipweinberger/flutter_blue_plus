@@ -87,6 +87,16 @@ final class AdapterBridge {
             case "adapter.isDiscovering":
                 value = adapter().isDiscovering();
                 break;
+            case "adapter.isLe2MPhySupported":
+                if (Build.VERSION.SDK_INT < 26)
+                    throw new UnsupportedOperationException("Requires Android API 26");
+                value = adapter().isLe2MPhySupported();
+                break;
+            case "adapter.isLeCodedPhySupported":
+                if (Build.VERSION.SDK_INT < 26)
+                    throw new UnsupportedOperationException("Requires Android API 26");
+                value = adapter().isLeCodedPhySupported();
+                break;
             case "adapter.cancelDiscovery":
                 value = adapter().cancelDiscovery();
                 break;
@@ -121,11 +131,25 @@ final class AdapterBridge {
                 }
             case "adapter.requestEnable":
                 p.needActivity();
+                boolean waitForResult = bool(a, "waitForResult", true);
+                if (!waitForResult) {
+                    int code = p.newRequestCode();
+                    p.enableEvents.put(code, p.enableEventResult());
+                    try {
+                        p.activity.startActivityForResult(
+                                new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE), code);
+                    } catch (RuntimeException failure) {
+                        p.enableEvents.remove(code);
+                        p.releaseRequestCode(code);
+                        throw failure;
+                    }
+                    result.success(true);
+                    return;
+                }
                 if (p.enableResult != null)
                     throw new IllegalStateException("Enable request already in progress");
-                boolean waitForResult = bool(a, "waitForResult", true);
                 p.enableRequestCode = p.newRequestCode();
-                p.enableResult = waitForResult ? result : p.enableEventResult();
+                p.enableResult = result;
                 try {
                     p.activity.startActivityForResult(
                             new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE),
@@ -136,7 +160,6 @@ final class AdapterBridge {
                     p.enableResult = null;
                     throw failure;
                 }
-                if (!waitForResult) result.success(true);
                 return;
             case "adapter.openSettings":
                 p.context.startActivity(

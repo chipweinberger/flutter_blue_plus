@@ -39,15 +39,14 @@ final class BluetoothManager {
   BluetoothAdapter get adapter => BluetoothAdapter.shared;
 
   /// API 21+. Requires BLUETOOTH_CONNECT on API 31+; queried profiles are GATT/GATT_SERVER.
-  Future<List<BluetoothDevice>> getConnectedDevices({int profile = BluetoothProfile.gatt}) async => List.unmodifiable(
-      _maps(await _Host.call<Object>('manager.connectedDevices', {'profile': profile})).map(BluetoothDevice._));
+  Future<List<BluetoothDevice>> getConnectedDevices({int profile = BluetoothProfile.gatt}) async =>
+      _decodeList(await _Host.call<Object>('manager.connectedDevices', {'profile': profile}), BluetoothDevice._);
 
   /// API 21+. Requires BLUETOOTH_CONNECT on API 31+; queried profiles are GATT/GATT_SERVER.
   Future<List<BluetoothDevice>> getDevicesMatchingConnectionStates(List<int> states,
           {int profile = BluetoothProfile.gatt}) async =>
-      List.unmodifiable(
-          _maps(await _Host.call<Object>('manager.matchingDevices', {'profile': profile, 'states': states}))
-              .map(BluetoothDevice._));
+      _decodeList(await _Host.call<Object>('manager.matchingDevices', {'profile': profile, 'states': states}),
+          BluetoothDevice._);
 
   /// API 21+. Requires BLUETOOTH_CONNECT on API 31+; queried profiles are GATT/GATT_SERVER.
   Future<int> getConnectionState(BluetoothDevice device, {int profile = BluetoothProfile.gatt}) =>
@@ -78,6 +77,12 @@ final class BluetoothAdapter {
   /// Reports competing Classic inquiry. Requires BLUETOOTH_SCAN on API 31+.
   Future<bool> get isDiscovering => _Host.call<bool>('adapter.isDiscovering');
 
+  /// API 26+. Unlike the optional capability snapshot, propagates permission failures.
+  Future<bool> get isLe2MPhySupported => _Host.call<bool>('adapter.isLe2MPhySupported');
+
+  /// API 26+. Unlike the optional capability snapshot, propagates permission failures.
+  Future<bool> get isLeCodedPhySupported => _Host.call<bool>('adapter.isLeCodedPhySupported');
+
   /// Cancels competing Classic inquiry. Requires BLUETOOTH_SCAN on API 31+.
   Future<bool> cancelDiscovery() => _Host.call<bool>('adapter.cancelDiscovery');
 
@@ -99,7 +104,7 @@ final class BluetoothAdapter {
 
   /// API 21+. Requires BLUETOOTH_CONNECT on API 31+ unless documented otherwise.
   Future<List<BluetoothDevice>> get bondedDevices async =>
-      List.unmodifiable(_maps(await _Host.call<Object>('adapter.bondedDevices')).map(BluetoothDevice._));
+      _decodeList(await _Host.call<Object>('adapter.bondedDevices'), BluetoothDevice._);
 
   /// Opens Android's system enable dialog. Requires an attached Activity and CONNECT on API 31+.
   /// With [waitForResult] false, resolves once the dialog is launched; the later
@@ -148,7 +153,15 @@ final class BluetoothDevice {
   final _Map _snapshot;
   _Map get _address =>
       {'address': address, if (addressType != null && addressType != addressTypeUnknown) 'addressType': addressType};
+  Future<T> _call<T>(String method, [_Map args = const {}]) => _Host.call<T>('device.$method', {..._address, ...args});
   String get address => _snapshot['address']! as String;
+
+  /// Open clients created for this address through AndroidBluetooth in this isolate.
+  ///
+  /// Includes clients owned by wrappers such as FlutterBluePlus. These are the
+  /// existing objects and callback streams; no additional connection is opened.
+  List<BluetoothGatt> get gattClients =>
+      List.unmodifiable(BluetoothGatt._clients.where((client) => client._address == address));
   String? get name => _snapshot['name'] as String?;
   int? get type => _snapshot['deviceType'] as int?;
   int? get bondState => _snapshot['bondState'] as int?;
@@ -158,42 +171,44 @@ final class BluetoothDevice {
 
   /// API 36+. Requires both BLUETOOTH_CONNECT and signature/privileged BLUETOOTH_PRIVILEGED permission.
   Future<BluetoothAddress> get identityAddressWithType async =>
-      BluetoothAddress._(_map(await _Host.call<Object>('device.identityAddressWithType', {..._address})));
-  Stream<BluetoothDeviceEvent> get events => _Host.events('device')
-      .where((e) => e['device'] != null && _map(e['device'])['address'] == address)
-      .map(BluetoothDeviceEvent._);
+      BluetoothAddress._(_map(await _call<Object>('identityAddressWithType')));
+
+  /// Broadcasts device actions for all addresses, including system bond changes.
+  static Stream<BluetoothDeviceEvent> get allEvents => _Host.events('device').map(BluetoothDeviceEvent._);
+
+  Stream<BluetoothDeviceEvent> get events => allEvents.where((e) => e.device?.address == address);
 
   /// Returns an updated device-property snapshot.
   /// API 21+. Requires BLUETOOTH_CONNECT on API 31+.
-  Future<BluetoothDevice> refresh() async =>
-      BluetoothDevice._(_map(await _Host.call<Object>('device.get', {..._address})));
+  Future<BluetoothDevice> refresh() async => BluetoothDevice._(_map(await _call<Object>('get')));
+
+  /// Reads the current bond state and propagates permission failures.
+  /// The nullable [bondState] field is optional metadata from a previous snapshot.
+  Future<int> getBondState() => _call<int>('bondState');
 
   /// API 21+. Requires BLUETOOTH_CONNECT on API 31+. Completion is reported by native callback events.
   /// Optionally arms [pin] atomically before starting bonding. It is applied once
   /// inside Android's pairing receiver, subject to Android's pairing permissions.
-  Future<bool> createBond({Uint8List? pin}) =>
-      _Host.call<bool>('device.createBond', {..._address, if (pin != null) 'pin': pin});
+  Future<bool> createBond({Uint8List? pin}) => _call<bool>('createBond', {if (pin != null) 'pin': pin});
 
   /// Applies [pin] synchronously to the next pairing request. Pass null to clear.
   /// Cleared on use, disconnect, terminal bond state, adapter shutdown or engine reset.
-  Future<void> setPinForNextPairing(Uint8List? pin) =>
-      _Host.call<void>('device.setPinForNextPairing', {..._address, 'pin': pin});
+  Future<void> setPinForNextPairing(Uint8List? pin) => _call<void>('setPinForNextPairing', {'pin': pin});
 
   /// API 31+. Subject to Android's CONNECT, companion-association or privileged-permission requirements; native status is preserved.
-  Future<int> setAlias(String alias) => _Host.call<int>('device.setAlias', {..._address, 'alias': alias});
+  Future<int> setAlias(String alias) => _call<int>('setAlias', {'alias': alias});
 
   /// Requires Android's privileged pairing eligibility; requesting CONNECT alone does not grant this capability.
-  Future<bool> setPairingConfirmation(bool confirm) =>
-      _Host.call<bool>('device.setPairingConfirmation', {..._address, 'confirm': confirm});
+  Future<bool> setPairingConfirmation(bool confirm) => _call<bool>('setPairingConfirmation', {'confirm': confirm});
 
   /// Supplies a PIN for the current pairing request; returns whether Android accepted it.
   /// API 21+. Requires BLUETOOTH_CONNECT on API 31+.
-  Future<bool> setPin(Uint8List pin) => _Host.call<bool>('device.setPin', {..._address, 'pin': pin});
+  Future<bool> setPin(Uint8List pin) => _call<bool>('setPin', {'pin': pin});
 
   /// Hidden Android API. Best effort: may throw `restricted_api` on any OS/device.
   ///
   /// API 21+. Requires BLUETOOTH_CONNECT on API 31+. Completion is reported by native callback events.
-  Future<bool> removeBond() => _Host.call<bool>('device.removeBond', {..._address});
+  Future<bool> removeBond() => _call<bool>('removeBond');
 
   /// Creates an independent GATT client registration. Subscribe to onConnectionStateChange for completion.
   /// LE transport is explicit on API 23+ and best-effort through the hidden overload on API 21–22.
@@ -202,12 +217,14 @@ final class BluetoothDevice {
   /// until the next successful discovery. This supports wrappers that own invalidation policy.
   Future<BluetoothGatt> connectGatt(
           {bool autoConnect = false, int phy = phyLe1mMask, bool preserveAttributeHandles = false}) async =>
-      BluetoothGatt._(await _Host.call<String>('gatt.open', {
-        ..._address,
-        'autoConnect': autoConnect,
-        'phy': phy,
-        'preserveAttributeHandles': preserveAttributeHandles,
-      }));
+      BluetoothGatt._(
+          await _Host.call<String>('gatt.open', {
+            ..._address,
+            'autoConnect': autoConnect,
+            'phy': phy,
+            'preserveAttributeHandles': preserveAttributeHandles,
+          }),
+          address);
 
   /// API 29+. Creates a secure LE CoC socket; call connect() to establish it. Obtain the peer's PSM through your protocol.
   Future<BluetoothSocket> createL2capChannel(int psm) => _channel(psm, true);

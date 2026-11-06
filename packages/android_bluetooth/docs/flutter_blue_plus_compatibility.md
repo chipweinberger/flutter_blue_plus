@@ -1,173 +1,80 @@
-# FlutterBluePlus compatibility audit
+# FlutterBluePlus Android compatibility
 
-Audited and updated 2026-11-06 against the sibling `flutter_blue_plus_android` 9.0.5 implementation, the checked-in platform interface, and FlutterBluePlus's public Dart implementation.
+Updated 2026-11-06 against `flutter_blue_plus_android` 9.0.5, its platform interface, and the public FlutterBluePlus Dart consumers.
 
-## Verdict
+## Implementation
 
-**The identified native and packaging gaps are fixed.** AndroidBluetooth now supplies the primitives needed for a behavior-preserving FlutterBluePlus adapter, while retaining stricter default GATT handling for other consumers. No third-party production dependencies were added.
+FBP's Android backend now uses AndroidBluetooth. The compatibility policies live in Dart feature files, following the Linux backend's structure:
 
-The FlutterBluePlus backend has not been migrated. Connection management, scan processing, CCCD policy, synthetic characteristic identity and FlutterBluePlus errors still need a Dart compatibility adapter behind the existing platform interface. Full behavior parity must be checked on that adapter and on physical devices before switching.
+| File | Responsibility |
+| --- | --- |
+| `android_backend.dart` | Existing event streams, initialization, permission orchestration, lifecycle and logging |
+| `android_adapter.dart` | Adapter queries, enable/disable, system/bonded devices, bond state and PHY support |
+| `android_scan.dart` | Scan submission, filters, duplicate policy, callback conversion and raw advertisement parsing |
+| `android_device.dart` | Connection ownership, cancellation, auto-connect and bonding |
+| `android_gatt.dart` | GATT operations, CCCDs, write limits/caches and callback conversion |
+| `android_types.dart` | Attribute graphs and FBP identity/handle translation |
+| `android_utils.dart` | Existing enum, GATT/HCI/status strings and small translation helpers |
 
-## Resolved native and packaging gaps
+The old Java backend is retained unchanged under [test/reference](../../flutter_blue_plus_android/test/reference/README.md), solely for comparison tests. It is not compiled into applications. FBP's plugin registration is Dart-only. AndroidBluetooth registers the native plugin once and hosts the existing FBP license build hook. The hook runs when the application lockfile contains FBP or its Android backend; standalone AndroidBluetooth builds do not acquire the FBP ping. Manifest ownership, min SDK 21 and Java 11 remain unchanged. No third-party runtime dependencies were introduced.
 
-### 1. Prearmed pairing PINs
+Feature mixins override the platform interface with typed `Bm*Request` parameters and result types. A shared generic `_run<T>` handles initialization, logging and native error translation. Requests are not routed through method-name switches or unpacked from dynamic maps. GATT lookup uses a typed identity snapshot; maps remain at event serialization and diagnostic boundaries. Each event explicitly supplies its typed controller and decoder; there is no synthetic MethodChannel/MethodCall or string-based event router. Shared subscription cleanup and AndroidBluetooth constants keep lifecycle and protocol values in one place. Focused helpers separate GATT callback handling, request acceptance, write validation, notification selection, scan filter snapshots, advertisement parsing and result filtering. Their ordering retains permission prompts, payload snapshots, duplicate filtering and callback delivery semantics.
 
-`BluetoothDevice.createBond(pin: ...)` arms a copied one-shot PIN atomically before native bonding submission. `setPinForNextPairing(pin)` also supports prearming separately; null cancels it. Android's receiver applies the PIN synchronously before returning from the pairing broadcast. It is cleared on use, failed submission, disconnect, terminal bond state, explicit rejection/removal, adapter shutdown and engine reset. `onPairingPinSet` reports acceptance without exposing the PIN. No pairing broadcast suppression was added.
+Adapter-state events are filtered and processed sequentially with `asyncMap`, awaiting scan/connection cleanup before the next state change. Generation checks suppress stale effects and cleanup errors after engine detach; subscription cancellation discards the old engine's queued events. Cleanup failures are forwarded to the listening zone and later events continue. Permission dialogs retain their separate future queue, while already-granted operations bypass it.
 
-The Dart adapter must retain FlutterBluePlus's connected-device and already-bonded/bonding checks. Supplying a PIN does not bypass Android's permission or pairing policies.
+## Contract retained
 
-### 2. Location-services preflight
+All 28 platform methods and 15 event streams remain available. Existing public FBP operation queues, timeouts, Android disconnect delay, default MTU request, automatic Service Changed subscription and state caches are unchanged.
 
-`AndroidBluetooth.isLocationEnabled` reports the actual system setting using LocationManager on API 28+ and Settings.Secure on earlier Android, without requesting permission or requiring an Activity. Comparison tests cover enabled/disabled location on API 23, 28 and 30 against the existing backend.
+| Area | Preserved behavior |
+| --- | --- |
+| Adapter | Support means adapter presence; denied/null names become empty; absent adapter names become `N/A`; unavailable/denied state becomes unknown. Already-on `turnOn` returns false; already-off `turnOff` returns true. Enable submission and the later Activity result remain separate, including concurrent launch requests. |
+| Permissions | Original per-operation permission sets and denial messages, API 21–30 location preflight before prompts, API 31+ bypass, optional fine location and serialized permission dialogs. Already-granted operations proceed while an unrelated dialog is open; queued requests recheck grants before prompting. Queries that previously did not prompt still do not prompt. Bond/PHY reads propagate permission failures rather than treating missing optional metadata as a false state. |
+| Scanning | Original scan mode, legacy flag, all-supported PHYs, separate OR filters, absent empty masks, API 33 keyword AD filters and case-sensitive advertised-name checks. Last-payload-per-address dedup emits A/B/A, suppresses A/A regardless of RSSI, and applies the continuous divisor after keyword matching. Batch callbacks remain ignored. |
+| Advertisements | Nullable platform/advertised names, TX-power sentinel, appearance, connectability fallback and short UUIDs. Every raw manufacturer payload is concatenated under the first company ID, including later company IDs, matching the original parser. |
+| Connections | One FBP client per address; original already-connected/connecting return values; pending cancellation reason `23789258` / `connection canceled`; duplicate/intermediate/stale connection handling; negotiated MTU retained on duplicate connected callbacks. Auto-connect clients survive disconnection until explicitly canceled. Adapter shutdown synthesizes the existing disconnected events. Adapter-on scan cleanup precedes the public state event. |
+| Attribute identity | Unique characteristics use FBP ID 0; duplicates in one service use native instance IDs; repeated matching services use ordinal positions across all characteristics. Included services remain flattened with their primary association; properties, descriptors and UUID normalization retain the original shape. |
+| GATT | Connected/property checks, original submission results and errors, status/reason strings, MTU/RSSI callbacks, PHY version gate and priority values. Cache refresh returns true when reflection succeeds even if Android returns false. Compatibility handles survive refresh/Service Changed and failed discovery; successful discovery replaces the graph. |
+| Writes | Default MTU 23; ordinary/no-response limit `min(MTU - 3, 512)`; long response writes up to 512; descriptors up to `MTU - 3`. Outbound values are cached by a typed FBP identity tuple before submission and removed for the matching write callback. FBP byte values remain mutable copies, isolated from AndroidBluetooth's immutable snapshots. |
+| Notifications | Local registration followed by CCCD write; notify preference, forced indication checks, exact enable/disable values and descriptor-written callbacks. Missing CCCD returns false after successful local registration. `1801/2a05` reads/notifications trigger services reset; Android's newer callback does not add another FBP reset event. |
+| Bonding | Connected check, already-bonded false, already-bonding true, original remove-bond behavior, synchronous one-shot PIN prearming and current/previous bond-state mapping. |
+| Errors/events | Existing method-specific `PlatformException` codes/messages and native `androidException` translation with string stack details; async success/status fields remain separate from submission acceptance. No new FBP name-change events. Engine detach maps to the existing detach stream. `setOptions` remains a successful no-op. |
 
-The adapter must call it before scan permission requests when `androidCheckLocationServices` is true on API 21–30, and preserve the existing error. As before, FlutterBluePlus bypasses this preflight on API 31+.
+### Approved diagnostic difference
 
-### 3. Cache refresh, Service Changed and callback identity
+The user approved not retaining exact internal logs on 2026-11-06. The removed Java backend's internal Logcat messages are no longer emitted. The public `FlutterBluePlusPlatform.logs` API, configured log level/color, and verbose FBP request/result/event logging remain. Exception stacks naturally refer to the new native/Dart implementation. No intentional BLE operation, result, or callback contract change was approved or introduced.
 
-`connectGatt(preserveAttributeHandles: true)` retains usable handles after successful refresh and Service Changed, matching the old backend's lifetime policy without adding rediscovery radio operations. It also reports the cached graph on discovery failure. Successful rediscovery still retires the previous handles. The default remains strict: refresh and Service Changed invalidate active handles.
+## Direct AndroidBluetooth access
 
-Invalidation now retains original routing handles and parent characteristic/service metadata for late callbacks. Those identities do not reactivate stale attributes, and are freed when the registration closes. The adapter must retain its identity mapping for late events and rebuild active mappings on successful discovery.
+Applications can import AndroidBluetooth directly:
 
-Comparison tests verify the old and new native reads still succeed after refresh in compatibility mode, Service Changed does not trigger extra discovery, and late descriptor callbacks retain their identity while native stale-handle operations remain rejected.
+```dart
+import 'package:android_bluetooth/android_bluetooth.dart' as android;
 
-### 4. Engine-detach event
+final adapter = android.BluetoothAdapter.shared;
+final device = android.BluetoothDevice(fbpDevice.remoteId.str);
+final clients = device.gattClients;
+```
 
-`AndroidBluetooth.onDetachedFromEngine` and the global event stream expose a native lifecycle event before cleanup and EventChannel completion. Dart registration streams finish and reject further operations. A subsequent call can reopen the event channel after native reattachment. Reusing the same native plugin instance also recreates its I/O executor.
+`gattClients` returns the original open clients for that address in the current Dart isolate, including FBP's client. It is an immutable list snapshot. Clients can be connecting, connected or disconnected for auto-connect; this is not an enumeration of other apps' connections. Closing a client or detaching the engine removes it from lookup. An explicit `connectGatt()` creates another registration.
 
-The adapter must map this event to the existing platform detach stream so FlutterBluePlus stops scan bookkeeping without another native call. Native and Dart detach/reattach tests cover delivery, cleanup and relistening; hot-restart cleanup remains separately tested.
+`FlutterBluePlusAndroid.getGatt(remoteId)` additionally selects FBP's client, or null when none is tracked. No new `.instance` API was added. Typed callback streams accept additional listeners without consuming FBP's callbacks. Serialize GATT requests across both APIs. Use FBP for its managed lifecycle: directly closing clients or changing discovery/notifications can invalidate FBP's cached state. Device-scoped L2CAP and other features do not require another GATT client.
 
-Outstanding native method calls receive a terminal engine-detached/restarted error instead of having their replies silently discarded. Late worker replies cannot complete a call twice. Enable, permission and association UI requests have distinct per-attempt codes, including across hot restart and engine replacement. Companion success retires the Dart session after preserving the expected success callback sequence.
+This migration does not change the Darwin backend. CoreBluetooth exposes `CBCentralManager.shared` and peripheral retrieval, but FBP must migrate to that shared manager before direct CoreBluetooth access can share FBP's Apple connection.
 
-### 5. LE transport on API 21–22
+## Validation
 
-The connection path now mirrors the old best-effort hidden `connectGatt(..., TRANSPORT_LE)` invocation on API 21–22, with fallback to the default overload if reflection fails. API 23+ continues to select LE explicitly. Tests cover LE overload selection and fallback; actual Android 5 radio behavior still requires device validation.
+- Backend Dart suite: 49 tests on current Flutter and Flutter 3.10.6/Dart 3.0.6, covering operation/error/event regressions, advertisement parsing boundaries, serialized adapter events and error recovery, concurrency, lifecycle, logging, direct client lookup, write-payload isolation and mutable FBP byte compatibility. AndroidBluetooth separately passes its 62 shared Dart tests on both toolchains, including typed-listener replay/completion, UUID lookup/validation ordering and immutable collection, capability and ranging snapshots.
+- Original-Java fixtures: complete service/characteristic/descriptor/property shapes for unique, duplicate and included graphs, plus advertisement conversion. `LegacyContractFixtureTest` generates/checks the committed fixture using the unchanged Java source; Dart tests independently compare their output with it.
+- Native suites: 151 passed/1 skipped on the current host (including original-backend comparisons), and 70 passed/1 skipped on the minimum host. AndroidBluetooth Dart/native tests and opt-in native comparisons cover permission/PIN/location primitives, foreground-service validation order and launch payloads, strict/compatibility handle lifetime, partial GATT graph rollback, LE transport on API 21–22, enable launch/results, stale routing, detach/reattach, close/stop failure recovery and engine restart.
+- Current-host FBP example APK and a Flutter 3.10.6 / Dart 3.0.6 / SDK 33 integration APK build. The minimum host also runs the backend's shared Dart tests. The current example's pre-existing Gradle 8.11.1 requires `-PskipDependencyChecks=true` with installed Flutter 3.47.5; the check does not require changing consumers' dependency constraints. The local build also uses sufficient heap and disables unnecessary Jetifier.
+- Merged manifests retain app-owned declarations. Generated Android registration contains AndroidBluetooth once; FBP has no native registration. The moved license task still runs for FBP apps and is absent from standalone AndroidBluetooth builds.
 
-### 6. Manifest and host toolchain
-
-The library manifest is empty: permissions, BLE feature flags and optional services/receiver declarations belong to the app. The example explicitly declares its own components. A central-only FlutterBluePlus adapter therefore does not acquire unrelated advertising, companion, background or ranging declarations transitively.
-
-Dart/Flutter constraints now match the existing backend (`^3.0.0` / `>=3.7.0`); Java 11 and min SDK 21 are retained. Native compile SDK follows Flutter when its plugin extension is available; older Flutter hosts fall back to SDK 33, with an optional `androidBluetoothCompileSdk` property override. SDK 33 builds include the existing FlutterBluePlus surface. API 36-only ranging and the newer companion presence service are optional source files included only with SDK 36. Newer socket/device/companion methods use guarded reflection so they remain callable on suitable devices even with the SDK 33 core build. Missing optional ranging code reports unsupported rather than breaking plugin registration.
-
-Dart 3.0–3.2 byte getters return isolated typed copies; immutable raw snapshots prevent mutations from affecting other consumers. Dart 3.3+ retains read-only typed views. The committed minimum-version host uses real Flutter 3.10.6 / Dart 3.0.6 and SDK 33 to run the shared Dart suite, assemble an APK and run native core tests. It does not substitute a Flutter services stub or copied production sources. Additional host versions and physical-device behavior remain separate validation.
-
-Keep FlutterBluePlus's Dart registration and existing build/licensing hooks when migrating. AndroidBluetooth should register once through the dependency, and the old native backend should then stop registering.
-
-### Additional submission/query primitives
-
-`BluetoothCapabilities.hasAdapter` exposes the old backend's support predicate independently of BLE capability and permissions. `requestEnable(waitForResult: false)` returns after successful dialog launch and emits the later user decision on `onEnableResponse`. This avoids treating native launch failures as user cancellation when adapting the old split submission/result contract. The default still waits for the activity result.
-
-## Complete platform-method mapping
-
-All 28 platform methods were checked. “Adapter” means the primitives exist, with the listed behavior implemented in FlutterBluePlus's Dart backend. It does not mean an adapter has already been implemented or tested end to end.
-
-| FlutterBluePlus method | AndroidBluetooth primitive | Work required |
-| --- | --- | --- |
-| `isSupported` | capabilities / adapter query | Adapter: use `capabilities.hasAdapter` for the old predicate; `isSupported` additionally requires the BLE feature. |
-| `getAdapterName` | adapter `name` | Adapter: preserve permission requests, empty string on denial/null, and `N/A` when no adapter exists. |
-| `getAdapterState` | adapter `state`, adapter events | Adapter: translate native enum values and unavailable/error cases to the existing unknown state. |
-| `turnOn` | adapter `requestEnable` | Adapter: use `requestEnable(waitForResult: false)` and map `onEnableResponse`; keep the already-on false result and permission policy. |
-| `turnOff` | adapter `disable` | Adapter: preserve already-off behavior and native submission result. |
-| `getSystemDevices` | manager `getConnectedDevices(profile: gatt)` | Adapter: keep system-wide connected devices distinct from this plugin's registrations; preserve CONNECT permission handling. |
-| `getBondedDevices` | adapter `bondedDevices` | Adapter: translate device/name snapshots and native errors. |
-| `getBondState` | device `refresh`, bond-state snapshot/events | Adapter: fetch fresh state rather than a previously cached device snapshot; map current/previous enums. |
-| `getPhySupport` | capabilities | Adapter: preserve API <26 error instead of treating absent capability fields as false; handle permission-limited capability snapshots. |
-| `startScan` | scanner filters/settings and scan callbacks | Adapter using the location-services query: preserve defaults, permission order, OR filters, keyword checks, deduplication, divisor, and advertisement conversion. |
-| `stopScan` | scan/session `stop` | Adapter: preserve harmless repeated stops and retire per-scan callback routing. |
-| `connect` | device `connectGatt(autoConnect:)` | Adapter (native LE transport branches now match): keep one current registration per remote ID, native auto-connect lifetime, and old changed/submitted return semantics. |
-| `disconnect` | GATT `disconnect`, `close` | Adapter: distinguish pending, connected, and idle auto-connect registrations; synthesize pending-connect cancellation and close at the correct time. |
-| `discoverServices` | GATT `discoverServices`, service graph callback | Adapter: flatten included services and rebuild FlutterBluePlus identities/handle maps. Enable `preserveAttributeHandles` so failed discovery includes the cached graph, as the old backend does. |
-| `readCharacteristic` | GATT `readCharacteristic` | Adapter: connected/property checks, identity lookup, submission errors, and callback translation. Use retained callback handles and parent metadata for late events. |
-| `writeCharacteristic` | GATT `writeCharacteristic` | Adapter: write type, MTU/512-byte policy, status normalization, and outbound-value cache for write callbacks. |
-| `readDescriptor` | GATT `readDescriptor` | Adapter: parent characteristic identity and submission/callback errors. Use retained callback handles and parent metadata for late events. |
-| `writeDescriptor` | GATT `writeDescriptor` | Adapter: MTU limit, outbound-value cache, status/error conversion. |
-| `setNotifyValue` | local `setCharacteristicNotification` plus CCCD write | Adapter: preserve notify/indicate preference, forced indications, missing-CCCD behavior, and descriptor-written event. |
-| `requestMtu` | GATT `requestMtu`, MTU callback | Adapter: cache negotiated MTU for native-equivalent write validation; keep callback result/error separate from submission. |
-| `readRssi` | GATT `readRemoteRssi`, RSSI callback | Adapter: map acceptance/result/errors. |
-| `requestConnectionPriority` | GATT `requestConnectionPriority` | Adapter: connected check, false-result error, same priority values. |
-| `setPreferredPhy` | GATT `setPreferredPhy` | Adapter: preserve API gate, connected check, and old `true` return on successful submission. |
-| `createBond` | device `createBond`, bond events | Adapter using atomic `createBond(pin:)` or the one-shot PIN facility: connected check, already-bonded/bonding semantics, false-result error. |
-| `removeBond` | device `removeBond` | Adapter: already-unbonded result and hidden-API errors. |
-| `clearGattCache` | GATT `refresh` | Use `preserveAttributeHandles`; old backend returns true after reflection succeeds even if the reflected method returns false. |
-| `setLogLevel` | FlutterBluePlus adapter logging | Adapter: keep public logging behavior; AndroidBluetooth does not implement the old native debug log stream. Exact old internal log text would require additional instrumentation if treated as contractual. |
-| `setOptions` | no native operation needed | Adapter: current Android backend is a successful no-op. |
-
-## Observable behavior the Dart adapter must preserve
-
-### Connection ownership and event ordering
-
-- Track connecting, connected, and auto-connect registrations by remote ID and AndroidBluetooth registration ID. An obsolete registration must not disconnect or update a newer connection to the same device.
-- Return false for already-connected `connect`, true for already-connecting `connect`, and the existing distinct disconnect return values. These booleans control whether public Dart code waits for callbacks.
-- Cancelling a pending connection must emit disconnected with reason `23789258` (`connection canceled`). Calling native disconnect/close alone is insufficient.
-- Keep auto-connect GATT registrations alive across disconnections; close ordinary registrations after disconnect. Ignore intermediate and duplicate connection events as the old backend does, including retaining negotiated MTU on duplicate connected events.
-- Synthesize disconnect events and clear appropriate state when the adapter turns off; Android callbacks are not the only source of these events in the old backend. Stop scan state and preserve the existing adapter-on auto-connect interaction.
-- Install event routing before operations can produce callbacks. AndroidBluetooth can buffer early session events, but the wrapper must associate them with the correct connection/scan generation and avoid replaying retired events.
-- Keep the existing public Dart mutexes, cancellation, timeouts, Android disconnect delay, and default post-connect MTU request. Moving the backend should not rewrite these policies.
-
-### Scanning
-
-- Explicitly request low-latency mode, `legacy: false`, and all supported PHYs on API 26+, matching FlutterBluePlus defaults. AndroidBluetooth's own defaults differ.
-- Request SCAN and CONNECT on API 31+, optionally fine location when requested; use fine location on older Android. Normalize empty filter masks to absent masks.
-- Build separate native filters per service/address/name/MSD/service-data entry: the old list is OR, not one combined AND filter. Preserve API 33+ name AD-type filters for keywords and the case-sensitive advertised-name substring test.
-- When `continuousUpdates` is false, compare each address's raw advertisement bytes with its last received payload: A/B/A should emit all three, while repeated A/A is suppressed even if RSSI changed. This is not a scan-wide set of previously seen payloads. In continuous mode, preserve per-device counting/divisor and its order relative to keyword checks. Reset these caches per scan.
-- Convert raw advertisement bytes with the old semantics, including appearance, TX-power sentinel, connectability fallback before API 26, nullable platform name, shortest-form UUIDs, and repeated manufacturer fields. The old parser concatenates every manufacturer AD payload, including subsequent company IDs, and stores the result under the first company ID. Copying AndroidBluetooth's parsed manufacturer map would change existing data.
-- Emit the existing scan failure code/string and stop public scan bookkeeping. Avoid adding new batch-result behavior accidentally; the old backend does not process batch callbacks.
-
-### Service and attribute identity
-
-- Do not expose AndroidBluetooth handles or raw Android instance IDs as FlutterBluePlus `instanceId`s. A unique characteristic in one matching service has ID 0 today, regardless of its native instance ID. Duplicate characteristics within that service use native IDs. With multiple matching services, IDs are ordinal positions across all their characteristics, including other UUIDs.
-- Preserve primary/included-service association, flattened secondary services, descriptor UUID lookup, graph order, and UUID normalization. Map the resulting FlutterBluePlus identity tuple to opaque AndroidBluetooth handles and back for callbacks.
-- Preserve Service Changed characteristic (`1801` / `2A05`) handling and FlutterBluePlus's automatic subscription during discovery. Do not silently add extra public reset events just because AndroidBluetooth exposes a newer native callback.
-
-### Writes and notifications
-
-- Track negotiated MTU, defaulting to 23. Normal and no-response writes are limited to `min(MTU - 3, 512)`; allowed long writes with response are limited to 512. Descriptor writes use `MTU - 3`. Preserve property checks and immediate failure behavior.
-- `allowLongWrite` currently lets Android perform the long write; it does not start a reliable-write transaction. Do not substitute one.
-- Cache outbound characteristic/descriptor bytes before dispatch. AndroidBluetooth's write callbacks contain status and attribute metadata, while FlutterBluePlus's written events include the submitted value.
-- Local notification registration alone is insufficient. Write CCCD values `01 00`, `02 00`, or `00 00`, prefer notifications when both properties exist unless forced, and preserve indication-property errors. If the CCCD is missing, return false after successful local registration so public Dart does not wait for a nonexistent descriptor-write callback.
-
-### Permissions, errors, and streams
-
-- AndroidBluetooth intentionally leaves permission orchestration to callers. The adapter must perform the old per-operation checks/requests, serialize concurrent permission requests as necessary, and preserve denial results. Do not start requesting permissions on methods that did not request them before.
-- Translate raw native states/statuses to the existing `Bm*` models and their success/error fields. Immediate booleans, API 33+ write status integers, and asynchronous GATT/HCI result codes are different contracts.
-- Preserve method-specific PlatformException codes, public error descriptions, disconnection reason strings, and unsupported-version errors. Directly forwarding AndroidBluetooth's `permission_denied`, `invalid_state`, or `unsupported` exceptions changes what callers observe.
-- The 15 platform event streams are accounted for: adapter state, bond state, characteristic received/written, connection state, descriptor read/written, detach, discovery, MTU, name, RSSI, scan, services reset, and turn-on response. All now have native primitives or Dart synthesis paths, including detach and late attribute identity. The current old backend declares `onNameChanged` but does not emit it; adding name broadcasts would be a deliberate expansion.
-
-## Validation and migration gate
-
-Completed after the gap fixes:
-
-- Read all 28 platform method implementations, all 15 event contracts, and the public Dart consumers of submission booleans, ordering, identity and timeouts.
-- Dart tests: 52 passed on both current and minimum hosts; analyzers clean. Regressions cover snapshot isolation, compatibility arguments, parent identities, detach/relisten and owner callback retention with global observers and ranging close/stop contracts.
-- Current-host native tests including old/new comparisons: 137 passed, 1 skipped, covering APIs 33 and 36 plus older targeted cases. Regressions cover copied one-shot PINs and cleanup, strict/compatibility GATT behavior, late routing identities, successful/failed enable launch, LE selection/fallback, detach ordering and reattachment.
-- Comparisons against the actual old backend verify refresh/PIN/location behavior and preserve the documented synthetic-ID and repeated-MSD translations the Dart adapter must retain.
-- Android lint and the SDK 36 release APK build pass. The minimum host uses Flutter 3.10.6, Dart 3.0.6, AGP 7.4.2, Gradle 7.6.4, SDK 33 and JDK 17; see its committed compatibility runner for the shared Dart suite, Android APK and native core checks.
-
-The opt-in harness is [tool/flutter_blue_plus_audit/compare.gradle](../tool/flutter_blue_plus_audit/compare.gradle), with [comparison probes](../tool/flutter_blue_plus_audit/java/com/jamcorder/android_bluetooth/FlutterBluePlusParityProbe.java). It adds the sibling Java implementation to test sources only and does not apply its Gradle build hooks or add production dependencies. Run from `packages/android_bluetooth/example/android` with a suitable Java installation:
+Run the backend tests from `packages/flutter_blue_plus_android` with `flutter test`. Run the native parity suite from `packages/android_bluetooth/example/android`:
 
 ```sh
-./gradlew :android_bluetooth:testDebugUnitTest \
-  --tests com.jamcorder.android_bluetooth.FlutterBluePlusParityProbe \
+./gradlew :android_bluetooth:testDebugUnitTest :android_bluetooth:lintDebug \
   --init-script ../../tool/flutter_blue_plus_audit/compare.gradle --console=plain
 ```
 
-Before replacing the backend:
-
-1. Implement the Dart compatibility adapter behind the existing platform interface, selecting the compatibility primitives above.
-2. Compare old/new `Bm*` results and event traces for scans, filters, repeated AD fields, duplicate/included services, reads/writes, CCCDs, submission failures, and error mapping. The resolved native-gap probes now assert the matching behavior; extend them to the actual Dart adapter.
-3. Exercise pending-connect cancellation/reconnect races, auto-connect, adapter power cycling, timeout/disconnect cleanup, permission denial/revocation, hot restart, and detach/reattach. Include a PIN-paired device and notifications arriving during discovery/cache refresh/service changes.
-4. Verify merged manifests and supported host Flutter/Android toolchain versions. Cover API 21–22 if retained, 23–30 location behavior, 31–32 Bluetooth permissions, and 33+ write callbacks/statuses.
-5. Validate on physical devices, including a dual-mode peripheral and at least two Android vendors. Mock/Robolectric tests cannot establish radio timing, pairing UI behavior, OEM GATT quirks, or actual reconnect reliability.
-
-L2CAP, GATT server, advertising, companions, ranging, ACL/encryption events, and other additional AndroidBluetooth features are not blockers for this migration: the existing FlutterBluePlus platform contract does not require them. The adapter can leave them unused without changing FlutterBluePlus's public API.
-
-## Source references
-
-- [Existing Android Dart backend](../../flutter_blue_plus_android/lib/flutter_blue_plus_android.dart)
-- [Existing Android native backend](../../flutter_blue_plus_android/android/src/main/java/com/jmx/flutter_blue_plus/FlutterBluePlusPlugin.java)
-- [Platform interface](../../flutter_blue_plus_platform_interface/lib/flutter_blue_plus_platform_interface.dart)
-- [Public scan/lifecycle consumers](../../flutter_blue_plus/lib/src/flutter_blue_plus.dart)
-- [Public connection/bonding consumers](../../flutter_blue_plus/lib/src/bluetooth_device.dart)
-- [Public notification/write consumers](../../flutter_blue_plus/lib/src/bluetooth_characteristic.dart)
-- [AndroidBluetooth native lifecycle/permissions](../android/src/main/java/com/jamcorder/android_bluetooth/AndroidBluetoothPlugin.java)
-- [AndroidBluetooth native GATT](../android/src/main/java/com/jamcorder/android_bluetooth/GattBridge.java)
-- [AndroidBluetooth native scanning](../android/src/main/java/com/jamcorder/android_bluetooth/ScanBridge.java)
+Physical-device parity remains unverified. Before release, compare old/new scans, permissions/revocation, PIN pairing, duplicate/included services, long/no-response writes, notifications during refresh, cancellation races, auto-connect, power cycling and hot restart on at least two Android vendors. Include Android 5/API 21–22 if retained. Mock/Robolectric tests cannot establish OEM radio timing, pairing UI behavior or reconnect reliability.

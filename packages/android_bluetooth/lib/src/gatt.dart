@@ -2,6 +2,15 @@ part of '../android_bluetooth.dart';
 
 int _localAttributeId = 0;
 
+T? _findByUuid<T>(Iterable<T> attributes, String uuid, String Function(T) uuidOf) {
+  // Empty collections have always returned null without validating the UUID.
+  late final normalized = _uuid(uuid);
+  for (final attribute in attributes) {
+    if (uuidOf(attribute) == normalized) return attribute;
+  }
+  return null;
+}
+
 final class BluetoothGattDescriptor {
   BluetoothGattDescriptor(String uuid, this.permissions)
       : uuid = _uuid(uuid),
@@ -40,7 +49,7 @@ final class BluetoothGattCharacteristic {
         instanceId = m['instanceId']! as int,
         properties = m['properties']! as int,
         permissions = m['permissions']! as int,
-        descriptors = List.unmodifiable(_maps(m['descriptors']).map(BluetoothGattDescriptor._)),
+        descriptors = _decodeList(m['descriptors'], BluetoothGattDescriptor._),
         service = m['service'] == null ? null : BluetoothGattService._(_map(m['service']));
   static const propertyBroadcast = 1, propertyRead = 2, propertyWriteNoResponse = 4, propertyWrite = 8;
   static const propertyNotify = 16, propertyIndicate = 32, propertySignedWrite = 64, propertyExtendedProps = 128;
@@ -54,7 +63,8 @@ final class BluetoothGattCharacteristic {
 
   /// Parent service identity, also retained for callbacks from invalidated discoveries.
   final BluetoothGattService? service;
-  BluetoothGattDescriptor? getDescriptor(String uuid) => _firstOrNull(descriptors.where((d) => d.uuid == _uuid(uuid)));
+  BluetoothGattDescriptor? getDescriptor(String uuid) =>
+      _findByUuid(descriptors, uuid, (descriptor) => descriptor.uuid);
   _Map _toMap() => {
         'uuid': uuid,
         'handle': handle,
@@ -80,15 +90,15 @@ final class BluetoothGattService {
         handle = m['handle']! as String,
         instanceId = m['instanceId']! as int,
         type = m['serviceType']! as int,
-        characteristics = List.unmodifiable(_maps(m['characteristics']).map(BluetoothGattCharacteristic._)),
-        includedServices = List.unmodifiable(_maps(m['includedServices']).map(BluetoothGattService._));
+        characteristics = _decodeList(m['characteristics'], BluetoothGattCharacteristic._),
+        includedServices = _decodeList(m['includedServices'], BluetoothGattService._);
   static const serviceTypePrimary = 0, serviceTypeSecondary = 1;
   final String uuid, handle;
   final int instanceId, type;
   final List<BluetoothGattCharacteristic> characteristics;
   final List<BluetoothGattService> includedServices;
   BluetoothGattCharacteristic? getCharacteristic(String uuid) =>
-      _firstOrNull(characteristics.where((c) => c.uuid == _uuid(uuid)));
+      _findByUuid(characteristics, uuid, (characteristic) => characteristic.uuid);
   _Map _toMap() => {
         'uuid': uuid,
         'handle': handle,
@@ -130,11 +140,15 @@ class BluetoothGattCallback extends BluetoothEvent {
       data['characteristic'] == null ? null : BluetoothGattCharacteristic._(_map(data['characteristic']));
   BluetoothGattDescriptor? get descriptor =>
       data['descriptor'] == null ? null : BluetoothGattDescriptor._(_map(data['descriptor']));
-  List<BluetoothGattService> get services => List.unmodifiable(_maps(data['services']).map(BluetoothGattService._));
+  List<BluetoothGattService> get services => _decodeList(data['services'], BluetoothGattService._);
 }
 
 final class BluetoothGatt {
-  BluetoothGatt._(String id) : _session = _Session(id);
+  BluetoothGatt._(String id, this._address) : _session = _Session(id) {
+    if (!_session.hub.finished) _clients.add(this);
+  }
+  static final _clients = <BluetoothGatt>{};
+  final String _address;
   final _Session _session;
   String get id => _session.id;
   static const gattSuccess = 0, gattReadNotPermitted = 2, gattWriteNotPermitted = 3;
@@ -176,7 +190,7 @@ final class BluetoothGatt {
   /// Looks up a service in the current discovery snapshot.
   /// API 21+. Requires BLUETOOTH_CONNECT on API 31+.
   Future<BluetoothGattService?> getService(String uuid) async =>
-      _firstOrNull((await services).where((s) => s.uuid == _uuid(uuid)));
+      _findByUuid(await services, uuid, (service) => service.uuid);
 
   /// API 21+. Requires BLUETOOTH_CONNECT on API 31+. The Future reports request acceptance; use the corresponding callback stream for completion.
   Future<bool> connect() => _call<bool>('connect');
@@ -188,7 +202,10 @@ final class BluetoothGatt {
   ///
   /// Idempotently releases the native registration and completes its callback streams. Further operations fail locally.
   /// If native close fails, retry cleanup; other native operations are rejected.
-  Future<void> close() => _session.close('gatt.close');
+  Future<void> close() async {
+    await _session.close('gatt.close');
+    _clients.remove(this);
+  }
 
   /// API 21+. Requires BLUETOOTH_CONNECT on API 31+. The Future reports request acceptance; use the corresponding callback stream for completion.
   Future<bool> discoverServices() => _call<bool>('discoverServices');
@@ -196,7 +213,7 @@ final class BluetoothGatt {
   /// Returns the immutable current discovery snapshot; does not initiate discovery.
   /// API 21+. Requires BLUETOOTH_CONNECT on API 31+.
   Future<List<BluetoothGattService>> get services async =>
-      List.unmodifiable(_maps(await _call<Object>('getServices')).map(BluetoothGattService._));
+      _decodeList(await _call<Object>('getServices'), BluetoothGattService._);
 
   /// API 21+. Requires BLUETOOTH_CONNECT on API 31+. The Future reports request acceptance; use the corresponding callback stream for completion.
   Future<bool> readCharacteristic(BluetoothGattCharacteristic characteristic) =>
@@ -326,7 +343,7 @@ final class BluetoothGattServer {
 
   /// API 21+. Requires BLUETOOTH_CONNECT on API 31+. The application owns values, CCCDs and prepared-write transactions.
   Future<BluetoothGattService?> getService(String uuid) async =>
-      _firstOrNull((await services).where((s) => s.uuid == _uuid(uuid)));
+      _findByUuid(await services, uuid, (service) => service.uuid);
 
   /// Idempotently releases the native server and completes its callback streams.
   /// If native close fails, retry cleanup; other native operations are rejected.
@@ -343,7 +360,7 @@ final class BluetoothGattServer {
 
   /// API 21+. Requires BLUETOOTH_CONNECT on API 31+. The application owns values, CCCDs and prepared-write transactions.
   Future<List<BluetoothGattService>> get services async =>
-      List.unmodifiable(_maps(await _call<Object>('getServices')).map(BluetoothGattService._));
+      _decodeList(await _call<Object>('getServices'), BluetoothGattService._);
 
   /// API 21+. Requires BLUETOOTH_CONNECT on API 31+. The application owns values, CCCDs and prepared-write transactions.
   Future<bool> connect(BluetoothDevice device, {bool autoConnect = false}) =>

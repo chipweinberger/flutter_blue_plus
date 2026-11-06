@@ -8,6 +8,7 @@ environment:
   flutter: '>=3.7.0'
 
 dependencies:
+  android_bluetooth: ^0.1.0
   flutter:
     sdk: flutter
   flutter_blue_plus_platform_interface: ^9.0.4
@@ -22,6 +23,4 @@ flutter:
     implements: flutter_blue_plus
     platforms:
       android:
-        package: com.jmx.flutter_blue_plus
-        pluginClass: FlutterBluePlusPlugin
         dartPluginClass: FlutterBluePlusAndroid

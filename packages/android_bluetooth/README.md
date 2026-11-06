@@ -68,6 +68,21 @@ if (!await adapter.isEnabled) await adapter.requestEnable();
 
 Permission requests, the enable dialog and companion association require an attached Activity. Android and device policy still decide which operations are allowed. `enable`/`disable` expose the deprecated native results; ordinary Android 13+ apps should use the system enable dialog/settings.
 
+## Sharing clients with FlutterBluePlus
+
+FBP's Android backend uses this package. You can access its existing client without importing the FBP backend or opening another connection:
+
+```dart
+final device = BluetoothDevice(fbpDevice.remoteId.str);
+final clients = device.gattClients;
+```
+
+`gattClients` is an immutable snapshot of clients opened for this address in the current Dart isolate. A client can be connecting, connected or disconnected while auto-connect remains active. It is removed after close or engine detach. Calling `connectGatt()` creates a separate client. The adapter is available through `BluetoothAdapter.shared`.
+
+Callback streams support additional listeners. Serialize GATT requests with FBP requests because both APIs share the client's Android request queue. Use FBP for the connection/discovery/notification lifecycle it manages; changing these directly can invalidate FBP's cached state. Device-scoped L2CAP is available independently through `createL2capChannel(psm)`.
+
+The Android Gradle integration hosts FBP's existing license hook when FBP is present. Standalone AndroidBluetooth builds retain their previous behavior. See the [compatibility audit](docs/flutter_blue_plus_compatibility.md) for parity checks and physical-device validation still needed.
+
 ## Scan
 
 ```dart

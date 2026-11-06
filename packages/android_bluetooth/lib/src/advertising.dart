@@ -114,11 +114,10 @@ final class BluetoothAdvertisement {
   BluetoothAdvertisement._(String id) : _session = _Session(id);
   final _Session _session;
   String get id => _session.id;
-  Stream<AdvertiseCallback> get events => _session.events().map(AdvertiseCallback._);
-  Stream<AdvertiseFailedResult> get onStartFailure =>
-      events.where((event) => event.type == 'onStartFailure').cast<AdvertiseFailedResult>();
-  Stream<AdvertiseStartedResult> get onStartSuccess =>
-      events.where((event) => event.type == 'onStartSuccess').cast<AdvertiseStartedResult>();
+  Stream<AdvertiseCallback> _events([String? type]) => _session.events(type).map(AdvertiseCallback._);
+  Stream<AdvertiseCallback> get events => _events();
+  Stream<AdvertiseFailedResult> get onStartFailure => _events('onStartFailure').cast<AdvertiseFailedResult>();
+  Stream<AdvertiseStartedResult> get onStartSuccess => _events('onStartSuccess').cast<AdvertiseStartedResult>();
 
   /// API 21+. Requires BLUETOOTH_ADVERTISE on API 31+. stop is idempotent and completes its event stream.
   Future<void> stop() => _session.close('advertise.stop');
@@ -129,27 +128,26 @@ final class AdvertisingSet {
   AdvertisingSet._(String id) : _session = _Session(id);
   final _Session _session;
   String get id => _session.id;
-  Stream<AdvertisingSetCallback> get events => _session.events().map(AdvertisingSetCallback._);
+  Stream<AdvertisingSetCallback> _events([String? type]) => _session.events(type).map(AdvertisingSetCallback._);
+  Stream<AdvertisingSetCallback> get events => _events();
   Stream<PeriodicAdvertisingEnabledResult> get onPeriodicAdvertisingEnabled =>
-      events.where((event) => event.type == 'onPeriodicAdvertisingEnabled').cast<PeriodicAdvertisingEnabledResult>();
+      _events('onPeriodicAdvertisingEnabled').cast<PeriodicAdvertisingEnabledResult>();
   Stream<PeriodicAdvertisingDataSetResult> get onPeriodicAdvertisingDataSet =>
-      events.where((event) => event.type == 'onPeriodicAdvertisingDataSet').cast<PeriodicAdvertisingDataSetResult>();
-  Stream<PeriodicAdvertisingParametersUpdatedResult> get onPeriodicAdvertisingParametersUpdated => events
-      .where((event) => event.type == 'onPeriodicAdvertisingParametersUpdated')
-      .cast<PeriodicAdvertisingParametersUpdatedResult>();
-  Stream<AdvertisingParametersUpdatedResult> get onAdvertisingParametersUpdated => events
-      .where((event) => event.type == 'onAdvertisingParametersUpdated')
-      .cast<AdvertisingParametersUpdatedResult>();
+      _events('onPeriodicAdvertisingDataSet').cast<PeriodicAdvertisingDataSetResult>();
+  Stream<PeriodicAdvertisingParametersUpdatedResult> get onPeriodicAdvertisingParametersUpdated =>
+      _events('onPeriodicAdvertisingParametersUpdated').cast<PeriodicAdvertisingParametersUpdatedResult>();
+  Stream<AdvertisingParametersUpdatedResult> get onAdvertisingParametersUpdated =>
+      _events('onAdvertisingParametersUpdated').cast<AdvertisingParametersUpdatedResult>();
   Stream<ScanResponseDataSetResult> get onScanResponseDataSet =>
-      events.where((event) => event.type == 'onScanResponseDataSet').cast<ScanResponseDataSetResult>();
+      _events('onScanResponseDataSet').cast<ScanResponseDataSetResult>();
   Stream<AdvertisingDataSetResult> get onAdvertisingDataSet =>
-      events.where((event) => event.type == 'onAdvertisingDataSet').cast<AdvertisingDataSetResult>();
+      _events('onAdvertisingDataSet').cast<AdvertisingDataSetResult>();
   Stream<AdvertisingEnabledResult> get onAdvertisingEnabled =>
-      events.where((event) => event.type == 'onAdvertisingEnabled').cast<AdvertisingEnabledResult>();
+      _events('onAdvertisingEnabled').cast<AdvertisingEnabledResult>();
   Stream<AdvertisingSetStoppedResult> get onAdvertisingSetStopped =>
-      events.where((event) => event.type == 'onAdvertisingSetStopped').cast<AdvertisingSetStoppedResult>();
+      _events('onAdvertisingSetStopped').cast<AdvertisingSetStoppedResult>();
   Stream<AdvertisingSetStartedResult> get onAdvertisingSetStarted =>
-      events.where((event) => event.type == 'onAdvertisingSetStarted').cast<AdvertisingSetStartedResult>();
+      _events('onAdvertisingSetStarted').cast<AdvertisingSetStartedResult>();
   Future<T> _call<T>(String method, [_Map args = const {}]) => _session.call<T>('advertise.$method', args);
 
   /// Idempotently requests stop. onAdvertisingSetStopped is delivered before the event streams finish; other operations are rejected once stopping starts.

@@ -21,15 +21,11 @@ bool _supportsReadOnlyBytes() {
 
 final bool _hasReadOnlyBytes = _supportsReadOnlyBytes();
 
-T? _firstOrNull<T>(Iterable<T> values) {
-  final iterator = values.iterator;
-  return iterator.moveNext() ? iterator.current : null;
-}
-
 Object? _freeze(Object? value) {
   if (value is Uint8List) {
+    if (!_hasReadOnlyBytes) return List<int>.unmodifiable(value);
     final copy = Uint8List.fromList(value);
-    return _hasReadOnlyBytes ? (copy as dynamic).asUnmodifiableView() : List<int>.unmodifiable(copy);
+    return (copy as dynamic).asUnmodifiableView();
   }
   if (value is Map) return Map<Object?, Object?>.unmodifiable(value.map((k, v) => MapEntry(k, _freeze(v))));
   if (value is List) return List<Object?>.unmodifiable(value.map(_freeze));
@@ -37,7 +33,8 @@ Object? _freeze(Object? value) {
 }
 
 _Map _map(Object? value) => Map<String, Object?>.unmodifiable(Map<String, Object?>.from(value! as Map));
-List<_Map> _maps(Object? value) => List<_Map>.unmodifiable((value as List? ?? []).map(_map));
+List<T> _decodeList<T>(Object? value, T Function(_Map) decode) =>
+    List<T>.unmodifiable((value as List? ?? []).map((entry) => decode(_map(entry))));
 Uint8List _bytes(Object? value) {
   // Received typed bytes were already copied and made read-only by _freeze.
   if (_hasReadOnlyBytes && value is Uint8List) return value;
@@ -64,14 +61,16 @@ BluetoothEvent _event(_Map data) {
   return BluetoothEvent._(data);
 }
 
+final _uuidPattern = RegExp(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$');
+
 String _uuid(String value) {
   final short = value.toLowerCase();
-  final expanded = short.length == 4
-      ? '0000$short-0000-1000-8000-00805f9b34fb'
-      : short.length == 8
-          ? '$short-0000-1000-8000-00805f9b34fb'
-          : short;
-  if (!RegExp(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$').hasMatch(expanded)) {
+  final expanded = switch (short.length) {
+    4 => '0000$short-0000-1000-8000-00805f9b34fb',
+    8 => '$short-0000-1000-8000-00805f9b34fb',
+    _ => short,
+  };
+  if (!_uuidPattern.hasMatch(expanded)) {
     throw ArgumentError.value(value, 'uuid', 'Expected a 16, 32 or 128 bit Bluetooth UUID');
   }
   return expanded;
@@ -81,7 +80,8 @@ String _uuid(String value) {
 /// Successful method invocation only means the request was submitted; completion
 /// is delivered separately as a callback, just as on Android.
 class BluetoothEvent {
-  BluetoothEvent._(_Map data) : data = _map(data);
+  // The host supplies an immutable snapshot shared by callback readers.
+  BluetoothEvent._(this.data);
   final Map<String, Object?> data;
   String get type => data['type']! as String;
 
@@ -101,17 +101,24 @@ final class _EventHub {
   bool flushScheduled = false;
   late final StreamController<_Map> controller = StreamController<_Map>.broadcast(onListen: scheduleFlush);
 
+  Stream<_Map> events([String? type]) {
+    final stream = controller.stream;
+    return type == null ? stream : stream.where((event) => event['type'] == type);
+  }
+
+  void flush() {
+    flushScheduled = false;
+    while (controller.hasListener && pending.isNotEmpty) {
+      controller.add(pending.removeFirst());
+    }
+    if (finished && pending.isEmpty) unawaited(controller.close());
+  }
+
   void scheduleFlush() {
     if (flushScheduled) return;
     flushScheduled = true;
     // Let all typed listeners installed in this synchronous block join the replay.
-    scheduleMicrotask(() {
-      flushScheduled = false;
-      while (controller.hasListener && pending.isNotEmpty) {
-        controller.add(pending.removeFirst());
-      }
-      if (finished && pending.isEmpty) unawaited(controller.close());
-    });
+    scheduleMicrotask(flush);
   }
 
   void add(_Map event) {
@@ -149,7 +156,7 @@ final class _Session {
   bool closing = false;
   Future<void>? _closeFuture;
 
-  Stream<_Map> events([String? type]) => hub.controller.stream.where((event) => type == null || event['type'] == type);
+  Stream<_Map> events([String? type]) => hub.events(type);
 
   Future<T> call<T>(String method, [_Map args = const {}]) async {
     if (closing || hub.finished) throw StateError('Native session $id is closed');
@@ -195,13 +202,40 @@ final class _Host {
 
   static bool terminal(_Map event) {
     final owner = event['owner']! as String, type = event['type']! as String;
-    return owner.startsWith('advertising-set-') &&
-            (type == 'onAdvertisingSetStopped' || type == 'onAdvertisingSetStarted' && event['status'] != 0) ||
-        owner.startsWith('advertisement-') && type == 'onStartFailure' ||
-        owner.startsWith('ranging-') && (type == 'onClosed' || type == 'onOpenFailed' && event['isComplete'] == true) ||
-        owner.startsWith('scan-') && type == 'onScanFailed' ||
-        owner.startsWith('association-') &&
-            (event['isComplete'] == true || type == 'onFailure' || type == 'onAssociationCancelled');
+    if (owner.startsWith('advertising-set-')) {
+      return type == 'onAdvertisingSetStopped' || type == 'onAdvertisingSetStarted' && event['status'] != 0;
+    }
+    if (owner.startsWith('advertisement-')) return type == 'onStartFailure';
+    if (owner.startsWith('ranging-')) {
+      return type == 'onClosed' || type == 'onOpenFailed' && event['isComplete'] == true;
+    }
+    if (owner.startsWith('scan-')) return type == 'onScanFailed';
+    if (owner.startsWith('association-')) {
+      return event['isComplete'] == true || type == 'onFailure' || type == 'onAssociationCancelled';
+    }
+    return false;
+  }
+
+  static void detachSessions() {
+    BluetoothGatt._clients.clear();
+    for (final session in sessions.values.toList()) {
+      session.finish();
+    }
+    // A callback may arrive before its native registration's open result.
+    for (final entry in hubs.entries.toList()) {
+      if (entry.key.contains('-')) {
+        entry.value.finish();
+        hubs.remove(entry.key);
+        retired.add(entry.key);
+      }
+    }
+  }
+
+  static void forwardError(Object error, StackTrace stack) {
+    controller.addError(error, stack);
+    for (final hub in hubs.values) {
+      if (hub.controller.hasListener) hub.controller.addError(error, stack);
+    }
   }
 
   static void accept(Object? raw) {
@@ -212,17 +246,7 @@ final class _Host {
     target.add(event);
     controller.add(event);
     if (owner == 'engine' && event['type'] == 'onDetachedFromEngine') {
-      for (final session in sessions.values.toList()) {
-        session.finish();
-      }
-      // A callback may arrive before its native registration's open result.
-      for (final entry in hubs.entries.toList()) {
-        if (entry.key.contains('-')) {
-          entry.value.finish();
-          hubs.remove(entry.key);
-          retired.add(entry.key);
-        }
-      }
+      detachSessions();
     }
     if (terminal(event)) {
       final session = sessions[owner];
@@ -237,12 +261,7 @@ final class _Host {
   static void listen() {
     if (subscription != null) return;
     late final StreamSubscription<Object?> current;
-    current = eventChannel.receiveBroadcastStream().listen(accept, onError: (Object error, StackTrace stack) {
-      controller.addError(error, stack);
-      for (final hub in hubs.values) {
-        if (hub.controller.hasListener) hub.controller.addError(error, stack);
-      }
-    }, onDone: () {
+    current = eventChannel.receiveBroadcastStream().listen(accept, onError: forwardError, onDone: () {
       if (identical(subscription, current)) subscription = null;
     });
     subscription = current;
@@ -250,7 +269,7 @@ final class _Host {
 
   static Stream<_Map> events(String owner, [String? type]) {
     listen();
-    return hub(owner).controller.stream.where((event) => type == null || event['type'] == type);
+    return hub(owner).events(type);
   }
 
   static Future<T> call<T>(String method, [_Map args = const {}]) async {
@@ -295,7 +314,7 @@ abstract final class AndroidBluetooth {
 }
 
 final class BluetoothCapabilities {
-  BluetoothCapabilities._(_Map values) : values = _map(values);
+  BluetoothCapabilities._(this.values);
   final Map<String, Object?> values;
   int get apiLevel => values['apiLevel']! as int;
   bool get isSupported => values['isSupported']! as bool;

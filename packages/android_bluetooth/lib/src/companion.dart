@@ -1,7 +1,7 @@
 part of '../android_bluetooth.dart';
 
 final class AssociationInfo {
-  AssociationInfo._(_Map data) : data = _map(data);
+  AssociationInfo._(this.data);
   final Map<String, Object?> data;
 
   /// Null on API 26–32, which expose associations as addresses.
@@ -67,7 +67,7 @@ final class CompanionDeviceManager {
 
   /// API 26+. Association is distinct from Bluetooth bonding; declare companion permissions required by the selected operation.
   Future<List<AssociationInfo>> get myAssociations async =>
-      List.unmodifiable(_maps(await _Host.call<Object>('companion.associations')).map(AssociationInfo._));
+      _decodeList(await _Host.call<Object>('companion.associations'), AssociationInfo._);
 
   /// API 26+. Association is distinct from Bluetooth bonding; declare companion permissions required by the selected operation.
   Future<void> disassociate({int? associationId, String? address}) =>
