@@ -1,10 +1,10 @@
 part of '../flutter_blue_plus_linux.dart';
 
-final class _LinuxFoundCharacteristic {
+final class _BlueZFoundCharacteristic {
   final BlueZGattService service;
   final BlueZGattCharacteristic characteristic;
 
-  const _LinuxFoundCharacteristic({
+  const _BlueZFoundCharacteristic({
     required this.service,
     required this.characteristic,
   });
@@ -60,14 +60,14 @@ final class _BlueZDevicePropertyChanges {
   String toString() => _names.toString();
 }
 
-final class _LinuxDeviceState {
+final class _BlueZDeviceState {
   final BlueZDevice device;
   final DeviceIdentifier remoteId;
   final Stream<_BlueZDevicePropertyChanges> propertyChanges;
   final characteristicSubscriptions = <StreamSubscription<List<String>>>[];
   late final StreamSubscription<_BlueZDevicePropertyChanges> subscription;
 
-  _LinuxDeviceState(this.device)
+  _BlueZDeviceState(this.device)
       : remoteId = device.remoteId,
         propertyChanges = device.propertiesChanged.map(_BlueZDevicePropertyChanges.new);
 

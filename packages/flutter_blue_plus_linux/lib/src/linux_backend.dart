@@ -2,7 +2,7 @@ part of '../flutter_blue_plus_linux.dart';
 
 abstract base class _LinuxBackend extends FlutterBluePlusPlatform {
   final _client = BlueZClient();
-  final _deviceStates = <DeviceIdentifier, _LinuxDeviceState>{};
+  final _deviceStates = <DeviceIdentifier, _BlueZDeviceState>{};
 
   BlueZAdapter? _adapter;
   StreamSubscription<List<String>>? _adapterSubscription;
@@ -65,7 +65,7 @@ abstract base class _LinuxBackend extends FlutterBluePlusPlatform {
   }
 
   void _onCharacteristicPropertiesChanged(
-    _LinuxDeviceState state,
+    _BlueZDeviceState state,
     BlueZGattService service,
     BlueZGattCharacteristic characteristic,
     List<String> changed,
@@ -91,7 +91,7 @@ abstract base class _LinuxBackend extends FlutterBluePlusPlatform {
     }
   }
 
-  void _listenToCharacteristics(_LinuxDeviceState state) {
+  void _listenToCharacteristics(_BlueZDeviceState state) {
     for (final subscription in state.characteristicSubscriptions) {
       unawaited(subscription.cancel());
     }
@@ -108,7 +108,7 @@ abstract base class _LinuxBackend extends FlutterBluePlusPlatform {
     }
   }
 
-  void _publishServicesIfReady(_LinuxDeviceState state) {
+  void _publishServicesIfReady(_BlueZDeviceState state) {
     final device = state.device;
     if (!device.connected) {
       _discoveryFailed(state.remoteId, StateError('device disconnected'));
@@ -127,7 +127,7 @@ abstract base class _LinuxBackend extends FlutterBluePlusPlatform {
     }
   }
 
-  void _onDevicePropertiesChanged(_LinuxDeviceState state, _BlueZDevicePropertyChanges changed) {
+  void _onDevicePropertiesChanged(_BlueZDeviceState state, _BlueZDevicePropertyChanges changed) {
     final device = state.device;
     if (_logLevel == LogLevel.verbose) {
       _log('device ${state.remoteId} properties changed $changed');
@@ -179,7 +179,7 @@ abstract base class _LinuxBackend extends FlutterBluePlusPlatform {
     if (previous != null) {
       unawaited(_onDeviceRemoved(previous.device, StateError('device replaced')));
     }
-    final state = _LinuxDeviceState(device);
+    final state = _BlueZDeviceState(device);
     _deviceStates[state.remoteId] = state;
     if (_logLevel == LogLevel.verbose) _log('device ${state.remoteId} added');
     state.subscription = state.propertyChanges.listen(

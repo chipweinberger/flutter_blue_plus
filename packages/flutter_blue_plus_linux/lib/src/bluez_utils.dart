@@ -50,7 +50,7 @@ int _instanceId(BlueZDevice device, BlueZGattService service, BlueZGattCharacter
   return 0;
 }
 
-_LinuxFoundCharacteristic _findCharacteristic(
+_BlueZFoundCharacteristic _findCharacteristic(
   BlueZDevice device,
   Guid serviceUuid,
   Guid characteristicUuid,
@@ -67,7 +67,7 @@ _LinuxFoundCharacteristic _findCharacteristic(
       final uuid = Guid.fromBytes(characteristic.uuid.value);
       return uuid == characteristicUuid && characteristic.localInstanceId(service) == instanceId;
     });
-    return _LinuxFoundCharacteristic(service: service, characteristic: characteristic);
+    return _BlueZFoundCharacteristic(service: service, characteristic: characteristic);
   }
 
   var idx = 0;
@@ -75,7 +75,7 @@ _LinuxFoundCharacteristic _findCharacteristic(
     for (final characteristic in service.characteristics) {
       final uuid = Guid.fromBytes(characteristic.uuid.value);
       if (idx == instanceId && uuid == characteristicUuid) {
-        return _LinuxFoundCharacteristic(service: service, characteristic: characteristic);
+        return _BlueZFoundCharacteristic(service: service, characteristic: characteristic);
       }
       idx++;
     }
