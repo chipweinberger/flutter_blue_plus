@@ -15,6 +15,8 @@
 dependency_overrides:
   core_bluetooth:
     path: ../core_bluetooth
+  android_bluetooth:
+    path: ../android_bluetooth
   flutter_blue_plus_platform_interface:
     path: ../flutter_blue_plus_platform_interface
   flutter_blue_plus_android:

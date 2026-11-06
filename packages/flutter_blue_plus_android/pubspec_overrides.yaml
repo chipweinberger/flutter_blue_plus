@@ -8,5 +8,7 @@
 # and package users still resolve the published dependency versions.
 
 dependency_overrides:
+  android_bluetooth:
+    path: ../android_bluetooth
   flutter_blue_plus_platform_interface:
     path: ../flutter_blue_plus_platform_interface

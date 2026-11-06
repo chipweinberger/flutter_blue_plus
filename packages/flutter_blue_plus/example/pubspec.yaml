@@ -23,6 +23,8 @@ dev_dependencies:
 dependency_overrides:
   core_bluetooth:
     path: ../../core_bluetooth
+  android_bluetooth:
+    path: ../../android_bluetooth
   # Note: We use these dependency overrides to test the example app with the latest changes.
   # In *your* app you should not add these overrides
   flutter_blue_plus_android:

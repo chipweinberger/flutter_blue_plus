@@ -1,3 +1,19 @@
+## Unreleased
+* Keep pending and disconnected auto-connect clients tracked when native disconnect submission fails, allowing retry with the existing error. Pause callbacks during cancellation and resume them on failure; successful cancellation still emits its existing single canceled event. Restore the former Java behavior for pending clients and correct the same tracking bug already present in its disconnected auto-connect path.
+* Retain the original auto-connect client and its callbacks when replacement registration fails, matching the former Java backend. Canceling or shutting down a pending replacement cleans up both clients without restoring a retired registration; native connection errors remain unchanged.
+* Attempt every GATT client's cleanup during adapter shutdown even if an earlier close fails. Preserve cleanup order, disconnect events and the first failure's error/stack, reporting it after all cleanup attempts finish (approved correction to the former Java backend).
+* Handle failures from automatic GATT cleanup after disconnect, logging at error level without an unhandled async exception or changing disconnect events. Suppress diagnostics after engine detach; explicit close and awaited disconnect failures still propagate.
+* Clear a device's pending write payloads before its disconnect event, including auto-connect link loss. Reconnecting native writes no longer inherit bytes from the previous connection; other devices' pending writes remain intact (approved correction to the former Java backend).
+* Discard cached characteristic, descriptor and notification payloads when native write submission is rejected or throws, preserving any earlier accepted write awaiting its callback. Later native writes no longer inherit rejected FBP bytes (approved correction to the former Java backend).
+* Snapshot scan name and remote-ID filters before initialization and permission requests, preserving the original submitted values and filter order when callers modify their lists.
+* Apply duplicate suppression and per-device continuousDivisor sampling in AndroidBluetooth before platform-channel delivery, then apply keyword filtering in Dart. Advertisements rejected by Dart now consume sampling slots. Preserve ignored batches and repeated-start history resets.
+* Move standard request/result/event logging to the main FBP package; retain backend initialization, availability checks and error translation.
+* Let already-granted operations proceed during unrelated permission dialogs, matching the original Android backend.
+* Implement the Android backend in Dart through AndroidBluetooth, retaining FBP operation, error and event semantics.
+* Add direct access to the existing GATT client through `FlutterBluePlusAndroid.getGatt` and AndroidBluetooth's `BluetoothDevice.gattClients`.
+* Move the conditional FBP license build hook to AndroidBluetooth and remove the native FBP plugin.
+* Preserve public logging controls; internal Java-only Logcat messages are no longer emitted.
+
 ## 9.0.5
 * **[LICENSE]** add global tier
 

@@ -1,8 +1,15 @@
 ## Unreleased
+* Keep Android clients manageable after failed disconnect submission so cancellation can be retried without leaving an open native registration untracked.
+* Preserve Android auto-connect tracking after a failed replacement connection so reconnect callbacks and explicit disconnect continue working.
+* Continue Android shutdown cleanup for other devices when one GATT close fails, then report the first cleanup failure.
+* Prevent automatic Android GATT cleanup failures after disconnect from escaping as unhandled async errors; preserve disconnect callbacks and explicit operation errors.
+* Clear pending Android write payloads on disconnect so later native writes after reconnect cannot report bytes from the previous connection.
+* Prevent rejected Android write payloads from appearing in callbacks for later native writes; preserve accepted-write bytes and existing submission errors.
+* Preserve Android scan name and remote-ID filters when caller lists change while initialization or permission requests are pending.
 * Fix Darwin service discovery reporting success before included-service discovery finishes, then emitting another result. Wait for all discovery callbacks and report included-service errors through the existing exception API.
-* Sample advertisements per device before Dart scan filtering on Darwin to reduce platform-channel traffic. With continuousDivisor greater than 1, advertisements rejected by Dart consume sampling slots and the first matching advertisement may be skipped.
+* Sample advertisements per device before Dart scan filtering on Android and Darwin to reduce platform-channel traffic. With continuousDivisor greater than 1, advertisements rejected by Dart consume sampling slots and the first matching advertisement may be skipped. Retain native Android duplicate suppression.
 * Use CoreBluetooth for the Darwin backend while retaining the existing FBP error API and shared logging.
-* Centralize verbose request, result and event logging in the main package. Darwin retains backend diagnostics without duplicating standard Dart traces.
+* Centralize verbose request, result and event logging in the main package. Android and Darwin retain backend diagnostics without duplicating standard Dart traces.
 
 ## 2.3.15
 * **[Fix]** Linux: select the correct characteristic when characteristic or service UUIDs repeat (#1345)

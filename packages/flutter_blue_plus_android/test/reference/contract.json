@@ -1,0 +1,285 @@
+{
+  "unique": [
+    {
+      "characteristics": [
+        {
+          "descriptors": [
+            {
+              "service_uuid": "180d",
+              "instance_id": 0,
+              "remote_id": "AA:BB:CC:DD:EE:FF",
+              "descriptor_uuid": "2902",
+              "characteristic_uuid": "2a37"
+            }
+          ],
+          "service_uuid": "180d",
+          "instance_id": 0,
+          "remote_id": "AA:BB:CC:DD:EE:FF",
+          "characteristic_uuid": "2a37",
+          "properties": {
+            "broadcast": 0,
+            "write_without_response": 1,
+            "notify_encryption_required": 0,
+            "read": 1,
+            "authenticated_signed_writes": 0,
+            "extended_properties": 0,
+            "indicate": 1,
+            "indicate_encryption_required": 0,
+            "write": 1,
+            "notify": 1
+          }
+        }
+      ],
+      "service_uuid": "180d",
+      "remote_id": "AA:BB:CC:DD:EE:FF"
+    }
+  ],
+  "duplicateCharacteristics": [
+    {
+      "characteristics": [
+        {
+          "descriptors": [
+            {
+              "service_uuid": "180d",
+              "instance_id": 4,
+              "remote_id": "AA:BB:CC:DD:EE:FF",
+              "descriptor_uuid": "2902",
+              "characteristic_uuid": "2a37"
+            }
+          ],
+          "service_uuid": "180d",
+          "instance_id": 4,
+          "remote_id": "AA:BB:CC:DD:EE:FF",
+          "characteristic_uuid": "2a37",
+          "properties": {
+            "broadcast": 0,
+            "write_without_response": 1,
+            "notify_encryption_required": 0,
+            "read": 1,
+            "authenticated_signed_writes": 0,
+            "extended_properties": 0,
+            "indicate": 1,
+            "indicate_encryption_required": 0,
+            "write": 1,
+            "notify": 1
+          }
+        },
+        {
+          "descriptors": [
+            {
+              "service_uuid": "180d",
+              "instance_id": 9,
+              "remote_id": "AA:BB:CC:DD:EE:FF",
+              "descriptor_uuid": "2902",
+              "characteristic_uuid": "2a37"
+            }
+          ],
+          "service_uuid": "180d",
+          "instance_id": 9,
+          "remote_id": "AA:BB:CC:DD:EE:FF",
+          "characteristic_uuid": "2a37",
+          "properties": {
+            "broadcast": 0,
+            "write_without_response": 1,
+            "notify_encryption_required": 0,
+            "read": 1,
+            "authenticated_signed_writes": 0,
+            "extended_properties": 0,
+            "indicate": 1,
+            "indicate_encryption_required": 0,
+            "write": 1,
+            "notify": 1
+          }
+        }
+      ],
+      "service_uuid": "180d",
+      "remote_id": "AA:BB:CC:DD:EE:FF"
+    }
+  ],
+  "duplicateServices": [
+    {
+      "characteristics": [
+        {
+          "descriptors": [
+            {
+              "service_uuid": "180d",
+              "instance_id": 0,
+              "remote_id": "AA:BB:CC:DD:EE:FF",
+              "descriptor_uuid": "2902",
+              "characteristic_uuid": "2a37"
+            }
+          ],
+          "service_uuid": "180d",
+          "instance_id": 0,
+          "remote_id": "AA:BB:CC:DD:EE:FF",
+          "characteristic_uuid": "2a37",
+          "properties": {
+            "broadcast": 0,
+            "write_without_response": 1,
+            "notify_encryption_required": 0,
+            "read": 1,
+            "authenticated_signed_writes": 0,
+            "extended_properties": 0,
+            "indicate": 1,
+            "indicate_encryption_required": 0,
+            "write": 1,
+            "notify": 1
+          }
+        },
+        {
+          "descriptors": [
+            {
+              "service_uuid": "180d",
+              "instance_id": 1,
+              "remote_id": "AA:BB:CC:DD:EE:FF",
+              "descriptor_uuid": "2902",
+              "characteristic_uuid": "2a38"
+            }
+          ],
+          "service_uuid": "180d",
+          "instance_id": 1,
+          "remote_id": "AA:BB:CC:DD:EE:FF",
+          "characteristic_uuid": "2a38",
+          "properties": {
+            "broadcast": 0,
+            "write_without_response": 1,
+            "notify_encryption_required": 0,
+            "read": 1,
+            "authenticated_signed_writes": 0,
+            "extended_properties": 0,
+            "indicate": 1,
+            "indicate_encryption_required": 0,
+            "write": 1,
+            "notify": 1
+          }
+        }
+      ],
+      "service_uuid": "180d",
+      "remote_id": "AA:BB:CC:DD:EE:FF"
+    },
+    {
+      "characteristics": [
+        {
+          "descriptors": [
+            {
+              "service_uuid": "180d",
+              "instance_id": 2,
+              "remote_id": "AA:BB:CC:DD:EE:FF",
+              "descriptor_uuid": "2902",
+              "characteristic_uuid": "2a37"
+            }
+          ],
+          "service_uuid": "180d",
+          "instance_id": 2,
+          "remote_id": "AA:BB:CC:DD:EE:FF",
+          "characteristic_uuid": "2a37",
+          "properties": {
+            "broadcast": 0,
+            "write_without_response": 1,
+            "notify_encryption_required": 0,
+            "read": 1,
+            "authenticated_signed_writes": 0,
+            "extended_properties": 0,
+            "indicate": 1,
+            "indicate_encryption_required": 0,
+            "write": 1,
+            "notify": 1
+          }
+        }
+      ],
+      "service_uuid": "180d",
+      "remote_id": "AA:BB:CC:DD:EE:FF"
+    }
+  ],
+  "included": [
+    {
+      "characteristics": [
+        {
+          "descriptors": [
+            {
+              "service_uuid": "1800",
+              "instance_id": 0,
+              "remote_id": "AA:BB:CC:DD:EE:FF",
+              "descriptor_uuid": "2902",
+              "characteristic_uuid": "2a00"
+            }
+          ],
+          "service_uuid": "1800",
+          "instance_id": 0,
+          "remote_id": "AA:BB:CC:DD:EE:FF",
+          "characteristic_uuid": "2a00",
+          "properties": {
+            "broadcast": 0,
+            "write_without_response": 1,
+            "notify_encryption_required": 0,
+            "read": 1,
+            "authenticated_signed_writes": 0,
+            "extended_properties": 0,
+            "indicate": 1,
+            "indicate_encryption_required": 0,
+            "write": 1,
+            "notify": 1
+          }
+        }
+      ],
+      "service_uuid": "1800",
+      "remote_id": "AA:BB:CC:DD:EE:FF"
+    },
+    {
+      "characteristics": [
+        {
+          "descriptors": [
+            {
+              "service_uuid": "180d",
+              "instance_id": 0,
+              "remote_id": "AA:BB:CC:DD:EE:FF",
+              "primary_service_uuid": "1800",
+              "descriptor_uuid": "2902",
+              "characteristic_uuid": "2a37"
+            }
+          ],
+          "service_uuid": "180d",
+          "instance_id": 0,
+          "remote_id": "AA:BB:CC:DD:EE:FF",
+          "primary_service_uuid": "1800",
+          "characteristic_uuid": "2a37",
+          "properties": {
+            "broadcast": 0,
+            "write_without_response": 1,
+            "notify_encryption_required": 0,
+            "read": 1,
+            "authenticated_signed_writes": 0,
+            "extended_properties": 0,
+            "indicate": 1,
+            "indicate_encryption_required": 0,
+            "write": 1,
+            "notify": 1
+          }
+        }
+      ],
+      "service_uuid": "180d",
+      "remote_id": "AA:BB:CC:DD:EE:FF",
+      "primary_service_uuid": "1800"
+    }
+  ],
+  "advertisement": {
+    "rssi": -40,
+    "connectable": 1,
+    "appearance": 832,
+    "manufacturer_data": {
+      "76": [
+        1,
+        76,
+        0,
+        2
+      ]
+    },
+    "remote_id": "AA:BB:CC:DD:EE:FF",
+    "platform_name": "Device",
+    "service_data": {},
+    "adv_name": "Heart",
+    "service_uuids": [
+      "180d"
+    ]
+  }
+}
