@@ -5,6 +5,7 @@
 library;
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -21,5 +22,6 @@ part 'src/bluetooth_service.dart';
 part 'src/bluetooth_utils.dart';
 part 'src/version.dart';
 part 'src/flutter_blue_plus.dart';
+part 'src/logging.dart';
 part 'src/mutex_factory.dart';
 part 'src/utils.dart';

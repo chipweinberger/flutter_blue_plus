@@ -8,5 +8,7 @@
 # and package users still resolve the published dependency versions.
 
 dependency_overrides:
+  core_bluetooth:
+    path: ../core_bluetooth
   flutter_blue_plus_platform_interface:
     path: ../flutter_blue_plus_platform_interface

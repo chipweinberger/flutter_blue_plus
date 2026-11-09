@@ -1,3 +1,15 @@
+## Unreleased
+* Wait for included-service discovery as well as characteristic and descriptor callbacks before reporting one final discovery result. Retain included-service errors, query shared included services once, and ignore duplicate subrequest callbacks. Restored services keep cached notification state while actual native discovery completes (approved correction to the former backend's premature/duplicate results).
+* Apply continuousDivisor per device in CoreBluetooth before platform-channel delivery, then apply custom scan filters in Dart. Advertisements rejected by Dart now consume sampling slots, so the first matching advertisement may be skipped when the divisor is greater than 1.
+* Clear invalid GATT attributes on disconnect so reconnecting requires fresh service discovery; retain peripheral identity and existing disconnect event formats.
+* Snapshot every scan-filter list when startScan is called, preserving submitted filters while initialization is pending and after caller lists change.
+* Recheck Bluetooth power after peripheral retrieval before submitting a connection.
+* Prevent pending writes from crossing reconnections and pending peripheral lookups from starting connections after backend disposal.
+* Simplify GATT operations and MTU monitoring; discard obsolete discovery failures, recover initialization failures and fully detach disposed backends.
+* Report native errors for failed descriptor reads with missing values instead of the former native crash (approved behavior correction).
+* Implement the Darwin backend in Dart through CoreBluetooth, preserving FBP operations and callback formats; expose the shared manager and tracked peripherals.
+* Let the main FBP package log standard requests, results and events; continue forwarding native log-level settings.
+
 ## 9.0.5
 * **[Fix]** allow service discovery to finish when CoreBluetooth restricts access to a UUID, including Matter attributes (#1344)
 * **[LICENSE]** add global tier

@@ -154,7 +154,8 @@ class BluetoothCharacteristic {
       Future<BmCharacteristicData> futureResponse = responseStream.first;
 
       // invoke
-      await FlutterBluePlus._invokePlatform(() => FlutterBluePlusPlatform.instance.readCharacteristic(request));
+      await FlutterBluePlus._invokePlatform(
+          'readCharacteristic', request, (request) => FlutterBluePlusPlatform.instance.readCharacteristic(request));
 
       // wait for response
       BmCharacteristicData response = await futureResponse
@@ -228,7 +229,8 @@ class BluetoothCharacteristic {
       Future<BmCharacteristicData> futureResponse = responseStream.first;
 
       // invoke
-      await FlutterBluePlus._invokePlatform(() => FlutterBluePlusPlatform.instance.writeCharacteristic(request));
+      await FlutterBluePlus._invokePlatform(
+          'writeCharacteristic', request, (request) => FlutterBluePlusPlatform.instance.writeCharacteristic(request));
 
       // wait for response so that we can:
       //  1. check for success (writeWithResponse)
@@ -294,8 +296,8 @@ class BluetoothCharacteristic {
       Future<BmDescriptorData> futureResponse = responseStream.first;
 
       // invoke
-      bool hasCCCD =
-          await FlutterBluePlus._invokePlatform(() => FlutterBluePlusPlatform.instance.setNotifyValue(request));
+      bool hasCCCD = await FlutterBluePlus._invokePlatform(
+          'setNotifyValue', request, (request) => FlutterBluePlusPlatform.instance.setNotifyValue(request));
 
       // wait for CCCD descriptor to be written?
       if (hasCCCD) {

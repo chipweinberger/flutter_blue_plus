@@ -1,3 +1,9 @@
+## Unreleased
+* Fix Darwin service discovery reporting success before included-service discovery finishes, then emitting another result. Wait for all discovery callbacks and report included-service errors through the existing exception API.
+* Sample advertisements per device before Dart scan filtering on Darwin to reduce platform-channel traffic. With continuousDivisor greater than 1, advertisements rejected by Dart consume sampling slots and the first matching advertisement may be skipped.
+* Use CoreBluetooth for the Darwin backend while retaining the existing FBP error API and shared logging.
+* Centralize verbose request, result and event logging in the main package. Darwin retains backend diagnostics without duplicating standard Dart traces.
+
 ## 2.3.15
 * **[Fix]** Linux: select the correct characteristic when characteristic or service UUIDs repeat (#1345)
 * **[Fix]** Linux: prevent service discovery from blocking disconnects and other platform calls (#1346)

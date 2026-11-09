@@ -8,6 +8,7 @@ environment:
   flutter: '>=3.7.0'
 
 dependencies:
+  core_bluetooth: ^3.0.0
   flutter:
     sdk: flutter
   flutter_blue_plus_platform_interface: ^9.0.4
@@ -22,10 +23,6 @@ flutter:
     implements: flutter_blue_plus
     platforms:
       ios:
-        pluginClass: FlutterBluePlusPlugin
         dartPluginClass: FlutterBluePlusDarwin
-        sharedDarwinSource: true
       macos:
-        pluginClass: FlutterBluePlusPlugin
         dartPluginClass: FlutterBluePlusDarwin
-        sharedDarwinSource: true
