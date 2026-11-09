@@ -128,7 +128,7 @@ class BluetoothCharacteristic {
     }
 
     // Only allow a single BLE operation to be underway per device.
-    _Mutex mtx = _MutexFactory.getMutexForKey(FlutterBluePlus._bleOperationMutexKey(remoteId));
+    _Mutex mtx = FlutterBluePlus._bleOperationMutex(remoteId);
     await mtx.take();
 
     // return value
@@ -200,7 +200,7 @@ class BluetoothCharacteristic {
     }
 
     // Only allow a single BLE operation to be underway per device.
-    _Mutex mtx = _MutexFactory.getMutexForKey(FlutterBluePlus._bleOperationMutexKey(remoteId));
+    _Mutex mtx = FlutterBluePlus._bleOperationMutex(remoteId);
     await mtx.take();
 
     try {
@@ -266,7 +266,7 @@ class BluetoothCharacteristic {
     }
 
     // Only allow a single BLE operation to be underway per device.
-    _Mutex mtx = _MutexFactory.getMutexForKey(FlutterBluePlus._bleOperationMutexKey(remoteId));
+    _Mutex mtx = FlutterBluePlus._bleOperationMutex(remoteId);
     await mtx.take();
 
     try {
