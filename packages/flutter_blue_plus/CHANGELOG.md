@@ -1,3 +1,6 @@
+## Unreleased
+* Wake only the next waiting Bluetooth operation in FIFO order.
+
 ## 2.3.15
 * **[Fix]** Linux: select the correct characteristic when characteristic or service UUIDs repeat (#1345)
 * **[Fix]** Linux: prevent service discovery from blocking disconnects and other platform calls (#1346)
