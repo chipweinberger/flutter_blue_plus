@@ -1380,6 +1380,23 @@ static const int kMtuSettledTicks = 20;
 
     // advertising data
     NSArray *advServices = advertisementData[CBAdvertisementDataServiceUUIDsKey];
+
+    // When an iOS app advertises from the background, CoreBluetooth moves its
+    // service UUIDs out of the normal advertisement and into the "overflow"
+    // area, delivered here under CBAdvertisementDataOverflowServiceUUIDsKey
+    // instead. Such an advertisement is still discovered, but only by a
+    // central that named those UUIDs in scanForPeripheralsWithServices.
+    // Without merging them in, the with_services filter below sees no
+    // services and rejects the very advertisements the OS matched for us,
+    // making backgrounded iOS peripherals permanently invisible to any scan
+    // that sets a service filter.
+    NSArray *advOverflowServices = advertisementData[CBAdvertisementDataOverflowServiceUUIDsKey];
+    if (advOverflowServices.count > 0) {
+        Log(LVERBOSE, @"overflow service uuids: %@", advOverflowServices);
+        advServices = advServices ? [advServices arrayByAddingObjectsFromArray:advOverflowServices]
+                                  : advOverflowServices;
+    }
+
     NSString *advName = advertisementData[CBAdvertisementDataLocalNameKey];
     NSData *advMsd = advertisementData[CBAdvertisementDataManufacturerDataKey];
     NSDictionary* advSd = advertisementData[CBAdvertisementDataServiceDataKey];
